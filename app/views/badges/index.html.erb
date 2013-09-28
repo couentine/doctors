@@ -1,29 +1,25 @@
-<h1>Listing badges</h1>
+<% provide(:title, 'All Badges') %>
 
-<table>
-  <tr>
-    <th>Name</th>
-    <th>Image url</th>
-    <th>Summary</th>
-    <th>Description</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
+<div class="page-header">
+  <h1> 
+    All Badges
+    <%= link_to 'New Badge', new_badge_path, class: "btn btn-primary", id: "new-badge-button" %>
+  </h1>
+</div>
 
-<% @badges.each do |badge| %>
-  <tr>
-    <td><%= badge.name %></td>
-    <td><%= badge.image_url %></td>
-    <td><%= badge.summary %></td>
-    <td><%= badge.description %></td>
-    <td><%= link_to 'Show', badge %></td>
-    <td><%= link_to 'Edit', edit_badge_path(badge) %></td>
-    <td><%= link_to 'Destroy', badge, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-  </tr>
-<% end %>
-</table>
+<ul class="thumbnails">
+  <% @badges.each do |badge| %>
+    <li class="span3">
+      <div class="thumbnail badge-index-item">
+        <img src="<%= badge.image_url %>" alt="View Badge Detail" class="badge-image">
+        <h3><%= link_to badge.name, badge %></h3>
+        <p><%= badge.summary %></p>
+      </div>
+    </li>
+
+  <% end %>
+</ul>
 
 <br />
 
-<%= link_to 'New Badge', new_badge_path %>
+

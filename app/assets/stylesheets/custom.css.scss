@@ -1,0 +1,72 @@
+@import "bootstrap";
+@import "bootstrap-responsive";
+
+
+/* mixins, variables, etc. */
+
+$grayMediumLight: #eaeaea;
+
+
+/* universal */
+
+body {
+  padding-top: 40px;
+}
+
+
+/* badge index */
+
+img.badge-image {
+  height: 120px;
+}
+
+img.badge-image-header {
+  margin: 0 20px 0 5px;
+}
+
+#new-badge-button {
+  color: white !important;
+  margin-right: 50px;
+  float: right;
+}
+
+#header-button-bar {
+  float: right;
+  padding-right: 50px;
+}
+
+.badge-index-item {
+  padding: 20px;
+}
+
+/* header */
+
+#logo {
+  float: left;
+  font-family: "courier new";
+  font-size: 30px;
+  font-weight: bold;
+  padding: 10px;
+}
+
+
+/* footer */
+
+footer {
+  margin-top: 45px;
+  padding-top: 5px;
+  border-top: 1px solid $grayMediumLight;
+  color: $grayLight;
+  
+  small { 
+    float: left; 
+  }
+  ul {
+    float: right;
+    list-style: none;
+    li {
+      float: left;
+      margin-left: 10px;
+    }
+  }
+}

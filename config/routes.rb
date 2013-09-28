@@ -1,6 +1,7 @@
 BadgeList::Application.routes.draw do
   resources :badges
 
+  root :to => 'badges#index'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

@@ -4,13 +4,15 @@ gem 'rails', '3.2.14'
 
 # HANK
 
-gem 'mongoid'
-gem 'bson_ext'
+gem 'mongoid', '3.1.5'
+gem 'bson_ext', '1.9.2'
+
+gem 'bootstrap-sass', '2.3.2.2'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-
+gem 'simple_form'
 
 # Gems used only for assets and not required
 # in production environments by default.

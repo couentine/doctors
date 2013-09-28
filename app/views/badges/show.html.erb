@@ -1,25 +1,26 @@
-<p id="notice"><%= notice %></p>
+<% provide(:title, @badge.name) %>
 
-<p>
-  <b>Name:</b>
-  <%= @badge.name %>
-</p>
+<div class="page-header">
+  <h1>
+    <img src="<%= @badge.image_url %>" class="badge-image badge-image-header"><%= @badge.name %>
+    <div class="btn-group" id="header-button-bar">
+      <%= link_to 'Edit Badge', edit_badge_path(@badge), class: "btn" %>
+      <%= link_to 'Delete Badge', @badge, method: :delete, class: "btn", data: { confirm: 'Are you sure?' } %>
+    </div><br/>
+  </h1>
+</div>
 
-<p>
-  <b>Image url:</b>
-  <%= @badge.image_url %>
-</p>
 
-<p>
-  <b>Summary:</b>
+
+
+<span class="label label-info">Summary</span><br/>
+<p class="lead">
   <%= @badge.summary %>
 </p>
 
 <p>
-  <b>Description:</b>
+  <span class="label label-info">Description</span><br/>
   <%= @badge.description %>
 </p>
 
 
-<%= link_to 'Edit', edit_badge_path(@badge) %> |
-<%= link_to 'Back', badges_path %>
