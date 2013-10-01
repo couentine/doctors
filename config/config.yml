@@ -1,0 +1,13 @@
+# BADGE LIST CONFIGURATION FILE
+
+defaults: &defaults
+  page_size: 28
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

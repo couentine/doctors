@@ -10,7 +10,16 @@ $grayMediumLight: #eaeaea;
 /* universal */
 
 body {
-  padding-top: 40px;
+  @media (min-width: 980px) { padding-top: 60px; }
+  overflow: auto;
+}
+
+section {
+  overflow: auto;
+}
+
+textarea {
+  resize: vertical;
 }
 
 
@@ -37,17 +46,53 @@ img.badge-image-header {
 
 .badge-index-item {
   padding: 20px;
+  overflow-y: hidden;
+  h3 { 
+    overflow: hidden; 
+    font-size: 22px;
+    line-height: 26px;
+  }
+
+  @media (min-width: 1200px) {
+    height: 310px;
+    h3 { max-height: 79px; }
+  }
+
+  @media (min-width: 980px) and (max-width: 1199px) {
+    height: 360px;
+    h3 { max-height: 109px; }
+  }
+   
+  @media (min-width: 768px) and (max-width: 979px) {
+    height: 396px;
+    padding: 15px;
+    h3 { 
+      max-height: 100px; 
+      font-size: 18px;
+      line-height: 24px;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    padding: 15px;
+    height: auto;
+  }
+   
+  @media (max-width: 480px) {
+    padding: 15px;
+    height: auto;
+  }
 }
 
 /* header */
 
 #logo {
-  float: left;
   font-family: "courier new";
   font-size: 30px;
   font-weight: bold;
-  padding: 10px;
+  margin-left: 0px;
 }
+
 
 
 /* footer */

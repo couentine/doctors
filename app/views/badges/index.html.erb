@@ -7,18 +7,21 @@
   </h1>
 </div>
 
-<ul class="thumbnails">
-  <% @badges.each do |badge| %>
-    <li class="span3">
-      <div class="thumbnail badge-index-item">
-        <img src="<%= badge.image_url %>" alt="View Badge Detail" class="badge-image">
-        <h3><%= link_to badge.name, badge %></h3>
-        <p><%= badge.summary %></p>
-      </div>
-    </li>
+<%= paginate @badges %>
 
-  <% end %>
-</ul>
+  <ul class="thumbnails">
+    <% @badges.each do |badge| %>
+      <li class="span3">
+        <div class="thumbnail badge-index-item">
+          <img src="<%= badge.image_url %>" alt="Badge Image" class="badge-image">
+          <h3><%= link_to badge.name, badge, class: "badge-detail-text-link" %></h3>
+          <p><%= badge.summary %></p>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+
+<%= paginate @badges %>
 
 <br />
 

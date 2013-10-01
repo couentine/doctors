@@ -2,7 +2,7 @@ class BadgesController < ApplicationController
   # GET /badges
   # GET /badges.json
   def index
-    @badges = Badge.all
+    @badges = Badge.asc(:name).page(params[:page]).per(APP_CONFIG['page_size'])
 
     respond_to do |format|
       format.html # index.html.erb

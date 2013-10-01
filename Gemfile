@@ -8,11 +8,17 @@ gem 'mongoid', '3.1.5'
 gem 'bson_ext', '1.9.2'
 
 gem 'bootstrap-sass', '2.3.2.2'
-
-# Bundle edge Rails instead:
-# gem 'rails', :git => 'git://github.com/rails/rails.git'
-
+gem 'faker'
 gem 'simple_form'
+
+# Pagination
+
+gem 'kaminari'
+gem 'kaminari-bootstrap'
+
+
+
+
 
 group :development, :test do
   gem 'rspec-rails', '~> 2.0'
