@@ -69,5 +69,8 @@ module BadgeList
     config.action_mailer.delivery_method = :postmark
     config.action_mailer.postmark_settings = { :api_key => ENV['POSTMARK_API_KEY'] }
 
+    # For devise
+    config.assets.initialize_on_precompile = false
+
   end
 end

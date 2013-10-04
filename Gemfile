@@ -21,6 +21,9 @@ gem 'kaminari-bootstrap'
 
 gem 'postmark-rails', '~> 0.5.2'
 
+# Users
+
+gem 'devise'
 
 
 group :development, :test do
