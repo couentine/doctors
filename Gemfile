@@ -17,6 +17,9 @@ gem 'kaminari'
 gem 'kaminari-bootstrap'
 
 
+# Email
+
+gem 'postmark-rails', '~> 0.5.2'
 
 
 
