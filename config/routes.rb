@@ -1,4 +1,6 @@
 BadgeList::Application.routes.draw do
+  devise_for :users
+
   resources :badges
 
   root :to => 'badges#index'
