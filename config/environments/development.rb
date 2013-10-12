@@ -32,4 +32,15 @@ BadgeList::Application.configure do
   # For devise
   config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 
+  # Send email through gmail for this environment
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address:              'smtp.gmail.com',
+    port:                 587,
+    domain:               'example.com',
+    user_name:            'knowledgestreem@gmail.com',
+    password:             'educ8every1!',
+    authentication:       'plain',
+    enable_starttls_auto: true  }
+
 end
