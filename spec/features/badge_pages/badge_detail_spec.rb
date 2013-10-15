@@ -2,9 +2,16 @@ require 'spec_helper'
 
 feature "View Badge Detail" do
   
+  given(:user) { FactoryGirl.create(:user) }
   given(:badge) { FactoryGirl.create(:badge) }
 
-  background(:each) { visit badge_path(badge) }
+  background(:each) do
+    visit new_user_session_path
+    fill_in 'user[email]', :with => user.email
+    fill_in 'user[password]', :with => 'password'
+    click_link_or_button 'Sign in'
+    visit badge_path(badge)
+  end
 
   scenario "User sees all fields correctly" do
     page.should have_text(badge.name)

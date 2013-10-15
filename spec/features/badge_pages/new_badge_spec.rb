@@ -2,7 +2,16 @@ require 'spec_helper'
 
 feature "Create New Badge" do
   
-  background(:each) { visit "/badges/new" }
+  given(:user) { FactoryGirl.create(:user) }
+  given(:badge) { FactoryGirl.create(:badge) }
+
+  background(:each) do
+    visit new_user_session_path
+    fill_in 'user[email]', :with => user.email
+    fill_in 'user[password]', :with => 'password'
+    click_link_or_button 'Sign in'
+    visit new_badge_path
+  end
 
   scenario "User fills in all fields correctly" do
     page.fill_in "badge_name", with: "New Badge Name"

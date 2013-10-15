@@ -2,7 +2,16 @@ require 'spec_helper'
 
 feature "Badge Index" do
   
-  background(:each) { visit "/badges" }
+  given(:user) { FactoryGirl.create(:user) }
+  given(:badge) { FactoryGirl.create(:badge) }
+
+  background(:each) do
+    visit new_user_session_path
+    fill_in 'user[email]', :with => user.email
+    fill_in 'user[password]', :with => 'password'
+    click_link_or_button 'Sign in'
+    visit badges_path
+  end
 
   scenario "User sees correct titles" do
     page.should have_title("All Badges")
@@ -20,13 +29,6 @@ feature "Badge Index" do
     page.should have_link("New Badge")
     click_link "New Badge" 
     page.should have_selector('h1', text: "Create New Badge")
-  end
-
-  given(:first_badge_link) { first("a.badge-detail-text-link") }
-
-  scenario "User clicks Badge detail link" do
-    first_badge_link.click
-    page.should have_selector('h1', text: first_badge_link.text )
   end
 
 end

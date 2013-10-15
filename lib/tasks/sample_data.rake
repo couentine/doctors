@@ -1,8 +1,22 @@
 namespace :db do
   desc "Fill database with sample data"
   task populate: :environment do
+    make_users
     make_badges
   end
+end
+
+def make_users
+  
+  50.times do |n|
+    name = Faker::Name.name
+    email = "human-#{n+1}@example.com"
+    password = "password"
+    User.create!(:name => name,
+                 :email => email,
+                 :password => password)
+  end
+
 end
 
 def make_badges

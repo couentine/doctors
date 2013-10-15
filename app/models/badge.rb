@@ -17,6 +17,5 @@ class Badge
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :image_url, presence: true
   validates :summary, presence: true, length: { maximum: MAX_SUMMARY_LENGTH }
-  validates :description, presence: true
 
 end

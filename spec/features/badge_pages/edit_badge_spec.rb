@@ -2,9 +2,16 @@ require 'spec_helper'
 
 feature "Edit Badge" do
   
+  given(:user) { FactoryGirl.create(:user) }
   given(:badge) { FactoryGirl.create(:badge) }
 
-  background(:each) { visit edit_badge_path(badge) }
+  background(:each) do
+    visit new_user_session_path
+    fill_in 'user[email]', :with => user.email
+    fill_in 'user[password]', :with => 'password'
+    click_link_or_button 'Sign in'
+    visit edit_badge_path(badge)
+  end
 
   scenario "User updates fields and clicks save" do
     page.fill_in "badge_name", with: "Updated Badge Name"

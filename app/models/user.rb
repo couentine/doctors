@@ -1,5 +1,11 @@
 class User
   include Mongoid::Document
+
+  # Constants
+  
+  MIN_PASSWORD_LENGTH = 6 # Note: This is just for use in tests & not actually tied to anything
+  MAX_NAME_LENGTH = 200
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -7,7 +13,9 @@ class User
          :confirmable, :lockable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :name, :password, :password_confirmation, :remember_me
+
+  # === STANDARD FIELDS === #
 
   ## Database authenticatable
   field :email,              :type => String, :default => ""
@@ -40,4 +48,11 @@ class User
 
   ## Token authenticatable
   # field :authentication_token, :type => String
+
+  # === CUSTOM FIELDS & VALIDTIONS === #
+  
+  field :name,                :type => String
+
+  validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
+
 end

@@ -42,9 +42,4 @@ describe Badge do
     it { should_not be_valid }
   end
 
-  describe "when description is blank" do
-    before { badge.description = nil }
-    it { should_not be_valid }
-  end
-
 end
