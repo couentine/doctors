@@ -1,0 +1,74 @@
+<% provide(:title, @user.name) %>
+<!--
+<div class="page-header">
+  <h1>
+    <%= gravatar_for @user, :size => 100, :class => 'img-polaroid' %> 
+    <%= @user.name %>
+  </h1>
+</div>
+-->
+
+<script>
+  $(document).ready(function() {
+      $('ul.nav li a').tooltip({
+        placement: 'bottom'
+      });
+  });
+</script>
+
+<% if (@user.id == current_user.id) && (!@user.confirmed? || @user.pending_reconfirmation?) %>
+  <p class="lead text-warning">
+    <b>Account Status:</b>
+    Currently waiting on email confirmation for "<%= @user.unconfirmed_email || @user.email %>"
+  </p>
+<% end %>
+
+<div class="row bl-toprow-no-header">
+  
+  <div class="span5">
+
+    <p class="text-center">
+      <%= gravatar_for @user, :size => 100, :class => 'img-polaroid' %> <br/>
+    </p>
+    <h2 class="text-center"><%= @user.name %></h2>
+
+    <% if (@user.id == current_user.id) %>
+      <div class="navbar">
+        <div class="navbar-inner">
+          <ul class="nav">
+            <li><a href="<%= edit_user_registration_path %>"><i class="icon-edit"></i> Change account info</a></li>
+            <li><a href="https://en.gravatar.com/site/login" target="_blank" data-toggle="tooltip" title="Badge List uses Gravatar to display your profile picture. Clicking this link will take you to the Gravatar site."><i class="icon-picture"></i> Change picture</a></li>
+          </ul>
+        </div>  
+      </div>
+    <% end %>
+      
+    <p>
+      List of groups goes here...
+    </p>
+
+  </div>
+
+  <div class="span7">
+
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+      quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+      consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+      cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+      proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </p>
+
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+      quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+      consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+      cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+      proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </p>
+
+  </div>
+
+</div>

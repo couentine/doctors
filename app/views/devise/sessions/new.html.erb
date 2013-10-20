@@ -1,15 +1,42 @@
-<h2>Sign in</h2>
+<% provide(:title, 'Sign in') %>
 
-<%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
-  <div class="form-inputs">
-    <%= f.input :email, :required => false, :autofocus => true %>
-    <%= f.input :password, :required => false %>
-    <%= f.input :remember_me, :as => :boolean if devise_mapping.rememberable? %>
+<div class="row bl-toprow-no-header">
+  
+  <div class="span7">
+    <div class="well well-large">
+      <h2>New to Badge List?</h2>
+      <p>
+          Badge List helps teachers, trainers and learners keep track of learning progress with Open Badges and simple self-guided assessments.
+      </p>
+      <ul>
+          <li>Create a mastery checklist to track progress towards completion</li>
+          <li>Assign exercises and log work</li>
+          <li>Issue badges compatible with Mozilla's Open Badge framework</li>
+      </ul>
+      <p><br/><%= link_to "Sign up for Badge List", new_user_registration_path, class: "btn btn-large btn-success" %></p>
+    </div>
   </div>
 
-  <div class="form-actions">
-    <%= f.button :submit, "Sign in" %>
-  </div>
-<% end %>
+  <div class="span4 offset1">
+    <h2>Sign in</h2>
+    
+    <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
+      <div class="form-inputs bl-form-large bl-form-no-labels">
+        <%= f.input :email, :required => true, :autofocus => true, :placeholder => 'Your email', :input_html => { :class => 'input-xlarge' } %>
+        <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'input-xlarge' } %>
+        <%= f.input :remember_me, :as => :hidden, :input_html => {:value => true} %>
+      </div>
 
-<%= render "devise/shared/links" %>
+      <div class="controls">
+        <%= f.button :submit, "Sign in", :class => 'btn-large btn-primary' %>
+      </div>
+
+      <div class="form-actions">
+        <%= render "devise/shared/links" %>
+      </div>
+    <% end %>
+  </div>
+
+</div>
+
+

@@ -5,6 +5,9 @@ BadgeList::Application.routes.draw do
 
   root :to => 'badges#index'
 
+  resources :users, :only => [:show]
+  # match 'users/:id' => 'users#show'
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

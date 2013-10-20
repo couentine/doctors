@@ -1,27 +1,63 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
+<% provide(:title, 'Change account info') %>
 
-<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put }) do |f| %>
-  <%= f.error_notification %>
+<div class="page-header">
+  <h1>Change your account info</h1>
+</div>
 
-  <div class="form-inputs">
-    <%= f.input :email, :required => true, :autofocus => true %>
-
-    <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-      <p>Currently waiting confirmation for: <%= resource.unconfirmed_email %></p>
-    <% end %>
-
-    <%= f.input :password, :autocomplete => "off", :hint => "leave it blank if you don't want to change it", :required => false %>
-    <%= f.input :password_confirmation, :required => false %>
-    <%= f.input :current_password, :hint => "we need your current password to confirm your changes", :required => true %>
-  </div>
-
-  <div class="form-actions">
-    <%= f.button :submit, "Update" %>
-  </div>
+<% if !resource.confirmed? || resource.pending_reconfirmation? %>
+  <p class="lead text-warning">
+    <b>Account Status:</b>
+    Currently waiting on email confirmation for "<%= @user.unconfirmed_email || @user.email %>"
+  </p>
 <% end %>
 
-<h3>Cancel my account</h3>
+<div class="row">
+  <div class="span6">
+    
+    <h3>Change your email</h3>
+    
+    <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put, :class => 'form-horizontal' }) do |f| %>
+      <%= f.error_notification %>
 
-<p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), :data => { :confirm => "Are you sure?" }, :method => :delete %></p>
+      <div class="form-inputs">
+        <%= f.input :email, :required => true, :autofocus => true, :label => "New email" %>
+        <%= f.input :current_password, :hint => "we need your current password to confirm your changes", :required => true %>
+      </div>
 
-<%= link_to "Back", :back %>
+      <div class="controls">
+        <%= f.button :submit, "Change my email", :class => "btn-large btn-info" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="span6">
+    <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put, :class => 'form-horizontal' }) do |f| %>
+      <%= f.error_notification %>
+
+      <div class="form-inputs">
+        
+        <h3>Change your password</h3>
+
+        <%= f.input :email, :as => :hidden, :required => true, :autofocus => true %>
+        <%= f.input :current_password, :hint => "we need your current password to confirm your changes", :required => true %>
+
+        <%= f.input :password, :autocomplete => "off", :required => true %>
+        <%= f.input :password_confirmation, :autocomplete => "off", :required => true %>
+      </div>
+
+      <div class="controls">
+        <%= f.button :submit, "Change my password", :class => "btn-large btn-info" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="row" style="margin-top: 100px">
+  <div class="span4 offset4 well">
+    <h3>Close your account</h3>
+    <p class="text-error">Careful! This can't be undone.</p>
+    <p> <%= link_to "Close my account", registration_path(resource_name), :data => { :confirm => "Are you sure?" }, :method => :delete, :class => "btn btn-danger" %></p>
+  </div>
+</div>
+
+

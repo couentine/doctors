@@ -1,17 +1,25 @@
-<h2>Sign up</h2>
+<% provide(:title, 'Join') %>
+
+<div class="page-header">
+  <h1>Create a new account</h1>
+</div>
+
 
 <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
   <%= f.error_notification %>
 
-  <div class="form-inputs">
-    <%= f.input :email, :required => true, :autofocus => true %>
-    <%= f.input :password, :required => true %>
-    <%= f.input :password_confirmation, :required => true %>
+  <div class="form-inputs bl-form-large bl-form-no-labels">
+    <%= f.input :name, :required => true, :autofocus => true, :placeholder => 'Your name', :input_html => { :class => 'input-xlarge' } %>
+    <%= f.input :email, :required => true, :placeholder => 'Your email', :input_html => { :class => 'input-xlarge' } %>
+    <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'input-xlarge' } %>
+  </div>
+
+  <div class="controls">
+    <%= f.button :submit, "Create an account", :class => 'btn-large btn-primary' %>
   </div>
 
   <div class="form-actions">
-    <%= f.button :submit, "Sign up" %>
+    <%= render "devise/shared/links" %>
   </div>
 <% end %>
 
-<%= render "devise/shared/links" %>

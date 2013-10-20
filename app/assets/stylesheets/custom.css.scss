@@ -22,6 +22,25 @@ textarea {
   resize: vertical;
 }
 
+a.btn:visited {
+  color: white;
+}
+
+div.bl-toprow-no-header {
+  margin-top: 30px;
+}
+
+/* Simple Form Overrides */
+
+div.bl-form-no-labels label {
+  display: none;
+}
+
+div.bl-form-large input {
+  font-size: 17.5px;
+  height: 30px;
+  padding: 5px 10px 4px 10px;
+}
 
 /* badge index */
 
@@ -91,6 +110,12 @@ img.badge-image-header {
   font-size: 30px;
   font-weight: bold;
   margin-left: 0px;
+}
+
+span#header-currentuser-name {
+  @media (max-width: 420px) {
+    display: none;
+  }
 }
 
 
