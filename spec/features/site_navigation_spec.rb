@@ -12,7 +12,7 @@ feature "Site Navigation" do
     visit new_user_session_path
     fill_in 'user[email]', :with => user.email
     fill_in 'user[password]', :with => 'password'
-    click_link_or_button 'Sign in'
+    click_button 'Sign in'
     visit root_path
     page.should have_selector('h1', text: "All Badges")
   end

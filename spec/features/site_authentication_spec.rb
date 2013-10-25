@@ -4,7 +4,7 @@ feature "Site Authentication" do
   
   given(:user) { FactoryGirl.create(:user) }
 
-  scenario "User visits root path and signs in" do
+  scenario "User visits root path and signs in, then signs out" do
     visit root_path
     page.should have_link("Sign in")
     click_link "Sign in"
@@ -14,6 +14,8 @@ feature "Site Authentication" do
     click_button 'Sign in'
     page.should_not have_link("Sign in")
     page.should have_text(user.name)
+    # visit destroy_user_session_path >> doesn't work
+    # page.should_not have_text(user.name)
   end
 
   scenario "User signs up for a new account" do

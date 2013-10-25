@@ -16,7 +16,7 @@
   });
 </script>
 
-<% if (@user.id == current_user.id) && (!@user.confirmed? || @user.pending_reconfirmation?) %>
+<% if user_signed_in? && (@user.id == current_user.id) && (!@user.confirmed? || @user.pending_reconfirmation?) %>
   <p class="lead text-warning">
     <b>Account Status:</b>
     Currently waiting on email confirmation for "<%= @user.unconfirmed_email || @user.email %>"
@@ -32,7 +32,7 @@
     </p>
     <h2 class="text-center"><%= @user.name %></h2>
 
-    <% if (@user.id == current_user.id) %>
+    <% if user_signed_in? && (@user.id == current_user.id) %>
       <div class="navbar">
         <div class="navbar-inner">
           <ul class="nav">

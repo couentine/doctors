@@ -15,10 +15,9 @@
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-header-currentuser">
-            <li><%= link_to 'View your profile', current_user %></li>
-            <li><a href="https://en.gravatar.com/site/login" target="_blank">Change your picture</a></li>
+            <li><a href="<%= url_for(current_user) %>"><i class="icon-user"></i> View your profile</a></li>
             <li class="divider"></li>
-            <li><%= link_to 'Sign out', destroy_user_session_path, :method => :delete %></li>
+            <li><%= link_to "<i class='icon-remove'></i> Sign out".html_safe, destroy_user_session_path, :method => :delete %></li>
           </ul>
         </li>
       </ul>
