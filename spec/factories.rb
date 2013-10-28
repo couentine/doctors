@@ -13,5 +13,14 @@ FactoryGirl.define do
     password "password"
     password_confirmation { "password" }
   end
+
+  factory :group do
+    sequence(:name)  { |n| "Learning Group #{n}" }
+    sequence(:url)  { |n| "zzz-uniquegroup-#{n}" }
+    location "San Franciso, CA"
+    website "http://example.com"
+    type "open"
+    creator
+  end
   
 end

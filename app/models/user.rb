@@ -1,10 +1,26 @@
 class User
   include Mongoid::Document
+  include Mongoid::Timestamps
 
-  # Constants
+  # === CONSTANTS === #
   
   MIN_PASSWORD_LENGTH = 6 # Note: This is just for use in tests & not actually tied to anything
   MAX_NAME_LENGTH = 200
+
+  # === RELATIONSHIP === #
+
+  has_many :created_groups, inverse_of: :creator, class_name: "Group"
+  has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
+  has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
+
+  # === CUSTOM FIELDS & VALIDTIONS === #
+  
+  field :name,                :type => String
+
+  validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
+
+  
+  # === DEVISE SETTINGS === #
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
@@ -15,7 +31,7 @@ class User
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :name, :password, :password_confirmation, :remember_me
 
-  # === STANDARD FIELDS === #
+  # === STANDARD DEVISE FIELDS === #
 
   ## Database authenticatable
   field :email,              :type => String, :default => ""
@@ -48,11 +64,5 @@ class User
 
   ## Token authenticatable
   # field :authentication_token, :type => String
-
-  # === CUSTOM FIELDS & VALIDTIONS === #
-  
-  field :name,                :type => String
-
-  validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
 
 end
