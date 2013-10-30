@@ -20,7 +20,7 @@ FactoryGirl.define do
     location "San Franciso, CA"
     website "http://example.com"
     type "open"
-    creator
+    association :creator, :factory => :user
   end
   
 end

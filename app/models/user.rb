@@ -9,7 +9,7 @@ class User
 
   # === RELATIONSHIP === #
 
-  has_many :created_groups, inverse_of: :creator, class_name: "Group"
+  has_many :created_groups, inverse_of: :creator, class_name: "Group", dependent: :nullify
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
 
@@ -64,5 +64,15 @@ class User
 
   ## Token authenticatable
   # field :authentication_token, :type => String
+
+  # === USER FUNCTIONS === #
+
+  def member_of?(group)
+    self.member_of.include?(group)
+  end
+
+  def admin_of?(group)
+    self.admin_of.include?(group)
+  end
 
 end

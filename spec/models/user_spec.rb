@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe User do
   
-  let(:user) { FactoryGirl.build(:user) };
-  let(:group) { FactoryGirl.build(:group, :creator => user) };
+  let(:user) { FactoryGirl.create(:user) };
+  let(:group) { FactoryGirl.create(:group, :creator => user) };
 
   subject { user }
 
@@ -28,8 +28,12 @@ describe User do
 
   # === RELATIONSHIPS === #
   
-  before { user.save! }
-  
+  describe "when user is creator of a group" do
+    it "should be linked to the group" do
+      user.created_groups.should include(group)
+    end
+  end
+
   describe "when is member of group" do
     before do
       group.members << user
