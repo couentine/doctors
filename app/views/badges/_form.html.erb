@@ -6,7 +6,7 @@
   <div class="controls">
     <%= f.button :submit, class: 'btn btn-large btn-primary' %>
     <%= 
-      if @badge.id.blank? 
+      if @badge.new_record?
         link_to "Cancel", badges_path, class: "btn btn-large"
       else 
         link_to "Cancel", @badge, class: "btn btn-large"

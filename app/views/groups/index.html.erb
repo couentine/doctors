@@ -1,0 +1,19 @@
+<% provide(:title, "Your Learning Groups") %>
+
+<div class="page-header">
+  <h1>
+    Your learning groups
+    <%= link_to 'New Group', new_group_path, class: "btn btn-primary", id: "new-group-button" %>
+  </h1>
+</div>
+
+
+<% if @groups.empty? %>
+  <p>You don't have any learning groups yet.</p>
+<% else %>
+  <ul>
+    <% @groups.each do |group| %>
+      <li><%= link_to group.name, group %></li>
+    <% end %>
+  </ul>
+<% end %>

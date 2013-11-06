@@ -1,12 +1,32 @@
 BadgeList::Application.routes.draw do
   devise_for :users
 
+  resources :groups
+  match 'groups/:id/leave' => 'groups#leave', via: :delete, as: :leave_group
+  match 'groups/:id/members/:user_id' => 'groups#destroy_user', 
+        via: :delete, as: :destroy_group_member, defaults: { type: 'member' }
+  match 'groups/:id/admins/:user_id' => 'groups#destroy_user', 
+        via: :delete, as: :destroy_group_admin, defaults: { type: 'admin' }
+  match 'groups/:id/invited_members/:email' => 'groups#destroy_invited_user', 
+        via: :delete, as: :destroy_group_invited_member,
+        defaults: { type: 'member' }
+  match 'groups/:id/invited_admins/:email' => 'groups#destroy_invited_user', 
+        via: :delete, as: :destroy_group_invited_admin,
+        defaults: { type: 'admin' }
+  match 'groups/:id/members/add' => 'groups#add_users', via: :get,
+        as: :add_group_members, defaults: { type: 'member' }
+  match 'groups/:id/admins/add' => 'groups#add_users', via: :get,
+        as: :add_group_admins, defaults: { type: 'admin' }
+  match 'groups/:id/members' => 'groups#create_users', via: :post,
+        as: :create_group_members, defaults: { type: 'member' }
+  match 'groups/:id/admins' => 'groups#create_users', via: :post,
+        as: :create_group_admins, defaults: { type: 'admin' }
+        
   resources :badges
 
   root :to => 'badges#index'
 
   resources :users, :only => [:show]
-  # match 'users/:id' => 'users#show'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

@@ -23,10 +23,10 @@ textarea {
 }
 
 a.btn:visited {
-  color: white;
+  /* color: white; */
 }
 
-div.bl-toprow-no-header {
+.add-top-margin {
   margin-top: 30px;
 }
 
@@ -40,6 +40,10 @@ div.bl-form-large input {
   font-size: 17.5px;
   height: 30px;
   padding: 5px 10px 4px 10px;
+}
+
+h2.form-header {
+  font-size: 22px;
 }
 
 /* badge index */

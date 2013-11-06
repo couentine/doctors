@@ -1,6 +1,6 @@
 class BadgesController < ApplicationController
   
-  before_filter :authenticate_user!
+  before_filter :authenticate_user!, only: [:index, :new, :edit, :create, :update, :destroy]
 
   # GET /badges
   # GET /badges.json
@@ -79,7 +79,7 @@ class BadgesController < ApplicationController
     @badge.destroy
 
     respond_to do |format|
-      format.html { redirect_to badges_url }
+      format.html { redirect_to root_url } # fixme: redirect to the learning group
       format.json { head :no_content }
     end
   end

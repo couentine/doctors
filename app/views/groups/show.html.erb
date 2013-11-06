@@ -1,0 +1,61 @@
+<% provide(:title, @group.name) %>
+
+<div class="row bl-toprow-no-header">
+  
+  <div class="span3 profile-sidebar">
+
+    <%= group_image_tag_for(@group) %><br/>
+
+    <div class="profile-section-header">
+
+      <h1>
+        <span class="profile-name"><%= @group.name %></span>
+        <span class="profile-url"><%= @group.url %></span>
+      </h1>
+
+      <span class="profile-type">
+        <%=
+          case @group.type
+            when "open"
+              "Open Learning Group"
+            when "closed"
+              "Public Learning Group"
+            when "private"
+              "Private Learning group"
+          end
+        %>
+      </span>
+
+      <span class="profile-actions">
+        <ul>
+          <li>Leave Group</li>
+        </ul>
+      </span>
+
+    </div>
+
+  </div>
+
+  <div class="span9 profile-body">
+
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+      quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+      consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+      cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+      proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </p>
+
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+      quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+      consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+      cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+      proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </p>
+
+  </div>
+
+</div>
