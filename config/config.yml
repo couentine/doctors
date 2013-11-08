@@ -5,9 +5,12 @@ defaults: &defaults
 
 development:
   <<: *defaults
+  from_email: knowledgestreem@gmail.com
 
 test:
   <<: *defaults
+  from_email: knowledgestreem@gmail.com
 
 production:
   <<: *defaults
+  from_email: app@badgelist.com

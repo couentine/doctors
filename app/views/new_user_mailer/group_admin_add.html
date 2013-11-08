@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>
+      You've been invited to join the <%= @group.name %> learning group as an admin in Badge List. 
+      To view the learning group, follow the link below to create a new Badge List account. 
+      (Be sure to sign up using the same email address!)
+    </p>
+    <p>
+      After you login you will see the learning group on your home page under "Your Groups".
+    </p>
+    <p>
+      <strong>Create a Badge List account:</strong> 
+      <a href="<%= "#{new_user_registration_path}?email=#{@to_email}&name=#{@to_name}" %>">
+        <%= new_user_registration_path %>
+      </a>
+    </p>
+    <p>
+      <i>
+        This email was sent automatically by the Badge List app.
+        Badge List is a badge-based tool for tracking learning progress. 
+        If you take no action you will not receive any further emails about this invitation.
+      </i>
+    </p>
+  </body>
+</html>

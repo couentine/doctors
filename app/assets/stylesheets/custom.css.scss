@@ -5,9 +5,11 @@
 /* mixins, variables, etc. */
 
 $grayMediumLight: #eaeaea;
+$seperator-color: #ddd;
+$light-text-color: #999;
 
 
-/* universal */
+/* === UNIVERSAL === */
 
 body {
   @media (min-width: 980px) { padding-top: 60px; }
@@ -23,14 +25,14 @@ textarea {
 }
 
 a.btn:visited {
-  /* color: white; */
+  color: initial;
 }
 
 .add-top-margin {
   margin-top: 30px;
 }
 
-/* Simple Form Overrides */
+/* === FORMS === */
 
 div.bl-form-no-labels label {
   display: none;
@@ -46,7 +48,146 @@ h2.form-header {
   font-size: 22px;
 }
 
-/* badge index */
+/* === PROFILES === */
+
+.profile-section-header {
+  span {
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    float: left;
+
+    span.profile-name {
+      float: left;
+      font-size: 26px;
+      line-height: 30px;
+      margin-bottom: 5px;
+      width: 100%;
+    }
+    span.profile-url {
+      float: left;
+      font-size: 20px;
+      font-weight: normal;
+      line-height: 24px;
+      width: 100%;
+    }
+  }
+  span.profile-type {
+    float: left;
+    font-size: 14px;
+    line-height: 17px;
+    color: $gray;
+    width: 100%;
+  }
+
+  span.profile-actions {
+    float: left;
+    width: 100%;
+    padding: 5px 0;
+    border-bottom: 1px solid $seperator-color;
+  }
+
+  span.profile-details {
+    float: left;
+    width: 100%;
+    border-bottom: 1px solid $seperator-color;
+    li {
+      line-height: 23px;
+    }
+  }
+
+  span.profile-stats {
+    float: left;
+    width: 100%;
+    margin-top: 5px;
+
+    li.profile-stat {
+      text-align: center;
+      float: left;
+      margin-right: 15px;
+    }
+
+    span.stat-number {
+      float: left;
+      width: 100%;
+      font-size: 28px;
+      font-weight: bold;
+      margin: 0;
+    }
+    span.stat-label {
+      float: left;
+      width: 100%;
+      font-size: 11px;
+      color: $light-text-color;
+      margin: 3px 0 0 0;
+    }
+  }
+}
+
+/* === TABS === */
+
+div.tab-header {
+  float: left;
+  width: 100%;
+  border-bottom: 1px solid $seperator-color;
+  margin: 0 0 30px 0;
+
+  h2 {
+    float: left;
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .btn { float: right; }
+  .btn-small {
+    margin: 6px 6px 0 6px;
+  }
+}
+
+ul.nav-tabs {
+  margin-bottom: 5px;
+}
+
+div.tab-pane {
+  div.well {
+    float: left;
+    text-align: center;
+    width: 92%;
+  }
+}
+
+/* === USER CARDS === */
+
+div.user-card {
+  margin-bottom: 30px;
+  position: relative;
+  float: left;
+
+  img, span { float: left; }
+
+  img.gravatar {
+    margin-right: 15px
+  }
+  span.user-card-name {
+    font-size: 18px;
+    font-weight: bold;
+    width: 70%;
+    margin: 15px 0;
+  }
+  span.user-card-date {
+    font-size: 11px;
+    color: $light-text-color;
+    width: 70%;
+  }
+  a.user-card-delete {
+    position: absolute;
+    top: -8px;
+    left: 72px;
+  }
+}
+
+/* === BADGES === */
 
 img.badge-image {
   height: 120px;
@@ -107,7 +248,7 @@ img.badge-image-header {
   }
 }
 
-/* header */
+/* === HEADER === */
 
 #logo {
   font-family: "courier new";
@@ -124,7 +265,7 @@ span#header-currentuser-name {
 
 
 
-/* footer */
+/* === FOOTER === */
 
 footer {
   margin-top: 45px;

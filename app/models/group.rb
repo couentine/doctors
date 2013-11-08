@@ -47,7 +47,7 @@ class Group
 
   after_validation :add_creator_to_admins, on: :create
 
-  # === GROUP FUNCTIONS === #
+  # === GROUP METHODS === #
 
   def has_member?(user)
     members.include?(user)

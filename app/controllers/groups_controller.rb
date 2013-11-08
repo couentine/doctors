@@ -51,6 +51,8 @@ class GroupsController < ApplicationController
   # GET /groups/1.json
   def show
     @group = Group.find(params[:id])
+    @current_user_is_admin = current_user && current_user.admin_of?(@group)
+    @current_user_is_member = current_user && current_user.member_of?(@group)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -184,7 +186,13 @@ class GroupsController < ApplicationController
   # GET /groups/1/admins/add?type=admin
   def add_users
     @group = Group.find(params[:id])
-    @type = params[:type] == 'admin' ? :admin : :member
+    if params[:type] == 'admin'
+      @type = :admin
+      @form_path = create_group_admins_path(@group)
+    else
+      @type = :member
+      @form_path = create_group_members_path(@group)
+    end
   end
 
   # PUT /groups/1/members?type=member
@@ -197,6 +205,7 @@ class GroupsController < ApplicationController
   def create_users
     @group = Group.find(params[:id])
     @type = params[:type] == 'admin' ? :admin : :member
+    @notify_by_email = params[:notify_by_email] == "1"
     @new_admin_emails = []
     @new_member_emails = []
     @upgraded_member_emails = [] # members who were upgraded to admins
@@ -226,13 +235,13 @@ class GroupsController < ApplicationController
       unless users_to_add.empty?
         if @type == :admin
           users_to_add.each do |user|
-            if group.has_admin?(user)
+            if @group.has_admin?(user)
               skipped_admin_emails << user.email
             else
-              group.admins << user
-              # fixme: Add function to send an email
-              if group.has_member?(user)
-                group.members.delete(user)
+              @group.admins << user
+              UserMailer.add_group_admin(user, current_user, @group).deliver if @notify_by_email
+              if @group.has_member?(user)
+                @group.members.delete(user)
                 upgraded_member_emails << user.email
               else
                 new_admin_emails << user.email
@@ -241,13 +250,13 @@ class GroupsController < ApplicationController
           end
         else
           users_to_add.each do |user|
-            if group.has_member?(user)
+            if @group.has_member?(user)
               skipped_member_emails << user.email
-            elsif group.has_admin?(user)
+            elsif @group.has_admin?(user)
               skipped_admin_emails << user.email
             else
-              group.members << user
-              # fixme: Add function to send an email
+              @group.members << user
+              UserMailer.add_group_member(user, current_user, @group).deliver if @notify_by_email
               new_member_emails << user.email
             end
           end
@@ -262,21 +271,23 @@ class GroupsController < ApplicationController
       end
       emails_to_invite.each do |email|
         if @type == :admin
-          group.invited_admins << {
+          @group.invited_admins << {
             :email => email,
             :name => name_from_email[email],
             :invite_date => invite_date
           }
           new_admin_emails << email
-          # fixme: Add function to send an email
+          NewUserMailer.add_group_admin(email, name_from_email[email],
+                                        current_user, @group).deliver if @notify_by_email
         else
-          group.invited_members << {
+          @group.invited_members << {
             :email => email,
             :name => name_from_email[email],
             :invite_date => invite_date
           }
           new_member_emails << email
-          # fixme: Add function to send an email
+          NewUserMailer.add_group_member(email, name_from_email[email],
+                                         current_user, @group).deliver if @notify_by_email
         end
       end
     end

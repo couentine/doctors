@@ -1,0 +1,33 @@
+<div class="span4 user-card">
+  <%=
+    # Output the little "X" that allows admins to remove users from groups
+    if current_user && @group && @current_user_is_admin  && (current_user != user)
+      if user.admin_of?(@group)
+        path = destroy_group_admin_path(@group, user) 
+        link_title = "Remove this admin from the learning group"
+      elsif user.member_of?(@group)
+        path = destroy_group_member_path(@group, user)
+        link_title = "Remove this member from the learning group"
+      else
+        path = nil
+        link_title = nil
+      end
+
+      if path
+        link_to '<i class="icon-remove"></i>'.html_safe, destroy_group_member_path(@group, user),
+                method: :delete, class: "user-card-delete", title: link_title,
+                data: { toggle: "tooltip", placement: "right",
+                     confirm: "Are you absolutely sure you want to revoke this user's membership?" }
+      end
+    end 
+  %>
+  <a href="<%= user_path(user) %>"><%= gravatar_for user, :size => 80, :class => 'img-rounded' %></a>
+  <span class="user-card-name"><%= link_to user.name, user %></span>
+  <span class="user-card-date">
+    Member since <%=  if user.created_at
+                        user.created_at.to_s(:full_date)
+                      else
+                        "the beginning of time"
+                      end %>
+  </span>
+</div>

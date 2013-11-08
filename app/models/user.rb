@@ -65,7 +65,11 @@ class User
   ## Token authenticatable
   # field :authentication_token, :type => String
 
-  # === USER FUNCTIONS === #
+  # === CALLBACKS === #
+
+  after_create :convert_group_invitations
+
+  # === USER METHODS === #
 
   def member_of?(group)
     self.member_of.include?(group)
@@ -74,5 +78,35 @@ class User
   def admin_of?(group)
     self.admin_of.include?(group)
   end
+
+  # Returns "John Doe <email@example.com>" OR "email@example.com" depending on presence of name
+  def email_name
+    if self.name.blank?
+      return email
+    else
+      return "#{name} <#{email}>"
+    end
+  end
+
+  protected
+
+    # Finds any references to this user's email in the invited_admins/users arrays on groups.
+    # When found it upgrades the invitation to an actual relationship.
+    def convert_group_invitations
+      # First query for groups where we have been invited as an admin
+      Group.where(:invited_admins.elem_match => { :email => self.email }).entries.each do |group|
+        group.admins << self
+        invited_item = group.invited_admins.detect { |u| u[:email] == self.email}
+        group.invited_admins.delete(invited_item) if invited_item
+        group.save!
+      end
+      # Then query for groups where we have been invited as a normal member
+      Group.where(:invited_members.elem_match => { :email => self.email }).entries.each do |group|
+        group.members << self
+        invited_item = group.invited_members.detect { |u| u[:email] == self.email}
+        group.invited_members.delete(invited_item) if invited_item
+        group.save!
+      end
+    end
 
 end

@@ -1,6 +1,6 @@
 <% provide(:title, @group.name) %>
 
-<div class="row bl-toprow-no-header">
+<div class="row add-top-margin">
   
   <div class="span3 profile-sidebar">
 
@@ -17,18 +17,75 @@
         <%=
           case @group.type
             when "open"
-              "Open Learning Group"
+              "<i class='icon-globe'></i> Open Learning Group".html_safe
             when "closed"
-              "Public Learning Group"
+              "<i class='icon-eye-open'></i> Public Learning Group".html_safe
             when "private"
-              "Private Learning group"
+              "<i class='icon-lock'></i> Private Learning Group".html_safe
           end
         %>
       </span>
 
       <span class="profile-actions">
-        <ul>
-          <li>Leave Group</li>
+        <ul class="inline">
+          <li><%
+            if @current_user_is_admin && @group.admins.count == 1
+              leave_group_link_disabled = true
+              leave_group_link_title = 'You are currently the only admin for this learning group so 
+                                        you can\'t leave'
+            else
+              leave_group_link_disabled = false
+              leave_group_link_data_toggle = 'Resign your membership in this learning group'
+            end
+
+            concat link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
+              leave_group_path, method: :delete, class: 'btn btn-mini',
+              disabled: leave_group_link_disabled, 'data-placement' => 'right',
+              title: leave_group_link_title, 'data-toggle' => 'tooltip',
+              data: { confirm: 'Are you absolutely sure you want to leave this learning group?' })
+          %></li>
+          <% if @current_user_is_admin %>
+            <li>
+              <%= link_to '<i class="icon-pencil"></i> Edit Group'.html_safe, edit_group_path,
+                    class: 'btn btn-mini' %>
+            </li>
+          <% end %>
+        </ul>
+      </span>
+
+      <span class="profile-details">
+        <ul class="unstyled">
+          <% unless @group.location.blank? %>
+            <li class="profile-location">
+              <i class="icon-map-marker"></i> <%= @group.location %>
+            </li>
+          <% end %>
+          <% unless @group.website.blank? %>
+            <li class="profile-website">
+              <i class="icon-share"></i> 
+              <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
+            </li>
+          <% end %>
+          <li class="profile-created-date">
+            <i class="icon-time"></i> Created on <%= @group.created_at.to_s(:full_date) %>
+          </li>
+        </ul>
+      </span>
+
+      <span class="profile-stats">
+        <ul class="inline">
+          <li class="profile-stat" >
+            <span class="stat-number">0</span><br/>
+            <span class="stat-label">badges</span>
+          </li>
+          <li class="profile-stat" >
+            <span class="stat-number"><%= @group.members.count %></span><br/>
+            <span class="stat-label">members</span>
+          </li>
+          <li class="profile-stat" >
+            <span class="stat-number"><%= @group.admins.count %></span><br/>
+            <span class="stat-label">admins</span>
+          </li>
         </ul>
       </span>
 
@@ -38,23 +95,64 @@
 
   <div class="span9 profile-body">
 
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-      quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-      consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-      cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-      proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    </p>
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="#members" data-toggle="tab">Members</a></li>
+      <li><a href="#admins" data-toggle="tab">Admins</a></li>
+    </ul>
 
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-      quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-      consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-      cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-      proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    </p>
+    <div class="tab-content">
+
+      <div class="tab-pane active" id="members">
+        
+        <div class="tab-header">
+          <h2>Active Members</h2>
+          <%= 
+            if @current_user_is_admin
+              link_to '<i class="icon-plus"></i> Add Members'.html_safe,
+              add_group_members_path(@group), class: 'btn btn-small' 
+            end
+          %>
+        </div>
+
+        <% if @group.members.empty? %>
+
+          <div class="well">
+            <p class="lead">No members yet!</p>
+            <p>
+              <%= 
+                if @current_user_is_admin
+                  link_to '<i class="icon-plus"></i> Add some members'.html_safe,
+                  add_group_members_path(@group), class: 'btn btn-success' 
+                end
+              %>
+            </p>
+          </div>
+
+        <% else %>
+
+          <%= render @group.members %>
+        
+        <% end %>
+
+      </div>
+
+      <div class="tab-pane" id="admins">
+        
+        <div class="tab-header">
+          <h2>Active Admins</h2>
+          <%= 
+            if @current_user_is_admin
+              link_to '<i class="icon-plus"></i> Add Admins'.html_safe,
+              add_group_admins_path(@group), class: 'btn btn-small' 
+            end
+          %>
+        </div>
+
+        <%= render @group.admins %>
+
+      </div>
+
+    </div>
 
   </div>
 

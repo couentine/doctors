@@ -23,3 +23,15 @@
   </div>
 <% end %>
 
+<script>
+  
+  var params_name='<%=j params[:name] unless params[:name].blank? %>';
+  var params_email='<%=j params[:email] unless params[:email].blank? %>';
+
+  $(document).ready(function() {
+    if (params_name != '') $('#user_name').val(params_name);
+    if (params_email != '') $('#user_email').val(params_email);
+  });
+
+</script>
+

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>
+      You've been added as an admin to the <%= @group.name %> learning group in Badge List. 
+      To view the learning group, login to Badge List as normal or click on the link below.
+    </p>
+    <p>
+      <strong><%= @group.name %>:</strong> 
+      <%= link_to group_path(@group), @group %> 
+      (Added by <%= @from_user.name %>.)
+    </p>
+    <p>
+      <i>
+        This email was sent automatically by the Badge List app.
+        Badge List is a badge-based tool for tracking learning progress. 
+        If you take no action you will not receive any further emails about this invitation.
+      </i>
+    </p>
+  </body>
+</html>
