@@ -1,4 +1,5 @@
 class GroupsController < ApplicationController
+  include EmailTools
 
   # === FILTERS === #
 
@@ -169,7 +170,7 @@ class GroupsController < ApplicationController
     email = params[:email].downcase
     invited_users = params[:type] == 'admin' ? 
                                     @group.invited_admins : @group.invited_users
-    found_user = invited_users.detect { |u| u[:email] == email}
+    found_user = invited_users.detect { |u| u["email"] == email}
 
     if found_user
       invited_users.delete(found_user)
@@ -236,32 +237,36 @@ class GroupsController < ApplicationController
         if @type == :admin
           users_to_add.each do |user|
             if @group.has_admin?(user)
-              skipped_admin_emails << user.email
+              @skipped_admin_emails << user.email
             else
               @group.admins << user
-              UserMailer.add_group_admin(user, current_user, @group).deliver if @notify_by_email
+              UserMailer.group_admin_add(user, current_user, @group).deliver if @notify_by_email
               if @group.has_member?(user)
                 @group.members.delete(user)
-                upgraded_member_emails << user.email
+                @upgraded_member_emails << user.email
               else
-                new_admin_emails << user.email
+                @new_admin_emails << user.email
               end
             end
           end
         else
           users_to_add.each do |user|
             if @group.has_member?(user)
-              skipped_member_emails << user.email
+              @skipped_member_emails << user.email
             elsif @group.has_admin?(user)
-              skipped_admin_emails << user.email
+              @skipped_admin_emails << user.email
             else
               @group.members << user
-              UserMailer.add_group_member(user, current_user, @group).deliver if @notify_by_email
-              new_member_emails << user.email
+              UserMailer.group_member_add(user, current_user, @group).deliver if @notify_by_email
+              @new_member_emails << user.email
             end
           end
         end
       end
+
+      # Check if the group variables need initialization
+      @group.invited_admins = [] if @group.invited_admins.nil?
+      @group.invited_members = [] if @group.invited_members.nil?
 
       # For new users: We will park them in an array of hashes on the group
       if params[:notify_by_email]
@@ -270,25 +275,40 @@ class GroupsController < ApplicationController
         invite_date = nil
       end
       emails_to_invite.each do |email|
+        invited_user = {:email => email, :name => name_from_email[email], :invite_date => invite_date }
+
         if @type == :admin
-          @group.invited_admins << {
-            :email => email,
-            :name => name_from_email[email],
-            :invite_date => invite_date
-          }
-          new_admin_emails << email
-          NewUserMailer.add_group_admin(email, name_from_email[email],
-                                        current_user, @group).deliver if @notify_by_email
+          if @group.has_invited_admin?(email)
+            @skipped_admin_emails << email
+          else
+            if @group.has_invited_member?(email)
+              @upgraded_member_emails << email
+              found_user = @group.invited_members.detect { |u| u["email"] == email}
+              @group.invited_members.delete(found_user) unless found_user.nil?
+            else
+              @new_admin_emails << email
+            end
+            @group.invited_admins << invited_user
+            NewUserMailer.group_admin_add(email, name_from_email[email],
+                                          current_user, @group).deliver if @notify_by_email
+          end
         else
-          @group.invited_members << {
-            :email => email,
-            :name => name_from_email[email],
-            :invite_date => invite_date
-          }
-          new_member_emails << email
-          NewUserMailer.add_group_member(email, name_from_email[email],
-                                         current_user, @group).deliver if @notify_by_email
+          if @group.has_invited_member?(email)
+            @skipped_member_emails << email
+          else
+            @group.invited_members << invited_user
+            @new_member_emails << email
+            NewUserMailer.group_member_add(email, name_from_email[email],
+                                           current_user, @group).deliver if @notify_by_email
+          end
         end
+      end
+    end
+
+    if @group.changed?
+      if !@group.save
+        flash[:error] = "You must be an admin of #{@group.name} to do that!"
+        render 'add_users'
       end
     end
   end

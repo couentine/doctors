@@ -57,6 +57,16 @@ class Group
     admins.include?(user)
   end
 
+  def has_invited_member?(email)
+    found_user = invited_members.detect { |u| u["email"] == email}
+    found_user != nil
+  end
+
+  def has_invited_admin?(email)
+    found_user = invited_admins.detect { |u| u["email"] == email}
+    found_user != nil
+  end
+
   protected
 
     def url_is_not_a_route

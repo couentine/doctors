@@ -1,5 +1,5 @@
 class NewUserMailer < ActionMailer::Base
-  helper :mail
+  include EmailTools
 
   def group_member_add(to_email, to_name, from_user, group)
     @to_email, @to_name, @from_user, @group = to_email, to_name, from_user, group

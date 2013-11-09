@@ -1,38 +1,33 @@
-<% 
-  if @type == :admin
-    provide(:title, "Add Admins - #{@group.name}")
-    submit_button_text = "Add New Admins"
-  else
-    provide(:title, "Add Members - #{@group.name}")
-    submit_button_text = "Add New Members"
-  end
-%>
+<% provide(:title, "Add #{@type.to_s.capitalize.pluralize} - #{@group.name}") %>
 
 <div class="page-header">
   <h1>
     <%= @group.name %>
-    <small>Add new members</small>
+    <small>Add new <%= @type.to_s.pluralize %></small>
   </h1>
 </div>
 
 
 <%= form_tag(@form_path, method: :post, id: "group-add-users-form", class: 'form-horizontal') do %>
 
-  <%= label_tag :emails, "New Member Emails" %>
-  <%= text_area_tag :emails, params[:emails], size: "50x5", placeholder: "Enter emails here" %>
-
-  <%= label_tag :notify_by_email %>
-  <%= check_box_tag :notify_by_email, "yes", true %>
-
-  <%= hidden_field_tag :type, @type %>
-
+  <div class="control-group">
+    <%= label_tag :emails, "New #{@type.to_s.capitalize} Emails", class: "control-label" %>
+    <div class="controls">
+      <%= text_area_tag :emails, params[:emails], size: "150x4",
+          placeholder: 'josh.cassada@nasa.gov, "Jessica U. Meir, Ph.D." <j.meir@nasa.gov>, "Anne McClain" <anne.mcclain@nasa.gov>',
+          class: "span6" %>
+      <br/>
+      <%= check_box_tag :notify_by_email, "1", true %>
+      <%= label_tag :notify_by_email, "Notify new #{@type.to_s.pluralize} by email",
+          class: "notify-by-email"%>
+    </div>
+  </div>
   
-  <div class="controls">
-    <%= button_to 'Cancel', @group, class: 'btn' %>
-    <%= button_tag submit_button_text, type: 'submit', class: 'btn btn-primary' %>
+  <div class="control-group">
+    <div class="controls">
+      <%= link_to 'Cancel', @group, class: 'btn' %> 
+      <%= button_tag "Add new #{@type.to_s.pluralize}", type: 'submit', class: 'btn btn-primary' %>
+    </div>
   </div>
 
 <% end %>
-
-
-

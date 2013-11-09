@@ -1,0 +1,62 @@
+<% provide(:title, "#{@type.to_s.capitalize.pluralize} Added - #{@group.name}") %>
+
+<div class="page-header">
+  <h1>
+    <%= @group.name %>
+    <small>New <%= @type.to_s.pluralize %> added</small>
+  </h1>
+
+  <dl>
+    
+    <% if @new_admin_emails.count > 0 %>
+      <dt><%= @new_admin_emails.count %> New Admins Added</dt>
+      <dd><%= @new_admin_emails.join ", " %></dd>
+    <% end %>
+
+    <% if @new_member_emails.count > 0 %>
+      <dt><%= @new_member_emails.count %> New Members Added</dt>
+      <dd><%= @new_member_emails.join ", " %></dd>
+    <% end %>
+    
+    <% if @upgraded_member_emails.count > 0 %>
+      <dt><%= @upgraded_member_emails.count %> Existing Members Upgraded to Admins</dt>
+      <dd><%= @upgraded_member_emails.join ", " %></dd>
+    <% end %>
+    
+    <% if @skipped_admin_emails.count > 0 %>
+      <dt><%= @skipped_admin_emails.count %> Existing Admins Skipped</dt>
+      <dd>
+        <%= @skipped_admin_emails.join ", " %><br/>
+        <small class="text-warning">
+          To downgrade an admin to a member, you should first remove them from the admins tab, 
+          then come back and add them as a member.
+        </small>
+      </dd>
+    <% end %>
+    
+    <% if @skipped_member_emails.count > 0 %>
+      <dt><%= @skipped_member_emails.count %> Existing Members Skipped</dt>
+      <dd><%= @skipped_member_emails.join ", " %></dd>
+    <% end %>
+    
+    <% if @invalid_emails.count > 0 %>
+      <dt><%= @invalid_emails.count %> Invalid Emails</dt>
+      <dd><%= @invalid_emails.join ", " %></dd>
+    <% end %>
+
+  </dl>
+
+  <p>
+    <%= link_to 'Done', @group, class: 'btn' %> 
+    <%=
+      if @type == :admin
+        link_to 'Add More Admins', add_group_admins_path(@group), class: 'btn btn-info' 
+      else
+        link_to 'Add More Members', add_group_members_path(@group), class: 'btn btn-info' 
+      end 
+    %>
+  </p>
+
+</div>
+
+

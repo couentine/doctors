@@ -48,6 +48,19 @@ h2.form-header {
   font-size: 22px;
 }
 
+/* === ADD USERS FORM === */
+
+form#group-add-users-form {
+  label.notify-by-email {
+    float: left;
+    margin-top: 10px;
+  }
+  input#notify_by_email {
+    float: left;
+    margin: 14px 10px 0 5px;
+  }
+}
+
 /* === PROFILES === */
 
 .profile-section-header {
@@ -84,8 +97,10 @@ h2.form-header {
   span.profile-actions {
     float: left;
     width: 100%;
-    padding: 5px 0;
     border-bottom: 1px solid $seperator-color;
+    li {
+      margin: 5px 0;
+    }
   }
 
   span.profile-details {
@@ -139,9 +154,16 @@ div.tab-header {
     margin: 0;
   }
 
-  .btn { float: right; }
+  .btn,.btn-group { float: right; }
+  .btn {
+    margin: 4px 4px 0 4px;
+  }
   .btn-small {
     margin: 6px 6px 0 6px;
+  }
+
+  ul.dropdown-menu {
+    font-size: 11px;
   }
 }
 

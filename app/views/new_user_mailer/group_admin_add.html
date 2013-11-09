@@ -14,9 +14,14 @@
     </p>
     <p>
       <strong>Create a Badge List account:</strong> 
-      <a href="<%= "#{new_user_registration_path}?email=#{@to_email}&name=#{@to_name}" %>">
-        <%= new_user_registration_path %>
+      <a href="<%= "#{new_user_registration_url}?email=#{@to_email}&name=#{@to_name}" %>">
+        <%= new_user_registration_url %>
       </a>
+    </p><br/><br/>
+    <p>
+      <%= @group.name %>: 
+      <%= link_to group_url(@group), group_url(@group) %> 
+      (Added by <%= @from_user.name %>.)
     </p>
     <p>
       <i>
