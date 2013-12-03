@@ -7,12 +7,22 @@ BadgeList::Application.routes.draw do
         via: :delete, as: :destroy_group_member, defaults: { type: 'member' }
   match 'groups/:id/admins/:user_id' => 'groups#destroy_user', 
         via: :delete, as: :destroy_group_admin, defaults: { type: 'admin' }
+  match 'groups/:id/invited_members/:email/invitation' => 'groups#send_invitation', 
+        via: :post, as: :send_group_member_invitation,
+        defaults: { type: 'member' },
+        constraints: { :email => /[^\/]+/ }
+  match 'groups/:id/invited_admins/:email/invitation' => 'groups#send_invitation', 
+        via: :post, as: :send_group_admin_invitation,
+        defaults: { type: 'admin' },
+        constraints: { :email => /[^\/]+/ }
   match 'groups/:id/invited_members/:email' => 'groups#destroy_invited_user', 
         via: :delete, as: :destroy_group_invited_member,
-        defaults: { type: 'member' }
+        defaults: { type: 'member' },
+        constraints: { :email => /[^\/]+/ }
   match 'groups/:id/invited_admins/:email' => 'groups#destroy_invited_user', 
         via: :delete, as: :destroy_group_invited_admin,
-        defaults: { type: 'admin' }
+        defaults: { type: 'admin' },
+        constraints: { :email => /[^\/]+/ }
   match 'groups/:id/members/add' => 'groups#add_users', via: :get,
         as: :add_group_members, defaults: { type: 'member' }
   match 'groups/:id/admins/add' => 'groups#add_users', via: :get,

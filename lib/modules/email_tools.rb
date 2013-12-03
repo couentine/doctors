@@ -34,7 +34,7 @@ module EmailTools
           if (email_parts.count > 0) && (email_parts[0][2])
             email = email_parts[0][2].downcase
             if email_parts[0][0]
-              name = email_parts[0][0].strip
+              name = email_parts[0][0].strip.gsub(/"/, '')
             else
               name = nil
             end

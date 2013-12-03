@@ -6,3 +6,5 @@ BadgeList::Application.initialize!
 
 # Add custom date & time formats
 Time::DATE_FORMATS[:full_date] = "%B %-d, %Y"
+Time::DATE_FORMATS[:full_date_time] = "%B %-d, %Y at %l:%M %p"
+Time::DATE_FORMATS[:short_date_time] = "%-m/%-d/%y at %l:%M%P"

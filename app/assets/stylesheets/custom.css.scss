@@ -1,12 +1,18 @@
-@import "bootstrap";
-@import "bootstrap-responsive";
-
-
 /* mixins, variables, etc. */
 
+$body-background-color: #f8f8f8;
+$bodyBackground: $body-background-color;
 $grayMediumLight: #eaeaea;
 $seperator-color: #ddd;
 $light-text-color: #999;
+$card-shadow-color: rgba(0, 0, 0, 0.2);
+$card-background-color: #fff;
+$card-text-color: #222;
+
+/* Do the bootstrap import (after variable declarations) */
+
+@import "bootstrap";
+@import "bootstrap-responsive";
 
 
 /* === UNIVERSAL === */
@@ -14,6 +20,7 @@ $light-text-color: #999;
 body {
   @media (min-width: 980px) { padding-top: 60px; }
   overflow: auto;
+  background-color: $body-background-color !important;
 }
 
 section {
@@ -62,6 +69,16 @@ form#group-add-users-form {
 }
 
 /* === PROFILES === */
+
+.profile-sidebar {
+  float: left;
+  border-radius: 2px;
+  background-color: $card-background-color;
+  color: $card-text-color;
+  box-shadow: 0 1px 2px 0 $card-shadow-color;
+  padding: 5%;
+  width: 90%;
+}
 
 .profile-section-header {
   span {
@@ -116,6 +133,7 @@ form#group-add-users-form {
     float: left;
     width: 100%;
     margin-top: 5px;
+    margin-bottom: 5px;
 
     li.profile-stat {
       text-align: center;
@@ -171,6 +189,10 @@ ul.nav-tabs {
   margin-bottom: 5px;
 }
 
+div.tab-content {
+  min-height: 400px;
+}
+
 div.tab-pane {
   div.well {
     float: left;
@@ -179,33 +201,62 @@ div.tab-pane {
   }
 }
 
-/* === USER CARDS === */
+/* === INFO CARDS === */
 
-div.user-card {
-  margin-bottom: 30px;
-  position: relative;
+div.info-card {
   float: left;
-
+  position: relative;
+  margin-bottom: 20px;
+  border-radius: 2px;
+  background-color: $card-background-color;
+  color: $card-text-color;
+  box-shadow: 0 1px 2px 0 $card-shadow-color;
+  
   img, span { float: left; }
+  span.card-body,td.card-body {
+    span.card-headline {
+      font-size: 18px;
+      font-weight: bold;
+      width: 100%;
+      margin: 0 0 2% 0;
+      height: 1.1em;
+      overflow-y: hidden;
+    }
+    span.card-text {
+      height: 3em;
+      overflow-y: hidden;
+      width: 100%;
+      margin: 0 0 2% 0;
+    }
+    span.card-footline {
+      font-size: 11px;
+      color: $light-text-color;
+      width: 100%;
+      height: 1.7em;
+      overflow-y: hidden;
+    }
+  }
 
-  img.gravatar {
-    margin-right: 15px
-  }
-  span.user-card-name {
-    font-size: 18px;
-    font-weight: bold;
-    width: 70%;
-    margin: 15px 0;
-  }
-  span.user-card-date {
-    font-size: 11px;
-    color: $light-text-color;
-    width: 70%;
-  }
-  a.user-card-delete {
+  span.card-corner {
     position: absolute;
-    top: -8px;
-    left: 72px;
+    top: 0;
+    right: 0;
+    padding: 5px;
+  }
+}
+
+div.image-card {
+  
+  tr {
+    min-height: 100px;
+  }
+  td.card-image {
+    width: 28%;
+    background-size: cover;
+    background-position: center center;
+  }
+  td.card-body {
+    padding: 3% 3% 2% 3%;
   }
 }
 

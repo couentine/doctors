@@ -7,7 +7,7 @@ class NewUserMailer < ActionMailer::Base
     if @to_name.blank?
       to_email_name = @to_email
     else
-      to_email_name = "@to_name <@to_email>"
+      to_email_name = "#{@to_name} <#{@to_email}>"
     end
 
     mail(
@@ -25,7 +25,7 @@ class NewUserMailer < ActionMailer::Base
     if @to_name.blank?
       to_email_name = @to_email
     else
-      to_email_name = "@to_name <@to_email>"
+      to_email_name = "#{@to_name} <#{@to_email}>"
     end
 
     mail(

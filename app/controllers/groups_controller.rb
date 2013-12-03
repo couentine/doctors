@@ -163,18 +163,53 @@ class GroupsController < ApplicationController
     redirect_to @group, :notice => notice
   end
 
+  # POST /groups/1/invited_members/{email}/invitation, :type = member
+  # POST /groups/1/invited_admins/{email}/invitation, :type = admin
+  def send_invitation
+    @group = Group.find(params[:id])
+    email = params[:email].downcase
+    invited_users = params[:type] == 'admin' ? 
+                                    @group.invited_admins : @group.invited_members
+    found_user = invited_users.detect { |u| u["email"] == email}
+
+    if found_user
+      if params[:type] == 'admin'
+        NewUserMailer.group_admin_add(found_user["email"], found_user["name"], 
+                                      current_user, @group).deliver
+      else
+        NewUserMailer.group_member_add(found_user["email"], found_user["name"], 
+                                      current_user, @group).deliver
+      end
+      found_user[:invite_date] = Time.now
+
+      if !@group.save
+        notice = "There was a problem updating the group, please try again later."
+      else
+        notice = "Learning Group invitation for #{email} has been sent."  
+      end
+    else
+      notice = "There's no pending Learning Group invitation for #{email}."
+    end
+
+    redirect_to @group, :notice => notice
+  end
+
   # DELETE /groups/1/invited_members/{email}, :type = member
   # DELETE /groups/1/invited_admins/{email}, :type = admin
   def destroy_invited_user
     @group = Group.find(params[:id])
     email = params[:email].downcase
     invited_users = params[:type] == 'admin' ? 
-                                    @group.invited_admins : @group.invited_users
+                                    @group.invited_admins : @group.invited_members
     found_user = invited_users.detect { |u| u["email"] == email}
 
     if found_user
       invited_users.delete(found_user)
-      notice = "Learning Group invitation for #{email} has been revoked."
+      if !@group.save
+        notice = "There was a problem updating the group, please try again later."
+      else
+        notice = "Learning Group invitation for #{email} has been revoked."  
+      end
     else
       notice = "There's no pending Learning Group invitation for #{email}."
     end
@@ -277,21 +312,19 @@ class GroupsController < ApplicationController
       emails_to_invite.each do |email|
         invited_user = {:email => email, :name => name_from_email[email], :invite_date => invite_date }
 
-        if @type == :admin
-          if @group.has_invited_admin?(email)
-            @skipped_admin_emails << email
+        if @group.has_invited_admin?(email)
+          @skipped_admin_emails << email
+        elsif @type == :admin
+          if @group.has_invited_member?(email)
+            @upgraded_member_emails << email
+            found_user = @group.invited_members.detect { |u| u["email"] == email}
+            @group.invited_members.delete(found_user) unless found_user.nil?
           else
-            if @group.has_invited_member?(email)
-              @upgraded_member_emails << email
-              found_user = @group.invited_members.detect { |u| u["email"] == email}
-              @group.invited_members.delete(found_user) unless found_user.nil?
-            else
-              @new_admin_emails << email
-            end
-            @group.invited_admins << invited_user
-            NewUserMailer.group_admin_add(email, name_from_email[email],
-                                          current_user, @group).deliver if @notify_by_email
+            @new_admin_emails << email
           end
+          @group.invited_admins << invited_user
+          NewUserMailer.group_admin_add(email, name_from_email[email],
+                                        current_user, @group).deliver if @notify_by_email
         else
           if @group.has_invited_member?(email)
             @skipped_member_emails << email
@@ -307,7 +340,7 @@ class GroupsController < ApplicationController
 
     if @group.changed?
       if !@group.save
-        flash[:error] = "You must be an admin of #{@group.name} to do that!"
+        flash[:error] = "There was a problem updating the group, please try again later."
         render 'add_users'
       end
     end
