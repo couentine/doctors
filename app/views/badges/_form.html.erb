@@ -1,4 +1,4 @@
-<%= simple_form_for(@badge, html: {class: 'form-horizontal'}) do |f| %>
+<%= simple_form_for(@badge, url: new_group_badge_path(@group), html: {class: 'form-horizontal'}) do |f| %>
   <%= f.input :name, label: 'Badge Name', input_html: {class: 'input-xlarge'} %>
   <%= f.input :image_url, label: 'Badge Image URL', input_html: {class: 'input-xxlarge'} %>
   <%= f.input :summary, label: 'Brief Summary', as: :text, input_html: {class: 'input-xlarge', :rows => '3'} %>
@@ -7,9 +7,9 @@
     <%= f.button :submit, class: 'btn btn-large btn-primary' %>
     <%= 
       if @badge.new_record?
-        link_to "Cancel", badges_path, class: "btn btn-large"
+        link_to "Cancel", @group, class: "btn btn-large"
       else 
-        link_to "Cancel", @badge, class: "btn btn-large"
+        link_to "Cancel", group_badge_path(@group, @badge), class: "btn btn-large"
       end
     %>
   </div>

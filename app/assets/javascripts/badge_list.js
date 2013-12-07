@@ -2,7 +2,7 @@
 
 
 $(document).ready(function() {
-    $('a[data-toggle=tooltip],span[data-toggle=tooltip]').tooltip();
+    $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip]').tooltip();
     disableLinks();
 });
 

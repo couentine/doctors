@@ -31,6 +31,9 @@ textarea {
   resize: vertical;
 }
 
+a:hover {
+  background-color: transparent !important;
+}
 a.btn:visited {
   color: initial;
 }
@@ -213,6 +216,14 @@ div.info-card {
   box-shadow: 0 1px 2px 0 $card-shadow-color;
   
   img, span { float: left; }
+  a:hover { color: inherit;}
+  a.image-link {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    color: transparent;
+    background-color: transparent;
+  }
   span.card-body,td.card-body {
     span.card-headline {
       font-size: 18px;
@@ -223,18 +234,44 @@ div.info-card {
       overflow-y: hidden;
     }
     span.card-text {
-      height: 3em;
       overflow-y: hidden;
       width: 100%;
       margin: 0 0 2% 0;
     }
-    span.card-footline {
+  }
+  
+  span.card-footline,td.card-footline {
+    font-size: 11px;
+    color: $light-text-color;
+    width: 100%;
+    height: 1.7em;
+    overflow-y: hidden;
+
+    a {
       font-size: 11px;
       color: $light-text-color;
-      width: 100%;
-      height: 1.7em;
+      height: 1.5em;
+    }
+    ul { margin: 0; }
+    ul.left-foot {
+      float: left;
+      max-width: 70%;
       overflow-y: hidden;
     }
+    ul.right-foot {
+      float: right;
+      max-width: 25%;
+      overflow-y: hidden;
+    }
+    li {
+      list-style: none;
+      float: left;
+      margin: 0 4px;
+      cursor: default;
+    }
+  }
+  td.card-footline {
+    padding: 2%;
   }
 
   span.card-corner {
@@ -246,14 +283,32 @@ div.info-card {
 }
 
 div.image-card {
-  
-  tr {
-    min-height: 100px;
+  span.card-text { height: 3em; }
+  tr.card-body-row {
+    height: 100px;
   }
   td.card-image {
     width: 28%;
+    position: relative;
     background-size: cover;
     background-position: center center;
+  }
+  td.card-body {
+    padding: 3% 3% 2% 3%;
+  }
+}
+
+div.small-image-card {
+  span.card-text { height: 5.5em; }
+  tr.card-body-row {
+    height: 100px;
+  }
+  td.card-image {
+    width: 28%;
+    position: relative;
+    background-size: 90% auto;
+    background-position: right center;
+    background-repeat: no-repeat;
   }
   td.card-body {
     padding: 3% 3% 2% 3%;

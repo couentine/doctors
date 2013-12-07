@@ -1,5 +1,6 @@
 class BadgesController < ApplicationController
   
+  before_filter :find_badge, only: [:show, :edit, :update, :destroy]
   before_filter :authenticate_user!, only: [:index, :new, :edit, :create, :update, :destroy]
 
   # GET /badges
@@ -16,8 +17,6 @@ class BadgesController < ApplicationController
   # GET /badges/1
   # GET /badges/1.json
   def show
-    @badge = Badge.find(params[:id])
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @badge }
@@ -27,7 +26,8 @@ class BadgesController < ApplicationController
   # GET /badges/new
   # GET /badges/new.json
   def new
-    @badge = Badge.new
+    @group = Group.find(params[:group_id])
+    @badge = Badge.new(group: @group)
 
     respond_to do |format|
       format.html # new.html.erb
@@ -37,14 +37,12 @@ class BadgesController < ApplicationController
 
   # GET /badges/1/edit
   def edit
-    @badge = Badge.find(params[:id])
+    # badge is found by find_badge, so nothing to do here
   end
 
   # POST /badges
   # POST /badges.json
   def create
-    @badge = Badge.new(params[:badge])
-
     respond_to do |format|
       if @badge.save
         format.html { redirect_to @badge, notice: 'Badge was successfully created.' }
@@ -59,8 +57,6 @@ class BadgesController < ApplicationController
   # PUT /badges/1
   # PUT /badges/1.json
   def update
-    @badge = Badge.find(params[:id])
-
     respond_to do |format|
       if @badge.update_attributes(params[:badge])
         format.html { redirect_to @badge, notice: 'Badge was successfully updated.' }
@@ -75,7 +71,6 @@ class BadgesController < ApplicationController
   # DELETE /badges/1
   # DELETE /badges/1.json
   def destroy
-    @badge = Badge.find(params[:id])
     @badge.destroy
 
     respond_to do |format|
@@ -83,4 +78,12 @@ class BadgesController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+private
+
+  def find_badge
+    @group = Group.find(params[:group_id])
+    @badge = Badge.find_by(group: @group, url: params[:id])
+  end
+
 end

@@ -201,13 +201,53 @@
   <div class="span9 profile-body">
 
     <ul class="nav nav-tabs">
-      <li class="active"><a href="#members" data-toggle="tab">Members</a></li>
+      <li class="active"><a href="#badges" data-toggle="tab">Badges</a></li>
+      <li><a href="#members" data-toggle="tab">Members</a></li>
       <li><a href="#admins" data-toggle="tab">Admins</a></li>
     </ul>
 
     <div class="tab-content">
 
-      <div class="tab-pane active" id="members">
+      <!-- === BADGES TAB === -->
+
+      <div class="tab-pane active" id="badges">
+        
+        <div class="tab-header">
+          <h2>All Badges</h2>
+
+          <%= 
+            if @current_user_is_admin
+              link_to '<i class="icon-plus"></i> New Badge'.html_safe,
+              new_group_badge_path(@group), class: 'btn btn-small' 
+            end
+          %>
+        </div>
+
+        <% if @group.badges.empty? %>
+
+          <div class="well">
+            <p class="lead">No badges yet!</p>
+            <p>
+              <%= 
+                if @current_user_is_admin
+                  link_to '<i class="icon-plus"></i> Create a badge'.html_safe,
+                  new_group_badge_path(@group), class: 'btn btn-success' 
+                end
+              %>
+            </p>
+          </div>
+
+        <% else %>
+
+          <%= render @group.badges %>
+        
+        <% end %>
+
+      </div>
+
+      <!-- === MEMBERS TAB === -->
+
+      <div class="tab-pane" id="members">
         
         <div class="tab-header">
           <h2>Active Members</h2>
@@ -278,6 +318,8 @@
         <% end %>
 
       </div>
+
+      <!-- === ADMINS TAB === -->
 
       <div class="tab-pane" id="admins">
         

@@ -1,0 +1,12 @@
+<% provide(:title, "Home") %>
+
+<p>This is the home page.</p>
+
+
+<ul>
+  <% @group_list.each do |item| %>
+    <li>
+      <%= link_to "#{item[:group].name} (#{item[:type]})", item[:group] %>
+    </li>
+  <% end %>
+</ul>

@@ -3,6 +3,37 @@
 defaults: &defaults
   page_size: 28
 
+  # This controls disallowed values for group & badge urls
+  blocked_url_slugs:
+   - badge
+   - badges
+   - user
+   - users
+   - group
+   - groups
+   - log
+   - logs
+   - invited_members
+   - invited_admins
+   - member
+   - members
+   - admin
+   - admins
+   - new
+   - show
+   - index
+   - delete
+   - destroy
+   - edit
+   - update
+   - leave
+   - invitation
+   - add
+   - about
+   - help
+   - contact
+   - support
+
 development:
   <<: *defaults
   from_email: knowledgestreem@gmail.com

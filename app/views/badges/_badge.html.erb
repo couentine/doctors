@@ -1,0 +1,32 @@
+<div class="span4 info-card small-image-card badge-card">
+  <table>
+    <tr class="card-body-row">
+      <td class="card-image" style="background-image: url('<%= badge.image_url %>')">
+        <%= link_to '&nbsp;'.html_safe, group_badge_path(badge.group, badge),
+            title: badge.name, class: 'image-link' %>
+      </td>
+      <td class="card-body">
+        <span class="card-headline">
+          <%= link_to badge.name, group_badge_path(badge.group, badge), title: badge.name %>
+        </span>
+        <span class="card-text"><%= badge.summary %></span>
+      </td>
+    </tr>
+    <tr class="card-footline-row">
+      <td class="card-footline" colspan="2">
+        <ul class="left-foot">
+          <li><%= link_to badge.url, group_badge_path(badge.group, badge), 
+                  title: group_badge_path(badge.group, badge) %></li>
+        </ul>
+        <ul class="right-foot">
+          <li data-toggle="tooltip" data-placement="bottom" title="Active Members">
+            <i class="icon-user"></i> 23
+          </li>
+          <li data-toggle="tooltip" data-placement="bottom" title="Badge Experts">
+            <i class="icon-certificate"></i> 5
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+</div>

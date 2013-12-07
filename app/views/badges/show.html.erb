@@ -4,8 +4,9 @@
   <h1>
     <img src="<%= @badge.image_url %>" class="badge-image badge-image-header"><%= @badge.name %>
     <div class="btn-group" id="header-button-bar">
-      <%= link_to 'Edit Badge', edit_badge_path(@badge), class: "btn" %>
-      <%= link_to 'Delete Badge', @badge, method: :delete, class: "btn", data: { confirm: 'Are you sure?' } %>
+      <%= link_to 'Edit Badge', edit_group_badge_path(@group, @badge), class: "btn" %>
+      <%= link_to 'Delete Badge', group_badge_path(@group, @badge), method: :delete, 
+          class: "btn", data: { confirm: 'Are you sure?' } %>
     </div><br/>
   </h1>
 </div>

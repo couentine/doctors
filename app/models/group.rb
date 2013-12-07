@@ -10,12 +10,12 @@ class Group
   VALID_TYPE_VALUES = ['open', 'closed', 'private']
   VALID_CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem'] # add new customers here
 
-  # === RELATIONSHIP === #
+  # === RELATIONSHIPS === #
 
-  belongs_to :creator, inverse_of: :created_groups, class_name: "User", 
-             dependent: :nullify
+  belongs_to :creator, inverse_of: :created_groups, class_name: "User"
   has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: "User"
   has_and_belongs_to_many :members, inverse_of: :member_of, class_name: "User"
+  has_many :badges, dependent: :delete
 
   # === FIELDS & VALIDATIONS === #
 
@@ -31,7 +31,9 @@ class Group
 
   validates :name, presence: true, length: { within: 3..MAX_NAME_LENGTH }
   validates :url, presence: true, uniqueness: true, length: { within: 3..MAX_URL_LENGTH }, 
-             format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" }
+            format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" },
+            exclusion: { in: APP_CONFIG['blocked_url_slugs'],
+                         message: "%{value} is a specially reserved url." }
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
   validates :website, url: true
   validates :image_url, url: true
@@ -41,13 +43,34 @@ class Group
   validates :customer_code, inclusion: { in: VALID_CUSTOMER_CODE_VALUES, 
             allow_nil: true, message: "%{value} is not a valid customer code" }, if: :private?
   validates :creator, presence: true
-  validate :url_is_not_a_route
 
   # === CALLBACKS === #
 
   after_validation :add_creator_to_admins, on: :create
+  after_validation :initialize_arrays, on: :create
 
-  # === GROUP METHODS === #
+  # === CLASS METHODS === #
+
+  # This will find by ObjectId OR by URL
+  def self.find(input)
+    group = nil
+
+    if input.to_s.match /^[0-9a-fA-F]{24}$/
+      group = super rescue nil
+    end
+
+    if group.nil?
+      group = Group.find_by(url: input.to_s.downcase) rescue nil
+    end
+
+    group
+  end
+
+  # === INSTANCE METHODS === #
+
+  def to_param
+    url
+  end
 
   def has_member?(user)
     members.include?(user)
@@ -67,19 +90,19 @@ class Group
     found_user != nil
   end
 
-  protected
+protected
 
-    def url_is_not_a_route
-      path = Rails.application.routes.recognize_path("/#{url}", :method => :get) rescue nil
-      errors.add(:url, "conflicts with existing path (/#{url})") if path && !path[:url]
-    end
+  def private?
+    type == "private"
+  end
 
-    def private?
-      type == "private"
-    end
+  def add_creator_to_admins
+    self.admins << self.creator unless self.creator.blank?
+  end
 
-    def add_creator_to_admins
-      self.admins << self.creator unless self.creator.blank?
-    end
+  def initialize_arrays
+    self.invited_admins ||= []
+    self.invited_members ||= []
+  end
 
 end

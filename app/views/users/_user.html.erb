@@ -1,15 +1,14 @@
 <div class="span4 info-card image-card user-card">
   <table>
-    <tr>
+    <tr class="card-body-row">
       <td class="card-image" style="background-image: url('<%= gravatar_url_for user, :size => 150 %>')">
-        <div class="card-image-crop">
-          <a title="<%= user.email %>" href="<%= user_path(user) %>" class="image-link">
-            &nbsp;
-          </a>
-      </div>
+        <%= link_to '&nbsp;'.html_safe, user, title: user.name, 
+            class: 'image-link' %>
       </td>
       <td class="card-body">
-        <span class="card-headline"><%= link_to user.name, user %></span>
+        <span class="card-headline">
+          <%= link_to user.name, user, title: user.name %>
+        </span>
         <span class="card-text"> &nbsp; </span>
         <span class="card-footline">
           Member since <%=  if user.created_at

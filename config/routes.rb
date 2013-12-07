@@ -1,7 +1,8 @@
 BadgeList::Application.routes.draw do
   devise_for :users
 
-  resources :groups
+  root :to => 'home#show'
+
   match 'groups/:id/leave' => 'groups#leave', via: :delete, as: :leave_group
   match 'groups/:id/members/:user_id' => 'groups#destroy_user', 
         via: :delete, as: :destroy_group_member, defaults: { type: 'member' }
@@ -31,12 +32,15 @@ BadgeList::Application.routes.draw do
         as: :create_group_members, defaults: { type: 'member' }
   match 'groups/:id/admins' => 'groups#create_users', via: :post,
         as: :create_group_admins, defaults: { type: 'admin' }
-        
-  resources :badges
-
-  root :to => 'badges#index'
 
   resources :users, :only => [:show]
+
+  resources :groups, only: [:index, :new, :create]
+  resources :groups, path: "", except: [:index, :new, :create] do
+    resources :badges, only: [:index, :new, :create]
+    resources :badges, path: "", except: [:index, :new, :create]
+  end
+
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

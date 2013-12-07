@@ -30,12 +30,10 @@ class GroupsController < ApplicationController
   # GET /groups.json
   def index
     current_user.reload
-    @groups = []
-
+    
     respond_to do |format|
       format.html do # index.html.erb
-        @groups << current_user.admin_of unless current_user.admin_of.empty?
-        @groups << current_user.member_of unless current_user.member_of.empty?
+        @group_list = current_user.group_list
       end
       format.json do
         @return_hash = {

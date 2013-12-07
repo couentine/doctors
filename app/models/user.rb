@@ -10,6 +10,7 @@ class User
   # === RELATIONSHIP === #
 
   has_many :created_groups, inverse_of: :creator, class_name: "Group", dependent: :nullify
+  has_many :created_badges, inverse_of: :creator, class_name: "Badge", dependent: :nullify
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
 
@@ -87,6 +88,22 @@ class User
       return "#{name} <#{email}>"
     end
   end
+
+  # Returns all groups for which this user is an admin OR a member
+  # Returns list of hashes = { :type => :member/:admin, :group => the_group }
+  def group_list
+    the_list = []
+
+    self.admin_of.each do |group|
+      the_list  << { :type => :admin, :group => group }
+    end unless self.admin_of.blank?
+    self.member_of.each do |group|
+      the_list  << { :type => :member, :group => group }
+    end unless self.member_of.blank?
+    
+    the_list.sort_by{ |item| item[:group].name }
+  end
+
 
   protected
 
