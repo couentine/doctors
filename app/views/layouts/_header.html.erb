@@ -3,14 +3,14 @@
     
     
 
-    <%= link_to "Badge List", root_path, id: "logo", class: "brand pull-left" %>
+    <%= link_to "BL", root_path, id: "logo", class: "brand pull-left", title: "Badge List Home" %>
     
     <!-- Everything you want hidden at 940px or less, place within here -->
     <% if user_signed_in? %>
       <ul class="nav pull-right">
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" id="dropdown-header-currentuser" role="button" data-toggle="dropdown" data-target="#">
-            <%= gravatar_for current_user, :size => 23, :class => 'img-rounded' %>
+            <%= gravatar_for current_user, :size => 23, :class => 'img-circle' %>
             <span id="header-currentuser-name"><%= current_user.name %></span>
             <b class="caret"></b>
           </a>

@@ -101,110 +101,125 @@
 </div>
 
 
-<!-- === PAGE CONTENT === -->
+<!-- === PAGE HEADER === -->
 
 <div class="row add-top-margin">
-  
-  <div class="span3">
-    <div class="profile-sidebar">
+  <div class="span12">
+    <div class="header-card group-header-card">
 
-      <%= group_image_tag_for(@group) %><br/>
+      <div class="primary-header">
+        <table>
+          <tr>
+            <td class="header-image" 
+                style="background-image: url('<%= group_image_url_for(@group) %>')">
+              &nbsp;
+            </td>
+            <td class="header-text">
+              <h1><%= @group.name %></h1>
+              <h2><%= @group.url %></h2>
+              <h3>
+                <%=
+                  case @group.type
+                    when "open"
+                      "<i class='icon-globe'></i> Open Learning Group".html_safe
+                    when "closed"
+                      "<i class='icon-eye-open'></i> Public Learning Group".html_safe
+                    when "private"
+                      "<i class='icon-lock'></i> Private Learning Group".html_safe
+                  end
+                %>
+              </h3>
+            </td>
+          </tr>
+        </table>
+      </div>
 
-      <div class="profile-section-header">
-
-        <h1>
-          <span class="profile-name"><%= @group.name %></span>
-          <span class="profile-url"><%= @group.url %></span>
-        </h1>
-
-        <span class="profile-type">
-          <%=
-            case @group.type
-              when "open"
-                "<i class='icon-globe'></i> Open Learning Group".html_safe
-              when "closed"
-                "<i class='icon-eye-open'></i> Public Learning Group".html_safe
-              when "private"
-                "<i class='icon-lock'></i> Private Learning Group".html_safe
+      <div class="secondary-header">
+        <ul>
+          <% unless @group.location.blank? %>
+            <li>
+              <i class="icon-map-marker"></i> <%= @group.location %>
+            </li>
+          <% end %>
+          <% unless @group.website.blank? %>
+            <li>
+              <i class="icon-share"></i> 
+              <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
+            </li>
+          <% end %>
+          <li>
+            <i class="icon-time"></i> Created on <%= @group.created_at.to_s(:full_date) %>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="card-actions collapse-when-small">
+        <ul>
+          <li><%
+            if @current_user_is_admin && @group.admins.count == 1
+              leave_group_link_disabled = true
+              leave_group_link_title = 'You are currently the only admin for this learning group so 
+                                        you can\'t leave'
+            else
+              leave_group_link_disabled = false
+              leave_group_link_data_toggle = 'Resign your membership in this learning group'
             end
-          %>
-        </span>
 
-        <span class="profile-actions">
-          <ul class="inline">
-            <li><%
-              if @current_user_is_admin && @group.admins.count == 1
-                leave_group_link_disabled = true
-                leave_group_link_title = 'You are currently the only admin for this learning group so 
-                                          you can\'t leave'
-              else
-                leave_group_link_disabled = false
-                leave_group_link_data_toggle = 'Resign your membership in this learning group'
-              end
-
-              concat link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
-                leave_group_path, method: :delete, class: 'btn btn-mini',
-                disabled: leave_group_link_disabled, 'data-placement' => 'right',
-                title: leave_group_link_title, 'data-toggle' => 'tooltip',
-                data: { confirm: 'Are you absolutely sure you want to leave this learning group?' })
-            %></li>
-            <% if @current_user_is_admin %>
-              <li>
-                <%= link_to '<i class="icon-pencil"></i> Edit Group'.html_safe, edit_group_path,
-                      class: 'btn btn-mini' %>
-              </li>
-            <% end %>
-          </ul>
-        </span>
-
-        <span class="profile-details">
-          <ul class="unstyled">
-            <% unless @group.location.blank? %>
-              <li class="profile-location">
-                <i class="icon-map-marker"></i> <%= @group.location %>
-              </li>
-            <% end %>
-            <% unless @group.website.blank? %>
-              <li class="profile-website">
-                <i class="icon-share"></i> 
-                <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
-              </li>
-            <% end %>
-            <li class="profile-created-date">
-              <i class="icon-time"></i> Created on <%= @group.created_at.to_s(:full_date) %>
+            concat link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
+              leave_group_path, method: :delete, class: 'btn btn-mini',
+              disabled: leave_group_link_disabled, 'data-placement' => 'right',
+              title: leave_group_link_title, 'data-toggle' => 'tooltip',
+              data: { confirm: 'Are you absolutely sure you want to leave this learning group?' })
+          %></li>
+          <% if @current_user_is_admin %>
+            <li>
+              <%= link_to '<i class="icon-pencil"></i> Edit Group'.html_safe, edit_group_path,
+                    class: 'btn btn-mini' %>
             </li>
-          </ul>
-        </span>
+          <% end %>
+        </ul>
+      </div>
 
-        <span class="profile-stats">
-          <ul class="inline">
-            <li class="profile-stat" >
-              <span class="stat-number">0</span><br/>
-              <span class="stat-label">badges</span>
-            </li>
-            <li class="profile-stat" >
-              <span class="stat-number"><%= @group.members.count %></span><br/>
-              <span class="stat-label">members</span>
-            </li>
-            <li class="profile-stat" >
-              <span class="stat-number"><%= @group.admins.count %></span><br/>
-              <span class="stat-label">admins</span>
-            </li>
-          </ul>
-        </span>
+      <div class="card-actions show-when-small">
+        <a href="#" class="dropdown-toggle" id="dropdown-header-card-actions" role="button"
+           data-toggle="dropdown" data-target="#"><b class="caret"></b></a>
+        <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdown-header-card-actions">
+          <li><%
+            if @current_user_is_admin && @group.admins.count == 1
+              leave_group_link_disabled = true
+            else
+              leave_group_link_disabled = false
+            end
 
+            concat link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
+              leave_group_path, method: :delete, disabled: leave_group_link_disabled, 
+              data: { confirm: 'Are you absolutely sure you want to leave this learning group?' })
+          %></li>
+          <% if @current_user_is_admin %>
+            <li>
+              <%= link_to '<i class="icon-pencil"></i> Edit Group'.html_safe, edit_group_path %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+
+      <div class="card-tabs">
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#badges" data-toggle="tab">Badges</a></li>
+          <li><a href="#members" data-toggle="tab">Members</a></li>
+          <li><a href="#admins" data-toggle="tab">Admins</a></li>
+        </ul>
       </div>
 
     </div>
   </div>
+</div>
 
-  <div class="span9 profile-body">
+<!-- === TAB CONTENT === -->
 
-    <ul class="nav nav-tabs">
-      <li class="active"><a href="#badges" data-toggle="tab">Badges</a></li>
-      <li><a href="#members" data-toggle="tab">Members</a></li>
-      <li><a href="#admins" data-toggle="tab">Admins</a></li>
-    </ul>
+<div class="row">
+  
+  <div class="span12 profile-body">
 
     <div class="tab-content">
 
@@ -213,14 +228,16 @@
       <div class="tab-pane active" id="badges">
         
         <div class="tab-header">
-          <h2>All Badges</h2>
+          <div class="tab-header-inner">
+            <h2>All Badges</h2>
 
-          <%= 
-            if @current_user_is_admin
-              link_to '<i class="icon-plus"></i> New Badge'.html_safe,
-              new_group_badge_path(@group), class: 'btn btn-small' 
-            end
-          %>
+            <%= 
+              if @current_user_is_admin
+                link_to '<i class="icon-plus"></i> New Badge'.html_safe,
+                new_group_badge_path(@group), class: 'btn btn-small' 
+              end
+            %>
+          </div>
         </div>
 
         <% if @group.badges.empty? %>
@@ -250,51 +267,53 @@
       <div class="tab-pane" id="members">
         
         <div class="tab-header">
-          <h2>Active Members</h2>
+          <div class="tab-header-inner">
+            <h2>Active Members</h2>
 
-          <%= 
-            if @current_user_is_admin
-              link_to '<i class="icon-plus"></i> Add Members'.html_safe,
-              add_group_members_path(@group), class: 'btn btn-small' 
-            end
-          %>
+            <%= 
+              if @current_user_is_admin
+                link_to '<i class="icon-plus"></i> Add Members'.html_safe,
+                add_group_members_path(@group), class: 'btn btn-small' 
+              end
+            %>
 
-          <% unless @group.invited_members.blank? %>
-            <div class="btn-group">
-              <a href="#" class="btn btn-small btn-link dropdown-toggle" data-toggle="dropdown">
-                Waiting on <%= @group.invited_members.count %> new members 
-                <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <% @group.invited_members.take(10).each do |u| %>
+            <% unless @group.invited_members.blank? %>
+              <div class="btn-group">
+                <a href="#" class="btn btn-small btn-link dropdown-toggle" data-toggle="dropdown">
+                  Waiting on <%= @group.invited_members.count %> new members 
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <% @group.invited_members.take(10).each do |u| %>
+                    <li>
+                      <a tabindex="-1" href="#manage-invited-members-modal" data-toggle="modal">
+                        <%= if u['name']
+                              "#{u['name']} <#{u['email']}>"
+                            else
+                              u['email']
+                            end %>
+                      </a>
+                    </li>
+                  <% end %>
+
+                  <% if @group.invited_members.count > 10 %>
+                    <li>
+                      <a tabindex="-1" href="#manage-invited-members-modal" data-toggle="modal">
+                        <%= (@group.invited_members.count - 10).to_s %> more...
+                      </a>
+                    </li>
+                  <% end %>
+
+                  <li class="divider"></li>
                   <li>
                     <a tabindex="-1" href="#manage-invited-members-modal" data-toggle="modal">
-                      <%= if u['name']
-                            "#{u['name']} <#{u['email']}>"
-                          else
-                            u['email']
-                          end %>
+                      <i class="icon-wrench"></i>  Manage Invited Members
                     </a>
                   </li>
-                <% end %>
-
-                <% if @group.invited_members.count > 10 %>
-                  <li>
-                    <a tabindex="-1" href="#manage-invited-members-modal" data-toggle="modal">
-                      <%= (@group.invited_members.count - 10).to_s %> more...
-                    </a>
-                  </li>
-                <% end %>
-
-                <li class="divider"></li>
-                <li>
-                  <a tabindex="-1" href="#manage-invited-members-modal" data-toggle="modal">
-                    <i class="icon-wrench"></i>  Manage Invited Members
-                  </a>
-                </li>
-              </ul>
-            </div>
-          <% end %>
+                </ul>
+              </div>
+            <% end %>
+          </div>
         </div>
 
         <% if @group.members.empty? %>
@@ -324,51 +343,53 @@
       <div class="tab-pane" id="admins">
         
         <div class="tab-header">
-          <h2>Active Admins</h2>
-          
-          <%= 
-            if @current_user_is_admin
-              link_to '<i class="icon-plus"></i> Add Admins'.html_safe,
-              add_group_admins_path(@group), class: 'btn btn-small' 
-            end
-          %>
+          <div class="tab-header-inner">
+            <h2>Active Admins</h2>
+            
+            <%= 
+              if @current_user_is_admin
+                link_to '<i class="icon-plus"></i> Add Admins'.html_safe,
+                add_group_admins_path(@group), class: 'btn btn-small' 
+              end
+            %>
 
-          <% unless @group.invited_admins.blank? %>
-            <div class="btn-group">
-              <a href="#" class="btn btn-small btn-link dropdown-toggle" data-toggle="dropdown">
-                Waiting on <%= @group.invited_admins.count %> new admins 
-                <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <% @group.invited_admins.take(10).each do |u| %>
+            <% unless @group.invited_admins.blank? %>
+              <div class="btn-group">
+                <a href="#" class="btn btn-small btn-link dropdown-toggle" data-toggle="dropdown">
+                  Waiting on <%= @group.invited_admins.count %> new admins 
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <% @group.invited_admins.take(10).each do |u| %>
+                    <li>
+                      <a tabindex="-1" href="#manage-invited-admins-modal" data-toggle="modal">
+                        <%= if u['name']
+                              "#{u['name']} <#{u['email']}>"
+                            else
+                              u['email']
+                            end %>
+                      </a>
+                    </li>
+                  <% end %>
+
+                  <% if @group.invited_admins.count > 10 %>
+                    <li>
+                      <a tabindex="-1" href="#manage-invited-admins-modal" data-toggle="modal">
+                        <%= (@group.invited_admins.count - 10).to_s %> more...
+                      </a>
+                    </li>
+                  <% end %>
+
+                  <li class="divider"></li>
                   <li>
                     <a tabindex="-1" href="#manage-invited-admins-modal" data-toggle="modal">
-                      <%= if u['name']
-                            "#{u['name']} <#{u['email']}>"
-                          else
-                            u['email']
-                          end %>
+                      <i class="icon-wrench"></i>  Manage Invited Admins
                     </a>
                   </li>
-                <% end %>
-
-                <% if @group.invited_admins.count > 10 %>
-                  <li>
-                    <a tabindex="-1" href="#manage-invited-admins-modal" data-toggle="modal">
-                      <%= (@group.invited_admins.count - 10).to_s %> more...
-                    </a>
-                  </li>
-                <% end %>
-
-                <li class="divider"></li>
-                <li>
-                  <a tabindex="-1" href="#manage-invited-admins-modal" data-toggle="modal">
-                    <i class="icon-wrench"></i>  Manage Invited Admins
-                  </a>
-                </li>
-              </ul>
-            </div>
-          <% end %>
+                </ul>
+              </div>
+            <% end %>
+          </div>
         </div>
 
         <%= render @group.admins %>

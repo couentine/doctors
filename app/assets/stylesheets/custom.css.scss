@@ -3,11 +3,31 @@
 $body-background-color: #f8f8f8;
 $bodyBackground: $body-background-color;
 $grayMediumLight: #eaeaea;
-$seperator-color: #ddd;
+
+$primary-light: #f1c40f;
+$primary-medium: #f39c12;
+$primary-dark: #d35400;
+
+$secondary-light: #86d6a7;
+$secondary-medium: #2ecc71;
+$secondary-dark: #27ae60;
+
+$tertiary-light: #1abc9c;
+$tertiary-medium: #3498db;
+$tertiary-dark: #2980b9;
+
+$medium-gray: #ccc;
+$light-gray: #eaeaea;
+
+$light-white: #fff;
+$medium-white: #fbfcfc;
+$dark-white: #f6f6f6;
+
+$card-shadow-color: rgba(0, 0, 0, 0.1);
+
 $light-text-color: #999;
-$card-shadow-color: rgba(0, 0, 0, 0.2);
-$card-background-color: #fff;
-$card-text-color: #222;
+$medium-text-color: #555;
+$dark-text-color: #222;
 
 /* Do the bootstrap import (after variable declarations) */
 
@@ -21,6 +41,7 @@ body {
   @media (min-width: 980px) { padding-top: 60px; }
   overflow: auto;
   background-color: $body-background-color !important;
+  color: $dark-text-color;
 }
 
 section {
@@ -40,6 +61,63 @@ a.btn:visited {
 
 .add-top-margin {
   margin-top: 30px;
+}
+
+@media (min-width: 768px) {
+  .show-when-small {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .collapse-when-small  {
+    display: none;
+  }
+}
+
+/* === HEADER === */
+
+#logo {
+  font-family: "tahoma";
+  color: $primary-medium;
+  font-size: 30px;
+  font-weight: bold;
+  margin-left: 0px;
+}
+
+span#header-currentuser-name {
+  @media (max-width: 420px) {
+    display: none;
+  }
+}
+
+header.navbar {
+  border-top: 4px solid $primary-medium;
+}
+.navbar-inner {
+  background-color: $medium-white;
+  background-image: none;
+  border: none;
+}
+
+/* === FOOTER === */
+
+footer {
+  margin-top: 45px;
+  padding-top: 5px;
+  border-top: 1px solid $grayMediumLight;
+  color: $grayLight;
+  
+  small { 
+    float: left; 
+  }
+  ul {
+    float: right;
+    list-style: none;
+    li {
+      float: left;
+      margin-left: 10px;
+    }
+  }
 }
 
 /* === FORMS === */
@@ -71,94 +149,144 @@ form#group-add-users-form {
   }
 }
 
-/* === PROFILES === */
+/* === HEADER CARDS === */
 
-.profile-sidebar {
+.header-card {
   float: left;
-  border-radius: 2px;
-  background-color: $card-background-color;
-  color: $card-text-color;
-  box-shadow: 0 1px 2px 0 $card-shadow-color;
-  padding: 5%;
-  width: 90%;
-}
+  border-radius: 3px;
+  color: $dark-text-color;
+  box-shadow: -1px 1px 7px 0 $card-shadow-color;
+  width: 100%;
+  position: relative;
+  background-color: $light-white;
 
-.profile-section-header {
-  span {
-    margin-bottom: 10px;
-  }
-
-  h1 {
+  .primary-header {
     float: left;
+    position: relative;
+    overflow: hidden;
+    width: 46%;
+    height: 150px;
+    padding: 2%;
 
-    span.profile-name {
-      float: left;
-      font-size: 26px;
-      line-height: 30px;
-      margin-bottom: 5px;
-      width: 100%;
+    background: linear-gradient(45deg, $dark-white 25%, $light-white 25%, $light-white 50%,
+                           $dark-white 50%, $dark-white 75%, $light-white 75%);
+    background-size: 16px 16px;
+
+    @media (max-width: 767px) {
+      width: 96%;
+      height: auto;
     }
-    span.profile-url {
+
+    table {
+      width: 100%;
+      @media (max-width: 767px) { width: 98%; }
+
+      td.header-image {       
+        width: 30%;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center top;
+      }
+      td.header-text {       
+        width: 70%;
+        padding-left: 10px;
+      }
+    }
+    img {
+      width: 27.88%%;
       float: left;
+      margin-right: 20px;
+    }
+    h1,h2,h3 {
+      line-height: 1.2em;
+      margin: 0 0 15px 0;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: bold;
+    }
+    h2 {
       font-size: 20px;
       font-weight: normal;
-      line-height: 24px;
-      width: 100%;
+    }
+    h3 {
+      font-size: 14px;
+      font-weight: normal;
+      color: $medium-text-color;
     }
   }
-  span.profile-type {
+  .secondary-header {
     float: left;
-    font-size: 14px;
-    line-height: 17px;
-    color: $gray;
-    width: 100%;
-  }
+    position: relative;
+    overflow: hidden;
+    width: 50%;
+    height: 150px;
+    padding: 2% 0;
 
-  span.profile-actions {
-    float: left;
-    width: 100%;
-    border-bottom: 1px solid $seperator-color;
-    li {
-      margin: 5px 0;
-    }
-  }
-
-  span.profile-details {
-    float: left;
-    width: 100%;
-    border-bottom: 1px solid $seperator-color;
-    li {
-      line-height: 23px;
-    }
-  }
-
-  span.profile-stats {
-    float: left;
-    width: 100%;
-    margin-top: 5px;
-    margin-bottom: 5px;
-
-    li.profile-stat {
-      text-align: center;
-      float: left;
-      margin-right: 15px;
-    }
-
-    span.stat-number {
-      float: left;
-      width: 100%;
-      font-size: 28px;
-      font-weight: bold;
+    ul {
+      position: absolute;
+      left: 15px;
+      bottom: 15px;
       margin: 0;
     }
-    span.stat-label {
-      float: left;
-      width: 100%;
-      font-size: 11px;
-      color: $light-text-color;
-      margin: 3px 0 0 0;
+    li {
+      list-style: none;
+      margin: 0 15px 5px 0;
+      color: $medium-text-color;
+    }
+
+    @media (max-width: 767px) {
+      display: none;
     }
   }
+
+  .card-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+
+    ul { float: left; }
+    li {
+      float: left;
+      list-style: none;
+      margin-right: 5px;
+    }
+  }
+
+  .card-tabs {
+    float: left;
+    width: 100%;
+    background-color: $medium-gray;
+
+    .nav-tabs > li, .nav-pills > li {
+      float: none;
+      display: inline-block;
+      *display: inline; /* ie7 fix */
+      zoom: 1; /* hasLayout ie7 trigger */
+    }
+    .nav-tabs, .nav-pills {
+      text-align: center;
+      margin: 0 0 2px 0;
+      border: none;
+    }
+    
+    .nav-tabs > li > a {
+      border: 3px solid transparent;
+      border-radius: 0;
+      color: $medium-text-color;
+    }
+    .nav-tabs > li > a:hover, .nav-tabs > li > a:focus {
+      color: $dark-text-color;
+      border-bottom-color: $secondary-light;
+    }
+    .nav-tabs > .active > a,.nav-tabs > .active > a:hover,.nav-tabs > .active > a:focus {
+      background-color: transparent;
+      border-bottom-color: $secondary-medium;
+      font-weight: bold;
+      color: $dark-text-color;
+    }
+  }
+  
 }
 
 /* === TABS === */
@@ -166,25 +294,37 @@ form#group-add-users-form {
 div.tab-header {
   float: left;
   width: 100%;
-  border-bottom: 1px solid $seperator-color;
-  margin: 0 0 30px 0;
+  margin: 30px 0;
+  text-align: center;
 
-  h2 {
-    float: left;
-    font-size: 20px;
-    margin: 0;
-  }
+  div.tab-header-inner {
+    display: inline-block;
+    width: 95%;
+    margin: 0 auto;
+    padding: 4px 9px;
+    border: 1px solid $secondary-medium;
+    border-radius: 5px;
+    background-color: $medium-white;
+    
+    box-shadow: -1px 1px 7px 0 $card-shadow-color;
 
-  .btn,.btn-group { float: right; }
-  .btn {
-    margin: 4px 4px 0 4px;
-  }
-  .btn-small {
-    margin: 6px 6px 0 6px;
-  }
+    h2 {
+      float: left;
+      font-size: 20px;
+      margin: 0;
+    }
 
-  ul.dropdown-menu {
-    font-size: 11px;
+    .btn,.btn-group { float: right; }
+    .btn {
+      margin: 4px 4px 0 4px;
+    }
+    .btn-small {
+      margin: 6px 6px 0 6px;
+    }
+
+    ul.dropdown-menu {
+      font-size: 11px;
+    }
   }
 }
 
@@ -210,11 +350,17 @@ div.info-card {
   float: left;
   position: relative;
   margin-bottom: 20px;
-  border-radius: 2px;
-  background-color: $card-background-color;
-  color: $card-text-color;
-  box-shadow: 0 1px 2px 0 $card-shadow-color;
+  border-radius: 5px;
+  background-color: $light-white;
+  color: $dark-text-color;
+  box-shadow: -1px 1px 7px 0 $card-shadow-color;
+  border: 1px solid $medium-gray;
   
+  @media (min-width: 768px) {
+    margin-right: 9px;
+    margin-left: 9px;
+  }
+
   img, span { float: left; }
   a:hover { color: inherit;}
   a.image-link {
@@ -255,12 +401,13 @@ div.info-card {
     ul { margin: 0; }
     ul.left-foot {
       float: left;
-      max-width: 70%;
-      overflow-y: hidden;
+      max-width: 60%;
+      height: 1.3em;
+      overflow: hidden;
     }
     ul.right-foot {
       float: right;
-      max-width: 25%;
+      max-width: 40%;
       overflow-y: hidden;
     }
     li {
@@ -274,7 +421,7 @@ div.info-card {
     padding: 2%;
   }
 
-  span.card-corner {
+  span.card-actions {
     position: absolute;
     top: 0;
     right: 0;
@@ -373,43 +520,5 @@ img.badge-image-header {
   @media (max-width: 480px) {
     padding: 15px;
     height: auto;
-  }
-}
-
-/* === HEADER === */
-
-#logo {
-  font-family: "courier new";
-  font-size: 30px;
-  font-weight: bold;
-  margin-left: 0px;
-}
-
-span#header-currentuser-name {
-  @media (max-width: 420px) {
-    display: none;
-  }
-}
-
-
-
-/* === FOOTER === */
-
-footer {
-  margin-top: 45px;
-  padding-top: 5px;
-  border-top: 1px solid $grayMediumLight;
-  color: $grayLight;
-  
-  small { 
-    float: left; 
-  }
-  ul {
-    float: right;
-    list-style: none;
-    li {
-      float: left;
-      margin-left: 10px;
-    }
   }
 }
