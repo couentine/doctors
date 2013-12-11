@@ -1,4 +1,4 @@
-<div class="span4 info-card image-card user-card">
+<div class="info-card image-card user-card fixed-height" data-bl-dyncol="child">
   <table>
     <tr class="card-body-row">
       <td class="card-image" style="background-image: url('<%= gravatar_url_for user, :size => 150 %>')">
@@ -9,12 +9,11 @@
         <span class="card-headline">
           <%= link_to user.name, user, title: user.name %>
         </span>
-        <span class="card-text"> &nbsp; </span>
         <span class="card-footline">
-          Member since <%=  if user.created_at
+          Joined <%=  if user.created_at && (user.created_at > (Date.today - 9.months))
                               user.created_at.to_s(:full_date)
                             else
-                              "the beginning of time"
+                              "forever ago"
                             end %>
         </span>
       </td>

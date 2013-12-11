@@ -1,10 +1,12 @@
-<div class="span4 info-card small-image-card badge-card">
+<div class="info-card badge-card" data-bl-dyncol="child">
   <table>
-    <tr class="card-body-row">
-      <td class="card-image" style="background-image: url('<%= badge.image_url %>')">
-        <%= link_to '&nbsp;'.html_safe, group_badge_path(badge.group, badge),
-            title: badge.name, class: 'image-link' %>
+    <tr class="card-image-row white-striped-background">
+      <td>
+        <%= link_to image_tag(badge.image_url), group_badge_path(badge.group, badge),
+            title: badge.name %><br/>
       </td>
+    </tr>
+    <tr class="card-body-row">
       <td class="card-body">
         <span class="card-headline">
           <%= link_to badge.name, group_badge_path(badge.group, badge), title: badge.name %>
@@ -13,7 +15,7 @@
       </td>
     </tr>
     <tr class="card-footline-row">
-      <td class="card-footline" colspan="2">
+      <td class="card-footline">
         <ul class="left-foot">
           <li><%= link_to badge.url, group_badge_path(badge.group, badge), 
                   title: group_badge_path(badge.group, badge) %></li>

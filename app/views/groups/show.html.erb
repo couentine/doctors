@@ -217,16 +217,14 @@
 
 <!-- === TAB CONTENT === -->
 
-<div class="row">
-  
-  <div class="span12 profile-body">
+<div class="tab-content">
 
-    <div class="tab-content">
+  <!-- === BADGES TAB === -->
 
-      <!-- === BADGES TAB === -->
+  <div class="tab-pane active" id="badges">
 
-      <div class="tab-pane active" id="badges">
-        
+    <div class="row">
+      <div class="span12">
         <div class="tab-header">
           <div class="tab-header-inner">
             <h2>All Badges</h2>
@@ -239,6 +237,14 @@
             %>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="row">
+      
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
+           data-bl-dyncol-width="12">
+        
 
         <% if @group.badges.empty? %>
 
@@ -261,11 +267,15 @@
         <% end %>
 
       </div>
+    </div>
+  </div>
 
-      <!-- === MEMBERS TAB === -->
+  <!-- === MEMBERS TAB === -->
 
-      <div class="tab-pane" id="members">
-        
+  <div class="tab-pane" id="members">
+
+    <div class="row">
+      <div class="span12">
         <div class="tab-header">
           <div class="tab-header-inner">
             <h2>Active Members</h2>
@@ -315,6 +325,13 @@
             <% end %>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="row">
+
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
+           data-bl-dyncol-width="12">
 
         <% if @group.members.empty? %>
 
@@ -337,11 +354,15 @@
         <% end %>
 
       </div>
+    </div>
+  </div>
 
-      <!-- === ADMINS TAB === -->
+  <!-- === ADMINS TAB === -->
 
-      <div class="tab-pane" id="admins">
-        
+  <div class="tab-pane" id="admins">
+
+    <div class="row">
+      <div class="span12">
         <div class="tab-header">
           <div class="tab-header-inner">
             <h2>Active Admins</h2>
@@ -391,13 +412,18 @@
             <% end %>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="row">
+
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="admins" 
+           data-bl-dyncol-width="12">
 
         <%= render @group.admins %>
       
       </div>
-
     </div>
-
   </div>
 
 </div>

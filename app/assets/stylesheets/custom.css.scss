@@ -18,6 +18,7 @@ $tertiary-dark: #2980b9;
 
 $medium-gray: #ccc;
 $light-gray: #eaeaea;
+$really-light-gray: #eee;
 
 $light-white: #fff;
 $medium-white: #fbfcfc;
@@ -59,6 +60,10 @@ a.btn:visited {
   color: initial;
 }
 
+.btn {
+  background-image: none;
+}
+
 .add-top-margin {
   margin-top: 30px;
 }
@@ -73,6 +78,16 @@ a.btn:visited {
     display: none;
   }
 }
+
+/* === PATTERNS, COLORS & TEXTURES === */
+
+.white-striped-background {
+  background: linear-gradient(45deg, $dark-white 25%, $light-white 25%, $light-white 50%,
+                           $dark-white 50%, $dark-white 75%, $light-white 75%);
+  background-size: 16px 16px;
+}
+
+.drop-shadow { box-shadow: -1px 1px 7px 0 $card-shadow-color; }
 
 /* === HEADER === */
 
@@ -134,6 +149,12 @@ div.bl-form-large input {
 
 h2.form-header {
   font-size: 22px;
+}
+
+/* === DYNAMIC COLUMNS === */
+
+.dynamic-column {
+  
 }
 
 /* === ADD USERS FORM === */
@@ -299,7 +320,7 @@ div.tab-header {
 
   div.tab-header-inner {
     display: inline-block;
-    width: 95%;
+    width: 97%;
     margin: 0 auto;
     padding: 4px 9px;
     border: 1px solid $secondary-medium;
@@ -307,6 +328,10 @@ div.tab-header {
     background-color: $medium-white;
     
     box-shadow: -1px 1px 7px 0 $card-shadow-color;
+
+    @media (max-width: 767px) {
+      width: 93%;
+    }
 
     h2 {
       float: left;
@@ -349,7 +374,8 @@ div.tab-pane {
 div.info-card {
   float: left;
   position: relative;
-  margin-bottom: 20px;
+  width: 99.4%;
+  margin: 0 0 20px 0;
   border-radius: 5px;
   background-color: $light-white;
   color: $dark-text-color;
@@ -357,8 +383,7 @@ div.info-card {
   border: 1px solid $medium-gray;
   
   @media (min-width: 768px) {
-    margin-right: 9px;
-    margin-left: 9px;
+    width: 93%;
   }
 
   img, span { float: left; }
@@ -370,45 +395,45 @@ div.info-card {
     color: transparent;
     background-color: transparent;
   }
+  table {
+    width: 100%;
+  }
   span.card-body,td.card-body {
     span.card-headline {
       font-size: 18px;
       font-weight: bold;
       width: 100%;
-      margin: 0 0 2% 0;
-      height: 1.1em;
-      overflow-y: hidden;
+      margin: 0 0 2.5% 0;
+      line-height: 1.2em;
     }
     span.card-text {
-      overflow-y: hidden;
       width: 100%;
       margin: 0 0 2% 0;
+      line-height: 1.4em;
     }
   }
   
   span.card-footline,td.card-footline {
     font-size: 11px;
     color: $light-text-color;
+    border-top: 1px solid $really-light-gray;
+    padding-top: 3px;
     width: 100%;
-    height: 1.7em;
-    overflow-y: hidden;
-
+    
     a {
       font-size: 11px;
       color: $light-text-color;
-      height: 1.5em;
     }
     ul { margin: 0; }
     ul.left-foot {
       float: left;
       max-width: 60%;
-      height: 1.3em;
-      overflow: hidden;
     }
     ul.right-foot {
-      float: right;
+      position: absolute;
+      bottom: 7px;
+      right: 5px;
       max-width: 40%;
-      overflow-y: hidden;
     }
     li {
       list-style: none;
@@ -430,9 +455,8 @@ div.info-card {
 }
 
 div.image-card {
-  span.card-text { height: 3em; }
-  tr.card-body-row {
-    height: 100px;
+  .card-headline {
+    width: 93% !important;
   }
   td.card-image {
     width: 28%;
@@ -443,19 +467,22 @@ div.image-card {
   td.card-body {
     padding: 3% 3% 2% 3%;
   }
+
+}
+.image-card.fixed-height {
+  .card-headline { min-height: 3.6em; }
 }
 
-div.small-image-card {
-  span.card-text { height: 5.5em; }
-  tr.card-body-row {
-    height: 100px;
-  }
-  td.card-image {
-    width: 28%;
-    position: relative;
-    background-size: 90% auto;
-    background-position: right center;
-    background-repeat: no-repeat;
+div.badge-card {
+  margin-top: 55px;
+  tr.card-image-row {
+    text-align: center;
+
+    a { display: inline-block; }
+    img {
+      height: 110px;
+      margin-top: -55px;
+    }
   }
   td.card-body {
     padding: 3% 3% 2% 3%;
