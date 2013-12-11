@@ -83,7 +83,7 @@ private
 
   def find_badge
     @group = Group.find(params[:group_id])
-    @badge = Badge.find_by(group: @group, url: params[:id])
+    @badge = Badge.find_by(group: @group.id, url: params[:id])
   end
 
 end

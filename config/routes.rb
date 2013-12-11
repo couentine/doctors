@@ -35,6 +35,7 @@ BadgeList::Application.routes.draw do
 
   resources :users, :only => [:show]
 
+  match ':id/edit' => 'groups#edit', via: :get
   resources :groups, only: [:index, :new, :create]
   resources :groups, path: "", except: [:index, :new, :create] do
     resources :badges, only: [:index, :new, :create]
