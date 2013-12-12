@@ -39,10 +39,14 @@ $dark-text-color: #222;
 /* === UNIVERSAL === */
 
 body {
-  @media (min-width: 980px) { padding-top: 60px; }
   overflow: auto;
   background-color: $body-background-color !important;
   color: $dark-text-color;
+}
+
+@media (min-width: 980px) {
+  body { padding-top: 60px; }
+  body.with-subheader { padding-top: 110px; }
 }
 
 section {
@@ -107,11 +111,46 @@ span#header-currentuser-name {
 
 header.navbar {
   border-top: 4px solid $primary-medium;
+  box-shadow: 0px 1px 7px 0 $card-shadow-color;
 }
 .navbar-inner {
   background-color: $medium-white;
   background-image: none;
   border: none;
+  box-shadow: none !important;
+}
+
+#subheader {
+  float: left;
+  width: 100%;
+  height: 40px;
+  overflow: hidden;
+  background-color: $medium-gray;
+  color: $light-white;
+  padding: 3px 0;
+
+  .subheader-breadcrumbs {
+    img {
+      float: left;
+      height: 30px;
+      margin: 5px 0 5px 10px;
+    }
+    ul {
+      float: left;
+      background-color: transparent;
+      overflow: hidden;
+      margin-top: 2px;
+
+      li {
+        font-size: 14px;
+        text-shadow: none;
+        color: $light-white;
+        a,a:visited,span.divider { color: $light-white; }
+        a:hover,a:focus { color: $medium-white; }
+      }
+      li.active { color: $light-text-color; }
+    }
+  }
 }
 
 /* === FOOTER === */
@@ -135,7 +174,133 @@ footer {
   }
 }
 
+/* === DYNAMIC COLUMNS === */
+
+.dynamic-column {
+  
+}
+
 /* === FORMS === */
+
+div.bl-form {
+  float: left;
+  margin-top: 30px;
+  background-color: $light-white;
+  box-shadow: -1px 1px 7px 0 $card-shadow-color;
+  border: 1px solid $medium-gray;
+  border-radius: 5px;
+
+  abbr[title="required"] { display: none; }
+  h1, h2, h3 {
+    float: left;
+    margin: 20px 0 10px 25px;
+    line-height: 1.2em;
+    color: $medium-text-color;
+  }
+  h1 { font-size: 26px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+  .control-label {
+    font-weight: bold;
+    color: $light-text-color;
+  }
+
+  @media (max-width: 767px) {
+    #group_url { width: 120px; }
+    .form-image { 
+      height: 75px !important; 
+      width: 75px !important; 
+    }
+    .control-label {
+      float: left;
+      width: 80%; 
+      margin-left: 25px;
+      text-align: left;
+    }
+    .controls { 
+      float: left;
+      width: 85%;
+      margin-left: 35px;
+      overflow: hidden;
+    }
+  }
+
+  form {
+    padding-right: 15px;
+  }
+  .form-header {
+    float: left;
+    width: 100%;
+    margin-bottom: 25px;
+    border-top: 4px solid $secondary-medium;
+
+    h1 {
+      max-width: 60%;
+    }
+    .form-image {
+      width: 100px;
+      height: 100px;
+      float: right;
+      margin: 20px 25px -55px 0;
+      border: 1px solid $medium-gray;
+      border-radius: 500px;
+      box-shadow: inset -1px 1px 7px 0 $card-shadow-color;
+      background-size: 85% 85%;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-color: $light-white;
+    }
+  }
+
+  .form-body {
+    float: left;
+    max-width: 100%;
+
+    h1,h2,h3 {
+      width: 90%;
+    }
+    span.add-on {
+      background-color: transparent;
+      border: none;
+    }
+    #form-extra-info {
+      min-width: 50%
+    }
+    span.fyi-input {
+      font-size: 14px;
+      color: $light-text-color;
+      padding: 4px 6px;
+      line-height: 20px;
+      border-bottom: 1px dashed $medium-gray;
+      position: relative;
+      top: 5px;
+    }
+  }
+
+  .form-footer {
+    float: left;
+    border-top: 1px solid $really-light-gray;
+    margin: 15px 0 0 0;
+    width: 98%;
+    text-align: right;
+    padding: 1.8%;
+  }
+
+  input[type="text"],textarea,input[type="url"] {
+    border-radius: 0;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid $medium-gray;
+    box-shadow: none;
+  }
+  textarea {
+    border-left: 1px solid $light-gray;
+  }
+  input[type="text"]:focus,textarea:focus,,input[type="url"]:focus {
+    background-color: $really-light-gray;
+  }
+}
 
 div.bl-form-no-labels label {
   display: none;
@@ -151,13 +316,7 @@ h2.form-header {
   font-size: 22px;
 }
 
-/* === DYNAMIC COLUMNS === */
-
-.dynamic-column {
-  
-}
-
-/* === ADD USERS FORM === */
+/* Add users form */
 
 form#group-add-users-form {
   label.notify-by-email {
@@ -180,6 +339,7 @@ form#group-add-users-form {
   width: 100%;
   position: relative;
   background-color: $light-white;
+  margin-bottom: 30px;
 
   .primary-header {
     float: left;
@@ -254,6 +414,9 @@ form#group-add-users-form {
       list-style: none;
       margin: 0 15px 5px 0;
       color: $medium-text-color;
+
+      a:visited { color: $medium-text-color; }
+      a:hover,a:focus { color: $dark-text-color; }
     }
 
     @media (max-width: 767px) {
@@ -315,19 +478,15 @@ form#group-add-users-form {
 div.tab-header {
   float: left;
   width: 100%;
-  margin: 30px 0;
+  margin: 0 0 30px 0;
   text-align: center;
 
   div.tab-header-inner {
     display: inline-block;
     width: 97%;
     margin: 0 auto;
-    padding: 4px 9px;
-    border: 1px solid $secondary-medium;
-    border-radius: 5px;
-    background-color: $medium-white;
-    
-    box-shadow: -1px 1px 7px 0 $card-shadow-color;
+    padding: 0px 9px;
+    border-bottom: 1px dashed $light-text-color;
 
     @media (max-width: 767px) {
       width: 93%;
@@ -365,7 +524,6 @@ div.tab-pane {
   div.well {
     float: left;
     text-align: center;
-    width: 92%;
   }
 }
 

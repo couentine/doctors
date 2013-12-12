@@ -8,7 +8,7 @@
     <%= render 'layouts/shim' %>    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-  <body>
+  <body class="<%= "with-subheader" if content_for?(:show_subheader) %>" >
     <%= render 'layouts/header' %>
     <div class="container">
       <% flash.each do |key, value| %>
