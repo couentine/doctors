@@ -1,4 +1,16 @@
-<% provide(:title, @badge.name) %>
+<% 
+  provide(:title, @badge.name + '  - Edit')
+  provide(:show_subheader, true)
+  provide(:subheader_image, group_image_url_for(@group)) 
+%>
+
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url, group_path(@group) %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active"><%= @badge.url %></li>
+<% end %>
 
 <div class="page-header">
   <h1>
@@ -21,7 +33,7 @@
 
 <p>
   <span class="label label-info">Description</span><br/>
-  <%= @badge.description.html_safe %>
+  <%= @badge.description.html_safe rescue nil %>
 </p>
 
 

@@ -28,7 +28,7 @@ class Badge
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :image_url, presence: true
-  validates :summary, presence: true, length: { maximum: MAX_SUMMARY_LENGTH }
+  validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
   validates :group, presence: true
   validates :creator, presence: true
   

@@ -31,50 +31,52 @@
 </script>
 
 <%= simple_form_for(@group, html: { class: 'form-horizontal' }) do |f| %>
+  <div class="form-body">
+    
+    <%= f.input :name, label: 'Group Name', placeholder: 'NASA Astronaut Training',
+                autofocus: true, input_html: { class: 'input-xlarge' } %>
+    
+    <%= f.input :url, wrapper: :prepend, label: 'Group URL' do %>
+      <%= content_tag :span, "app.badgelist.com/", class: "add-on" %>
+      <%= f.input_field :url, placeholder: 'nasa-crew', class: 'input-medium' %>
+    <% end %>
+
+    <%= f.input :type, label: 'Group Type', as: :radio_buttons,
+                collection: @group_type_options %>
+
+    <%= f.input :customer_code, label: 'Customer Code',
+                hint: 'A customer code is required for private learning groups',
+                input_html: { class: 'input-small' },
+                wrapper_html: { id: 'customer-code-wrapper' } %>
+    
+    <h2>
+      Extra information (optional)
+      <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
+        value="<%= @group.new_record? ? 'Show Extra Info' : 'Hide Extra Info' %>" 
+        onclick="toggleExtraInfo()" />
+    </h2> 
+
+    <div id="form-extra-info" 
+         style="<%= @group.new_record? ? 'display:none' : '' %>">
+      <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
+                  input_html: { class: 'input-xlarge' } %>
+
+      <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
+                  input_html: { class: 'input-xlarge' } %>
+
+      <%= f.input :image_url, label: 'Group Image URL', 
+                  placeholder: 'http://nasa.gov/logo.png',
+                  input_html: { class: 'input-xlarge' } %>
+    </div>
+  </div>  
   
-  <%= f.input :name, label: 'Group Name', placeholder: 'NASA Astronaut Training',
-              autofocus: true, input_html: { class: 'input-xlarge' } %>
-  
-  <%= f.input :url, wrapper: :prepend, label: 'Group URL' do %>
-    <%= content_tag :span, "app.badgelist.com/", class: "add-on" %>
-    <%= f.input_field :url, placeholder: 'nasa-crew', class: 'input-medium' %>
-  <% end %>
-
-  <%= f.input :type, label: 'Group Type', as: :radio_buttons,
-              collection: @group_type_options %>
-
-  <%= f.input :customer_code, label: 'Customer Code',
-              hint: 'A customer code is required for private learning groups',
-              input_html: { class: 'input-small' },
-              wrapper_html: { id: 'customer-code-wrapper' } %>
-  
-  <h2 class="form-header">
-    Extra information (optional)
-    <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
-      value="<%= @group.new_record? ? 'Show Extra Info' : 'Hide Extra Info' %>" 
-      onclick="toggleExtraInfo()" />
-  </h2> 
-
-  <div id="form-extra-info" 
-       style="<%= @group.new_record? ? 'display:none' : '' %>">
-    <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
-                input_html: { class: 'input-xlarge' } %>
-
-    <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
-                input_html: { class: 'input-xlarge' } %>
-
-    <%= f.input :image_url, label: 'Group Image URL', 
-                placeholder: 'http://nasa.gov/logo.png',
-                input_html: { class: 'input-xlarge' } %>
-  </div>
-  
-  <div class="controls add-top-margin">
-    <%= f.button :submit, "Save", class: 'btn btn-large btn-primary' %>
+  <div class="form-footer add-top-margin">
+    <%= f.button :submit, class: 'btn btn-primary' %>
     <%= 
       if @group.new_record?
-        link_to "Cancel", root_path, class: "btn btn-large"
+        link_to "Cancel", root_path, class: "btn"
       else 
-        link_to "Cancel", @group, class: "btn btn-large"
+        link_to "Cancel", @group, class: "btn"
       end
     %>
   </div>

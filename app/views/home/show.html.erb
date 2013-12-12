@@ -2,6 +2,11 @@
 
 <p>This is the home page.</p>
 
+<p>
+  <strong>Your learning groups</strong>
+  <%= link_to "New group", new_group_path, class: 'btn btn-small' %>
+</p>
+
 
 <ul>
   <% @group_list.each do |item| %>

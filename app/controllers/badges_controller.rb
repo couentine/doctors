@@ -43,12 +43,17 @@ class BadgesController < ApplicationController
   # POST /badges
   # POST /badges.json
   def create
+    @group = Group.find(params[:group_id])
+    @badge = Badge.new(params[:badge])
+    @badge.group = @group
+    @badge.creator = current_user
+
     respond_to do |format|
       if @badge.save
-        format.html { redirect_to @badge, notice: 'Badge was successfully created.' }
+        format.html { redirect_to group_badge_path(@group, @badge), notice: 'Badge was successfully created.' }
         format.json { render json: @badge, status: :created, location: @badge }
       else
-        format.html { render action: "new" }
+        format.html { render action: "new", error: 'Oops! Looks like something was missing.' }
         format.json { render json: @badge.errors, status: :unprocessable_entity }
       end
     end

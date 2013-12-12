@@ -1,7 +1,17 @@
 <% provide(:title, "Edit Learning Group - #{@group.name}") %>
 
-<div class="page-header">
-  <h1>Edit learning group</h1>
-</div>
+<div class="row">
+  <div class="bl-form bl-form-group span10 offset1">
+    
+    <div class="form-header">
+      <h1>Edit learning group</h1>
+      <div class="form-image" 
+           style="background-image: url('<%= image_path 'group-edit-medium.png' %>')">
+        &nbsp;
+      </div>
+    </div>
 
-<%= render 'form' %>
+    <%= render 'form' %>
+
+  </div>
+</div>

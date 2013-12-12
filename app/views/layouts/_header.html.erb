@@ -38,4 +38,26 @@
       </nav>
     <% end %>
   </div>
+
+  <% if content_for? :show_subheader %>
+    <div id="subheader">
+      <% if content_for?(:subheader_links) || content_for?(:subheader_image) %>
+        <div class="subheader-breadcrumbs">
+          <%= if content_for?(:subheader_image)
+                image_tag yield(:subheader_image)
+                end %>
+          <ul class="breadcrumb">
+            <%= yield :subheader_links if content_for?(:subheader_links) %>  
+          </ul>
+        </div>
+      <% end %>
+            
+      <% if content_for?(:subheader_actions) %>
+        <div class="subheader-actions">
+          <%= yield :subheader_actions %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  
 </header>
