@@ -46,8 +46,8 @@ class GroupsController < ApplicationController
     end
   end
 
-  # GET /groups/1
-  # GET /groups/1.json
+  # GET /group-url
+  # GET /group-url.json
   def show
     @group = Group.find(params[:id])
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
@@ -71,7 +71,7 @@ class GroupsController < ApplicationController
     end
   end
 
-  # GET /groups/1/edit
+  # GET /group-url/edit
   def edit
       @group = Group.find(params[:id])
       @group_type_options = GROUP_TYPE_OPTIONS
@@ -96,8 +96,8 @@ class GroupsController < ApplicationController
     end
   end
 
-  # PUT /groups/1
-  # PUT /groups/1.json
+  # PUT /group-url
+  # PUT /group-url.json
   def update
     @group = Group.find(params[:id])
 
@@ -113,8 +113,8 @@ class GroupsController < ApplicationController
     end
   end
 
-  # DELETE /groups/1
-  # DELETE /groups/1.json
+  # DELETE /group-url
+  # DELETE /group-url.json
   def destroy
     @group = Group.find(params[:id])
     @group.destroy
@@ -127,7 +127,7 @@ class GroupsController < ApplicationController
 
   # === NON-RESTFUL ACTIONS === #
 
-  # DELETE /groups/1/leave
+  # DELETE /group-url/leave
   def leave
     @group = Group.find(params[:id])
     notice = "You aren't a member of this Learning Group, so you can't leave it."
@@ -143,8 +143,8 @@ class GroupsController < ApplicationController
     redirect_to @group, :notice => notice
   end
 
-  # DELETE /groups/1/members/2, :id = 1, :user_id = 2, :type = member
-  # DELETE /groups/1/admins/2, :id = 1, :user_id = 2, :type = admin
+  # DELETE /group-url/members/2, :id = 1, :user_id = 2, :type = member
+  # DELETE /group-url/admins/2, :id = 1, :user_id = 2, :type = admin
   def destroy_user
     @group = Group.find(params[:id])
     @user = User.find(params[:user_id])
@@ -161,8 +161,8 @@ class GroupsController < ApplicationController
     redirect_to @group, :notice => notice
   end
 
-  # POST /groups/1/invited_members/{email}/invitation, :type = member
-  # POST /groups/1/invited_admins/{email}/invitation, :type = admin
+  # POST /group-url/invited_members/{email}/invitation, :type = member
+  # POST /group-url/invited_admins/{email}/invitation, :type = admin
   def send_invitation
     @group = Group.find(params[:id])
     email = params[:email].downcase
@@ -192,8 +192,8 @@ class GroupsController < ApplicationController
     redirect_to @group, :notice => notice
   end
 
-  # DELETE /groups/1/invited_members/{email}, :type = member
-  # DELETE /groups/1/invited_admins/{email}, :type = admin
+  # DELETE /group-url/invited_members/{email}, :type = member
+  # DELETE /group-url/invited_admins/{email}, :type = admin
   def destroy_invited_user
     @group = Group.find(params[:id])
     email = params[:email].downcase
@@ -216,8 +216,8 @@ class GroupsController < ApplicationController
   end
 
 
-  # GET /groups/1/members/add?type=member
-  # GET /groups/1/admins/add?type=admin
+  # GET /group-url/members/add?type=member
+  # GET /group-url/admins/add?type=admin
   def add_users
     @group = Group.find(params[:id])
     if params[:type] == 'admin'
@@ -229,8 +229,8 @@ class GroupsController < ApplicationController
     end
   end
 
-  # PUT /groups/1/members?type=member
-  # PUT /groups/1/admins?type=admin
+  # PUT /group-url/members?type=member
+  # PUT /group-url/admins?type=admin
   # :emails => '"Bob Smith" <bob@example.com>, another@example.com \n yet@example.com'
   # :notify_by_email => boolean
   # State variables for output: 

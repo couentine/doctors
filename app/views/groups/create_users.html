@@ -1,62 +1,83 @@
-<% provide(:title, "#{@type.to_s.capitalize.pluralize} Added - #{@group.name}") %>
+<% 
+  provide(:title, "#{@type.to_s.capitalize.pluralize} Added - #{@group.name}")
+  provide(:show_subheader, true)
+  provide(:subheader_image, group_image_url_for(@group)) 
+%>
 
-<div class="page-header">
-  <h1>
-    <%= @group.name %>
-    <small>New <%= @type.to_s.pluralize %> added</small>
-  </h1>
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url, group_path(@group) %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active">New Admins Added</li>
+<% end %>
 
-  <dl>
+
+<div class="row">
+  <div class="bl-form bl-form-members span10 offset1">
     
-    <% if @new_admin_emails.count > 0 %>
-      <dt><%= @new_admin_emails.count %> New Admins Added</dt>
-      <dd><%= @new_admin_emails.join ", " %></dd>
-    <% end %>
+    <div class="form-header">
+      <h1>New <%= @type.to_s.pluralize %> added</h1>
+      <div class="form-image" 
+           style="background-image: url('<%= image_path 'group-new-medium.png' %>')">
+        &nbsp;
+      </div>
+    </div>
 
-    <% if @new_member_emails.count > 0 %>
-      <dt><%= @new_member_emails.count %> New Members Added</dt>
-      <dd><%= @new_member_emails.join ", " %></dd>
-    <% end %>
-    
-    <% if @upgraded_member_emails.count > 0 %>
-      <dt><%= @upgraded_member_emails.count %> Existing Members Upgraded to Admins</dt>
-      <dd><%= @upgraded_member_emails.join ", " %></dd>
-    <% end %>
-    
-    <% if @skipped_admin_emails.count > 0 %>
-      <dt><%= @skipped_admin_emails.count %> Existing Admins Skipped</dt>
-      <dd>
-        <%= @skipped_admin_emails.join ", " %><br/>
-        <small class="text-warning">
-          To downgrade an admin to a member, you should first remove them from the admins tab, 
-          then come back and add them as a member.
-        </small>
-      </dd>
-    <% end %>
-    
-    <% if @skipped_member_emails.count > 0 %>
-      <dt><%= @skipped_member_emails.count %> Existing Members Skipped</dt>
-      <dd><%= @skipped_member_emails.join ", " %></dd>
-    <% end %>
-    
-    <% if @invalid_emails.count > 0 %>
-      <dt><%= @invalid_emails.count %> Invalid Emails</dt>
-      <dd><%= @invalid_emails.join ", " %></dd>
-    <% end %>
+    <div class="form-text">
+      <dl>
+        
+        <% if @new_admin_emails.count > 0 %>
+          <dt><%= @new_admin_emails.count %> New Admins Added</dt>
+          <dd><%= @new_admin_emails.join ", " %></dd>
+        <% end %>
 
-  </dl>
+        <% if @new_member_emails.count > 0 %>
+          <dt><%= @new_member_emails.count %> New Members Added</dt>
+          <dd><%= @new_member_emails.join ", " %></dd>
+        <% end %>
+        
+        <% if @upgraded_member_emails.count > 0 %>
+          <dt><%= @upgraded_member_emails.count %> Existing Members Upgraded to Admins</dt>
+          <dd><%= @upgraded_member_emails.join ", " %></dd>
+        <% end %>
+        
+        <% if @skipped_admin_emails.count > 0 %>
+          <dt><%= @skipped_admin_emails.count %> Existing Admins Skipped</dt>
+          <dd>
+            <%= @skipped_admin_emails.join ", " %><br/>
+            <small class="text-warning">
+              To downgrade an admin to a member, you should first remove them from the admins tab, 
+              then come back and add them as a member.
+            </small>
+          </dd>
+        <% end %>
+        
+        <% if @skipped_member_emails.count > 0 %>
+          <dt><%= @skipped_member_emails.count %> Existing Members Skipped</dt>
+          <dd><%= @skipped_member_emails.join ", " %></dd>
+        <% end %>
+        
+        <% if @invalid_emails.count > 0 %>
+          <dt><%= @invalid_emails.count %> Invalid Emails</dt>
+          <dd><%= @invalid_emails.join ", " %></dd>
+        <% end %>
 
-  <p>
-    <%= link_to 'Done', @group, class: 'btn' %> 
-    <%=
-      if @type == :admin
-        link_to 'Add More Admins', add_group_admins_path(@group), class: 'btn btn-info' 
-      else
-        link_to 'Add More Members', add_group_members_path(@group), class: 'btn btn-info' 
-      end 
-    %>
-  </p>
+      </dl>
+    </div>
 
+    <div class="form-footer">
+      <%= link_to 'Done', @group, class: 'btn' %> 
+      <%=
+        if @type == :admin
+          link_to 'Add More Admins', add_group_admins_path(@group), class: 'btn btn-info' 
+        else
+          link_to 'Add More Members', add_group_members_path(@group), class: 'btn btn-info' 
+        end 
+      %>
+    </div>
+
+  </div>
 </div>
 
 

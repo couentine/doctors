@@ -182,6 +182,74 @@ footer {
 
 /* === FORMS === */
 
+/* General Form Elements */
+div.bl-form,div.bl-modal-form {
+  .control-label {
+    font-weight: bold;
+    color: $light-text-color;
+  }
+
+  @media (max-width: 767px) {
+    #group_url { width: 120px; }
+    .control-label {
+      float: left;
+      width: 80%; 
+      margin-left: 25px;
+      text-align: left;
+    }
+    .controls { 
+      float: left;
+      width: 85%;
+      margin-left: 35px;
+      overflow: hidden;
+    }
+  }
+
+  .form-body {
+    h1,h2,h3 {
+      width: 90%;
+    }
+    span.add-on {
+      background-color: transparent;
+      border: none;
+    }
+    #form-extra-info {
+      min-width: 50%
+    }
+    span.fyi-input {
+      font-size: 14px;
+      color: $light-text-color;
+      padding: 4px 6px;
+      line-height: 20px;
+      border-bottom: 1px dashed $medium-gray;
+      position: relative;
+      top: 5px;
+    }
+  }
+
+  input[type="text"],textarea,input[type="url"] {
+    border-radius: 0;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid $medium-gray;
+    box-shadow: none;
+  }
+  textarea {
+    border-left: 1px solid $light-gray;
+  }
+  input[type="text"]:focus,textarea:focus,,input[type="url"]:focus {
+    background-color: $really-light-gray;
+  }
+  .huge-text-area {
+    width: 90%;
+    height: 250px;
+    border: 1px solid $light-gray;
+    border-bottom: 1px solid $medium-gray;
+  }
+}
+
+/* Full Page Forms Only */
 div.bl-form {
   float: left;
   margin-top: 30px;
@@ -200,28 +268,11 @@ div.bl-form {
   h1 { font-size: 26px; }
   h2 { font-size: 20px; }
   h3 { font-size: 18px; }
-  .control-label {
-    font-weight: bold;
-    color: $light-text-color;
-  }
-
+  
   @media (max-width: 767px) {
-    #group_url { width: 120px; }
     .form-image { 
       height: 75px !important; 
       width: 75px !important; 
-    }
-    .control-label {
-      float: left;
-      width: 80%; 
-      margin-left: 25px;
-      text-align: left;
-    }
-    .controls { 
-      float: left;
-      width: 85%;
-      margin-left: 35px;
-      overflow: hidden;
     }
   }
 
@@ -255,26 +306,11 @@ div.bl-form {
   .form-body {
     float: left;
     max-width: 100%;
-
-    h1,h2,h3 {
-      width: 90%;
-    }
-    span.add-on {
-      background-color: transparent;
-      border: none;
-    }
-    #form-extra-info {
-      min-width: 50%
-    }
-    span.fyi-input {
-      font-size: 14px;
-      color: $light-text-color;
-      padding: 4px 6px;
-      line-height: 20px;
-      border-bottom: 1px dashed $medium-gray;
-      position: relative;
-      top: 5px;
-    }
+  }
+  .form-text {
+    float: left;
+    max-width: 90%;
+    padding: 0 0 10px 25px;
   }
 
   .form-footer {
@@ -284,21 +320,6 @@ div.bl-form {
     width: 98%;
     text-align: right;
     padding: 1.8%;
-  }
-
-  input[type="text"],textarea,input[type="url"] {
-    border-radius: 0;
-    border-top: none;
-    border-right: none;
-    border-left: none;
-    border-bottom: 1px solid $medium-gray;
-    box-shadow: none;
-  }
-  textarea {
-    border-left: 1px solid $light-gray;
-  }
-  input[type="text"]:focus,textarea:focus,,input[type="url"]:focus {
-    background-color: $really-light-gray;
   }
 }
 
@@ -316,6 +337,16 @@ h2.form-header {
   font-size: 22px;
 }
 
+/* Rich Text Areas */
+.rich-text-toolbar {
+  width: 90%;
+  padding: 0 10px 10px 0;
+  .btn-group {
+    margin-left: 10px;
+  }
+}
+
+
 /* Add users form */
 
 form#group-add-users-form {
@@ -329,8 +360,29 @@ form#group-add-users-form {
   }
 }
 
+/* === MODALS === */
+
+.modal {
+  border-radius: 5px;
+
+  .modal-header {
+    border-top: 4px solid $tertiary-medium;
+    border-bottom: none;
+    padding: 15px;
+  }
+  .modal-footer {
+    background-color: $dark-white;
+  }
+}
+
 /* === HEADER CARDS === */
 
+.group-header-card {
+  .primary-header,.secondary-header { height: 150px; }
+}
+.badge-header-card {
+  .primary-header,.secondary-header { height: auto; }
+}
 .header-card {
   float: left;
   border-radius: 3px;
@@ -346,7 +398,6 @@ form#group-add-users-form {
     position: relative;
     overflow: hidden;
     width: 46%;
-    height: 150px;
     padding: 2%;
 
     background: linear-gradient(45deg, $dark-white 25%, $light-white 25%, $light-white 50%,
@@ -401,7 +452,6 @@ form#group-add-users-form {
     position: relative;
     overflow: hidden;
     width: 50%;
-    height: 150px;
     padding: 2% 0;
 
     ul {
@@ -477,7 +527,7 @@ form#group-add-users-form {
 
 div.tab-header {
   float: left;
-  width: 100%;
+  width: 99%;
   margin: 0 0 30px 0;
   text-align: center;
 
@@ -644,6 +694,36 @@ div.badge-card {
   }
   td.card-body {
     padding: 3% 3% 2% 3%;
+  }
+}
+
+div.text-card {
+  padding: 20px 15px;
+  border-top: 4px solid $tertiary-dark;
+  max-width: 90%;
+
+  p {
+    overflow: hidden;
+  }
+  h3 {
+    font-size: 18px;
+    margin: 0;
+    color: $tertiary-dark;
+  }
+  a,a:visited {
+    color: $dark-text-color;
+    font-weight: bold;
+  }
+  a:hover,a:focus {
+    color: $tertiary-medium;
+    text-decoration: none;
+    font-weight: bold;
+    border-bottom: 1px dotted $tertiary-dark;
+  }
+  img {
+    max-width: 98%;
+    padding: 10px 0;
+    border-radius: 20px;
   }
 }
 

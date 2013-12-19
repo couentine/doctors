@@ -18,5 +18,9 @@
       <%= render 'layouts/footer' %>
       <%= debug(params) if Rails.env.development? %>
     </div>
+    
+    <% if content_for? :include_rich_text %>
+      <%= render 'shared/rich_text_toolbar' %>
+    <% end %>
   </body>
 </html>
