@@ -3,8 +3,8 @@ class BadgesController < ApplicationController
   before_filter :find_badge, only: [:show, :edit, :update, :destroy]
   before_filter :authenticate_user!, only: [:index, :new, :edit, :create, :update, :destroy]
 
-  # GET /badges
-  # GET /badges.json
+  # GET /group-url/badges
+  # GET /group-url/badges.json
   def index
     @badges = Badge.asc(:name).page(params[:page]).per(APP_CONFIG['page_size'])
 
@@ -14,8 +14,8 @@ class BadgesController < ApplicationController
     end
   end
 
-  # GET /badges/1
-  # GET /badges/1.json
+  # GET /group-url/badge-url
+  # GET /group-url/badge-url.json
   def show
     respond_to do |format|
       format.html # show.html.erb
@@ -23,8 +23,8 @@ class BadgesController < ApplicationController
     end
   end
 
-  # GET /badges/new
-  # GET /badges/new.json
+  # GET /group-url/badges/new
+  # GET /group-url/badges/new.json
   def new
     @group = Group.find(params[:group_id])
     @badge = Badge.new(group: @group)
@@ -35,13 +35,13 @@ class BadgesController < ApplicationController
     end
   end
 
-  # GET /badges/1/edit
+  # GET /group-url/badge-url/edit
   def edit
     # badge is found by find_badge, so nothing to do here
   end
 
-  # POST /badges
-  # POST /badges.json
+  # POST /group-url/badges
+  # POST /group-url/badges.json
   def create
     @group = Group.find(params[:group_id])
     @badge = Badge.new(params[:badge])
@@ -59,22 +59,30 @@ class BadgesController < ApplicationController
     end
   end
 
-  # PUT /badges/1
-  # PUT /badges/1.json
+  # PUT /group-url/badge-url
+  # PUT /group-url/badge-url?modal=true >> Redirects back to group with flash error on save failure
+  # PUT /group-url/badge-url.json
   def update
     respond_to do |format|
       if @badge.update_attributes(params[:badge])
-        format.html { redirect_to @badge, notice: 'Badge was successfully updated.' }
+        format.html { redirect_to [@group, @badge], notice: 'Badge was successfully updated.' }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html do 
+          if params[:modal]
+            render action: "show", 
+            error: "There was a problem updating the badge, try again later.\nError Text: #{@badge.errors}"
+          else
+            render action: "edit"
+          end
+        end
         format.json { render json: @badge.errors, status: :unprocessable_entity }
       end
     end
   end
 
-  # DELETE /badges/1
-  # DELETE /badges/1.json
+  # DELETE /group-url/badge-url
+  # DELETE /group-url/badge-url.json
   def destroy
     @badge.destroy
 
@@ -89,6 +97,9 @@ private
   def find_badge
     @group = Group.find(params[:group_id])
     @badge = Badge.find_by(group: @group.id, url: params[:id])
+    @current_user_is_admin = current_user.admin_of?(@group)
+    @current_user_is_expert = @current_user_is_admin # for now we'll use this as a proxy
+    @current_user_is_learner = current_user.member_of?(@group)
   end
 
 end

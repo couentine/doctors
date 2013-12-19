@@ -6,14 +6,20 @@ $(document).ready(function() {
     disableLinks();
     initializeDynamicColumns();
     checkDynamicColumns();
+    checkResponsiveFormatting();
+    checkForLocationHash();
+    registerLocationHashEvents();
+    registerAllRichTextAreas();
 
     $(window).on('resize', function() {
       if (hasDynamicColumns) checkDynamicColumns();
+      checkResponsiveFormatting();
     });
 });
 
 function checkForTooltips() {
   $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip]').tooltip();
+  $('a[rel=tooltip],span[rel=tooltip],li[rel=tooltip]').tooltip();
 }
 
 function disableLinks() {
@@ -23,6 +29,120 @@ function disableLinks() {
   })
 }
 
+/* === RICH TEXT AREAS === */
+
+// Registers rich text areas with wysihtml5
+var wysihtml5ParserRules = {
+  tags: { h3: {}, strong: {}, b: {}, i: {}, em: {}, br: {}, p: {}, ul: {}, ol: {}, li: {} }
+};
+
+function registerAllRichTextAreas() {
+  if ($('#rich-text-toolbar').length > 0) {  
+    var richTextToolbar = $('#rich-text-toolbar').first();
+    var newToolbar;
+
+    // First go through and clone / create the toolbars
+    $('textarea.rich-text-area,textarea.modal-rich-text-area').each(function() { 
+      newToolbar = $(richTextToolbar).clone();
+      newToolbar.attr('id', $(this).attr('id')+"_toolbar");
+      $(this).before(newToolbar);
+    });
+
+    // Then register the static text areas / register an event for the modal ones
+    $('textarea.rich-text-area').each(function() { registerRichTextArea(this); });
+    $('.modal').on('shown', function (e) { findAndRegisterModalRichTextAreas(this); })
+  }
+}
+
+function findAndRegisterModalRichTextAreas(modalDiv) {
+  $(modalDiv).find('textarea.modal-rich-text-area').each(function() {
+    registerRichTextArea(this);
+  });
+}
+
+function registerRichTextArea(textAreaElement) {
+  var myId = $(textAreaElement).attr('id');
+
+  var editor = new wysihtml5.Editor(myId, {
+    toolbar: myId + "_toolbar",
+    parserRules: wysihtml5ParserRules,
+    autoLink: false,
+    useLineBreaks: false,
+    cleanUp: false
+  });
+}
+
+
+
+// Checks for something like "/group-url#admins" and tries to show the "admins" tab or modal
+function checkForLocationHash() {
+  // Javascript to enable link to tab
+  var url = document.location.toString();
+  
+  if (url.match('#')) {
+    var header = url.split('#')[1];
+    if ($('.nav-tabs a[href=#'+header+']').length > 0) {
+      $('.nav-tabs a[href=#'+header+']').tab('show');
+    } else if ($('#'+header).length > 0) {
+      $('#'+header).modal('show');
+      $('#'+header).find('textarea.modal-rich-text-area').each(function() {
+        registerRichTextArea(this);
+      });
+    }
+  } 
+}
+
+// Changes the location hash when modals & tabs are toggled
+function registerLocationHashEvents() {
+  // Tabs
+  $('.nav-tabs a').on('shown', function (e) {
+    var scrollTop = $(document).scrollTop();
+    window.location.hash = e.target.hash; 
+    $(document).scrollTop(scrollTop);
+  })
+
+  // Modals (Set on show, clear on hide)
+  $('.modal').on('shown', function (e) {
+    var scrollTop = $(document).scrollTop();
+    window.location.hash = e.target.id;
+    $(document).scrollTop(scrollTop);
+  })
+  $('.modal').on('hidden', function (e) { window.location.hash = ''; })
+  
+}
+
+
+/* === CUSTOM RESPONSIVE REFORMATTING === */
+
+// This checks to see if any of our custom responsive formatting code needs to be run
+function checkResponsiveFormatting() {
+  // Sub-header formatting
+  if (($("#subheader").length > 0) && ($("#subheader ul.breadcrumb").length > 0)) {
+    var availableWidth = $("#subheader").width() - 100;
+    var isDone = false;
+
+    if ($("#subheader ul.breadcrumb").width() > availableWidth) {
+      var theElement;
+      var theText;
+      $("#subheader ul.breadcrumb li").each(function() {
+        if ($(this).find("a").length > 0) theElement = $(this).find("a");
+        else theElement = this;
+        
+        theText = $(theElement).text();
+        if (!isDone && theText.length > 11) {
+          $(theElement).tooltip({
+            title: theText,
+            placement: 'bottom'
+          });
+          $(theElement).text(theText.substring(0,5) + "..." + theText.substring(theText.length-3));
+
+        }
+
+        isDone = ($("#subheader ul.breadcrumb").width() < availableWidth);
+      });
+    }
+  }
+}
 
 /* === DYNAMIC COLUMNS FUNCTIONALITY === */
 

@@ -1,12 +1,14 @@
 class Badge
   include Mongoid::Document
   include Mongoid::Timestamps
+  include StringTools
 
   # === CONSTANTS === #
   
   MAX_NAME_LENGTH = 50
   MAX_URL_LENGTH = 40
   MAX_SUMMARY_LENGTH = 140
+  SECTION_DIVIDER_REGEX = /<p>\s*-+\s*<\/p>/
 
   # === RELATIONSHIPS === #
 
@@ -19,7 +21,7 @@ class Badge
   field :url,     type: String
   field :image_url,     type: String
   field :summary,       type: String
-  field :description,   type: String
+  field :info,   type: String
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url, presence: true, length: { within: 3..MAX_URL_LENGTH },
@@ -36,6 +38,11 @@ class Badge
 
   def to_param
     url
+  end
+
+  # returns linkified info text broken into sections based on empty paragraphs
+  def info_sections
+    linkify_text(info, group, self).split(SECTION_DIVIDER_REGEX)
   end
 
 end

@@ -2,6 +2,7 @@
   provide(:title, @badge.name + '  - Edit')
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
+  provide(:include_rich_text, true)
 %>
 
 <% content_for :subheader_links do %>
@@ -12,28 +13,145 @@
   <li class="active"><%= @badge.url %></li>
 <% end %>
 
-<div class="page-header">
-  <h1>
-    <img src="<%= @badge.image_url %>" class="badge-image badge-image-header"><%= @badge.name %>
-    <div class="btn-group" id="header-button-bar">
-      <%= link_to 'Edit Badge', edit_group_badge_path(@group, @badge), class: "btn" %>
-      <%= link_to 'Delete Badge', group_badge_path(@group, @badge), method: :delete, 
-          class: "btn", data: { confirm: 'Are you sure?' } %>
-    </div><br/>
-  </h1>
+
+<!-- === EDIT BADGE INFO MODAL === -->
+
+<div id="edit-badge-info" class="modal hide fade" tabindex="-1" role="dialog" 
+ aria-labelledby="mimm-label" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="mimm-label">Edit Badge Info</h3>
+  </div>
+
+  <div class="modal-body">
+    <div class="bl-modal-form"><div class="form-body">
+      <%= form_for [@group, @badge], url: group_badge_path(@group, @badge), method: :put,
+          id: 'edit-badge-info-form' do |f| %>
+        <%= f.text_area :info, class: "huge-text-area modal-rich-text-area", 
+            autofocus: true %><br />
+      <% end %>
+    </div></div>
+
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn" aria-hidden="true" 
+     onclick="$('#edit-badge-info .bl-modal-form form').submit();">
+      Save
+    </button>
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
 </div>
 
+<!-- === PAGE HEADER === -->
 
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="header-card badge-header-card">
 
+      <div class="primary-header">
+        <table>
+          <tr>
+            <td class="header-image" 
+                style="background-image: url('<%= @badge.image_url %>')">
+              &nbsp;
+            </td>
+            <td class="header-text">
+              <h1><%= @badge.name %></h1>
+              <h2><%= "#{@group.url}/#{@badge.url}" %></h2>
+              <p>
+                <%= @badge.summary %>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
 
-<span class="label label-info">Summary</span><br/>
-<p class="lead">
-  <%= @badge.summary %>
-</p>
+      <div class="secondary-header">
+        &nbsp;
+      </div>
+      
+      <div class="card-actions collapse-when-small">
+        <ul>
+          <% if @current_user_is_expert %>
+            <li>
+              <%= link_to '<i class="icon-pencil"></i> Edit Badge'.html_safe, 
+                  edit_group_badge_path(@group, @badge), class: 'btn btn-mini' %>
+            </li>
+            <li>
+              <%= link_to '<i class="icon-remove"></i> Delete Badge'.html_safe,
+                  group_badge_path(@group, @badge), method: :delete, 
+                  class: "btn btn-mini", data: { confirm: 'Are you sure?' } %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
 
-<p>
-  <span class="label label-info">Description</span><br/>
-  <%= @badge.description.html_safe rescue nil %>
-</p>
+      <div class="card-tabs">
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+          <li><a href="#learners" data-toggle="tab">Learners</a></li>
+          <li><a href="#expert" data-toggle="tab">Admins</a></li>
+        </ul>
+      </div>
 
+    </div>
+  </div>
+</div>
 
+<!-- === TAB CONTENT === -->
+
+<div class="tab-content">
+
+  <!-- === BADGES TAB === -->
+
+  <div class="tab-pane active" id="home">
+
+    <div class="row">
+      <div class="span4">
+        <div class="tab-header">
+          <div class="tab-header-inner">
+            <h2>Badge Info</h2>
+
+            <% if @current_user_is_expert %>
+              <a tabindex="-1" href="#edit-badge-info" data-toggle="modal"
+                 title="Edit badge info" rel="tooltip" data-placement: "bottom"
+                 class="btn btn-link" >
+                <i class="icon-pencil"></i>
+              </a>
+
+            <% end %>
+          </div>
+        </div>
+
+        <% @badge.info_sections.each do |section_text| %>
+          <div class="info-card text-card">
+            <%= section_text.html_safe %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="span8">
+        <div class="tab-header">
+          <div class="tab-header-inner">
+            <h2>Recent Activity</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- === MEMBERS TAB === -->
+
+  <div class="tab-pane" id="learners">
+
+  </div>
+
+  <!-- === ADMINS TAB === -->
+
+  <div class="tab-pane" id="experts">
+
+  </div>
+
+</div>

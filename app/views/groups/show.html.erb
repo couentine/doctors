@@ -2,7 +2,7 @@
 
 <!-- === MANAGE MEMBERS MODAL === -->
 
-<div id="manage-invited-members-modal" class="modal hide fade" tabindex="-1" role="dialog" 
+<div id="manage-invited-members" class="modal hide fade" tabindex="-1" role="dialog" 
  aria-labelledby="mimm-label" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -52,7 +52,7 @@
 
 <!-- === MANAGE ADMINS MODAL === -->
 
-<div id="manage-invited-admins-modal" class="modal hide fade" tabindex="-1" role="dialog" 
+<div id="manage-invited-admins" class="modal hide fade" tabindex="-1" role="dialog" 
  aria-labelledby="mimm-label" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -290,7 +290,7 @@
                   <ul class="dropdown-menu">
                     <% @group.invited_members.take(10).each do |u| %>
                       <li>
-                        <a tabindex="-1" href="#manage-invited-members-modal" data-toggle="modal">
+                        <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
                           <%= if u['name']
                                 "#{u['name']} <#{u['email']}>"
                               else
@@ -302,7 +302,7 @@
 
                     <% if @group.invited_members.count > 10 %>
                       <li>
-                        <a tabindex="-1" href="#manage-invited-members-modal" data-toggle="modal">
+                        <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
                           <%= (@group.invited_members.count - 10).to_s %> more...
                         </a>
                       </li>
@@ -310,7 +310,7 @@
 
                     <li class="divider"></li>
                     <li>
-                      <a tabindex="-1" href="#manage-invited-members-modal" data-toggle="modal">
+                      <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
                         <i class="icon-wrench"></i>  Manage Invited Members
                       </a>
                     </li>
@@ -373,7 +373,7 @@
                   <ul class="dropdown-menu">
                     <% @group.invited_admins.take(10).each do |u| %>
                       <li>
-                        <a tabindex="-1" href="#manage-invited-admins-modal" data-toggle="modal">
+                        <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
                           <%= if u['name']
                                 "#{u['name']} <#{u['email']}>"
                               else
@@ -385,7 +385,7 @@
 
                     <% if @group.invited_admins.count > 10 %>
                       <li>
-                        <a tabindex="-1" href="#manage-invited-admins-modal" data-toggle="modal">
+                        <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
                           <%= (@group.invited_admins.count - 10).to_s %> more...
                         </a>
                       </li>
@@ -393,7 +393,7 @@
 
                     <li class="divider"></li>
                     <li>
-                      <a tabindex="-1" href="#manage-invited-admins-modal" data-toggle="modal">
+                      <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
                         <i class="icon-wrench"></i>  Manage Invited Admins
                       </a>
                     </li>

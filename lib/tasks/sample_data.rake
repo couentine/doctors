@@ -81,12 +81,14 @@ namespace :db do
         name = Faker::Company.bs.split.map(&:capitalize).join(' ')
         url = name.parameterize
         summary = Faker::Lorem.sentence(4)
-        description = "<p>" + Faker::Lorem.paragraphs(3).join("</p><p>") + "</p>"
+        info = "<h3>Overview</h3><p>First, a cute kitten:<br/>img:http://bit.ly/1bEupcD</p>"
+        info += "<p>---</p>  <h3>Relevant Links</h3><p>These may be of interest <ul><li>http://google.com</li><li>http://yahoo.com</li></ul><br/>Plus, #here #are #hash-tags.</p> <p>---</p>"
+        info += "<p>" + Faker::Lorem.paragraphs(3).join("</p><p>") + "</p>"
         Badge.create!(name: name[0..Badge::MAX_NAME_LENGTH-1],
            url: url[0..Badge::MAX_URL_LENGTH-1],
            image_url: image_url,
            summary: summary,
-           description: description,
+           info: info,
            group: group,
            creator: admin)
       end
