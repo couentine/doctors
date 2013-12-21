@@ -8,7 +8,7 @@ class Badge
   MAX_NAME_LENGTH = 50
   MAX_URL_LENGTH = 40
   MAX_SUMMARY_LENGTH = 140
-  SECTION_DIVIDER_REGEX = /<p>\s*-+\s*<\/p>/
+  SECTION_DIVIDER_REGEX = /-+\s*<br *\/?>\s*/i
 
   # === RELATIONSHIPS === #
 
@@ -40,6 +40,7 @@ class Badge
   
   # === CALLBACKS === #
 
+  before_create :set_default_values
   after_validation :update_info_sections
   after_validation :update_info_versions, on: :update # Don't store the first (default) value
 
@@ -51,6 +52,10 @@ class Badge
 
 protected
   
+  def set_default_values
+    self.info ||= APP_CONFIG['default_badge_info']
+  end
+
   def update_info_sections
     if info_changed?
       self.info_sections = linkify_text(info, group, self).split(SECTION_DIVIDER_REGEX)

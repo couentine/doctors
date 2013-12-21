@@ -92,8 +92,8 @@ function registerRichTextArea(textAreaElement) {
     toolbar: myId + "_toolbar",
     parserRules: wysihtml5ParserRules,
     autoLink: false,
-    useLineBreaks: false,
-    cleanUp: false
+    useLineBreaks: true,
+    cleanUp: true
   });
 }
 

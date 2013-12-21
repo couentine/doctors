@@ -27,9 +27,12 @@
 
       $(document).ready(function() {
         if (badgeInfoVersions.length > 1) {
+          var userName;
           for (var i in badgeInfoVersions) {
+            userName = badgeInfoVersions[i].user_name;
+            if (userName == null) userName = "Badge List System";
             $('#badge-versions').append("<option value='"+i+"'>v" + (parseInt(i)+1) + " - "
-              + badgeInfoVersions[i].user_name + " ("+badgeInfoVersions[i].updated_at_text+")"
+              + userName + " ("+badgeInfoVersions[i].updated_at_text+")"
               + "</option>");
           }
           $('#badge-versions').change(function() {
@@ -174,7 +177,7 @@
           <div class="info-card text-card">
             <%= section_text.html_safe %>
           </div>
-        <% end %>
+        <% end unless @badge.info_sections.nil? %>
       </div>
 
       <div class="span8">

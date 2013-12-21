@@ -34,6 +34,26 @@ defaults: &defaults
    - contact
    - support
 
+  default_badge_info: |
+    <h3>Overview</h3><br>
+    Use this area to store information and instructions that will be useful to badge learners
+    and experts. Also remember to include information that will be relevant to the public when
+    they refer to the badge at a later date.<br><br>
+    <strong>Use Lists to Suggest Pathways</strong><br>
+    <ul><li>#intro - Use hashtags to create wiki pages</li>
+    <li>#resources - Youy badge has unlimited wiki pages</li></ul>
+    -----<br>
+    <h3>Formatting Examples</h3>
+    <strong>Section Breaks:</strong><br>
+    Create section breaks by including one or more dashes on a separate line.<br><br>
+    <strong>Links:</strong><br>
+    #hash-tags are automatically made #clickable, #Use_Them_Freely.<br>
+    URLs are also made clickable: http://en.wikipedia.org/wiki/Open-source_software<br><br>
+    <strong>Images:</strong><br>
+    URLs with image extensions will automatically be turned into embedded images or you can 
+    add an "img:" prefix for links that aren't automatically recognized.<br>
+    img:http://bit.ly/1l4vkp4
+
 development:
   <<: *defaults
   from_email: knowledgestreem@gmail.com

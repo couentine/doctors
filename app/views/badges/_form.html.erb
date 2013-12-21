@@ -1,3 +1,27 @@
+<%
+  badge_image_options = [
+    ["App Store Design", "https://wac.a8b5.edgecastcdn.net/80A8B5/badges/badges_iPhone_CrystalBall_Stage6.png"],
+    ["Chef's Knife", "http://mattersofgrey.com/wp-content/uploads/2010/11/bravo_top_chef_big.png"],
+    ["Chemistry Test Tube", "http://s3.amazonaws.com/commendablekids.com.prod/badges/45/large.png?1287262798"],
+    ["Cube", "https://wac.a8b5.edgecastcdn.net/80A8B5/badges/badges_iPhone_BlogReader_Stage4.png"],
+    ["Database Design", "https://wac.a8b5.edgecastcdn.net/80A8B5/badges/badges_DD_Database_Stage2.png"],
+    ["Excel Ninja", "http://a1.distilledcdn.com/wp-content/uploads/2012/03/excel-badge.png"],
+    ["Google+ Social Media", "http://iconbug.com/data/f3/256/600fff96f94015434f9371d881630203.png"],
+    ["HTML5", "http://tantek.com/presentations/2011/10/html5-now/HTML5_Badge_512.png"],
+    ["Man with Case", "http://www.textually.org/textually/archives/2010/11/25/Baggage%20Handler%20badge.png"],
+    ["Martial Arts Fist", "http://upload.wikimedia.org/wikipedia/en/8/87/Kuk_sool_won_logo.png"],
+    ["Meditation Lotus Flower", "http://www.leanteen.com/file/pic/badge/2013/04/ede7ab02976755991fb69412c7860aa5.png"],
+    ["Moma", "http://foursquareguru.com/media/badges/moma_big.png"],
+    ["Programming", "https://wac.a8b5.edgecastcdn.net/80A8B5/badges/badges_eCommerce_Stage1.png"],
+    ["Rainforest", "http://31.media.tumblr.com/8ef0864859850a8594b3cf4271835688/tumblr_mg7kdnpbD71rha3vbo1_500.png"],
+    ["Ringleader Coffee", "http://www.dallasmuseumofart.org/idc/groups/web_view/documents/dma_images/dma_517998.png"],
+    ["Singing", "http://24.media.tumblr.com/48052bc0427c0c48a1a3f0777b0ff6d6/tumblr_mjyumk4gbK1rha3vbo1_500.png"],
+    ["Textile Design", "https://badge.chicagosummeroflearning.org/badge/image/math-by-design.png"],
+    ["Video Game Gears", "http://teens.denverlibrary.org/sites/teens/files/gamedesign.png"],
+    ["Website Design", "https://wac.a8b5.edgecastcdn.net/80A8B5/badges/badges_eCommerce_Stage2.png"]
+  ];
+%>
+
 <%= simple_form_for [@group, @badge], html: {class: 'form-horizontal'} do |f| %>
   <div class="form-body">
     <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics',
@@ -6,7 +30,8 @@
       <%= content_tag :span, "app.badgelist.com/#{@group.url}/", class: "add-on" %>
       <%= f.input_field :url, placeholder: 'et-physics', class: 'input-small' %>
     <% end %>
-    <%= f.input :image_url, label: 'Badge Image', input_html: {class: 'input-xlarge'} %>
+    <%= f.input :image_url, label: 'Badge Image', collection: badge_image_options,
+        label_method: :first, value_method: :last, input_html: {class: 'input-xlarge'} %>
     <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
         :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH } } %>
   </div>
