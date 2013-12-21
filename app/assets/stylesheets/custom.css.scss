@@ -243,9 +243,28 @@ div.bl-form,div.bl-modal-form {
   }
   .huge-text-area {
     width: 90%;
-    height: 250px;
+    height: 245px;
     border: 1px solid $light-gray;
     border-bottom: 1px solid $medium-gray;
+  }
+  .character-count-wrap { 
+    float: left;
+    position: relative; 
+  }
+  .character-count {
+    position: absolute;
+    right: 21px;
+    bottom: 5px;
+    font-size: 11px;
+    font-style: italic;
+    color: $light-text-color;
+    padding: 1px 3px;
+    border-radius: 5px;
+  }
+  .character-count.negative {
+    color: $primary-dark;
+    font-weight: bold;
+    background-color: $medium-white;
   }
 }
 
@@ -346,6 +365,14 @@ h2.form-header {
   }
 }
 
+/* Specific Form Fields */
+#badge_summary {
+  width: 300px;
+  height: 6em;
+}
+#badge-versions {
+  width: 340px;
+}
 
 /* Add users form */
 

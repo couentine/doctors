@@ -13,26 +13,72 @@
   <li class="active"><%= @badge.url %></li>
 <% end %>
 
+<% if @current_user_is_expert %>
 
-<!-- === EDIT BADGE INFO MODAL === -->
+  <!-- === BADGE INFO VERSIONS === -->
 
-<div id="edit-badge-info" class="modal hide fade" tabindex="-1" role="dialog" 
- aria-labelledby="mimm-label" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="mimm-label">Edit Badge Info</h3>
-  </div>
+    <script type="text/javascript">
+      var badgeInfoVersions = 
+        <%= if @badge.info_versions.nil?
+              "[]" 
+            else
+              raw @badge.info_versions.to_json
+            end %>;
 
-  <div class="modal-body">
-    <div class="bl-modal-form"><div class="form-body">
-      <%= form_for [@group, @badge], url: group_badge_path(@group, @badge), method: :put,
-          id: 'edit-badge-info-form' do |f| %>
-        <%= f.text_area :info, class: "huge-text-area modal-rich-text-area", 
-            autofocus: true %><br />
-      <% end %>
-    </div></div>
+      $(document).ready(function() {
+        if (badgeInfoVersions.length > 1) {
+          for (var i in badgeInfoVersions) {
+            $('#badge-versions').append("<option value='"+i+"'>v" + (parseInt(i)+1) + " - "
+              + badgeInfoVersions[i].user_name + " ("+badgeInfoVersions[i].updated_at_text+")"
+              + "</option>");
+          }
+          $('#badge-versions').change(function() {
+            console.log($(this).val());
+            if ($(this).val() >= 0)
+              $('#badge_info').siblings("iframe").contents().find("body").html(badgeInfoVersions[$(this).val()].info);
+          });
+        } else
+          $('#edit-badge-info div.form-footer').hide();
+      });
+    </script>
 
-  </div>
+  <!-- === EDIT BADGE INFO MODAL === -->
+
+  <div id="edit-badge-info" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Edit Badge Info</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+
+        <div class="form-body">
+          <%= form_for [@group, @badge], url: group_badge_path(@group, @badge), method: :put,
+              id: 'edit-badge-info-form' do |f| %>
+            <%= f.text_area :info, class: "huge-text-area modal-rich-text-area", 
+                autofocus: true %><br />
+          <% end %>
+        </div>
+
+        <div class="form-footer">
+          <div class="control-group">
+            <label class="control-label">Restore Previous Versions</label>
+            <div class="controls">
+              <select id="badge-versions">
+                <option value="-1">--- Browse previous versions ---</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+
+    </div>
+  
+  <% end %>
 
   <div class="modal-footer">
     <button class="btn" aria-hidden="true" 

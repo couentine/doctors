@@ -72,6 +72,16 @@ class Group
     url
   end
 
+  # Is this group visible to the public?
+  def public?
+    (type == 'open') || (type == 'closed')
+  end
+
+  # Does this group have open membership?
+  def open?
+    (type == 'open')
+  end
+
   def has_member?(user)
     members.include?(user)
   end

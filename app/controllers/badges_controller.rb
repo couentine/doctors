@@ -47,6 +47,8 @@ class BadgesController < ApplicationController
     @badge = Badge.new(params[:badge])
     @badge.group = @group
     @badge.creator = current_user
+    @badge.current_user = current_user
+    @badge.current_user_name = current_user.name
 
     respond_to do |format|
       if @badge.save
@@ -63,6 +65,9 @@ class BadgesController < ApplicationController
   # PUT /group-url/badge-url?modal=true >> Redirects back to group with flash error on save failure
   # PUT /group-url/badge-url.json
   def update
+    @badge.current_user = current_user
+    @badge.current_user_name = current_user.name
+    
     respond_to do |format|
       if @badge.update_attributes(params[:badge])
         format.html { redirect_to [@group, @badge], notice: 'Badge was successfully updated.' }

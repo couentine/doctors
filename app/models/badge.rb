@@ -17,11 +17,15 @@ class Badge
 
   # === FIELDS & VALIDATIONS === #
 
-  field :name,          type: String
-  field :url,     type: String
-  field :image_url,     type: String
-  field :summary,       type: String
-  field :info,   type: String
+  field :name,                type: String
+  field :url,                 type: String
+  field :image_url,           type: String
+  field :summary,             type: String
+  field :info,                type: String
+  field :info_sections,       type: Array
+  field :info_versions,       type: Array
+  field :current_user,        type: String # used when logging info_versions
+  field :current_user_name,   type: String # used when logging info_versions
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url, presence: true, length: { within: 3..MAX_URL_LENGTH },
@@ -34,15 +38,37 @@ class Badge
   validates :group, presence: true
   validates :creator, presence: true
   
+  # === CALLBACKS === #
+
+  after_validation :update_info_sections
+  after_validation :update_info_versions, on: :update # Don't store the first (default) value
+
   # === BADGE METHODS === #
 
   def to_param
     url
   end
 
-  # returns linkified info text broken into sections based on empty paragraphs
-  def info_sections
-    linkify_text(info, group, self).split(SECTION_DIVIDER_REGEX)
+protected
+  
+  def update_info_sections
+    if info_changed?
+      self.info_sections = linkify_text(info, group, self).split(SECTION_DIVIDER_REGEX)
+    end
+  end
+
+  def update_info_versions
+    if info_changed?
+      current_version_row = { :info => info, :user => current_user, 
+                              :user_name => current_user_name, :updated_at => Time.now,
+                              :updated_at_text => Time.now.strftime("%-m/%-d/%y at %l:%M%P") }
+
+      if info_versions.nil? || (info_versions.length == 0)
+        self.info_versions = [current_version_row]
+      elsif info_versions.last[:info] != info
+        self.info_versions << current_version_row
+      end
+    end
   end
 
 end

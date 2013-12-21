@@ -10,6 +10,7 @@ $(document).ready(function() {
     checkForLocationHash();
     registerLocationHashEvents();
     registerAllRichTextAreas();
+    createCharacterCounts();
 
     $(window).on('resize', function() {
       if (hasDynamicColumns) checkDynamicColumns();
@@ -27,6 +28,30 @@ function disableLinks() {
     //event.preventDefault(); // Prevent link from following its href
     return false;
   })
+}
+
+/* === CHARACTER COUNTS === */
+
+function createCharacterCounts() {
+  var maxLengh;
+  $("textarea[data-character-count=true]").each(function() {
+    var remainingCharacters = $(this).attr('data-max-length') - $(this).val().length;
+    var classText = "character-count";
+    if (remainingCharacters < 0) classText += " negative";
+
+    // Create the html elements
+    $(this).wrap("<div class='character-count-wrap'></div>");
+    $(this).after("<span class='" + classText + "'>" + remainingCharacters + "</span>");
+
+    // Create the event attachment
+    $(this).keyup(function() {
+      var remainingCharacters = $(this).attr('data-max-length') - $(this).val().length;
+      $(this).siblings('.character-count').text(remainingCharacters);
+      
+      if (remainingCharacters < 0) $(this).siblings('.character-count').addClass('negative');
+      else $(this).siblings('.character-count').removeClass('negative');
+    });
+  });
 }
 
 /* === RICH TEXT AREAS === */

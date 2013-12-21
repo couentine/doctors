@@ -127,6 +127,29 @@ class GroupsController < ApplicationController
 
   # === NON-RESTFUL ACTIONS === #
 
+  # POST /group-url/join
+  def join
+    @group = Group.find(params[:id])
+    notice = ""
+
+    if @group.has_member?(current_user)
+      notice = "You are already a member of this group."
+    elsif @group.has_admin?(current_user)
+      notice = "You are already an admin of this group."
+    elsif !@group.open?
+      notice = "This is a closed group, you cannot join without being invited."
+    else
+      @group.members << current_user
+      if @group.save
+        notice = "Welcome to the group!"
+      else
+        notice = "There was a problem adding you to the group, please try again later."
+      end
+    end
+
+    redirect_to @group, :notice => notice
+  end
+
   # DELETE /group-url/leave
   def leave
     @group = Group.find(params[:id])

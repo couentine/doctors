@@ -3,6 +3,7 @@ BadgeList::Application.routes.draw do
 
   root :to => 'home#show'
 
+  match 'groups/:id/join' => 'groups#join', via: :post, as: :join_group
   match 'groups/:id/leave' => 'groups#leave', via: :delete, as: :leave_group
   match 'groups/:id/members/:user_id' => 'groups#destroy_user', 
         via: :delete, as: :destroy_group_member, defaults: { type: 'member' }
