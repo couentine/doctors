@@ -6,6 +6,7 @@ class User
   
   MIN_PASSWORD_LENGTH = 6 # Note: This is just for use in tests & not actually tied to anything
   MAX_NAME_LENGTH = 200
+  MAX_USERNAME_LENGTH = 15
 
   # === RELATIONSHIP === #
 
@@ -17,8 +18,11 @@ class User
   # === CUSTOM FIELDS & VALIDTIONS === #
   
   field :name,                :type => String
+  field :username,            :type => String
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
+  validates :username, presence: true, length: { within: 3..MAX_USERNAME_LENGTH }, uniqueness:true,
+            format: { with: /\A[\w-]+\Z/, message: "can't have special characters." }
 
   
   # === DEVISE SETTINGS === #
@@ -30,7 +34,7 @@ class User
          :confirmable, :lockable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :name, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :name, :username, :password, :password_confirmation, :remember_me
 
   # === STANDARD DEVISE FIELDS === #
 
@@ -70,7 +74,28 @@ class User
 
   after_create :convert_group_invitations
 
-  # === USER METHODS === #
+  # === CLASS METHODS === #
+
+  # This will find by ObjectId OR by username
+  def self.find(input)
+    user = nil
+
+    if input.to_s.match /^[0-9a-fA-F]{24}$/
+      user = super rescue nil
+    end
+
+    if user.nil?
+      user = User.find_by(username: input.to_s.downcase) rescue nil
+    end
+
+    user
+  end
+
+  # === INSTANCE METHODS === #
+
+  def to_param
+    username
+  end
 
   def member_of?(group)
     self.member_of.include?(group)

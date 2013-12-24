@@ -34,7 +34,7 @@ BadgeList::Application.routes.draw do
   match 'groups/:id/admins' => 'groups#create_users', via: :post,
         as: :create_group_admins, defaults: { type: 'admin' }
 
-  resources :users, :only => [:show]
+  resources :users, :only => [:show], path: "u"
 
   match ':id/edit' => 'groups#edit', via: :get
   resources :groups, only: [:index, :new, :create]

@@ -1,17 +1,22 @@
 namespace :db do
   desc "Fill database with sample data"
   task populate: :environment do
+    puts "Making users..."
     make_users
+    puts "Making badges..."
     make_groups_with_badges
+    puts "Done!"
   end
 
   def make_users
     # make admins
     5.times do |n|
       name = Faker::Name.name
+      username = (0...User::MAX_USERNAME_LENGTH).map { ('a'..'z').to_a[rand(26)] }.join
       email = "admin#{n+1}@example.com"
       password = "password"
       user = User.new(:name => name,
+                   :username => username,
                    :email => email,
                    :password => password)
       user.skip_confirmation!
@@ -21,9 +26,11 @@ namespace :db do
     # make learners
     50.times do |n|
       name = Faker::Name.name
+      username = (0...User::MAX_USERNAME_LENGTH).map { ('a'..'z').to_a[rand(26)] }.join
       email = "learner#{n+1}@example.com"
       password = "password"
       user = User.new(:name => name,
+                   :username => username,
                    :email => email,
                    :password => password)
       user.skip_confirmation!

@@ -40,7 +40,7 @@ class Badge
   
   # === CALLBACKS === #
 
-  before_create :set_default_values
+  after_validation :set_default_values, on: :create
   after_validation :update_info_sections
   after_validation :update_info_versions, on: :update # Don't store the first (default) value
 
