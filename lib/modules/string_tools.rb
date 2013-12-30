@@ -5,6 +5,7 @@ module StringTools
   NON_HTTP_URL_REGEX = /\b[a-z]{3}\.[^\s<]+\b/
   IMG_REGEX = /(?:png|jpe?g|gif|svg)$|^img:/i
   HASHTAG_REGEX = /#[\w-]+/
+  SECTION_DIVIDER_REGEX = /-+\s*<br *\/?>\s*/i
 
   # Replaces links and hashtags with valid anchor tags
   # Also replace links that end with image extensions into image tags

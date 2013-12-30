@@ -5,10 +5,10 @@ class Group
   # === CONSTANTS === #
 
   MAX_NAME_LENGTH = 50
-  MAX_URL_LENGTH = 40
+  MAX_URL_LENGTH = 30
   MAX_LOCATION_LENGTH = 200
-  VALID_TYPE_VALUES = ['open', 'closed', 'private']
-  VALID_CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem'] # add new customers here
+  TYPE_VALUES = ['open', 'closed', 'private']
+  CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem'] # add new customers here
 
   # === RELATIONSHIPS === #
 
@@ -19,15 +19,16 @@ class Group
 
   # === FIELDS & VALIDATIONS === #
 
-  field :name,            :type => String
-  field :url,             :type => String
-  field :location,        :type => String
-  field :website,         :type => String
-  field :image_url,       :type => String
-  field :type,            :type => String
-  field :customer_code,   :type => String
-  field :invited_admins,  :type => Array
-  field :invited_members, :type => Array
+  field :name,                    :type => String
+  field :url,                     :type => String
+  field :location,                :type => String
+  field :website,                 :type => String
+  field :image_url,               :type => String
+  field :type,                    :type => String
+  field :customer_code,           :type => String
+  field :validation_threshold,    :type => Integer
+  field :invited_admins,          :type => Array
+  field :invited_members,         :type => Array
 
   validates :name, presence: true, length: { within: 3..MAX_NAME_LENGTH }
   validates :url, presence: true, uniqueness: true, length: { within: 3..MAX_URL_LENGTH }, 
@@ -37,17 +38,21 @@ class Group
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
   validates :website, url: true
   validates :image_url, url: true
-  validates :type, inclusion: { in: VALID_TYPE_VALUES, 
+  validates :type, inclusion: { in: TYPE_VALUES, 
                                 message: "%{value} is not a valid Group Type" }
   validates :customer_code, presence: { message: "is required for private Groups" }, if: :private?
-  validates :customer_code, inclusion: { in: VALID_CUSTOMER_CODE_VALUES, 
+  validates :customer_code, inclusion: { in: CUSTOMER_CODE_VALUES, 
             allow_nil: true, message: "%{value} is not a valid customer code" }, if: :private?
   validates :creator, presence: true
 
+  # Which fields are accessible?
+  attr_accessible :name, :url, :location, :website, :image_url, :type, :customer_code, 
+    :validation_threshold
+
   # === CALLBACKS === #
 
+  before_validation :set_default_values, on: :create
   after_validation :add_creator_to_admins, on: :create
-  after_validation :initialize_arrays, on: :create
 
   # === CLASS METHODS === #
 
@@ -110,9 +115,10 @@ protected
     self.admins << self.creator unless self.creator.blank?
   end
 
-  def initialize_arrays
+  def set_default_values
     self.invited_admins ||= []
     self.invited_members ||= []
+    self.validation_threshold ||= 2
   end
 
 end

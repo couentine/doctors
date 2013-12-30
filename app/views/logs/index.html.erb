@@ -1,0 +1,39 @@
+<h1>Listing logs</h1>
+
+<table>
+  <tr>
+    <th>Validation status</th>
+    <th>Show on profile</th>
+    <th>Private log</th>
+    <th>Detached log</th>
+    <th>Date requested</th>
+    <th>Date withdrawn</th>
+    <th>Date validated</th>
+    <th>Date sent to backpack</th>
+    <th>Next entry number</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @logs.each do |log| %>
+  <tr>
+    <td><%= log.validation_status %></td>
+    <td><%= log.show_on_profile %></td>
+    <td><%= log.private_log %></td>
+    <td><%= log.detached_log %></td>
+    <td><%= log.date_requested %></td>
+    <td><%= log.date_withdrawn %></td>
+    <td><%= log.date_validated %></td>
+    <td><%= log.date_sent_to_backpack %></td>
+    <td><%= log.next_entry_number %></td>
+    <td><%= link_to 'Show', log %></td>
+    <td><%= link_to 'Edit', edit_log_path(log) %></td>
+    <td><%= link_to 'Destroy', log, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Log', new_log_path %>

@@ -11,7 +11,7 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "Badge List Learning Group Invitation: #{group.name}",
+      :subject  => "Welcome to #{group.name}!",
       :to       => to_email_name,
       :from     => build_from_string(from_user),
       :reply_to => from_user.email_name,
@@ -29,7 +29,7 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "Badge List Learning Group Invitation: #{group.name}",
+      :subject  => "You're now an admin of #{group.name}",
       :to       => to_email_name,
       :from     => build_from_string(from_user),
       :reply_to => from_user.email_name,

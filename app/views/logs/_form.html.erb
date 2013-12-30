@@ -1,0 +1,19 @@
+<%= simple_form_for(@log) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :validation_status %>
+    <%= f.input :show_on_profile %>
+    <%= f.input :private_log %>
+    <%= f.input :detached_log %>
+    <%= f.input :date_requested %>
+    <%= f.input :date_withdrawn %>
+    <%= f.input :date_validated %>
+    <%= f.input :date_sent_to_backpack %>
+    <%= f.input :next_entry_number %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit %>
+  </div>
+<% end %>

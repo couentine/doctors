@@ -29,7 +29,7 @@
         if (badgeInfoVersions.length > 1) {
           var userName;
           for (var i in badgeInfoVersions) {
-            userName = badgeInfoVersions[i].user_name;
+            userName = badgeInfoVersions[i].username;
             if (userName == null) userName = "Badge List System";
             $('#badge-versions').append("<option value='"+i+"'>v" + (parseInt(i)+1) + " - "
               + userName + " ("+badgeInfoVersions[i].updated_at_text+")"
@@ -51,7 +51,7 @@
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Edit Badge Info</h3>
+      <h3 id="mimm-label">Edit Badge Wiki</h3>
     </div>
 
     <div class="modal-body">
@@ -160,7 +160,7 @@
       <div class="span4">
         <div class="tab-header">
           <div class="tab-header-inner">
-            <h2>Badge Info</h2>
+            <h2>Badge Wiki</h2>
 
             <% if @current_user_is_expert %>
               <a tabindex="-1" href="#edit-badge-info" data-toggle="modal"

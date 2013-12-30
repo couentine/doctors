@@ -9,9 +9,19 @@
 
 
 <ul>
-  <% @group_list.each do |item| %>
+  <% @group_and_log_list.each do |group_item| %>
     <li>
-      <%= link_to "#{item[:group].name} (#{item[:type]})", item[:group] %>
+      <%= link_to "#{group_item[:group].name} (#{group_item[:type]})", group_item[:group] %>
+      <% if (group_item[:expert_logs].count + group_item[:learner_logs].count) > 0 %>
+      	<ul>
+          <% group_item[:expert_logs].each do |log| %>
+            <li><%= link_to "#{log.badge.name} (Expert)", [log.badge.group, log.badge] %></li>
+		      <% end %>
+          <% group_item[:learner_logs].each do |log| %>
+            <li><%= link_to "#{log.badge.name} (Learner)", [log.badge.group, log.badge] %></li>
+          <% end %>
+      	</ul>
+      <% end %>
     </li>
-  <% end %>
+  <% end unless @group_and_log_list.empty? %>
 </ul>

@@ -12,6 +12,7 @@ class User
 
   has_many :created_groups, inverse_of: :creator, class_name: "Group", dependent: :nullify
   has_many :created_badges, inverse_of: :creator, class_name: "Badge", dependent: :nullify
+  has_many :logs, dependent: :nullify
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
 
@@ -98,33 +99,72 @@ class User
   end
 
   def member_of?(group)
-    self.member_of.include?(group)
+    member_of.include?(group)
   end
 
   def admin_of?(group)
-    self.admin_of.include?(group)
+    admin_of.include?(group)
+  end
+
+  def learner_of?(badge)
+    log = logs.detect { |log| log.badge == badge }
+    
+    # Return value = 
+    !log.nil? && !log.detached_log && log.validation_status != 'validated'
+  end
+
+  def expert_of?(badge)
+    log = logs.detect { |log| log.badge == badge }
+    
+    # Return value = 
+    !log.nil? && !log.detached_log && log.validation_status == 'validated'
   end
 
   # Returns "John Doe <email@example.com>" OR "email@example.com" depending on presence of name
   def email_name
-    if self.name.blank?
+    if name.blank?
       return email
     else
       return "#{name} <#{email}>"
     end
   end
 
-  # Returns all groups for which this user is an admin OR a member
-  # Returns list of hashes = { :type => :member/:admin, :group => the_group }
-  def group_list
-    the_list = []
+  # Returns all group AND badge memberships.
+  # Return array has one entry for each group = {
+  #   :type => :member/:admin,
+  #   :group => the_group,
+  #   :learner_logs => learner_logs_sorted_by_name[],
+  #   :expert_logs => expert_logs_sorted_by_name[] }
+  # >> Return array is sorted by group name
+  def group_and_log_list
+    # First go through and build a hash of all logs
+    learner_log_map, expert_log_map = {}, {} # maps from group to array of logs
+    logs.each do |log|
+      target_map = (log.validation_status == 'validated') ? expert_log_map : learner_log_map
+      if target_map.has_key?(log.group)
+        target_map[log.group] << log
+      else
+        target_map[log.group] = [log]
+      end
+    end
 
-    self.admin_of.each do |group|
-      the_list  << { :type => :admin, :group => group }
-    end unless self.admin_of.blank?
-    self.member_of.each do |group|
-      the_list  << { :type => :member, :group => group }
-    end unless self.member_of.blank?
+    # Now build the return list
+    the_list = []
+    [{ groups: admin_of, type: :admin },
+     { groups: member_of, type: :memberships }].each do |source|
+      if (!source[:group].blank?)
+        source[:groups].each do |group|
+          learner_logs = (learner_log_map.has_key?(group)) ? learner_log_map[group] : []
+          expert_logs = (expert_log_map.has_key?(group)) ? expert_log_map[group] : []
+          the_list  << { 
+            :type => source[:type], 
+            :group => group,
+            :learner_logs => learner_logs.sort_by{ |log| log.badge.name },
+            :expert_logs => expert_logs.sort_by{ |log| log.badge.name }
+          }
+        end
+      end
+    end
     
     the_list.sort_by{ |item| item[:group].name }
   end

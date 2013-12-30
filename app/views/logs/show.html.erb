@@ -1,0 +1,50 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Validation status:</b>
+  <%= @log.validation_status %>
+</p>
+
+<p>
+  <b>Show on profile:</b>
+  <%= @log.show_on_profile %>
+</p>
+
+<p>
+  <b>Private log:</b>
+  <%= @log.private_log %>
+</p>
+
+<p>
+  <b>Detached log:</b>
+  <%= @log.detached_log %>
+</p>
+
+<p>
+  <b>Date requested:</b>
+  <%= @log.date_requested %>
+</p>
+
+<p>
+  <b>Date withdrawn:</b>
+  <%= @log.date_withdrawn %>
+</p>
+
+<p>
+  <b>Date validated:</b>
+  <%= @log.date_validated %>
+</p>
+
+<p>
+  <b>Date sent to backpack:</b>
+  <%= @log.date_sent_to_backpack %>
+</p>
+
+<p>
+  <b>Next entry number:</b>
+  <%= @log.next_entry_number %>
+</p>
+
+
+<%= link_to 'Edit', edit_log_path(@log) %> |
+<%= link_to 'Back', logs_path %>

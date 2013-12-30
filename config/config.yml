@@ -5,34 +5,38 @@ defaults: &defaults
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:
-   - badge
-   - badges
-   - user
-   - users
-   - group
-   - groups
-   - log
-   - logs
-   - invited_members
-   - invited_admins
-   - member
-   - members
+   - about
+   - add
    - admin
    - admins
-   - new
-   - show
-   - index
+   - badge
+   - badges
+   - contact
    - delete
    - destroy
    - edit
-   - update
-   - leave
-   - invitation
-   - add
-   - about
+   - expert
+   - experts
+   - group
+   - groups
    - help
-   - contact
+   - index
+   - invitation
+   - invited_admins
+   - invited_members
+   - learner
+   - learners
+   - leave
+   - log
+   - logs
+   - member
+   - members
+   - new
+   - show
    - support
+   - update
+   - user
+   - users
 
   default_badge_info: |
     <h3>Overview</h3><br>
@@ -53,6 +57,11 @@ defaults: &defaults
     URLs with image extensions will automatically be turned into embedded images or you can 
     add an "img:" prefix for links that aren't automatically recognized.<br>
     img:http://bit.ly/1l4vkp4
+
+  default_log_wiki: |
+    I'm new here.<br>
+    -----<br>
+    I haven't added any information to my wiki yet.
 
 development:
   <<: *defaults

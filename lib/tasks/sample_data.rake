@@ -3,7 +3,7 @@ namespace :db do
   task populate: :environment do
     puts "Making users..."
     make_users
-    puts "Making badges..."
+    puts "Making groups, badges and logs..."
     make_groups_with_badges
     puts "Done!"
   end
@@ -76,8 +76,8 @@ namespace :db do
                   url: url[0..Group::MAX_URL_LENGTH-1],
                   location: location[0..Group::MAX_LOCATION_LENGTH-1],
                   website: website,
-                  type: type,
-                  creator: admin)
+                  type: type)
+      group.creator = admin
 
       # add members and save group
       all_users.each { |user| group.members << user unless user == admin }
@@ -88,13 +88,21 @@ namespace :db do
         name = Faker::Company.bs.split.map(&:capitalize).join(' ')
         url = name.parameterize
         summary = Faker::Lorem.sentence(4)
-        Badge.create!(name: name[0..Badge::MAX_NAME_LENGTH-1],
+        badge = Badge.new(name: name[0..Badge::MAX_NAME_LENGTH-1],
            url: url[0..Badge::MAX_URL_LENGTH-1],
            image_url: image_url,
            summary: summary,
-           group: group,
-           creator: admin)
+           group: group)
+        badge.creator = admin
+        badge.save!
+
+        # add 10 learners
+        group.members.sample(10).each do |learner_user|
+          badge.add_learner(learner_user)
+        end
       end
+  
+      puts "> Group created."
     end
   end
 

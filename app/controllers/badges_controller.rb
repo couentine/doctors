@@ -48,7 +48,7 @@ class BadgesController < ApplicationController
     @badge.group = @group
     @badge.creator = current_user
     @badge.current_user = current_user
-    @badge.current_user_name = current_user.name
+    @badge.current_username = current_user.username
 
     respond_to do |format|
       if @badge.save
@@ -66,7 +66,7 @@ class BadgesController < ApplicationController
   # PUT /group-url/badge-url.json
   def update
     @badge.current_user = current_user
-    @badge.current_user_name = current_user.name
+    @badge.current_username = current_user.username
     
     respond_to do |format|
       if @badge.update_attributes(params[:badge])
