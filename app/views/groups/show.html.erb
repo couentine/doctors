@@ -167,7 +167,7 @@
               end
 
               concat link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
-                leave_group_path, method: :delete, class: 'btn btn-mini',
+                leave_group_path(@group), method: :delete, class: 'btn btn-mini',
                 disabled: leave_group_link_disabled, 'data-placement' => 'right',
                 title: leave_group_link_title, 'data-toggle' => 'tooltip',
                 data: { confirm: 'Are you absolutely sure you want to leave this learning group?' })
@@ -202,7 +202,7 @@
               end
 
               concat link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
-                leave_group_path, method: :delete, disabled: leave_group_link_disabled, 
+                leave_group_path(@group), method: :delete, disabled: leave_group_link_disabled, 
                 data: { confirm: 'Are you absolutely sure you want to leave this learning group?' })
             %></li>
             <% if @current_user_is_admin %>
@@ -216,8 +216,8 @@
                     join_group_path, method: :post %>
               </li>
             <% end %>
-          <% end %>  
-        </ul>
+          </ul>
+        <% end %>  
       </div>
 
       <% if @group.public? || @current_user_is_admin || @current_user_is_member %>

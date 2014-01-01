@@ -5,7 +5,7 @@ class HomeController < ApplicationController
   # GET /
   # This is the root page for a signed in user
   def show
-    @group_list = current_user.group_list
+    @group_and_log_list = current_user.group_and_log_list
   end
 
 end

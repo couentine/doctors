@@ -1,66 +1,81 @@
 class LogsController < ApplicationController
-  # GET /logs
-  # GET /logs.json
-  def index
-    @logs = Log.all
+  
+  before_filter :find_parent_records
+  before_filter :find_log, only: [:show, :edit, :update, :destroy]
+  before_filter :authenticate_user!, only: [:edit, :create, :update, :destroy]
+  before_filter :log_owner, only: [:edit, :update, :destroy]
 
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: @logs }
-    end
-  end
+  # === RESTFUL ACTIONS === #
 
-  # GET /logs/1
-  # GET /logs/1.json
+  # GET /group-url/badge-url/u/username
+  # GET /group-url/badge-url/u/username.json
   def show
-    @log = Log.find(params[:id])
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @log }
     end
   end
 
-  # GET /logs/new
-  # GET /logs/new.json
-  def new
-    @log = Log.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @log }
-    end
-  end
-
-  # GET /logs/1/edit
+  # GET /group-url/badge-url/u/username/edit
   def edit
-    @log = Log.find(params[:id])
+    # Nothing to do (find_records loads the log)
   end
 
-  # POST /logs
-  # POST /logs.json
+  # POST /group-url/badge-url/logs
+  # POST /group-url/badge-url/logs.json
+  # This action allows the CURRENT_USER to join the badge
+  # It will also add them to the group if needed or present an error message if
+  # they do not have the appropriate permissions.
   def create
-    @log = Log.new(params[:log])
+    log_already_exists = @current_user_is_expert || @current_user_is_learner
+    needs_to_join_group = !@current_user_is_admin && !@current_user_is_member
+    allowed_to_join_badge = @current_user_is_admin || @current_user_is_member || @group.open?
+    is_error = false
+    message = ''
+
+    if allowed_to_join_badge
+      if needs_to_join_group # group is open so we'll add the user to the members now
+        @group.members << current_user
+        if @group.save
+          message = 'You have joined both the learning group and the badge. Welcome!'
+        else
+          message = 'An error occured while trying to add you to the learning group and badge.'
+          is_error = true
+        end
+      elsif log_already_exists
+        message = 'You are already a member of this badge.'
+      else
+        message = 'Welcome to the badge!'
+      end
+      @log = @badge.add_learner(current_user) # retreive their existing badge OR create new one
+      is_error = @log.new_record?
+      message = 'An error occured while trying to create a learning log for you.' if is_error
+    else
+      @log = Log.new
+      message = 'You must be a member of the group to join this badge.'
+      @log.errors.add(:base, message)
+      is_error = true
+    end
 
     respond_to do |format|
-      if @log.save
-        format.html { redirect_to @log, notice: 'Log was successfully created.' }
-        format.json { render json: @log, status: :created, location: @log }
-      else
-        format.html { render action: "new" }
+      if is_error
+        format.html { redirect_to [@group, @badge], 
+          notice: message }
         format.json { render json: @log.errors, status: :unprocessable_entity }
+      else
+        format.html { redirect_to [@group, @badge, @log], notice: message }
+        format.json { render json: @log, status: :created, location: [@group, @badge, @log] }
       end
     end
   end
 
-  # PUT /logs/1
-  # PUT /logs/1.json
+  # PUT /group-url/badge-url/u/username
+  # PUT /group-url/badge-url/u/username.json
   def update
-    @log = Log.find(params[:id])
-
     respond_to do |format|
       if @log.update_attributes(params[:log])
-        format.html { redirect_to @log, notice: 'Log was successfully updated.' }
+        format.html { redirect_to [@group, @badge, @log], 
+          notice: 'Learning log visibility was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: "edit" }
@@ -69,10 +84,9 @@ class LogsController < ApplicationController
     end
   end
 
-  # DELETE /logs/1
-  # DELETE /logs/1.json
+  # DELETE /group-url/badge-url/u/username
+  # DELETE /group-url/badge-url/u/username.json
   def destroy
-    @log = Log.find(params[:id])
     @log.destroy
 
     respond_to do |format|
@@ -80,4 +94,31 @@ class LogsController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+private
+
+  def find_parent_records
+    @group = Group.find(params[:group_id])
+    @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase)
+    
+    @current_user_is_admin = current_user.admin_of?(@group)
+    @current_user_is_member = current_user.member_of?(@group)
+    @current_user_is_expert = current_user.expert_of?(@badge)
+    @current_user_is_learner = current_user.learner_of?(@badge)
+  end
+
+  def find_log
+    @user = User.find(params[:id].to_s.downcase) # find user by username
+    @log = @user.logs.find { |log| log.badge == }
+
+    @belongs_to_current_user = (@user == current_user)
+  end
+
+  def log_owner
+    unless @belongs_to_current_user
+      flash[:error] = "That action is restricted to the log owner."
+      redirect_to [@group, @badge, @log]
+    end
+  end
+
 end

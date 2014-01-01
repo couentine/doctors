@@ -110,11 +110,11 @@ class Badge
     if the_log
       if the_log.detached_log
         the_log.detached_log = false
-        the_log.save!
+        the_log.save
       end
     else
       the_log = Log.new(badge: self, user: user)
-      the_log.save!
+      the_log.save
     end
 
     the_log

@@ -1,18 +1,12 @@
 class BadgesController < ApplicationController
   
-  before_filter :find_badge, only: [:show, :edit, :update, :destroy]
-  before_filter :authenticate_user!, only: [:index, :new, :edit, :create, :update, :destroy]
+  before_filter :find_related_records
+  before_filter :find_badge, only: [:show, :edit, :update, :destroy, :add_learners]
+  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy]
+  before_filter :group_admin, only: [:new, :create, :destroy]
+  before_filter :badge_expert, only: [:edit, :update, :add_learners]
 
-  # GET /group-url/badges
-  # GET /group-url/badges.json
-  def index
-    @badges = Badge.asc(:name).page(params[:page]).per(APP_CONFIG['page_size'])
-
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: @badges }
-    end
-  end
+  # === RESTFUL ACTIONS === #
 
   # GET /group-url/badge-url
   # GET /group-url/badge-url.json
@@ -26,7 +20,6 @@ class BadgesController < ApplicationController
   # GET /group-url/badges/new
   # GET /group-url/badges/new.json
   def new
-    @group = Group.find(params[:group_id])
     @badge = Badge.new(group: @group)
 
     respond_to do |format|
@@ -37,13 +30,12 @@ class BadgesController < ApplicationController
 
   # GET /group-url/badge-url/edit
   def edit
-    # badge is found by find_badge, so nothing to do here
+    # badge is found by find_records, so nothing to do here
   end
 
   # POST /group-url/badges
   # POST /group-url/badges.json
   def create
-    @group = Group.find(params[:group_id])
     @badge = Badge.new(params[:badge])
     @badge.group = @group
     @badge.creator = current_user
@@ -97,14 +89,59 @@ class BadgesController < ApplicationController
     end
   end
 
+  # === NON-RESTFUL ACTIONS === #
+
+  # GET /group-url/badge-url/learners/add
+  # GET /group-url/badge-url/learners/add.json
+  # :usernames => array_of_usernames_to_add[]
+  def add_learners
+    new_learner_count = 0
+
+    params[:usernames].each do |username|
+      user = User.find(username.to_s.downcase) rescue nil
+      if user
+        log = @badge.add_learner(user)
+        new_learner_count += 1
+      end
+    end
+
+    respond_to do |format|
+      format.html { redirect_to [@group, @badge], 
+        notice: "#{new_learner_count} learners were added to the badge." } 
+      format.json { head :no_content }
+    end
+  end
+
 private
 
-  def find_badge
+  def find_related_records
     @group = Group.find(params[:group_id])
-    @badge = Badge.find_by(group: @group.id, url: params[:id])
     @current_user_is_admin = current_user.admin_of?(@group)
-    @current_user_is_expert = @current_user_is_admin # for now we'll use this as a proxy
-    @current_user_is_learner = current_user.member_of?(@group)
+    @current_user_is_member = current_user.member_of?(@group)
+  end
+
+  def find_badge
+    @badge = @group.badges.find_by(url: params[:id].to_s.downcase)
+    @current_user_is_expert = current_user.expert_of?(@badge)
+    @current_user_is_learner = current_user.learner_of?(@badge)
+
+    if @current_user_is_learner || @current_user_is_expert
+      @log = @badge.logs.find { |log| log.user == current_user }
+    end
+  end
+
+  def group_admin
+    unless @current_user_is_admin
+      flash[:error] = "You must be a group admin to do that!"
+      redirect_to @group
+    end 
+  end
+
+  def badge_expert
+    unless @current_user_is_expert
+      flash[:error] = "You must be a badge expert to do that!"
+      redirect_to @badge
+    end 
   end
 
 end

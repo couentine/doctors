@@ -81,6 +81,10 @@ class Group
   def public?
     (type == 'open') || (type == 'closed')
   end
+  
+  def private?
+    type == "private"
+  end
 
   # Does this group have open membership?
   def open?
@@ -107,9 +111,6 @@ class Group
 
 protected
 
-  def private?
-    type == "private"
-  end
 
   def add_creator_to_admins
     self.admins << self.creator unless self.creator.blank?

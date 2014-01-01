@@ -25,26 +25,6 @@ class GroupsController < ApplicationController
   ]
 
   # === RESTFUL ACTIONS === #
-  
-  # GET /groups
-  # GET /groups.json
-  def index
-    current_user.reload
-    
-    respond_to do |format|
-      format.html do # index.html.erb
-        @group_list = current_user.group_list
-      end
-      format.json do
-        @return_hash = {
-          :admin_of => current_user.admin_of,
-          :member_of => current_user.member_of,
-          :created_groups => current_user.created_groups
-        }
-        render json: @return_hash
-      end
-    end
-  end
 
   # GET /group-url
   # GET /group-url.json
@@ -172,13 +152,28 @@ class GroupsController < ApplicationController
     @group = Group.find(params[:id])
     @user = User.find(params[:user_id])
     notice = "That user is not a #{params[:type]}!"
+    detached_log_count = 0
 
     if params[:type] == 'admin' && @group.has_admin?(@user)
       @group.admins.delete(@user)
-      notice = "#{@user.name} has been removed from the Learning Group admins."
+      @user.logs.find_all { |log| log.badge.group == @group }.each do |log_to_detach|
+        log_to_detach.detached_log = true
+        log_to_detach.save!
+        detached_log_count += 1
+      end
+      notice = "#{@user.name} has been removed from the learning group admins"
+      notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
+      notice += "."
     elsif params[:type] == 'member' && @group.has_member?(@user)
       @group.members.delete(@user)
-      notice = "#{@user.name} has been removed from the Learning Group members."
+      @user.logs.find_all { |log| log.badge.group == @group }.each do |log_to_detach|
+        log_to_detach.detached_log = true
+        log_to_detach.save!
+        detached_log_count += 1
+      end
+      notice = "#{@user.name} has been removed from the learning group members"
+      notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
+      notice += "."
     end
 
     redirect_to @group, :notice => notice
@@ -367,24 +362,22 @@ class GroupsController < ApplicationController
     end
   end
 
-  private
+private
 
-    # === BEFORE FILTERS === #
+  def group_admin
+    @group = Group.find(params[:id])
+    unless @group.has_admin?(current_user)
+      flash[:error] = "You must be an admin of #{@group.name} to do that!"
+      redirect_to @group
+    end 
+  end
 
-    def group_admin
-      @group = Group.find(params[:id])
-      unless @group.has_admin?(current_user)
-        flash[:error] = "You must be an admin of #{@group.name} to do that!"
-        redirect_to @group
-      end 
+  def group_member_or_admin
+    @group = Group.find(params[:id])
+    if !@group.has_member?(current_user) && !@group.has_admin?(current_user)
+      flash[:error] = "You must be a member or admin of #{@group.name} to do that!"
+      redirect_to @group
     end
-
-    def group_member_or_admin
-      @group = Group.find(params[:id])
-      if !@group.has_member?(current_user) && !@group.has_admin?(current_user)
-        flash[:error] = "You must be a member or admin of #{@group.name} to do that!"
-        redirect_to @group
-      end
-    end
+  end
 
 end

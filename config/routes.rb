@@ -38,22 +38,18 @@ BadgeList::Application.routes.draw do
         as: :create_group_admins, defaults: { type: 'admin' }
 
   # === MANUAL BADGE PATHS === #
-  match ':group_id/:badge_id/learners/add' => 'badge#add_users', via: :get,
-        as: :add_badge_learners, defaults: { type: 'learner' }
-  match ':group_id/:badge_id/experts/add' => 'badge#add_users', via: :get,
-        as: :add_badge_experts, defaults: { type: 'expert' }
-  match ':group_id/:badge_id/learners' => 'badge#create_users', via: :post,
-        as: :create_badge_learners, defaults: { type: 'learner' }
-  match ':group_id/:badge_id/experts' => 'badge#create_users', via: :post,
-        as: :create_badge_experts, defaults: { type: 'expert' }
+  match ':group_id/:badge_id/learners/add' => 'badge#add_learners', via: :get,
+        as: :add_badge_learners
+  match ':group_id/:badge_id/learners' => 'badge#create_learners', via: :post,
+        as: :create_badge_learners
 
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #
   match ':id/edit' => 'groups#edit', via: :get
-  resources :groups, only: [:index, :new, :create]
+  resources :groups, only: [:new, :create]
   resources :groups, path: "", except: [:index, :new, :create] do
-    resources :badges, only: [:index, :new, :create]
+    resources :badges, only: [:new, :create]
     resources :badges, path: "", except: [:index, :new, :create] do
-      resources :logs, only: [:index, :new, :create]
+      resources :logs, only: [:create]
       resources :logs, path: "u", except: [:index, :new, :create]
     end
   end

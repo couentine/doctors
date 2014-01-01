@@ -113,6 +113,7 @@ protected
       # First update the validation status if needed
       if validation_status != 'validated'
         self.validation_status = 'validated'
+        back_validate_if_needed # check for validation threshold problems
       end
 
       # Then update the issue status if needed
@@ -121,6 +122,20 @@ protected
         self.date_issued = Time.now
         self.date_retracted = nil
       end
+    end
+  end
+
+  # Called from update_stati...
+  # This method checks to see if the addition of SELF as an expert has increased the validation threshold.
+  # If so, this method will "back-validate" all of the existing experts who are in danger of being "de-validated".
+  def back_validate_if_needed
+    badge.logs.find_all do |log| 
+      log.validation_status == 'validated' && !log.currently_validated?
+    end.each do |devalidated_log|
+      time_string = Time.now.to_s(:full_date_time)
+      devalidated_log.add_validation(user, "Back-Validation of Existing Expert",
+      "#{devalidated_log.user.name} was an existing expert when #{user.name} was initially \
+      validated on #{time_string}. This 'back-validation' was added automatically.")
     end
   end
 

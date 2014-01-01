@@ -96,10 +96,11 @@ namespace :db do
         badge.creator = admin
         badge.save!
 
-        # add 10 learners
-        group.members.sample(10).each do |learner_user|
-          badge.add_learner(learner_user)
-        end
+        # add 11 learners & validate 1 of them as an additional expert
+        group.members.sample(11).each { |learner_user| badge.add_learner(learner_user) }
+        new_expert_log = badge.learner_logs.first
+        new_expert_log.add_validation(admin, "True demonstration of mastery", 
+          "#{new_expert_log.user.name} has absolutely proven master of this badge.")
       end
   
       puts "> Group created."
