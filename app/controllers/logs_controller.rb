@@ -1,9 +1,11 @@
 class LogsController < ApplicationController
+  include UsersHelper
   
-  before_filter :find_parent_records
-  before_filter :find_log, only: [:show, :edit, :update, :destroy]
+  prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy]
+  prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy]
   before_filter :authenticate_user!, only: [:edit, :create, :update, :destroy]
-  before_filter :log_owner, only: [:edit, :update, :destroy]
+  before_filter :log_owner, only: [:edit, :destroy]
+  before_filter :group_admin_or_log_owner, only: [:update]
 
   # === RESTFUL ACTIONS === #
 
@@ -72,10 +74,13 @@ class LogsController < ApplicationController
   # PUT /group-url/badge-url/u/username
   # PUT /group-url/badge-url/u/username.json
   def update
+    @log.current_user = current_user
+    @log.current_username = current_user.username
+
     respond_to do |format|
       if @log.update_attributes(params[:log])
         format.html { redirect_to [@group, @badge, @log], 
-          notice: 'Learning log visibility was successfully updated.' }
+          notice: 'Learning log was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: "edit" }
@@ -88,9 +93,14 @@ class LogsController < ApplicationController
   # DELETE /group-url/badge-url/u/username.json
   def destroy
     @log.destroy
+    if @belongs_to_current_user
+      notice = "You are no longer a member of this badge."
+    else
+      notice = "#{@user.name} is no longer a member of the badge."
+    end
 
     respond_to do |format|
-      format.html { redirect_to logs_url }
+      format.html { redirect_to [@group, @badge], notice: notice }
       format.json { head :no_content }
     end
   end
@@ -100,23 +110,30 @@ private
   def find_parent_records
     @group = Group.find(params[:group_id])
     @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase)
-    
     @current_user_is_admin = current_user.admin_of?(@group)
     @current_user_is_member = current_user.member_of?(@group)
     @current_user_is_expert = current_user.expert_of?(@badge)
     @current_user_is_learner = current_user.learner_of?(@badge)
   end
 
-  def find_log
-    @user = User.find(params[:id].to_s.downcase) # find user by username
-    @log = @user.logs.find { |log| log.badge == }
+  def find_all_records
+    find_parent_records
 
+    @user = User.find(params[:id].to_s.downcase) # find user by username
+    @log = @user.logs.find_by(badge: @badge)
     @belongs_to_current_user = (@user == current_user)
   end
 
   def log_owner
     unless @belongs_to_current_user
       flash[:error] = "That action is restricted to the log owner."
+      redirect_to [@group, @badge, @log]
+    end
+  end
+
+  def group_admin_or_log_owner
+    unless @current_user_is_admin || @belongs_to_current_user
+      flash[:error] = "That action is restricted to group admins or the log owner."
       redirect_to [@group, @badge, @log]
     end
   end

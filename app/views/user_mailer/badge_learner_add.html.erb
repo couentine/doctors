@@ -11,9 +11,10 @@
     </p>
     <p>
       <strong>Your Learning Log / Personal Wiki:</strong> 
-      <%= link_to log_url(@group, @badge, @log), log_url(@group, @badge, @log) %> <br>
+      <%= link_to group_badge_log_url(@group, @badge, @log), 
+        group_badge_log_url(@group, @badge, @log) %> <br>
       <strong><%= @badge.name %>:</strong> 
-      <%= link_to badge_url(@group, @badge), badge_url(@group, @badge) %> 
+      <%= link_to group_badge_url(@group, @badge), group_badge_url(@group, @badge) %> 
       (You were added by <%= @from_user.name %>.)
     </p>
     <p>

@@ -1,4 +1,63 @@
-<% provide(:title, @group.name) %>
+<% 
+  provide(:title, @group.name)
+%>
+
+<% if @current_user_is_admin || @current_user_is_member || @group.open? %>
+  <% 
+    provide(:show_subheader, true)
+    provide(:subheader_image, group_image_url_for(@group)) 
+  %>
+  
+  <% content_for :subheader_links do %>
+    <li class="active">
+      <%= @group.url %>
+    </li>
+  <% end %>
+
+  <% content_for :subheader_actions do %>
+    <% if @group.open? && !@current_user_is_admin && !@current_user_is_member %>
+      <li class="collapsible">
+        <%= link_to '<i class="icon-plus-sign icon-white"></i> Join Group'.html_safe, 
+            join_group_path(@group), method: :post %>
+      </li>
+    <% else %>
+      <li class="collapsible">
+        <div class="dropdown">
+          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
+            role="button" data-toggle="dropdown" data-target="#">
+            Learning Group Settings
+            <i class="icon-cog icon-white"></i>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdown-subheader-settings">
+            <% if @current_user_is_admin %>
+              <li>
+                <%= link_to '<i class="icon-pencil"></i> Edit Group'.html_safe, edit_group_path %>
+              </li>
+            <% end %>
+            <% if @current_user_is_admin || @current_user_is_member %>
+              <li>
+                <%= link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
+                  leave_group_path(@group), method: :delete, 
+                  data: { confirm: 'Are you absolutely sure you want to leave this learning group?' }) %>
+              </li>
+            <% end %>
+            <% if @current_user_is_admin %>
+              <li class="divider"></li>
+              <li>
+                  <%= link_to '<i class="icon-remove"></i> Delete Group'.html_safe, 
+                    @group, method: :delete,
+                    data: { confirm: 'WARNING: THIS WILL PERMANENTLY DESTROY DATA. Are you absolutely'\
+                    + ' sure you want to permanently delete this learning group and all the badges' \
+                    + ' inside of it?' } %>
+                </li>
+            <% end %>
+          </ul>
+        </div>
+      </li>
+    <% end %>
+  <% end %>
+<% end %>
 
 <!-- === MANAGE MEMBERS MODAL === -->
 
@@ -134,90 +193,29 @@
         </table>
       </div>
 
-      <div class="secondary-header">
-        <ul>
-          <% unless @group.location.blank? %>
-            <li>
-              <i class="icon-map-marker"></i> <%= @group.location %>
-            </li>
-          <% end %>
-          <% unless @group.website.blank? %>
-            <li>
-              <i class="icon-share"></i> 
-              <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
-            </li>
-          <% end %>
-          <li>
-            <i class="icon-time"></i> Created on <%= @group.created_at.to_s(:full_date) %>
-          </li>
-        </ul>
-      </div>
-      
-      <div class="card-actions collapse-when-small">
-        <ul>
-          <% if @current_user_is_member || @current_user_is_admin || @group.open? %>
-            <li><%
-              if @current_user_is_admin && @group.admins.count == 1
-                leave_group_link_disabled = true
-                leave_group_link_title = 'You are currently the only admin for this learning group so 
-                                          you can\'t leave'
-              else
-                leave_group_link_disabled = false
-                leave_group_link_data_toggle = 'Resign your membership in this learning group'
-              end
-
-              concat link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
-                leave_group_path(@group), method: :delete, class: 'btn btn-mini',
-                disabled: leave_group_link_disabled, 'data-placement' => 'right',
-                title: leave_group_link_title, 'data-toggle' => 'tooltip',
-                data: { confirm: 'Are you absolutely sure you want to leave this learning group?' })
-            %></li>
-            <% if @current_user_is_admin %>
-              <li>
-                <%= link_to '<i class="icon-pencil"></i> Edit Group'.html_safe, edit_group_path,
-                      class: 'btn btn-mini' %>
-              </li>
-            <% end %>
-            <% if @group.open? && !@current_user_is_admin && !@current_user_is_member %>
-              <li>
-                <%= link_to '<i class="icon-plus-sign"></i> Join Group'.html_safe, 
-                    join_group_path, method: :post, class: 'btn btn-mini' %>
-              </li>
-            <% end %>
-          <% end %>
-          
-        </ul>
-      </div>
-
-      <div class="card-actions show-when-small">
-        <% if @current_user_is_member || @current_user_is_admin || @group.open? %>
-          <a href="#" class="dropdown-toggle" id="dropdown-header-card-actions" role="button"
-             data-toggle="dropdown" data-target="#"><b class="caret"></b></a>
-          <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdown-header-card-actions">
-            <li><%
-              if @current_user_is_admin && @group.admins.count == 1
-                leave_group_link_disabled = true
-              else
-                leave_group_link_disabled = false
-              end
-
-              concat link_to('<i class="icon-ban-circle"></i> Leave Group'.html_safe, 
-                leave_group_path(@group), method: :delete, disabled: leave_group_link_disabled, 
-                data: { confirm: 'Are you absolutely sure you want to leave this learning group?' })
-            %></li>
-            <% if @current_user_is_admin %>
-              <li>
-                <%= link_to '<i class="icon-pencil"></i> Edit Group'.html_safe, edit_group_path %>
-              </li>
-            <% end %>
-            <% if @group.open? && !@current_user_is_admin && !@current_user_is_member %>
-              <li>
-                <%= link_to '<i class="icon-plus-sign"></i> Join Group'.html_safe, 
-                    join_group_path, method: :post %>
-              </li>
-            <% end %>
-          </ul>
-        <% end %>  
+      <div class="secondary-header collapse-when-small">
+        <table>
+          <tr>
+            <td class="header-text">
+              <ul>
+                <% unless @group.location.blank? %>
+                  <li>
+                    <i class="icon-map-marker"></i> <%= @group.location %>
+                  </li>
+                <% end %>
+                <% unless @group.website.blank? %>
+                  <li>
+                    <i class="icon-share"></i> 
+                    <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
+                  </li>
+                <% end %>
+                <li>
+                  <i class="icon-time"></i> Created on <%= @group.created_at.to_s(:full_date) %>
+                </li>
+              </ul>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <% if @group.public? || @current_user_is_admin || @current_user_is_member %>

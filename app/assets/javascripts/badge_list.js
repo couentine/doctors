@@ -141,30 +141,60 @@ function registerLocationHashEvents() {
 
 // This checks to see if any of our custom responsive formatting code needs to be run
 function checkResponsiveFormatting() {
-  // Sub-header formatting
   if (($("#subheader").length > 0) && ($("#subheader ul.breadcrumb").length > 0)) {
-    var availableWidth = $("#subheader").width() - 100;
-    var isDone = false;
+    var availableWidth = $("#subheader").width()-90;
 
-    if ($("#subheader ul.breadcrumb").width() > availableWidth) {
-      var theElement;
-      var theText;
-      $("#subheader ul.breadcrumb li").each(function() {
-        if ($(this).find("a").length > 0) theElement = $(this).find("a");
-        else theElement = this;
+    // First check if we're actually out of space
+    if (($("#subheader ul.breadcrumb").width() + $("ul.subheader-actions").width()) > availableWidth) {
+      // Sub-header formatting (right side)
+      if ($("ul.subheader-actions").width() > (availableWidth*0.3)) {
+        var newHTMLContent; var textContent;
         
-        theText = $(theElement).text();
-        if (!isDone && theText.length > 11) {
-          $(theElement).tooltip({
-            title: theText,
+        $("ul.subheader-actions li.collapsible, ul.subheader-actions li.collapsible div.dropdown")
+          .children('a').each(function() {
+          
+          textContent = $(this).text().trim();
+          newHTMLContent = "";
+          
+          // Run through each node and extract HTML of only the non-text elements
+          $(this).contents().each(function(){
+            if (this.nodeType!=3)
+              newHTMLContent += $(this).clone().wrap('<div>').parent().html(); 
+          });
+
+          // Clear out everything but html and recreate the text content as a tooltip
+          $(this).html(newHTMLContent);
+          $(this).tooltip({
+            title: textContent,
             placement: 'bottom'
           });
-          $(theElement).text(theText.substring(0,5) + "..." + theText.substring(theText.length-3));
+        });
+      }
+      
+      // Sub-header formatting (left side)
+      availableWidth -= $("ul.subheader-actions").width();
+      if ($("#subheader ul.breadcrumb").width() > availableWidth) {
+        var theElement; var theText;
+        var isDone = false;
 
-        }
+        $("#subheader ul.breadcrumb li").each(function() {
+          if ($(this).find("a").length > 0) theElement = $(this).find("a");
+          else theElement = this;
+          
+          theText = $(theElement).text();
+          if (!isDone && theText.length > 11) {
+            $(theElement).tooltip({
+              title: theText,
+              placement: 'bottom'
+            });
+            $(theElement).text(theText.substring(0,5) + "..." + theText.substring(theText.length-3));
 
-        isDone = ($("#subheader ul.breadcrumb").width() < availableWidth);
-      });
+          }
+
+          isDone = ($("#subheader ul.breadcrumb").width() < availableWidth);
+        });
+      }
+
     }
   }
 }

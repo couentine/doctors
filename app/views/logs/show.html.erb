@@ -1,50 +1,344 @@
-<p id="notice"><%= notice %></p>
+<% 
+  provide(:title, "#{@badge.name} Learning Log - #{@user.name}")
+  provide(:show_subheader, true)
+  provide(:subheader_image, group_image_url_for(@group)) 
+  provide(:include_rich_text, true)
+%>
 
-<p>
-  <b>Validation status:</b>
-  <%= @log.validation_status %>
-</p>
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url, @group %>
+    <span class="divider">/</span>
+  </li>
+  <li>
+    <%= link_to @badge.url, [@group, @badge] %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active">
+    u
+    <span class="divider">/</span>
+    <%= @user.username %>
+  </li>
+<% end %>
 
-<p>
-  <b>Show on profile:</b>
-  <%= @log.show_on_profile %>
-</p>
+<% if @belongs_to_current_user %>
+  <% content_for :subheader_actions do %>
+    <li class="collapsible">
+        <div class="dropdown">
+          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
+            role="button" data-toggle="dropdown" data-target="#">
+            Learning Log Settings
+            <i class="icon-cog icon-white"></i>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu pull-right" role="menu" 
+            aria-labelledby="dropdown-subheader-settings">
+            <li>
+              <a href="#log-visibility" tabindex="-1" data-toggle="modal">
+                <i class="icon-pencil"></i> 
+                Change log visiblity &amp; membership
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+  <% end %>
+<% end %>
 
-<p>
-  <b>Private log:</b>
-  <%= @log.private_log %>
-</p>
+<% if @belongs_to_current_user %>
 
-<p>
-  <b>Detached log:</b>
-  <%= @log.detached_log %>
-</p>
+  <!-- === LOG WIKI VERSIONS === -->
 
-<p>
-  <b>Date requested:</b>
-  <%= @log.date_requested %>
-</p>
+    <script type="text/javascript">
+      var logWikiVersions = 
+        <%= if @log.wiki_versions.nil?
+              "[]" 
+            else
+              raw @log.wiki_versions.to_json
+            end %>;
 
-<p>
-  <b>Date withdrawn:</b>
-  <%= @log.date_withdrawn %>
-</p>
+      $(document).ready(function() {
+        if (logWikiVersions.length > 1) {
+          var userName;
+          for (var i in logWikiVersions) {
+            userName = logWikiVersions[i].username;
+            if (userName == null) userName = "Badge List System";
+            $('#log-wiki-versions').append("<option value='"+i+"'>v" + (parseInt(i)+1) + " - "
+              + userName + " ("+logWikiVersions[i].updated_at_text+")"
+              + "</option>");
+          }
+          $('#log-wiki-versions').change(function() {
+            if ($(this).val() >= 0)
+              $('#log_wiki').siblings("iframe").contents().find("body").html(logWikiVersions[$(this).val()].info);
+          });
+        } else
+          $('#edit-log-wiki div.form-footer').hide();
+      });
+    </script>
 
-<p>
-  <b>Date validated:</b>
-  <%= @log.date_validated %>
-</p>
+  <!-- === EDIT LOG WIKI MODAL === -->
 
-<p>
-  <b>Date sent to backpack:</b>
-  <%= @log.date_sent_to_backpack %>
-</p>
+  <div id="edit-log-wiki" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Edit Log Wiki</h3>
+    </div>
 
-<p>
-  <b>Next entry number:</b>
-  <%= @log.next_entry_number %>
-</p>
+    <div class="modal-body">
+      <div class="bl-modal-form">
+
+        <div class="form-body">
+          <%= form_for [@group, @badge, @log], url: group_badge_log_path(@group, @badge, @log), 
+            method: :put, id: 'edit-log-wiki-form' do |f| %>
+            <%= f.text_area :wiki, class: "huge-text-area modal-rich-text-area", 
+                autofocus: true %><br />
+          <% end %>
+        </div>
+
+        <div class="form-footer">
+          <div class="control-group">
+            <label class="control-label">Restore Previous Versions</label>
+            <div class="controls">
+              <select id="log-wiki-versions">
+                <option value="-1">--- Browse previous versions ---</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
 
-<%= link_to 'Edit', edit_log_path(@log) %> |
-<%= link_to 'Back', logs_path %>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" aria-hidden="true" 
+       onclick="$('#edit-log-wiki .bl-modal-form form').submit();">
+        Save
+      </button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+  <!-- === EDIT LOG VISIBILITY MODAL === -->
+
+  <div id="log-visibility" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Edit learning log visiblity</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <%= simple_form_for [@group, @badge, @log], method: :put,
+            html: {id: 'log-visibility-form', class: 'form-horizontal'} do |f| %>
+
+            <%= f.input :show_on_profile, as: :radio_buttons, 
+              collection: [[true, 'Visible on profile'] , \
+              [false, "Must have link <p class='text-success'><small>(Hidden from profile, but shareable via direct link)</small></p>".html_safe]],
+              label_method: :last, value_method: :first, 
+              label: 'Should this badge be visible on your profile?' %>
+
+            <% 
+              if @group.private? 
+                private_text = 'This will break Mozilla compatibility'
+              else
+                private_text = 'Only available for private learning grouups'
+              end 
+            %>
+
+            <%= f.input :private_log, as: :radio_buttons, collection: [[false, 'Public'] , \
+              [true, "Private <p class='text-error'><small>(#{private_text})</small></p>".html_safe]],
+              label_method: :last, value_method: :first, disabled: !@group.private?,
+              label: 'After you earn the badge your learning log will be' %>
+
+            <h4>Dangerous Stuff</h4>
+
+            <div class="control-group">
+              <label class="control-label" for="delete-log">
+                Delete learning log and resign badge membership
+              </label>
+              <div class="controls">
+                <%= link_to 'Delete this learning log', [@group, @badge, @log], title: "Careful!",
+                  method: :delete, id: "delete-log", class: 'btn btn-danger brn-large', 
+                  data: { confirm: "Warning: This can't be undone. Are you absolutely sure you want to"\
+                  + " permanently delete your learning log?", toggle: 'tooltip', 
+                  placement: 'bottom' } %>
+                
+              </div>
+            </div>
+
+          <% end %>
+         
+         </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" aria-hidden="true" 
+       onclick="$('#log-visibility-form').submit();">
+        Save
+      </button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+<% end %>
+
+
+<!-- === PAGE HEADER === -->
+
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="header-card log-header-card">
+
+      <div class="primary-header">
+        <table>
+          <tr>
+            <td class="header-image" 
+                style="background-image: url('<%= @badge.image_url %>')">
+              &nbsp;
+            </td>
+            <td class="header-text">
+              <h1><%= @badge.name %></h1>
+              <h2><%= "#{@group.url}/#{@badge.url}" %></h2>
+              <p>
+                <%= @badge.summary %>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="secondary-header">
+        <table>
+          <tr>
+            <td class="header-text">
+              <h1><%= @user.name %></h1>
+              <h2>Badge Learning Log</h2>  
+              
+              <ul class="bl-icon-list">
+                <% if @log.validation_status == 'requested' %>
+                  <li data-toggle="tooltip" data-placement="bottom" title=
+                    "Requested expert validation on <%= @log.date_requested.to_s(:full_date) %>">
+                    <div style="background-image: url('<%= image_path 'flag-orange-small.png' %>')" 
+                      class="full-opacity">
+                    </div>
+                  </li>
+                <% end %>
+
+                <% if @log.validation_status == 'validated' %>
+                  <li data-toggle="tooltip" data-placement="bottom" 
+                    title="Badge issued on <%= @log.date_issued.to_s(:full_date) %>">
+                    <div style="background-image: url('<%= image_path 'issued-small.png' %>')" ></div>
+                  </li>
+                <% end %>
+
+                <% if @log.public? %>
+                  <li data-toggle="tooltip" data-placement="bottom" 
+                    title="Learning log is public.">
+                    <div style="background-image: url('<%= image_path 'public-small.png' %>')" >
+                    </div>
+                  </li>
+                <% elsif @log.private_log %>
+                  <li data-toggle="tooltip" data-placement="bottom" 
+                    title="Learning log is private.">
+                    <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
+                    </div>
+                  </li>
+                <% else %>
+                  <li data-toggle="tooltip" data-placement="bottom" 
+                    title="Learning log will become public after validation.">
+                    <div style="background-image: url('<%= image_path 'public-small.png' %>')" >
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+            </td>
+            <td class="header-image">
+              <%= gravatar_for @user, size: 150, class: "img-circle" %>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <% if @log.validation_status == 'validated' %>
+        <div class="card-tabs">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#validations" data-toggle="tab">Expert Validation</a></li>
+            <li><a href="#entries" data-toggle="tab">Learning Log Entries</a></li>
+          </ul>
+        </div>
+      <% end %>
+
+    </div>
+  </div>
+</div>
+
+
+
+<div class="row">
+
+  <!-- === LOG WIKI SECTION (INDEPENDENT OF TABS) === -->
+
+  <div class="span4">
+    <div class="tab-header">
+      <div class="tab-header-inner">
+        <h2>Personal Wiki</h2>
+
+        <% if @belongs_to_current_user %>
+          <a tabindex="-1" href="#edit-log-wiki" data-toggle="modal"
+             title="Edit log wiki" rel="tooltip" data-placement: "bottom"
+             class="btn btn-link" >
+            <i class="icon-pencil"></i>
+          </a>
+
+        <% end %>
+      </div>
+    </div>
+
+    <% @log.wiki_sections.each do |section_text| %>
+      <div class="info-card text-card">
+        <%= section_text.html_safe %>
+      </div>
+    <% end unless @log.wiki_sections.nil? %>
+  </div>
+
+  <!-- === TAB CONTENT === -->
+      
+  <div class="span8">
+
+    <div class="tab-content">
+  
+      <!-- === VALIDATIONS TAB === -->
+
+      <% if @log.validation_status == 'validated' %>
+
+        <div class="tab-pane active" id="validations">
+          <div class="tab-header">
+            <div class="tab-header-inner">
+              <h2>Expert Validations</h2>
+            </div>
+          </div>
+        </div>
+
+      <% end %>
+
+      <!-- === ENTRIES TAB === -->
+
+      <div class="tab-pane <%= 'active' unless @log.validation_status=='validated' %>" id="entries">
+        <div class="tab-header">
+          <div class="tab-header-inner">
+            <h2>Learning Log Entries</h2>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

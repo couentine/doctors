@@ -38,9 +38,9 @@ BadgeList::Application.routes.draw do
         as: :create_group_admins, defaults: { type: 'admin' }
 
   # === MANUAL BADGE PATHS === #
-  match ':group_id/:badge_id/learners/add' => 'badge#add_learners', via: :get,
+  match ':group_id/:badge_id/learners/add' => 'badges#add_learners', via: :get,
         as: :add_badge_learners
-  match ':group_id/:badge_id/learners' => 'badge#create_learners', via: :post,
+  match ':group_id/:badge_id/learners' => 'badges#create_learners', via: :post,
         as: :create_badge_learners
 
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #

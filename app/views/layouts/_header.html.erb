@@ -54,7 +54,9 @@
             
       <% if content_for?(:subheader_actions) %>
         <div class="subheader-actions">
-          <%= yield :subheader_actions %>
+          <ul class="subheader-actions">
+            <%= yield :subheader_actions %>
+          </ul>
         </div>
       <% end %>
     </div>

@@ -87,7 +87,7 @@ class Badge
       )
     end.sort_by do |log|
       log.date_withdrawn || log.date_requested
-    end
+    end.reverse
   end
 
   # Returns all recently validated experts, reverse sorted by issue date
@@ -98,7 +98,7 @@ class Badge
       && (log.date_issued > (Time.now - RECENT_DATE_THRESHOLD))
     end.sort_by do |log|
       log.date_withdrawn || log.date_requested
-    end
+    end.reverse
   end
 
   # Adds a learner to the badge by creating or reattaching a log for them

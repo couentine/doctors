@@ -1,0 +1,75 @@
+<% 
+  provide(:title, "Add learners - #{@group.name}") 
+  provide(:show_subheader, true)
+  provide(:subheader_image, group_image_url_for(@group)) 
+%>
+
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url, group_path(@group) %>
+    <span class="divider">/</span>
+  </li>
+  <li>
+    <%= link_to @badge.url, [@group, @badge] %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active">Add Badge Learners</li>
+<% end %>
+
+<div class="row">
+  <div class="bl-form bl-form-members span10 offset1">
+    
+    <div class="form-header">
+      <h1>Add badge learners</h1>
+      <div class="form-image" 
+           style="background-image: url('<%= image_path 'log-new-medium.png' %>')">
+        &nbsp;
+      </div>
+    </div>
+
+    <%= form_tag(create_badge_learners_path(@group, @badge), method: :post, 
+      id: "badge-add-learners-form", class: 'form-horizontal') do %>
+
+      <div class="form-body">
+        <p class="text-success">
+          <em><strong>Note: Only active learning group members and admins can be added to a badge.</strong></em>
+        </p>
+
+        <div class="control-group">
+          <%= label_tag :usernames, "Learning group members / admins", class: "control-label" %>
+          <div class="controls">
+            <ul class="unstyled">
+              <% @learner_list.each do |item| %>
+                <li>
+                  <label class="checkbox <%= 'muted' if item[:disabled] %>">
+                    <%= check_box_tag 'usernames[]', item[:user].username, item[:disabled], 
+                      disabled: item[:disabled] %> 
+                    <%= item[:user].name %>
+                  </label>
+                </li>
+              <% end %>
+            </ul>
+            <br/>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <%= label_tag :notify_by_email, "Send email notifications", class: "control-label" %>
+        <div class="controls">
+          <label class="checkbox">
+            <%= check_box_tag :notify_by_email, "1", true %> 
+            Notify new learners by email
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-footer">
+        <%= button_tag "Add new learners", type: 'submit', class: 'btn btn-primary' %>
+        <%= link_to 'Cancel', group_badge_path(@group, @badge)+'#learners', class: 'btn' %> 
+      </div>
+
+    <% end %>
+
+  </div>
+</div>

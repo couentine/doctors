@@ -7,11 +7,12 @@ class GroupsController < ApplicationController
   # Non-RESTful Actions >> :leave, :destroy_user, :destroy_invited_user, 
   #                        :add_users, :create_users
 
+  before_filter :find_group, only: [:show, :edit, :update, :destroy, :join, :leave,
+    :destroy_user, :send_invitation, :destroy_invited_user, :add_users, :create_users]
   before_filter :authenticate_user!, except: [:show]
   before_filter :group_member_or_admin, only: [:leave]
-  before_filter :group_admin, only: [:edit, :update, :destroy,
-                                     :destroy_user, :destroy_invited_user,
-                                     :add_users, :create_users]
+  before_filter :group_admin, only: [:edit, :update, :destroy, :destroy_user, 
+    :destroy_invited_user, :add_users, :create_users]
 
   # === CONSTANTS === #
 
@@ -29,10 +30,6 @@ class GroupsController < ApplicationController
   # GET /group-url
   # GET /group-url.json
   def show
-    @group = Group.find(params[:id])
-    @current_user_is_admin = current_user && current_user.admin_of?(@group)
-    @current_user_is_member = current_user && current_user.member_of?(@group)
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @group }
@@ -53,8 +50,7 @@ class GroupsController < ApplicationController
 
   # GET /group-url/edit
   def edit
-      @group = Group.find(params[:id])
-      @group_type_options = GROUP_TYPE_OPTIONS
+    @group_type_options = GROUP_TYPE_OPTIONS
   end
 
   # POST /groups
@@ -79,7 +75,6 @@ class GroupsController < ApplicationController
   # PUT /group-url
   # PUT /group-url.json
   def update
-    @group = Group.find(params[:id])
 
     respond_to do |format|
       if @group.update_attributes(params[:group])
@@ -96,7 +91,6 @@ class GroupsController < ApplicationController
   # DELETE /group-url
   # DELETE /group-url.json
   def destroy
-    @group = Group.find(params[:id])
     @group.destroy
 
     respond_to do |format|
@@ -109,7 +103,6 @@ class GroupsController < ApplicationController
 
   # POST /group-url/join
   def join
-    @group = Group.find(params[:id])
     notice = ""
 
     if @group.has_member?(current_user)
@@ -132,15 +125,18 @@ class GroupsController < ApplicationController
 
   # DELETE /group-url/leave
   def leave
-    @group = Group.find(params[:id])
     notice = "You aren't a member of this Learning Group, so you can't leave it."
 
     if @group.has_member?(current_user)
       @group.members.delete(current_user)
       notice = "You have left this group."
     elsif @group.has_admin?(current_user)
-      @group.admin.delete(current_user)
-      notice = "You have left this group."
+      if @group.admins.count > 1
+        @group.admin.delete(current_user)
+        notice = "You have left this group."
+      else
+        notice = "You are currently the only admin and cannot leave the group."
+      end
     end
 
     redirect_to @group, :notice => notice
@@ -149,7 +145,6 @@ class GroupsController < ApplicationController
   # DELETE /group-url/members/2, :id = 1, :user_id = 2, :type = member
   # DELETE /group-url/admins/2, :id = 1, :user_id = 2, :type = admin
   def destroy_user
-    @group = Group.find(params[:id])
     @user = User.find(params[:user_id])
     notice = "That user is not a #{params[:type]}!"
     detached_log_count = 0
@@ -182,7 +177,6 @@ class GroupsController < ApplicationController
   # POST /group-url/invited_members/{email}/invitation, :type = member
   # POST /group-url/invited_admins/{email}/invitation, :type = admin
   def send_invitation
-    @group = Group.find(params[:id])
     email = params[:email].downcase
     invited_users = params[:type] == 'admin' ? 
                                     @group.invited_admins : @group.invited_members
@@ -213,7 +207,6 @@ class GroupsController < ApplicationController
   # DELETE /group-url/invited_members/{email}, :type = member
   # DELETE /group-url/invited_admins/{email}, :type = admin
   def destroy_invited_user
-    @group = Group.find(params[:id])
     email = params[:email].downcase
     invited_users = params[:type] == 'admin' ? 
                                     @group.invited_admins : @group.invited_members
@@ -237,7 +230,6 @@ class GroupsController < ApplicationController
   # GET /group-url/members/add?type=member
   # GET /group-url/admins/add?type=admin
   def add_users
-    @group = Group.find(params[:id])
     if params[:type] == 'admin'
       @type = :admin
       @form_path = create_group_admins_path(@group)
@@ -255,7 +247,6 @@ class GroupsController < ApplicationController
   #   @group, @type, @invalid_emails, @upgraded_member_emails, @new_member_emails,
   #   @new_admin_emails, @skipped_member_emails, @skipped_admin_emails
   def create_users
-    @group = Group.find(params[:id])
     @type = params[:type] == 'admin' ? :admin : :member
     @notify_by_email = params[:notify_by_email] == "1"
     @new_admin_emails = []
@@ -364,8 +355,13 @@ class GroupsController < ApplicationController
 
 private
 
+  def find_group
+    @group = Group.find(params[:id] || params[:group_id])
+    @current_user_is_admin = current_user && @group.has_admin?(current_user)
+    @current_user_is_member = current_user && @group.has_member?(current_user)
+  end
+
   def group_admin
-    @group = Group.find(params[:id])
     unless @group.has_admin?(current_user)
       flash[:error] = "You must be an admin of #{@group.name} to do that!"
       redirect_to @group
@@ -373,7 +369,6 @@ private
   end
 
   def group_member_or_admin
-    @group = Group.find(params[:id])
     if !@group.has_member?(current_user) && !@group.has_admin?(current_user)
       flash[:error] = "You must be a member or admin of #{@group.name} to do that!"
       redirect_to @group

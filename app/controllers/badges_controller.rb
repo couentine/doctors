@@ -1,10 +1,12 @@
 class BadgesController < ApplicationController
   
-  before_filter :find_related_records
-  before_filter :find_badge, only: [:show, :edit, :update, :destroy, :add_learners]
-  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy]
+  prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy, 
+    :add_learners, :create_learners]
+  prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy, 
+    :add_learners, :create_learners]
+  before_filter :authenticate_user!, except: [:show]
   before_filter :group_admin, only: [:new, :create, :destroy]
-  before_filter :badge_expert, only: [:edit, :update, :add_learners]
+  before_filter :badge_expert, only: [:edit, :update, :add_learners, :create_learners]
 
   # === RESTFUL ACTIONS === #
 
@@ -94,19 +96,43 @@ class BadgesController < ApplicationController
   # GET /group-url/badge-url/learners/add
   # GET /group-url/badge-url/learners/add.json
   # :usernames => array_of_usernames_to_add[]
+  # @learner_list = array of {
+  #   :user => user
+  #   :disabled => true_if_already_added_to_badge
   def add_learners
+    @learner_list = []
+    @already_added_users = @badge.logs.map{ |log| log.user unless log.detached_log } 
+
+    [@group.members, @group.admins].flatten.sort_by { |user| user.name }.each do |user|
+      @learner_list << {
+        user: user,
+        disabled: @already_added_users.include?(user)
+      }
+    end
+  end
+
+  # POST /group-url/badge-url/learners
+  # POST /group-url/badge-url/learners.json
+  # :usernames[] => array_of_usernames_to_add[]
+  # :notify_by_email => boolean
+  def create_learners
+    @notify_by_email = params[:notify_by_email] == "1"
     new_learner_count = 0
 
     params[:usernames].each do |username|
       user = User.find(username.to_s.downcase) rescue nil
-      if user
+      if user && !user.learner_of?(@badge) && !user.expert_of?(@badge)
         log = @badge.add_learner(user)
         new_learner_count += 1
+        
+        if @notify_by_email
+          UserMailer.badge_learner_add(user, current_user, @group, @badge, @log).deliver 
+        end
       end
     end
 
     respond_to do |format|
-      format.html { redirect_to [@group, @badge], 
+      format.html { redirect_to group_badge_path(@group, @badge)+'#learners', 
         notice: "#{new_learner_count} learners were added to the badge." } 
       format.json { head :no_content }
     end
@@ -114,19 +140,20 @@ class BadgesController < ApplicationController
 
 private
 
-  def find_related_records
+  def find_parent_records
     @group = Group.find(params[:group_id])
     @current_user_is_admin = current_user.admin_of?(@group)
     @current_user_is_member = current_user.member_of?(@group)
   end
 
-  def find_badge
-    @badge = @group.badges.find_by(url: params[:id].to_s.downcase)
+  def find_all_records
+    find_parent_records
+
+    @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase)
     @current_user_is_expert = current_user.expert_of?(@badge)
     @current_user_is_learner = current_user.learner_of?(@badge)
-
     if @current_user_is_learner || @current_user_is_expert
-      @log = @badge.logs.find { |log| log.user == current_user }
+      @log = @badge.logs.find_by(user: current_user)
     end
   end
 
@@ -140,7 +167,7 @@ private
   def badge_expert
     unless @current_user_is_expert
       flash[:error] = "You must be a badge expert to do that!"
-      redirect_to @badge
+      redirect_to [@group, @badge]
     end 
   end
 

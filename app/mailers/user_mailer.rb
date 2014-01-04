@@ -49,4 +49,16 @@ class UserMailer < ActionMailer::Base
     )
   end
 
+  def badge_retracted(to_user, from_user, group, badge, log)
+    @to_user, @from_user, @group, @badge, @log = to_user, from_user, group, badge, log
+
+    mail(
+      :subject  => "Your badge has been retracted",
+      :to       => to_user.email_name,
+      :from     => build_from_string(from_user),
+      :reply_to => from_user.email_name,
+      :tag      => 'badge_retracted,user_mailer'
+    )
+  end
+
 end

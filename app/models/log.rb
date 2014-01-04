@@ -25,6 +25,7 @@ class Log
   field :wiki_sections,           type: Array
   field :wiki_versions,           type: Array
 
+  field :date_started,            type: Time
   field :date_requested,          type: Time
   field :date_withdrawn,          type: Time
   field :date_issued,             type: Time
@@ -61,6 +62,11 @@ class Log
     user? ? user.username : _id
   end
 
+  # Rerturns true if log is currently public
+  def public?
+    badge.group.public? || ((validation_status == 'validated') && !private_log)
+  end
+
   # Adds a generic validation from the specified user
   # NOTE: Doesn't work for new records.
   def add_validation(validating_user, validation_summary, validation_body)
@@ -74,6 +80,7 @@ class Log
 protected
   
   def set_default_values
+    self.date_started ||= Time.now
     self.validation_status ||= 'incomplete'
     self.issue_status ||= 'unissued'
     self.show_on_profile ||= true
@@ -141,7 +148,7 @@ protected
 
   def update_wiki_sections
     if wiki_changed?
-      self.wiki_sections = linkify_text(wiki, badge.group, self).split(SECTION_DIVIDER_REGEX)
+      self.wiki_sections = linkify_text(wiki, badge.group, badge).split(SECTION_DIVIDER_REGEX)
     end
   end
 
