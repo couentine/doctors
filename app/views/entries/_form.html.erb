@@ -1,0 +1,20 @@
+<%= simple_form_for(@entry) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :entry_number %>
+    <%= f.input :summary %>
+    <%= f.input :private %>
+    <%= f.input :type %>
+    <%= f.input :log_validated %>
+    <%= f.input :body %>
+    <%= f.input :body_versions %>
+    <%= f.input :body_sections %>
+    <%= f.input :current_user %>
+    <%= f.input :current_username %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit %>
+  </div>
+<% end %>

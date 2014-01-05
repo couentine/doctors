@@ -40,7 +40,7 @@ class Badge
   validates :creator, presence: true
 
   # Which fields are accessible?
-  attr_accessible :group, :name, :url, :image_url, :summary, :info, :current_user, :current_username
+  attr_accessible :name, :url, :image_url, :summary, :info
   
   # === CALLBACKS === #
 
@@ -113,11 +113,19 @@ class Badge
         the_log.save
       end
     else
-      the_log = Log.new(badge: self, user: user)
+      the_log = Log.new
+      the_log.badge = self
+      the_log.user = user
       the_log.save
     end
 
     the_log
+  end
+
+  # Returns all entries with type = 'post', sorted from newest to oldest
+  # NOTE: Uses pagination
+  def posts(page = 1, page_size = APP_CONFIG['page_size_normal'])
+    Entry.where(:log.in => logs, :type => 'post').desc(:updated_at).page(page).per(page_size)
   end
 
 protected

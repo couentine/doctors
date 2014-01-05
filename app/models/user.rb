@@ -13,6 +13,7 @@ class User
   has_many :created_groups, inverse_of: :creator, class_name: "Group", dependent: :nullify
   has_many :created_badges, inverse_of: :creator, class_name: "Badge", dependent: :nullify
   has_many :logs, dependent: :nullify
+  has_many :entries, inverse_of: :creator, class_name: "Entry", dependent: :nullify
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
 
@@ -169,6 +170,11 @@ class User
     the_list.sort_by{ |item| item[:group].name }
   end
 
+  # Returns all entries created by this user, sorted from newest to oldest
+  # NOTE: Uses pagination and includes both posts AND validations
+  def activity(page=1, page_size = APP_CONFIG['page_size_normal'])
+    entries.desc(:updated_at).page(page).per(page_size)
+  end
 
   protected
 

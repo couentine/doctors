@@ -1,7 +1,10 @@
 # BADGE LIST CONFIGURATION FILE
 
 defaults: &defaults
-  page_size: 28
+  # Page sizes should be evenly divisible by 2 and 3 (4 is nice but not required)
+  page_size_small: 12
+  page_size_normal: 30
+  page_size_large: 60
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:

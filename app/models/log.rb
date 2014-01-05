@@ -12,6 +12,7 @@ class Log
 
   belongs_to :badge
   belongs_to :user
+  has_many :entries, dependent: :delete
 
   # === FIELDS & VALIDATIONS === #
 
@@ -35,8 +36,8 @@ class Log
   field :validation_count,        type: Integer
   field :rejection_count,         type: Integer
   field :next_entry_number,       type: Integer
-  field :current_user,        type: String # used when logging wiki_versions
-  field :current_username,   type: String # used when logging wiki_versions
+  field :current_user,            type: String # used when logging wiki_versions
+  field :current_username,        type: String # used when logging wiki_versions
 
   validates :badge, presence: true
   validates :user, presence: true
@@ -46,8 +47,8 @@ class Log
                                 message: "%{value} is not a valid badge issue status" }
   
   # Which fields are accessible?
-  attr_accessible :badge, :user, :show_on_profile, :private_log, :detached_log, :date_requested, 
-    :date_withdrawn, :date_sent_to_backpack, :wiki, :current_user, :current_username
+  attr_accessible :show_on_profile, :private_log, :detached_log, :date_requested, 
+    :date_withdrawn, :date_sent_to_backpack, :wiki
 
   # === CALLBACKS === #
 
@@ -67,14 +68,38 @@ class Log
     badge.group.public? || ((validation_status == 'validated') && !private_log)
   end
 
-  # Adds a generic validation from the specified user
+  # Adds a validation entry to the log
   # NOTE: Doesn't work for new records.
-  def add_validation(validating_user, validation_summary, validation_body)
-    # FIXME: After adding entries come back and make this work properly (insert a log entry)
-    if !new_record?
-      self.validation_count += 1
-      self.save!
+  # log_validated = Boolean
+  def add_validation(creator_user, summary, body, log_validated)
+    unless new_record?
+      entry = Entry.new(summary: summary, body: body, log_validated: log_validated)
+      entry.log = self
+      entry.creator = creator_user
+      entry.save!
     end
+  end
+
+  # Adds a post entry to the log
+  # NOTE: Doesn't work for new records.
+  def add_post(creator_user, summary, body)
+    unless new_record?
+      entry = Entry.new(summary: summary, body: body)
+      entry.log = self
+      entry.creator = creator_user
+      entry.save!
+    end
+  end  
+
+  # Returns all entries with type = 'post', sorted from newest to oldest
+  # NOTE: Uses pagination
+  def posts(page = 1, page_size = APP_CONFIG['page_size_normal'])
+    entries.all(type: 'post').desc(:updated_at).page(page).per(page_size)
+  end
+
+  # Returns all entries with type = 'validation', sorted from newest to oldest
+  def validations
+    entries.all(type: 'validation').desc(:updated_at)
   end
 
 protected

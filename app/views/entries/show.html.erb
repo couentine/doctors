@@ -1,0 +1,55 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Entry number:</b>
+  <%= @entry.entry_number %>
+</p>
+
+<p>
+  <b>Summary:</b>
+  <%= @entry.summary %>
+</p>
+
+<p>
+  <b>Private:</b>
+  <%= @entry.private %>
+</p>
+
+<p>
+  <b>Type:</b>
+  <%= @entry.type %>
+</p>
+
+<p>
+  <b>Log validated:</b>
+  <%= @entry.log_validated %>
+</p>
+
+<p>
+  <b>Body:</b>
+  <%= @entry.body %>
+</p>
+
+<p>
+  <b>Body versions:</b>
+  <%= @entry.body_versions %>
+</p>
+
+<p>
+  <b>Body sections:</b>
+  <%= @entry.body_sections %>
+</p>
+
+<p>
+  <b>Current user:</b>
+  <%= @entry.current_user %>
+</p>
+
+<p>
+  <b>Current username:</b>
+  <%= @entry.current_username %>
+</p>
+
+
+<%= link_to 'Edit', edit_entry_path(@entry) %> |
+<%= link_to 'Back', entries_path %>

@@ -1,0 +1,41 @@
+<h1>Listing entries</h1>
+
+<table>
+  <tr>
+    <th>Entry number</th>
+    <th>Summary</th>
+    <th>Private</th>
+    <th>Type</th>
+    <th>Log validated</th>
+    <th>Body</th>
+    <th>Body versions</th>
+    <th>Body sections</th>
+    <th>Current user</th>
+    <th>Current username</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @entries.each do |entry| %>
+  <tr>
+    <td><%= entry.entry_number %></td>
+    <td><%= entry.summary %></td>
+    <td><%= entry.private %></td>
+    <td><%= entry.type %></td>
+    <td><%= entry.log_validated %></td>
+    <td><%= entry.body %></td>
+    <td><%= entry.body_versions %></td>
+    <td><%= entry.body_sections %></td>
+    <td><%= entry.current_user %></td>
+    <td><%= entry.current_username %></td>
+    <td><%= link_to 'Show', entry %></td>
+    <td><%= link_to 'Edit', edit_entry_path(entry) %></td>
+    <td><%= link_to 'Destroy', entry, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Entry', new_entry_path %>

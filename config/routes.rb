@@ -1,5 +1,8 @@
 BadgeList::Application.routes.draw do
 
+  resources :entries
+
+
   devise_for :users
 
   root :to => 'home#show'
@@ -42,6 +45,8 @@ BadgeList::Application.routes.draw do
         as: :add_badge_learners
   match ':group_id/:badge_id/learners' => 'badges#create_learners', via: :post,
         as: :create_badge_learners
+  match ':group_id/:badge_id/entries' => 'badges#entries_index', via: :get,
+        as: :badge_entries
 
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #
   match ':id/edit' => 'groups#edit', via: :get
@@ -50,7 +55,10 @@ BadgeList::Application.routes.draw do
     resources :badges, only: [:new, :create]
     resources :badges, path: "", except: [:index, :new, :create] do
       resources :logs, only: [:create]
-      resources :logs, path: "u", except: [:index, :new, :create]
+      resources :logs, path: "u", except: [:index, :new, :create] do
+        resources :entries, only: [:index, :new, :create]
+        resources :entries, path: "", except: [:index, :new, :create]
+      end
     end
   end
 
