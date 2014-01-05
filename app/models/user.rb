@@ -176,18 +176,20 @@ class User
     # When found it upgrades the invitation to an actual relationship.
     def convert_group_invitations
       # First query for groups where we have been invited as an admin
-      Group.where(:invited_admins.elem_match => { :email => self.email }).entries.each do |group|
+      Group.where(:invited_admins.elem_match => { :email => email }).entries.each do |group|
         group.admins << self
-        invited_item = group.invited_admins.detect { |u| u[:email] == self.email}
+        group.reload
+        invited_item = group.invited_admins.detect { |u| u["email"] == unconfirmed_email}
         group.invited_admins.delete(invited_item) if invited_item
-        group.save!
+        group.save
       end
       # Then query for groups where we have been invited as a normal member
-      Group.where(:invited_members.elem_match => { :email => self.email }).entries.each do |group|
+      Group.where(:invited_members.elem_match => { :email => email }).entries.each do |group|
         group.members << self
-        invited_item = group.invited_members.detect { |u| u[:email] == self.email}
+        group.reload
+        invited_item = group.invited_members.detect { |u| u["email"] == unconfirmed_email}
         group.invited_members.delete(invited_item) if invited_item
-        group.save!
+        group.save
       end
     end
 

@@ -78,7 +78,7 @@
 
   <!-- === EDIT LOG WIKI MODAL === -->
 
-  <div id="edit-log-wiki" class="modal hide fade" tabindex="-1" role="dialog" 
+  <div id="edit-log-wiki" class="modal full-screen hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -149,11 +149,18 @@
                 private_text = 'Only available for private learning grouups'
               end 
             %>
-
-            <%= f.input :private_log, as: :radio_buttons, collection: [[false, 'Public'] , \
-              [true, "Private <p class='text-error'><small>(#{private_text})</small></p>".html_safe]],
-              label_method: :last, value_method: :first, disabled: !@group.private?,
-              label: 'After you earn the badge your learning log will be' %>
+            <% if @group.private? %>
+              <%= f.input :private_log, as: :radio_buttons, collection: [[false, 'Public'] , \
+                [true, "Private <p class='text-error'><small>(#{private_text})</small></p>".html_safe]],
+                label_method: :last, value_method: :first,
+                label: 'After you earn the badge your learning log will be' %>
+            <% else %>
+              <%= f.input :private_log, as: :radio_buttons, collection: [[false, 'Public'] , \
+                [true, "Private <p class='text-error'><small>(#{private_text})</small></p>".html_safe]],
+                label_method: :last, value_method: :first, disabled: true,
+                label: 'After you earn the badge your learning log will be' %>
+            <% end %>
+                
 
             <h4>Dangerous Stuff</h4>
 
@@ -200,10 +207,11 @@
           <tr>
             <td class="header-image" 
                 style="background-image: url('<%= @badge.image_url %>')">
-              &nbsp;
+              <%= link_to '&nbsp;'.html_safe, [@group, @badge], class: 'image-link', 
+                title: 'View badge' %>
             </td>
             <td class="header-text">
-              <h1><%= @badge.name %></h1>
+              <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
               <h2><%= "#{@group.url}/#{@badge.url}" %></h2>
               <p>
                 <%= @badge.summary %>
@@ -217,7 +225,7 @@
         <table>
           <tr>
             <td class="header-text">
-              <h1><%= @user.name %></h1>
+              <h1><%= link_to @user.name, @user, title: 'View user profile' %></h1>
               <h2>Badge Learning Log</h2>  
               
               <ul class="bl-icon-list">
@@ -251,27 +259,31 @@
                   </li>
                 <% else %>
                   <li data-toggle="tooltip" data-placement="bottom" 
-                    title="Learning log will become public after validation.">
-                    <div style="background-image: url('<%= image_path 'public-small.png' %>')" >
+                    title="Learning log currently private, but will become public after validation.">
+                    <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
                     </div>
                   </li>
                 <% end %>
               </ul>
             </td>
             <td class="header-image">
-              <%= gravatar_for @user, size: 150, class: "img-circle" %>
+              <a href="<%= user_path(@user) %>" class="image-link" title="View user profile">
+                <%= gravatar_for @user, size: 150, class: "img-circle" %>
+              </a>
             </td>
           </tr>
         </table>
       </div>
 
-      <% if @log.validation_status == 'validated' %>
-        <div class="card-tabs">
-          <ul class="nav nav-tabs">
-            <li class="active"><a href="#validations" data-toggle="tab">Expert Validation</a></li>
-            <li><a href="#entries" data-toggle="tab">Learning Log Entries</a></li>
-          </ul>
-        </div>
+      <% if @log.public? || @current_user_is_admin || @current_user_is_member %>
+        <% if @log.validation_status == 'validated' %>
+          <div class="card-tabs">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#validations" data-toggle="tab">Expert Validation</a></li>
+              <li><a href="#entries" data-toggle="tab">Learning Log Entries</a></li>
+            </ul>
+          </div>
+        <% end %>
       <% end %>
 
     </div>
@@ -279,66 +291,81 @@
 </div>
 
 
+<% if @log.public? || @current_user_is_admin || @current_user_is_member %>
 
-<div class="row">
+  <div class="row">
 
-  <!-- === LOG WIKI SECTION (INDEPENDENT OF TABS) === -->
+    <!-- === LOG WIKI SECTION (INDEPENDENT OF TABS) === -->
 
-  <div class="span4">
-    <div class="tab-header">
-      <div class="tab-header-inner">
-        <h2>Personal Wiki</h2>
+    <div class="span4">
+      <div class="tab-header">
+        <div class="tab-header-inner">
+          <h2>Personal Wiki</h2>
 
-        <% if @belongs_to_current_user %>
-          <a tabindex="-1" href="#edit-log-wiki" data-toggle="modal"
-             title="Edit log wiki" rel="tooltip" data-placement: "bottom"
-             class="btn btn-link" >
-            <i class="icon-pencil"></i>
-          </a>
+          <% if @belongs_to_current_user %>
+            <a tabindex="-1" href="#edit-log-wiki" data-toggle="modal"
+               title="Edit log wiki" rel="tooltip" data-placement: "bottom"
+               class="btn btn-link" >
+              <i class="icon-pencil"></i>
+            </a>
 
-        <% end %>
+          <% end %>
+        </div>
       </div>
+
+      <% @log.wiki_sections.each do |section_text| %>
+        <div class="info-card text-card">
+          <%= section_text.html_safe %>
+        </div>
+      <% end unless @log.wiki_sections.nil? %>
     </div>
 
-    <% @log.wiki_sections.each do |section_text| %>
-      <div class="info-card text-card">
-        <%= section_text.html_safe %>
-      </div>
-    <% end unless @log.wiki_sections.nil? %>
-  </div>
+    <!-- === TAB CONTENT === -->
+        
+    <div class="span8">
 
-  <!-- === TAB CONTENT === -->
-      
-  <div class="span8">
+      <div class="tab-content">
+    
+        <!-- === VALIDATIONS TAB === -->
 
-    <div class="tab-content">
-  
-      <!-- === VALIDATIONS TAB === -->
+        <% if @log.validation_status == 'validated' %>
 
-      <% if @log.validation_status == 'validated' %>
+          <div class="tab-pane active" id="validations">
+            <div class="tab-header">
+              <div class="tab-header-inner">
+                <h2>Expert Validations</h2>
+              </div>
+            </div>
+          </div>
 
-        <div class="tab-pane active" id="validations">
+        <% end %>
+
+        <!-- === ENTRIES TAB === -->
+
+        <div class="tab-pane <%= 'active' unless @log.validation_status=='validated' %>" id="entries">
           <div class="tab-header">
             <div class="tab-header-inner">
-              <h2>Expert Validations</h2>
+              <h2>Learning Log Entries</h2>
             </div>
           </div>
         </div>
 
-      <% end %>
-
-      <!-- === ENTRIES TAB === -->
-
-      <div class="tab-pane <%= 'active' unless @log.validation_status=='validated' %>" id="entries">
-        <div class="tab-header">
-          <div class="tab-header-inner">
-            <h2>Learning Log Entries</h2>
-          </div>
-        </div>
       </div>
 
     </div>
 
   </div>
 
-</div>
+<% else %>
+  
+  <div class="row">
+    <div class="well span7 offset2">
+      <p class="lead">This is a private learning log</p>
+      <p>
+        The owner of this learning log has set it to be private.  
+        Its contents are only visible to members of the learning group.
+      </p>
+    </div>
+  </div>
+
+<% end %>

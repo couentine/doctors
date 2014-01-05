@@ -2,12 +2,13 @@
   <table>
     <tr class="card-body-row">
       <td class="card-image" style="background-image: url('<%= gravatar_url_for user, :size => 150 %>')">
-        <%= link_to '&nbsp;'.html_safe, user, title: user.name, 
+        <%= link_to '&nbsp;'.html_safe, user, title: "View user profile", 
             class: 'image-link' %>
       </td>
       <td class="card-body">
         <span class="card-headline">
-          <%= link_to user.name, user, title: user.name %>
+          <h2><%= link_to user.name, user, title: "View user profile" %></h2>
+          <h3><%= user.username %></h3>
         </span>
         <span class="card-footline">
           Joined <%=  if user.created_at && (user.created_at > (Date.today - 9.months))

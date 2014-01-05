@@ -126,7 +126,8 @@ class GroupsController < ApplicationController
   # DELETE /group-url/leave
   def leave
     notice = "You aren't a member of this Learning Group, so you can't leave it."
-
+    
+    # First leave the group
     if @group.has_member?(current_user)
       @group.members.delete(current_user)
       notice = "You have left this group."
@@ -137,6 +138,12 @@ class GroupsController < ApplicationController
       else
         notice = "You are currently the only admin and cannot leave the group."
       end
+    end
+
+    # Then detach any logs
+    current_user.logs.find_all { |log| log.badge.group == @group }.each do |log_to_detach|
+      log_to_detach.detached_log = true
+      log_to_detach.save!
     end
 
     redirect_to @group, :notice => notice

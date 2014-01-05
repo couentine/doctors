@@ -359,7 +359,7 @@
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
              data-bl-dyncol-width="12">
 
-            <%= render @group.members if !@group.members.empty? %>
+            <%= render @group.members.sort_by{|u| u.name} if !@group.members.empty? %>
 
         </div>
       </div>
@@ -428,7 +428,7 @@
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="admins" 
              data-bl-dyncol-width="12">
 
-          <%= render @group.admins %>
+          <%= render @group.admins.sort_by{|u| u.name} %>
         
         </div>
       </div>

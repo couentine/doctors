@@ -19,6 +19,9 @@
       <li class="collapsible">
         <%= link_to '<i class="icon-plus icon-white"></i> Join Badge'.html_safe, 
             group_badge_logs_path(@group, @badge), method: :post %>
+        <% if @current_user_is_admin %>
+          <span class="divider">|</span>
+        <% end %>
       </li>
     <% else %>
       <li  class="collapsible">
@@ -106,7 +109,7 @@
 
   <!-- === EDIT BADGE INFO MODAL === -->
 
-  <div id="edit-badge-info" class="modal hide fade" tabindex="-1" role="dialog" 
+  <div id="edit-badge-info" class="modal full-screen hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -313,168 +316,101 @@
         &nbsp;
       </div>
 
-      <div class="card-tabs">
-        <ul class="nav nav-tabs">
-          <li class="active"><a href="#home" data-toggle="tab">Home</a></li>
-          <li><a href="#learners" data-toggle="tab">Learners</a></li>
-          <li><a href="#experts" data-toggle="tab">Experts</a></li>
-        </ul>
-      </div>
+      <% if @group.public? || @current_user_is_admin || @current_user_is_member %>
+        <div class="card-tabs">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+            <li><a href="#learners" data-toggle="tab">Learners</a></li>
+            <li><a href="#experts" data-toggle="tab">Experts</a></li>
+          </ul>
+        </div>
+      <% end %>
 
     </div>
   </div>
 </div>
 
-<!-- === TAB CONTENT === -->
+<% if @group.public? || @current_user_is_admin || @current_user_is_member %>
 
-<div class="tab-content">
+  <!-- === TAB CONTENT === -->
 
-  <!-- === HOME TAB === -->
+  <div class="tab-content">
 
-  <div class="tab-pane active" id="home">
+    <!-- === HOME TAB === -->
 
-    <div class="row">
-      <div class="span4">
-        <div class="tab-header">
-          <div class="tab-header-inner">
-            <h2>Badge Wiki</h2>
+    <div class="tab-pane active" id="home">
 
-            <% if @current_user_is_expert %>
-              <a tabindex="-1" href="#edit-badge-info" data-toggle="modal"
-                 title="Edit badge info" rel="tooltip" data-placement: "bottom"
-                 class="btn btn-link" >
-                <i class="icon-pencil"></i>
-              </a>
-
-            <% end %>
-          </div>
-        </div>
-
-        <% @badge.info_sections.each do |section_text| %>
-          <div class="info-card text-card">
-            <%= section_text.html_safe %>
-          </div>
-        <% end unless @badge.info_sections.nil? %>
-      </div>
-
-      <div class="span8">
-        <div class="tab-header">
-          <div class="tab-header-inner">
-            <h2>Recent Activity</h2>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- === LEARNERS TAB === -->
-
-  <div class="tab-pane" id="learners">
-
-    <div class="row">
-      <div class="span12">
-        <% if @current_user_is_expert %>
+      <div class="row">
+        <div class="span4">
           <div class="tab-header">
             <div class="tab-header-inner">
-              <h2>Badge Learners</h2>
+              <h2>Badge Wiki</h2>
 
-              <%= link_to '<i class="icon-plus"></i> Add Learners'.html_safe,
-                  add_badge_learners_path(@group, @badge), class: 'btn btn-small' %>
-            
-              <% unless @badge.requesting_learner_logs.blank? %>
-                <div class="btn-group">
-                  <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 
-                    data-toggle="dropdown">
-                    <%= @badge.requesting_learner_logs.count %> validation requests
-                    <span class="caret"></span>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <% @badge.requesting_learner_logs.take(10).each do |log| %>
-                      <li>
-                        <%= link_to "#{log.user.name}" \
-                          + " (#{log.date_withdrawn.nil? ? 'Requested' : 'Withdrawn'}"\
-                          + " #{(log.date_withdrawn || log.date_requested).to_s(:short_date)})",
-                          [log.badge.group, log.badge, log], title: 'Click to add your expertise',
-                          tabindex: -1 %>
-                      </li>
-                    <% end %>
+              <% if @current_user_is_expert %>
+                <a tabindex="-1" href="#edit-badge-info" data-toggle="modal"
+                   title="Edit badge info" rel="tooltip" data-placement: "bottom"
+                   class="btn btn-link" >
+                  <i class="icon-pencil"></i>
+                </a>
 
-                    <% if @badge.requesting_learner_logs.count > 10 %>
-                      <li>
-                        <a tabindex="-1" href="#validation-requests" data-toggle="modal">
-                          <%= (@badge.requesting_learner_logs.count - 10).to_s %> more...
-                        </a>
-                      </li>
-                    <% end %>
-                  </ul>
-                </div>
               <% end %>
-
             </div>
           </div>
-        <% end %>
 
-        <% if @badge.learner_logs.empty? %>
-          <div class="well span7 offset2">
-            <p class="lead">No learners yet!</p>
-            <p>
-              <%= 
-                if @current_user_is_admin
-                  link_to '<i class="icon-plus"></i> Add some learners'.html_safe,
-                  add_badge_learners_path(@group, @badge), class: 'btn btn-success' 
-                end
-              %>
-            </p>
+          <% @badge.info_sections.each do |section_text| %>
+            <div class="info-card text-card">
+              <%= section_text.html_safe %>
+            </div>
+          <% end unless @badge.info_sections.nil? %>
+        </div>
+
+        <div class="span8">
+          <div class="tab-header">
+            <div class="tab-header-inner">
+              <h2>Recent Activity</h2>
+            </div>
           </div>
-        <% end %>
+        </div>
       </div>
+
     </div>
 
-    <div class="row">
-      
-      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="learners" 
-           data-bl-dyncol-width="12">
+    <!-- === LEARNERS TAB === -->
 
-          <%= render @badge.learner_logs if !@badge.learner_logs.empty? %>
-
-      </div>
-    </div>
-
-  </div>
-
-  <!-- === EXPERTS TAB === -->
-
-  <div class="tab-pane" id="experts">
+    <div class="tab-pane" id="learners">
 
       <div class="row">
         <div class="span12">
           <% if @current_user_is_expert %>
             <div class="tab-header">
               <div class="tab-header-inner">
-                <h2>Badge Experts</h2>
+                <h2>Badge Learners</h2>
 
-                <% unless @badge.new_expert_logs.blank? %>
+                <%= link_to '<i class="icon-plus"></i> Add Learners'.html_safe,
+                    add_badge_learners_path(@group, @badge), class: 'btn btn-small' %>
+              
+                <% unless @badge.requesting_learner_logs.blank? %>
                   <div class="btn-group">
                     <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 
                       data-toggle="dropdown">
-                      <%= @badge.new_expert_logs.count %> new experts
+                      <%= @badge.requesting_learner_logs.count %> validation requests
                       <span class="caret"></span>
                     </a>
-                    <ul class="dropdown-menu pull-right">
-                      <% @badge.new_expert_logs.take(10).each do |log| %>
+                    <ul class="dropdown-menu">
+                      <% @badge.requesting_learner_logs.take(10).each do |log| %>
                         <li>
-                          <%= link_to \
-                            "#{log.user.name} (Validated #{log.date_issued.to_s(:short_date)})",
+                          <%= link_to "#{log.user.name}" \
+                            + " (#{log.date_withdrawn.nil? ? 'Requested' : 'Withdrawn'}"\
+                            + " #{(log.date_withdrawn || log.date_requested).to_s(:short_date)})",
                             [log.badge.group, log.badge, log], title: 'Click to add your expertise',
                             tabindex: -1 %>
                         </li>
                       <% end %>
 
-                      <% if @badge.new_expert_logs.count > 10 %>
+                      <% if @badge.requesting_learner_logs.count > 10 %>
                         <li>
-                          <a tabindex="-1" href="#new-experts" data-toggle="modal">
-                            <%= (@badge.new_expert_logs.count - 10).to_s %> more...
+                          <a tabindex="-1" href="#validation-requests" data-toggle="modal">
+                            <%= (@badge.requesting_learner_logs.count - 10).to_s %> more...
                           </a>
                         </li>
                       <% end %>
@@ -486,19 +422,104 @@
             </div>
           <% end %>
 
+          <% if @badge.learner_logs.empty? %>
+            <div class="well span7 offset2">
+              <p class="lead">No learners yet!</p>
+              <p>
+                <%= 
+                  if @current_user_is_admin
+                    link_to '<i class="icon-plus"></i> Add some learners'.html_safe,
+                    add_badge_learners_path(@group, @badge), class: 'btn btn-success' 
+                  end
+                %>
+              </p>
+            </div>
+          <% end %>
         </div>
       </div>
 
       <div class="row">
         
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="experts" 
+        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="learners" 
              data-bl-dyncol-width="12">
 
-            <%= render @badge.expert_logs %>
+            <%= render @badge.learner_logs if !@badge.learner_logs.empty? %>
 
         </div>
       </div>
 
+    </div>
+
+    <!-- === EXPERTS TAB === -->
+
+    <div class="tab-pane" id="experts">
+
+        <div class="row">
+          <div class="span12">
+            <% if @current_user_is_expert %>
+              <div class="tab-header">
+                <div class="tab-header-inner">
+                  <h2>Badge Experts</h2>
+
+                  <% unless @badge.new_expert_logs.blank? %>
+                    <div class="btn-group">
+                      <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 
+                        data-toggle="dropdown">
+                        <%= @badge.new_expert_logs.count %> new experts
+                        <span class="caret"></span>
+                      </a>
+                      <ul class="dropdown-menu pull-right">
+                        <% @badge.new_expert_logs.take(10).each do |log| %>
+                          <li>
+                            <%= link_to \
+                              "#{log.user.name} (Validated #{log.date_issued.to_s(:short_date)})",
+                              [log.badge.group, log.badge, log], title: 'Click to add your expertise',
+                              tabindex: -1 %>
+                          </li>
+                        <% end %>
+
+                        <% if @badge.new_expert_logs.count > 10 %>
+                          <li>
+                            <a tabindex="-1" href="#new-experts" data-toggle="modal">
+                              <%= (@badge.new_expert_logs.count - 10).to_s %> more...
+                            </a>
+                          </li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  <% end %>
+
+                </div>
+              </div>
+            <% end %>
+
+          </div>
+        </div>
+
+        <div class="row">
+          
+          <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="experts" 
+               data-bl-dyncol-width="12">
+
+              <%= render @badge.expert_logs %>
+
+          </div>
+        </div>
+
+    </div>
+
   </div>
 
-</div>
+<% else %>
+  
+  <div class="row">
+    <div class="well span7 offset2">
+      <p class="lead">This is a private badge</p>
+      <p>
+        This badge belongs to a private learning group. 
+        Its contents are only visible to members.
+      </p>
+    </div>
+  </div>
+
+<% end %>

@@ -118,15 +118,16 @@ class BadgesController < ApplicationController
   def create_learners
     @notify_by_email = params[:notify_by_email] == "1"
     new_learner_count = 0
+    new_learner_log = nil
 
     params[:usernames].each do |username|
       user = User.find(username.to_s.downcase) rescue nil
       if user && !user.learner_of?(@badge) && !user.expert_of?(@badge)
-        log = @badge.add_learner(user)
+        new_learner_log = @badge.add_learner(user)
         new_learner_count += 1
         
         if @notify_by_email
-          UserMailer.badge_learner_add(user, current_user, @group, @badge, @log).deliver 
+          UserMailer.badge_learner_add(user, current_user, @group, @badge, new_learner_log).deliver 
         end
       end
     end
@@ -142,16 +143,16 @@ private
 
   def find_parent_records
     @group = Group.find(params[:group_id])
-    @current_user_is_admin = current_user.admin_of?(@group)
-    @current_user_is_member = current_user.member_of?(@group)
+    @current_user_is_admin = current_user && current_user.admin_of?(@group)
+    @current_user_is_member = current_user && current_user.member_of?(@group)
   end
 
   def find_all_records
     find_parent_records
 
     @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase)
-    @current_user_is_expert = current_user.expert_of?(@badge)
-    @current_user_is_learner = current_user.learner_of?(@badge)
+    @current_user_is_expert = current_user && current_user.expert_of?(@badge)
+    @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     if @current_user_is_learner || @current_user_is_expert
       @log = @badge.logs.find_by(user: current_user)
     end

@@ -7,8 +7,9 @@
       </td>
       <td class="card-body">
         <span class="card-headline">
-          <%= link_to log.user.name, [log.badge.group, log.badge, log], 
-            title: "View learning log" %>
+          <h2><%= link_to log.user.name, [log.badge.group, log.badge, log], 
+            title: "View learning log" %></h2>
+          <h3><%= log.user.username %></h3>
         </span>
         <span class="card-content">
           <ul class="metric-list">
