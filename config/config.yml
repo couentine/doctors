@@ -15,9 +15,14 @@ defaults: &defaults
    - badge
    - badges
    - contact
+   - create
    - delete
    - destroy
    - edit
+   - entry
+   - entries
+   - exercise
+   - exercises
    - expert
    - experts
    - group
@@ -27,6 +32,7 @@ defaults: &defaults
    - invitation
    - invited_admins
    - invited_members
+   - join
    - learner
    - learners
    - leave
@@ -40,6 +46,8 @@ defaults: &defaults
    - update
    - user
    - users
+   - validation
+   - validations
 
   default_badge_info: |
     <h3>Overview</h3><br>

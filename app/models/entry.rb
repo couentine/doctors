@@ -1,7 +1,7 @@
 class Entry
   include Mongoid::Document
   include Mongoid::Timestamps
-  includ StringTools
+  include StringTools
 
   # === CONSTANTS === #
   
@@ -27,16 +27,15 @@ class Entry
 
   field :current_user,        type: String
   field :current_username,    type: String
+  field :flags,                 type: Array
 
   validates :log, presence: true
   validates :creator, presence: true
   validates :entry_number, presence: true, uniqueness: { scope: :log }
   validates :summary, presence: true, length: { within: 3..MAX_SUMMARY_LENGTH }
-  validates :private, inclusion: { in: [false] }, if: "type=='validation'",
-    message: "validations can't be private"
   validates :type, inclusion: { in: TYPE_VALUES, 
                                 message: "%{value} is not a valid entry type" }
-  validates :log_validated, presence: true, if: "type=='validation'"
+  validates :creator, uniqueness: { scope: :log }, if: "type=='validation'"
 
   # Which fields are accessible?
   attr_accessible :summary, :private, :log_validated, :body
@@ -44,11 +43,12 @@ class Entry
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
-  after_validation :update_body_sections
-  after_validation :update_body_versions # DO store the first value since it comes from the user
+  before_save :update_body_sections
+  before_save :update_body_versions # DO store the first value since it comes from the user
   after_create :increment_log_next_entry_number
   after_create :process_new_validation
-  after_update :process_updated_validation
+  after_create :send_notifications
+  after_save :process_updated_validation, on: :update
 
   # === ENTRY METHODS === #
 
@@ -59,8 +59,10 @@ class Entry
 protected
   
   def set_default_values
-    self.entry_number ||= log.next_entry_number if log
     self.private ||= false
+    self.entry_number ||= log.next_entry_number if log
+
+    true # don't return false! that causes an error
   end
 
   def update_body_sections
@@ -114,6 +116,16 @@ protected
         log.rejection_count += 1
       end
       log.save!
+    end
+  end
+
+  def send_notifications
+    # Note: The created_at condition is to filter out sample_data & migrations
+    if created_at > (Time.now - 1.hour)
+      if type == 'validation'
+        UserMailer.log_validation_received(log.user, creator, \
+          log.badge.group, log.badge, log, self)
+      end
     end
   end
 

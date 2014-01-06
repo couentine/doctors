@@ -15,20 +15,21 @@ class Group
   belongs_to :creator, inverse_of: :created_groups, class_name: "User"
   has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: "User"
   has_and_belongs_to_many :members, inverse_of: :member_of, class_name: "User"
-  has_many :badges, dependent: :delete
+  has_many :badges, dependent: :restrict # You have to delete all the badges FIRST
 
   # === FIELDS & VALIDATIONS === #
 
-  field :name,                    :type => String
-  field :url,                     :type => String
-  field :location,                :type => String
-  field :website,                 :type => String
-  field :image_url,               :type => String
-  field :type,                    :type => String
-  field :customer_code,           :type => String
-  field :validation_threshold,    :type => Integer
-  field :invited_admins,          :type => Array
-  field :invited_members,         :type => Array
+  field :name,                    type: String
+  field :url,                     type: String
+  field :location,                type: String
+  field :website,                 type: String
+  field :image_url,               type: String
+  field :type,                    type: String
+  field :customer_code,           type: String
+  field :validation_threshold,    type: Integer
+  field :invited_admins,          type: Array
+  field :invited_members,         type: Array
+  field :flags,                   type: Array
 
   validates :name, presence: true, length: { within: 3..MAX_NAME_LENGTH }
   validates :url, presence: true, uniqueness: true, length: { within: 3..MAX_URL_LENGTH }, 
@@ -52,7 +53,7 @@ class Group
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
-  after_validation :add_creator_to_admins, on: :create
+  before_create :add_creator_to_admins
 
   # === CLASS METHODS === #
 
@@ -120,6 +121,7 @@ protected
     self.invited_admins ||= []
     self.invited_members ||= []
     self.validation_threshold ||= 2
+    self.flags ||= []
   end
 
 end

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>
+      <% if @from_self %>
+        You've joined the <%= @badge.name %> badge in Badge List as a learner.
+      <% else %>
+        You've been added as a learner to the <%= @badge.name %> badge in Badge List. 
+      <% end %>
+      This badge is part of the <%= @group.name %> learning group.
+      To begin adding entries to your learning log you can login to Badge List as normal or click on the link below.
+    </p>
+    <p>
+      <strong>Your Learning Log / Personal Wiki:</strong> 
+      <%= link_to group_badge_log_url(@group, @badge, @log), 
+        group_badge_log_url(@group, @badge, @log) %> <br>
+      <strong><%= @badge.name %>:</strong> 
+      <%= link_to group_badge_url(@group, @badge), group_badge_url(@group, @badge) %> 
+      <% if !@from_self %>
+        (You were added by <%= @from_user.name %>.)
+      <% end %>
+    </p>
+    <p>
+      <i>
+        This email was sent automatically by the Badge List app.
+        Badge List is a badge-based tool for tracking learning progress. 
+        If you take no action you will not receive any further emails about this change.
+      </i>
+    </p>
+  </body>
+</html>

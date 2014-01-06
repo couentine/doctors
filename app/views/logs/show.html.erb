@@ -21,7 +21,7 @@
   </li>
 <% end %>
 
-<% if @belongs_to_current_user %>
+<% if @current_user_is_log_owner %>
   <% content_for :subheader_actions do %>
     <li class="collapsible">
         <div class="dropdown">
@@ -45,7 +45,7 @@
   <% end %>
 <% end %>
 
-<% if @belongs_to_current_user %>
+<% if @current_user_is_log_owner %>
 
   <!-- === LOG WIKI VERSIONS === -->
 
@@ -302,7 +302,7 @@
         <div class="tab-header-inner">
           <h2>Personal Wiki</h2>
 
-          <% if @belongs_to_current_user %>
+          <% if @current_user_is_log_owner %>
             <a tabindex="-1" href="#edit-log-wiki" data-toggle="modal"
                title="Edit log wiki" rel="tooltip" data-placement: "bottom"
                class="btn btn-link" >

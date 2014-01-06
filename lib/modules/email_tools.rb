@@ -6,7 +6,7 @@ module EmailTools
 
   # Returns a string in the form of "John Doe <email@example.com>"
   # from_user_or_name can be a User a name string or nil
-  def build_from_string(from_user_or_name)
+  def build_from_string(from_user_or_name = nil)
     if from_user_or_name.nil?
       "Badge List <#{APP_CONFIG['from_email']}>"
     elsif from_user_or_name.instance_of?(User) && !from_user_or_name.name.blank?

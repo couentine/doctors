@@ -3,8 +3,8 @@ class BadgesController < ApplicationController
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy, 
     :add_learners, :create_learners]
   prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy, 
-    :add_learners, :create_learners]
-  before_filter :authenticate_user!, except: [:show]
+    :entries_index, :add_learners, :create_learners]
+  before_filter :authenticate_user!, except: [:show, :entries_index]
   before_filter :group_admin, only: [:new, :create, :destroy]
   before_filter :badge_expert, only: [:edit, :update, :add_learners, :create_learners]
 
@@ -93,6 +93,21 @@ class BadgesController < ApplicationController
 
   # === NON-RESTFUL ACTIONS === #
 
+  # Accepts page parameters: page, page_size
+  # GET /group-url/badge-url/entries
+  # GET /group-url/badge-url/entries.json
+  def entries_index
+    # Grab the current page of entries
+    @page = params[:page] || 1
+    @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
+    @entries = @badge.entries(@page, @page_size)
+
+    respond_to do |format|
+      format.html # entries_index.html.erb
+      format.json { render json: @badge }
+    end
+  end
+
   # GET /group-url/badge-url/learners/add
   # GET /group-url/badge-url/learners/add.json
   # :usernames => array_of_usernames_to_add[]
@@ -127,7 +142,7 @@ class BadgesController < ApplicationController
         new_learner_count += 1
         
         if @notify_by_email
-          UserMailer.badge_learner_add(user, current_user, @group, @badge, new_learner_log).deliver 
+          UserMailer.log_new(user, current_user, @group, @badge, new_learner_log).deliver 
         end
       end
     end

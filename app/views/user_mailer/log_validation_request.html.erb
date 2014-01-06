@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>
+      <% @from_user.name %> has requested expert validation of their learning log for the 
+      <%= @badge.name %> badge in Badge List.
+      To add your expertise, log into Badge List or click one of the links below. 
+    </p>
+    <p>
+      <strong>Is it your first time? Adding your expertise is easy.</strong>
+      <ol>
+        <li>Read through the learner's log</li>
+        <li>Click "Add my expertise"</li>
+        <li>Decide whether or not the learner has earned the badge</li>
+        <li>Write specific feedback and notes for the learner (and the eventual badge viewers)</li>
+      </ol>
+    </p>
+    <p>
+      <strong><% @from_user.name %> Learning Log:</strong> 
+      <%= link_to group_badge_log_url(@group, @badge, @log), 
+        group_badge_log_url(@group, @badge, @log) %> <br>
+      <strong><%= @badge.name %>:</strong> 
+      <%= link_to group_badge_url(@group, @badge), group_badge_url(@group, @badge) %> <br>
+      <strong><%= @group.name %>:</strong> 
+      <%= link_to group_url(@group), group_url(@group) %> 
+    </p>
+    <p>
+      <i>
+        This email was sent automatically by the Badge List app.
+        Badge List is a badge-based tool for tracking learning progress. 
+        If you take no action you will not receive any further emails about this change.
+      </i>
+    </p>
+  </body>
+</html>

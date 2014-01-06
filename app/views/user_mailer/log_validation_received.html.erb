@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>
+      You've received a 
+      <strong><em><%= (entry.log_validated) ? 'positive' : 'negative' %></em></strong> 
+      validation from <%= @from_user.name %> for the <%= @badge.name %> badge in Badge List.
+    </p>
+
+    <p>
+      <strong>Read the validation in a browser:</strong> 
+      <%= link_to group_badge_log_entry_url(@group, @badge, @log, @entry), 
+        group_badge_log_entry_url(@group, @badge, @log, @entry) %> <br>
+      <strong>View your learning log:</strong> 
+      <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %>
+    </p>
+
+    <p>
+      <strong><u>Content of the Validation</u></strong>
+    </p>
+    <p>
+      <%= @entry.body_sections.join '<br>-----------------------<br>' %>
+    </p>
+
+    <p>
+      <i>
+        This email was sent automatically by the Badge List app.
+        Badge List is a badge-based tool for tracking learning progress. 
+        If you take no action you will not receive any further emails about this change.
+      </i>
+    </p>
+  </body>
+</html>

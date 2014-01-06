@@ -26,7 +26,8 @@ class Badge
   field :info_sections,       type: Array
   field :info_versions,       type: Array
   field :current_user,        type: String # used when logging info_versions
-  field :current_username,   type: String # used when logging info_versions
+  field :current_username,    type: String # used when logging info_versions
+  field :flags,               type: Array
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url, presence: true, length: { within: 3..MAX_URL_LENGTH },
@@ -103,8 +104,9 @@ class Badge
 
   # Adds a learner to the badge by creating or reattaching a log for them
   # NOTE: If there is already a detached log this function will reattach it
+  # date_started: Defaults to nil. If set, overrides the log.date_started fields
   # Return value = the newly created/reattached log
-  def add_learner(user)
+  def add_learner(user, date_started = nil)
     the_log = Badge.logs.find_by(user: user) rescue nil
 
     if the_log
@@ -113,7 +115,7 @@ class Badge
         the_log.save
       end
     else
-      the_log = Log.new
+      the_log = Log.new(date_started: date_started)
       the_log.badge = self
       the_log.user = user
       the_log.save
@@ -122,24 +124,37 @@ class Badge
     the_log
   end
 
-  # Returns all entries with type = 'post', sorted from newest to oldest
+  # Returns all entries (posts AND validations), sorted from newest to oldest
   # NOTE: Uses pagination
-  def posts(page = 1, page_size = APP_CONFIG['page_size_normal'])
-    Entry.where(:log.in => logs, :type => 'post').desc(:updated_at).page(page).per(page_size)
+  def entries(page = 1, page_size = APP_CONFIG['page_size_normal'])
+    Entry.where(:log.in => logs).desc(:updated_at).page(page).per(page_size)
+  end
+
+  # Returns the ACTUAL validation threshold based on the group settings AND the badge expert count
+  def current_validation_threshold
+    validation_threshold = expert_logs.count
+
+    if group && group.validation_threshold
+      validation_threshold = [validation_threshold, group.validation_threshold].min
+    end
+
+    validation_threshold
   end
 
 protected
   
   def set_default_values
     self.info ||= APP_CONFIG['default_badge_info']
+    self.flags ||= []
   end
 
   def add_creator_as_expert
-    log = Log.create(badge: self, user: creator)
-    time_string = Time.now.to_s(:full_date_time)
-    log.add_validation(creator, "Badge Creator",
-      "#{creator.name} created the badge on #{time_string}" \
-      + " and was automatically added as an expert.")
+    log = Log.new
+    log.badge = self
+    log.user = creator
+    log.save! 
+    # NOTE: This log will automatically be validated (by log.update_stati) 
+    # and self-validated (by log.back_validate_if_needed)
   end
 
   def update_info_sections

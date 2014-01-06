@@ -9,9 +9,16 @@ class LogsController < ApplicationController
 
   # === RESTFUL ACTIONS === #
 
+  # Accepts page parameters: page, page_size
   # GET /group-url/badge-url/u/username
   # GET /group-url/badge-url/u/username.json
   def show
+    # Grab the current page of posts & all of the validations
+    @page = params[:page] || 1
+    @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
+    @posts = @log.posts(@page, @page_size)
+    @validations = @log.validations
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @log }
@@ -49,9 +56,16 @@ class LogsController < ApplicationController
       else
         message = 'Welcome to the badge!'
       end
-      @log = @badge.add_learner(current_user) # retreive their existing badge OR create new one
-      is_error = @log.new_record?
-      message = 'An error occured while trying to create a learning log for you.' if is_error
+      
+      if !is_error
+        @log = @badge.add_learner(current_user) # retreive their existing badge OR create new one
+        is_error = @log.new_record?
+        if is_error
+          message = 'An error occured while trying to create a learning log for you.' 
+        else
+          UserMailer.log_new(current_user, current_user, @group, @badge, @log).deliver
+        end
+      end
     else
       @log = Log.new
       message = 'You must be a member of the group to join this badge.'
@@ -93,7 +107,7 @@ class LogsController < ApplicationController
   # DELETE /group-url/badge-url/u/username.json
   def destroy
     @log.destroy
-    if @belongs_to_current_user
+    if @current_user_is_log_owner
       notice = "You are no longer a member of this badge."
     else
       notice = "#{@user.name} is no longer a member of the badge."
@@ -121,18 +135,18 @@ private
 
     @user = User.find(params[:id].to_s.downcase) # find user by username
     @log = @user.logs.find_by(badge: @badge)
-    @belongs_to_current_user = current_user && (@user == current_user)
+    @current_user_is_log_owner = current_user && (@user == current_user)
   end
 
   def log_owner
-    unless @belongs_to_current_user
+    unless @current_user_is_log_owner
       flash[:error] = "That action is restricted to the log owner."
       redirect_to [@group, @badge, @log]
     end
   end
 
   def group_admin_or_log_owner
-    unless @current_user_is_admin || @belongs_to_current_user
+    unless @current_user_is_admin || @current_user_is_log_owner
       flash[:error] = "That action is restricted to group admins or the log owner."
       redirect_to [@group, @badge, @log]
     end
