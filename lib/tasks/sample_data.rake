@@ -39,7 +39,7 @@ namespace :db do
     end_time = start_time + 1.month
 
     # make admins
-    3.times do |n|
+    1.times do |n|
       name = Faker::Name.name
       username = (0...User::MAX_USERNAME_LENGTH).map { ('a'..'z').to_a[rand(26)] }.join
       email = "admin#{n+1}@example.com"
