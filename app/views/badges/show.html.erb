@@ -364,12 +364,11 @@
           <% end unless @badge.info_sections.nil? %>
         </div>
 
-        <div class="span8">
-          <div class="tab-header">
-            <div class="tab-header-inner">
-              <h2>Recent Activity</h2>
-            </div>
-          </div>
+        <div class="span8" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
+             data-bl-dyncol-width="8">
+
+            <%= render @entries if !@entries.empty? %>
+
         </div>
       </div>
 

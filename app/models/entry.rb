@@ -56,6 +56,12 @@ class Entry
     entry_number || _id
   end
 
+  # Returns a number representing the updated_at date relative to the learner's start date
+  # Example: if updated_at == log.date_started, return = 1 (learner's first week)
+  def learner_week_updated_at
+    ((updated_at.to_date - log.date_started.to_date).to_f / 7).ceil
+  end
+
 protected
   
   def set_default_values

@@ -207,9 +207,9 @@ var dcThresholds = [1, 700, 980];
 var dcGroups = {}; // each entry has the following subkeys: children, width, columns
 var hasDynamicColumns = false;
 
-function getTargetColCount(windowWidth) {
+function getTargetColCount(availableWidth) {
   var target;
-  for (target=0; (dcThresholds[target]!=null) && (windowWidth>=dcThresholds[target]); target++) {}
+  for (target=0; (dcThresholds[target]!=null) && (availableWidth>=dcThresholds[target]); target++) {}
   return target;
 }
 
@@ -236,10 +236,18 @@ function initializeDynamicColumns() {
 
 // This checks each DC group for a column mismatch and, when found, calls updateDynamicColumnGroup()
 function checkDynamicColumns() {
-  var targetColCount = getTargetColCount($(window).width());
+  var availableWidth;
+  var targetColCount;
   var curColCount;
 
   for (var key in dcGroups) {
+    availableWidth = 1;
+    if ($(window).width() > 0) availableWidth = ($(window).width()/12) * dcGroups[key].width;
+    targetColCount = getTargetColCount(availableWidth);
+
+    // Make sure that we don't go to three columns unless our width is divisible by three
+    if ((targetColCount == 3) && ((dcGroups[key].width % 3) > 0)) targetColCount = 2;
+
     curColCount = dcGroups[key].columns.length;
     if (curColCount != targetColCount) {
       updateDynamicColumnGroup(key, targetColCount);

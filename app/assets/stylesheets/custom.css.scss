@@ -922,6 +922,91 @@ div.badge-card {
   }
 }
 
+div.entry-card {
+  tr.card-headline-row {
+    h2 {
+      font-size: 14px;
+      line-height: 1.4em;
+
+      a,a:visited {
+        text-decoration: none;
+      }
+    }
+    td.headline-left {
+      vertical-align: top;
+      width: 60px;
+      padding: 10px 10px 0 10px;
+
+      img { width: 60px; }
+    }
+    td.headline-middle {
+      vertical-align: middle;
+      padding: 0;
+    }
+    td.headline-right {
+      vertical-align: top;
+      width: 45px;
+      padding: 10px 10px 0 10px;
+      position: relative;
+      text-align: center;
+
+      img { width: 45px; }
+      span.entry-number {
+        position: absolute;
+        left: 0;
+        right: 5px;
+        top: 25px;
+        text-align: center;
+        font-size: 18px;
+        color: $light-text-color;
+        text-shadow: -1px -1px 0 $dark-white,
+          1px -1px 0 $dark-white,
+          -1px 1px 0 $dark-white,
+          1px 1px 0 $dark-white;
+      }
+      span.username {
+        color: $medium-text-color;
+        width: 100%;
+        font-size: 9px;
+      }
+    }
+  }
+
+  td.card-body {
+    overflow: hidden;
+    position: relative;
+
+    img { 
+      max-width: 100%; 
+      margin-bottom: 15px;
+    }
+    p { 
+      display: inline-block;
+      border-top: 1px solid $really-light-gray; 
+      margin: 2.5% 0 0 2.5%;
+      padding: 2.5% 0 0 0;
+      width: 95%;
+      font-size: 11px;
+    }
+    p:first-child { 
+      border-top: none; 
+      padding-top: 0%;
+      margin-top: 1.5%;
+    }
+    p:last-child { margin-bottom: 2.5%; }
+  }
+
+  tr.card-footline-row td {
+    font-size: 11px;
+    padding: 5px 10px;
+    color: $light-text-color;
+    border-top: 1px solid $really-light-gray;
+    i { opacity: 0.55; }
+  }
+  td.left-foot { text-align: left; }
+  td.right-foot { text-align: right; }
+}
+
 div.text-card {
   padding: 20px 15px;
   border-top: 4px solid $tertiary-dark;

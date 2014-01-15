@@ -16,7 +16,7 @@ module StringTools
     if text.blank?
       ""
     else
-      text.gsub(HASHTAG_REGEX) { |tag| "<a href='/#{group.url}/#{badge.url}/#{tag[1..tag.length]}'>#{tag}</a>" }
+      text.gsub(HASHTAG_REGEX) { |tag| "<a class='tag-link' href='/#{group.url}/#{badge.url}/#{tag[1..tag.length]}'>#{tag}</a>" }
       .gsub(HTTP_URL_REGEX) { |url| make_tag_for url }
       # Removing this for now... it double tags some things
       # .gsub(NON_HTTP_URL_REGEX) { |url| make_tag_for "http://#{url}" }
@@ -26,9 +26,9 @@ module StringTools
   def make_tag_for(url)
     if url[IMG_REGEX]
       stripped_url = url.sub(/^img:/i, '')
-      "<a href='#{stripped_url}' target='_blank'><img src='#{stripped_url}'/></a>"
+      "<a class='image-link' href='#{stripped_url}' target='_blank'><img src='#{stripped_url}'/></a>"
     else
-      "<a href='#{url}' target='_blank'>#{url}</a>"
+      "<a class='image-link' href='#{url}' target='_blank'>#{url}</a>"
     end
   end
 

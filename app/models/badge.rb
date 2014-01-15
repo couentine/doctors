@@ -127,7 +127,8 @@ class Badge
   # Returns all entries (posts AND validations), sorted from newest to oldest
   # NOTE: Uses pagination
   def entries(page = 1, page_size = APP_CONFIG['page_size_normal'])
-    Entry.where(:log.in => logs).desc(:updated_at).page(page).per(page_size)
+    log_ids = logs.map{ |log| log.id }
+    Entry.where(:log.in => log_ids).desc(:updated_at).page(page).per(page_size)
   end
 
   # Returns the ACTUAL validation threshold based on the group settings AND the badge expert count

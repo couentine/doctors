@@ -13,6 +13,8 @@ class BadgesController < ApplicationController
   # GET /group-url/badge-url
   # GET /group-url/badge-url.json
   def show
+    @entries = @badge.entries
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @badge }

@@ -251,17 +251,17 @@ protected
     if validation_status_changed? && (updated_at > (Time.now - 1.hour))
       if validation_status == 'requested'
         badge.expert_logs.each do |expert_log|
-          #UserMailer.log_validation_request(self.user, expert_log.user,\
-            #badge.group, badge, self).deliver 
+          UserMailer.log_validation_request(self.user, expert_log.user,\
+            badge.group, badge, self).deliver 
         end
       elsif validation_status == 'validated'
-        #UserMailer.log_badge_issued(user, badge.group, badge, self)
+        UserMailer.log_badge_issued(user, badge.group, badge, self)
       end
     end
 
     if issue_status_changed? && (updated_at > (Time.now - 1.hour))
       if issue_status == 'retracted'
-        #UserMailer.log_badge_retracted(user, badge.group, badge, self)
+        UserMailer.log_badge_retracted(user, badge.group, badge, self)
       end
     end
   end

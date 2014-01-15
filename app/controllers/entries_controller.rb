@@ -35,6 +35,7 @@ class EntriesController < ApplicationController
           render :new
         else
           render :new_validation
+        end
       end
       format.json { render json: @entry }
     end
@@ -149,9 +150,12 @@ private
 
   def find_all_records
     find_parent_records
+    logger.debug '+++find_all_records: Checkpoint 1.+++'
 
     @entry = @log.entries.find_by(entry_number: (params[:entry_id] || params[:id]))
-    @current_user_is_entry_creator = current_user && (current_user == @entry.creator)
+    logger.debug "+++find_all_records: @entry = #{@entry.inspect}, current_user = #{current_user.inspect}.+++"
+    @current_user_is_entry_creator = current_user && (current_user.id == @entry.creator_id)
+    logger.debug '+++find_all_records: Checkpoint 3.+++'
   end
 
   def entry_creator

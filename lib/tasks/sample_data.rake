@@ -128,10 +128,8 @@ namespace :db do
         start_time = badge.created_at
         end_time = start_time + 6.months
         tags = @example_data['tags'].sample(20) # pick a subset of tags that this badge will use
-        images = @example_data['image_urls'].shuffle
-        image_pos = 0
-        links = @example_data['link_urls'].shuffle
-        link_pos = 0
+        images = @example_data['image_urls']
+        links = @example_data['link_urls']
         most_active_learner_log = nil
         most_active_learner_count = 0
         
@@ -175,7 +173,7 @@ namespace :db do
               # add 1 to 3 tags (1/3 probability)
               stuff_to_add += tags.sample(rand(1..3)) if rand(1..3) == 1
               # add 1 link (1/5 probability)
-              stuff_to_add << get_next(links, link_pos) if rand(1..5) == 1
+              stuff_to_add << links.sample(1) if rand(1..5) == 1
               stuff_to_add.each { |text| words.insert rand(0..words.count), text }
               body += words.join(' ')
 
@@ -183,7 +181,7 @@ namespace :db do
               if i < number_of_paragraphs
                 body += "<br><br>" # always add a paragraph separator
                 # add image (1/4 probability)
-                body += "#{get_next(images, image_pos)}<br><br>" if rand(1..4) == 1
+                body += "#{images.sample(1)}<br><br>" if rand(1..4) == 1
                 # add section break (1/3 probability)
                 body += '-----<br><br>' if rand(1..3) == 1
               end
@@ -205,18 +203,11 @@ namespace :db do
         # make the most active learner an expert
         # NOTE: We're stealing the body of their first post to make ours look more full-bodied
         most_active_learner_log.add_validation(admin, "True demonstration of mastery", 
-          "#{most_active_learner_log.user.name} has absolutely proven master of this badge."\
+          "#{most_active_learner_log.user.name} has absolutely proven mastery of this badge."\
           + " #validation <br>---<br>" + most_active_learner_log.entries.first.body, true)
         puts " >> 11 populated logs created."
       end
     end
-  end
-
-  # returns list[position] and increments position or sets it to zero
-  def get_next(list, position)
-    return_value = list[position]
-    position = ((position + 1) < list.count) ? (position + 1) : 0
-    return_value
   end
 
 end

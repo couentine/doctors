@@ -1,0 +1,44 @@
+<div class="info-card entry-card" data-bl-dyncol="child">
+  <table>
+    <tr class="card-headline-row">
+      <td class="headline-left">
+        <%= link_to image_tag(entry.log.badge.image_url), group_badge_path(entry.log.badge.group, 
+          entry.log.badge), title: entry.log.badge.name %>
+      </td>
+      <td class="headline-middle">
+        <h2>
+          <%= link_to \
+            ((entry.summary.length>70) ? "#{entry.summary[0..70]}..." : entry.summary), 
+            [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
+        </h2>
+      </td>
+      <td class="headline-right">
+        <%= link_to gravatar_for(entry.log.user, class: 'img-circle'), 
+          [entry.log.badge.group, entry.log.badge, entry.log],
+          title: "View #{entry.log.user.name}'s learning log" %><br/>
+        <span class="entry-number">#<%= entry.entry_number %></span>
+        <span class="username"><%= entry.log.user.username[0..6] %></span>
+      </td>
+    </tr>
+    <tr class="card-body-row">
+      <td class="card-body" colspan="3">
+        <% entry.body_sections.each do |section_text| %>
+          <p><%= section_text.html_safe %></p>
+        <% end %>
+      </td>
+    </tr>
+    <tr class="card-footline-row">
+      <td class="left-foot" colspan="1">
+        <% if entry.private %>
+          <i class='icon-lock'></i> Private
+        <% else %>
+          <i class='icon-eye-open'></i> Public
+        <% end %>
+      </td>
+      <td class="right-foot" colspan="2">
+        <%= (entry.body_versions && (entry.body_versions.count > 1)) ? 'Updated' : 'Posted' %>
+        <%= "#{time_ago_in_words(entry.updated_at)} ago (Learner week #{entry.learner_week_updated_at})" %>
+      </td>
+    </tr>
+  </table>
+</div>
