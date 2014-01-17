@@ -11,7 +11,7 @@ class Entry
   # === RELATIONSHIPS === #
 
   belongs_to :log
-  belongs_to :creator, inverse_of: :entries, class_name: "User"
+  belongs_to :creator, inverse_of: :created_entries, class_name: "User"
 
   # === FIELDS & VALIDATIONS === #
 
@@ -35,7 +35,6 @@ class Entry
   validates :summary, presence: true, length: { within: 3..MAX_SUMMARY_LENGTH }
   validates :type, inclusion: { in: TYPE_VALUES, 
                                 message: "%{value} is not a valid entry type" }
-  validates :creator, uniqueness: { scope: :log }, if: "type=='validation'"
 
   # Which fields are accessible?
   attr_accessible :summary, :private, :log_validated, :body
@@ -67,8 +66,6 @@ protected
   def set_default_values
     self.private ||= false
     self.entry_number ||= log.next_entry_number if log
-
-    true # don't return false! that causes an error
   end
 
   def update_body_sections

@@ -13,7 +13,7 @@ class User
   has_many :created_groups, inverse_of: :creator, class_name: "Group"
   has_many :created_badges, inverse_of: :creator, class_name: "Badge"
   has_many :logs, dependent: :destroy
-  has_many :entries, inverse_of: :creator, class_name: "Entry"
+  has_many :created_entries, inverse_of: :creator, class_name: "Entry"
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
 

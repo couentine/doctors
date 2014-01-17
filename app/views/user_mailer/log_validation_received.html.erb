@@ -6,7 +6,7 @@
   <body>
     <p>
       You've received a 
-      <strong><em><%= (entry.log_validated) ? 'positive' : 'negative' %></em></strong> 
+      <strong><em><%= (@entry.log_validated) ? 'positive' : 'negative' %></em></strong> 
       validation from <%= @from_user.name %> for the <%= @badge.name %> badge in Badge List.
     </p>
 
