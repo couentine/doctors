@@ -15,7 +15,7 @@ gem 'simple_form'
 # Pagination
 
 gem 'kaminari'
-gem 'kaminari-bootstrap'
+gem 'kaminari-bootstrap', '~> 0.1.3'
 
 
 # Email

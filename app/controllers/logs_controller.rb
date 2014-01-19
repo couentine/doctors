@@ -17,6 +17,7 @@ class LogsController < ApplicationController
     @page = params[:page] || 1
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
     @posts = @log.posts(@page, @page_size)
+    @posts_by_month = @log.posts_by_month(@page, @page_size)
     @validations = @log.validations
 
     respond_to do |format|
@@ -136,6 +137,10 @@ private
     @user = User.find(params[:id].to_s.downcase) # find user by username
     @log = @user.logs.find_by(badge: @badge)
     @current_user_is_log_owner = current_user && (@user == current_user)
+    if current_user
+      @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil 
+      @validation = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
+    end
   end
 
   def log_owner

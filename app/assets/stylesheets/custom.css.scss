@@ -42,11 +42,16 @@ body {
   overflow: auto;
   background-color: $body-background-color !important;
   color: $dark-text-color;
+
 }
 
 @media (min-width: 980px) {
   body { padding-top: 60px; }
   body.with-subheader { padding-top: 110px; }
+}
+
+::selection {
+  background: $primary-light;
 }
 
 section {
@@ -74,12 +79,12 @@ a.btn:visited {
 
 @media (min-width: 768px) {
   .show-when-small {
-    display: none;
+    display: none !important;
   }
 }
 @media (max-width: 767px) {
   .collapse-when-small  {
-    display: none;
+    display: none !important;
   }
 }
 ul.dropdown-menu {
@@ -205,21 +210,23 @@ header.navbar {
 /* === FOOTER === */
 
 footer {
-  margin-top: 45px;
-  padding-top: 5px;
-  border-top: 1px solid $grayMediumLight;
-  color: $grayLight;
+  margin-top: 30px;
+  background-color: $primary-light;
+  color: $dark-text-color;
+  padding: 10px 15px;
+  text-align: center;
+  opacity: 0.6;
+  border-radius: 20px;
   
-  small { 
-    float: left; 
+  a,a:visited { 
+    color: $dark-text-color;
+    text-decoration: none;
+    font-weight: bold;
   }
-  ul {
-    float: right;
-    list-style: none;
-    li {
-      float: left;
-      margin-left: 10px;
-    }
+  a:hover,a:focus { 
+    color: $primary-dark;
+    text-decoration: none;
+    border-bottom: 1px dashed $primary-dark;
   }
 }
 
@@ -421,11 +428,23 @@ h2.form-header {
     margin-left: 10px;
   }
 }
+.rich-text-area {
+  min-height: 300px;
+  width: 98%;
+}
 
 /* Specific Form Fields */
-#badge_summary {
+#badge_summary,#entry_summary {
   width: 300px;
   height: 6em;
+}
+#entry_body, {
+  -webkit-transition: height 0.2s;
+  -moz-transition: height 0.2s;
+  transition: height 0.2s;
+}
+.control-group.entry_body {
+  width: 100%;
 }
 #badge-versions {
   width: 340px;
@@ -573,7 +592,6 @@ form#group-add-users-form {
     }
   }
   .secondary-header {
-
     ul {
       float: left;
       margin: 0;
@@ -638,7 +656,7 @@ form#group-add-users-form {
         width: 80px !important;
       }
       h1,h2 {
-        width: 55%;
+        width: 80%;
         display: inline-block;
         height: 25px;
       }
@@ -702,44 +720,67 @@ form#group-add-users-form {
   }
   
 }
+.badge-entries-header-card {
+  .secondary-header {
+    @media (max-width: 767px) {
+      h1,h2 {
+        width: 100%;
+      }
+    }
+  }
+}
 
 /* === TABS === */
 
-div.tab-header {
-  float: left;
-  width: 99%;
+.tab-header,.tab-footer,.pagination-header,.pagination-footer {
+  padding: 7px 7px;
+  position: relative;
+  
+  &:after { 
+     content: " ";
+     display: block; 
+     height: 0; 
+     clear: both;
+  }
+
+  h2 {
+    display: inline;
+    font-size: 20px;
+    line-height: 1.3em;
+    margin: 0;
+  }
+
+  .label,.badge { 
+    float: right;
+    margin: 4px 6px 0 6px;
+  }
+  .btn,.btn-group { float: right; }
+  .btn {
+    margin: 0px 6px;
+  }
+  ul.dropdown-menu {
+    font-size: 11px;
+  }
+}
+.tab-header {
   margin: 0 0 30px 0;
+  border-bottom: 1px dashed $light-text-color;
+}
+.tab-footer {
+  margin: 20px 0 0 0;
+  padding: 10px 9px;
+  background-color: $light-gray;
   text-align: center;
 
-  div.tab-header-inner {
-    display: inline-block;
-    width: 97%;
-    margin: 0 auto;
-    padding: 0px 9px;
-    border-bottom: 1px dashed $light-text-color;
-
-    @media (max-width: 767px) {
-      width: 93%;
-    }
-
-    h2 {
-      float: left;
-      font-size: 20px;
-      margin: 0;
-    }
-
-    .btn,.btn-group { float: right; }
-    .btn {
-      margin: 4px 4px 0 4px;
-    }
-    .btn-small {
-      margin: 6px 6px 0 6px;
-    }
-
-    ul.dropdown-menu {
-      font-size: 11px;
-    }
+  a {
+    font-size: 14px;
+    font-weight: bold;
+    color: $dark-text-color;
+    margin: 0;
   }
+}
+.pagination-header,.pagination-footer {
+  text-align: center;
 }
 
 ul.nav-tabs {
@@ -763,9 +804,7 @@ div.tab-pane {
 /* === INFO CARDS === */
 
 div.info-card {
-  float: left;
   position: relative;
-  width: 99.4%;
   margin: 0 0 20px 0;
   border-radius: 5px;
   background-color: $light-white;
@@ -773,13 +812,8 @@ div.info-card {
   box-shadow: -1px 1px 7px 0 $card-shadow-color;
   border: 1px solid $medium-gray;
   
-  @media (min-width: 768px) {
-    width: 93%;
-  }
-
-  img, span { float: left; }
   a:hover { color: inherit;}
-  a.image-link {
+  td a.image-link {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
@@ -793,7 +827,7 @@ div.info-card {
     span.card-headline {
       font-size: 18px;
       font-weight: bold;
-      width: 100%;
+      display: block;
       margin: 0 0 2.5% 0;
       line-height: 1.2em;
       h2 {
@@ -810,7 +844,7 @@ div.info-card {
       }
     }
     span.card-text {
-      width: 100%;
+      display: block;
       margin: 0 0 2% 0;
       line-height: 1.4em;
     }
@@ -821,7 +855,7 @@ div.info-card {
     color: $light-text-color;
     border-top: 1px solid $really-light-gray;
     padding-top: 3px;
-    width: 100%;
+    display: block;
     
     a {
       font-size: 11px;
@@ -829,7 +863,7 @@ div.info-card {
     }
     ul { margin: 0; }
     ul.left-foot {
-      float: left;
+      display: inline-block;
       max-width: 60%;
     }
     ul.right-foot {
@@ -840,7 +874,7 @@ div.info-card {
     }
     li {
       list-style: none;
-      float: left;
+      display: inline-block;
       margin: 0 4px;
       cursor: default;
     }
@@ -850,26 +884,22 @@ div.info-card {
   }
 
   span.card-actions {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 5px;
+    display: inline-block;
+    float: right;
+    padding-left: 5px;
   }
   ul.metric-list {
-    float: right;
+    display: block;
     list-style: none;
     margin: 5px 0 15px 0;
     li {
-      float: left;
-      margin: 0 12px;
+      display: inline-block;
       position: relative;
-      width: 58px;
-      height: 30px;
-      padding-top: 10px;
-      font-size: 20px;
-      font-weight: bold;
-      text-align: right;
+      padding-left: 1.3em;
+      margin: 10px 0.6em 0 0;
+      font-size: 18px;
       color: $light-text-color;
+
       div {
         top: 0; left: 0; bottom: 0; right: 0;
         position: absolute;
@@ -884,7 +914,7 @@ div.info-card {
 
 div.user-card,div.log-card {
   .card-headline {
-    width: 93% !important;
+    /*width: 93% !important;*/
   }
   td.card-image {
     width: 28%;
@@ -896,18 +926,18 @@ div.user-card,div.log-card {
     padding: 3% 3% 2% 3%;
   }
   span.card-content {
-
+    display: block;
   }
 }
 .user-card.fixed-height {
   .card-headline { min-height: 3.9em; }
 }
 .log-card.fixed-height {
-  .card-headline { min-height: 2.4em; }
+  .card-headline { min-height: 3.6em; }
 }
 
 div.badge-card {
-  margin-top: 55px;
+  margin: 80px 15px 0 0;
   tr.card-image-row {
     text-align: center;
 
@@ -922,6 +952,9 @@ div.badge-card {
   }
 }
 
+div.entry-card.validation { border-top: 4px solid $primary-dark; }
+div.entry-card.learner_post { border-top: 4px solid $secondary-dark; }
+div.entry-card.expert_post { border-top: 4px solid $tertiary-dark; }
 div.entry-card {
   tr.card-headline-row {
     h2 {
@@ -931,17 +964,30 @@ div.entry-card {
       a,a:visited {
         text-decoration: none;
       }
+      a:hover,a:focus {
+        text-decoration: underline;
+      }
     }
     td.headline-left {
       vertical-align: top;
-      width: 60px;
-      padding: 10px 10px 0 10px;
-
       img { width: 60px; }
     }
     td.headline-middle {
-      vertical-align: middle;
-      padding: 0;
+      vertical-align: top;
+      padding: 0 0 0 15px;
+
+      span.creator-gravatar {
+        float: right;
+        margin: 0 -7px 5px 5px;
+
+        img {
+          width: 25px;
+        }
+        span.arrow {
+          margin: 2px 0 0 4px;
+          color: $medium-gray;
+        }
+      }
     }
     td.headline-right {
       vertical-align: top;
@@ -951,19 +997,6 @@ div.entry-card {
       text-align: center;
 
       img { width: 45px; }
-      span.entry-number {
-        position: absolute;
-        left: 0;
-        right: 5px;
-        top: 25px;
-        text-align: center;
-        font-size: 18px;
-        color: $light-text-color;
-        text-shadow: -1px -1px 0 $dark-white,
-          1px -1px 0 $dark-white,
-          -1px 1px 0 $dark-white,
-          1px 1px 0 $dark-white;
-      }
       span.username {
         color: $medium-text-color;
         width: 100%;
@@ -971,29 +1004,61 @@ div.entry-card {
       }
     }
   }
+  tr.card-headline-row.with-badge {
+    td.headline-left {
+      width: 60px;
+      padding: 10px 10px 0 10px;
+    }
+  }
 
   td.card-body {
     overflow: hidden;
     position: relative;
 
-    img { 
-      max-width: 100%; 
-      margin-bottom: 15px;
+    div.card-body-inner {
+      max-height: 650px;
     }
     p { 
-      display: inline-block;
+      display: block;
       border-top: 1px solid $really-light-gray; 
-      margin: 2.5% 0 0 2.5%;
-      padding: 2.5% 0 0 0;
-      width: 95%;
+      margin: 5px 10px 0 10px;
+      padding: 5px 0 0 0;
       font-size: 11px;
+
+      -ms-word-break: break-all;
+      word-break: break-all;
+      word-break: break-word;
+      -webkit-hyphens: auto;
+      -moz-hyphens: auto;
+      hyphens: auto;
+
+      a,a:visited {
+        font-weight: bold;
+      }
+      a:hover,a:focus {
+        color: $tertiary-medium;
+        text-decoration: none;
+        border-bottom: 1px dotted $tertiary-dark;
+      }
+      
+      img {
+        max-height: 500px;
+      }
     }
     p:first-child { 
       border-top: none; 
-      padding-top: 0%;
-      margin-top: 1.5%;
+      padding-top: 0;
     }
-    p:last-child { margin-bottom: 2.5%; }
+    p:last-child { margin-bottom: 10px; }
+    div.overflow-mark {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 60%);
+      padding: 30px 0 15px 0;
+      text-align: center;
+    }
   }
 
   tr.card-footline-row td {
@@ -1008,9 +1073,9 @@ div.entry-card {
 }
 
 div.text-card {
-  padding: 20px 15px;
+  padding: 5px 15px 20px 15px;
   border-top: 4px solid $tertiary-dark;
-  max-width: 90%;
+  /*max-width: 90%;*/
 
   p {
     overflow: hidden;
@@ -1032,9 +1097,161 @@ div.text-card {
   }
   img {
     max-width: 98%;
+    max-height: 500px;
     padding: 10px 0;
     border-radius: 20px;
   }
+}
+
+/* === PAGE CARDS === */
+
+.entry-page-card.validation { 
+  .super-header-section { border-bottom: 4px solid $primary-dark; } 
+  .arrow { color: $primary-dark; } 
+}
+.entry-page-card.learner_post { 
+  .super-header-section { border-bottom: 4px solid $secondary-dark; } 
+  .arrow { color: $secondary-dark; } 
+}
+.entry-page-card.expert_post { 
+  .super-header-section { border-bottom: 4px solid $tertiary-dark; } 
+  .arrow { color: $tertiary-dark; } 
+}
+.page-card {
+  border-radius: 3px;
+  color: $dark-text-color;
+  box-shadow: -1px 1px 7px 0 $card-shadow-color;
+  position: relative;
+  background-color: $light-white;
+  margin: 50px 0 20px 0;
+
+  @media (max-width: 767px) {
+    margin: 35px 0 10px 0;
+  }
+
+  .super-header-section { 
+    display: block;
+    margin: 0;
+    padding-bottom: 5px;
+    text-align: center;
+    
+    img { 
+      height: 120px; 
+      margin-top: -60px;
+
+      @media (max-width: 767px) {
+        height: 70px;
+        margin-top: -35px;
+      }
+    }
+  }
+  .header-section {
+    padding: 20px 30px;
+    &:after { 
+       content: " ";
+       display: block; 
+       height: 0; 
+       clear: both;
+    }
+
+    h1 {
+      display: inline;
+      padding: 0 7px 4px 7px;
+      background-color: $really-light-gray;
+      font-size: 26px;
+      font-weight: bold;
+      line-height: 1.4em;
+      
+      @media (max-width: 767px) { font-size: 24px; }
+    }
+    ul {
+      display: block;
+      margin: 15px 0 0 0;
+
+      li {
+        display: inline-block;
+        margin: 0 20px 0 0;
+        color: $medium-text-color;
+        font-style: italic;
+        font-size: 11px;
+
+        i {
+          opacity: 0.55;
+        }
+      }
+    }
+
+    .creator-user-link { 
+      float: right; 
+      width: 75px;
+      margin: -47px 0 10px 10px;
+      word-break: break-word;
+      
+      img { width: 50px; }
+      .arrow {
+        font-size: 20px;
+        display: inline-block;
+        position: relative;
+        top: 3px;
+        right: -5px;
+      }
+
+      @media (max-width: 767px) {
+        margin: -42px 0 10px 10px;
+        width: 65px;
+
+        img { width: 40px; }
+      }
+    }
+    .log-user-link { 
+      float: right; 
+      width: 100px; 
+      margin: -70px 0 10px 10px;
+      word-break: break-word;
+      text-align: center;
+
+      @media (max-width: 767px) {
+        width: 55px; 
+        margin: -50px 0 10px 10px;
+        font-size: 10px;
+      }
+    }
+  }
+  .body-section {
+    padding: 10px 30px 30px 30px;
+
+    p {
+      border-top: 2px dashed $really-light-gray;
+      padding: 10px 0 0 0;
+      margin: 10px 0 0 0;
+
+      a,a:visited {
+        color: $dark-text-color;
+        font-weight: bold;
+      }
+      a:hover,a:focus {
+        color: $tertiary-medium;
+        text-decoration: none;
+        font-weight: bold;
+        border-bottom: 1px dotted $tertiary-dark;
+      }
+      img {
+        max-height: 500px !important;
+      }
+    }
+    p:first-child { 
+      border: none; 
+      padding-top: 0;
+      margin-top: 0;
+    }
+  }
+  .footer-section {
+    border-top: 1px solid $light-gray;
+    font-size: 13px;
+    padding: 10px 30px;
+    color: $light-text-color;
+  }
+
 }
 
 /* === BADGES === */

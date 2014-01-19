@@ -35,17 +35,17 @@ namespace :db do
 
   def make_users
     # first define the acceptable time range for account creation (start_time..end_time)
-    start_time = Time.now - 1.year
-    end_time = start_time + 1.month
+    user_start_time = Time.now - 1.year
+    user_end_time = user_start_time + 1.month
 
     # make admins
     1.times do |n|
       name = Faker::Name.name
-      username = (0...User::MAX_USERNAME_LENGTH).map { ('a'..'z').to_a[rand(26)] }.join
-      email = "admin#{n+1}@example.com"
+      username = "zadmin#{n+1}"
+      email = "admin#{n+1}@hankish.com"
       password = "password"
       flags = ['sample_data']
-      joined_at = rand(start_time..end_time)
+      joined_at = rand(user_start_time..user_end_time)
       user = User.new(:name => name,
                    :username => username,
                    :email => email,
@@ -61,10 +61,10 @@ namespace :db do
     # make learners
     30.times do |n|
       name = Faker::Name.name
-      username = (0...User::MAX_USERNAME_LENGTH).map { ('a'..'z').to_a[rand(26)] }.join
-      email = "learner#{n+1}@example.com"
+      username = "zlearner#{n+1}"
+      email = "learner#{n+1}@hankish.com"
       password = "password"
-      joined_at = rand(start_time..end_time)
+      joined_at = rand(user_start_time..user_end_time)
       user = User.new(:name => name,
                    :username => username,
                    :email => email,
@@ -106,27 +106,27 @@ namespace :db do
       puts ">> #{group.url} created."
 
       # create 10 random badges for each group
-      start_time = Time.now - 11.months # this ensures that all users existed before badge create date
-      end_time = start_time + 3.months
+      badge_start_time = Time.now - 11.months # this ensures that all users existed before badge create date
+      badge_end_time = badge_start_time + 3.months
       @example_data['badge_image_urls'].sample(10).each do |image_url|
         name = Faker::Company.bs.split.map(&:capitalize).join(' ')
         url = name.parameterize
-        summary = Faker::Lorem.sentence(4)
+        summary = Faker::Lorem.words(20).join(' ').capitalize()
         badge = Badge.new(name: name[0..Badge::MAX_NAME_LENGTH-1],
            url: url[0..Badge::MAX_URL_LENGTH-1],
            image_url: image_url,
-           summary: summary)
+           summary: summary[0..Badge::MAX_SUMMARY_LENGTH-1])
         badge.group = group
         badge.flags = ['sample_data']
         badge.creator = admin
-        badge.created_at = rand(start_time..end_time)
+        badge.created_at = rand(badge_start_time..badge_end_time)
         badge.updated_at = Time.now - 2.hours # NOTE: This keeps the emails from firing
         badge.timeless.save!
         puts ">> #{group.url} \\ #{badge.url} created."
 
         # first, create the randomized variables / example data sets
-        start_time = badge.created_at
-        end_time = start_time + 6.months
+        log_start_time = badge.created_at
+        log_end_time = log_start_time + 6.months
         tags = @example_data['tags'].sample(20) # pick a subset of tags that this badge will use
         images = @example_data['image_urls']
         links = @example_data['link_urls']
@@ -136,11 +136,11 @@ namespace :db do
         # now add 11 learners, keep track of the most active one
         print ">> #{group.url} \\ #{badge.url} \\ Building logs..."
         group.members.sample(11).each do |learner_user| 
-          join_date = rand(start_time..end_time)
+          join_date = rand(log_start_time..log_end_time)
           log = Log.new(date_started: join_date)
           log.user = learner_user
           log.badge = badge
-          log.created_at = start_time
+          log.created_at = join_date
           log.updated_at = Time.now - 2.hours # NOTE: This keeps the emails from firing
           log.flags = ['sample_data']
           log.timeless.save!
@@ -158,7 +158,7 @@ namespace :db do
           number_of_entries.times do |i|
             # first initialize the summary and body and the date field
             entry_time = first_entry_time + (i * increment)
-            summary = Faker::Company.catch_phrase
+            summary = Faker::Lorem.words(20).join(' ').capitalize[0..Entry::MAX_SUMMARY_LENGTH-1]
             number_of_paragraphs = rand(1..5)
             body = ""
 

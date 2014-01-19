@@ -71,57 +71,92 @@ class Log
     badge.group.public? || ((validation_status == 'validated') && !private_log)
   end
 
-  # Adds a validation entry to the log
+  # Adds a validation entry to the log and returns it
   # NOTE: Doesn't work for new records.
   # log_validated = Boolean
-  # Return value = true if new validation was created, false if existing validation was updated 
-  #                also returns nil if nothing was done
   def add_validation(creator_user, summary, body, log_validated)
     unless new_record?
       # First look for an existing validation for this creator (We're only allowed one per expert)
-      existing_entry = entries.find_by(creator: creator_user) rescue nil
+      entry = entries.find_by(creator: creator_user) rescue nil
 
-      if existing_entry
-        existing_entry.update_attributes({
-          summary: summary,
-          body: body,
-          log_validated: log_validated
-        })
-        return false
-      else
+      if entry.nil?
         entry = Entry.new(summary: summary, body: body, log_validated: log_validated)
         entry.type = 'validation'
         entry.log = self
         entry.creator = creator_user
-        entry.save!
-        return true
+        entry.current_user = creator_user
+        entry.current_username = creator_user.username
+        entry.save
+      else
+        entry.current_user = creator_user
+        entry.current_username = creator_user.username
+        entry.update_attributes({
+          summary: summary,
+          body: body,
+          log_validated: log_validated
+        })
       end
+
+      return entry
     else
       return nil
     end
   end
 
-  # Adds a post entry to the log
+  # Adds a post entry to the log and returns it
   # NOTE: Doesn't work for new records.
-  def add_post(creator_user, summary, body)
+  # private = Boolean
+  def add_post(creator_user, summary, body, private = false)
     unless new_record?
-      entry = Entry.new(summary: summary, body: body)
+      entry = Entry.new(summary: summary, body: body, private: private)
       entry.type = 'post'
       entry.log = self
       entry.creator = creator_user
-      entry.save!
+      entry.current_user = creator_user
+      entry.current_username = creator_user.username
+      entry.save
+      return entry
+    else
+      return nil
     end
   end  
 
   # Returns all entries with type = 'post', sorted from newest to oldest
   # NOTE: Uses pagination
   def posts(page = 1, page_size = APP_CONFIG['page_size_normal'])
-    entries.all(type: 'post').desc(:updated_at).page(page).per(page_size)
+    entries.all(type: 'post').order_by(:updated_at.desc).page(page).per(page_size)
+  end
+
+  # Groups posts() return by month string (Ex: "January 2014", "This Month", "Last Month")
+  def posts_by_month(page = 1, page_size = APP_CONFIG['page_size_normal'])
+    return_list = []
+    cur_item, cur_month_label, new_month_label = nil, nil, nil
+
+    self.posts(page, page_size).each do |post|
+      # First set the label of the new post
+      new_month_label = post.updated_at.strftime('%B %Y')
+      if new_month_label == Date.today.strftime("%B %-d, %Y at %l:%M %p")
+        new_month_label = "This Month"
+      elsif new_month_label == (Date.today - 1.month).strftime("%B %-d, %Y at %l:%M %p")
+        new_month_label = "Last Month"
+      end
+
+      if cur_month_label == new_month_label
+        cur_item[:posts] << post
+      else
+        return_list << cur_item unless cur_item.nil? 
+        cur_item = { posts: [post], label: new_month_label }
+        cur_month_label = new_month_label
+      end
+    end
+
+    return_list << cur_item unless cur_item.nil? 
+    return_list
   end
 
   # Returns all entries with type = 'validation', sorted from newest to oldest
   def validations
-    entries.all(type: 'validation').desc(:updated_at)
+    entries.all(type: 'validation').order_by(:updated_at.desc)
   end
 
 protected
@@ -130,9 +165,9 @@ protected
     self.date_started ||= Time.now
     self.validation_status ||= 'incomplete'
     self.issue_status ||= 'unissued'
-    self.show_on_profile ||= true
-    self.private_log ||= false
-    self.detached_log ||= false
+    self.show_on_profile = true if show_on_profile.nil?
+    self.private_log = false if private_log.nil?
+    self.detached_log = false if detached_log.nil?
     self.wiki ||= APP_CONFIG['default_log_wiki']
     self.validation_count ||= 0
     self.rejection_count ||= 0

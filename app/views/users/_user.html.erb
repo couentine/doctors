@@ -7,41 +7,38 @@
       </td>
       <td class="card-body">
         <span class="card-headline">
+          <span class="card-actions">
+            <%=
+              # Output the little "X" that allows admins to remove users from groups
+              if current_user && @group && @current_user_is_admin  && (current_user != user)
+                if user.admin_of?(@group)
+                  path = destroy_group_admin_path(@group, user) 
+                  link_title = "Remove this admin"
+                elsif user.member_of?(@group)
+                  path = destroy_group_member_path(@group, user)
+                  link_title = "Remove this member"
+                else
+                  path = nil
+                  link_title = nil
+                end
+
+                if path
+                  link_to '<i class="icon-remove"></i>'.html_safe, destroy_group_member_path(@group, user),
+                          method: :delete, class: "user-card-delete", title: link_title,
+                          data: { toggle: "tooltip", placement: "bottom",
+                               confirm: "Are you absolutely sure you want to revoke this user's membership?" }
+                end
+              end 
+            %>
+          </span>
+
           <h2><%= link_to user.name, user, title: "View user profile" %></h2>
           <h3><%= user.username %></h3>
         </span>
         <span class="card-footline">
-          Joined <%=  if user.created_at && (user.created_at > (Date.today - 9.months))
-                              user.created_at.to_s(:full_date)
-                            else
-                              "forever ago"
-                            end %>
+          Joined <%= user.created_at.to_s(:full_date) %>
         </span>
       </td>
     </tr>
   </table>
-  <span class="card-actions">
-    <%=
-      # Output the little "X" that allows admins to remove users from groups
-      if current_user && @group && @current_user_is_admin  && (current_user != user)
-        if user.admin_of?(@group)
-          path = destroy_group_admin_path(@group, user) 
-          link_title = "Remove this admin"
-        elsif user.member_of?(@group)
-          path = destroy_group_member_path(@group, user)
-          link_title = "Remove this member"
-        else
-          path = nil
-          link_title = nil
-        end
-
-        if path
-          link_to '<i class="icon-remove"></i>'.html_safe, destroy_group_member_path(@group, user),
-                  method: :delete, class: "user-card-delete", title: link_title,
-                  data: { toggle: "tooltip", placement: "bottom",
-                       confirm: "Are you absolutely sure you want to revoke this user's membership?" }
-        end
-      end 
-    %>
-  </span>
 </div>

@@ -1,6 +1,56 @@
-<h1>Editing entry</h1>
+<% 
+  provide(:title, "Edit #{@entry.type.capitalize} ##{@entry.entry_number}")
+  provide(:show_subheader, true)
+  provide(:subheader_image, group_image_url_for(@group))
+  provide(:include_rich_text, true) 
+%>
 
-<%= render 'form' %>
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url, [@group] %>
+    <span class="divider">/</span>
+  </li>
+  <li>
+    <%= link_to @badge.url, [@group, @badge] %>
+    <span class="divider">/</span>
+  </li>
+  <li>
+    u
+    <span class="divider">/</span>
+    <%= link_to @user.username, [@group, @badge] %>
+    <span class="divider">/</span>
+  </li>
+  <li>
+    <%= link_to @entry.entry_number, [@group, @badge, @log, @entry] %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active">Edit <%= @entry.type.capitalize %></li>
+<% end %>
 
-<%= link_to 'Show', @entry %> |
-<%= link_to 'Back', entries_path %>
+<div class="row">
+  <div class="bl-form bl-form-entry span10 offset1">
+    
+    <div class="form-header">
+      <% if @entry.type == 'validation' %>
+        <% if @current_user_is_log_owner %>
+          <h1>Update your self validation</h1>
+        <% else %>
+          <h1>Update your validation of <%= @user.name %>'s learning log</h1>
+        <% end %>
+      <% else %>
+        <% if @current_user_is_log_owner %>
+          <h1>Update your post</h1>
+        <% else %>
+          <h1>Update your post on <%= @user.name %>'s learning log</h1>
+        <% end %>
+      <% end %>
+      <div class="form-image" 
+           style="background-image: url('<%= image_path 'log-edit-medium.png' %>')">
+        &nbsp;
+      </div>
+    </div>
+
+    <%= render 'form' %>
+
+  </div>
+</div>

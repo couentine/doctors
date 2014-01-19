@@ -1,7 +1,7 @@
 class BadgesController < ApplicationController
   
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy, 
-    :add_learners, :create_learners]
+    :entries_index, :add_learners, :create_learners]
   prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy, 
     :entries_index, :add_learners, :create_learners]
   before_filter :authenticate_user!, except: [:show, :entries_index]

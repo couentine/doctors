@@ -58,13 +58,27 @@ class Entry
   # Returns a number representing the updated_at date relative to the learner's start date
   # Example: if updated_at == log.date_started, return = 1 (learner's first week)
   def learner_week_updated_at
-    ((updated_at.to_date - log.date_started.to_date).to_f / 7).ceil
+    ((updated_at.to_date - log.date_started.to_date).to_f / 3600 / 7).ceil
+  end
+  def learner_week_created_at
+    ((created_at.to_date - log.date_started.to_date).to_f / 3600 / 7).ceil
+  end
+
+  # Return Values = [:learner_post, :expert_post, :validation]
+  def category
+    if type == 'validation'
+      :validation
+    elsif (creator != log.user) || (log.date_issued && (self.created_at > log.date_issued))
+      :expert_post
+    else
+      :learner_post
+    end
   end
 
 protected
   
   def set_default_values
-    self.private ||= false
+    self.private = false if private.nil?
     self.entry_number ||= log.next_entry_number if log
   end
 

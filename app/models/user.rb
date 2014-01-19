@@ -101,6 +101,15 @@ class User
     username
   end
 
+  # Returns boolean if the object is understood, otherwise returns nil
+  def can_see?(some_record)
+    if some_record.class == Entry
+      return true # FIXME >> Build out the logic
+    else
+      return nil
+    end
+  end
+
   def member_of?(group)
     member_of.include?(group)
   end
@@ -175,7 +184,7 @@ class User
   # Returns all entries created by this user, sorted from newest to oldest
   # NOTE: Uses pagination and includes both posts AND validations
   def entries(page=1, page_size = APP_CONFIG['page_size_normal'])
-    entries.desc(:updated_at).page(page).per(page_size)
+    created_entries.desc(:updated_at).page(page).per(page_size)
   end
 
 protected

@@ -1,20 +1,53 @@
-<%= simple_form_for(@entry) do |f| %>
-  <%= f.error_notification %>
+<%= simple_form_for [@group, @badge, @log, @entry], html: {class: 'form-horizontal'} do |f| %>
+  <div class="form-body">
+    
+    <% if @entry.type == 'validation' %>
+      <%= f.input :log_validated, as: :radio_buttons, 
+        label: "In your expertise, has #{@user.name} achieved this badge?",
+        collection: [
+          ['<b>Yes</b>, issue the badge'.html_safe, true],
+          ['<b>Not yet</b>, greater mastery is needed'.html_safe, true]
+        ] %>
 
-  <div class="form-inputs">
-    <%= f.input :entry_number %>
-    <%= f.input :summary %>
-    <%= f.input :private %>
-    <%= f.input :type %>
-    <%= f.input :log_validated %>
-    <%= f.input :body %>
-    <%= f.input :body_versions %>
-    <%= f.input :body_sections %>
-    <%= f.input :current_user %>
-    <%= f.input :current_username %>
+        <p class="text-success">
+          <em><strong>Please explain your opinion. Include lots of detail!</strong></em>
+        </p>
+
+    <% end %>
+
+    <%= f.input :summary, as: :text, label: 'Summary', auto_focus: true, input_html: { data: {
+      :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+      cols: '200', rows: '5' } %>
+    <%= f.input :body, as: :text, label: 'Body', 
+      input_html: { class: "huge-text-area rich-text-area" } %>
+    
+    <% if @entry.type != 'validation' %>
+      <%= f.input :private, as: :radio_buttons, label: 'Who can see this post?',
+        collection: [
+          ['<b>Public</b> - Stored as part of public learning log'.html_safe, false],
+          ['<b>Private</b> - Visible only to you and the badge experts'.html_safe, true]
+        ] %>
+    <% end %>
+
+    <%= f.input :type, as: :hidden %>
+
   </div>
-
-  <div class="form-actions">
-    <%= f.button :submit %>
+  
+  <div class="form-footer">
+    <%
+      if (@entry.type == 'validation')
+        save_button_text = (@entry.new_record?) ? 'Submit my validation' : 'Update my validation'
+      else
+        save_button_text = (@entry.new_record?) ? 'Post to learning log' : 'Update my post'
+      end
+    %>
+    <%= f.button :submit, label: save_button_text, class: 'btn btn-primary' %>
+    <%= 
+      if @entry.new_record?
+        link_to "Cancel", @group, class: "btn"
+      else 
+        link_to "Cancel", [@group, @badge, @log, @entry], class: "btn"
+      end
+    %>
   </div>
 <% end %>

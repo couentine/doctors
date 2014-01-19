@@ -21,76 +21,81 @@ class EntriesController < ApplicationController
 
   # This returns a form for a POST type entry by default.
   # To specify a validation, include "type" parameter set to "validation"
+  # NOTE: Will redirect to EDIT for validations that already exist
   # GET /group-url/badge-url/u/username/entries/new => NEW POST
   # GET /group-url/badge-url/u/username/entries/new?type=validation => NEW VALIDATION
   # GET /group-url/badge-url/u/username/entries/new.json
   def new
-    @entry = Entry.new
-    privacy_count = cookies[:log_privacy_count]
-    @entry.private = privacy_count && (privacy_count > 2) # They have to pick private twice in a row
+    @type = params[:type] || 'post'
 
-    respond_to do |format|
-      format.html do
-        if params[:type] == 'validation'
-          render :new
-        else
-          render :new_validation
-        end
+    if @type == 'validation'
+      @entry = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
+      @validation_already_exists = !@entry.nil?
+      if @validation_already_exists
+        render :edit
+      else
+        @entry = Entry.new
+        @entry.private = false
+        @entry.type = 'validation'
+        render :new
       end
-      format.json { render json: @entry }
+    else
+      @entry = Entry.new
+      @entry.type = 'post'
+      privacy_count = cookies[:log_privacy_count]
+      @entry.private = privacy_count && (privacy_count.to_i > 2) # They have to pick private twice in a row
+      @entry.private = false if @entry.private.nil?
+      render :new
     end
   end
 
   # GET /group-url/badge-url/u/username/1/edit
   def edit
-    if @entry.type == 'validation'
-      render :edit_validation
-    else
-      render :edit
-    end
+    # nothing specific to do here
   end
 
-  # This creates a new POST type entry by default.
-  # To specify a validation, include "type" parameter set to "validation"
   # POST /group-url/badge-url/u/username/entries
   # POST /group-url/badge-url/u/username/entries.json
   def create
-    @entry = Entry.new(params[:entry])
-    @entry.log = @log
-    @entry.creator = current_user
-    @entry.type = 'post'
-    @entry.current_user = current_user
-    @entry.current_username = current_user.username
+    @type = params[:entry][:type] || 'post'
 
-    if params[:type] == 'validation'
-      @entry.type = 'validation'
-      @entry.private = false
-    else # update the privacy count cookie (this controls whether private is default)
+    # First create the entry
+    if @type == 'validation'
+      # First determine if the validation already exists
+      existing_entry = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
+      @validation_already_exists = !existing_entry.nil? # only used to set the flash message
+
+      # Now add the validation using the standard field (thus preventing duplicates)
+      @entry = @log.add_validation current_user, params[:entry][:summary], params[:entry][:body],
+        params[:entry][:log_validated]
+    else
+      @entry = @log.add_post current_user, params[:entry][:summary], params[:entry][:body],
+        params[:entry][:private]
+      
+      # update the privacy count cookie (this controls whether private is default)
       log_privacy_count = cookies[:log_privacy_count] || 0
       delta = (@entry.private) ? 1 : -1
       # don't let the count go below zero or above 4
-      log_privacy_count = [[0, log_privacy_count+delta].max, 4].min
-      cookies.permanent[:log_privacy_count] = log_privacy_count
+      log_privacy_count = [[0, log_privacy_count+delta].max, 4].min.to_i
+      cookies.permanent[:log_privacy_count] = log_privacy_count.to_s
     end
 
-    respond_to do |format|
-      if (@entry.type == 'validation') && !@current_user_is_expert
-        format.html { render action: "new", 
-          error: "Only badge experts can validate a learning log." }
-        format.json { render json: @entry.errors, status: :unprocessable_entity }
-      elsif @entry.save
-        format.html do
-          if @entry.type == 'validation'
-            redirect_to @entry, notice: 'Your learning log entry was successfully created.'
-          else
-            redirect_to @entry, notice: 'Your learning log validation was successfully created.'
-          end
-        end
-        format.json { render json: @entry, status: :created, location: @entry }
+    
+    # Now do the redirect
+    if @entry.errors.count > 0
+      if @entry.new_record?
+        render :new, error: "There was an error creating your #{@type}."
       else
-        format.html { render action: "new" }
-        format.json { render json: @entry.errors, status: :unprocessable_entity }
+        render :edit, error: "There was an error updating your #{@type}."
       end
+    else
+      if (@type == 'validation') && @validation_already_exists
+        notice = "Your existing learning log validation was updated."
+      else
+        notice = "Your learning log #{@type} was created."
+      end
+
+      redirect_to [@group, @badge, @log, @entry], notice: notice
     end
   end
 
@@ -104,16 +109,16 @@ class EntriesController < ApplicationController
       if @entry.update_attributes(params[:entry])
         format.html do
           if @entry.type == 'validation'
-            redirect_to @entry, notice: 'Validation was successfully updated.'
+            redirect_to [@group, @badge, @log, @entry], notice: 'Validation was successfully updated.'
           else
-            redirect_to @entry, notice: 'Entry was successfully updated.'
+            redirect_to [@group, @badge, @log, @entry], notice: 'Entry was successfully updated.'
           end
         end
         format.json { head :no_content }
       else
         format.html do
           if @entry.type == 'validation'
-            render :edit_validation
+            render :edit
           else
             render :edit
           end
@@ -150,12 +155,13 @@ private
 
   def find_all_records
     find_parent_records
-    logger.debug '+++find_all_records: Checkpoint 1.+++'
 
     @entry = @log.entries.find_by(entry_number: (params[:entry_id] || params[:id]))
-    logger.debug "+++find_all_records: @entry = #{@entry.inspect}, current_user = #{current_user.inspect}.+++"
     @current_user_is_entry_creator = current_user && (current_user.id == @entry.creator_id)
-    logger.debug '+++find_all_records: Checkpoint 3.+++'
+
+    if current_user
+      @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil 
+    end
   end
 
   def entry_creator

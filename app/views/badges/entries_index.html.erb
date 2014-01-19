@@ -1,0 +1,116 @@
+<% 
+  provide(:title, "#{@badge.name} - All Entries")
+  provide(:show_subheader, true)
+  provide(:subheader_image, group_image_url_for(@group)) 
+%>
+
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url, @group %>
+    <span class="divider">/</span>
+  </li>
+  <li>
+    <%= link_to @badge.url, [@group, @badge] %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active">
+    All Learning Log Entries
+  </li>
+<% end %>
+
+<% if @current_user_is_admin || @current_user_is_member || @group.open? %>
+  <% content_for :subheader_actions do %>
+    <% if !@current_user_is_expert && !@current_user_is_learner %>
+      <li class="collapsible">
+        <%= link_to '<i class="icon-plus icon-white"></i> Join Badge'.html_safe, 
+            group_badge_logs_path(@group, @badge), method: :post %>
+        <% if @current_user_is_admin %>
+          <span class="divider">|</span>
+        <% end %>
+      </li>
+    <% else %>
+      <li  class="collapsible">
+        <%= link_to '<i class="icon-user icon-white"></i> Your Learning Log'.html_safe, 
+            [@group, @badge, @log] %>
+        <span class="divider">|</span>
+      </li>
+      <li class="collapsible">
+        <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
+            [@group, @badge, @log] %>
+      </li>
+    <% end %>
+  <% end %>
+<% end %>
+
+<!-- === PAGE HEADER === -->
+
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="header-card badge-entries-header-card">
+
+      <div class="primary-header">
+        <table>
+          <tr>
+            <td class="header-image" 
+                style="background-image: url('<%= @badge.image_url %>')">
+              <%= link_to '&nbsp;'.html_safe, [@group, @badge], class: 'image-link', 
+                title: 'View badge' %>
+            </td>
+            <td class="header-text">
+              <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
+              <h2><%= "#{@group.url}/#{@badge.url}" %></h2>
+              <p>
+                <%= @badge.summary %>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="secondary-header">
+        <table>
+          <tr>
+            <td class="header-text">
+              <h1>All Learning Log Entries</h1>
+              <h2>
+                Showing <%= ((@page.to_i - 1) * @page_size.to_i) + 1 %>
+                - <%= [(@page.to_i * @page_size.to_i), @entries.count].min %>
+                of <%= @entries.count %>
+              </h2>  
+            </td>
+            
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === ENTRIES LIST === -->
+
+<% if !@entries.blank? %>
+  
+  <div class="row">
+    <div class="span12">
+      <div class="pagination-header">
+        <div class="pagination"><%= paginate @entries %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
+      data-bl-dyncol-width="12">
+        <%= render(@entries, show_badge: false) %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12">
+      <div class="pagination-footer">
+        <div class="pagination"><%= paginate @entries %></div>
+      </div>
+    </div>
+  </div>
+
+<% end %>

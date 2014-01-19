@@ -4,9 +4,11 @@
 $(document).ready(function() {
     checkForTooltips();
     disableLinks();
+    addAnchorsToPaginateLinks();
     initializeDynamicColumns();
     checkDynamicColumns();
     checkResponsiveFormatting();
+    setTimeout("checkForOverflowMarks();", 250);
     checkForLocationHash();
     registerLocationHashEvents();
     registerAllRichTextAreas();
@@ -20,13 +22,36 @@ $(document).ready(function() {
 
 function checkForTooltips() {
   $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip]').tooltip();
+  $('img[data-toggle=tooltip]').tooltip();
   $('a[rel=tooltip],span[rel=tooltip],li[rel=tooltip]').tooltip();
+}
+
+// This checks the page for items with data-mark-overflow
+// If found, the overflow-mark div is created or destroyed
+function checkForOverflowMarks() {
+  var entryURL;
+  $("div[data-mark-overflow='true']").each(function() {
+    if (($(this).height()+"px") == $(this).css('max-height')) {
+      entryURL = $(this).closest("table").find("td.headline-middle h2 a").prop("href");
+      if ($(this).closest("td").find("div.overflow-mark").length == 0)
+        $(this).after("<div class='overflow-mark'><a href='" + entryURL + "'>Read more...</a></div>");
+    } else $(this).closest("td").remove("div.overflow-mark");
+  });
 }
 
 function disableLinks() {
   $('a[disabled=disabled]').click(function(event){
     //event.preventDefault(); // Prevent link from following its href
     return false;
+  })
+}
+
+function addAnchorsToPaginateLinks() {
+  $("div.tab-pane").each(function() {
+    var tabAnchor = "#" + this.id;
+    $(this).find("nav.pagination ul li a").each(function() {
+      $(this).prop("href", $(this).prop("href") + tabAnchor);
+    });
   })
 }
 
@@ -74,18 +99,18 @@ function registerAllRichTextAreas() {
     });
 
     // Then register the static text areas / register an event for the modal ones
-    $('textarea.rich-text-area').each(function() { registerRichTextArea(this); });
+    $('textarea.rich-text-area').each(function() { registerRichTextArea(this, true); });
     $('.modal').on('shown', function (e) { findAndRegisterModalRichTextAreas(this); })
   }
 }
 
 function findAndRegisterModalRichTextAreas(modalDiv) {
   $(modalDiv).find('textarea.modal-rich-text-area').each(function() {
-    registerRichTextArea(this);
+    registerRichTextArea(this, false);
   });
 }
 
-function registerRichTextArea(textAreaElement) {
+function registerRichTextArea(textAreaElement, addGrow) {
   var myId = $(textAreaElement).attr('id');
 
   var editor = new wysihtml5.Editor(myId, {
@@ -95,6 +120,8 @@ function registerRichTextArea(textAreaElement) {
     useLineBreaks: true,
     cleanUp: true
   });
+
+  //if (addGrow) $(textAreaElement).siblings("iframe").autosize({append: "\n"});
 }
 
 
@@ -124,6 +151,7 @@ function registerLocationHashEvents() {
     var scrollTop = $(document).scrollTop();
     window.location.hash = e.target.hash; 
     $(document).scrollTop(scrollTop);
+    setTimeout("checkForOverflowMarks();", 250);
   })
 
   // Modals (Set on show, clear on hide)
@@ -252,6 +280,7 @@ function checkDynamicColumns() {
     if (curColCount != targetColCount) {
       updateDynamicColumnGroup(key, targetColCount);
       checkForTooltips();
+      setTimeout("checkForOverflowMarks();", 250);
     }
   }
 }

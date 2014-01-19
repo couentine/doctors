@@ -48,12 +48,6 @@ BadgeList::Application.routes.draw do
   match ':group_id/:badge_id/entries' => 'badges#entries_index', via: :get,
         as: :badge_entries
 
-  # === MANUAL ENTRY PATHS === #
-  match ':group_id/:badge_id/u/:log_id/validations/new' => 'entries#new', via: :get,
-        as: :new_log_validation, defaults: { type: 'validation' }
-  match ':group_id/:badge_id/u/:log_id/validations' => 'entries#create', via: :post,
-        as: :create_log_validation, defaults: { type: 'validation' }
-
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #
   match ':id/edit' => 'groups#edit', via: :get
   resources :groups, only: [:new, :create]

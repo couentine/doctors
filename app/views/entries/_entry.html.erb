@@ -1,43 +1,78 @@
-<div class="info-card entry-card" data-bl-dyncol="child">
+<%
+  # OPTIONS:
+  #   show_badge >> Is the badge image shown? >> default = true
+  #   date_format >> How is the date displayed? >> options = :full, :ago, :learner_week >> default = :full
+
+  show_badge = true if show_badge.nil?
+  date_format ||= :full
+%>
+
+<div class="info-card entry-card <%= entry.category %>" data-bl-dyncol="child">
   <table>
-    <tr class="card-headline-row">
+    <tr class="card-headline-row <%= (show_badge) ? 'with-badge' : 'no-badge' %>">
       <td class="headline-left">
-        <%= link_to image_tag(entry.log.badge.image_url), group_badge_path(entry.log.badge.group, 
-          entry.log.badge), title: entry.log.badge.name %>
+        <% if show_badge %>
+          <%= link_to image_tag(entry.log.badge.image_url), group_badge_path(entry.log.badge.group, 
+            entry.log.badge), title: entry.log.badge.name %>
+        <% end %>
       </td>
       <td class="headline-middle">
         <h2>
-          <%= link_to \
-            ((entry.summary.length>70) ? "#{entry.summary[0..70]}..." : entry.summary), 
-            [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
+          <% if entry.creator != entry.log.user %>
+            <span class="creator-gravatar">
+              <img src="<%= gravatar_url_for entry.creator %>" class="img-circle"
+                title="Posted by <%= entry.creator.name %>" data-placement="bottom"
+                data-toggle="tooltip">
+              <span class="arrow">&#9654;</span>
+            </span>
+          <% end %>
+          <% if show_badge %>
+            <%= link_to \
+              "##{entry.entry_number}. " + ((entry.summary.length>90) ? "#{entry.summary[0..90]}..." : entry.summary), 
+              [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
+          <% else %>
+            <%= link_to \
+              "##{entry.entry_number}. #{entry.summary}", 
+              [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
+          <% end %>
         </h2>
       </td>
       <td class="headline-right">
         <%= link_to gravatar_for(entry.log.user, class: 'img-circle'), 
           [entry.log.badge.group, entry.log.badge, entry.log],
-          title: "View #{entry.log.user.name}'s learning log" %><br/>
-        <span class="entry-number">#<%= entry.entry_number %></span>
+          title: "View #{entry.log.user.name}'s learning log" %>
         <span class="username"><%= entry.log.user.username[0..6] %></span>
       </td>
     </tr>
     <tr class="card-body-row">
       <td class="card-body" colspan="3">
-        <% entry.body_sections.each do |section_text| %>
-          <p><%= section_text.html_safe %></p>
-        <% end %>
+        <div class="card-body-inner" data-mark-overflow="true">
+          <% entry.body_sections.each do |section_text| %>
+            <p><%= section_text.html_safe %></p>
+          <% end %>
+        </div>
       </td>
     </tr>
     <tr class="card-footline-row">
-      <td class="left-foot" colspan="1">
+      <td class="left-foot" colspan="2">
+        <% if date_format == :ago %>
+          <% if entry.updated_at <= Time.now %>
+            <%= "#{time_ago_in_words(entry.updated_at).capitalize} ago" %>
+          <% else %>
+            <%= "#{time_ago_in_words(entry.updated_at).capitalize} from now" %>
+          <% end %>
+        <% elsif date_format == :learner_week %>
+          <%= "Learner Week #{entry.learner_week_updated_at}" %> / 
+        <% else %>
+          <%= entry.updated_at.to_s(:full_date_time) %>
+        <% end %>
+      </td>
+      <td class="right-foot">
         <% if entry.private %>
           <i class='icon-lock'></i> Private
         <% else %>
-          <i class='icon-eye-open'></i> Public
+          <!-- <i class='icon-eye-open'></i> Public -->
         <% end %>
-      </td>
-      <td class="right-foot" colspan="2">
-        <%= (entry.body_versions && (entry.body_versions.count > 1)) ? 'Updated' : 'Posted' %>
-        <%= "#{time_ago_in_words(entry.updated_at)} ago (Learner week #{entry.learner_week_updated_at})" %>
       </td>
     </tr>
   </table>

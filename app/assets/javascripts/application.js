@@ -16,4 +16,5 @@
 // Loads all Bootstrap javascripts
 //= require bootstrap
 //= require wysihtml5-0.3.0.min.js
+//= require jquery.autosize.min.js
 //= require badge_list
