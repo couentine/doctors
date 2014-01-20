@@ -8,15 +8,16 @@
     <%= render 'layouts/shim' %>    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-  <body class="<%= "with-subheader" if content_for?(:show_subheader) %>" >
+  <body class="<%= "with-subheader" if content_for?(:show_subheader) \
+    %> <%= yield(:body_class) if content_for?(:body_class) %>" >
     <%= render 'layouts/header' %>
     <div class="container">
       <% flash.each do |key, value| %>
         <%= content_tag(:div, value, class: "alert alert-#{key}") %>
       <% end %>
       <%= yield %>
-      <%= render 'layouts/footer' %>
-      <%= debug(params) if Rails.env.development? %>
+      <%= render 'layouts/footer' unless content_for?(:hide_footer) %>
+      <%= debug(params) if Rails.env.development? && !content_for?(:hide_footer) %>
     </div>
     
     <% if content_for? :include_rich_text %>

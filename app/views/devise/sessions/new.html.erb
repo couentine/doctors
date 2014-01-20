@@ -1,40 +1,59 @@
-<% provide(:title, 'Sign in') %>
+<% 
+  provide(:title, "Sign in")
+  provide(:body_class, "signin")
+  provide(:hide_footer, true)
+%>
 
-<div class="row add-top-margin">
+<div class="row">
   
   <div class="span7">
-    <div class="well well-large">
+    <div class="clear-box">
       <h2>New to Badge List?</h2>
       <p>
-          Badge List helps teachers, trainers and learners keep track of learning progress with Open Badges and simple self-guided assessments.
+        It's time to put badges at the center of your learning.<br>
+        Each badge is like...
       </p>
       <ul>
-          <li>Create a mastery checklist to track progress towards completion</li>
-          <li>Assign exercises and log work</li>
-          <li>Issue badges compatible with Mozilla's Open Badge framework</li>
+          <li><strong>#</strong> A little <a href="/badgelist/explainer/social-network">social network</a></li>
+          <li><strong>#</strong> of <a href="/badgelist/explainer/learning-logs">learning logs</a></li>
+          <li><strong>#</strong> and <a href="/badgelist/explainer/wikis">knowledge wikis</a></li>
+          <li><strong>#</strong> making <a href="/badgelist/explainer/open-badges">Open Badges</a>.</li>
       </ul>
-      <p><br/><%= link_to "Sign up for Badge List", new_user_registration_path, class: "btn btn-large btn-success" %></p>
+      <p>
+        
+      </p>
+      <h3>
+        >> <a href="/badgelist/explainer/intro">Read more</a> 
+        or <%= link_to "sign up for Badge List", new_user_registration_path %>
+      </h3>
     </div>
   </div>
 
-  <div class="span4 offset1">
-    <h2>Sign in</h2>
-    
-    <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
-      <div class="form-inputs bl-form-large bl-form-no-labels">
-        <%= f.input :email, :required => true, :autofocus => true, :placeholder => 'Your email', :input_html => { :class => 'input-xlarge' } %>
-        <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'input-xlarge' } %>
-        <%= f.input :remember_me, :as => :hidden, :input_html => {:value => true} %>
+  <div class="span5">
+    <div class="signin-box">
+      
+      <div class="signin-header">
+        <h2>Sign in</h2>
       </div>
+      
+      <div class="signin-form bl-form-no-labels">
+        <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
+          <%= f.input :email, :required => true, :autofocus => true, :placeholder => 'Your email', :input_html => { :class => 'signin' } %>
+          <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'signin' } %>
+          <%= f.input :remember_me, :as => :hidden, :input_html => {:value => true} %>
 
-      <div class="controls">
-        <%= f.button :submit, "Sign in", :class => 'btn-large btn-primary' %>
+          <div class="controls">
+            <%= f.button :submit, "Sign in", :class => 'btn-large' %>
+          </div>
+
+        <% end %>
       </div>
-
+      
       <div class="form-actions">
         <%= render "devise/shared/links" %>
       </div>
-    <% end %>
+
+    </div>
   </div>
 
 </div>

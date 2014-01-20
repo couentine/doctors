@@ -30,7 +30,7 @@ class Badge
   field :flags,               type: Array
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
-  validates :url, presence: true, length: { within: 3..MAX_URL_LENGTH },
+  validates :url, presence: true, length: { within: 2..MAX_URL_LENGTH },
             uniqueness: { scope: :group },
             format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],

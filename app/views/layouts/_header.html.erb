@@ -43,8 +43,15 @@
     <div id="subheader">
       <% if content_for?(:subheader_links) || content_for?(:subheader_image) %>
         <div class="subheader-breadcrumbs">
+          <% 
+            if content_for?(:subheader_image_class)
+              the_class = yield(:subheader_image_class)  
+            else
+              the_class = ''
+            end 
+          %>
           <%= if content_for?(:subheader_image)
-                image_tag yield(:subheader_image)
+                image_tag yield(:subheader_image), class: the_class
                 end %>
           <ul class="breadcrumb">
             <%= yield :subheader_links if content_for?(:subheader_links) %>  

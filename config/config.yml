@@ -8,7 +8,6 @@ defaults: &defaults
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:
-   - about
    - add
    - admin
    - admins
@@ -27,7 +26,6 @@ defaults: &defaults
    - experts
    - group
    - groups
-   - help
    - index
    - invitation
    - invited_admins

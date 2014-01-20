@@ -1,6 +1,6 @@
 module GroupsHelper
 
-  def group_image_tag_for(group)
+  def group_image_tag_for(group, size = nil)
     if group.image_url && !group.image_url.empty?
       image_tag(group.image_url, size: size, class: "group-image", alt: "Learning Group Image")
     else

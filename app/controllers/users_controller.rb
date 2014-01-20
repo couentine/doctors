@@ -5,7 +5,7 @@ class UsersController < ApplicationController
   # GET /u/username.json
   def show
     @user = User.find(params[:id])
-    @this_is_current_user = (@user == current_user)
+    @this_is_current_user = current_user && (@user == current_user)
 
     # Grab the current page of entries
     @page = params[:page] || 1

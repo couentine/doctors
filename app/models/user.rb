@@ -24,7 +24,7 @@ class User
   field :flags,               type: Array
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
-  validates :username, presence: true, length: { within: 3..MAX_USERNAME_LENGTH }, uniqueness:true,
+  validates :username, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
             format: { with: /\A[\w-]+\Z/, message: "can't have special characters." }
 
   
@@ -153,10 +153,12 @@ class User
     learner_log_map, expert_log_map = {}, {} # maps from group to array of logs
     logs.each do |log|
       target_map = (log.validation_status == 'validated') ? expert_log_map : learner_log_map
-      if target_map.has_key?(log.badge.group)
-        target_map[log.badge.group] << log
-      else
-        target_map[log.badge.group] = [log]
+      if log.badge != nil
+        if target_map.has_key?(log.badge.group)
+          target_map[log.badge.group] << log
+        else
+          target_map[log.badge.group] = [log]
+        end
       end
     end
 

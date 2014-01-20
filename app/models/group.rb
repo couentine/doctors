@@ -31,8 +31,8 @@ class Group
   field :invited_members,         type: Array
   field :flags,                   type: Array
 
-  validates :name, presence: true, length: { within: 3..MAX_NAME_LENGTH }
-  validates :url, presence: true, uniqueness: true, length: { within: 3..MAX_URL_LENGTH }, 
+  validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
+  validates :url, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
             format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }

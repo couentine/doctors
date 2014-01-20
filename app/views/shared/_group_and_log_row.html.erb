@@ -1,0 +1,25 @@
+
+
+<% unless row.nil? %>
+
+  <li>
+    <%= link_to "#{group_and_log_row[:group].name} (#{group_and_log_row[:type]})", group_and_log_row[:group] %>
+    <% if (group_and_log_row[:expert_logs].count + group_and_log_row[:learner_logs].count) > 0 %>
+      <ul>
+        <% group_and_log_row[:expert_logs].each do |log| %>
+          <li>
+            <%= link_to "#{log.badge.name} (Expert#{'/Detached' if log.detached_log})", 
+              [log.badge.group, log.badge] %>
+            </li>
+        <% end %>
+        <% group_and_log_row[:learner_logs].each do |log| %>
+          <li>
+            <%= link_to "#{log.badge.name} (Learner#{'/Detached' if log.detached_log})", 
+              [log.badge.group, log.badge] %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </li>
+
+<% end %>

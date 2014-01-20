@@ -22,7 +22,7 @@ $(document).ready(function() {
 
 function checkForTooltips() {
   $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip]').tooltip();
-  $('img[data-toggle=tooltip]').tooltip();
+  $('img[data-toggle=tooltip],abbr[data-toggle=tooltip]').tooltip();
   $('a[rel=tooltip],span[rel=tooltip],li[rel=tooltip]').tooltip();
 }
 
@@ -83,7 +83,7 @@ function createCharacterCounts() {
 
 // Registers rich text areas with wysihtml5
 var wysihtml5ParserRules = {
-  tags: { h3: {}, strong: {}, b: {}, i: {}, em: {}, br: {}, p: {}, ul: {}, ol: {}, li: {} }
+  tags: { h3: {}, strong: {}, b: {}, i: {}, em: {}, br: {}, ul: {}, ol: {}, li: {} }
 };
 
 function registerAllRichTextAreas() {

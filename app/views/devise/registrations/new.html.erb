@@ -1,28 +1,42 @@
-<% provide(:title, 'Join') %>
+<% 
+  provide(:title, "Sign up")
+  provide(:body_class, "signup")
+  provide(:hide_footer, true)
+%>
 
-<div class="page-header">
-  <h1>Create a new account</h1>
+<div class="row">
+
+  <div class="span8 offset2">
+    <div class="signin-box">
+      
+      <div class="signin-header">
+        <h2>Create a new account</h2>
+      </div>
+      
+      <div class="signin-form bl-form-no-labels">
+        <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
+          <%= f.error_notification %>
+
+          <%= f.input :name, :required => true, :autofocus => true, :placeholder => 'Your name', :input_html => { :class => 'signin' } %>
+          <%= f.input :username, :required => true, :placeholder => 'Your username', :input_html => { :class => 'signin' } %>
+          <%= f.input :email, :required => true, :placeholder => 'Your email', :input_html => { :class => 'signin' } %>
+          <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'signin' } %>
+          
+
+          <div class="controls">
+            <%= f.button :submit, "Create an account", :class => 'btn-large' %>
+          </div>
+
+        <% end %>
+      </div>
+      
+      <div class="form-actions">
+        <%= render "devise/shared/links" %>
+      </div>
+    </div>
+  </div>
+
 </div>
-
-
-<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
-  <%= f.error_notification %>
-
-  <div class="form-inputs bl-form-large bl-form-no-labels">
-    <%= f.input :name, :required => true, :autofocus => true, :placeholder => 'Your name', :input_html => { :class => 'input-xlarge' } %>
-    <%= f.input :username, :required => true, :placeholder => 'Your username', :input_html => { :class => 'input-xlarge' } %>
-    <%= f.input :email, :required => true, :placeholder => 'Your email', :input_html => { :class => 'input-xlarge' } %>
-    <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'input-xlarge' } %>
-  </div>
-
-  <div class="controls">
-    <%= f.button :submit, "Create an account", :class => 'btn-large btn-primary' %>
-  </div>
-
-  <div class="form-actions">
-    <%= render "devise/shared/links" %>
-  </div>
-<% end %>
 
 <script>
   

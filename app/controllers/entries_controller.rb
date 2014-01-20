@@ -76,7 +76,7 @@ class EntriesController < ApplicationController
       log_privacy_count = cookies[:log_privacy_count] || 0
       delta = (@entry.private) ? 1 : -1
       # don't let the count go below zero or above 4
-      log_privacy_count = [[0, log_privacy_count+delta].max, 4].min.to_i
+      # FIXME: log_privacy_count = [[0, log_privacy_count+delta].max, 4].min.to_i
       cookies.permanent[:log_privacy_count] = log_privacy_count.to_s
     end
 
