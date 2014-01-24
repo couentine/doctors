@@ -56,7 +56,7 @@ namespace :db do
       user.skip_confirmation!
       user.timeless.save! if user.valid?
     end
-    puts ">> 3 admins created."
+    puts ">> 1 admin created."
 
     # make learners
     30.times do |n|

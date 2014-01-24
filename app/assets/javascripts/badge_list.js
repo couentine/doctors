@@ -283,10 +283,10 @@ function checkDynamicColumns() {
       setTimeout("checkForOverflowMarks();", 250);
 
       // Finally fix the column widths in FF/IE
-      $(".entry-card .card-body-inner").each(function() {
-        if ($(this).width() > $(this).closest(".entry-card").width()) 
-          $(this).width($(this).closest(".entry-card").width()-22);
-      });
+      // $(".entry-card .card-body-inner").each(function() {
+      //   if ($(this).width() > $(this).closest(".entry-card").width()) 
+      //     $(this).width($(this).closest(".entry-card").width()-22);
+      // });
     }
   }
 }
