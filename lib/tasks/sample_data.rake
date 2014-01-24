@@ -143,10 +143,11 @@ namespace :db do
           log.created_at = join_date
           log.updated_at = Time.now - 2.hours # NOTE: This keeps the emails from firing
           log.flags = ['sample_data']
+          number_of_entries = rand(5..50)
+          log.next_entry_number = number_of_entries + 1
           log.timeless.save!
 
           # now make between 5 and 50 log entries
-          number_of_entries = rand(5..50)
           if number_of_entries > most_active_learner_count
             most_active_learner_log = log
             most_active_learner_count = number_of_entries
@@ -190,12 +191,14 @@ namespace :db do
             # then create the entry
             entry = Entry.new(summary: summary, body: body)
             entry.type = 'post'
+            entry.entry_number = i+1
             entry.log = log
             entry.creator = learner_user
             entry.created_at = entry_time
             entry.updated_at = entry_time
             entry.flags = ["sample_data"]
             entry.timeless.save!
+            i += 1
             print "."
           end
         end
