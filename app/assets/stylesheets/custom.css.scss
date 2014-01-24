@@ -4,18 +4,23 @@ $body-background-color: #f8f8f8;
 $bodyBackground: $body-background-color;
 $grayMediumLight: #eaeaea;
 
-$primary-really-light: #ffefad;
-$primary-light: #f1c40f;
-$primary-medium: #f39c12;
-$primary-dark: #d35400;
+$primary-medium: #FF7C1C;
+$primary-really-light: desaturate(lighten($primary-medium, 40%), 5%);
+$primary-light: desaturate(lighten($primary-medium, 10%), 7%);
+$primary-dark: saturate(darken($primary-medium, 10%), 7%);
 
-$secondary-light: #86d6a7;
-$secondary-medium: #2ecc71;
-$secondary-dark: #27ae60;
+$secondary-medium: #A8CB17;
+$secondary-really-light: desaturate(lighten($secondary-medium, 40%), 5%);
+$secondary-light: desaturate(lighten($secondary-medium, 10%), 7%);
+$secondary-dark: saturate(darken($secondary-medium, 10%), 7%);
 
-$tertiary-light: #1abc9c;
-$tertiary-medium: #3498db;
-$tertiary-dark: #2980b9;
+$tertiary-medium: #4BC1DD;
+$tertiary-really-light: desaturate(lighten($tertiary-medium, 40%), 5%);
+$tertiary-light: desaturate(lighten($tertiary-medium, 10%), 7%);
+$tertiary-dark: saturate(darken($tertiary-medium, 10%), 7%);
+
+$green: #74AB00;
+$red: #CE534D;
 
 $medium-gray: #ccc;
 $light-gray: #eaeaea;
@@ -63,17 +68,6 @@ textarea {
   resize: vertical;
 }
 
-a:hover {
-  background-color: transparent !important;
-}
-a.btn:visited {
-  color: initial;
-}
-
-.btn {
-  background-image: none;
-}
-
 .add-top-margin {
   margin-top: 30px;
 }
@@ -88,12 +82,42 @@ a.btn:visited {
     display: none !important;
   }
 }
+
+/* === BOOTSTRAP OVERRIDES === */
+
+a:not(.btn):hover {
+  background-color: transparent;
+}
+a.btn:visited {
+  color: initial;
+}
+.btn {
+  background-image: none;
+}
 ul.dropdown-menu {
   text-align: left;
 }
 .alert {
   background-color: $primary-really-light;
   color: $medium-text-color;
+}
+.tooltip {
+  display: block;
+}
+.btn-success {
+  background-color: $secondary-medium;
+  color: $light-white !important;
+}
+.well {
+  ul {
+    color: $dark-text-color;
+    list-style: none;
+    font-size: 21px;
+
+    li {
+      line-height: 2em;
+    }
+  }
 }
 
 /* === PATTERNS, COLORS & TEXTURES === */
@@ -969,9 +993,9 @@ div.badge-card {
   }
 }
 
-div.entry-card.validation { border-top: 4px solid $primary-dark; }
-div.entry-card.learner_post { border-top: 4px solid $secondary-dark; }
-div.entry-card.expert_post { border-top: 4px solid $tertiary-dark; }
+div.entry-card.validation { border-top: 4px solid $primary-light; }
+div.entry-card.learner_post { border-top: 4px solid $secondary-light; }
+div.entry-card.expert_post { border-top: 4px solid $tertiary-light; }
 div.entry-card {
   tr.card-headline-row {
     h2 {
@@ -1004,6 +1028,16 @@ div.entry-card {
           margin: 2px 0 0 4px;
           color: $medium-gray;
         }
+        span.validation-result {
+          margin: 0;
+          position: relative;
+          font-size: 26px;
+          top: 5px;
+          cursor: pointer;
+
+          &.positive { color: $green; }
+          &.negative { color: $red; }
+        }
       }
     }
     td.headline-right {
@@ -1035,37 +1069,46 @@ div.entry-card {
 
     div.card-body-inner {
       max-height: 650px;
+      padding: 5px 10px 15px 10px;
+      position: relative;
       
-      a,a:visited {
+      a.linkified-url,a.linkified-url:visited,a.linkified-tag,a.linkified-tag:visited {
         font-weight: bold;
         position: initial;
       }
-      a:hover,a:focus {
+      a.linkified-url:hover,a.linkified-url:focus,a.linkified-tag:hover,a.linkified-tag:focus {
         color: $tertiary-medium;
         text-decoration: none;
         border-bottom: 1px dotted $tertiary-dark;
       }
-      a,a.image-link {
-        position: initial;
-        width: auto; 
-        height: auto;
+      a.linkified-image {
+        display: block;
+        margin: 5px 0;
+        &:last-child { margin-bottom: 0; }
+
         img {
           max-width: 100%;
           max-height: 300px;
+          display: block;
+          border-radius: 10px;
+          border: 1px solid $really-light-gray;
         }
       }
       h1,h2,h3,h4,h5 {
         font-size: 18px;
         font-weight: bold;
-        color: $tertiary-medium;
+        color: $medium-text-color;
         line-height: 1.4em;
         margin: 10px 0;
       }
-      p { 
+      h1:first-child,h2:first-child,h3:first-child,h4:first-child,h5:first-child {
+        margin-top: 0;
+      }
+      .section-container { 
         display: block;
         border-top: 1px solid $really-light-gray; 
-        margin: 5px 10px 0 10px;
-        padding: 5px 0 0 0;
+        margin: 5px 0;
+        padding: 5px 0;
         font-size: 11px;
 
         -ms-word-break: break-all;
@@ -1076,20 +1119,45 @@ div.entry-card {
         hyphens: auto;
 
       }
-      p:first-child { 
+      div:first-child { 
         border-top: none; 
+        margin-top: 0;
         padding-top: 0;
       }
-      p:last-child { margin-bottom: 10px; }
-      div.overflow-mark {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 60%);
-        padding: 30px 0 15px 0;
-        text-align: center;
+      div:last-child { margin-bottom: 0; }
+      .card-body-footer {
+        border-top: 1px solid $light-gray;
+        padding-top: 10px;
+        font-size: 11px;
+        line-height: 11px;
+        color: $light-text-color;
+
+        label {
+          display: inline-block;
+          font-size: 11px;
+
+          i { opacity: 0.55; }
+        }
+        a,a:visited {
+          color: $dark-text-color;
+          font-weight: normal;
+        }
+        a:hover,a:focus {
+          color: $tertiary-medium;
+          font-weight: normal;
+          text-decoration: none;
+          border-bottom: 1px dotted $tertiary-dark;
+        }
       }
+    }
+    div.overflow-mark {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 60%);
+      padding: 30px 0 20px 0;
+      text-align: center;
     }
   }
 
@@ -1105,49 +1173,54 @@ div.entry-card {
 }
 
 div.text-card {
-  padding: 5px 15px 20px 15px;
+  padding: 20px;
   border-top: 4px solid $tertiary-dark;
-  /*max-width: 90%;*/
 
-  p {
-    overflow: hidden;
-  }
   h3 {
     font-size: 18px;
-    margin: 0;
+    margin: 10px 0;
     color: $tertiary-dark;
+    line-height: 1.2em;
   }
-  a,a:visited {
-    color: $dark-text-color;
+  h3:first-child { margin-top: 0; }
+  a.linkified-url,a.linkified-url:visited,a.linkified-tag,a.linkified-tag:visited {
     font-weight: bold;
+    color: $dark-text-color;
+    text-decoration: none;
   }
-  a:hover,a:focus {
+  a.linkified-url:hover,a.linkified-url:focus,a.linkified-tag:hover,a.linkified-tag:focus {
     color: $tertiary-medium;
     text-decoration: none;
-    font-weight: bold;
     border-bottom: 1px dotted $tertiary-dark;
   }
-  img {
-    max-width: 98%;
-    max-height: 500px;
-    padding: 10px 0;
-    border-radius: 20px;
+  a.linkified-image {
+    display: block;
+    margin: 10px 0;
+    &:last-child { margin-bottom: 0; }
+
+    img {
+      max-width: 100%;
+      max-height: 300px;
+      display: block;
+      border-radius: 10px;
+      border: 1px solid $really-light-gray;
+    }
   }
 }
 
 /* === PAGE CARDS === */
 
 .entry-page-card.validation { 
-  .super-header-section { border-bottom: 4px solid $primary-dark; } 
-  .arrow { color: $primary-dark; } 
+  .super-header-section { border-bottom: 4px solid $primary-medium; } 
+  .arrow { color: $primary-medium; } 
 }
 .entry-page-card.learner_post { 
-  .super-header-section { border-bottom: 4px solid $secondary-dark; } 
-  .arrow { color: $secondary-dark; } 
+  .super-header-section { border-bottom: 4px solid $secondary-medium; } 
+  .arrow { color: $secondary-medium; } 
 }
 .entry-page-card.expert_post { 
-  .super-header-section { border-bottom: 4px solid $tertiary-dark; } 
-  .arrow { color: $tertiary-dark; } 
+  .super-header-section { border-bottom: 4px solid $tertiary-medium; } 
+  .arrow { color: $tertiary-medium; } 
 }
 .page-card {
   border-radius: 3px;
@@ -1178,7 +1251,7 @@ div.text-card {
     }
   }
   .header-section {
-    padding: 20px 30px;
+    padding: 20px 30px 0px 30px;
     &:after { 
        content: " ";
        display: block; 
@@ -1252,29 +1325,53 @@ div.text-card {
   .body-section {
     padding: 10px 30px 30px 30px;
 
-    p {
-      border-top: 1px solid $light-gray;
-      padding: 10px 0 0 0;
-      margin: 10px 0 0 0;
+    h1,h2,h3 {
+      font-size: 22px;
+      color: $dark-text-color;
+    }
+    a.linkified-url,a.linkified-url:visited,a.linkified-tag,a.linkified-tag:visited {
+      color: $dark-text-color;
+      font-weight: bold;
+    }
+    a.linkified-url:hover,a.linkified-url:focus,a.linkified-tag:hover,a.linkified-tag:focus {
+      color: $tertiary-medium;
+      text-decoration: none;
+      font-weight: bold;
+      border-bottom: 1px dotted $tertiary-dark;
+    }
+    a.linkified-image {
+      display: block;
+      margin: 10px 0;
+      &:last-child { margin-bottom: 0; }
 
-      a,a:visited {
-        color: $dark-text-color;
-        font-weight: bold;
-      }
-      a:hover,a:focus {
-        color: $tertiary-medium;
-        text-decoration: none;
-        font-weight: bold;
-        border-bottom: 1px dotted $tertiary-dark;
-      }
       img {
-        max-height: 500px !important;
+        max-width: 100%;
+        max-height: 300px;
+        display: block;
+        border-radius: 10px;
+        border: 1px solid $really-light-gray;
       }
     }
-    p:first-child { 
+    .section-container {
+      display: block;
+      border-top: 1px solid $light-gray;
+      padding: 10px 0;
+      margin: 10px 0 0 0;
+    }
+    .section-container:first-child { 
       border: none; 
       padding-top: 0;
       margin-top: 0;
+    }
+    .section-container:last-child { 
+      padding-bottom: 0;
+    }
+
+    .validation-result {
+      display: block;
+      
+      &.yes { color: $green; }
+      &.no { color: $red; }
     }
   }
   .footer-section {
@@ -1282,6 +1379,21 @@ div.text-card {
     font-size: 13px;
     padding: 10px 30px;
     color: $light-text-color;
+
+    label {
+      display: inline-block;
+      margin-right: 10px;
+
+      i { opacity: 0.55; }
+    }
+    a,a:visited {
+      color: $dark-text-color;
+    }
+    a:hover,a:focus {
+      color: $tertiary-medium;
+      text-decoration: none;
+      border-bottom: 1px dotted $tertiary-dark;
+    }
   }
 }
 
@@ -1332,14 +1444,14 @@ div.text-card {
           text-decoration: none;
         }
         a:hover,a:focus {
-          color: $primary-medium;
+          color: $primary-dark;
           text-decoration: none;
-          border-bottom: 2px dashed $primary-medium;
+          border-bottom: 2px dashed $primary-dark;
         }
         abbr:hover,abbr:focus {
-          color: $primary-medium;
+          color: $primary-dark;
           text-decoration: none;
-          border-bottom: 1px dotted $primary-medium;
+          border-bottom: 1px dotted $primary-dark;
         }
       }
       h2 {
@@ -1388,9 +1500,9 @@ div.text-card {
             color: $medium-text-color;
           }
           a:hover,a:focus {
-            color: $primary-medium;
+            color: $primary-dark;
             text-decoration: none;
-            border-bottom: 1px dashed $primary-medium;
+            border-bottom: 1px dashed $primary-dark;
           }
         }
         h2 {
@@ -1468,16 +1580,22 @@ div.text-card {
 
 /* === SIGN IN PAGE === */
 
-.clear-box {
+.color-box {
   display: block;
-  margin-top: 30px;
+  margin: 60px 25px 0 0;
+  background-color: $secondary-really-light;
+  border-radius: 5px;
+  padding: 0 10px 10px 25px;
 
   h2 {
-    display: inline-block;
+    display: block;
+    float: left;
+    width: 50%;
+    text-align: center;
     padding: 10px;
-    margin: 0 10px 10px 0;
-    background-color: $primary-light;
-    border-radius: 3px;
+    margin: -30px 40% 10px 5%;
+    background-color: $secondary-light;
+    border-radius: 1px;
     font-size: 26px;
     font-weight: lighter;
   }
@@ -1487,12 +1605,12 @@ div.text-card {
     border-radius: 3px;
     font-size: 24px;
     font-weight: lighter;
-    color: $primary-medium;
+    color: $secondary-dark;
 
     a,a:visited {
       text-decoration: none;
-      color: $primary-medium;
-      border-bottom: 1px dotted $primary-medium;
+      color: $secondary-dark;
+      border-bottom: 1px dotted $secondary-dark;
     }
     a:hover,a:focus {
       text-decoration: none;
@@ -1506,22 +1624,26 @@ div.text-card {
     list-style: none;
     font-size: 20px;
     font-weight: lighter;
-    line-height: 1.2em;
+    line-height: 1.5em;
 
+    b,strong { font-weight: bold; }
     li {
       display: block;
       margin: 9px 5px 5px 15px;
 
-      strong { color: $primary-dark;}
+      b,strong { 
+        color: $secondary-dark;
+        font-weight: bold;
+      }
       a,a:visited {
         color: $dark-text-color;
         text-decoration: none;
         border-bottom: 1px dotted $dark-text-color;        
       }
       a:hover,a:focus {
-        color: $primary-dark;
+        color: $secondary-dark;
         text-decoration: none;
-        border-bottom: 1px dotted $primary-dark;        
+        border-bottom: 1px dotted $secondary-dark;        
       }
     }
   }
@@ -1576,7 +1698,7 @@ div.text-card {
   margin: 5px 0 0 0;
 
   h2 {
-    color: $primary-medium;
+    color: $primary-dark;
     font-size: 26px;
     font-weight: lighter;
   }

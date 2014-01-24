@@ -51,7 +51,8 @@ class BadgesController < ApplicationController
         format.html { redirect_to group_badge_path(@group, @badge), notice: 'Badge was successfully created.' }
         format.json { render json: @badge, status: :created, location: @badge }
       else
-        format.html { render action: "new", error: 'Oops! Looks like something was missing.' }
+        flash[:error] = "There was an error creating the badge."
+        format.html { render action: "new" }
         format.json { render json: @badge.errors, status: :unprocessable_entity }
       end
     end
@@ -71,8 +72,8 @@ class BadgesController < ApplicationController
       else
         format.html do 
           if params[:modal]
-            render action: "show", 
-            error: "There was a problem updating the badge, try again later.\nError Text: #{@badge.errors}"
+            flash[:error] = "There was a problem updating the badge, try again later.\nError Text: #{@badge.errors}"
+            render action: "show"
           else
             render action: "edit"
           end

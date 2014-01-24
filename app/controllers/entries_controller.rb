@@ -4,6 +4,7 @@ class EntriesController < ApplicationController
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy]
   prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy]
   before_filter :authenticate_user!, only: [:edit, :new, :create, :update, :destroy]
+  before_filter :visible_to_current_user, only: [:show]
   before_filter :entry_creator, only: [:edit, :update]
   before_filter :log_owner_or_entry_creator, only: [:destroy]
   before_filter :badge_expert_or_log_owner, only: [:new, :create]
@@ -64,10 +65,12 @@ class EntriesController < ApplicationController
       # First determine if the validation already exists
       existing_entry = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
       @validation_already_exists = !existing_entry.nil? # only used to set the flash message
+      logger.debug "+++create: params[:entry][:log_validated] = #{params[:entry][:log_validated]}+++"
+      @log_validated = (params[:entry][:log_validated] == 'true')
 
       # Now add the validation using the standard field (thus preventing duplicates)
       @entry = @log.add_validation current_user, params[:entry][:summary], params[:entry][:body],
-        params[:entry][:log_validated]
+        @log_validated
     else
       @entry = @log.add_post current_user, params[:entry][:summary], params[:entry][:body],
         params[:entry][:private]
@@ -77,16 +80,18 @@ class EntriesController < ApplicationController
       delta = (@entry.private) ? 1 : -1
       # don't let the count go below zero or above 4
       # FIXME: log_privacy_count = [[0, log_privacy_count+delta].max, 4].min.to_i
-      cookies.permanent[:log_privacy_count] = log_privacy_count.to_s
+      # cookies.permanent[:log_privacy_count] = log_privacy_count.to_s
     end
 
     
     # Now do the redirect
     if @entry.errors.count > 0
       if @entry.new_record?
-        render :new, error: "There was an error creating your #{@type}."
+        flash[:error] = "There was an error creating your #{@type}."
+        render :new
       else
-        render :edit, error: "There was an error updating your #{@type}."
+        flash[:error] = "There was an error updating your #{@type}."
+        render :edit
       end
     else
       if (@type == 'validation') && @validation_already_exists
@@ -106,13 +111,16 @@ class EntriesController < ApplicationController
     @entry.current_username = current_user.username
 
     respond_to do |format|
-      if @entry.update_attributes(params[:entry])
+      if @entry.type == 'validation' && (@log.add_validation(current_user, 
+        params[:entry][:summary], params[:entry][:body], params[:entry][:log_validated]) != nil)
+        
         format.html do
-          if @entry.type == 'validation'
-            redirect_to [@group, @badge, @log, @entry], notice: 'Validation was successfully updated.'
-          else
-            redirect_to [@group, @badge, @log, @entry], notice: 'Entry was successfully updated.'
-          end
+          redirect_to [@group, @badge, @log, @entry], notice: 'Validation was successfully updated.'
+        end
+        format.json { head :no_content }
+      elsif @entry.update_attributes(params[:entry])
+        format.html do
+          redirect_to [@group, @badge, @log, @entry], notice: 'Entry was successfully updated.'
         end
         format.json { head :no_content }
       else
@@ -134,7 +142,7 @@ class EntriesController < ApplicationController
     @entry.destroy
 
     respond_to do |format|
-      format.html { redirect_to entries_url }
+      format.html { redirect_to [@group, @badge, @log] }
       format.json { head :no_content }
     end
   end
@@ -158,9 +166,17 @@ private
 
     @entry = @log.entries.find_by(entry_number: (params[:entry_id] || params[:id]))
     @current_user_is_entry_creator = current_user && (current_user.id == @entry.creator_id)
+    @visible_to_current_user = @entry.visible_to?(current_user)
 
     if current_user
       @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil 
+    end
+  end
+
+  def visible_to_current_user
+    unless @visible_to_current_user
+      flash[:error] = "Oops! it looks like you don't have access to this learning log entry."
+      redirect_to [@group, @badge, @log]
     end
   end
 

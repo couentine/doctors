@@ -25,6 +25,8 @@ class Log
   field :wiki,                    type: String
   field :wiki_sections,           type: Array
   field :wiki_versions,           type: Array
+  field :tags,                    type: Array
+  field :tags_with_caps,          type: Array
 
   field :date_started,            type: Time
   field :date_requested,          type: Time
@@ -66,20 +68,23 @@ class Log
     user? ? user.username : _id
   end
 
-  # Rerturns true if log is currently public
+  # Returns true if log is currently public
+  # Public = Visible to everyone, Private = Visible to group admins & members
   def public?
-    badge.group.public? || ((validation_status == 'validated') && !private_log)
+    !private_log && (detached_log || badge.nil? || badge.group.public? || (validation_status == 'validated'))
   end
 
-  # Adds a validation entry to the log and returns it
+  # Adds or updates a validation entry to the log and returns it
   # NOTE: Doesn't work for new records.
   # log_validated = Boolean
-  def add_validation(creator_user, summary, body, log_validated)
+  # Set overwrite_existing=false if you do NOT want to overwrite & save a existing validation
+  def add_validation(creator_user, summary, body, log_validated, overwrite_existing = true)
     unless new_record?
       # First look for an existing validation for this creator (We're only allowed one per expert)
-      entry = entries.find_by(creator: creator_user) rescue nil
+      entry = entries.find_by(creator: creator_user, type: 'validation') rescue nil
 
       if entry.nil?
+        # First create the entry
         entry = Entry.new(summary: summary, body: body, log_validated: log_validated)
         entry.type = 'validation'
         entry.log = self
@@ -87,7 +92,28 @@ class Log
         entry.current_user = creator_user
         entry.current_username = creator_user.username
         entry.save
-      else
+
+        # Then increment the counts
+        if log_validated
+          self.validation_count += 1
+        else
+          self.rejection_count += 1
+        end
+        self.next_entry_number += 1
+        self.save
+      elsif overwrite_existing
+        # First check and see if the counts need updating because of this change
+        if log_validated != entry.log_validated
+          if log_validated
+            self.validation_count += 1
+            self.rejection_count -= 1
+          else
+            self.validation_count -= 1
+            self.rejection_count += 1
+          end
+          self.save
+        end
+
         entry.current_user = creator_user
         entry.current_username = creator_user.username
         entry.update_attributes({
@@ -108,6 +134,7 @@ class Log
   # private = Boolean
   def add_post(creator_user, summary, body, private = false)
     unless new_record?
+      # First create the post
       entry = Entry.new(summary: summary, body: body, private: private)
       entry.type = 'post'
       entry.log = self
@@ -115,6 +142,10 @@ class Log
       entry.current_user = creator_user
       entry.current_username = creator_user.username
       entry.save
+
+      # Then update the next entry number
+      self.next_entry_number += 1
+      self.save
       return entry
     else
       return nil
@@ -122,17 +153,22 @@ class Log
   end  
 
   # Returns all entries with type = 'post', sorted from newest to oldest
+  # Filters out private entries based on the permissions of the passed filter_user
   # NOTE: Uses pagination
-  def posts(page = 1, page_size = APP_CONFIG['page_size_normal'])
-    entries.all(type: 'post').order_by(:updated_at.desc).page(page).per(page_size)
+  def posts(filter_user, page = 1, page_size = APP_CONFIG['page_size_normal'])
+    if filter_user && ((filter_user == user) || (!detached_log && filter_user.expert_of?(badge)))
+      entries.all(type: 'post').order_by(:updated_at.desc).page(page).per(page_size)
+    else
+      entries.all(type: 'post', private: false).order_by(:updated_at.desc).page(page).per(page_size)
+    end
   end
 
   # Groups posts() return by month string (Ex: "January 2014", "This Month", "Last Month")
-  def posts_by_month(page = 1, page_size = APP_CONFIG['page_size_normal'])
+  def posts_by_month(filter_user, page = 1, page_size = APP_CONFIG['page_size_normal'])
     return_list = []
     cur_item, cur_month_label, new_month_label = nil, nil, nil
 
-    self.posts(page, page_size).each do |post|
+    self.posts(filter_user, page, page_size).each do |post|
       # First set the label of the new post
       new_month_label = post.updated_at.strftime('%B %Y')
       if new_month_label == Date.today.strftime("%B %-d, %Y at %l:%M %p")
@@ -171,7 +207,7 @@ protected
     self.wiki ||= APP_CONFIG['default_log_wiki']
     self.validation_count ||= 0
     self.rejection_count ||= 0
-    self.next_entry_number ||= 1
+    self.next_entry_number = 1 if self.next_entry_number.nil?
     self.flags ||= []
   end
 
@@ -193,6 +229,7 @@ protected
         self.validation_status = 'withdrawn'
       elsif date_requested_changed? && !date_requested.nil?
         self.validation_status = 'requested'
+        self.date_withdrawn = nil # In case this is not their first request
       end
       
       # Then update the issue status if needed
@@ -222,6 +259,7 @@ protected
   def back_validate_if_needed
     if (validation_status == 'validated') && validation_status_changed?
       validation_threshold = badge.current_validation_threshold
+      logger.debug "+++back_validate_if_needed: log user = #{user.name}, validation count = #{validation_count}, validation_threshold = #{validation_threshold}+++"
       time_string = Time.now.to_s(:full_date_time)
       
       if validation_threshold == 1
@@ -233,6 +271,7 @@ protected
         badge.logs.find_all do |log| 
           log.validation_status == 'validated' && (log.validation_count < validation_threshold)
         end.each do |devalidated_log|
+          logger.debug "+++back_validate_if_needed: devalidated_log = #{devalidated_log.inspect}+++"
           if devalidated_log.user == self.user
             summary = "Self-validation of founding expert"
             body = "#{user.name} was added as one of the founding experts on #{time_string}."\
@@ -242,7 +281,7 @@ protected
             body = "#{user.name} was added as one of the founding experts on #{time_string}."\
               + " This 'back-validation' was added automatically."
           end
-          devalidated_log.add_validation(user, summary, body, true)
+          devalidated_log.add_validation(user, summary, body, true, false)
         end
       end
     end
@@ -250,7 +289,10 @@ protected
 
   def update_wiki_sections
     if wiki_changed?
-      self.wiki_sections = linkify_text(wiki, badge.group, badge).split(SECTION_DIVIDER_REGEX)
+      linkified_result = linkify_text(wiki, badge.group, badge)
+      self.wiki_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
+      self.tags = linkified_result[:tags]
+      self.tags_with_caps = linkified_result[:tags_with_caps]
     end
   end
 
@@ -274,7 +316,7 @@ protected
     if badge
       validation_threshold = badge.current_validation_threshold
     else
-      validation_threshold = 0 # default value (for tests and such)
+      validation_threshold = 1 # default value (for tests and such)
     end
     
     # Return value = 
@@ -286,7 +328,7 @@ protected
     if validation_status_changed? && (updated_at > (Time.now - 1.hour))
       if validation_status == 'requested'
         badge.expert_logs.each do |expert_log|
-          UserMailer.log_validation_request(self.user, expert_log.user,\
+          UserMailer.log_validation_request(expert_log.user, user, \
             badge.group, badge, self).deliver 
         end
       elsif validation_status == 'validated'

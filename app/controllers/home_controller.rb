@@ -6,7 +6,8 @@ class HomeController < ApplicationController
   # This is the root page for a signed in user
   def show
     @user = current_user
-    @group_and_log_list = @user.group_and_log_list
+    @this_is_current_user = true
+    @group_and_log_list = @user.group_and_log_list @user
   end
 
 end

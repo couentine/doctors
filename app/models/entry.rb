@@ -24,6 +24,8 @@ class Entry
   field :body,                type: String
   field :body_versions,       type: Array
   field :body_sections,       type: Array
+  field :tags,                type: Array
+  field :tags_with_caps,      type: Array
 
   field :current_user,        type: String
   field :current_username,    type: String
@@ -44,11 +46,9 @@ class Entry
   before_validation :set_default_values, on: :create
   before_save :update_body_sections
   before_save :update_body_versions # DO store the first value since it comes from the user
-  after_create :increment_log_next_entry_number
-  after_create :process_new_validation
   after_create :send_notifications
-  after_save :process_updated_validation, on: :update
-
+  after_destroy :check_log_validation_counts
+  
   # === ENTRY METHODS === #
 
   def to_param
@@ -75,6 +75,37 @@ class Entry
     end
   end
 
+  # Returns a symbol representing the widest group to which this post is visible
+  # NOTE: A post is ALWAYS visible to the creator and log owner (the :users).
+  # Return values = [:users, :experts, :members, :anonymous]
+  def visibility
+    if self.private
+      return (log.detached_log) ? :users : :experts
+    elsif log.public?
+      return :anonymous
+    elsif log.detached_log
+      return :users
+    else
+      return :members
+    end
+  end
+
+  # Uses the return value of the visibility method to determine if this user can see the log entry
+  # NOTE: It's ok if user is nil
+  def visible_to?(user)
+    if (self.visibility == :anonymous) || (user == self.creator) || (user == self.log.user)
+      return true
+    elsif user && (self.visibility != :users)
+      if self.visibility == :experts
+        return user.expert_of?(self.log.badge)
+      else # :members
+        return user.member_of?(self.log.badge.group) || user.admin_of?(self.log.badge.group)
+      end
+    else # anonymous user / users only visibility
+      return false
+    end 
+  end
+
 protected
   
   def set_default_values
@@ -84,7 +115,10 @@ protected
 
   def update_body_sections
     if body_changed?
-      self.body_sections = linkify_text(body, log.badge.group, log.badge).split(SECTION_DIVIDER_REGEX)
+      linkified_result = linkify_text(body, log.badge.group, log.badge)
+      self.body_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
+      self.tags = linkified_result[:tags]
+      self.tags_with_caps = linkified_result[:tags_with_caps]
     end
   end
 
@@ -102,40 +136,6 @@ protected
     end
   end
 
-  def increment_log_next_entry_number
-    log.next_entry_number += 1
-    log.save!
-  end
-
-  # Updates the validation_count / rejection_count fields as appropriate
-  def process_new_validation
-    if type == 'validation'
-      if log_validated
-        log.validation_count += 1
-      else
-        log.rejection_count += 1
-      end
-      log.save!
-    end
-  end
-
-  # Updates the validation_count / rejection_count fields as appropriate
-  # Only updates the counts if log_validated changes
-  def process_updated_validation
-    if (type == 'validation') && log_validated_changed?
-      if log_validated
-        # we've changed FROM a rejection TO a validation
-        log.validation_count += 1
-        log.rejection_count -= 1
-      else
-        # we've changed FROM a validation TO a rejection
-        log.validation_count -= 1
-        log.rejection_count += 1
-      end
-      log.save!
-    end
-  end
-
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
     if created_at > (Time.now - 1.hour)
@@ -143,6 +143,19 @@ protected
         UserMailer.log_validation_received(log.user, creator, \
           log.badge.group, log.badge, log, self)
       end
+    end
+  end
+
+  # Update the log if this was a validation
+  def check_log_validation_counts
+    if type == 'validation'
+      if log_validated
+        log.validation_count -= 1
+      else
+        log.rejection_count -= 1
+      end
+      log.save
+      flash[:notice] = "Validation deleted and learning log validation counts adjusted."
     end
   end
 

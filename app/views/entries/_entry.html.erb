@@ -33,7 +33,20 @@
                 <img src="<%= gravatar_url_for entry.creator %>" class="img-circle"
                   title="Posted by <%= entry.creator.name %>" data-placement="bottom"
                   data-toggle="tooltip">
-                <span class="arrow">&#9654;</span>
+                
+                <% if (entry.type == 'validation') && entry.log_validated %>
+                  <span class="validation-result positive" title="Learning was positively validated"
+                    data-toggle="tooltip">
+                    &#10003;
+                  </span>
+                <% elsif (entry.type == 'validation') && !entry.log_validated %>
+                  <span class="validation-result negative" title="Learning was negatively validated"
+                    data-toggle="tooltip">
+                    &#10007;
+                  </span>
+                <% else %>
+                  <span class="arrow">&#9654;</span>
+                <% end %>
               </span>
             <% end %>
             <% if show_badge %>
@@ -54,14 +67,24 @@
           <abbr class="username" title="<%= entry.log.user.name %>" data-toggle="tooltip"
             data-placement="bottom">
             <%= entry.log.user.username %>
-          </span>
+          </abbr>
         </td>
       </tr>
       <tr class="card-body-row">
         <td class="card-body" colspan="3">
           <div class="card-body-inner" data-mark-overflow="true">
             <% entry.body_sections.each do |section_text| %>
-              <p><%= section_text.html_safe %></p>
+              <div class="section-container"><%= section_text.html_safe %></div>
+            <% end %>
+            
+            <% unless entry.tags.blank? %>
+              <div class="card-body-footer">
+                <label><i class="icon-tags"></i> Tags:</label> 
+                <% entry.tags.each do |tag| %>
+                  <% comma = (tag == entry.tags.last) ? '' : ', ' %>
+                  <%= link_to tag, "/#{@group.url}/#{@badge.url}/#{tag}" %><%= comma %>
+                <% end %>
+              </div>
             <% end %>
           </div>
         </td>
@@ -81,10 +104,18 @@
           <% end %>
         </td>
         <td class="right-foot">
-          <% if entry.private %>
-            <i class='icon-lock'></i> Private
+          <% if entry.visibility == :anonymous %>
+            <i class='icon-eye-open' data-toggle='tooltip' 
+              title='Visible to public'></i>
+          <% elsif entry.visibility == :members %>
+            <i class='icon-eye-close' data-toggle='tooltip' 
+              title='Only visible to members now, visible to public when badge is issued'></i>
+          <% elsif entry.visibility == :experts %>
+            <i class='icon-lock' data-toggle='tooltip' 
+              title='Only visible to badge experts'></i>
           <% else %>
-            <!-- <i class='icon-eye-open'></i> Public -->
+            <i class='icon-warning-sign' data-toggle='tooltip' 
+              title='Only visible to log owner / entry creator'></i>
           <% end %>
         </td>
       </tr>

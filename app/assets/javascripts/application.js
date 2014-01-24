@@ -17,4 +17,5 @@
 //= require bootstrap
 //= require wysihtml5-0.3.0.min.js
 //= require jquery.autosize.min.js
+//= require jquery.wordrotator.min
 //= require badge_list

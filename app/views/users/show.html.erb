@@ -115,7 +115,7 @@
             <% if @this_is_current_user %>
               It's time to get posting!
             <% else %>
-              Looks like <%= @user.name %> hasn't posted anything yet.
+              Looks like <%= @user.name %> hasn't posted anything that's visible to you.
             <% end %>
           </p>
         </div>
@@ -156,7 +156,7 @@
 
   <div class="tab-pane" id="memberships">
 
-    <% if @user.group_and_log_list.blank? %>
+    <% if @group_and_log_list.blank? %>
 
       <div class="row">
         <div class="well span7 offset2">
@@ -180,7 +180,7 @@
       <div class="row">
         <div class="span12">
           
-        <% @user.group_and_log_list.each do |row|
+        <% @group_and_log_list.each do |row|
              unless row[:group].name.nil?  %>
 
           <div class="container-card group-container-card">
@@ -193,7 +193,7 @@
                 <td class="header-column">
                   <%= link_to group_image_tag_for(row[:group]), row[:group],
                     title: "View the learning group", class: "image-link" %><br>
-                  <h2><%= row[:group].name %></h2>
+                  <h2><%= link_to row[:group].name, row[:group],title: "View the learning group" %></h2>
                   <h3>
                     <% if @this_is_current_user %>
                       You are 

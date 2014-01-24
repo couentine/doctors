@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "#{@badge.name} Learning Log - #{@user.name}")
+  provide(:title, "#{@user.name} - #{@badge.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
@@ -44,7 +44,7 @@
           <%= link_to "<i class='icon-plus-sign icon-white'></i> Post to This Log".html_safe,
             new_group_badge_log_entry_path(@group, @badge, @log) %>
           <% if @validation.nil? %>
-            <span class="divider">|</span>
+            <span class="divider">|</span>f
           <% end %>
         <% end %>
       </li>
@@ -52,8 +52,13 @@
 
     <% if @current_user_is_expert && !@current_user_is_log_owner && @validation.nil? %>
       <li class="collapsible">
-        <%= link_to "<i class='icon-check icon-white'></i> Validate This Log".html_safe,
-          new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
+        <% if @log.validation_status == 'requested' %>
+          <%= link_to "<i class='icon-check icon-white'></i> Add Your Expertise".html_safe,
+            new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
+        <% else %>
+          <%= link_to "<i class='icon-check icon-white'></i> Validate This Log".html_safe,
+            new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
+        <% end %>
       </li>
     <% end %>
 
@@ -76,7 +81,7 @@
             </li>
             <% if @log.validation_status == 'requested' %>
               <li>
-                <%= link_to "<i class='icon-flag icon-white'></i>Withdraw validation request".html_safe,
+                <%= link_to "<i class='icon-flag'></i>Withdraw validation request".html_safe,
                   group_badge_log_path(@group, @badge, @log, log: { date_withdrawn: Time.now }), 
                   method: :put, data: { confirm: "Are you sure you want to withdraw your request "\
                   + "for expert validation of your learning log? \n\n"\
@@ -85,7 +90,7 @@
               </li>
             <% elsif @log.validation_status != 'validated' %>
               <li>
-                <%= link_to "<i class='icon-flag icon-white'></i>Request expert validation".html_safe,
+                <%= link_to "<i class='icon-flag'></i>Request expert validation".html_safe,
                   group_badge_log_path(@group, @badge, @log, log: { date_requested: Time.now }), 
                   method: :put, data: { confirm: "Are you sure you want to send a request to all "\
                   + "of the badge experts asking for them to validate your learning log? \n\n"\
@@ -335,7 +340,8 @@
         <div class="card-tabs">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#wiki" data-toggle="tab">Wiki</a></li>
-            <% if (@log.validation_status == 'validated') || (@log.validation_status == 'requested') %>
+            <% if !@validations.empty? || (@log.validation_status == 'validated') \
+              || (@log.validation_status == 'requested') %>
               <li>
                 <a href="#validations" data-toggle="tab">
                   <span class="collapse-when-small">Expert </span>Validation
@@ -394,7 +400,7 @@
 
     <!-- === VALIDATIONS TAB === -->
 
-    <% if !@log.validations.empty? || (@log.validation_status == 'validated') \
+    <% if !@validations.empty? || (@log.validation_status == 'validated') \
       || (@log.validation_status == 'requested') %>
       <div class="tab-pane" id="validations">
         
@@ -448,7 +454,7 @@
           </div>
         </div>
           
-        <% if @log.validations.empty? %>
+        <% if @validations.empty? %>
 
           <div class="row">
             <div class="well span7 offset2">
@@ -458,8 +464,9 @@
                   This learner needs expert validations! To add your expertise, click the button
                   below and let the learner know whether or not your believe they have mastered
                   the badge.<br><br>
-                  <%= link_to "<i class='icon-plus icon-white'></i> Add your expertise".html_safe,
-                    add_badge_learners_path(@group, @badge), class: 'btn btn-success' %>
+                  <%= link_to "<i class='icon-check icon-white'></i> Add your expertise".html_safe,
+                    new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
+                    class: 'btn btn-success' %>
                 <% elsif @current_user_is_log_owner %>
                   Once experts weigh in on your learning log, their validations will appear here!
                 <% else %>
@@ -474,7 +481,7 @@
           <div class="row">
             <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="validations" 
             data-bl-dyncol-width="12">
-              <%= render(@log.validations, show_badge: false, date_format: :full) %>
+              <%= render(@validations, show_badge: false, date_format: :full) %>
             </div>
           </div>
 

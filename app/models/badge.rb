@@ -22,9 +22,13 @@ class Badge
   field :url,                 type: String
   field :image_url,           type: String
   field :summary,             type: String
+  
   field :info,                type: String
   field :info_sections,       type: Array
   field :info_versions,       type: Array
+  field :tags,                type: Array
+  field :tags_with_caps,      type: Array
+  
   field :current_user,        type: String # used when logging info_versions
   field :current_username,    type: String # used when logging info_versions
   field :flags,               type: Array
@@ -96,9 +100,10 @@ class Badge
     logs.find_all do |log|
       !log.detached_log \
       && (log.validation_status == 'validated') \
+      && !log.date_issued.nil? \
       && (log.date_issued > (Time.now - RECENT_DATE_THRESHOLD))
     end.sort_by do |log|
-      log.date_withdrawn || log.date_requested
+      log.date_issued
     end.reverse
   end
 
@@ -160,7 +165,10 @@ protected
 
   def update_info_sections
     if info_changed?
-      self.info_sections = linkify_text(info, group, self).split(SECTION_DIVIDER_REGEX)
+      linkified_result = linkify_text(info, group, self)
+      self.info_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
+      self.tags = linkified_result[:tags]
+      self.tags_with_caps = linkified_result[:tags_with_caps]
     end
   end
 

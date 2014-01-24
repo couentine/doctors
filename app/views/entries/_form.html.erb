@@ -6,7 +6,7 @@
         label: "In your expertise, has #{@user.name} achieved this badge?",
         collection: [
           ['<b>Yes</b>, issue the badge'.html_safe, true],
-          ['<b>Not yet</b>, greater mastery is needed'.html_safe, true]
+          ['<b>Not yet</b>, greater mastery is needed'.html_safe, false]
         ] %>
 
         <p class="text-success">
@@ -44,7 +44,7 @@
     <%= f.button :submit, label: save_button_text, class: 'btn btn-primary' %>
     <%= 
       if @entry.new_record?
-        link_to "Cancel", @group, class: "btn"
+        link_to "Cancel", [@group, @badge, @log], class: "btn"
       else 
         link_to "Cancel", [@group, @badge, @log, @entry], class: "btn"
       end

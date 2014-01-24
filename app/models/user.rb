@@ -142,23 +142,27 @@ class User
   end
 
   # Returns all group AND badge memberships.
+  # Filters out private groups if filter_user is not also a member
   # Return array has one entry for each group = {
   #   :type => :member/:admin,
   #   :group => the_group,
   #   :learner_logs => learner_logs_sorted_by_name[],
   #   :expert_logs => expert_logs_sorted_by_name[] }
   # >> Return array is sorted by group name
-  def group_and_log_list
+  def group_and_log_list(filter_user)
     # First go through and build a hash of all logs
     learner_log_map, expert_log_map = {}, {} # maps from group to array of logs
     logs.each do |log|
       target_map = (log.validation_status == 'validated') ? expert_log_map : learner_log_map
-      if log.badge != nil
+      if (log.badge != nil) && ((filter_user == self) || (log.public? && log.show_on_profile)\
+        || (filter_user && (filter_user.member_of?(log.badge.group) || filter_user.admin_of?(log.badge.group))))
+        
         if target_map.has_key?(log.badge.group)
           target_map[log.badge.group] << log
         else
           target_map[log.badge.group] = [log]
         end
+
       end
     end
 
@@ -166,16 +170,21 @@ class User
     the_list = []
     [{ groups: admin_of, type: :admin },
      { groups: member_of, type: :member }].each do |source|
-      if (!source[:groups].blank?)
+      if !source[:groups].blank?
         source[:groups].each do |group|
-          learner_logs = (learner_log_map.has_key?(group)) ? learner_log_map[group] : []
-          expert_logs = (expert_log_map.has_key?(group)) ? expert_log_map[group] : []
-          the_list  << { 
-            :type => source[:type], 
-            :group => group,
-            :learner_logs => learner_logs.sort_by{ |log| log.badge.name },
-            :expert_logs => expert_logs.sort_by{ |log| log.badge.name }
-          }
+          if (filter_user == self) || group.public? \
+            || (filter_user && (group.has_member?(filter_user) || group.has_admin?(filter_user)))
+
+            learner_logs = (learner_log_map.has_key?(group)) ? learner_log_map[group] : []
+            expert_logs = (expert_log_map.has_key?(group)) ? expert_log_map[group] : []
+            the_list  << { 
+              :type => source[:type], 
+              :group => group,
+              :learner_logs => learner_logs.sort_by{ |log| log.badge.name },
+              :expert_logs => expert_logs.sort_by{ |log| log.badge.name }
+            }
+
+          end
         end
       end
     end
@@ -184,9 +193,33 @@ class User
   end
 
   # Returns all entries created by this user, sorted from newest to oldest
+  # Filters out entries which are not visible to the passed filter_user
+  # (Incorporates both log visibility and entry visiblity)
   # NOTE: Uses pagination and includes both posts AND validations
-  def entries(page=1, page_size = APP_CONFIG['page_size_normal'])
-    created_entries.desc(:updated_at).page(page).per(page_size)
+  def entries(filter_user, page=1, page_size = APP_CONFIG['page_size_normal'])
+    if (filter_user == self)
+      created_entries.desc(:updated_at).page(page).per(page_size)
+    else
+      # First run through this users logs and figure out the visibility of each
+      include_private_entries = []
+      only_public_entries = []
+      logs.where(:show_on_profile => true).each do |log| 
+        only_public_entries << log.id if log.public?
+
+        if filter_user && !log.badge.nil? && !log.detached_log
+          if filter_user.expert_of?(log.badge)
+            include_private_entries << log.id
+          elsif !log.public? && \
+            (filter_user.member_of?(log.badge.group) || filter_user.admin_of?(log.badge.group))
+            only_public_entries << log.id
+          end
+        end 
+      end
+
+      created_entries.or({:creator => filter_user}, {:log.in => include_private_entries}, \
+      {:private => false, :log.in => only_public_entries})\
+      .desc(:updated_at).page(page).per(page_size)
+    end
   end
 
 protected

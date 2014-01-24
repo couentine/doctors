@@ -7,24 +7,34 @@
 <div class="row">
   
   <div class="span7">
-    <div class="clear-box">
+    <div class="color-box">
       <h2>New to Badge List?</h2>
       <p>
-        It's time to put badges at the center of your learning.<br>
+        It's time to put <b>badges</b> at the center of your 
+        <b><span id="rotate-words">learning</span></b>.
+        <br>
         Each badge is like...
       </p>
       <ul>
-          <li><strong>#</strong> A little <a href="/badgelist/explainer/social-network">social network</a></li>
-          <li><strong>#</strong> of <a href="/badgelist/explainer/learning-logs">learning logs</a></li>
-          <li><strong>#</strong> and <a href="/badgelist/explainer/wikis">knowledge wikis</a></li>
-          <li><strong>#</strong> making <a href="/badgelist/explainer/open-badges">Open Badges</a>.</li>
+          <li>
+            <b>#</b> A little <a href="/badgelist/explainer/social-learning">social network</a>
+          </li>
+          <li>
+            <b>#</b> made of <a href="/badgelist/explainer/learning-logs">learning logs</a>
+          </li>
+          <li>
+            <b>#</b> and <a href="/badgelist/explainer/wikis">knowledge wikis</a>
+          </li>
+          <li>
+            <b>#</b> linked to <a href="/badgelist/explainer/open-badges">Mozilla's Open Badges</a>.
+          </li>
       </ul>
       <p>
         
       </p>
       <h3>
         >> <a href="/badgelist/explainer/intro">Read more</a> 
-        or <%= link_to "sign up for Badge List", new_user_registration_path %>
+        or <%= link_to "create an account now", new_user_registration_path %>
       </h3>
     </div>
   </div>
@@ -57,5 +67,18 @@
   </div>
 
 </div>
+
+<script type="text/javascript">
+  
+  $(document).ready(function() {
+    $("#rotate-words").wordsrotator({
+      animationIn: "flipInX",
+      animationOut: "flipOutX",
+      speed: 3500,
+      words: ['learning', 'training', 'teaching', 'business', 'community']
+    });
+  });
+
+</script>
 
 

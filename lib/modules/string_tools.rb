@@ -12,23 +12,34 @@ module StringTools
   # "http://google.com" => "<a href='http://google.com' target='_blank'>http://google.com</a>"
   # "#hash-tag" => "<a href='/group-url/badge-url/hash-tag'>#hash-tag</a>"
   # "http://example.com/image.png" => "<img src='http://example.com/image.png'/>"
+  # Returns a hash = { :text => linkified_text, :tags => [list_of_downcased_tags],
+  #                    :tags_with_caps => [list_of_tags_as_typed] }
   def linkify_text(text, group, badge)
     if text.blank?
-      ""
+      { text: '', tags: [], tags_with_caps: [] }
     else
-      text.gsub(HASHTAG_REGEX) { |tag| "<a class='tag-link' href='/#{group.url}/#{badge.url}/#{tag[1..tag.length]}'>#{tag}</a>" }
-      .gsub(HTTP_URL_REGEX) { |url| make_tag_for url }
+      tags, tags_with_caps = [], []
+      new_text = text.gsub(HASHTAG_REGEX) do |tag| 
+        stripped_tag = tag[1..tag.length]
+        unless tags.include? stripped_tag.downcase
+          tags << stripped_tag.downcase 
+          tags_with_caps << stripped_tag
+        end
+        "<a class='linkified-tag' href='/#{group.url}/#{badge.url}/#{stripped_tag.downcase}'>#{tag}</a>"
+      end.gsub(HTTP_URL_REGEX) { |url| make_tag_for url }
       # Removing this for now... it double tags some things
       # .gsub(NON_HTTP_URL_REGEX) { |url| make_tag_for "http://#{url}" }
+
+      { text: new_text, tags: tags, tags_with_caps: tags_with_caps }
     end
   end
 
   def make_tag_for(url)
     if url[IMG_REGEX]
       stripped_url = url.sub(/^img:/i, '')
-      "<a class='image-link' href='#{stripped_url}' target='_blank'><img src='#{stripped_url}'/></a>"
+      "<a class='linkified-image' href='#{stripped_url}' target='_blank'><img src='#{stripped_url}'/></a>"
     else
-      "<a class='image-link' href='#{url}' target='_blank'>#{url}</a>"
+      "<a class='linkified-url' href='#{url}' target='_blank'>#{url}</a>"
     end
   end
 

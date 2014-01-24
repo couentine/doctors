@@ -33,7 +33,11 @@
 <div class="row">
   <div class="span12">
     <div class="home-page-header">
-      <h2>Your learning groups &amp; badges...</h2>
+      <% if @group_and_log_list.blank? %>
+        <h2>No groups or badges yet...</h2><br>
+      <% else %>
+        <h2>Your learning groups &amp; badges...</h2>
+      <% end %>
     </div>
   </div>
 </div>
@@ -45,14 +49,13 @@
   <div class="row">
     <div class="well span7 offset2">
       <p class="lead">
-        No memberships yet...<br>
-        <strong>Step 1:</strong> Create a learning group.
-        <strong>Step 2:</strong> Create a badge.
-        <Strong>Step 3:</Strong> Invite experts &amp; learners to the badge.
-      </p>
-      <p>
-        <%= link_to "<i class='icon-plus'></i> Create a new learning group".html_safe,
-          new_group_path, class: 'btn btn-success' %>
+        <ul>
+          <li><strong>Step 1:</strong> Create a learning group<br></li>
+          <li><strong>Step 2:</strong> Create a badge<br></li>
+          <li><Strong>Step 3:</Strong> Invite experts &amp; learners to the badge</li>
+        </ul><br>
+        <%= link_to "<i class='icon-plus icon-white'></i> Create a new learning group".html_safe,
+          new_group_path, class: 'btn btn-large btn-success pull-right' %>
       </p>
     </div>
   </div>

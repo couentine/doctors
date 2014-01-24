@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "#{@user.username} Entry ##{@entry.entry_number} - #{@badge.url}")
+  provide(:title, "#{@user.name} Entry ##{@entry.entry_number} - #{@badge.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
@@ -28,121 +28,143 @@
 <% if @current_user_is_expert || @current_user_is_learner %>
   <% content_for :subheader_actions do %>
 
-    <% if !@current_user_is_log_owner %>
-      <li  class="collapsible">
-        <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
-            [@group, @badge, @current_user_log] %>
-      </li>
-    <% end %>
-
-    <% if @current_user_is_log_owner %>
-      <li class="collapsible">
-        <%= link_to "<i class='icon-pencil icon-white'></i> Edit this entry".html_safe,
-          edit_group_badge_log_entry_path(@group, @badge, @log, @entry) %>
+    <li  class="collapsible">
+      <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
+          [@group, @badge, @current_user_log] %>
+      <span class="divider">|</span>
+    </li>
+    <li  class="collapsible">
+      <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
+          new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
+      <% if @current_user_is_entry_creator %>
         <span class="divider">|</span>
-      </li>
-      <li class="collapsible">
-        <%= link_to '<i class="icon-remove icon-white"></i> Delete this entry'.html_safe, 
-          @group, method: :delete,
-          data: { confirm: 'WARNING: This cannot be undone. Are you absolutely sure?' } %>
+      <% end %>
+    </li>
+
+    <% if @current_user_is_entry_creator %>
+      <li>
+        <div class="dropdown">
+          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
+            role="button" data-toggle="dropdown" data-target="#">
+            Entry Settings
+            <i class="icon-cog icon-white"></i>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu pull-right" role="menu" 
+            aria-labelledby="dropdown-subheader-settings">
+
+            <li>
+              <%= link_to "<i class='icon-pencil'></i> Edit this entry".html_safe,
+                edit_group_badge_log_entry_path(@group, @badge, @log, @entry) %>
+            </li>
+            <li>
+              <%= link_to '<i class="icon-remove"></i> Delete this entry'.html_safe, 
+                [@group, @badge, @log, @entry], method: :delete, data: { 
+                confirm: 'Are you sure you want to permanently delete this learning log entry?' } %>
+            </li>
+
+          </ul>
+        </div>
       </li>
     <% end %>
 
   <% end %>
 <% end %>
 
-<% if (@log.public? || @current_user_is_admin || @current_user_is_member) \
-      && (!@entry.private || @current_user_is_expert) %>
-  
-  <!-- === PAGE HEADER === -->
+<!-- === PAGE HEADER === -->
 
-  <div class="row add-top-margin">
-    <div class="span12">
-      <div class="page-card entry-page-card <%= @entry.category %>">
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="page-card entry-page-card <%= @entry.category %>">
 
-        <div class="super-header-section white-striped-background">
-          <%= link_to image_tag(@badge.image_url), [@group, @badge], title: @badge.name,
-            data: { toggle: 'tooltip', placement: 'right' } %>
-          <br/>
-        </div>
+      <div class="super-header-section white-striped-background">
+        <%= link_to image_tag(@badge.image_url), [@group, @badge], title: @badge.name,
+          data: { toggle: 'tooltip', placement: 'right' } %>
+        <br/>
+      </div>
 
-        <div class="header-section">
+      <div class="header-section">
 
-          <span class="log-user-link">
-            <%= link_to gravatar_for(@entry.log.user, class: 'img-circle', size: 200), 
-              [@entry.log.badge.group, @entry.log.badge, @entry.log],
-              title: "View #{@entry.log.user.name}'s learning log",
-              data: { toggle: 'tooltip', placement: 'left' } %>
-            <span class="username">
-              <abbr title="Username = <%= @entry.log.user.username %>"><%= @entry.log.user.name %></abbr>
-            </span>
+        <span class="log-user-link">
+          <%= link_to gravatar_for(@entry.log.user, class: 'img-circle', size: 200), 
+            [@entry.log.badge.group, @entry.log.badge, @entry.log],
+            title: "View #{@entry.log.user.name}'s learning log",
+            data: { toggle: 'tooltip', placement: 'left' } %>
+          <span class="username">
+            <abbr title="Username = <%= @entry.log.user.username %>"><%= @entry.log.user.name %></abbr>
           </span>
+        </span>
 
-          <% if @entry.creator != @entry.log.user %>
-            <span class="creator-user-link">
-              <%= link_to gravatar_for(@entry.creator, class: 'img-circle'), 
-                [@entry.log.badge.group, @entry.log.badge, @entry.log],
-                title: "This was posted by #{@entry.creator.name}",
-                data: { toggle: 'tooltip', placement: 'left' } %>
-              <span class="arrow">&#9654;</span>
-            </span>
-          <% end %>
+        <% if @entry.creator != @entry.log.user %>
+          <span class="creator-user-link">
+            <%= link_to gravatar_for(@entry.creator, class: 'img-circle'), 
+              [@entry.log.badge.group, @entry.log.badge, @entry.log],
+              title: "This was posted by #{@entry.creator.name}",
+              data: { toggle: 'tooltip', placement: 'left' } %>
+            <span class="arrow">&#9654;</span>
+          </span>
+        <% end %>
 
-          <h1>
-            <abbr title="Badge learning log entry #<%= @entry.entry_number %>">#<%= @entry.entry_number %></abbr>.
-            <%= @entry.summary %>
-          </h1>
-          
-          <ul>
+        <h1>
+          <abbr title="Badge learning log entry #<%= @entry.entry_number %>">#<%= @entry.entry_number %></abbr>.
+          <%= @entry.summary %>
+        </h1>
+        
+        <ul>
+          <li>
+            <i class="icon-time" title="Creation date"></i> 
+            <%= @entry.created_at.to_s(:full_date_time) %>
+          </li>
+          <% if @entry.updated_at != @entry.created_at %>
             <li>
-              <i class="icon-time" title="Creation date"></i> 
-              <%= @entry.created_at.to_s(:full_date_time) \
-                + " (Learner Week #{@entry.learner_week_created_at})"  %>
-            </li>
-            <% if @entry.updated_at != @entry.created_at %>
-              <li>
-                <% if @entry.updated_at <= Time.now %>
-                  <%= "Last updated #{time_ago_in_words(@entry.updated_at)} ago" %>
-                <% else %>
-                  <%= "Last updated #{time_ago_in_words(@entry.updated_at)} from now" %>
-                <% end %>
-              </li>
-            <% end %>
-            <li>
-              <% if @entry.private %>
-                <i class='icon-lock'></i> Private
+              <% if @entry.updated_at <= Time.now %>
+                <%= "Last updated #{time_ago_in_words(@entry.updated_at)} ago" %>
               <% else %>
-                <i class='icon-eye-close'></i> Visible with log
+                <%= "Last updated #{time_ago_in_words(@entry.updated_at)} from now" %>
               <% end %>
             </li>
-          </ul>
-
-        </div>
-        
-        <div class="body-section">
-          <% @entry.body_sections.each do |section_text| %>
-            <p><%= section_text.html_safe %></p>
           <% end %>
-        </div>
-
-        <div class="footer-section">
-          <label>Tags:</label> 
-          <!-- FIXME: Add in tag list -->
-        </div>
+          <li>
+            <% if @entry.visibility == :anonymous %>
+              <i class='icon-eye-open'></i> 
+              Visible to public
+            <% elsif @entry.visibility == :members %>
+              <i class='icon-eye-close'></i> 
+              Only visible to members now, visible to public when badge is issued
+            <% elsif @entry.visibility == :experts %>
+              <i class='icon-lock'></i> 
+              Only visible to badge experts
+            <% else %>
+              <i class='icon-warning-sign'></i> 
+              Only visible to log owner / entry creator
+            <% end %>
+          </li>
+        </ul>
 
       </div>
+      
+      <div class="body-section">
+        <% if @entry.type == 'validation' %>
+          <span class="validation-result <%= @entry.log_validated ? 'yes' : 'no' %>">
+            <strong>Learning Validated:</strong> <%= @entry.log_validated ? "Yes" : "No" %>
+          </span>
+        <% end %>
+
+        <% @entry.body_sections.each do |section_text| %>
+          <div class="section-container"><%= section_text.html_safe %></div>
+        <% end %>
+      </div>
+
+      <% unless @entry.tags.blank? %>
+        <div class="footer-section">
+          <label><i class="icon-tags"></i> Tags:</label> 
+          <% @entry.tags.each do |tag| %>
+            <% comma = (tag == @entry.tags.last) ? '' : ', ' %>
+            <%= link_to tag, "/#{@group.url}/#{@badge.url}/#{tag}" %><%= comma %>
+          <% end %>
+        </div>
+      <% end %>
+
     </div>
   </div>
-
-<% else %>
-  
-  <div class="row">
-    <div class="well span7 offset2">
-      <p class="lead">This is a private entry</p>
-      <p>
-        Oops, you don't have access to see this yet. Come back when you're an expert!
-      </p>
-    </div>
-  </div>
-
-<% end %>
+</div>

@@ -16,8 +16,8 @@ class LogsController < ApplicationController
     # Grab the current page of posts & all of the validations
     @page = params[:page] || 1
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
-    @posts = @log.posts(@page, @page_size)
-    @posts_by_month = @log.posts_by_month(@page, @page_size)
+    @posts = @log.posts(current_user, @page, @page_size)
+    @posts_by_month = @log.posts_by_month(current_user, @page, @page_size)
     @validations = @log.validations
 
     respond_to do |format|

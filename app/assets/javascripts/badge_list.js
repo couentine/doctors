@@ -21,9 +21,9 @@ $(document).ready(function() {
 });
 
 function checkForTooltips() {
-  $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip]').tooltip();
-  $('img[data-toggle=tooltip],abbr[data-toggle=tooltip]').tooltip();
-  $('a[rel=tooltip],span[rel=tooltip],li[rel=tooltip]').tooltip();
+  $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip],'
+    + 'img[data-toggle=tooltip],abbr[data-toggle=tooltip],i[data-toggle=tooltip],'
+    + 'a[rel=tooltip],span[rel=tooltip],li[rel=tooltip]').tooltip();
 }
 
 // This checks the page for items with data-mark-overflow
@@ -281,6 +281,12 @@ function checkDynamicColumns() {
       updateDynamicColumnGroup(key, targetColCount);
       checkForTooltips();
       setTimeout("checkForOverflowMarks();", 250);
+
+      // Finally fix the column widths in FF/IE
+      $(".entry-card .card-body-inner").each(function() {
+        if ($(this).width() > $(this).closest(".entry-card").width()) 
+          $(this).width($(this).closest(".entry-card").width()-22);
+      });
     }
   }
 }
