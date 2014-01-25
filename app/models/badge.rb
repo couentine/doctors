@@ -52,9 +52,9 @@ class Badge
 
   before_validation :set_default_values, on: :create
   before_validation :update_caps_field
+  before_save :update_info_sections
+  before_save :update_info_versions, on: :update # Don't store the first (default) value
   after_create :add_creator_as_expert
-  after_validation :update_info_sections
-  after_validation :update_info_versions, on: :update # Don't store the first (default) value
 
   # === BADGE METHODS === #
 

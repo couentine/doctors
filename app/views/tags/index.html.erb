@@ -1,0 +1,35 @@
+<h1>Listing tags</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Name with caps</th>
+    <th>Wiki</th>
+    <th>Wiki versions</th>
+    <th>Wiki sections</th>
+    <th>Tags</th>
+    <th>Tags with caps</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @tags.each do |tag| %>
+  <tr>
+    <td><%= tag.name %></td>
+    <td><%= tag.name_with_caps %></td>
+    <td><%= tag.wiki %></td>
+    <td><%= tag.wiki_versions %></td>
+    <td><%= tag.wiki_sections %></td>
+    <td><%= tag.tags %></td>
+    <td><%= tag.tags_with_caps %></td>
+    <td><%= link_to 'Show', tag %></td>
+    <td><%= link_to 'Edit', edit_tag_path(tag) %></td>
+    <td><%= link_to 'Destroy', tag, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Tag', new_tag_path %>

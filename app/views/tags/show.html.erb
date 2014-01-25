@@ -1,0 +1,40 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @tag.name %>
+</p>
+
+<p>
+  <b>Name with caps:</b>
+  <%= @tag.name_with_caps %>
+</p>
+
+<p>
+  <b>Wiki:</b>
+  <%= @tag.wiki %>
+</p>
+
+<p>
+  <b>Wiki versions:</b>
+  <%= @tag.wiki_versions %>
+</p>
+
+<p>
+  <b>Wiki sections:</b>
+  <%= @tag.wiki_sections %>
+</p>
+
+<p>
+  <b>Tags:</b>
+  <%= @tag.tags %>
+</p>
+
+<p>
+  <b>Tags with caps:</b>
+  <%= @tag.tags_with_caps %>
+</p>
+
+
+<%= link_to 'Edit', edit_tag_path(@tag) %> |
+<%= link_to 'Back', tags_path %>
