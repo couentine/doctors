@@ -1,40 +1,161 @@
-<p id="notice"><%= notice %></p>
+<% 
+  provide(:title, "#{@tag.name_with_caps} - #{@badge.name}")
+  provide(:show_subheader, true)
+  provide(:subheader_image, group_image_url_for(@group)) 
+%>
 
-<p>
-  <b>Name:</b>
-  <%= @tag.name %>
-</p>
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url_with_caps, @group %>
+    <span class="divider">/</span>
+  </li>
+  <li>
+    <%= link_to @badge.url_with_caps, [@group, @badge] %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active">
+    <%= "Tag: #{@tag.name_with_caps}" %>
+  </li>
+<% end %>
 
-<p>
-  <b>Name with caps:</b>
-  <%= @tag.name_with_caps %>
-</p>
+<% if @current_user_is_expert || @current_user_is_learner %>
+  <% content_for :subheader_actions do %>
 
-<p>
-  <b>Wiki:</b>
-  <%= @tag.wiki %>
-</p>
+    <li  class="collapsible">
+      <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
+          [@group, @badge, @current_user_log] %>
+      <span class="divider">|</span>
+    </li>
+    <li  class="collapsible">
+      <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
+          new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
+      <% if @tag_exists %>
+        <span class="divider">|</span>
+      <% end %>
+    </li>
+    
+    <% if @tag_exists %>
+      <li>
+        <div class="dropdown">
+          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
+            role="button" data-toggle="dropdown" data-target="#">
+            Edit Tag Wiki
+            <i class="icon-cog icon-white"></i>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu pull-right" role="menu" 
+            aria-labelledby="dropdown-subheader-settings">
 
-<p>
-  <b>Wiki versions:</b>
-  <%= @tag.wiki_versions %>
-</p>
+            <li>
+              <%= link_to "<i class='icon-pencil'></i> Edit tag wiki page".html_safe, 
+                "#{@tag.name_with_caps}/edit" %>
+            </li>
+            <% if @current_user_is_expert %>
+              <li>
+                <%= link_to '<i class="icon-remove"></i> Delete tag wiki page'.html_safe, 
+                  [@group, @badge, @tag], method: :delete, data: { 
+                  confirm: 'Are you sure you want to permanently delete the contents of this wiki page?' } %>
+              </li>
+            <% end %>
 
-<p>
-  <b>Wiki sections:</b>
-  <%= @tag.wiki_sections %>
-</p>
+          </ul>
+        </div>
+      </li>
+    <% end %>
 
-<p>
-  <b>Tags:</b>
-  <%= @tag.tags %>
-</p>
+  <% end %>
+<% end %>
 
-<p>
-  <b>Tags with caps:</b>
-  <%= @tag.tags_with_caps %>
-</p>
+<!-- === TAG WIKI === -->
 
+<div class="row add-top-margin">
 
-<%= link_to 'Edit', edit_tag_path(@tag) %> |
-<%= link_to 'Back', tags_path %>
+  <div class="span12">
+    <div class="page-card tag-page-card">
+
+      <div class="header-section">
+
+        <span class="badge-link">
+          <%= link_to image_tag(@badge.image_url), [@group, @badge],
+            title: "Return to the badge page",
+            data: { toggle: 'tooltip', placement: 'left' } %>
+          <span class="badgename">
+            <%= @badge.name %>
+          </span>
+        </span>
+
+        <h1>
+          #<%= @tag.name_with_caps %>
+        </h1>
+        
+        <% if @tag_exists %>
+          <ul>
+            <li>
+              <i class="icon-time" title="Creation date"></i> 
+              <%= @tag.created_at.to_s(:full_date_time) %>
+            </li>
+            <% if @tag.updated_at != @tag.created_at %>
+              <li>
+                <% if @tag.updated_at <= Time.now %>
+                  <%= "Last updated #{time_ago_in_words(@tag.updated_at)} ago" %>
+                <% else %>
+                  <%= "Last updated #{time_ago_in_words(@tag.updated_at)} from now" %>
+                <% end %>
+              </li>
+            <% end %>
+            <li>
+              This is version <%= @version %> of the wiki page
+            </li>
+          </ul>
+        <% end %>
+
+      </div>
+      
+      <div class="body-section">
+        <% if @tag_exists %>
+          
+          <% @tag.wiki_sections.each do |section_text| %>
+            <div class="section-container"><%= section_text.html_safe %></div>
+          <% end %>
+
+        <% else %>
+
+          <div class="section-container alert">
+              This tag hasn't had a wiki page created for it yet.
+              <% if @current_user_is_expert || @current_user_is_learner %>
+                <br><br>
+                <%= link_to \
+                  "<i class='icon-plus-sign icon-white'></i> Create tag wiki page".html_safe,
+                  "#{@tag.name_with_caps}/edit", class: 'btn btn-success' %>
+              <% end %>
+          </div>
+        
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- === ENTRIES SECTION === -->
+
+<% unless @entries.blank? %>
+
+  <div class="row add-top-margin">
+    <div class="span12">
+      <div class="tab-header">
+        <h2>Learning log entries tagged with #<%= @tag.name_with_caps %></h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
+      data-bl-dyncol-width="12">
+
+      <%= render(@entries, show_badge: false, date_format: :ago) %>
+
+    </div>
+  </div>
+
+<% end %>

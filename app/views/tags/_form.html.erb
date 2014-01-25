@@ -1,14 +1,10 @@
-<%= simple_form_for(@tag) do |f| %>
+<%= simple_form_for [@group, @badge, @tag], 
+  html: { class: 'form-horizontal' }  do |f| %>
   <%= f.error_notification %>
 
   <div class="form-inputs">
-    <%= f.input :name %>
     <%= f.input :name_with_caps %>
-    <%= f.input :wiki %>
-    <%= f.input :wiki_versions %>
-    <%= f.input :wiki_sections %>
-    <%= f.input :tags %>
-    <%= f.input :tags_with_caps %>
+    <%= f.input :wiki, as: :text %>
   </div>
 
   <div class="form-actions">
