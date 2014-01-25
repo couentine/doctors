@@ -78,7 +78,6 @@ class User
 
   before_validation :set_default_values, on: :create
   before_validation :update_caps_field
-  before_create :set_caps_field
   after_create :convert_group_invitations
 
   # === CLASS METHODS === #
