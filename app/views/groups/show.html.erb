@@ -10,7 +10,7 @@
   
   <% content_for :subheader_links do %>
     <li class="active">
-      <%= @group.url %>
+      <%= @group.url_with_caps %>
     </li>
   <% end %>
 
@@ -165,57 +165,47 @@
 <div class="row add-top-margin">
   <div class="span12">
     <div class="header-card group-header-card">
+      <div class="white-background">&nbsp;</div>
 
-      <div class="primary-header">
-        <table>
-          <tr>
-            <td class="header-image" 
-                style="background-image: url('<%= group_image_url_for(@group) %>')">
-              &nbsp;
-            </td>
-            <td class="header-text">
-              <h1><%= @group.name %></h1>
-              <h2><%= @group.url %></h2>
-              <h3>
-                <%=
-                  case @group.type
-                    when "open"
-                      "<i class='icon-globe'></i> Open Learning Group".html_safe
-                    when "closed"
-                      "<i class='icon-eye-open'></i> Public Learning Group (Closed Membership)".html_safe
-                    when "private"
-                      "<i class='icon-lock'></i> Private Learning Group".html_safe
-                  end
-                %>
-              </h3>
-            </td>
-          </tr>
-        </table>
+      <div class="span6 primary-header">
+        <span class="header-image" >
+          <%= group_image_tag_for @group %>
+        </span>
+        <span class="header-text">
+          <h1><%= @group.name %></h1>
+          <h2><%= @group.url_with_caps %></h2>
+          <h3>
+            <%=
+              case @group.type
+                when "open"
+                  "<i class='icon-globe'></i> Open Learning Group".html_safe
+                when "closed"
+                  "<i class='icon-eye-open'></i> Public Learning Group (Closed Membership)".html_safe
+                when "private"
+                  "<i class='icon-lock'></i> Private Learning Group".html_safe
+              end
+            %>
+          </h3>
+        </span>
       </div>
 
-      <div class="secondary-header collapse-when-small">
-        <table>
-          <tr>
-            <td class="header-text">
-              <ul>
-                <% unless @group.location.blank? %>
-                  <li>
-                    <i class="icon-map-marker"></i> <%= @group.location %>
-                  </li>
-                <% end %>
-                <% unless @group.website.blank? %>
-                  <li>
-                    <i class="icon-share"></i> 
-                    <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
-                  </li>
-                <% end %>
-                <li>
-                  <i class="icon-time"></i> Created on <%= @group.created_at.to_s(:full_date) %>
-                </li>
-              </ul>
-            </td>
-          </tr>
-        </table>
+      <div class="span6 secondary-header">
+        <ul>
+          <% unless @group.location.blank? %>
+            <li>
+              <i class="icon-map-marker"></i> <%= @group.location %>
+            </li>
+          <% end %>
+          <% unless @group.website.blank? %>
+            <li>
+              <i class="icon-share"></i> 
+              <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
+            </li>
+          <% end %>
+          <li>
+            <i class="icon-time"></i> Created on <%= @group.created_at.to_s(:full_date) %>
+          </li>
+        </ul>
       </div>
 
       <% if @group.public? || @current_user_is_admin || @current_user_is_member %>
@@ -227,7 +217,6 @@
           </ul>
         </div>
       <% end %>
-
     </div>
   </div>
 </div>

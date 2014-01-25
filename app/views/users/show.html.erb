@@ -13,7 +13,7 @@
   <li class="active">
     u
     <span class="divider">/</span>
-    <%= @user.username %>
+    <%= @user.username_with_caps %>
   </li>
 <% end %>
 
@@ -59,29 +59,23 @@
   <div class="span12">
     <div class="header-card user-header-card">
 
-      <div class="primary-header">
-        <table>
-          <tr>
-            <td class="header-image"> 
-              <%= gravatar_for(@user, :size => 120, :class => 'img-circle') %>
-            </td>
-            <td class="header-text">
-              <h1><%= @user.name %></h1>
-              <h2><%= @user.username %></h2>
-              <p>
-                <i class="icon-time"></i>
-                <% if @user.created_at < (Time.now - 3.months) %>
-                  <%= "Badge List member since #{@user.created_at.to_s(:full_date)}" %>
-                <% else %>
-                  <%= "Badge List member since the beginning of time" %>
-                <% end %>
-              </p>
-            </td>
-          </tr>
-        </table>
+      <div class="primary-header span12">
+        <span class="header-image"> 
+          <%= gravatar_for(@user, :size => 100, :class => 'img-circle') %>
+        </span>
+        <span class="header-text">
+          <h1><%= @user.name %></h1>
+          <h2><%= @user.username_with_caps %></h2>
+          <h3>
+            <i class="icon-time"></i>
+            <% if @user.created_at < (Time.now - 3.months) %>
+              <%= "Badge List member since #{@user.created_at.to_s(:full_date)}" %>
+            <% else %>
+              <%= "Badge List member since the beginning of time" %>
+            <% end %>
+          </h3>
+        </span>
       </div>
-
-      <div class="secondary-header collapse-when-small">&nbsp;</div>
 
       <div class="card-tabs">
         <ul class="nav nav-tabs">

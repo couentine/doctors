@@ -7,17 +7,17 @@
 
 <% content_for :subheader_links do %>
   <li>
-    <%= link_to @group.url, @group %>
+    <%= link_to @group.url_with_caps, @group %>
     <span class="divider">/</span>
   </li>
   <li>
-    <%= link_to @badge.url, [@group, @badge] %>
+    <%= link_to @badge.url_with_caps, [@group, @badge] %>
     <span class="divider">/</span>
   </li>
   <li class="active">
     u
     <span class="divider">/</span>
-    <%= @user.username %>
+    <%= @user.username_with_caps %>
   </li>
 <% end %>
 
@@ -262,78 +262,69 @@
 <div class="row add-top-margin">
   <div class="span12">
     <div class="header-card log-header-card">
+      <div class="white-background">&nbsp;</div>
 
-      <div class="primary-header">
-        <table>
-          <tr>
-            <td class="header-image" 
-                style="background-image: url('<%= @badge.image_url %>')">
-              <%= link_to '&nbsp;'.html_safe, [@group, @badge], class: 'image-link', 
-                title: 'View badge' %>
-            </td>
-            <td class="header-text">
-              <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
-              <h2><%= "#{@group.url}/#{@badge.url}" %></h2>
-              <p>
-                <%= @badge.summary %>
-              </p>
-            </td>
-          </tr>
-        </table>
+      <div class="primary-header span6">
+        <span class="header-image">
+          <%= link_to image_tag(@badge.image_url), [@group, @badge], title: 'View badge' %>
+        </span>
+        <span class="header-text">
+          <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
+          <h2><%= "#{@group.url_with_caps}/#{@badge.url_with_caps}" %></h2>
+          <h3>
+            <%= @badge.summary %>
+          </h3>
+        </span>
       </div>
 
-      <div class="secondary-header">
-        <table>
-          <tr>
-            <td class="header-text">
-              <h1><%= link_to @user.name, @user, title: 'View user profile' %></h1>
-              <h2>Badge Learning Log</h2>  
-              
-              <ul class="bl-icon-list">
-                <% if @log.validation_status == 'requested' %>
-                  <li data-toggle="tooltip" data-placement="bottom" title=
-                    "Requested expert validation on <%= @log.date_requested.to_s(:full_date) %>">
-                    <div style="background-image: url('<%= image_path 'flag-orange-small.png' %>')" 
-                      class="full-opacity">
-                    </div>
-                  </li>
-                <% end %>
+      <div class="secondary-header span6">
+        <span class="header-image">
+          <a href="<%= user_path(@user) %>" title="View user profile">
+            <%= gravatar_for @user, size: 150, class: "img-circle" %>
+          </a>
+        </span>
+        <span class="header-text">
+          <h1><%= link_to @user.name, @user, title: 'View user profile' %></h1>
+          <h2>Badge Learning Log</h2>  
+          
+          <ul class="bl-icon-list">
+            <% if @log.validation_status == 'requested' %>
+              <li data-toggle="tooltip" data-placement="bottom" title=
+                "Requested expert validation on <%= @log.date_requested.to_s(:full_date) %>">
+                <div style="background-image: url('<%= image_path 'flag-orange-small.png' %>')" 
+                  class="full-opacity">
+                </div>
+              </li>
+            <% end %>
 
-                <% if @log.validation_status == 'validated' %>
-                  <li data-toggle="tooltip" data-placement="bottom" 
-                    title="Badge issued on <%= @log.date_issued.to_s(:full_date) %>">
-                    <div style="background-image: url('<%= image_path 'issued-small.png' %>')" ></div>
-                  </li>
-                <% end %>
+            <% if @log.validation_status == 'validated' %>
+              <li data-toggle="tooltip" data-placement="bottom" 
+                title="Badge issued on <%= @log.date_issued.to_s(:full_date) %>">
+                <div style="background-image: url('<%= image_path 'issued-small.png' %>')" ></div>
+              </li>
+            <% end %>
 
-                <% if @log.public? %>
-                  <li data-toggle="tooltip" data-placement="bottom" 
-                    title="Learning log is public.">
-                    <div style="background-image: url('<%= image_path 'public-small.png' %>')" >
-                    </div>
-                  </li>
-                <% elsif @log.private_log %>
-                  <li data-toggle="tooltip" data-placement="bottom" 
-                    title="Learning log is private.">
-                    <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
-                    </div>
-                  </li>
-                <% else %>
-                  <li data-toggle="tooltip" data-placement="bottom" 
-                    title="Learning log currently private, but will become public after validation.">
-                    <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
-                    </div>
-                  </li>
-                <% end %>
-              </ul>
-            </td>
-            <td class="header-image">
-              <a href="<%= user_path(@user) %>" class="image-link" title="View user profile">
-                <%= gravatar_for @user, size: 150, class: "img-circle" %>
-              </a>
-            </td>
-          </tr>
-        </table>
+            <% if @log.public? %>
+              <li data-toggle="tooltip" data-placement="bottom" 
+                title="Learning log is public.">
+                <div style="background-image: url('<%= image_path 'public-small.png' %>')" >
+                </div>
+              </li>
+            <% elsif @log.private_log %>
+              <li data-toggle="tooltip" data-placement="bottom" 
+                title="Learning log is private.">
+                <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
+                </div>
+              </li>
+            <% else %>
+              <li data-toggle="tooltip" data-placement="bottom" 
+                title="Learning log currently private, but will become public after validation.">
+                <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </span>
       </div>
 
       <% if @log.public? || @current_user_is_admin || @current_user_is_member %>

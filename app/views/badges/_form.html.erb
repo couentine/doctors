@@ -26,9 +26,9 @@
   <div class="form-body">
     <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics',
         input_html: {class: 'input-xlarge'}, autofocus: true %>
-    <%= f.input :url, wrapper: :prepend, label: 'Badge URL' do %>
-      <%= content_tag :span, "app.badgelist.com/#{@group.url}/", class: "add-on" %>
-      <%= f.input_field :url, placeholder: 'et-physics', class: 'input-small' %>
+    <%= f.input :url_with_caps, wrapper: :prepend, label: 'Badge URL' do %>
+      <%= content_tag :span, "app.badgelist.com/#{@group.url_with_caps}/", class: "add-on" %>
+      <%= f.input_field :url_with_caps, placeholder: 'et-physics', class: 'input-small' %>
     <% end %>
     <%= f.input :image_url, label: 'Badge Image', collection: badge_image_options,
         label_method: :first, value_method: :last, input_html: {class: 'input-xlarge'} %>

@@ -7,17 +7,17 @@
 
 <% content_for :subheader_links do %>
   <li>
-    <%= link_to @group.url, @group %>
+    <%= link_to @group.url_with_caps, @group %>
     <span class="divider">/</span>
   </li>
   <li>
-    <%= link_to @badge.url, [@group, @badge] %>
+    <%= link_to @badge.url_with_caps, [@group, @badge] %>
     <span class="divider">/</span>
   </li>
   <li>
     u
     <span class="divider">/</span>
-    <%= link_to @user.username, [@group, @badge, @log] %>
+    <%= link_to @user.username_with_caps, [@group, @badge, @log] %>
     <span class="divider">/</span>
   </li>
   <li class="active">
@@ -86,20 +86,24 @@
       <div class="header-section">
 
         <span class="log-user-link">
-          <%= link_to gravatar_for(@entry.log.user, class: 'img-circle', size: 200), 
+          <%= link_to gravatar_for(@entry.log.user, \
+            class: "img-circle #{@entry.log_user_type}", size: 200), 
             [@entry.log.badge.group, @entry.log.badge, @entry.log],
             title: "View #{@entry.log.user.name}'s learning log",
             data: { toggle: 'tooltip', placement: 'left' } %>
           <span class="username">
-            <abbr title="Username = <%= @entry.log.user.username %>"><%= @entry.log.user.name %></abbr>
+            <abbr title="<%= "#{@entry.log_user_type.capitalize} at time of #{@entry.type}" %>" 
+            class="<%= @entry.log_user_type %>" data-toggle="tooltip"
+            data-placement="bottom"><%= @entry.log.user.name %></abbr>
           </span>
         </span>
 
         <% if @entry.creator != @entry.log.user %>
           <span class="creator-user-link">
-            <%= link_to gravatar_for(@entry.creator, class: 'img-circle'), 
+            <%= link_to gravatar_for(@entry.creator, \
+              class: "img-circle #{@entry.entry_creator_type}"), 
               [@entry.log.badge.group, @entry.log.badge, @entry.log],
-              title: "This was posted by #{@entry.creator.name}",
+              title: "Posted by #{@entry.creator.name} (#{@entry.entry_creator_type.capitalize} at time of #{@entry.type})",
               data: { toggle: 'tooltip', placement: 'left' } %>
             <span class="arrow">&#9654;</span>
           </span>
@@ -146,7 +150,8 @@
       <div class="body-section">
         <% if @entry.type == 'validation' %>
           <span class="validation-result <%= @entry.log_validated ? 'yes' : 'no' %>">
-            <strong>Learning Validated:</strong> <%= @entry.log_validated ? "Yes" : "No" %>
+            <strong>Learning Validated:</strong> 
+            <%= @entry.log_validated ? "Yes &#10003;".html_safe : "No &#10007;".html_safe %>
           </span>
         <% end %>
 
@@ -160,7 +165,7 @@
           <label><i class="icon-tags"></i> Tags:</label> 
           <% @entry.tags.each do |tag| %>
             <% comma = (tag == @entry.tags.last) ? '' : ', ' %>
-            <%= link_to tag, "/#{@group.url}/#{@badge.url}/#{tag}" %><%= comma %>
+            <%= link_to tag, "/#{@group.url_with_caps}/#{@badge.url_with_caps}/#{tag}" %><%= comma %>
           <% end %>
         </div>
       <% end %>

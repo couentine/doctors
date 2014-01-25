@@ -21,6 +21,7 @@ class User
   
   field :name,                type: String
   field :username,            type: String
+  field :username_with_caps,  type: String
   field :flags,               type: Array
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
@@ -37,7 +38,7 @@ class User
          :confirmable, :lockable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :name, :username, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :name, :username_with_caps, :password, :password_confirmation, :remember_me
 
   # === STANDARD DEVISE FIELDS === #
 
@@ -76,6 +77,8 @@ class User
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_validation :update_caps_field
+  before_create :set_caps_field
   after_create :convert_group_invitations
 
   # === CLASS METHODS === #
@@ -119,17 +122,28 @@ class User
   end
 
   def learner_of?(badge)
-    log = logs.detect { |log| log.badge == badge }
+    log = logs.find_by(badge: badge) rescue nil
     
     # Return value = 
     !log.nil? && !log.detached_log && log.validation_status != 'validated'
   end
 
   def expert_of?(badge)
-    log = logs.detect { |log| log.badge == badge }
+    log = logs.find_by(badge: badge) rescue nil
     
     # Return value = 
     !log.nil? && !log.detached_log && log.validation_status == 'validated'
+  end
+
+  # Returns the date which this user's badge was issued (or nil if they are not an expert)
+  def expert_date(badge)
+    log = logs.find_by(badge: badge) rescue nil
+    
+    if log.nil? || log.detached_log
+      nil
+    else
+      log.date_issued
+    end
   end
 
   # Returns "John Doe <email@example.com>" OR "email@example.com" depending on presence of name
@@ -204,7 +218,7 @@ class User
       include_private_entries = []
       only_public_entries = []
       logs.where(:show_on_profile => true).each do |log| 
-        only_public_entries << log.id if log.public?
+        only_public_entries << log.id if log.public? && !log.badge.nil?
 
         if filter_user && !log.badge.nil? && !log.detached_log
           if filter_user.expert_of?(log.badge)
@@ -226,6 +240,14 @@ protected
 
   def set_default_values
     self.flags ||= []
+  end
+
+  def update_caps_field
+    if username_with_caps.nil?
+      self.username = nil
+    else
+      self.username = username_with_caps.downcase
+    end
   end
 
   # Finds any references to this user's email in the invited_admins/users arrays on groups.

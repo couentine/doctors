@@ -123,7 +123,7 @@ class LogsController < ApplicationController
 private
 
   def find_parent_records
-    @group = Group.find(params[:group_id])
+    @group = Group.find(params[:group_id].to_s.downcase)
     @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase)
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)
@@ -138,7 +138,7 @@ private
     @log = @user.logs.find_by(badge: @badge)
     @current_user_is_log_owner = current_user && (@user == current_user)
     if current_user
-      @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil 
+      @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil
       @validation = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
     end
   end

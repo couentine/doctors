@@ -150,7 +150,7 @@ class EntriesController < ApplicationController
 private
 
   def find_parent_records
-    @group = Group.find(params[:group_id])
+    @group = Group.find(params[:group_id].to_s.downcase)
     @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase)
     @user = User.find(params[:log_id].to_s.downcase) # find user by username
     @log = @user.logs.find_by(badge: @badge)

@@ -7,10 +7,10 @@
 
 <% content_for :subheader_links do %>
   <li>
-    <%= link_to @group.url, group_path(@group) %>
+    <%= link_to @group.url_with_caps, group_path(@group) %>
     <span class="divider">/</span>
   </li>
-  <li class="active"><%= @badge.url %></li>
+  <li class="active"><%= @badge.url_with_caps %></li>
 <% end %>
 
 <% if @current_user_is_admin || @current_user_is_member || @group.open? %>
@@ -294,26 +294,17 @@
   <div class="span12">
     <div class="header-card badge-header-card">
 
-      <div class="primary-header">
-        <table>
-          <tr>
-            <td class="header-image" 
-                style="background-image: url('<%= @badge.image_url %>')">
-              &nbsp;
-            </td>
-            <td class="header-text">
-              <h1><%= @badge.name %></h1>
-              <h2><%= "#{@group.url}/#{@badge.url}" %></h2>
-              <p>
-                <%= @badge.summary %>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="secondary-header collapse-when-small">
-        &nbsp;
+      <div class="primary-header span12">
+        <span class="header-image" >
+          <%= image_tag @badge.image_url %>
+        </span>
+        <span class="header-text">
+          <h1><%= @badge.name %></h1>
+          <h2><%= "#{@group.url_with_caps}/#{@badge.url_with_caps}" %></h2>
+          <h3>
+            <%= @badge.summary %>
+          </h3>
+        </span>
       </div>
 
       <% if @group.public? || @current_user_is_admin || @current_user_is_member %>

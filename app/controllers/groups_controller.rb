@@ -363,7 +363,7 @@ class GroupsController < ApplicationController
 private
 
   def find_group
-    @group = Group.find(params[:id] || params[:group_id])
+    @group = Group.find(params[:id] || params[:group_id]) # Note: Downcase is handled by model
     @current_user_is_admin = current_user && @group.has_admin?(current_user)
     @current_user_is_member = current_user && @group.has_member?(current_user)
   end

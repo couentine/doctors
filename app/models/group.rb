@@ -21,6 +21,7 @@ class Group
 
   field :name,                    type: String
   field :url,                     type: String
+  field :url_with_caps,           type: String
   field :location,                type: String
   field :website,                 type: String
   field :image_url,               type: String
@@ -47,12 +48,13 @@ class Group
   validates :creator, presence: true
 
   # Which fields are accessible?
-  attr_accessible :name, :url, :location, :website, :image_url, :type, :customer_code, 
+  attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
     :validation_threshold
 
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_validation :update_caps_field
   before_create :add_creator_to_admins
 
   # === CLASS METHODS === #
@@ -122,6 +124,14 @@ protected
     self.invited_members ||= []
     self.validation_threshold ||= 2
     self.flags ||= []
+  end
+
+   def update_caps_field
+    if url_with_caps.nil?
+      self.url = nil
+    else
+      self.url = url_with_caps.downcase
+    end
   end
 
 end

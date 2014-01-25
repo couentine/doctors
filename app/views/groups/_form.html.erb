@@ -36,9 +36,9 @@
     <%= f.input :name, label: 'Group Name', placeholder: 'NASA Astronaut Training',
                 autofocus: true, input_html: { class: 'input-xlarge' } %>
     
-    <%= f.input :url, wrapper: :prepend, label: 'Group URL' do %>
+    <%= f.input :url_with_caps, wrapper: :prepend, label: 'Group URL' do %>
       <%= content_tag :span, "app.badgelist.com/", class: "add-on" %>
-      <%= f.input_field :url, placeholder: 'nasa-crew', class: 'input-medium' %>
+      <%= f.input_field :url_with_caps, placeholder: 'nasa-crew', class: 'input-medium' %>
     <% end %>
 
     <%= f.input :type, label: 'Group Type', as: :radio_buttons,

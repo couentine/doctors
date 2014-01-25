@@ -6,11 +6,11 @@
 
 <% content_for :subheader_links do %>
   <li>
-    <%= link_to @group.url, @group %>
+    <%= link_to @group.url_with_caps, @group %>
     <span class="divider">/</span>
   </li>
   <li>
-    <%= link_to @badge.url, [@group, @badge] %>
+    <%= link_to @badge.url_with_caps, [@group, @badge] %>
     <span class="divider">/</span>
   </li>
   <li class="active">
@@ -47,40 +47,30 @@
 <div class="row add-top-margin">
   <div class="span12">
     <div class="header-card badge-entries-header-card">
+      <div class="white-background no-tabs">&nbsp;</div>
 
-      <div class="primary-header">
-        <table>
-          <tr>
-            <td class="header-image" 
-                style="background-image: url('<%= @badge.image_url %>')">
-              <%= link_to '&nbsp;'.html_safe, [@group, @badge], class: 'image-link', 
-                title: 'View badge' %>
-            </td>
-            <td class="header-text">
-              <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
-              <h2><%= "#{@group.url}/#{@badge.url}" %></h2>
-              <p>
-                <%= @badge.summary %>
-              </p>
-            </td>
-          </tr>
-        </table>
+      <div class="primary-header span6">
+        <span class="header-image">
+          <%= link_to image_tag(@badge.image_url), [@group, @badge], title: 'View badge' %>
+        </span>
+        <span class="header-text">
+          <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
+          <h2><%= "#{@group.url_with_caps}/#{@badge.url_with_caps}" %></h2>
+          <h3>
+            <%= @badge.summary %>
+          </h3>
+        </span>
       </div>
 
-      <div class="secondary-header">
-        <table>
-          <tr>
-            <td class="header-text">
-              <h1>All Learning Log Entries</h1>
-              <h2>
-                Showing <%= ((@page.to_i - 1) * @page_size.to_i) + 1 %>
-                - <%= [(@page.to_i * @page_size.to_i), @entries.count].min %>
-                of <%= @entries.count %>
-              </h2>  
-            </td>
-            
-          </tr>
-        </table>
+      <div class="secondary-header span6">
+        <span class="header-text">
+          <h1>All Learning Log Entries</h1>
+          <h2>
+            Showing <%= ((@page.to_i - 1) * @page_size.to_i) + 1 %>
+            - <%= [(@page.to_i * @page_size.to_i), @entries.count].min %>
+            of <%= @entries.count %>
+          </h2>  
+        </span>            
       </div>
     </div>
   </div>

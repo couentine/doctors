@@ -30,7 +30,8 @@
           <h2>
             <% if entry.creator != entry.log.user %>
               <span class="creator-gravatar">
-                <img src="<%= gravatar_url_for entry.creator %>" class="img-circle"
+                <img src="<%= gravatar_url_for entry.creator %>" 
+                  class="gravatar img-circle <%= entry.entry_creator_type %>"
                   title="Posted by <%= entry.creator.name %>" data-placement="bottom"
                   data-toggle="tooltip">
                 
@@ -61,11 +62,11 @@
           </h2>
         </td>
         <td class="headline-right">
-          <%= link_to gravatar_for(entry.log.user, class: 'img-circle'), 
+          <%= link_to gravatar_for(entry.log.user, class: "img-circle #{entry.log_user_type}"), 
             [entry.log.badge.group, entry.log.badge, entry.log],
             title: "View #{entry.log.user.name}'s learning log" %>
-          <abbr class="username" title="<%= entry.log.user.name %>" data-toggle="tooltip"
-            data-placement="bottom">
+          <abbr class="username <%= entry.log_user_type %>" data-toggle="tooltip" data-placement="bottom"
+            title="<%= "#{entry.log.user.name} (#{entry.log_user_type.capitalize} at time of #{entry.type})" %>" >
             <%= entry.log.user.username %>
           </abbr>
         </td>
@@ -82,7 +83,8 @@
                 <label><i class="icon-tags"></i> Tags:</label> 
                 <% entry.tags.each do |tag| %>
                   <% comma = (tag == entry.tags.last) ? '' : ', ' %>
-                  <%= link_to tag, "/#{@group.url}/#{@badge.url}/#{tag}" %><%= comma %>
+                  <%= link_to tag, \
+                    "/#{entry.log.badge.group.url}/#{entry.log.badge.url}/#{tag}" %><%= comma %>
                 <% end %>
               </div>
             <% end %>

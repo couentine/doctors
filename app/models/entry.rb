@@ -75,6 +75,34 @@ class Entry
     end
   end
 
+  # Return Values = [:learner, :expert]
+  def entry_creator_type
+    if log.badge.nil?
+      :learner
+    else
+      expert_date = creator.expert_date log.badge
+      if expert_date && (created_at > expert_date)
+        :expert
+      else
+        :learner
+      end
+    end
+  end
+
+  # Return Values = [:learner, :expert]
+  def log_user_type
+    if log.badge.nil?
+      :learner
+    else
+      expert_date = log.user.expert_date log.badge
+      if expert_date && (created_at > expert_date)
+        :expert
+      else
+        :learner
+      end
+    end
+  end
+
   # Returns a symbol representing the widest group to which this post is visible
   # NOTE: A post is ALWAYS visible to the creator and log owner (the :users).
   # Return values = [:users, :experts, :members, :anonymous]

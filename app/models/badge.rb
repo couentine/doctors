@@ -20,6 +20,7 @@ class Badge
 
   field :name,                type: String
   field :url,                 type: String
+  field :url_with_caps,       type: String
   field :image_url,           type: String
   field :summary,             type: String
   
@@ -45,11 +46,12 @@ class Badge
   validates :creator, presence: true
 
   # Which fields are accessible?
-  attr_accessible :name, :url, :image_url, :summary, :info
+  attr_accessible :name, :url_with_caps, :image_url, :summary, :info
   
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_validation :update_caps_field
   after_create :add_creator_as_expert
   after_validation :update_info_sections
   after_validation :update_info_versions, on: :update # Don't store the first (default) value
@@ -152,6 +154,14 @@ protected
   def set_default_values
     self.info ||= APP_CONFIG['default_badge_info']
     self.flags ||= []
+  end
+
+  def update_caps_field
+    if url_with_caps.nil?
+      self.url = nil
+    else
+      self.url = url_with_caps.downcase
+    end
   end
 
   def add_creator_as_expert

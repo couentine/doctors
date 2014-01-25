@@ -120,6 +120,33 @@ ul.dropdown-menu {
   }
 }
 
+/* === BOOTSTRAP-RELATED MANUAL RESPONSIVE WIDTHS === */
+
+/*@-moz-document url-prefix() {
+  .card-body-inner { 
+    width: 87%; 
+    background-color: blue;
+  }
+}*/
+@media (min-width: 1200px) {
+  .span4 .entry-card .card-body-inner { width: 346px; }
+}
+@media (min-width: 980px) and (max-width: 1199px) {
+  .span4 .entry-card .card-body-inner { width: 276px; }
+  .span6 .entry-card .card-body-inner { width: 436px; }
+}
+@media (min-width: 768px) and (max-width: 979px) {
+  .span6 .entry-card .card-body-inner { width: 328px; }
+}
+@media (max-width: 767px) and (min-width: 481px) {
+@-moz-document url-prefix() {
+    [class*="span"] .entry-card .card-body-inner { width: 87%; }
+  }
+  @media (max-width: 480px) {
+    [class*="span"] .entry-card .card-body-inner { width: 65%; } 
+  }
+}
+
 /* === PATTERNS, COLORS & TEXTURES === */
 
 .white-striped-background {
@@ -538,37 +565,74 @@ form#group-add-users-form {
   border-radius: 3px;
   color: $dark-text-color;
   box-shadow: -1px 1px 7px 0 $card-shadow-color;
-  width: 100%;
   position: relative;
-  background-color: $light-white;
   margin-bottom: 30px;
+  background: linear-gradient(45deg, $dark-white 25%, $light-white 25%, $light-white 50%,
+                           $dark-white 50%, $dark-white 75%, $light-white 75%);
+  background-size: 16px 16px;
 
+  @media (max-width: 767px) {
+    float: none;
+  }
+
+  .white-background {
+    position: absolute;
+    top: 0;
+    bottom: 43px;
+    left: 48%;
+    right: 0;
+    background-color: $light-white;
+
+    &.no-tabs { bottom: 0; }
+    @media (max-width: 767px) { display: none; }
+  }
+  .primary-header {
+    min-height: 100px;
+
+    span.header-image { 
+      float: left; 
+      margin: 0 20px;
+    }
+    span.header-text { padding-left: 120px; }
+  }
+  .secondary-header {
+    @media (max-width: 767px) {
+      background-color: $light-white;
+    }
+
+    span.header-image { 
+      float: right; 
+      margin: 0 0 0 20px;
+    }
+  }
   .primary-header,.secondary-header {
-    float: left;
-    height: auto;
     position: relative;
-    width: 46%;
-    padding: 2%;
+    padding: 20px 0;
+    margin: 0;
     
     a,a:visited { color: $dark-text-color; }
     a:hover,a:focus { 
       color: $medium-text-color;
       text-decoration: none;
     }
-    td.header-image {
-      position: relative;
+    span.header-image {
+      display: block;
 
       a.image-link {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
         color: transparent;
         background-color: transparent;
       }
+      img {
+        width: 100px;
+      }
+    }
+    span.header-text {
+      display: block;
+      margin: 0 20px;
     }
     h1,h2,h3 {
       line-height: 1.2em;
-      margin: 0 0 15px 0;
+      margin: 0 0 8px 0;
     }
     h1 {
       font-size: 26px;
@@ -583,47 +647,9 @@ form#group-add-users-form {
       font-weight: normal;
       color: $medium-text-color;
     }
-    table {
-      width: 100%;
-      @media (max-width: 767px) { width: 98%; }
-    }
-    img {
-      width: 27.88%%;
-      float: left;
-      margin-right: 20px;
-    }
-
-    @media (max-width: 767px) {
-      width: 96%;
-    }
-  }
-  .primary-header {
-    background: linear-gradient(45deg, $dark-white 25%, $light-white 25%, $light-white 50%,
-                           $dark-white 50%, $dark-white 75%, $light-white 75%);
-    background-size: 16px 16px;
-
-    table {
-      td.header-image {       
-        width: 30%;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center top;
-      }
-      td.header-text {       
-        width: 70%;
-        padding-left: 10px;
-      }
-    }
-    img {
-      width: 27.88%%;
-      float: left;
-      margin-right: 20px;
-    }
-  }
-  .secondary-header {
     ul {
-      float: left;
-      margin: 0;
+      display: inline-block;
+      margin: 0 20px;
     }
     li {
       list-style: none;
@@ -633,32 +659,12 @@ form#group-add-users-form {
       a:visited { color: $medium-text-color; }
       a:hover,a:focus { color: $dark-text-color; }
     }
-    table {
-      td.header-image {       
-        width: 25%;
-        vertical-align: top;
-        img {
-          width: 100%;
-        }
-      }
-      td.header-text {       
-        padding-left: 10px;
-        vertical-align: top;
-        position: relative;
-      }
-    }
-    img {
-      width: 27.88%%;
-      float: left;
-      margin-right: 20px;
-    }
-
     ul.bl-icon-list {
-      float: left;
+      display: inline-block;
       list-style: none;
-      margin: 5px 0 15px 0;
+      margin: 5px 0 0 0;
       li {
-        float: left;
+        display: inline-block;
         margin: 0 12px;
         position: relative;
         width: 40px;
@@ -681,23 +687,19 @@ form#group-add-users-form {
     }
 
     @media (max-width: 767px) {
-      td.header-image {
-        width: 80px !important;
+      h1 { font-size: 22px; }
+      h2 { font-size: 18px; }
+      h3 { font-size: 13px; }
+      ul {
+        margin-top: 0;
+        margin-bottom: 0;
       }
-      h1,h2 {
-        width: 80%;
-        display: inline-block;
-        height: 25px;
-      }
-      li {
-        width: 30px !important;
-        height: 30px !important;
-      }
-      ul.bl-icon-list {
-        position: absolute;
-        right: 5px;
-        top: -5px;
-      }
+    }
+  }
+
+  @media (max-width: 767px) {
+    .secondary-header span.header-image {
+      margin-right: 20px;
     }
   }
 
@@ -747,28 +749,9 @@ form#group-add-users-form {
       font-weight: bold;
       color: $dark-text-color;
     }
-  }
-  
+  }  
 }
-.badge-entries-header-card {
-  .secondary-header {
-    @media (max-width: 767px) {
-      h1,h2 {
-        width: 100%;
-      }
-    }
-  }
-}
-.user-header-card {
-  .primary-header {
-    td.header-image {
-      vertical-align: top;
-      img {
-        width: 120px;
-      }
-    }
-  }
-}
+
 
 /* === TABS === */
 
@@ -994,10 +977,10 @@ div.badge-card {
 }
 
 div.entry-card.validation { border-top: 4px solid $primary-light; }
-div.entry-card.learner_post { border-top: 4px solid $secondary-light; }
-div.entry-card.expert_post { border-top: 4px solid $tertiary-light; }
 div.entry-card {
   tr.card-headline-row {
+    img.gravatar.learner { border: 2px solid $secondary-light; }
+    img.gravatar.expert { border: 2px solid $tertiary-light; }
     h2 {
       font-size: 14px;
       line-height: 1.4em;
@@ -1042,18 +1025,26 @@ div.entry-card {
     }
     td.headline-right {
       vertical-align: top;
-      width: 45px;
+      width: 49px;
       padding: 10px 10px 0 10px;
       position: relative;
       text-align: center;
-      word-break: break-word;
+      word-break: break-all;
 
       img { width: 45px; }
       abbr.username {
-        color: $medium-text-color;
         width: 100%;
         font-size: 9px;
       }
+      abbr.username.learner { 
+        color: $secondary-light;
+        border-bottom: 1px dotted $secondary-light;
+      }
+      abbr.username.expert { 
+        color: $tertiary-light;
+        border-bottom: 1px dotted $tertiary-light;
+      }
+      .tooltip { width: 160px; }
     }
   }
   tr.card-headline-row.with-badge {
@@ -1082,14 +1073,14 @@ div.entry-card {
         border-bottom: 1px dotted $tertiary-dark;
       }
       a.linkified-image {
-        display: block;
+        display: inline-block;
         margin: 5px 0;
         &:last-child { margin-bottom: 0; }
 
         img {
           max-width: 100%;
           max-height: 300px;
-          display: block;
+          display: inline-block;
           border-radius: 10px;
           border: 1px solid $really-light-gray;
         }
@@ -1113,7 +1104,7 @@ div.entry-card {
 
         -ms-word-break: break-all;
         word-break: break-all;
-        word-break: break-word;
+        word-break: break-all;
         -webkit-hyphens: auto;
         -moz-hyphens: auto;
         hyphens: auto;
@@ -1194,14 +1185,14 @@ div.text-card {
     border-bottom: 1px dotted $tertiary-dark;
   }
   a.linkified-image {
-    display: block;
+    display: inline-block;
     margin: 10px 0;
     &:last-child { margin-bottom: 0; }
 
     img {
       max-width: 100%;
       max-height: 300px;
-      display: block;
+      display: inline-block;
       border-radius: 10px;
       border: 1px solid $really-light-gray;
     }
@@ -1211,16 +1202,8 @@ div.text-card {
 /* === PAGE CARDS === */
 
 .entry-page-card.validation { 
-  .super-header-section { border-bottom: 4px solid $primary-medium; } 
-  .arrow { color: $primary-medium; } 
-}
-.entry-page-card.learner_post { 
-  .super-header-section { border-bottom: 4px solid $secondary-medium; } 
-  .arrow { color: $secondary-medium; } 
-}
-.entry-page-card.expert_post { 
-  .super-header-section { border-bottom: 4px solid $tertiary-medium; } 
-  .arrow { color: $tertiary-medium; } 
+  .super-header-section { border-bottom: 4px solid $primary-light; } 
+  .arrow { color: $primary-light !important; } 
 }
 .page-card {
   border-radius: 3px;
@@ -1285,16 +1268,27 @@ div.text-card {
         }
       }
     }
+    img.gravatar.learner { border: 2px solid $secondary-light; }
+    img.gravatar.expert { border: 2px solid $tertiary-light; }
+    abbr.learner { 
+      /*color: $secondary-light; */
+      border-bottom: 1px dotted $secondary-light; 
+    }
+    abbr.expert { 
+      /*color: $tertiary-light; */
+      border-bottom: 1px dotted $tertiary-light; 
+    }
 
     .creator-user-link { 
       float: right; 
-      width: 75px;
-      margin: -47px 0 10px 10px;
-      word-break: break-word;
+      width: 77px;
+      margin: -49px 0 10px 10px;
+      word-break: break-all;
       
       img { width: 50px; }
       .arrow {
         font-size: 20px;
+        color: $medium-gray;
         display: inline-block;
         position: relative;
         top: 3px;
@@ -1303,7 +1297,7 @@ div.text-card {
 
       @media (max-width: 767px) {
         margin: -42px 0 10px 10px;
-        width: 65px;
+        width: 67px;
 
         img { width: 40px; }
       }
@@ -1311,8 +1305,8 @@ div.text-card {
     .log-user-link { 
       float: right; 
       width: 100px; 
-      margin: -70px 0 10px 10px;
-      word-break: break-word;
+      margin: -72px 0 10px 10px;
+      word-break: break-all;
       text-align: center;
 
       @media (max-width: 767px) {
@@ -1340,14 +1334,14 @@ div.text-card {
       border-bottom: 1px dotted $tertiary-dark;
     }
     a.linkified-image {
-      display: block;
+      display: inline-block;
       margin: 10px 0;
       &:last-child { margin-bottom: 0; }
 
       img {
         max-width: 100%;
         max-height: 300px;
-        display: block;
+        display: inline-block;
         border-radius: 10px;
         border: 1px solid $really-light-gray;
       }

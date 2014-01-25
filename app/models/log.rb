@@ -33,6 +33,7 @@ class Log
   field :date_withdrawn,          type: Time
   field :date_issued,             type: Time
   field :date_retracted,          type: Time
+  field :date_originally_issued,  type: Time
   field :date_sent_to_backpack,   type: Time
 
   field :validation_count,        type: Integer
@@ -213,41 +214,45 @@ protected
 
   # Updates validation & issue status values
   def update_stati
-    if !currently_validated?
-      # First update the validation status if needed
-      if validation_status == 'validated'
-        if date_requested.nil?
-          self.validation_status = 'incomplete'
-        else
-          if date_withdrawn.nil?
-            self.validation_status = 'requested'
-          else
-            self.validation_status = 'withdrawn'
-          end
+    if (validation_count_changed? || rejection_count_changed?)
+      if currently_validated?
+        # First update the validation status if needed
+        if validation_status != 'validated'
+          self.validation_status = 'validated'
         end
-      elsif date_withdrawn_changed? && !date_withdrawn.nil?
-        self.validation_status = 'withdrawn'
-      elsif date_requested_changed? && !date_requested.nil?
-        self.validation_status = 'requested'
-        self.date_withdrawn = nil # In case this is not their first request
-      end
-      
-      # Then update the issue status if needed
-      if issue_status == 'issued'
-        issue_status = 'retracted'
-        date_retracted = Time.now
-      end 
-    else
-      # First update the validation status if needed
-      if validation_status != 'validated'
-        self.validation_status = 'validated'
-      end
 
-      # Then update the issue status if needed
-      if issue_status != 'issued'
-        self.issue_status = 'issued'
-        self.date_issued = Time.now
-        self.date_retracted = nil
+        # Then update the issue status if needed
+        if issue_status != 'issued'
+          self.issue_status = 'issued'
+          self.date_issued ||= Time.now
+          self.date_retracted = nil
+        end
+      else
+        # First update the validation status if needed
+        if validation_status == 'validated'
+          if date_requested.nil?
+            self.validation_status = 'incomplete'
+          else
+            if date_withdrawn.nil?
+              self.validation_status = 'requested'
+            else
+              self.validation_status = 'withdrawn'
+            end
+          end
+        elsif date_withdrawn_changed? && !date_withdrawn.nil?
+          self.validation_status = 'withdrawn'
+        elsif date_requested_changed? && !date_requested.nil?
+          self.validation_status = 'requested'
+          self.date_withdrawn = nil # In case this is not their first request
+        end
+        
+        # Then update the issue status if needed
+        if issue_status == 'issued'
+          issue_status = 'retracted'
+          date_originally_issued = date_issued
+          date_retracted = Time.now
+          date_issued = nil
+        end 
       end
     end
   end
