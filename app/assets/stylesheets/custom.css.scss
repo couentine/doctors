@@ -119,6 +119,9 @@ ul.dropdown-menu {
     }
   }
 }
+.badge-success { background-color: $secondary-light; }
+.badge-warning { background-color: $primary-light; }
+.badge-info { background-color: $tertiary-light; }
 
 /* === BOOTSTRAP-RELATED MANUAL RESPONSIVE WIDTHS === */
 
@@ -499,8 +502,11 @@ h2.form-header {
   -moz-transition: height 0.2s;
   transition: height 0.2s;
 }
-.control-group.entry_body {
+.control-group.entry_body,.control-group.tag_wiki {
   width: 100%;
+}
+.control-group.tag_wiki {
+  margin-top: 55px;
 }
 #badge-versions {
   width: 340px;
@@ -1211,7 +1217,6 @@ div.text-card {
   box-shadow: -1px 1px 7px 0 $card-shadow-color;
   position: relative;
   background-color: $light-white;
-  margin: 50px 0 20px 0;
 
   @media (max-width: 767px) {
     margin: 35px 0 10px 0;
@@ -1278,50 +1283,18 @@ div.text-card {
       /*color: $tertiary-light; */
       border-bottom: 1px dotted $tertiary-light; 
     }
-
-    .creator-user-link { 
-      float: right; 
-      width: 77px;
-      margin: -49px 0 10px 10px;
-      word-break: break-all;
-      
-      img { width: 50px; }
-      .arrow {
-        font-size: 20px;
-        color: $medium-gray;
-        display: inline-block;
-        position: relative;
-        top: 3px;
-        right: -5px;
-      }
-
-      @media (max-width: 767px) {
-        margin: -42px 0 10px 10px;
-        width: 67px;
-
-        img { width: 40px; }
-      }
-    }
-    .log-user-link { 
-      float: right; 
-      width: 100px; 
-      margin: -72px 0 10px 10px;
-      word-break: break-all;
-      text-align: center;
-
-      @media (max-width: 767px) {
-        width: 55px; 
-        margin: -50px 0 10px 10px;
-        font-size: 10px;
-      }
-    }
   }
   .body-section {
-    padding: 10px 30px 30px 30px;
+    padding: 20px 30px 30px 30px;
 
     h1,h2,h3 {
       font-size: 22px;
       color: $dark-text-color;
+      line-height: 1.2em;
+      margin: 15px 0;
+    }
+    h1:first-child,h2:first-child,h3:first-child {
+      margin-top: 0;
     }
     a.linkified-url,a.linkified-url:visited,a.linkified-tag,a.linkified-tag:visited {
       color: $dark-text-color;
@@ -1387,6 +1360,67 @@ div.text-card {
       color: $tertiary-medium;
       text-decoration: none;
       border-bottom: 1px dotted $tertiary-dark;
+    }
+  }
+}
+.entry-page-card {
+  margin: 50px 0 20px 0;
+
+  .header-section {
+    .creator-user-link { 
+      float: right; 
+      width: 77px;
+      margin: -49px 0 10px 10px;
+      
+      img { width: 50px; }
+      .arrow {
+        font-size: 20px;
+        color: $medium-gray;
+        display: inline-block;
+        position: relative;
+        top: 3px;
+        right: -5px;
+      }
+
+      @media (max-width: 767px) {
+        margin: -42px 0 10px 10px;
+        width: 67px;
+
+        img { width: 40px; }
+      }
+    }
+    .log-user-link { 
+      float: right; 
+      width: 100px; 
+      margin: -72px 0 10px 10px;
+      text-align: center;
+
+      @media (max-width: 767px) {
+        width: 55px; 
+        margin: -50px 0 10px 10px;
+        font-size: 10px;
+      }
+    }
+  }
+}
+.tag-page-card {
+  margin: 35px 0 20px 0;
+
+  .body-section {
+    .section-container.alert {
+      font-weight: bold;
+      font-size: 22px;
+      line-height: 1.5em;
+      padding: 15px;
+      background-color: $secondary-really-light;
+    }
+  }
+  .header-section {
+    .badge-link { 
+      float: right; 
+      width: 100px; 
+      margin-top: -65px;
+      text-align: center;
     }
   }
 }

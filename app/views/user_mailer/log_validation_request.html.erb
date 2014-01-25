@@ -5,7 +5,7 @@
   </head>
   <body>
     <p>
-      <% @from_user.name %> has requested expert validation of their learning log for the 
+      <%= @from_user.name %> has requested expert validation of their learning log for the 
       <%= @badge.name %> badge in Badge List.
       To add your expertise, log into Badge List or click one of the links below. 
     </p>
@@ -19,7 +19,7 @@
       </ol>
     </p>
     <p>
-      <strong><% @from_user.name %> Learning Log:</strong> 
+      <strong><%= @from_user.name %>'s Learning Log:</strong> 
       <%= link_to group_badge_log_url(@group, @badge, @log), 
         group_badge_log_url(@group, @badge, @log) %> <br>
       <strong><%= @badge.name %>:</strong> 

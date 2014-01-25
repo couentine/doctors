@@ -13,7 +13,7 @@ class BadgesController < ApplicationController
   # GET /group-url/badge-url
   # GET /group-url/badge-url.json
   def show
-    @entries = @badge.entries
+    @entries = @badge.entries(current_user)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -103,7 +103,7 @@ class BadgesController < ApplicationController
     # Grab the current page of entries
     @page = params[:page] || 1
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
-    @entries = @badge.entries(@page, @page_size)
+    @entries = @badge.entries(current_user, nil, @page, @page_size)
 
     respond_to do |format|
       format.html # entries_index.html.erb

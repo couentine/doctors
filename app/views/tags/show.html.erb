@@ -14,7 +14,7 @@
     <span class="divider">/</span>
   </li>
   <li class="active">
-    <%= "Tag: #{@tag.name_with_caps}" %>
+    <%= @tag.name_with_caps %>
   </li>
 <% end %>
 
@@ -96,6 +96,7 @@
             </li>
             <% if @tag.updated_at != @tag.created_at %>
               <li>
+                <i class="icon-info-sign"></i> 
                 <% if @tag.updated_at <= Time.now %>
                   <%= "Last updated #{time_ago_in_words(@tag.updated_at)} ago" %>
                 <% else %>
@@ -104,7 +105,7 @@
               </li>
             <% end %>
             <li>
-              This is version <%= @version %> of the wiki page
+              <i class="icon-file"></i> This is version <%= @version %> of the wiki page
             </li>
           </ul>
         <% end %>

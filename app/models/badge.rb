@@ -15,6 +15,7 @@ class Badge
   belongs_to :group
   belongs_to :creator, inverse_of: :created_badges, class_name: "User"
   has_many :logs, dependent: :nullify
+  has_many :tags, dependent: :destroy
 
   # === FIELDS & VALIDATIONS === #
 
@@ -27,8 +28,8 @@ class Badge
   field :info,                type: String
   field :info_sections,       type: Array
   field :info_versions,       type: Array
-  field :tags,                type: Array
-  field :tags_with_caps,      type: Array
+  field :info_tags,           type: Array
+  field :info_tags_with_caps, type: Array
   
   field :current_user,        type: String # used when logging info_versions
   field :current_username,    type: String # used when logging info_versions
@@ -132,10 +133,34 @@ class Badge
   end
 
   # Returns all entries (posts AND validations), sorted from newest to oldest
+  # Filters out private entries based on the permissions of the passed filter_user
+  # Also selects only entries which contain tag_name (if supplied)
   # NOTE: Uses pagination
-  def entries(page = 1, page_size = APP_CONFIG['page_size_normal'])
-    log_ids = logs.map{ |log| log.id }
-    Entry.where(:log.in => log_ids).order_by(:updated_at.desc).page(page).per(page_size)
+  def entries(filter_user, tag_name = nil, page = 1, page_size = APP_CONFIG['page_size_normal'])
+    attached_log_ids = []
+    owned_log_ids = []
+    logs.each do |log| 
+      attached_log_ids << log.id unless log.detached_log
+      owned_log_ids << log.id if log.user == filter_user
+    end
+
+    if tag_name.nil?
+      if filter_user && filter_user.expert_of?(self)
+        Entry.where(:log.in => attached_log_ids).order_by(:updated_at.desc).page(page).per(page_size)
+      else
+        Entry.or({:log.in => attached_log_ids, :private => false}, {:log.in => owned_log_ids}, \
+          {:creator => filter_user}).order_by(:updated_at.desc).page(page).per(page_size)
+      end
+    else
+      if filter_user && filter_user.expert_of?(self)
+        Entry.where(:log.in => attached_log_ids, :tags => tag_name.downcase)\
+          .order_by(:updated_at.desc).page(page).per(page_size)
+      else
+        Entry.where(:tags => tag_name.downcase)\
+          .or({:log.in => attached_log_ids, :private => false}, {:log.in => owned_log_ids}, \
+          {:creator => filter_user}).order_by(:updated_at.desc).page(page).per(page_size)
+      end
+    end
   end
 
   # Returns the ACTUAL validation threshold based on the group settings AND the badge expert count
@@ -177,8 +202,8 @@ protected
     if info_changed?
       linkified_result = linkify_text(info, group, self)
       self.info_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
-      self.tags = linkified_result[:tags]
-      self.tags_with_caps = linkified_result[:tags_with_caps]
+      self.info_tags = linkified_result[:tags]
+      self.info_tags_with_caps = linkified_result[:tags_with_caps]
     end
   end
 

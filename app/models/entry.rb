@@ -166,10 +166,10 @@ protected
 
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
-    if created_at > (Time.now - 1.hour)
+    if created_at > (Time.now - 2.hours)
       if type == 'validation'
         UserMailer.log_validation_received(log.user, creator, \
-          log.badge.group, log.badge, log, self)
+          log.badge.group, log.badge, log, self).deliver 
       end
     end
   end
@@ -183,7 +183,6 @@ protected
         log.rejection_count -= 1
       end
       log.save
-      flash[:notice] = "Validation deleted and learning log validation counts adjusted."
     end
   end
 

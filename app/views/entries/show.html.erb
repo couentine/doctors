@@ -121,6 +121,7 @@
           </li>
           <% if @entry.updated_at != @entry.created_at %>
             <li>
+              <i class="icon-info-sign"></i>
               <% if @entry.updated_at <= Time.now %>
                 <%= "Last updated #{time_ago_in_words(@entry.updated_at)} ago" %>
               <% else %>

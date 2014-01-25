@@ -214,7 +214,9 @@ protected
 
   # Updates validation & issue status values
   def update_stati
-    if (validation_count_changed? || rejection_count_changed?)
+    if validation_count_changed? || rejection_count_changed? || date_requested_changed? \
+      || date_withdrawn_changed?
+
       if currently_validated?
         # First update the validation status if needed
         if validation_status != 'validated'
@@ -254,6 +256,7 @@ protected
           date_issued = nil
         end 
       end
+      
     end
   end
 
@@ -330,20 +333,20 @@ protected
 
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
-    if validation_status_changed? && (updated_at > (Time.now - 1.hour))
+    if validation_status_changed? && (updated_at > (Time.now - 2.hours))
       if validation_status == 'requested'
         badge.expert_logs.each do |expert_log|
-          UserMailer.log_validation_request(expert_log.user, user, \
+          UserMailer.log_validation_request(expert_log.user, self.user, \
             badge.group, badge, self).deliver 
         end
       elsif validation_status == 'validated'
-        UserMailer.log_badge_issued(user, badge.group, badge, self)
+        UserMailer.log_badge_issued(user, badge.group, badge, self).deliver 
       end
     end
 
     if issue_status_changed? && (updated_at > (Time.now - 1.hour))
       if issue_status == 'retracted'
-        UserMailer.log_badge_retracted(user, badge.group, badge, self)
+        UserMailer.log_badge_retracted(user, badge.group, badge, self).deliver 
       end
     end
   end

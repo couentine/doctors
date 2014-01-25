@@ -62,13 +62,9 @@ BadgeList::Application.routes.draw do
         resources :entries, only: [:new, :create]
         resources :entries, path: "", except: [:index, :new, :create]
       end
+
+      resources :tags, path: "", except: [:index, :new, :create]
     end
   end
-
-  # === MANUAL TAG PATHS === #
-  match ':group_id/:badge_id/:tag_id' => 'tags#show', via: :get, as: :group_badge_tag_path
-  match ':group_id/:badge_id/:tag_id' => 'tags#update', via: :put
-  match ':group_id/:badge_id/:tag_id' => 'tags#destroy', via: :delete
-  match ':group_id/:badge_id/:tag_id/edit' => 'tags#edit', via: :get, as: :edit_group_badge_tag_path
-
+  
 end

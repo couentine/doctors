@@ -70,7 +70,7 @@ class UserMailer < ActionMailer::Base
   
   def log_validation_request(to_user, from_user, group, badge, log)
     @to_user, @from_user, @group, @badge, @log = to_user, from_user, group, badge, log
-    
+
     mail(
       :subject  => "Learning Validation Request",
       :to       => to_user.email_name,

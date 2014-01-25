@@ -22,10 +22,12 @@
         </ul>
         <ul class="right-foot">
           <li data-toggle="tooltip" data-placement="bottom" title="Active Members">
-            <i class="icon-user"></i> 23
+            <i class="icon-user"></i> 
+            <%= badge.learner_logs.count %>
           </li>
           <li data-toggle="tooltip" data-placement="bottom" title="Badge Experts">
-            <i class="icon-certificate"></i> 5
+            <i class="icon-certificate"></i>
+            <%= badge.expert_logs.count %>
           </li>
         </ul>
       </td>

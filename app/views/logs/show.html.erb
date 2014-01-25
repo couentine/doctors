@@ -44,7 +44,7 @@
           <%= link_to "<i class='icon-plus-sign icon-white'></i> Post to This Log".html_safe,
             new_group_badge_log_entry_path(@group, @badge, @log) %>
           <% if @validation.nil? %>
-            <span class="divider">|</span>f
+            <span class="divider">|</span>
           <% end %>
         <% end %>
       </li>
@@ -421,6 +421,15 @@
                 <% end %>
               <% end %>
 
+            
+              <% if @log.validation_count < @badge.current_validation_threshold %>
+                <span class="badge badge-success collapse-when-small">
+                  Current validation threshold is <%= @badge.current_validation_threshold %>
+                </span>
+                <span class="badge badge-success show-when-small">
+                  Threshold is <%= @badge.current_validation_threshold %>
+                </span>
+              <% end %>
 
               <% if @log.validation_status == 'requested' %>
                 <span class="badge badge-warning collapse-when-small">
@@ -437,7 +446,7 @@
                   Issued <%= @log.date_issued.to_s(:short_date) %>
                 </span>
               <% end %>
-            
+
               <h2 class="collapse-when-small">Validation of Badge Experts</h2>
               <h2 class="show-when-small">Validations</h2>
             

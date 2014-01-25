@@ -22,7 +22,7 @@
       <strong><u>Content of the Validation</u></strong>
     </p>
     <p>
-      <%= @entry.body_sections.join '<br>-----------------------<br>' %>
+      <%= (@entry.body_sections.join '<br>-----------------------<br>').html_safe %>
     </p>
 
     <p>

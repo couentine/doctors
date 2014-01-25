@@ -1,6 +1,63 @@
-<h1>Editing tag</h1>
+<% 
+  provide(:title, "Edit #{@tag.name_with_caps} - #{@badge.name}")
+  provide(:show_subheader, true)
+  provide(:subheader_image, group_image_url_for(@group)) 
+  provide(:include_rich_text, true) 
+%>
 
-<%= render 'form' %>
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url_with_caps, @group %>
+    <span class="divider">/</span>
+  </li>
+  <li>
+    <%= link_to @badge.url_with_caps, [@group, @badge] %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active">
+    <%= "#{ (@tag_exists) ? 'Edit' : 'Create' } Tag Wiki Page: #{@tag.name_with_caps}" %>
+  </li>
+<% end %>
 
-<%= link_to 'Show', @tag %> |
-<%= link_to 'Back', tags_path %>
+<!-- === FORM AREA === -->
+
+<div class="row">
+  <div class="bl-form bl-form-tag span10 offset1">
+    
+    <div class="form-header">
+      <% if @tag_exists %>
+        <h1>Edit tag wiki page for #<%= @tag.name_with_caps %></h1>
+      <% else %>
+        <h1>Create tag wiki page for #<%= @tag.name_with_caps %></h1>
+      <% end %>
+
+      <div class="form-image" 
+           style="background-image: url('<%= image_path 'tag-medium.png' %>')">
+        &nbsp;
+      </div>
+    </div>
+
+    <!-- === THE FORM ITSELF === -->
+    
+    <%= simple_form_for [@group, @badge, @tag], method: :put,
+      url: "#{group_badge_path(@group, @badge)}/#{@tag.name_with_caps}",
+      html: {class: 'form-horizontal'} do |f| %>
+
+      <div class="form-body" style="float: none">
+        
+        <%= f.input :wiki, as: :text, label: 'Wiki Page Body', 
+          input_html: { class: "huge-text-area rich-text-area" } %>
+
+        <%= f.input :name_with_caps, as: :hidden %>
+
+      </div>
+      
+      <div class="form-footer">
+        <% save_button_text = (@tag_exists) ? 'Create wiki page' : 'Save changes' %>
+        <%= f.button :submit, label: save_button_text, class: 'btn btn-primary' %>
+        <%= link_to "Cancel", "../#{@tag.name_with_caps}", class: "btn" %>
+      </div>
+    <% end %>
+
+  </div>
+</div>
