@@ -10,7 +10,7 @@ module EmailTools
   def build_from_string(from_user = nil)
     if from_user.nil? || from_user.name.blank?
       "Badge List <#{APP_CONFIG['from_email']}>"
-    elsif 
+    else
       "#{from_user.name} <#{APP_CONFIG['from_email']}>"
     end
   end

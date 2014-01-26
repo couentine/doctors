@@ -91,10 +91,10 @@
             </td>
             <td>
               <%= link_to '<i class="icon-envelope"></i>'.html_safe, 
-                  send_group_member_invitation_path(@group.id, u['email']), :method => :post,
+                  send_group_member_invitation_path(@group, u['email']), :method => :post,
                   title: 'Resend invitation email', data: { toggle: "tooltip", placement: "bottom"} %> 
               <%= link_to '<i class="icon-remove"></i>'.html_safe, 
-                  destroy_group_invited_member_path(@group.id, u['email']), :method => :delete,
+                  destroy_group_invited_member_path(@group, u['email']), :method => :delete,
                   title: 'Revoke invitation', data: { toggle: "tooltip", placement: "bottom",
                   confirm: "Are you absolutely sure you want to revoke this user's invitation?" } %>
             </td>
@@ -141,10 +141,10 @@
             </td>
             <td>
               <%= link_to '<i class="icon-envelope"></i>'.html_safe, 
-                  send_group_admin_invitation_path(@group.id, u['email']), :method => :post,
+                  send_group_admin_invitation_path(@group, u['email']), :method => :post,
                   title: 'Resend invitation email', data: { toggle: "tooltip", placement: "bottom"} %> 
               <%= link_to '<i class="icon-remove"></i>'.html_safe, 
-                  destroy_group_invited_admin_path(@group.id, u['email']), :method => :delete,
+                  destroy_group_invited_admin_path(@group, u['email']), :method => :delete,
                   title: 'Revoke invitation', data: { toggle: "tooltip", placement: "bottom",
                   confirm: "Are you absolutely sure you want to revoke this user's invitation?" } %>
             </td>
