@@ -7,7 +7,7 @@ class UserMailer < ActionMailer::Base
     mail(
       :subject  => "You're now an admin of #{group.name}",
       :to       => to_user.email_name,
-      :from     => from_user.email_name,
+      :from     => build_from_string(from_user),
       :reply_to => from_user.email_name,
       :tag      => 'group_admin_add,user_mailer'
     )
@@ -19,7 +19,7 @@ class UserMailer < ActionMailer::Base
     mail(
       :subject  => "Welcome to #{group.name}!",
       :to       => to_user.email_name,
-      :from     => from_user.email_name,
+      :from     => build_from_string(from_user),
       :reply_to => from_user.email_name,
       :tag      => 'group_member_add,user_mailer'
     )
@@ -32,7 +32,7 @@ class UserMailer < ActionMailer::Base
       :subject  => "You've been issued a badge",
       :to       => to_user.email_name,
       :from     => build_from_string,
-      :reply_to => build_from_string,
+      :reply_to => no_reply_to_string,
       :tag      => 'log_badge_issued,user_mailer'
     )
   end
@@ -44,7 +44,7 @@ class UserMailer < ActionMailer::Base
       :subject  => "Your badge has been retracted",
       :to       => to_user.email_name,
       :from     => build_from_string,
-      :reply_to => build_from_string,
+      :reply_to => no_reply_to_string,
       :tag      => 'log_validation_retracted,user_mailer'
     )
   end
@@ -55,15 +55,19 @@ class UserMailer < ActionMailer::Base
 
     if @from_self
       subject = "You've joined a badge"
+      from_string = build_from_string
+      reply_to_string = no_reply_to_string
     else
       subject = "You've beed added to a badge"
+      from_string = build_from_string(from_user)
+      reply_to_string = from_user.email_name
     end
 
     mail(
       :subject  => subject,
       :to       => to_user.email_name,
-      :from     => (@from_self) ? build_from_string : from_user.email_name,
-      :reply_to => (@from_self) ? build_from_string : from_user.email_name,
+      :from     => from_string,
+      :reply_to => reply_to_string,
       :tag      => 'log_new,user_mailer'
     )
   end
@@ -74,7 +78,7 @@ class UserMailer < ActionMailer::Base
     mail(
       :subject  => "Learning Validation Request",
       :to       => to_user.email_name,
-      :from     => from_user.email_name,
+      :from     => build_from_string(from_user),
       :reply_to => from_user.email_name,
       :tag      => 'log_validation_request,user_mailer'
     )
@@ -87,7 +91,7 @@ class UserMailer < ActionMailer::Base
     mail(
       :subject  => "Expert Validation - #{entry.summary}",
       :to       => to_user.email_name,
-      :from     => from_user.email_name,
+      :from     => build_from_string(from_user),
       :reply_to => from_user.email_name,
       :tag      => 'log_validation_received,user_mailer'
     )

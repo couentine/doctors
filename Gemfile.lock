@@ -33,6 +33,8 @@ GEM
     bcrypt-ruby (3.1.2-x86-mingw32)
     bootstrap-sass (2.3.2.2)
       sass (~> 3.2)
+    browser_details (0.0.6)
+      useragent (>= 0.4)
     bson (1.9.2)
     bson_ext (1.9.2)
       bson (~> 1.9.2)
@@ -58,6 +60,9 @@ GEM
       warden (~> 1.2.3)
     diff-lcs (1.2.5)
     erubis (2.7.0)
+    exception_notification (4.0.1)
+      actionmailer (>= 3.0.4)
+      activesupport (>= 3.0.4)
     execjs (2.0.2)
     factory_girl (4.3.0)
       activesupport (>= 3.0.0)
@@ -91,6 +96,8 @@ GEM
       tzinfo (~> 0.3.29)
     moped (1.5.1)
     multi_json (1.8.4)
+    nokogiri (1.6.1)
+      mini_portile (~> 0.5.0)
     nokogiri (1.6.1-x86-mingw32)
       mini_portile (~> 0.5.0)
     origin (1.1.0)
@@ -163,6 +170,7 @@ GEM
     uglifier (2.4.0)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
+    useragent (0.10.0)
     warden (1.2.3)
       rack (>= 1.0)
     xpath (2.0.0)
@@ -173,10 +181,12 @@ PLATFORMS
 
 DEPENDENCIES
   bootstrap-sass (= 2.3.2.2)
+  browser_details
   bson_ext (= 1.9.2)
   capybara
   coffee-rails (~> 3.2.1)
   devise
+  exception_notification
   factory_girl_rails (~> 4.0)
   faker
   jquery-rails

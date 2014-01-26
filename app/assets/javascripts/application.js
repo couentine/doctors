@@ -18,4 +18,5 @@
 //= require wysihtml5-0.3.0.min.js
 //= require jquery.autosize.min.js
 //= require jquery.wordrotator.min
+//= require browser_details
 //= require badge_list

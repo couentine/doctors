@@ -11,6 +11,8 @@ gem 'bootstrap-sass', '2.3.2.2'
 gem 'faker'
 gem 'simple_form'
 
+gem 'browser_details'
+gem 'exception_notification'
 
 # Pagination
 

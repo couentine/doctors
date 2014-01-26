@@ -68,4 +68,12 @@ BadgeList::Application.configure do
   config.action_mailer.delivery_method = :postmark
   config.action_mailer.postmark_settings = { :api_key => ENV['POSTMARK_API_KEY'] }
 
+  # Exception notification gem
+  config.middleware.use ExceptionNotification::Rack,
+    :email => {
+      :email_prefix => "[BLA] ",
+      :sender_address => %{Badge List Alerts <app@badgelist.com>},
+      :exception_recipients => %w{hank@kstreem.com}
+    }
+
 end

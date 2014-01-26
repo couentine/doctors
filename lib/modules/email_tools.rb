@@ -4,18 +4,19 @@ module EmailTools
   VALID_EMAIL_REGEX = /[a-z0-9\.\_\%\+\-]+@[a-z0-9\.\-]+\.[a-z]{2,4}/i
   COMBINED_EMAIL_REGEX = /("[^"]+")?(\s*<)?([a-z0-9\.\_\%\+\-]+@[a-z0-9\.\-]+\.[a-z]{2,4})(>)?/i
 
-  # Returns a string in the form of "John Doe <email@example.com>"
-  # from_user_or_name can be a User a name string or nil
-  def build_from_string(from_user_or_name = nil)
-    if from_user_or_name.nil?
+  # Returns a string in the form of "John Doe <app@badgelist.com>"
+  # NOTE: This will return a mocked from string with the user's name and the system email
+  #       in order to be compatible with postmark.
+  def build_from_string(from_user = nil)
+    if from_user.nil? || from_user.name.blank?
       "Badge List <#{APP_CONFIG['from_email']}>"
-    elsif from_user_or_name.instance_of?(User) && !from_user_or_name.name.blank?
-      "#{from_user_or_name.name} <#{APP_CONFIG['from_email']}>"
-    elsif from_user_or_name.instance_of?(String) && !from_user_or_name.blank?
-      "#{from_user_or_name}  <#{APP_CONFIG['from_email']}>"
-    else
-      "Badge List <#{APP_CONFIG['from_email']}>"
+    elsif 
+      "#{from_user.name} <#{APP_CONFIG['from_email']}>"
     end
+  end
+
+  def no_reply_to_string
+    "Badge List <no-reply@badgelist.com>"
   end
 
   # Accepts string containing comma, semicolon, new-line or bar delimited emails

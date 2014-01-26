@@ -167,7 +167,7 @@ protected
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
     if created_at > (Time.now - 2.hours)
-      if type == 'validation'
+      if (type == 'validation') && (log.user != creator)
         UserMailer.log_validation_received(log.user, creator, \
           log.badge.group, log.badge, log, self).deliver 
       end
