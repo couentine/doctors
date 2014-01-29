@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
     rescue_from ActionController::RoutingError, with: :render_404
     rescue_from ActionController::UnknownController, with: :render_404
     rescue_from ActionController::UnknownAction, with: :render_404
-    # rescue_from Mongoid::Errors::RecordNotFound, with: :render_404
+    rescue_from Mongoid::Errors::DocumentNotFound, with: :render_404
   # end
 
   def not_found
