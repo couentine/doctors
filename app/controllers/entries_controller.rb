@@ -150,10 +150,10 @@ class EntriesController < ApplicationController
 private
 
   def find_parent_records
-    @group = Group.find(params[:group_id].to_s.downcase)
-    @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase)
-    @user = User.find(params[:log_id].to_s.downcase) # find user by username
-    @log = @user.logs.find_by(badge: @badge)
+    @group = Group.find(params[:group_id].to_s.downcase) || not_found
+    @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase) || not_found
+    @user = User.find(params[:log_id].to_s.downcase) || not_found # find user by username
+    @log = @user.logs.find_by(badge: @badge) || not_found
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
@@ -164,7 +164,7 @@ private
   def find_all_records
     find_parent_records
 
-    @entry = @log.entries.find_by(entry_number: (params[:entry_id] || params[:id]))
+    @entry = @log.entries.find_by(entry_number: (params[:entry_id] || params[:id])) || not_found
     @current_user_is_entry_creator = current_user && (current_user.id == @entry.creator_id)
     @visible_to_current_user = @entry.visible_to?(current_user)
 

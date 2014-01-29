@@ -205,22 +205,28 @@ function checkResponsiveFormatting() {
         var theElement; var theText;
         var isDone = false;
 
+        // First run through and reduce everything you can
         $("#subheader ul.breadcrumb li").each(function() {
           if ($(this).find("a").length > 0) theElement = $(this).find("a");
           else theElement = this;
           
           theText = $(theElement).text();
-          if (!isDone && theText.length > 11) {
+          if (!isDone && theText.length > 3) {
             $(theElement).tooltip({
               title: theText,
               placement: 'bottom'
             });
-            $(theElement).text(theText.substring(0,5) + "..." + theText.substring(theText.length-3));
+            $(theElement).text("...");
 
           }
 
           isDone = ($("#subheader ul.breadcrumb").width() < availableWidth);
         });
+
+        // If we still are too big, just hide it all 
+        // (FIXME: Improve this... make it collapse into a drop down menu)
+        if (!isDone)
+          $("#subheader ul.breadcrumb li").hide();
       }
 
     }

@@ -160,7 +160,7 @@ class BadgesController < ApplicationController
 private
 
   def find_parent_records
-    @group = Group.find(params[:group_id])
+    @group = Group.find(params[:group_id]) || not_found
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)
   end
@@ -168,7 +168,7 @@ private
   def find_all_records
     find_parent_records
 
-    @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase)
+    @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase) || not_found
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     if @current_user_is_learner || @current_user_is_expert

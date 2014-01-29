@@ -19,8 +19,15 @@ $tertiary-really-light: desaturate(lighten($tertiary-medium, 40%), 5%);
 $tertiary-light: desaturate(lighten($tertiary-medium, 10%), 7%);
 $tertiary-dark: saturate(darken($tertiary-medium, 10%), 7%);
 
-$green: #74AB00;
-$red: #CE534D;
+$green-medium: #74AB00;
+$green-really-light: desaturate(lighten($green-medium, 40%), 5%);
+$green-light: desaturate(lighten($green-medium, 10%), 7%);
+$green-dark: saturate(darken($tertiary-medium, 10%), 7%);
+
+$red-medium: #C3211D;
+$red-really-light: desaturate(lighten($red-medium, 40%), 5%);
+$red-light: desaturate(lighten($red-medium, 10%), 7%);
+$red-dark: saturate(darken($red-medium, 10%), 7%);
 
 $medium-gray: #ccc;
 $light-gray: #eaeaea;
@@ -1024,8 +1031,8 @@ div.entry-card {
           top: 5px;
           cursor: pointer;
 
-          &.positive { color: $green; }
-          &.negative { color: $red; }
+          &.positive { color: $green-medium; }
+          &.negative { color: $red-medium; }
         }
       }
     }
@@ -1337,8 +1344,8 @@ div.text-card {
     .validation-result {
       display: block;
       
-      &.yes { color: $green; }
-      &.no { color: $red; }
+      &.yes { color: $green-medium; }
+      &.no { color: $red-medium; }
     }
   }
   .footer-section {
@@ -1611,7 +1618,6 @@ div.text-card {
 .color-box {
   display: block;
   margin: 60px 25px 0 0;
-  background-color: $secondary-really-light;
   border-radius: 5px;
   padding: 0 10px 10px 25px;
 
@@ -1622,7 +1628,6 @@ div.text-card {
     text-align: center;
     padding: 10px;
     margin: -30px 40% 10px 5%;
-    background-color: $secondary-light;
     border-radius: 1px;
     font-size: 26px;
     font-weight: lighter;
@@ -1633,12 +1638,9 @@ div.text-card {
     border-radius: 3px;
     font-size: 24px;
     font-weight: lighter;
-    color: $secondary-dark;
 
     a,a:visited {
       text-decoration: none;
-      color: $secondary-dark;
-      border-bottom: 1px dotted $secondary-dark;
     }
     a:hover,a:focus {
       text-decoration: none;
@@ -1660,7 +1662,6 @@ div.text-card {
       margin: 9px 5px 5px 15px;
 
       b,strong { 
-        color: $secondary-dark;
         font-weight: bold;
       }
       a,a:visited {
@@ -1669,13 +1670,47 @@ div.text-card {
         border-bottom: 1px dotted $dark-text-color;        
       }
       a:hover,a:focus {
-        color: $secondary-dark;
         text-decoration: none;
-        border-bottom: 1px dotted $secondary-dark;        
+      }
+    }
+  }
+
+  &.secondary {
+    background-color: $secondary-really-light;
+    
+    h2 { background-color: $secondary-light; }
+    h3 { color: $secondary-dark; }
+    a,a:visited {
+      color: $secondary-dark;
+      border-bottom: 1px dotted $secondary-dark;
+    }
+    li {
+      b,strong { color: $secondary-dark; }
+      a:hover,a:focus {
+        color: $secondary-dark;
+        border-bottom: 1px dotted $secondary-dark;
+      }
+    }
+  }
+  &.red {
+    background-color: $red-really-light;
+    
+    h2 { background-color: $red-light; }
+    h3 { color: $red-dark; }
+    a,a:visited {
+      color: $red-dark;
+      border-bottom: 1px dotted $red-dark;
+    }
+    li {
+      b,strong { color: $red-dark; }
+      a:hover,a:focus {
+        color: $red-dark;
+        border-bottom: 1px dotted $red-dark;
       }
     }
   }
 }
+
 .signin-box {
   border-radius: 3px;
   color: $dark-text-color;

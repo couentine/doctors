@@ -72,8 +72,8 @@ class TagsController < ApplicationController
 private
 
   def find_all_records
-    @group = Group.find(params[:group_id].to_s.downcase)
-    @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase)
+    @group = Group.find(params[:group_id].to_s.downcase) || not_found
+    @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase) || not_found
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)

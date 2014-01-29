@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   # GET /u/username
   # GET /u/username.json
   def show
-    @user = User.find(params[:id])
+    @user = User.find(params[:id]) || not_found
     @group_and_log_list = @user.group_and_log_list current_user
     @this_is_current_user = current_user && (@user == current_user)
 
