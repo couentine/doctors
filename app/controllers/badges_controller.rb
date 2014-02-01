@@ -22,7 +22,7 @@ class BadgesController < ApplicationController
         if @badge.image.nil?
           send_data BadgeMaker.build_image.to_blob, type: "image/png", disposition: "inline"
         else
-          send_data @badge.image, type: "image/png", disposition: "inline"
+          send_data @badge.image.encode('ISO-8859-1'), type: "image/png", disposition: "inline"
         end
       end
       format.json { render json: @badge }

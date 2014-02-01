@@ -221,7 +221,7 @@ protected
       || image_color2_changed?
       # First build the image
       badge_image = BadgeMaker.build_image image_frame, image_icon, image_color1, image_color2
-      self.image = badge_image.to_block unless badge_image.nil?
+      self.image = badge_image.to_blob.force_encoding("ISO-8859-1").encode("UTF-8") unless badge_image.nil?
 
       # Then store the attribution information 
       # Note: The parameters will only be missing for test data, randomization for users will happen

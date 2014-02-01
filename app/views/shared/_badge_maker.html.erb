@@ -1,0 +1,79 @@
+<style>
+
+  #badge-image {
+    width: 100px;
+    height: 100px;
+    margin-right: 20px;
+  }
+
+</style>
+
+<script type="text/javascript">
+  
+  $(document).ready(function() {
+
+  }
+
+</script>
+
+<div class="badge-maker">
+  <div class="control-group">
+    <label class="control-label">Badge Image</label>
+    <div class="controls">
+      
+      <div class="badge-image-viewer">
+        <img src="" id="badge-image"/>
+        <button type="button" id="randomize-badge-image" class="btn btn-small">
+          Randomize
+        </button>
+        <button type="button" id="toggle-badge-image-editor" class="btn btn-small">
+          Edit Badge Image
+        </button>
+      </div>
+
+      <div class="badge-image-editor" style="">
+
+        <h2>Frame</h2>
+        <select id="badge_image_frame" name="badge[image_frame]">
+          <% BADGE_MAKER_CONFIG[:frames].keys.each do |frame| %>
+            <option value="<%= frame %>" 
+              data-thumbnail="<%= image_path "badge_maker/frames/#{frame}.png" %>">
+              <%= frame.split("-").map{ |s| s.capitalize }.join(" ") %>
+            </option>
+          <% end %>
+        </select>
+
+        <h2>Icon</h2>
+        <span id="icon-options">
+          <!-- FIXME -->
+        </span>
+        <select id="badge_image_icon" name="badge[image_icon]">
+          <% BADGE_MAKER_CONFIG[:icons].keys.each do |icon| %>
+            <option value="<%= icon %>" 
+              data-thumbnail="<%= image_path "badge_maker/icons/#{icon}.png" %>">
+              <%= icon.split("-").map{ |s| s.capitalize }.join(" ") %>
+            </option>
+          <% end %>
+        </select>
+
+        <h2>Color</h2>
+        <select id="badge_image_color1" name="badge[image_color1]">
+          <% BADGE_MAKER_CONFIG[:colors]['all'].keys.each do |color| %>
+            <option value="<%= BADGE_MAKER_CONFIG[:colors]['all'][color]['hex'] %>">
+              <%= color.split(" ").map{ |s| s.capitalize }.join(" ") %>
+            </option>
+          <% end %>
+        </select>
+        <select id="badge_image_color2" name="badge[image_color2]">
+          <% BADGE_MAKER_CONFIG[:colors]['all'].keys.each do |color| %>
+            <option value="<%= BADGE_MAKER_CONFIG[:colors]['all'][color]['hex'] %>">
+              <%= color.split(" ").map{ |s| s.capitalize }.join(" ") %>
+            </option>
+          <% end %>
+        </select>
+
+      </div>
+
+    </div>
+  </div>
+</div>
