@@ -1,17 +1,178 @@
-<style>
-
-  #badge-image {
-    width: 100px;
-    height: 100px;
-    margin-right: 20px;
-  }
-
-</style>
-
 <script type="text/javascript">
   
-  $(document).ready(function() {
+  var selectedElement = {}; // maps from targetSelector to currently selected element
 
+  $(document).ready(function() {
+    var thumbnail; var text; var value;
+    var sourceList; var newList;
+    var options; var curTable; var curRow; var curElement;
+    
+    // First build the frame list
+    sourceList = $("#badge_image_frame"); 
+    sourceList.after("<div id='badge-frames'></div>");
+    newList = $("#badge-frames");
+    newList.append("<a href='#' class='scroll-arrow scroll-left'>&#9654;</a>")
+     .append("<a href='#' class='scroll-arrow scroll-right'>&#9664;</a>");
+    sourceList.hide();
+    sourceList.find("option").each(function() { 
+      text = $(this).text();
+      value = $(this).val();
+      thumbnail = $(this).data("thumbnail");
+
+      newList.append("<a href='#' class='list-element' data-value='" + value + "' "
+        + "data-target='#badge_image_frame'>" + "<img src='" + thumbnail + "'><br>" 
+        + "<span>" + text + "</span></a>");
+    });
+
+    // Then build the icon list
+    sourceList = $("#badge_image_icon"); 
+    sourceList.after("<div id='badge-icons'></div>");
+    newList = $("#badge-icons");
+    newList.append("<a href='#' class='scroll-arrow scroll-left'>&#9654;</a>")
+     .append("<a href='#' class='scroll-arrow scroll-right'>&#9664;</a>");
+    sourceList.hide();
+    sourceList.find("option").each(function() { 
+      text = $(this).text();
+      value = $(this).val();
+      thumbnail = $(this).data("thumbnail");
+
+      newList.append("<a href='#' class='list-element' data-value='" + value + "' "
+        + "data-target='#badge_image_icon'>" + "<img src='" + thumbnail + "'><br>" 
+        + "<span>" + text + "</span></a>");
+    });
+
+    // Foreground color list
+    sourceList = $("#badge_image_color2"); 
+    sourceList.after("<div id='badge-foreground-colors'></div>");
+    newList = $("#badge-foreground-colors");
+    sourceList.hide();
+    options = sourceList.find("option");
+    var group_size = 8;
+    for (var group = 0; (group*group_size) < options.length; group++) {
+      if (group <= 2) {
+        newList.append("<table></table>");
+        curTable = newList.find("table").last();
+      }
+      curTable.append("<tr></tr>");
+      curRow = curTable.find("tr").last();
+
+      for (var i = group*group_size; (i < ((group+1)*group_size)) && (i < options.length); i++) { 
+        curElement = $(options[i]);
+        text = curElement.text();
+        value = curElement.val();
+
+        curRow.append("<td style='background-color:#" + value + "'>"
+          + "<a href='#' class='list-element' data-value='" + value + "' "
+          + "data-update='#manual-foreground-color' "
+          + "data-target='#badge_image_color2' title=' + text + '> &nbsp; </a></td>");
+      }
+    }
+    newList.append("<span class='manual-color'><label>Hex Color code:</label> "
+      + "<input type='text' id='manual-foreground-color'>"
+      + "<button type='button' class='btn btn-mini set-color' "
+      + "data-target='#badge_image_color2' data-source='#manual-foreground-color'>"
+      + "Update</button></span>");
+
+    // Background color list
+    sourceList = $("#badge_image_color1"); 
+    sourceList.after("<div id='badge-background-colors'></div>");
+    newList = $("#badge-background-colors");
+    sourceList.hide();
+    options = sourceList.find("option");
+    var group_size = 8;
+    for (var group = 0; (group*group_size) < options.length; group++) {
+      if (group <= 2) {
+        newList.append("<table></table>");
+        curTable = newList.find("table").last();
+      }
+      curTable.append("<tr></tr>");
+      curRow = curTable.find("tr").last();
+
+      for (var i = group*group_size; (i < ((group+1)*group_size)) && (i < options.length); i++) { 
+        curElement = $(options[i]);
+        text = curElement.text();
+        value = curElement.val();
+
+        curRow.append("<td style='background-color:#" + value + "'>"
+          + "<a href='#' class='list-element' data-value='" + value + "' "
+          + "data-update='#manual-background-color' "
+          + "data-target='#badge_image_color1' title=' + text + '> &nbsp; </a></td>");
+      }
+    }
+    newList.append("<span class='manual-color'><label>Hex Color code:</label> "
+      + "<input type='text' id='manual-background-color'>"
+      + "<button type='button' class='btn btn-mini set-color' "
+      + "data-target='#badge_image_color1' data-source='#manual-background-color'>"
+      + "Update</button></span>");
+
+    // Now associate the events
+    $("a.list-element").click(function() {
+      return listElementClick($(this));
+    });
+    $("button.set-color").click(function() {
+      manuallySetColor($(this));
+    });
+
+  });
+
+  function listElementClick(jqListElement) {
+    var targetSelector = jqListElement.data("target");
+    var updateSelector = jqListElement.data("update");
+
+    // Set the value
+    $(targetSelector).val(jqListElement.data("value"));
+    if (updateSelector != null) $(updateSelector).val(jqListElement.data("value"));
+    
+    // Update the css
+    jqListElement.addClass('selected');
+    if (selectedElement[targetSelector] != null) 
+      selectedElement[targetSelector].removeClass('selected');
+    selectedElement[targetSelector] = jqListElement;
+
+    // Update the badge image preview & return false
+    updateBadgeImagePreview();
+    return false;
+  }
+
+  function manuallySetColor(jqButton) {
+    var sourceSelector = jqButton.data("source");
+    var targetSelector = jqButton.data("target");
+    var value = $(sourceSelector).val();
+    
+    // First clean up the value and save it back to the source box so the user can see it
+    value = value.trim().replace(/#/g, "");
+    $(sourceSelector).val(value);
+    
+    // Then set the value
+    $(targetSelector).val(value);
+    
+    // Update the css
+    jqButton.addClass('selected');
+    if (selectedElement[targetSelector] != null) {
+      selectedElement[targetSelector].removeClass('selected');
+      selectedElement[targetSelector] == null;
+    }
+
+    // Update the badge image preview
+    updateBadgeImagePreview();
+  }
+
+  function updateBadgeImagePreview() {
+    var frame = $("#badge_image_frame").val();
+    var icon = $("#badge_image_icon").val();
+    var color1 = $("#badge_image_color1").val();
+    var color2 = $("#badge_image_color2").val();
+
+    // Load the image with javascript so we can show the spinner while it's loading
+    $("#badge-image-spinner").show();
+    var imagePath = "/i?frame=" + frame + "&icon=" + icon + "&c1=" + color1 + "&c2=" + color2;
+    var newImage = new Image();
+    newImage.onload = function() {
+      $("#badge-image").attr("src", imagePath);
+      setTimeout(function() { $("#badge-image-spinner").hide() }, 1000);
+    }
+
+    newImage.src = imagePath;
   }
 
 </script>
@@ -22,7 +183,12 @@
     <div class="controls">
       
       <div class="badge-image-viewer">
-        <img src="" id="badge-image"/>
+        <span id="badge-image-wrapper">
+          <div class="spinner-wrapper" id="badge-image-spinner" style="display:none">
+            <div class="spinner"></div>
+          </div>
+          <img src="" id="badge-image"/>
+        </span>
         <button type="button" id="randomize-badge-image" class="btn btn-small">
           Randomize
         </button>
@@ -57,14 +223,14 @@
         </select>
 
         <h2>Color</h2>
-        <select id="badge_image_color1" name="badge[image_color1]">
+        <select id="badge_image_color2" name="badge[image_color2]">
           <% BADGE_MAKER_CONFIG[:colors]['all'].keys.each do |color| %>
             <option value="<%= BADGE_MAKER_CONFIG[:colors]['all'][color]['hex'] %>">
               <%= color.split(" ").map{ |s| s.capitalize }.join(" ") %>
             </option>
           <% end %>
         </select>
-        <select id="badge_image_color2" name="badge[image_color2]">
+        <select id="badge_image_color1" name="badge[image_color1]">
           <% BADGE_MAKER_CONFIG[:colors]['all'].keys.each do |color| %>
             <option value="<%= BADGE_MAKER_CONFIG[:colors]['all'][color]['hex'] %>">
               <%= color.split(" ").map{ |s| s.capitalize }.join(" ") %>

@@ -157,6 +157,44 @@ ul.dropdown-menu {
   }
 }
 
+/* === RE-USABLE COMPONENTS === */
+
+/* CSS Spinner */
+.spinner-wrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  opacity: 0.4;
+  text-align: center;
+  background: linear-gradient(45deg, $dark-white 25%, $light-white 25%, $light-white 50%,
+                           $dark-white 50%, $dark-white 75%, $light-white 75%);
+  background-size: 16px 16px;
+  
+  .spinner {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border: solid 30px;
+    border-radius: 5em;
+    border-color: $primary-medium transparent $primary-medium transparent;
+    margin-top: 20px;
+    animation: spin 1s linear infinite;
+    -webkit-animation: spin 1s linear infinite;
+    -moz-animation: spin 1s linear infinite;
+  }
+}
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* === PATTERNS, COLORS & TEXTURES === */
 
 .white-striped-background {
@@ -1767,63 +1805,16 @@ div.text-card {
   }
 }
 
-/* === BADGES === */
+/* === BADGE IMAGE MAKER === */
 
-img.badge-image {
-  height: 120px;
+#badge-image-wrapper {
+  width: 100px;
+  height: 100px;
+  margin-right: 20px;
+  position: relative;
+  display: inline-block;
 }
-
-img.badge-image-header {
-  margin: 0 20px 0 5px;
-}
-
-#new-badge-button {
-  color: white !important;
-  margin-right: 50px;
-  float: right;
-}
-
-#header-button-bar {
-  float: right;
-  padding-right: 50px;
-}
-
-.badge-index-item {
-  padding: 20px;
-  overflow-y: hidden;
-  h3 { 
-    overflow: hidden; 
-    font-size: 22px;
-    line-height: 26px;
-  }
-
-  @media (min-width: 1200px) {
-    height: 310px;
-    h3 { max-height: 79px; }
-  }
-
-  @media (min-width: 980px) and (max-width: 1199px) {
-    height: 360px;
-    h3 { max-height: 109px; }
-  }
-   
-  @media (min-width: 768px) and (max-width: 979px) {
-    height: 396px;
-    padding: 15px;
-    h3 { 
-      max-height: 100px; 
-      font-size: 18px;
-      line-height: 24px;
-    }
-  }
-  
-  @media (max-width: 767px) {
-    padding: 15px;
-    height: auto;
-  }
-   
-  @media (max-width: 480px) {
-    padding: 15px;
-    height: auto;
-  }
+#badge-image {
+  width: 100px;
+  height: 100px;
 }
