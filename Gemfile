@@ -14,6 +14,8 @@ gem 'simple_form'
 gem 'browser_details'
 gem 'exception_notification'
 
+gem 'mini_magick'
+
 # Pagination
 
 gem 'kaminari'

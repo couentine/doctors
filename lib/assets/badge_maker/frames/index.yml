@@ -1,0 +1,121 @@
+---
+4-point-double:
+  inner_width: 280
+  offset_x: 0
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+4-point-skinny:
+  inner_width: 250
+  offset_x: 0
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+6-point:
+  inner_width: 300
+  offset_x: -7
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+circle:
+  inner_width: 310
+  offset_x: 0
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+diamond:
+  inner_width: 200
+  offset_x: 0
+  offset_y: -32
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+frame-square:
+  inner_width: 275
+  offset_x: 0
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+heart:
+  inner_width: 200
+  offset_x: 0
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+medal:
+  inner_width: 260
+  offset_x: 0
+  offset_y: 2
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+octagon:
+  inner_width: 330
+  offset_x: 0
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+ribbon-angle:
+  inner_width: 220
+  offset_x: -44
+  offset_y: -48
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+square-rounded:
+  inner_width: 410
+  offset_x: 0
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 
+stamp:
+  inner_width: 270
+  offset_x: 0
+  offset_y: 0
+  attribution:
+    item_name: 
+    author_name: 
+    author_url: 
+    org_name: 
+    org_url: 

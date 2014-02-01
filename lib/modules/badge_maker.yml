@@ -1,0 +1,519 @@
+colors:
+
+  all:
+    black:
+      color: black
+      tone: 
+      hex: "000000"
+    dark gray:
+      color: gray
+      tone: dark
+      hex: "434343"
+    gray:
+      color: gray
+      tone: medium dark
+      hex: "666666"
+    medium gray:
+      color: gray
+      tone: medium
+      hex: "999999"
+    medium light gray:
+      color: gray
+      tone: medium light
+      hex: "CCCCCC"
+    light gray:
+      color: gray
+      tone: light
+      hex: "EFEFEF"
+    really light gray:
+      color: gray
+      tone: really light
+      hex: "F3F3F3"
+    white:
+      color: white
+      tone: 
+      hex: "FFFFFF"
+    medium red:
+      color: red
+      tone: medium
+      hex: "FB4C2F"
+    medium orange:
+      color: orange
+      tone: medium
+      hex: "FFAD47"
+    medium yellow:
+      color: yellow
+      tone: medium
+      hex: "FAD165"
+    medium green:
+      color: green
+      tone: medium
+      hex: "16A766"
+    medium turquoise:
+      color: turquoise
+      tone: medium
+      hex: "43D692"
+    medium blue:
+      color: blue
+      tone: medium
+      hex: "4A86E8"
+    medium purple:
+      color: purple
+      tone: medium
+      hex: "A479E2"
+    medium pink:
+      color: pink
+      tone: medium
+      hex: "F691B3"
+    really light red:
+      color: red
+      tone: really light
+      hex: "F6C5BE"
+    really light orange:
+      color: orange
+      tone: really light
+      hex: "FFE6C7"
+    really light yellow:
+      color: yellow
+      tone: really light
+      hex: "FEF1D1"
+    really light green:
+      color: green
+      tone: really light
+      hex: "B9E4D0"
+    really light turquoise:
+      color: turquoise
+      tone: really light
+      hex: "C6F3DE"
+    really light blue:
+      color: blue
+      tone: really light
+      hex: "C9DAF8"
+    really light purple:
+      color: purple
+      tone: really light
+      hex: "E4D7F5"
+    really light pink:
+      color: pink
+      tone: really light
+      hex: "FCDEE8"
+    light red:
+      color: red
+      tone: light
+      hex: "EFA093"
+    light orange:
+      color: orange
+      tone: light
+      hex: "FFD6A2"
+    light yellow:
+      color: yellow
+      tone: light
+      hex: "FCE8B3"
+    light green:
+      color: green
+      tone: light
+      hex: "89D3B2"
+    light turquoise:
+      color: turquoise
+      tone: light
+      hex: "A0EAC9"
+    light blue:
+      color: blue
+      tone: light
+      hex: "A4C2F4"
+    light purple:
+      color: purple
+      tone: light
+      hex: "D0BCF1"
+    light pink:
+      color: pink
+      tone: light
+      hex: "FBC8D9"
+    medium light red:
+      color: red
+      tone: medium light
+      hex: "E66550"
+    medium light orange:
+      color: orange
+      tone: medium light
+      hex: "FFBC6B"
+    medium light yellow:
+      color: yellow
+      tone: medium light
+      hex: "FCDA83"
+    medium light green:
+      color: green
+      tone: medium light
+      hex: "44B984"
+    medium light turquoise:
+      color: turquoise
+      tone: medium light
+      hex: "68DFA9"
+    medium light blue:
+      color: blue
+      tone: medium light
+      hex: "6D9EEB"
+    medium light purple:
+      color: purple
+      tone: medium light
+      hex: "B694E8"
+    medium light pink:
+      color: pink
+      tone: medium light
+      hex: "F7A7C0"
+    medium dark red:
+      color: red
+      tone: medium dark
+      hex: "CC3A21"
+    medium dark orange:
+      color: orange
+      tone: medium dark
+      hex: "EAA041"
+    medium dark yellow:
+      color: yellow
+      tone: medium dark
+      hex: "F2C960"
+    medium dark green:
+      color: green
+      tone: medium dark
+      hex: "149E60"
+    medium dark turquoise:
+      color: turquoise
+      tone: medium dark
+      hex: "3DC789"
+    medium dark blue:
+      color: blue
+      tone: medium dark
+      hex: "3C78D8"
+    medium dark purple:
+      color: purple
+      tone: medium dark
+      hex: "8E63CE"
+    medium dark pink:
+      color: pink
+      tone: medium dark
+      hex: "E07798"
+    dark red:
+      color: red
+      tone: dark
+      hex: "AC2B16"
+    dark orange:
+      color: orange
+      tone: dark
+      hex: "CF8933"
+    dark yellow:
+      color: yellow
+      tone: dark
+      hex: "D5AE49"
+    dark green:
+      color: green
+      tone: dark
+      hex: "0B804B"
+    dark turquoise:
+      color: turquoise
+      tone: dark
+      hex: "2A9C68"
+    dark blue:
+      color: blue
+      tone: dark
+      hex: "285BAC"
+    dark purple:
+      color: purple
+      tone: dark
+      hex: "653E9B"
+    dark pink:
+      color: pink
+      tone: dark
+      hex: "B65775"
+    really dark red:
+      color: red
+      tone: really dark
+      hex: "822111"
+    really dark orange:
+      color: orange
+      tone: really dark
+      hex: "A46A21"
+    really dark yellow:
+      color: yellow
+      tone: really dark
+      hex: "AA8831"
+    really dark green:
+      color: green
+      tone: really dark
+      hex: "076239"
+    really dark turquoise:
+      color: turquoise
+      tone: really dark
+      hex: "1A764D"
+    really dark blue:
+      color: blue
+      tone: really dark
+      hex: "1C4587"
+    really dark purple:
+      color: purple
+      tone: really dark
+      hex: "41236D"
+    really dark pink:
+      color: pink
+      tone: really dark
+      hex: "83334C"
+
+  background:
+    medium gray:
+      color: gray
+      tone: medium
+      hex: "999999"
+    medium light gray:
+      color: gray
+      tone: medium light
+      hex: "CCCCCC"
+    light gray:
+      color: gray
+      tone: light
+      hex: "EFEFEF"
+    really light gray:
+      color: gray
+      tone: really light
+      hex: "F3F3F3"
+    white:
+      color: white
+      tone: 
+      hex: "FFFFFF"
+    really light red:
+      color: red
+      tone: really light
+      hex: "F6C5BE"
+    really light orange:
+      color: orange
+      tone: really light
+      hex: "FFE6C7"
+    really light yellow:
+      color: yellow
+      tone: really light
+      hex: "FEF1D1"
+    really light green:
+      color: green
+      tone: really light
+      hex: "B9E4D0"
+    really light turquoise:
+      color: turquoise
+      tone: really light
+      hex: "C6F3DE"
+    really light blue:
+      color: blue
+      tone: really light
+      hex: "C9DAF8"
+    really light purple:
+      color: purple
+      tone: really light
+      hex: "E4D7F5"
+    really light pink:
+      color: pink
+      tone: really light
+      hex: "FCDEE8"
+    light red:
+      color: red
+      tone: light
+      hex: "EFA093"
+    light orange:
+      color: orange
+      tone: light
+      hex: "FFD6A2"
+    light yellow:
+      color: yellow
+      tone: light
+      hex: "FCE8B3"
+    light green:
+      color: green
+      tone: light
+      hex: "89D3B2"
+    light turquoise:
+      color: turquoise
+      tone: light
+      hex: "A0EAC9"
+    light blue:
+      color: blue
+      tone: light
+      hex: "A4C2F4"
+    light purple:
+      color: purple
+      tone: light
+      hex: "D0BCF1"
+    light pink:
+      color: pink
+      tone: light
+      hex: "FBC8D9"
+    medium light red:
+      color: red
+      tone: medium light
+      hex: "E66550"
+    medium light orange:
+      color: orange
+      tone: medium light
+      hex: "FFBC6B"
+    medium light yellow:
+      color: yellow
+      tone: medium light
+      hex: "FCDA83"
+    medium light green:
+      color: green
+      tone: medium light
+      hex: "44B984"
+    medium light turquoise:
+      color: turquoise
+      tone: medium light
+      hex: "68DFA9"
+    medium light blue:
+      color: blue
+      tone: medium light
+      hex: "6D9EEB"
+    medium light purple:
+      color: purple
+      tone: medium light
+      hex: "B694E8"
+    medium light pink:
+      color: pink
+      tone: medium light
+      hex: "F7A7C0"
+
+  foreground:
+    black:
+      color: black
+      tone: 
+      hex: "000000"
+    dark gray:
+      color: gray
+      tone: dark
+      hex: "434343"
+    gray:
+      color: gray
+      tone: medium dark
+      hex: "666666"
+    medium red:
+      color: red
+      tone: medium
+      hex: "FB4C2F"
+    medium orange:
+      color: orange
+      tone: medium
+      hex: "FFAD47"
+    medium yellow:
+      color: yellow
+      tone: medium
+      hex: "FAD165"
+    medium green:
+      color: green
+      tone: medium
+      hex: "16A766"
+    medium turquoise:
+      color: turquoise
+      tone: medium
+      hex: "43D692"
+    medium blue:
+      color: blue
+      tone: medium
+      hex: "4A86E8"
+    medium purple:
+      color: purple
+      tone: medium
+      hex: "A479E2"
+    medium pink:
+      color: pink
+      tone: medium
+      hex: "F691B3"
+    medium dark red:
+      color: red
+      tone: medium dark
+      hex: "CC3A21"
+    medium dark orange:
+      color: orange
+      tone: medium dark
+      hex: "EAA041"
+    medium dark yellow:
+      color: yellow
+      tone: medium dark
+      hex: "F2C960"
+    medium dark green:
+      color: green
+      tone: medium dark
+      hex: "149E60"
+    medium dark turquoise:
+      color: turquoise
+      tone: medium dark
+      hex: "3DC789"
+    medium dark blue:
+      color: blue
+      tone: medium dark
+      hex: "3C78D8"
+    medium dark purple:
+      color: purple
+      tone: medium dark
+      hex: "8E63CE"
+    medium dark pink:
+      color: pink
+      tone: medium dark
+      hex: "E07798"
+    dark red:
+      color: red
+      tone: dark
+      hex: "AC2B16"
+    dark orange:
+      color: orange
+      tone: dark
+      hex: "CF8933"
+    dark yellow:
+      color: yellow
+      tone: dark
+      hex: "D5AE49"
+    dark green:
+      color: green
+      tone: dark
+      hex: "0B804B"
+    dark turquoise:
+      color: turquoise
+      tone: dark
+      hex: "2A9C68"
+    dark blue:
+      color: blue
+      tone: dark
+      hex: "285BAC"
+    dark purple:
+      color: purple
+      tone: dark
+      hex: "653E9B"
+    dark pink:
+      color: pink
+      tone: dark
+      hex: "B65775"
+    really dark red:
+      color: red
+      tone: really dark
+      hex: "822111"
+    really dark orange:
+      color: orange
+      tone: really dark
+      hex: "A46A21"
+    really dark yellow:
+      color: yellow
+      tone: really dark
+      hex: "AA8831"
+    really dark green:
+      color: green
+      tone: really dark
+      hex: "076239"
+    really dark turquoise:
+      color: turquoise
+      tone: really dark
+      hex: "1A764D"
+    really dark blue:
+      color: blue
+      tone: really dark
+      hex: "1C4587"
+    really dark purple:
+      color: purple
+      tone: really dark
+      hex: "41236D"
+    really dark pink:
+      color: pink
+      tone: really dark
+      hex: "83334C"
