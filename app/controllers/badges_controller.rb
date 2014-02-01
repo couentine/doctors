@@ -11,12 +11,20 @@ class BadgesController < ApplicationController
   # === RESTFUL ACTIONS === #
 
   # GET /group-url/badge-url
+  # GET /group-url/badge-url.png => Serves the badge image as a PNG file
   # GET /group-url/badge-url.json
   def show
     @entries = @badge.entries(current_user)
 
     respond_to do |format|
       format.html # show.html.erb
+      format.png do
+        if @badge.image.nil?
+          send_data BadgeMaker.build_image.to_blob, type: "image/png", disposition: "inline"
+        else
+          send_data @badge.image, type: "image/png", disposition: "inline"
+        end
+      end
       format.json { render json: @badge }
     end
   end

@@ -22,7 +22,6 @@ class Badge
   field :name,                type: String
   field :url,                 type: String
   field :url_with_caps,       type: String
-  field :image_url,           type: String
   field :summary,             type: String
   
   field :info,                type: String
@@ -30,7 +29,16 @@ class Badge
   field :info_versions,       type: Array
   field :info_tags,           type: Array
   field :info_tags_with_caps, type: Array
-  
+
+  field :image_frame,         type: String
+  field :image_icon,          type: String
+  field :image_color1,        type: String
+  field :image_color2,        type: String
+  field :image_url,           type: String # RETIRED field
+  field :image,               type: Moped::BSON::Binary # stores the actual badge image
+  field :image_attributions,  type: Array
+  field :icon_search_text,    type: String # stores what the user searched for b4 picking the icon
+
   field :current_user,        type: String # used when logging info_versions
   field :current_username,    type: String # used when logging info_versions
   field :flags,               type: Array
@@ -41,13 +49,13 @@ class Badge
             format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
-  validates :image_url, presence: true
   validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
   validates :group, presence: true
   validates :creator, presence: true
 
   # Which fields are accessible?
-  attr_accessible :name, :url_with_caps, :image_url, :summary, :info
+  attr_accessible :name, :url_with_caps, :summary, :info, :image_frame, :image_icon, :image_color1,
+    :image_color2, :icon_search_text
   
   # === CALLBACKS === #
 
@@ -55,6 +63,7 @@ class Badge
   before_validation :update_caps_field
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
+  before_save :build_badge_image
   after_create :add_creator_as_expert
 
   # === BADGE METHODS === #
@@ -204,6 +213,26 @@ protected
       self.info_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
       self.info_tags = linkified_result[:tags]
       self.info_tags_with_caps = linkified_result[:tags_with_caps]
+    end
+  end
+
+  def build_badge_image
+    if self.new_record? || image_frame_changed? || image_icon_changed? || image_color1_changed?\
+      || image_color2_changed?
+      # First build the image
+      badge_image = BadgeMaker.build_image image_frame, image_icon, image_color1, image_color2
+      self.image = badge_image.to_block unless badge_image.nil?
+
+      # Then store the attribution information 
+      # Note: The parameters will only be missing for test data, randomization for users will happen
+      #       client-side meaning that the potential for missing attribution info below is low.
+      image_attributions = []
+      if !image_frame.nil? && BADGE_MAKER_CONFIG[:frames].include?(image_frame.downcase)
+        image_attributions << BADGE_MAKER_CONFIG[:frames][image_frame.downcase]['attribution']
+      end
+      if !image_icon.nil? && BADGE_MAKER_CONFIG[:icons].include?(image_icon.downcase)
+        image_attributions << BADGE_MAKER_CONFIG[:icons][image_icon.downcase]['attribution']
+      end
     end
   end
 

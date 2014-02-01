@@ -4,118 +4,130 @@
   offset_x: 0
   offset_y: 0
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Shield
+    author_name: Yosh Talwar
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 4-point-skinny:
   inner_width: 250
   offset_x: 0
   offset_y: 0
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Shield
+    author_name: Benni
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 6-point:
   inner_width: 300
   offset_x: -7
   offset_y: 0
   attribution:
+    item_type: frame
     item_name: 
     author_name: 
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 circle:
   inner_width: 310
   offset_x: 0
   offset_y: 0
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Circle
+    author_name: Renee Ramsey-Passmore
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 diamond:
   inner_width: 200
   offset_x: 0
   offset_y: -32
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Diamond
+    author_name: Gustav Salomonsson
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 frame-square:
   inner_width: 275
   offset_x: 0
   offset_y: 0
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Frame
+    author_name: Gergely Korinek
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 heart:
   inner_width: 200
   offset_x: 0
   offset_y: 0
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Heart
+    author_name: Jardson A.
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 medal:
   inner_width: 260
   offset_x: 0
   offset_y: 2
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Badge
+    author_name: George Bourletsikas
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 octagon:
   inner_width: 330
   offset_x: 0
   offset_y: 0
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Octagon
+    author_name: Renee Ramsey-Passmore
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 ribbon-angle:
   inner_width: 220
   offset_x: -44
   offset_y: -48
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Ribbon
+    author_name: Alejandro Cordara
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 square-rounded:
   inner_width: 410
   offset_x: 0
   offset_y: 0
   attribution:
-    item_name: 
-    author_name: 
+    item_type: frame
+    item_name: Square
+    author_name: Renee Ramsey-Passmore
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
 stamp:
   inner_width: 270
   offset_x: 0
   offset_y: 0
   attribution:
+    item_type: frame
     item_name: 
     author_name: 
     author_url: 
-    org_name: 
-    org_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com

@@ -114,7 +114,6 @@ namespace :db do
         summary = Faker::Lorem.words(20).join(' ').capitalize()
         badge = Badge.new(name: name[0..Badge::MAX_NAME_LENGTH-1],
            url: url[0..Badge::MAX_URL_LENGTH-1],
-           image_url: image_url,
            summary: summary[0..Badge::MAX_SUMMARY_LENGTH-1])
         badge.group = group
         badge.flags = ['sample_data']

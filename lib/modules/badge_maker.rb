@@ -45,6 +45,7 @@ class BadgeMaker
           'offset_x' => 0,
           'offset_y' => 0,
           'attribution' => {
+            'item_type' => 'frame',
             'item_name' => nil,
             'author_name' => nil,
             'author_url' => nil,
@@ -65,6 +66,7 @@ class BadgeMaker
         icon_index_changed = true
         icon_index[image_name] = {
           'attribution' => {
+            'item_type' => 'icon',
             'item_name' => nil,
             'author_name' => nil,
             'author_url' => nil,
