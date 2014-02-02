@@ -3,6 +3,47 @@
   var selectedElement = {}; // maps from targetSelector to currently selected element
 
   $(document).ready(function() {
+    buildUserInterface();
+
+    // Now associate the events
+    $("a.list-element").click(function() {
+      return listElementClick($(this));
+    });
+    $("button.set-color").click(function() {
+      manuallySetColor($(this));
+    });
+    $("#badge-frames,#badge-icons").scroll(function() {
+      var e = $(this);
+      var l = e.find(".scroll-left");
+      var r = e.find(".scroll-right");
+      l.css('left', (10 + e.scrollLeft())+"px")
+      r.css('right', (10 - e.scrollLeft())+"px")
+      
+      if (e.scrollLeft() > 0) { if (!l.is(":visible")) l.fadeIn(); }
+      else if (l.is(":visible")) l.fadeOut();
+
+      if ((e[0].scrollWidth - e.width() - e.scrollLeft()) > 20) { if (!r.is(":visible")) r.fadeIn(); }
+      else if (r.is(":visible")) r.fadeOut();
+    });
+    $(".scroll-left").click(function() {
+      var e = $(this).closest("#badge-frames,#badge-icons");
+      var newScrollLeft = Math.max(e.scrollLeft() - parseInt(e.width()*0.8), 0);
+      e.animate({ scrollLeft: newScrollLeft }, 700);
+      return false;
+    });
+    $(".scroll-right").click(function() {
+      var e = $(this).closest("#badge-frames,#badge-icons");
+      var newScrollLeft = Math.min(e.scrollLeft() + parseInt(e.width()*0.8), 
+                                   e[0].scrollWidth - e.width()-20);
+      e.animate({ scrollLeft: newScrollLeft }, 700);
+      return false;
+    });
+
+    // Then select a random badge
+    randomize();
+  });
+
+  function buildUserInterface() {
     var thumbnail; var text; var value;
     var sourceList; var newList;
     var options; var curTable; var curRow; var curElement;
@@ -11,8 +52,8 @@
     sourceList = $("#badge_image_frame"); 
     sourceList.after("<div id='badge-frames'></div>");
     newList = $("#badge-frames");
-    newList.append("<a href='#' class='scroll-arrow scroll-left'>&#9654;</a>")
-     .append("<a href='#' class='scroll-arrow scroll-right'>&#9664;</a>");
+    newList.append("<a href='#' class='scroll-arrow scroll-left' style='display:none'>&#9664;</a>")
+     .append("<a href='#' class='scroll-arrow scroll-right'>&#9654;</a>");
     sourceList.hide();
     sourceList.find("option").each(function() { 
       text = $(this).text();
@@ -28,9 +69,11 @@
     sourceList = $("#badge_image_icon"); 
     sourceList.after("<div id='badge-icons'></div>");
     newList = $("#badge-icons");
-    newList.append("<a href='#' class='scroll-arrow scroll-left'>&#9654;</a>")
-     .append("<a href='#' class='scroll-arrow scroll-right'>&#9664;</a>");
+    newList.append("<a href='#' class='scroll-arrow scroll-left' style='display:none'>&#9664;</a>")
+     .append("<a href='#' class='scroll-arrow scroll-right'>&#9654;</a>");
     sourceList.hide();
+    var iconCount = sourceList.find("option").length;
+    var rowBreakAt = Math.ceil(iconCount / 3); var curCol = 1;
     sourceList.find("option").each(function() { 
       text = $(this).text();
       value = $(this).val();
@@ -39,11 +82,16 @@
       newList.append("<a href='#' class='list-element' data-value='" + value + "' "
         + "data-target='#badge_image_icon'>" + "<img src='" + thumbnail + "'><br>" 
         + "<span>" + text + "</span></a>");
+
+      if (curCol == rowBreakAt) {
+        newList.append("<br>");
+        curCol = 1;
+      } else curCol++;
     });
 
     // Foreground color list
     sourceList = $("#badge_image_color2"); 
-    sourceList.after("<div id='badge-foreground-colors'></div>");
+    sourceList.after("<div id='badge-foreground-colors'><h2>Foreground Color</h2><br></div>");
     newList = $("#badge-foreground-colors");
     sourceList.hide();
     options = sourceList.find("option");
@@ -67,7 +115,7 @@
           + "data-target='#badge_image_color2' title=' + text + '> &nbsp; </a></td>");
       }
     }
-    newList.append("<span class='manual-color'><label>Hex Color code:</label> "
+    newList.append("<span class='manual-color'><label for='manual-foreground-color'>Hex code</label> "
       + "<input type='text' id='manual-foreground-color'>"
       + "<button type='button' class='btn btn-mini set-color' "
       + "data-target='#badge_image_color2' data-source='#manual-foreground-color'>"
@@ -75,7 +123,7 @@
 
     // Background color list
     sourceList = $("#badge_image_color1"); 
-    sourceList.after("<div id='badge-background-colors'></div>");
+    sourceList.after("<div id='badge-background-colors'><h2>Background Color</h2><br></div>");
     newList = $("#badge-background-colors");
     sourceList.hide();
     options = sourceList.find("option");
@@ -99,21 +147,12 @@
           + "data-target='#badge_image_color1' title=' + text + '> &nbsp; </a></td>");
       }
     }
-    newList.append("<span class='manual-color'><label>Hex Color code:</label> "
+    newList.append("<span class='manual-color'><label for='manual-background-color'>Hex code</label> "
       + "<input type='text' id='manual-background-color'>"
       + "<button type='button' class='btn btn-mini set-color' "
       + "data-target='#badge_image_color1' data-source='#manual-background-color'>"
       + "Update</button></span>");
-
-    // Now associate the events
-    $("a.list-element").click(function() {
-      return listElementClick($(this));
-    });
-    $("button.set-color").click(function() {
-      manuallySetColor($(this));
-    });
-
-  });
+  }
 
   function listElementClick(jqListElement) {
     var targetSelector = jqListElement.data("target");
@@ -124,9 +163,9 @@
     if (updateSelector != null) $(updateSelector).val(jqListElement.data("value"));
     
     // Update the css
-    jqListElement.addClass('selected');
     if (selectedElement[targetSelector] != null) 
       selectedElement[targetSelector].removeClass('selected');
+    jqListElement.addClass('selected');
     selectedElement[targetSelector] = jqListElement;
 
     // Update the badge image preview & return false
@@ -175,6 +214,45 @@
     newImage.src = imagePath;
   }
 
+  function randomize() {
+    var options; var random; var value; var target; var e;
+    var source_selectors = ["#badge-frames", "#badge-icons", "#badge-background-colors", 
+      "#badge-foreground-colors"];
+
+    // Run through and pick random list elements, copying each one to it's destination
+    for (i in source_selectors) {
+      options = $(source_selectors[i]).find(".list-element");
+      random = Math.floor(Math.random()*options.length);
+      e = options.eq(random);
+      value = e.data("value");
+      target = e.data("target");
+      
+      // Set the value
+      $(target).val(value);
+
+      // Update the css
+      if (selectedElement[target] != null) 
+        selectedElement[target].removeClass('selected');
+      e.addClass('selected');
+      selectedElement[target] = e;
+    }
+
+    // Then update the image
+    updateBadgeImagePreview();
+  }
+
+  function toggleEditor(buttonElement) {
+    if ($(buttonElement).data("visible")) {
+      $("#badge-image-editor").slideUp();
+      $(buttonElement).text("Edit Badge Image");
+      $(buttonElement).data("visible", false);
+    } else {
+      $("#badge-image-editor").slideDown();
+      $(buttonElement).text("Hide Editor");
+      $(buttonElement).data("visible", true);
+    }
+  }
+
 </script>
 
 <div class="badge-maker">
@@ -182,22 +260,23 @@
     <label class="control-label">Badge Image</label>
     <div class="controls">
       
-      <div class="badge-image-viewer">
+      <div id="badge-image-viewer">
         <span id="badge-image-wrapper">
           <div class="spinner-wrapper" id="badge-image-spinner" style="display:none">
             <div class="spinner"></div>
           </div>
           <img src="" id="badge-image"/>
         </span>
-        <button type="button" id="randomize-badge-image" class="btn btn-small">
+        <button type="button" id="randomize-badge-image" class="btn btn-small" onclick="randomize()">
           Randomize
         </button>
-        <button type="button" id="toggle-badge-image-editor" class="btn btn-small">
+        <button type="button" id="toggle-badge-image-editor" class="btn btn-small"
+          onclick="toggleEditor(this)">
           Edit Badge Image
         </button>
       </div>
 
-      <div class="badge-image-editor" style="">
+      <div id="badge-image-editor" style="display:none">
 
         <h2>Frame</h2>
         <select id="badge_image_frame" name="badge[image_frame]">
@@ -222,21 +301,22 @@
           <% end %>
         </select>
 
-        <h2>Color</h2>
-        <select id="badge_image_color2" name="badge[image_color2]">
-          <% BADGE_MAKER_CONFIG[:colors]['all'].keys.each do |color| %>
-            <option value="<%= BADGE_MAKER_CONFIG[:colors]['all'][color]['hex'] %>">
-              <%= color.split(" ").map{ |s| s.capitalize }.join(" ") %>
-            </option>
-          <% end %>
-        </select>
-        <select id="badge_image_color1" name="badge[image_color1]">
-          <% BADGE_MAKER_CONFIG[:colors]['all'].keys.each do |color| %>
-            <option value="<%= BADGE_MAKER_CONFIG[:colors]['all'][color]['hex'] %>">
-              <%= color.split(" ").map{ |s| s.capitalize }.join(" ") %>
-            </option>
-          <% end %>
-        </select>
+        <div id="badge-colors">
+          <select id="badge_image_color2" name="badge[image_color2]">
+            <% BADGE_MAKER_CONFIG[:colors]['all'].keys.each do |color| %>
+              <option value="<%= BADGE_MAKER_CONFIG[:colors]['all'][color]['hex'] %>">
+                <%= color.split(" ").map{ |s| s.capitalize }.join(" ") %>
+              </option>
+            <% end %>
+          </select>
+          <select id="badge_image_color1" name="badge[image_color1]">
+            <% BADGE_MAKER_CONFIG[:colors]['all'].keys.each do |color| %>
+              <option value="<%= BADGE_MAKER_CONFIG[:colors]['all'][color]['hex'] %>">
+                <%= color.split(" ").map{ |s| s.capitalize }.join(" ") %>
+              </option>
+            <% end %>
+          </select>
+        </div>
 
       </div>
 

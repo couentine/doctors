@@ -1807,14 +1807,165 @@ div.text-card {
 
 /* === BADGE IMAGE MAKER === */
 
-#badge-image-wrapper {
-  width: 100px;
-  height: 100px;
-  margin-right: 20px;
-  position: relative;
-  display: inline-block;
+.badge-maker {
+
+  #badge-image-wrapper {
+    width: 100px;
+    height: 100px;
+    margin-right: 20px;
+    position: relative;
+    display: inline-block;
+    
+    #badge-image {
+      width: 100px;
+      height: 100px;
+    }
+  }
+  
+  #badge-image-editor {
+    padding: 15px 0 0 0;
+
+    h2 {
+      margin: 0;
+      display: inline-block;
+    }
+
+    #badge-frames,#badge-icons {
+      display: block;
+      float: left;
+      position: relative;
+      padding: 7px;
+      margin: 10px 0 20px 0;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      white-space: nowrap;
+      box-shadow: inset -1px 1px 7px 0 rgba(0, 0, 0, 0.1);
+      width: 100%;
+
+      a:not(.scroll-arrow) {
+        display: inline-block;
+        height: 77px;
+        width: 50px;
+        white-space: normal;
+        text-align: center;
+        margin: 0 5px;
+        padding: 4px;
+        vertical-align: top;
+        font-size: 10px;
+        line-height: 12px;
+        color: $dark-text-color;
+        opacity: 0.65;
+        border-radius: 5px;
+        z-index: 99;
+
+        span { 
+          position: relative;
+          top: 3px; 
+        }
+
+        &:hover,&:focus {
+          color: $dark-text-color;
+          text-decoration: none;
+          background-color: $secondary-really-light;
+        }
+        &.selected {
+          background: linear-gradient(45deg, $dark-white 25%, $secondary-really-light 25%, $secondary-really-light 50%,
+                                   $dark-white 50%, $dark-white 75%, $secondary-really-light 75%);
+          background-size: 16px 16px;
+          opacity: 0.75;
+        }
+      }
+      a.scroll-arrow {
+        display: block;
+        position: absolute;
+        top: 10px;
+        bottom: 10px;
+        padding: 0 5px;
+        font-size: 20px;
+        background-color: $secondary-really-light;
+        color: $secondary-dark;
+        border: 1px solid $light-gray;
+        border-radius: 20px;
+        opacity: 0.93;
+
+        &.scroll-left { left: 10px; }
+        &.scroll-right { right: 10px; }
+        &:visited { color: $secondary-dark; }
+        &:hover,&:focus { 
+          color: $secondary-dark; 
+          text-decoration: none;
+        }
+      }
+    }
+    #badge-frames {
+      height: 98px;
+
+      a.scroll-arrow { padding-top: 25px; }
+    }
+    #badge-icons {
+      height: 268px;
+
+      a.scroll-arrow { padding-top: 110px; }
+    }
+    #badge-colors {
+      display: block;
+
+      h2 {
+        width: auto;
+        display: block;
+        margin-bottom: 10px;
+      }
+      #badge-foreground-colors,#badge-background-colors {
+        display: inline-block;
+        margin-right: 40px;
+
+        span.manual-color {
+          display: inline-block;
+
+          label {
+            font-size: 12px;
+            color: $medium-text-color;
+            display: inline-block;
+          }
+          input {
+            font-size: 12px;
+            height: 15px;
+            width: 55px;
+            text-align: center;
+            display: inline-block;
+            padding: 2px;
+            margin-right: 10px;
+          }
+        }
+        table {
+          border: 1px solid $medium-gray;
+          margin: 10px 0;
+
+          tr {
+            td {
+              a,a:visited {
+                display: inline-block;
+                width: 25px;
+                height: 25px;
+                box-shadow: inset -1px 1px 15px 0 rgba(0, 0, 0, 0.1);
+              }
+              a:focus,a:hover {
+                text-decoration: none;
+                box-shadow: none;
+              }
+              a.selected {
+                box-shadow: inset -1px 1px 15px 0 rgba(0, 0, 0, 0.5);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    @media (min-width: 1200px) { width: 700px; }
+    @media (min-width: 980px) and (max-width: 1199px) { width: 500px; }
+    @media (min-width: 768px) and (max-width: 979px) { width: 400px; }
+    @media (max-width: 767px) and (min-width: 481px) { width: 90% }
+  }
 }
-#badge-image {
-  width: 100px;
-  height: 100px;
-}
+
