@@ -266,7 +266,8 @@
 
       <div class="primary-header span6">
         <span class="header-image">
-          <%= link_to image_tag(@badge.image_url), [@group, @badge], title: 'View badge' %>
+          <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), 
+            [@group, @badge], title: 'View badge' %>
         </span>
         <span class="header-text">
           <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>

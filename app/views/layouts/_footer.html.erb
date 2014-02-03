@@ -1,4 +1,10 @@
 
 <footer class="footer">
-  Thanks for everything, you're awesome! We're <a href="http://kstreem.com" target="_blank">Knowledgestreem</a>.
+  <% if content_for? :extra_footer_text %>
+    <%= yield :extra_footer_text %>
+    <hr>
+    Also... thanks for everything, you're awesome! We're <a href="http://kstreem.com" target="_blank">Knowledgestreem</a>.
+  <% else %>
+    Thanks for everything, you're awesome! We're <a href="http://kstreem.com" target="_blank">Knowledgestreem</a>.
+  <% end %>
 </footer><br/><br/>

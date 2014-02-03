@@ -2,8 +2,8 @@
   <table>
     <tr class="card-image-row white-striped-background">
       <td>
-        <%= link_to image_tag(badge.image_url), group_badge_path(badge.group, badge),
-            title: badge.name %><br/>
+        <%= link_to image_tag(group_badge_path(badge.group, badge, format: :png)), 
+          group_badge_path(badge.group, badge), title: badge.name %><br/>
       </td>
     </tr>
     <tr class="card-body-row">

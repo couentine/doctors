@@ -76,6 +76,19 @@
   <% end %>
 <% end %>
 
+<% content_for :extra_footer_text do %>
+  This badge's image includes the following elements from
+  <a href="http://www.thenounproject.com" target="_blank">the Noun Project</a>:
+  <% @badge.image_attributions.each do |attribution| %>
+    <%= " &amp; ".html_safe unless attribution == @badge.image_attributions.first %>
+    <% if attribution['type'] == "attribution" %>
+      <%= "#{attribution['item_name'] || "Untitled"} by #{attribution['author_name'] || "Anonymous"}" %>
+    <% else %>
+      <%= "#{attribution['item_name'] || "Untitled"} in the Public Domain" %>
+    <% end %>
+  <% end %>
+<% end unless @badge.image_attributions.blank? %>
+
 <% if @current_user_is_expert %>
 
   <!-- === BADGE INFO VERSIONS === -->
@@ -296,7 +309,7 @@
 
       <div class="primary-header span12">
         <span class="header-image" >
-          <%= image_tag @badge.image_url %>
+          <%= image_tag group_badge_path(@group, @badge, format: :png) %>
         </span>
         <span class="header-text">
           <h1><%= @badge.name %></h1>

@@ -226,13 +226,11 @@ protected
       # Then store the attribution information 
       # Note: The parameters will only be missing for test data, randomization for users will happen
       #       client-side meaning that the potential for missing attribution info below is low.
-      image_attributions = []
-      if !image_frame.nil? && BADGE_MAKER_CONFIG[:frames].include?(image_frame.downcase)
-        image_attributions << BADGE_MAKER_CONFIG[:frames][image_frame.downcase]['attribution']
-      end
-      if !image_icon.nil? && BADGE_MAKER_CONFIG[:icons].include?(image_icon.downcase)
-        image_attributions << BADGE_MAKER_CONFIG[:icons][image_icon.downcase]['attribution']
-      end
+      self.image_attributions = []
+      frame_attribution = BadgeMaker.get_attribution :frames, image_frame
+      icon_attribution = BadgeMaker.get_attribution :icons, image_icon
+      self.image_attributions << frame_attribution unless frame_attribution.nil?
+      self.image_attributions << icon_attribution unless icon_attribution.nil?
     end
   end
 

@@ -21,7 +21,8 @@
       <tr class="card-headline-row <%= (show_badge) ? 'with-badge' : 'no-badge' %>">
         <td class="headline-left">
           <% if show_badge %>
-            <%= link_to image_tag(entry.log.badge.image_url), group_badge_path(entry.log.badge.group, 
+            <%= link_to image_tag(group_badge_path(entry.log.badge.group, entry.log.badge, format: :png)), 
+              group_badge_path(entry.log.badge.group, 
               entry.log.badge), title: entry.log.badge.name, data: { toggle: 'tooltip', 
                 placement: 'right' } %>
           <% end %>

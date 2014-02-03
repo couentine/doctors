@@ -4,6 +4,7 @@
   offset_x: 0
   offset_y: 0
   attribution:
+    type: attribution
     item_type: frame
     item_name: Shield
     author_name: Yosh Talwar
@@ -15,6 +16,7 @@
   offset_x: 0
   offset_y: 0
   attribution:
+    type: attribution
     item_type: frame
     item_name: Shield
     author_name: Benni
@@ -26,6 +28,7 @@
   offset_x: -7
   offset_y: 0
   attribution:
+    type: public
     item_type: frame
     item_name: 
     author_name: 
@@ -37,6 +40,7 @@ circle:
   offset_x: 0
   offset_y: 0
   attribution:
+    type: attribution
     item_type: frame
     item_name: Circle
     author_name: Renee Ramsey-Passmore
@@ -48,6 +52,7 @@ diamond:
   offset_x: 0
   offset_y: -32
   attribution:
+    type: attribution
     item_type: frame
     item_name: Diamond
     author_name: Gustav Salomonsson
@@ -59,6 +64,7 @@ frame-square:
   offset_x: 0
   offset_y: 0
   attribution:
+    type: attribution
     item_type: frame
     item_name: Frame
     author_name: Gergely Korinek
@@ -70,6 +76,7 @@ heart:
   offset_x: 0
   offset_y: 0
   attribution:
+    type: attribution
     item_type: frame
     item_name: Heart
     author_name: Jardson A.
@@ -81,6 +88,7 @@ medal:
   offset_x: 0
   offset_y: 2
   attribution:
+    type: attribution
     item_type: frame
     item_name: Badge
     author_name: George Bourletsikas
@@ -92,6 +100,7 @@ octagon:
   offset_x: 0
   offset_y: 0
   attribution:
+    type: attribution
     item_type: frame
     item_name: Octagon
     author_name: Renee Ramsey-Passmore
@@ -103,6 +112,7 @@ ribbon-angle:
   offset_x: -44
   offset_y: -48
   attribution:
+    type: attribution
     item_type: frame
     item_name: Ribbon
     author_name: Alejandro Cordara
@@ -114,6 +124,7 @@ square-rounded:
   offset_x: 0
   offset_y: 0
   attribution:
+    type: attribution
     item_type: frame
     item_name: Square
     author_name: Renee Ramsey-Passmore
@@ -125,6 +136,7 @@ stamp:
   offset_x: 0
   offset_y: 0
   attribution:
+    type: public
     item_type: frame
     item_name: 
     author_name: 

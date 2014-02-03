@@ -332,6 +332,9 @@ footer {
     text-decoration: none;
     border-bottom: 1px dashed $primary-medium;
   }
+  hr {
+    margin: 5px 0;
+  }
 }
 
 /* === DYNAMIC COLUMNS === */
@@ -354,7 +357,8 @@ div.bl-form,div.bl-modal-form {
   }
   
   @media (max-width: 767px) {
-    #group_url { width: 120px; }
+    #group_url_with_caps { width: 120px; }
+    #badge_url_with_caps { width: 120px; }
     .control-label {
       float: left;
       width: 80%; 
@@ -1809,16 +1813,22 @@ div.text-card {
 
 .badge-maker {
 
-  #badge-image-wrapper {
-    width: 100px;
-    height: 100px;
-    margin-right: 20px;
-    position: relative;
-    display: inline-block;
-    
-    #badge-image {
+  #badge-image-viewer {
+    #badge-image-wrapper {
       width: 100px;
       height: 100px;
+      margin-right: 10px;
+      position: relative;
+      display: inline-block;
+      
+      #badge-image {
+        width: 100px;
+        height: 100px;
+      }
+    }
+    button {
+      margin-right: 5px;
+      &:last-child { margin-right: 0; }
     }
   }
   
@@ -1828,9 +1838,32 @@ div.text-card {
     h2 {
       margin: 0;
       display: inline-block;
+      width: auto;
+    }
+    .header-wrap {
+      display: block;
+      float: left;
     }
 
-    #badge-frames,#badge-icons {
+    #icon-options {
+      display: inline-block;
+      margin-left: 20px;
+
+      select {
+        font-size: 16px;
+        position: relative;
+        top: -3px;
+        border-radius: 1px;
+        background-color: $really-light-gray;
+        border: none;
+
+        &:hover,&:focus {
+          background-color: $light-gray;
+          border: none;
+        }
+      }
+    }
+    #badge-frames,#badge-icons,#badge-icon-text {
       display: block;
       float: left;
       position: relative;
@@ -1856,7 +1889,6 @@ div.text-card {
         color: $dark-text-color;
         opacity: 0.65;
         border-radius: 5px;
-        z-index: 99;
 
         span { 
           position: relative;
@@ -1887,6 +1919,7 @@ div.text-card {
         border: 1px solid $light-gray;
         border-radius: 20px;
         opacity: 0.93;
+        z-index: 99;
 
         &.scroll-left { left: 10px; }
         &.scroll-right { right: 10px; }
@@ -1907,8 +1940,30 @@ div.text-card {
 
       a.scroll-arrow { padding-top: 110px; }
     }
+    #badge-icon-text {
+      text-align: left;
+      height: 50px;
+      overflow: hidden;
+      padding-top: 20px;
+
+      span {
+        label {
+          display: inline;
+          font-weight: bold;
+          margin: 0 10px 0 20px;
+          position: relative;
+          top: 2px;
+        }
+        input {
+          font-size: 20px;
+          width: 38px;
+          text-align: center;
+        }
+      }
+    }
     #badge-colors {
       display: block;
+      float: left;
 
       h2 {
         width: auto;
@@ -1917,7 +1972,6 @@ div.text-card {
       }
       #badge-foreground-colors,#badge-background-colors {
         display: inline-block;
-        margin-right: 40px;
 
         span.manual-color {
           display: inline-block;
@@ -1959,13 +2013,22 @@ div.text-card {
             }
           }
         }
+
+        @media (max-width: 979px) { 
+          margin-bottom: 20px;
+          &:last-child { margin-bottom: 0; }
+        }
+      }
+      #badge-foreground-colors {
+        margin-right: 40px;
       }
     }
 
     @media (min-width: 1200px) { width: 700px; }
     @media (min-width: 980px) and (max-width: 1199px) { width: 500px; }
-    @media (min-width: 768px) and (max-width: 979px) { width: 400px; }
-    @media (max-width: 767px) and (min-width: 481px) { width: 90% }
+    @media (min-width: 768px) and (max-width: 979px) { width: 370px; }
+    @media (max-width: 767px) and (min-width: 481px) { width: 370px; }
+    @media (max-width: 480px) { width: 300px; }
   }
 }
 

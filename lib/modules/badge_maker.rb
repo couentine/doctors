@@ -181,6 +181,13 @@ class BadgeMaker
     composite_with_mask(badge_image, color2_overlay, foreground_mask)
   end
 
+  # Returns the attribution hash for the specified type (:frames or :icons) and name
+  def self.get_attribution(type, name)
+    unless BADGE_MAKER_CONFIG.nil?
+      BADGE_MAKER_CONFIG[type][name.to_s.downcase]["attribution"]
+    end
+  end
+
   def self.test
     config = self.init
     

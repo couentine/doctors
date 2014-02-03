@@ -100,8 +100,8 @@
               <% if (row[:expert_logs].count + row[:learner_logs].count) > 0 %>
                 <% [row[:expert_logs], row[:learner_logs]].flatten.each do |log| %>
                   <div class="inner-row">
-                    <%= link_to image_tag(log.badge.image_url), [log.badge.group, log.badge], 
-                      title: "View the badge", class: "image-link" %>
+                    <%= link_to image_tag(group_badge_path(log.badge.group, log.badge, format: :png)), 
+                      [log.badge.group, log.badge], title: "View the badge", class: "image-link" %>
 
                     <h2><%= link_to log.badge.name, [log.badge.group, log.badge] %></h2><br>
                     <% if log.validation_status == 'validated' %>

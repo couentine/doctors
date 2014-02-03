@@ -1,9 +1,16 @@
+<% content_for :extra_footer_text do %>
+  Many thanks to <a href="http://www.thenounproject.com" target="_blank">the Noun Project</a> and
+  their cadre of generous designers for building the icons used to make our badges. Please <a href="http://www.thenounproject.com" target="_blank">check out their website</a> and 
+  consider supporting the wonderful work they do.
+<% end %>
+
 <script type="text/javascript">
   
   var selectedElement = {}; // maps from targetSelector to currently selected element
 
   $(document).ready(function() {
     buildUserInterface();
+    checkForTooltips();
 
     // Now associate the events
     $("a.list-element").click(function() {
@@ -39,14 +46,36 @@
       return false;
     });
 
-    // Then select a random badge
-    randomize();
+    $("#icon-type").change(function() {
+      if ($(this).val() == "text") {
+        $("#badge-icons").slideUp();
+        $("#badge-icon-text").slideDown();
+        $("#text-icon").focus();
+      } else {
+        $("#badge-icon-text").slideUp();
+        $("#badge-icons").slideDown();
+      }
+    });
+    $("#text-icon").keyup(function() {
+      setTextIcon($(this).val());
+    });
+
+    <% if @badge.new_record? %>
+      // Then select a random badge
+      randomize();
+    <% end %>
   });
 
   function buildUserInterface() {
     var thumbnail; var text; var value;
-    var sourceList; var newList;
+    var sourceList; var newList; var selectedClass;
     var options; var curTable; var curRow; var curElement;
+
+    // Get the current badge info if this is an edit
+    var curBadgeFrame = "<%= @badge.image_frame %>";
+    var curBadgeIcon = "<%= @badge.image_icon %>";
+    var curBadgeColor1 = "<%= @badge.image_color1 %>";
+    var curBadgeColor2 = "<%= @badge.image_color2 %>";
     
     // First build the frame list
     sourceList = $("#badge_image_frame"); 
@@ -59,9 +88,10 @@
       text = $(this).text();
       value = $(this).val();
       thumbnail = $(this).data("thumbnail");
+      selectedClass = (curBadgeFrame == value) ? "selected" : "";
 
-      newList.append("<a href='#' class='list-element' data-value='" + value + "' "
-        + "data-target='#badge_image_frame'>" + "<img src='" + thumbnail + "'><br>" 
+      newList.append("<a href='#' class='list-element " + selectedClass + "' data-value='" 
+        + value + "' " + "data-target='#badge_image_frame'>" + "<img src='" + thumbnail + "'><br>" 
         + "<span>" + text + "</span></a>");
     });
 
@@ -78,9 +108,10 @@
       text = $(this).text();
       value = $(this).val();
       thumbnail = $(this).data("thumbnail");
+      selectedClass = (curBadgeIcon == value) ? "selected" : "";
 
-      newList.append("<a href='#' class='list-element' data-value='" + value + "' "
-        + "data-target='#badge_image_icon'>" + "<img src='" + thumbnail + "'><br>" 
+      newList.append("<a href='#' class='list-element " + selectedClass + "' data-value='" 
+        + value + "' " + "data-target='#badge_image_icon'>" + "<img src='" + thumbnail + "'><br>" 
         + "<span>" + text + "</span></a>");
 
       if (curCol == rowBreakAt) {
@@ -88,6 +119,12 @@
         curCol = 1;
       } else curCol++;
     });
+
+    // Now build the text icon editor
+    newList.after("<div id='badge-icon-text' style='display:none'></div>");
+    newList = $("#badge-icon-text");
+    newList.append("<span><label for='text-icon' maxlength='2'>Enter one or two letters:</label>"
+      + "<input type='text' id='text-icon'></span>");
 
     // Foreground color list
     sourceList = $("#badge_image_color2"); 
@@ -108,11 +145,12 @@
         curElement = $(options[i]);
         text = curElement.text();
         value = curElement.val();
+        selectedClass = (curBadgeColor2 == value) ? "selected" : "";
 
         curRow.append("<td style='background-color:#" + value + "'>"
-          + "<a href='#' class='list-element' data-value='" + value + "' "
-          + "data-update='#manual-foreground-color' "
-          + "data-target='#badge_image_color2' title=' + text + '> &nbsp; </a></td>");
+          + "<a href='#' class='list-element " + selectedClass + "' data-value='" + value + "' "
+          + "data-update='#manual-foreground-color' data-toggle='tooltip' "
+          + "data-target='#badge_image_color2' title='" + text.trim() + "'> &nbsp; </a></td>");
       }
     }
     newList.append("<span class='manual-color'><label for='manual-foreground-color'>Hex code</label> "
@@ -140,11 +178,12 @@
         curElement = $(options[i]);
         text = curElement.text();
         value = curElement.val();
+        selectedClass = (curBadgeColor1 == value) ? "selected" : "";
 
         curRow.append("<td style='background-color:#" + value + "'>"
-          + "<a href='#' class='list-element' data-value='" + value + "' "
-          + "data-update='#manual-background-color' "
-          + "data-target='#badge_image_color1' title=' + text + '> &nbsp; </a></td>");
+          + "<a href='#' class='list-element " + selectedClass + "' data-value='" + value + "' "
+          + "data-update='#manual-background-color' data-toggle='tooltip' "
+          + "data-target='#badge_image_color1' title='" + text.trim() + "'> &nbsp; </a></td>");
       }
     }
     newList.append("<span class='manual-color'><label for='manual-background-color'>Hex code</label> "
@@ -152,6 +191,20 @@
       + "<button type='button' class='btn btn-mini set-color' "
       + "data-target='#badge_image_color1' data-source='#manual-background-color'>"
       + "Update</button></span>");
+
+    // Now if this is an edit we need to set the initially selectedElements
+    // And we also need to manually set the initial values of the form fields
+    <% unless @badge.new_record? %>
+      selectedElement["#badge_image_frame"] = $("#badge-frames").find(".list-element.selected");
+      selectedElement["#badge_image_icon"] = $("#badge-icons").find(".list-element.selected");
+      selectedElement["#badge_image_color2"] = $("#badge-foreground-colors").find(".list-element.selected");
+      selectedElement["#badge_image_color1"] = $("#badge-background-colors").find(".list-element.selected");
+
+      $("#badge_image_frame").val(curBadgeFrame);
+      $("#badge_image_icon").val(curBadgeIcon);
+      $("#badge_image_color1").val(curBadgeColor1);
+      $("#badge_image_color2").val(curBadgeColor2);
+    <% end %>
   }
 
   function listElementClick(jqListElement) {
@@ -168,8 +221,9 @@
     jqListElement.addClass('selected');
     selectedElement[targetSelector] = jqListElement;
 
-    // Update the badge image preview & return false
+    // Update the badge image preview and scroll up to the badge image
     updateBadgeImagePreview();
+    $("html, body").animate({scrollTop: $("#badge-image-viewer").offset().top-95}, 500);
     return false;
   }
 
@@ -177,23 +231,51 @@
     var sourceSelector = jqButton.data("source");
     var targetSelector = jqButton.data("target");
     var value = $(sourceSelector).val();
-    
+
     // First clean up the value and save it back to the source box so the user can see it
     value = value.trim().replace(/#/g, "");
     $(sourceSelector).val(value);
     
     // Then set the value
     $(targetSelector).val(value);
+    if ($(targetSelector).val() == null) { // then we need to add this color as an option
+      $(targetSelector).append("<option value='" + value + "'>Custom Color</option>");
+      $(targetSelector).val(value);
+    }
     
     // Update the css
-    jqButton.addClass('selected');
     if (selectedElement[targetSelector] != null) {
       selectedElement[targetSelector].removeClass('selected');
       selectedElement[targetSelector] == null;
     }
 
-    // Update the badge image preview
+    // Update the badge image preview and scroll up to the badge image
     updateBadgeImagePreview();
+    $("html, body").animate({scrollTop: $("#badge-image-viewer").offset().top-95}, 500);
+  }
+
+  function setTextIcon(value) {
+    // First clean up the value and save it back to the source box so the user can see it
+    if (value != $("#badge_image_icon").val()) {
+      value = value.trim()
+      $("#text-icon").val(value);
+      
+      // Then set the value
+      $("#badge_image_icon").val(value);
+      if ($("#badge_image_icon").val() == null) { // then we need to add this text as an option
+        $("#badge_image_icon").append("<option value='" + value + "'>Custom Text</option>");
+        $("#badge_image_icon").val(value);
+      }
+      
+      // Update the css
+      if (selectedElement["#badge_image_icon"] != null) {
+        selectedElement["#badge_image_icon"].removeClass('selected');
+        selectedElement["#badge_image_icon"] == null;
+      }
+
+      // Update the badge image preview
+      updateBadgeImagePreview();
+    }
   }
 
   function updateBadgeImagePreview() {
@@ -237,6 +319,12 @@
       selectedElement[target] = e;
     }
 
+    // Switch back to image icon mode if we were in text icon mode before
+    if ($("#icon-type").val() == "text") {
+      $("#icon-type").val("image");
+      $("#icon-type").change();
+    }
+
     // Then update the image
     updateBadgeImagePreview();
   }
@@ -265,7 +353,11 @@
           <div class="spinner-wrapper" id="badge-image-spinner" style="display:none">
             <div class="spinner"></div>
           </div>
-          <img src="" id="badge-image"/>
+          <% if @badge.new_record? %>
+            <img src="/i" id="badge-image"/>
+          <% else %>
+            <img src="<%= group_badge_path(@group, @badge, format: :png) %>" id="badge-image"/>
+          <% end %>
         </span>
         <button type="button" id="randomize-badge-image" class="btn btn-small" onclick="randomize()">
           Randomize
@@ -278,7 +370,9 @@
 
       <div id="badge-image-editor" style="display:none">
 
-        <h2>Frame</h2>
+        <div class="header-wrap">
+          <h2>Frame</h2>
+        </div>
         <select id="badge_image_frame" name="badge[image_frame]">
           <% BADGE_MAKER_CONFIG[:frames].keys.each do |frame| %>
             <option value="<%= frame %>" 
@@ -288,10 +382,15 @@
           <% end %>
         </select>
 
-        <h2>Icon</h2>
-        <span id="icon-options">
-          <!-- FIXME -->
-        </span>
+        <div class="header-wrap">
+          <h2>Icon</h2>
+          <span id="icon-options">
+            <select id="icon-type">
+              <option value="image" selected="true">Use an image icon</option>
+              <option value="text">Use text initials as icon</option>
+            </select>
+          </span>
+        </div>
         <select id="badge_image_icon" name="badge[image_icon]">
           <% BADGE_MAKER_CONFIG[:icons].keys.each do |icon| %>
             <option value="<%= icon %>" 

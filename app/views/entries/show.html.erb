@@ -78,8 +78,8 @@
     <div class="page-card entry-page-card <%= @entry.category %>">
 
       <div class="super-header-section white-striped-background">
-        <%= link_to image_tag(@badge.image_url), [@group, @badge], title: @badge.name,
-          data: { toggle: 'tooltip', placement: 'right' } %>
+        <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), 
+          [@group, @badge], title: @badge.name, data: { toggle: 'tooltip', placement: 'right' } %>
         <br/>
       </div>
 

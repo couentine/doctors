@@ -54,6 +54,7 @@ BadgeList::Application.routes.draw do
 
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #
   match ':id/edit' => 'groups#edit', via: :get
+  match ':group_id/:id/edit' => 'badges#edit', via: :get
   resources :groups, only: [:new, :create]
   resources :groups, path: "", except: [:index, :new, :create] do
     resources :badges, only: [:new, :create]
