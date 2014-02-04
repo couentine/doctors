@@ -183,8 +183,10 @@ class BadgeMaker
 
   # Returns the attribution hash for the specified type (:frames or :icons) and name
   def self.get_attribution(type, name)
-    unless BADGE_MAKER_CONFIG.nil?
+    if !BADGE_MAKER_CONFIG.nil? && BADGE_MAKER_CONFIG[type].include?(name.to_s.downcase)
       BADGE_MAKER_CONFIG[type][name.to_s.downcase]["attribution"]
+    else
+      nil
     end
   end
 
