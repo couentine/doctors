@@ -202,6 +202,11 @@ class BadgeMaker
     end
   end
 
+  def self.process_new_icons
+    config = init
+    # FINISH ME
+  end
+
 private
 
   def self.composite_with_mask(source_image, overlay_image, mask_image, output_extension = 'png', &block)

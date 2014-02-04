@@ -3,8 +3,8 @@ algebra:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Algebra
+    author_name: Ilsur Aptukov
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -12,8 +12,8 @@ artwork:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Artwork
+    author_name: Cornelius Danger
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -21,8 +21,8 @@ cells:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Bacteria
+    author_name: Maurizio Fusillo
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -30,16 +30,16 @@ cloud-database:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Cloud Database
+    author_name: Roman Kovbasyuk
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
 education:
   attribution:
-    type: attribution
+    type: public
     item_type: icon
-    item_name: 
+    item_name: Education
     author_name: 
     author_url: 
     org_name: The Noun Project
@@ -48,8 +48,8 @@ flask:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Flask
+    author_name: Cornelius Danger
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -57,8 +57,8 @@ gavel:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Gavel
+    author_name: Diego Naive
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -66,8 +66,8 @@ geometry:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Geometry
+    author_name: Ilsur Aptukov
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -75,8 +75,8 @@ graphic-design:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Graphic Design
+    author_name: Ben Hsu
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -84,8 +84,8 @@ hammer:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Hammer
+    author_name: Cornelius Danger
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -93,8 +93,8 @@ music:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Music
+    author_name: Ilsur Aptukov
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -102,8 +102,8 @@ physics:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Physics
+    author_name: Ilsur Aptukov
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -111,8 +111,8 @@ presentation:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Presentation
+    author_name: Michela Tannoia
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -120,16 +120,16 @@ shopping-cart:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Shopping Cart
+    author_name: Cornelius Danger
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
 telescope:
   attribution:
-    type: attribution
+    type: public
     item_type: icon
-    item_name: 
+    item_name: Telescope
     author_name: 
     author_url: 
     org_name: The Noun Project
@@ -138,8 +138,8 @@ test-tube:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Test Tube
+    author_name: Blake Thompson
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -147,8 +147,8 @@ time:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Time
+    author_name: Cornelius Danger
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -156,8 +156,8 @@ tree:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Tree
+    author_name: David Chapman
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
@@ -165,8 +165,8 @@ yoga:
   attribution:
     type: attribution
     item_type: icon
-    item_name: 
-    author_name: 
+    item_name: Yoga
+    author_name: Andrew J. Young
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
