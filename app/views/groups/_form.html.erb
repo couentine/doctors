@@ -45,7 +45,8 @@
                 collection: @group_type_options %>
 
     <%= f.input :customer_code, label: 'Customer Code',
-                hint: 'A customer code is required for private learning groups',
+                hint: ("A customer code is required for private learning groups "\
+                + "(<a href='/badgelist/about/pricing' target='_blank'>View pricing info</a>)").html_safe,
                 input_html: { class: 'input-small' },
                 wrapper_html: { id: 'customer-code-wrapper' } %>
     

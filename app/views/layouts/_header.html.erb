@@ -3,7 +3,22 @@
     
     
 
-    <%= link_to "BL", root_path, id: "logo", class: "brand pull-left", title: "Badge List Home" %>
+    <ul class="nav header-left">
+      <li>
+        <%= link_to "BL", root_path, id: "logo", class: "brand", 
+          title: "Badge List Home" %>
+          <span class="divider"><i class="fa fa-caret-right"></i></span>
+      </li>
+      <li>
+        <a href="/" title="Badge List Home"><i class="fa fa-home"></i></a>
+        <span class="divider"><i class="fa fa-caret-right"></i></span>
+      </li>
+      <li>
+        <a href="/badgelist/help" title="Help with Badge List" class="smaller">
+          <i class="fa fa-question"></i>
+        </a>
+      </li>
+    </ul>
     
     <!-- Everything you want hidden at 940px or less, place within here -->
     <% if user_signed_in? %>

@@ -56,7 +56,11 @@
         </span>
         <span class="header-text">
           <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
-          <h2><%= "#{@group.url_with_caps}/#{@badge.url_with_caps}" %></h2>
+          <h2>
+            <%= link_to @group.url_with_caps, @group, 
+              title: @group.name %>/<%= link_to @badge.url_with_caps, [@group, @badge], 
+              title: "View badge" %>
+          </h2>
           <h3>
             <%= @badge.summary %>
           </h3>

@@ -101,6 +101,26 @@ a.btn:visited {
 .btn {
   background-image: none;
 }
+.btn-success {
+  background-color: $secondary-medium;
+  color: $light-white !important;
+  &:focus,&:hover { background-color: $secondary-dark; }
+}
+.btn-primary {
+  background-color: $tertiary-medium;
+  color: $light-white !important;
+  &:focus,&:hover { background-color: $tertiary-dark; }
+}
+.btn-warning {
+  background-color: $primary-medium;
+  color: $light-white !important;
+  &:focus,&:hover { background-color: $primary-dark; }
+}
+.btn-danger {
+  background-color: $red-medium;
+  color: $light-white !important;
+  &:focus,&:hover { background-color: $red-dark; }
+}
 ul.dropdown-menu {
   text-align: left;
 }
@@ -110,10 +130,6 @@ ul.dropdown-menu {
 }
 .tooltip {
   display: block;
-}
-.btn-success {
-  background-color: $secondary-medium;
-  color: $light-white !important;
 }
 .well {
   ul {
@@ -213,12 +229,43 @@ ul.dropdown-menu {
 
 /* === HEADER === */
 
-#logo {
-  font-family: "tahoma";
-  color: $primary-medium;
-  font-size: 30px;
-  font-weight: bold;
-  margin-left: 0px;
+ul.nav.header-left {
+  display: inline-block;
+
+  li {
+    display: inline-block;
+    color: $primary-medium;
+    font-size: 20px;
+    margin: 10px 0;
+    
+    #logo {
+      font-family: "tahoma";
+      font-size: 30px;
+      font-weight: bold;
+      margin-left: 0px;
+      padding-left: 15px;
+    }
+    .divider {
+      font-size: 10px;
+      font-family: "tahoma";
+      display: inline-block;
+      margin: 0 8px 0 0;
+      position: relative;
+      top: -3px;
+    }
+    a,a:visited {
+      display: inline-block;
+      vertical-align: top;
+      color: $primary-medium;
+      text-decoration: none;
+      padding: 0;
+    }
+    a:hover,a:focus {
+      color: $primary-dark;
+      text-decoration: none;
+    }
+    a.smaller { font-size: 19px; }
+  }
 }
 
 span#header-currentuser-name {
@@ -392,6 +439,19 @@ div.bl-form,div.bl-modal-form {
       position: relative;
       top: 5px;
     }
+    .controls {
+      p { 
+        margin: 5px 0 0 0; 
+        a,a:visited {
+          color: $medium-text-color;
+          text-decoration: underline;
+        }
+        a:focus,a:hover {
+          color: $dark-text-color;
+          text-decoration: underline;
+        }
+      }
+    }
   }
 
   input[type="text"],textarea,input[type="url"] {
@@ -432,6 +492,19 @@ div.bl-form,div.bl-modal-form {
     color: $primary-dark;
     font-weight: bold;
     background-color: $medium-white;
+  }
+}
+p.button-info-block { 
+  margin: 10px 0 0 0; 
+  color: $medium-text-color;
+
+  a,a:visited {
+    color: $tertiary-medium;
+    text-decoration: none;
+  }
+  a:focus,a:hover {
+    color: $tertiary-dark;
+    text-decoration: underline;
   }
 }
 
@@ -688,6 +761,16 @@ form#group-add-users-form {
     h1,h2,h3 {
       line-height: 1.2em;
       margin: 0 0 8px 0;
+
+      a,a:visited {
+        text-decoration: none;
+        color: $dark-text-color;
+      }
+      a:focus,a:hover {
+        text-decoration: none;
+        border-bottom: 1px dashed $medium-text-color;
+        color: $medium-text-color;
+      }
     }
     h1 {
       font-size: 26px;

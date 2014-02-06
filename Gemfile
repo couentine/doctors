@@ -16,6 +16,8 @@ gem 'exception_notification'
 
 gem 'mini_magick'
 
+gem 'font-awesome-sass'
+
 # Pagination
 
 gem 'kaminari'

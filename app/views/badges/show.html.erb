@@ -313,7 +313,10 @@
         </span>
         <span class="header-text">
           <h1><%= @badge.name %></h1>
-          <h2><%= "#{@group.url_with_caps}/#{@badge.url_with_caps}" %></h2>
+          <h2>
+            <%= link_to @group.url_with_caps, @group, 
+              title: @group.name %>/<%= @badge.url_with_caps %>
+          </h2>
           <h3>
             <%= @badge.summary %>
           </h3>
