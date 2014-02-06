@@ -11,6 +11,7 @@ BadgeList::Application.routes.draw do
   root :to => 'home#show'
   resources :users, :only => [:show], path: "u"
   match 'i' => 'badge_maker#show', via: :get, as: :badge_image
+  match 'c' => 'static_pages#colors', via: :get
 
   # === MANUAL GROUP PATHS === #
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group

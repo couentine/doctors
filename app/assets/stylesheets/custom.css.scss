@@ -22,7 +22,7 @@ $tertiary-dark: saturate(darken($tertiary-medium, 10%), 7%);
 $green-medium: #74AB00;
 $green-really-light: desaturate(lighten($green-medium, 40%), 5%);
 $green-light: desaturate(lighten($green-medium, 10%), 7%);
-$green-dark: saturate(darken($tertiary-medium, 10%), 7%);
+$green-dark: saturate(darken($green-medium, 10%), 7%);
 
 $red-medium: #C3211D;
 $red-really-light: desaturate(lighten($red-medium, 40%), 5%);
@@ -226,6 +226,29 @@ ul.dropdown-menu {
 }
 
 .drop-shadow { box-shadow: -1px 1px 7px 0 $card-shadow-color; }
+
+.color {
+  &.primary-medium { background-color: $primary-medium; }
+  &.primary-really-light { background-color: $primary-really-light; }
+  &.primary-light { background-color: $primary-light; }
+  &.primary-dark { background-color: $primary-dark; }
+  &.secondary-medium { background-color: $secondary-medium; }
+  &.secondary-really-light { background-color: $secondary-really-light; }
+  &.secondary-light { background-color: $secondary-light; }
+  &.secondary-dark { background-color: $secondary-dark; }
+  &.tertiary-medium { background-color: $tertiary-medium; }
+  &.tertiary-really-light { background-color: $tertiary-really-light; }
+  &.tertiary-light { background-color: $tertiary-light; }
+  &.tertiary-dark { background-color: $tertiary-dark; }
+  &.green-medium { background-color: $green-medium; }
+  &.green-really-light { background-color: $green-really-light; }
+  &.green-light { background-color: $green-light; }
+  &.green-dark { background-color: $green-dark; }
+  &.red-medium { background-color: $red-medium; }
+  &.red-really-light { background-color: $red-really-light; }
+  &.red-light { background-color: $red-light; }
+  &.red-dark { background-color: $red-dark; }
+}
 
 /* === HEADER === */
 
