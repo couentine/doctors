@@ -62,7 +62,7 @@ BadgeList::Application.configure do
   config.active_support.deprecation = :notify
 
   # For devise
-  config.action_mailer.default_url_options = { :host => 'app.badgelist.com' }
+  config.action_mailer.default_url_options = { :host => 'badgelist.com' }
 
   # Configure postmark gem (for email delivery)
   config.action_mailer.delivery_method = :postmark
