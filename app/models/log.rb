@@ -229,7 +229,7 @@ protected
           self.date_issued ||= Time.now
           self.date_retracted = nil
         end
-      else
+      elsif rejection_count.to_i > 0 # you can be validated w/ 0 count, but not rejected w/ 0 count
         # First update the validation status if needed
         if validation_status == 'validated'
           if date_requested.nil?
@@ -250,13 +250,12 @@ protected
         
         # Then update the issue status if needed
         if issue_status == 'issued'
-          issue_status = 'retracted'
-          date_originally_issued = date_issued
-          date_retracted = Time.now
-          date_issued = nil
+          self.issue_status = 'retracted'
+          self.date_originally_issued = date_issued
+          self.date_retracted = Time.now
+          self.date_issued = nil
         end 
-      end
-      
+      end 
     end
   end
 

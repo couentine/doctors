@@ -111,9 +111,10 @@ class EntriesController < ApplicationController
     @entry.current_username = current_user.username
 
     respond_to do |format|
-      if @entry.type == 'validation' && (@log.add_validation(current_user, 
-        params[:entry][:summary], params[:entry][:body], params[:entry][:log_validated]) != nil)
-        
+      if @entry.type == 'validation'
+        @log.add_validation current_user, params[:entry][:summary], params[:entry][:body], 
+          (params[:entry][:log_validated] == "true")
+
         format.html do
           redirect_to [@group, @badge, @log, @entry], notice: 'Validation was successfully updated.'
         end
