@@ -248,7 +248,7 @@
               <p>
                 <%= 
                   if @current_user_is_admin
-                    link_to '<i class="icon-plus"></i> Create a badge'.html_safe,
+                    link_to '<i class="fa fa-plus"></i> Create a badge'.html_safe,
                     new_group_badge_path(@group), class: 'btn btn-success' 
                   end
                 %>
@@ -331,7 +331,7 @@
               <p>
                 <%= 
                   if @current_user_is_admin
-                    link_to '<i class="icon-plus"></i> Add some members'.html_safe,
+                    link_to '<i class="fa fa-plus"></i> Add some members'.html_safe,
                     add_group_members_path(@group), class: 'btn btn-success' 
                   end
                 %>

@@ -1,7 +1,10 @@
 
 
 <%= simple_form_for [@group, @badge], html: {class: 'form-horizontal'} do |f| %>
+  <%= f.error_notification %>
+
   <div class="form-body">
+    
     <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics',
         input_html: {class: 'input-xlarge'}, autofocus: true %>
     <%= f.input :url_with_caps, wrapper: :prepend, label: 'Badge URL' do %>

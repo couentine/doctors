@@ -1,6 +1,7 @@
 <%= simple_form_for [@group, @badge, @log, @entry], html: {class: 'form-horizontal'} do |f| %>
+  <%= f.error_notification %>
+
   <div class="form-body">
-    
     <% if @entry.type == 'validation' %>
       <%= f.input :log_validated, as: :radio_buttons, 
         label: "In your expertise, has #{@user.name} achieved this badge?",

@@ -128,6 +128,12 @@ protected
     self.invited_members ||= []
     self.validation_threshold ||= 2
     self.flags ||= []
+    if !website.blank? && !website.downcase.start_with?("http")
+        self.website = "http://#{website}"
+    end
+    if !image_url.blank? && !image_url.downcase.start_with?("http")
+        self.image_url = "http://#{image_url}"
+    end
   end
 
    def update_caps_field

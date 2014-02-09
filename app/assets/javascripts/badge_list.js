@@ -1,5 +1,24 @@
 // This file includes site-wide javascript that will be loaded for all pages.
 
+// jQuery plugin to prevent double submission of forms
+jQuery.fn.preventDoubleSubmission = function() {
+  $(this).on('submit',function(e){
+    var $form = $(this);
+
+    if ($form.data('submitted') === true) {
+      // Previously submitted - don't submit again
+      e.preventDefault();
+    } else {
+      // Mark it so that the next submit can be ignored
+      $form.data('submitted', true);
+    }
+  });
+
+  // Keep chainability
+  return this;
+};
+
+// Do on page load
 
 $(document).ready(function() {
     checkForTooltips();
@@ -13,6 +32,7 @@ $(document).ready(function() {
     registerLocationHashEvents();
     registerAllRichTextAreas();
     createCharacterCounts();
+    $('form:not(.allow-double-submission)').preventDoubleSubmission();
 
     $(window).on('resize', function() {
       if (hasDynamicColumns) checkDynamicColumns();

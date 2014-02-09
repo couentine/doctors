@@ -25,6 +25,8 @@ class User
   field :flags,               type: Array
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
+  validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
+            format: { with: /\A[\w-]+\Z/, message: "can't have special characters." }
   validates :username, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
             format: { with: /\A[\w-]+\Z/, message: "can't have special characters." }
 

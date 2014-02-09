@@ -45,6 +45,9 @@
       e.animate({ scrollLeft: newScrollLeft }, 700);
       return false;
     });
+    $("#badge-image").load(function() {
+      $("#badge-image-spinner").fadeOut();
+    });
 
     $("#icon-type").change(function() {
       if ($(this).val() == "text") {
@@ -61,8 +64,13 @@
     });
 
     <% if @badge.new_record? %>
-      // Then select a random badge
-      randomize();
+      <% if @badge.errors.blank? %>
+        // Then select a random badge
+        randomize();
+      <% else %>
+        // Load the current badge
+        updateBadgeImagePreview();
+      <% end %>
     <% end %>
   });
 
@@ -74,8 +82,35 @@
     // Get the current badge info if this is an edit
     var curBadgeFrame = "<%= @badge.image_frame %>";
     var curBadgeIcon = "<%= @badge.image_icon %>";
+    var curIconIsText = false;
     var curBadgeColor1 = "<%= @badge.image_color1 %>";
+    var curColor1IsCustom = false
     var curBadgeColor2 = "<%= @badge.image_color2 %>";
+    var curColor2IsCustom = false
+
+    // Copy the current info into the DOM
+    $("#badge_image_frame").val(curBadgeFrame);
+    $("#badge_image_icon").val(curBadgeIcon);
+    if ($("#badge_image_icon").val() == null) { 
+      // then we need to add this text as an option and log that the icon state is text
+      $("#badge_image_icon").append("<option value='" + curBadgeIcon + "'>Custom Text</option>");
+      $("#badge_image_icon").val(curBadgeIcon);
+      curIconIsText = true;
+    }
+    $("#badge_image_color1").val(curBadgeColor1);
+    if ($("#badge_image_color1").val() == null) { 
+      // then we need to add this color as an option and log that the color is custom
+      $("#badge_image_color1").append("<option value='" + curBadgeColor1 + "'>Custom Color</option>");
+      $("#badge_image_color1").val(curBadgeColor1);
+      curColor1IsCustom = true;
+    }
+    $("#badge_image_color2").val(curBadgeColor2);
+    if ($("#badge_image_color2").val() == null) {
+      // then we need to add this color as an option and log that the color is custom
+      $("#badge_image_color2").append("<option value='" + curBadgeColor2 + "'>Custom Color</option>");
+      $("#badge_image_color2").val(curBadgeColor2);
+      curColor2IsCustom = true;
+    }
     
     // First build the frame list
     sourceList = $("#badge_image_frame"); 
@@ -97,7 +132,8 @@
 
     // Then build the icon list
     sourceList = $("#badge_image_icon"); 
-    sourceList.after("<div id='badge-icons'></div>");
+    if (curIconIsText) sourceList.after("<div id='badge-icons' style='display:none'></div>");
+    else sourceList.after("<div id='badge-icons'></div>");
     newList = $("#badge-icons");
     newList.append("<a href='#' class='scroll-arrow scroll-left' style='display:none'>&#9664;</a>")
      .append("<a href='#' class='scroll-arrow scroll-right'>&#9654;</a>");
@@ -121,10 +157,17 @@
     });
 
     // Now build the text icon editor
-    newList.after("<div id='badge-icon-text' style='display:none'></div>");
-    newList = $("#badge-icon-text");
-    newList.append("<span><label for='text-icon' maxlength='2'>Enter one or two letters:</label>"
-      + "<input type='text' id='text-icon'></span>");
+    if (curIconIsText) {
+      newList.after("<div id='badge-icon-text'></div>");
+      newList = $("#badge-icon-text");
+      newList.append("<span><label for='text-icon' maxlength='2'>Enter one or two letters:</label>"
+        + "<input type='text' id='text-icon' value='" + curBadgeIcon + "'></span>");
+    } else {
+      newList.after("<div id='badge-icon-text' style='display:none'></div>");
+      newList = $("#badge-icon-text");
+      newList.append("<span><label for='text-icon' maxlength='2'>Enter one or two letters:</label>"
+        + "<input type='text' id='text-icon'></span>");
+    }
 
     // Foreground color list
     sourceList = $("#badge_image_color2"); 
@@ -154,7 +197,7 @@
       }
     }
     newList.append("<span class='manual-color'><label for='manual-foreground-color'>Hex code</label> "
-      + "<input type='text' id='manual-foreground-color'>"
+      + "<input type='text' id='manual-foreground-color' value='" + curBadgeColor2 + "'>"
       + "<button type='button' class='btn btn-mini set-color' "
       + "data-target='#badge_image_color2' data-source='#manual-foreground-color'>"
       + "Update</button></span>");
@@ -187,23 +230,18 @@
       }
     }
     newList.append("<span class='manual-color'><label for='manual-background-color'>Hex code</label> "
-      + "<input type='text' id='manual-background-color'>"
+      + "<input type='text' id='manual-background-color' value='" + curBadgeColor1 + "'>"
       + "<button type='button' class='btn btn-mini set-color' "
       + "data-target='#badge_image_color1' data-source='#manual-background-color'>"
       + "Update</button></span>");
 
     // Now if this is an edit we need to set the initially selectedElements
     // And we also need to manually set the initial values of the form fields
-    <% unless @badge.new_record? %>
+    <% if !@badge.new_record? || !@badge.errors.blank? %>
       selectedElement["#badge_image_frame"] = $("#badge-frames").find(".list-element.selected");
       selectedElement["#badge_image_icon"] = $("#badge-icons").find(".list-element.selected");
       selectedElement["#badge_image_color2"] = $("#badge-foreground-colors").find(".list-element.selected");
       selectedElement["#badge_image_color1"] = $("#badge-background-colors").find(".list-element.selected");
-
-      $("#badge_image_frame").val(curBadgeFrame);
-      $("#badge_image_icon").val(curBadgeIcon);
-      $("#badge_image_color1").val(curBadgeColor1);
-      $("#badge_image_color2").val(curBadgeColor2);
     <% end %>
   }
 
@@ -287,13 +325,7 @@
     // Load the image with javascript so we can show the spinner while it's loading
     $("#badge-image-spinner").show();
     var imagePath = "/i?frame=" + frame + "&icon=" + icon + "&c1=" + color1 + "&c2=" + color2;
-    var newImage = new Image();
-    newImage.onload = function() {
-      $("#badge-image").attr("src", imagePath);
-      setTimeout(function() { $("#badge-image-spinner").hide() }, 1000);
-    }
-
-    newImage.src = imagePath;
+    $("#badge-image").attr("src", imagePath);
   }
 
   function randomize() {
@@ -354,7 +386,7 @@
             <div class="spinner"></div>
           </div>
           <% if @badge.new_record? %>
-            <img src="/i" id="badge-image"/>
+            <%= image_tag "blank.png", id: "badge-image" %>
           <% else %>
             <img src="<%= group_badge_path(@group, @badge, format: :png) %>" id="badge-image"/>
           <% end %>

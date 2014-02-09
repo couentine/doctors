@@ -31,8 +31,8 @@
 </script>
 
 <%= simple_form_for(@group, html: { class: 'form-horizontal' }) do |f| %>
+  <%= f.error_notification %>
   <div class="form-body">
-    
     <%= f.input :name, label: 'Group Name', placeholder: 'NASA Astronaut Training',
                 autofocus: true, input_html: { class: 'input-xlarge' } %>
     
@@ -53,12 +53,12 @@
     <h2>
       Extra information (optional)
       <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
-        value="<%= @group.new_record? ? 'Show Extra Info' : 'Hide Extra Info' %>" 
+        value="<%= (@group.new_record? && @group.errors.blank?) ? 'Show Extra Info' : 'Hide Extra Info' %>" 
         onclick="toggleExtraInfo()" />
     </h2> 
 
     <div id="form-extra-info" 
-         style="<%= @group.new_record? ? 'display:none' : '' %>">
+         style="<%= (@group.new_record? && @group.errors.blank?) ? 'display:none' : '' %>">
       <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
                   input_html: { class: 'input-xlarge' } %>
 

@@ -15,23 +15,26 @@
       
       <div class="signin-form bl-form-no-labels">
         <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
-          <%= f.error_notification %>
+          <div class="form-body">
 
-          <%= f.input :name, :required => true, :autofocus => true, :placeholder => 'Your name', :input_html => { :class => 'signin' } %>
-          <%= f.input :username_with_caps, :required => true, :placeholder => 'Your username', :input_html => { :class => 'signin' } %>
-          <%= f.input :email, :required => true, :placeholder => 'Your email', :input_html => { :class => 'signin' } %>
-          <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'signin' } %>
-          
+            <%= f.error_notification %>
 
-          <div class="controls">
-            <%= f.button :submit, "Create an account", :class => 'btn-large btn-success' %>
-            <p class="button-info-block">
-              By clicking "Create an account", you agree to our 
-              <a href="/badgelist/about/terms-of-service" target="_blank">terms of service</a> and 
-              <a href="/badgelist/about/privacy-policy" target="_blank">privacy policy</a>.
-            </p>
+            <%= f.input :name, :required => true, :autofocus => true, :placeholder => 'Your full name', :input_html => { :class => 'signin' } %>
+            <%= f.input :username_with_caps, :required => true, :placeholder => 'Pick a username', :input_html => { :class => 'signin' } %>
+            <%= f.input :email, :required => true, :placeholder => 'Your email', :input_html => { :class => 'signin' } %>
+            <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'signin' } %>
+            
+
+            <div class="controls">
+              <%= f.button :submit, "Create an account", :class => 'btn-large btn-success' %>
+              <p class="button-info-block">
+                By clicking "Create an account", you agree to our 
+                <a href="/badgelist/about/terms-of-service" target="_blank">terms of service</a> and 
+                <a href="/badgelist/about/privacy-policy" target="_blank">privacy policy</a>.
+              </p>
+            </div>
+
           </div>
-
         <% end %>
       </div>
       

@@ -56,12 +56,15 @@ body {
   background-color: $body-background-color !important;
   color: $dark-text-color;
 
+  @media (min-width: 980px) {
+    padding-top: 60px;
+    &.with-subheader { padding-top: 110px; }
+  }
+  @media (max-width: 979px) {
+    &.with-subheader header.navbar { margin-bottom: 65px; }
+  }
 }
 
-@media (min-width: 980px) {
-  body { padding-top: 60px; }
-  body.with-subheader { padding-top: 110px; }
-}
 
 ::selection {
   background: $primary-light;
@@ -100,46 +103,78 @@ a.btn:visited {
 }
 .btn {
   background-image: none;
-}
-.btn-success {
-  background-color: $secondary-medium;
-  color: $light-white !important;
-  &:focus,&:hover { background-color: $secondary-dark; }
-}
-.btn-primary {
-  background-color: $tertiary-medium;
-  color: $light-white !important;
-  &:focus,&:hover { background-color: $tertiary-dark; }
-}
-.btn-warning {
-  background-color: $primary-medium;
-  color: $light-white !important;
-  &:focus,&:hover { background-color: $primary-dark; }
-}
-.btn-danger {
-  background-color: $red-medium;
-  color: $light-white !important;
-  &:focus,&:hover { background-color: $red-dark; }
+  
+  &.btn-success {
+    background-color: $secondary-medium;
+    color: $light-white !important;
+    &:focus,&:hover { background-color: $secondary-dark; }
+  }
+  &.btn-primary {
+    background-color: $tertiary-medium;
+    color: $light-white !important;
+    &:focus,&:hover { background-color: $tertiary-dark; }
+  }
+  &.btn-warning {
+    background-color: $primary-medium;
+    color: $light-white !important;
+    &:focus,&:hover { background-color: $primary-dark; }
+  }
+  &.btn-danger {
+    background-color: $red-medium;
+    color: $light-white !important;
+    &:focus,&:hover { background-color: $red-dark; }
+  }
 }
 ul.dropdown-menu {
   text-align: left;
 }
 .alert {
   background-color: $primary-really-light;
+  border-color: $primary-light;
+  border-style: dashed;
   color: $medium-text-color;
+  
+  &.alert-error {
+    background-color: $red-really-light;
+    border-color: $red-medium;
+  }
+  &.alert-notice {
+    background-color: $secondary-really-light;
+    border-color: $secondary-light;
+  }
+  &.alert-success {
+    background-color: $green-really-light;
+    border-color: $green-light;
+  }
+  &.alert-info {
+    background-color: $tertiary-really-light;
+    border-color: $tertiary-light;
+  }
 }
 .tooltip {
   display: block;
 }
 .well {
+  color: $dark-text-color;
+  background-color: $light-white;
+  border: 1px dashed $secondary-medium;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  
   ul {
-    color: $dark-text-color;
     list-style: none;
     font-size: 21px;
 
     li {
       line-height: 2em;
     }
+  }
+  i.header-icon {
+    float: right;
+    margin: 0 0 15px 15px;
+    font-size: 70px;
+    color: $secondary-really-light;
   }
 }
 .badge-success { background-color: $secondary-light; }
@@ -442,6 +477,10 @@ div.bl-form,div.bl-modal-form {
     }
   }
 
+  .alert {
+    display: inline-block;
+    margin-left: 25px;
+  }
   .form-body {
     h1,h2,h3,h4 {
       width: 90%;
@@ -462,59 +501,67 @@ div.bl-form,div.bl-modal-form {
       position: relative;
       top: 5px;
     }
-    .controls {
-      p { 
-        margin: 5px 0 0 0; 
-        a,a:visited {
-          color: $medium-text-color;
-          text-decoration: underline;
+    .control-group {
+      .controls {
+        p { 
+          margin: 5px 0 0 0; 
+          a,a:visited {
+            color: $medium-text-color;
+            text-decoration: underline;
+          }
+          a:focus,a:hover {
+            color: $dark-text-color;
+            text-decoration: underline;
+          }
         }
-        a:focus,a:hover {
-          color: $dark-text-color;
-          text-decoration: underline;
+
+        input[type="text"],textarea,input[type="url"] {
+          border-radius: 0;
+          border-top: none;
+          border-right: none;
+          border-left: none;
+          border-bottom: 1px solid $medium-gray;
+          box-shadow: none;
+        }
+        textarea {
+          border-left: 1px solid $light-gray;
+        }
+        input[type="text"]:focus,textarea:focus,,input[type="url"]:focus {
+          background-color: $really-light-gray;
+        }
+        .huge-text-area {
+          width: 95%;
+          height: 245px;
+          border: 1px solid $light-gray;
+          border-bottom: 1px solid $medium-gray;
+        }
+        .character-count-wrap { 
+          float: left;
+          position: relative; 
+        }
+        .character-count {
+          position: absolute;
+          right: 21px;
+          bottom: 5px;
+          font-size: 11px;
+          font-style: italic;
+          color: $light-text-color;
+          padding: 1px 3px;
+          border-radius: 5px;
+        }
+        .character-count.negative {
+          color: $primary-dark;
+          font-weight: bold;
+          background-color: $medium-white;
+        }
+      }
+
+      &.error {
+        .controls {
+          .help-inline { color: $red-medium; font-style: italic; }
         }
       }
     }
-  }
-
-  input[type="text"],textarea,input[type="url"] {
-    border-radius: 0;
-    border-top: none;
-    border-right: none;
-    border-left: none;
-    border-bottom: 1px solid $medium-gray;
-    box-shadow: none;
-  }
-  textarea {
-    border-left: 1px solid $light-gray;
-  }
-  input[type="text"]:focus,textarea:focus,,input[type="url"]:focus {
-    background-color: $really-light-gray;
-  }
-  .huge-text-area {
-    width: 95%;
-    height: 245px;
-    border: 1px solid $light-gray;
-    border-bottom: 1px solid $medium-gray;
-  }
-  .character-count-wrap { 
-    float: left;
-    position: relative; 
-  }
-  .character-count {
-    position: absolute;
-    right: 21px;
-    bottom: 5px;
-    font-size: 11px;
-    font-style: italic;
-    color: $light-text-color;
-    padding: 1px 3px;
-    border-radius: 5px;
-  }
-  .character-count.negative {
-    color: $primary-dark;
-    font-weight: bold;
-    background-color: $medium-white;
   }
 }
 p.button-info-block { 
@@ -1896,6 +1943,11 @@ div.text-card {
     }
     input[type="email"].signin:focus,input[type="password"].signin:focus,input[type="text"].signin:focus {
       background-color: $really-light-gray !important;
+    }
+    .control-group.error {
+      .controls {
+        .help-inline { color: $red-medium; font-style: italic; }
+      }
     }
   }
   .form-actions {
