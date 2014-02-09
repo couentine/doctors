@@ -48,25 +48,24 @@ defaults: &defaults
    - validations
 
   default_badge_info: |
-    <h3>Overview</h3><br>
-    Use this area to store information and instructions that will be useful to badge learners
-    and experts. Also remember to include information that will be relevant to the public when
-    they refer to the badge at a later date.<br><br>
-    <strong>Use Lists to Suggest Pathways</strong><br>
-    <ul><li>#intro - Use hashtags to create wiki pages</li>
-    <li>#resources - Hashtags can also be used in learners' log entries</li></ul>
-    -----<br>
-    <h3>Formatting Examples</h3>
-    <strong>Section Breaks:</strong><br>
-    Create section breaks by including one or more dashes on a separate line.<br><br>
-    <strong>Links:</strong><br>
-    #hash-tags are automatically made #clickable, #Use_Them_Freely.<br>
-    URLs are also made clickable: http://en.wikipedia.org/wiki/Open-source_software<br><br>
-    <strong>Images:</strong><br>
-    URLs with image extensions will automatically be turned into embedded images or you can 
-    add an "img:" prefix for links that aren't automatically recognized.<br>
-    img:http://bit.ly/1l4vkp4
-
+    <h3>Build a badge checklist...</h3>
+    You can use the badge wiki page to build a checklist of items which need to be mastered in 
+    order for learners to earn the badge. &nbsp;Click the "Edit badge wiki" button to get started. 
+    &nbsp;Below is an example of what a checklist might look like.<br>
+    <ul>
+    <li>#rocket-construction - Put a hash symbol before a string of text to create a clickable link 
+    to another page in your badge wiki.</li>
+    <li>#crew-selection - It's important to build trust and cooperation amongst your crew.</li>
+    <li>#launch-location - Selecting a good location takes a lot of coordination.</li>
+    <li>#launch-timing - Calculating your orbital trajectories properly is absolutely crucial.</li>
+    <li>#mission-control - A dependable base for communications is important.</li>
+    <li>#mid-air-maneuvering - Rocket ships are notoriously challenging to pilot effectively.</li>
+    <li>#zero-gravity - Be prepared for the weightless void of orbit.</li>
+    </ul>-----<br>
+    <h3>Want some help?</h3>
+    Clicking the little orange question mark in the top left corner of the Badge List page will 
+    take you to the Badge List Helper badge, where you can learn more about the app.
+  
   default_log_wiki: |
     I'm new here.<br>
     -----<br>
