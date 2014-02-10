@@ -7,6 +7,9 @@ class BadgeMaker
   IMAGES_ROOT_PATH = "#{Rails.root}/lib/assets/badge_maker"
   THUMBNAILS_ROOT_PATH = "#{Rails.root}/app/assets/images/badge_maker"
   
+  NEW_ICONS_INBOX = "#{IMAGES_ROOT_PATH}/inbox"
+  NEW_ICONS_OUTBOX = "#{IMAGES_ROOT_PATH}/outbox"
+  
   # === CLASS METHODS === #
 
   # Returns hash containing BadgeMaker settings
@@ -45,6 +48,7 @@ class BadgeMaker
           'offset_x' => 0,
           'offset_y' => 0,
           'attribution' => {
+            'type' => 'public',
             'item_type' => 'frame',
             'item_name' => nil,
             'author_name' => nil,
@@ -66,6 +70,7 @@ class BadgeMaker
         icon_index_changed = true
         icon_index[image_name] = {
           'attribution' => {
+            'type' => 'public',
             'item_type' => 'icon',
             'item_name' => nil,
             'author_name' => nil,
@@ -203,8 +208,116 @@ class BadgeMaker
   end
 
   def self.process_new_icons
-    config = init
-    # FINISH ME
+    license_regex = /must be attributed as:\s+(.+)\s+by\s+(.+)\s+from The Noun Project/
+    name_regex = /name="(.+)"/
+    key_regex = /key="(.+)"/
+    
+    # Make the folders we'll need
+    FileUtils.mkdir_p("#{NEW_ICONS_OUTBOX}/icons") unless File.directory? "#{NEW_ICONS_OUTBOX}/icons"
+    FileUtils.mkdir_p("#{NEW_ICONS_OUTBOX}") unless File.directory? "#{NEW_ICONS_OUTBOX}"
+    FileUtils.mkdir_p("#{NEW_ICONS_OUTBOX}/success") unless File.directory? "#{NEW_ICONS_OUTBOX}/success"
+    FileUtils.mkdir_p("#{NEW_ICONS_OUTBOX}/error") unless File.directory? "#{NEW_ICONS_OUTBOX}/error"
+    FileUtils.mkdir_p("#{NEW_ICONS_OUTBOX}/duplicate") unless File.directory? "#{NEW_ICONS_OUTBOX}/duplicate"
+    FileUtils.mkdir_p("#{NEW_ICONS_OUTBOX}/public") unless File.directory? "#{NEW_ICONS_OUTBOX}/public"
+
+    icon_folders = Dir["#{NEW_ICONS_INBOX}/*/"]
+    key, type, name, author_name, status, result = nil, nil, nil, nil, nil, nil
+    icon_image_file, config_row = nil, nil
+    org_name, org_url = "The Noun Project", "http://www.thenounproject.com"
+    
+    updated_icon_index = init[:icons]
+    new_icon_index = {}
+
+    icon_folders.sort.each do |icon_folder|
+      begin
+        icon_image_file = icon_folder + icon_folder.split("/").last + ".png"
+        license = File.read("#{icon_folder}license.txt")
+
+        # First load the license information
+        if license.include? "This icon is in the Public Domain"
+          type = "public"
+          if license.include? "name="
+            # This is a manually named public domain icon
+            result = license.scan(name_regex)
+            if result.count == 1
+              name = result.first[0].strip
+              key = name.parameterize.downcase
+              type = "public"
+              author_name = nil
+              status = :success
+            else
+              status = :error
+            end
+          else
+            name, key, author_name = nil, nil, nil
+            status = :public
+          end
+        elsif license.include? "must be attributed as:"
+          result = license.scan(license_regex)
+          if (result.count == 1)
+            name = result.first[0].strip
+            key = name.parameterize.downcase
+            type = "attribution"
+            author_name = result.first[1].strip
+            status = :success
+
+            # Look for a manually specified key
+            if license.include? "key="
+              result = license.scan(key_regex)
+              key = result.first[0].strip if result.count == 1
+            end
+          else
+            status = :error
+          end
+        else
+          status = :error
+        end
+        puts "#{icon_folder} >> #{status}:#{key}:#{name}:#{author_name}"
+
+        # Now build the icons if license retrieval was successful
+        if status == :success
+          if updated_icon_index.include? key
+            status = :duplicate
+          else
+            # Build the image
+            icon_image = MiniMagick::Image.open(icon_image_file)
+            icon_image.resize "500x500"
+            icon_image.write "#{NEW_ICONS_OUTBOX}/icons/#{key}.png"
+
+            # Build the config row
+            config_row = { 'attribution' => { 
+              'type' => type,
+              'item_type' => 'icon',
+              'item_name' => name,
+              'author_name' => author_name,
+              'author_url' => nil,
+              'org_name' => org_name,
+              'org_url' => org_url
+            } }
+            updated_icon_index[key] = config_row
+            new_icon_index[key] = config_row
+          end
+        end
+      rescue Exception => e
+        status = :error
+        puts "#{icon_folder} >> ERROR = #{e.message}"
+      end
+
+      # Finally we move the original folder
+      case status
+      when :success
+        FileUtils.mv(icon_folder, "#{NEW_ICONS_OUTBOX}/success")
+      when :error
+        FileUtils.mv(icon_folder, "#{NEW_ICONS_OUTBOX}/error")
+      when :duplicate
+        FileUtils.mv(icon_folder, "#{NEW_ICONS_OUTBOX}/duplicate")
+      when :public
+        FileUtils.mv(icon_folder, "#{NEW_ICONS_OUTBOX}/public")
+      end
+    end
+
+    # The last step is outputing the YAML file
+    File.open("#{NEW_ICONS_OUTBOX}/icons/index.yml", 'w') {|f| f.write new_icon_index.to_yaml }
   end
 
 private

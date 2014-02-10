@@ -426,7 +426,7 @@
           </span>
         </div>
         <select id="badge_image_icon" name="badge[image_icon]">
-          <% BADGE_MAKER_CONFIG[:icons].keys.each do |icon| %>
+          <% BADGE_MAKER_CONFIG[:icons].keys.sort.each do |icon| %>
             <option value="<%= icon %>" 
               data-thumbnail="<%= image_path "badge_maker/icons/#{icon}.png" %>">
               <%= icon.split("-").map{ |s| s.capitalize }.join(" ") %>

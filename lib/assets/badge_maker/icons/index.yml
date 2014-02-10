@@ -170,3 +170,516 @@ yoga:
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
+list:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: List
+    author_name: Nicholas Menghini
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+horse:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Horse
+    author_name: Gilad Fried
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+penny:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Penny
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+tablet:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: iPad
+    author_name: Manuela Barroso
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+equestrian:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Equestrian
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+computer:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Computer
+    author_name: Patrick Morrison
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+pen:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Pen
+    author_name: Ethan Clark
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+government:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Congress
+    author_name: Martha Ormiston
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+programming:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Programming
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+congress:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Congress
+    author_name: Jonathan Higley
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+molecule:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Molecule
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+components:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Components
+    author_name: Q. Li
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+knowledge-transfer:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Knowledge Transfer
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+exercise:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Exercise
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+app:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: App
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+hard-drive:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Hard Drive
+    author_name: Eddie Alshehri
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+adobe-photoshop:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Photoshop
+    author_name: Joe Harrison
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+adobe-illustrator:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Illustrator
+    author_name: Joe Harrison
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+survey:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Survey
+    author_name: Brennan Novak
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+bicycle:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Bicycle
+    author_name: Scott Lewis
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+microscope:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Microscope
+    author_name: Stuart McCoy
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+farm:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Farm
+    author_name: Jane Pellicciotto
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+wings:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Wings
+    author_name: DW
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+family-hierarchy:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Family Hierarchy
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+code:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Code
+    author_name: Darren Barone
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+poop:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Poop
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+bicyclist:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Bicyclist
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+icosahedron:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Icosahedron
+    author_name: Ruth Miller
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+onion:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Onion
+    author_name: Jakob Vogel
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+design:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Design
+    author_name: André Luiz Gollo
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+barn:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Farm
+    author_name: Bonnie Beach
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+guy-fawkes:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Guy Fawkes
+    author_name: Christopher T. Howlett
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+owl:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Owl
+    author_name: Travis Yunis
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+republican:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Republican
+    author_name: Yi Chen
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+democrat:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Democrat
+    author_name: Yi Chen
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+forest:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Forest
+    author_name: Juan Pablo Bravo
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+colosseum:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Colosseum
+    author_name: Adriano Gazzellini
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+woman-power:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Woman Power
+    author_name: TNS
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+handshake:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Handshake
+    author_name: Shailendra Chouhan
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+lotus-flower:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Flower
+    author_name: Jamie Dickinson
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+turnip:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Turnip
+    author_name: Oleg Frolov
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+pharaoh:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Pharaoh
+    author_name: Simon Child
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+eiffel-tower:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Eiffel Tower
+    author_name: Inês Delicioso
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+dna:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: DNA
+    author_name: Darrin Higgins
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+heart-healthy:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Heart Healthy
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+copyright:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Copyright
+    author_name: Thomas Hirter
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+social-services:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Social Services
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+tractor:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Tractor
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+hackathon:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Hackathon
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+raccoon:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Raccoon
+    author_name: Andrea Gourley
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+fist:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Fist
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+open-source:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Open Source
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+cat:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Cat
+    author_name: Marie Coons
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+cooking-pot:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Cooking Pot
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+books:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Books
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+book:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Book
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+pilates:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Pilates
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
