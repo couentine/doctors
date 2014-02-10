@@ -1,8 +1,8 @@
 class NewUserMailer < ActionMailer::Base
   include EmailTools
 
-  def group_member_add(to_email, to_name, from_user, group)
-    @to_email, @to_name, @from_user, @group = to_email, to_name, from_user, group
+  def group_member_add(to_email, to_name, from_user, group, badges)
+    @to_email, @to_name, @from_user, @group, @badges = to_email, to_name, from_user, group, badges
 
     if @to_name.blank?
       to_email_name = @to_email
@@ -19,8 +19,8 @@ class NewUserMailer < ActionMailer::Base
     )
   end
 
-  def group_admin_add(to_email, to_name, from_user, group)
-    @to_email, @to_name, @from_user, @group = to_email, to_name, from_user, group
+  def group_admin_add(to_email, to_name, from_user, group, badges)
+    @to_email, @to_name, @from_user, @group, @badges = to_email, to_name, from_user, group, badges
 
     if @to_name.blank?
       to_email_name = @to_email

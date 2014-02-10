@@ -25,6 +25,14 @@
     </div>
 
     <div class="form-text">
+      <% unless @badges.blank? %>
+        <p class="text-info">
+          These emails were also added to the following 
+          <%= pluralize @badges.count, "badge" %>: 
+          <%= @badges.map{|b| b.name}.join ", " %>
+        </p>
+      <% end %>
+
       <dl>
         
         <% if @new_admin_emails.count > 0 %>

@@ -161,20 +161,51 @@ ul.dropdown-menu {
   box-shadow: none;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
+  padding: 10px;
   
+  h3 {
+    font-size: 16px;
+    color: $secondary-dark;
+    line-height: 1.2em;
+    margin: 0 0 10px 0;
+  }
   ul {
+    margin: 0 0 0 10px;
     list-style: none;
-    font-size: 21px;
+    font-size: 14px;
+    li { 
+      line-height: 1.3em; 
+      margin-bottom: 0.8em;
 
-    li {
-      line-height: 2em;
+      a,a:visited {
+        color: $dark-text-color;
+        text-decoration: underline;
+        font-size: 12px;
+      }
+      a:focus,a:hover {
+        color: $secondary-dark;
+      }
+
+      &.item-complete {
+        color: $light-text-color;
+        text-decoration: line-through;
+
+        a,a:visited { color: $light-text-color; }
+      }
+      &:last-child { margin-bottom: 0; }
     }
   }
   i.header-icon {
     float: right;
     margin: 0 0 15px 15px;
-    font-size: 70px;
+    font-size: 50px;
     color: $secondary-really-light;
+  }
+  
+  &.well-lead {
+    padding: 19px;
+    ul { font-size: 21px; }
+    i.header-icon { font-size: 70px; }
   }
 }
 .badge-success { background-color: $secondary-light; }
@@ -636,7 +667,7 @@ div.bl-form {
     float: left;
     max-width: 100%;
 
-    p {
+    p:not(.help-block) {
       max-width: 80%;
       margin: 20px 0 10px 25px;
     }
@@ -769,10 +800,6 @@ form#group-add-users-form {
                            $dark-white 50%, $dark-white 75%, $light-white 75%);
   background-size: 16px 16px;
 
-  @media (max-width: 767px) {
-    float: none;
-  }
-
   .white-background {
     position: absolute;
     top: 0;
@@ -792,6 +819,8 @@ form#group-add-users-form {
       margin: 0 20px;
     }
     span.header-text { padding-left: 120px; }
+
+    @media (max-width: 767px) { min-height: 140px; }
   }
   .secondary-header {
     @media (max-width: 767px) {
@@ -905,12 +934,6 @@ form#group-add-users-form {
     }
   }
 
-  @media (max-width: 767px) {
-    .secondary-header span.header-image {
-      margin-right: 20px;
-    }
-  }
-
   .card-actions {
     position: absolute;
     top: 15px;
@@ -958,6 +981,16 @@ form#group-add-users-form {
       color: $dark-text-color;
     }
   }  
+
+  @media (max-width: 767px) {
+    float: none;
+    
+    .card-tabs { float: none; }
+    .secondary-header span.header-image {
+      margin-right: 20px;
+    }
+
+  }
 }
 
 

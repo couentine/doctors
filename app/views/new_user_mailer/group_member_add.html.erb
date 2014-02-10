@@ -4,15 +4,37 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    <p>
-      You've been invited to join the <%= @group.name %> learning group in Badge List. 
-      To view the learning group, follow the link below to create a new Badge List account. 
-      (Be sure to sign up using the same email address!)
-    </p>
-    <p>
-      After you login you will see the learning group on your home page and you can join any of the 
-      badges in the group.
-    </p>
+    <% if @badges.blank? %>
+      <p>
+        You've been invited to join the <%= @group.name %> learning group in Badge List. 
+        To view the learning group, follow the link below to create a new Badge List account. 
+        (Be sure to sign up using the same email address!)
+      </p>
+      <p>
+        After you login you will see the learning group on your home page and you can join any of the 
+        badges in the group.
+      </p>
+    <% else %>
+      <p>
+        You've been invited to join <%= pluralize @badges.count, 'badge' %> in Badge List.
+        You've also been added as a member of the <%= @group.name %> learning group. 
+        To view the learning group and begin adding entries to your badge learning log, 
+        follow the link below to create a new Badge List account. 
+        (Be sure to sign up using the same email address!)<br>
+        <br>
+        <strong>Badges you've been invited to:</strong>
+      </p>
+      <ul>
+        <% @badges.each do |badge| %>
+          <li><%= link_to badge.name, group_badge_url(@group, badge) %></li>
+        <% end %>
+      </ul>
+      <p>
+        After you login you will see the learning group and its badges on your home page.
+      </p>
+    <% end %>
+
+    
     <p>
       <strong>Create a Badge List account:</strong> 
       <a href="<%= "#{new_user_registration_url}?email=#{@to_email}&name=#{@to_name}" %>">

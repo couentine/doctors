@@ -75,6 +75,7 @@
           <th>Name</th>
           <th>Email</th>
           <th>Invitation Sent</th>
+          <th>Invited to Badges</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -89,6 +90,7 @@
                     : 'No invitation sent yet' 
               %>
             </td>
+            <td><%= u['badges'].join(', ') unless u['badges'].blank? %></td>
             <td>
               <%= link_to '<i class="icon-envelope"></i>'.html_safe, 
                   send_group_member_invitation_path(@group, u['email']), :method => :post,
@@ -125,6 +127,7 @@
           <th>Name</th>
           <th>Email</th>
           <th>Invitation Sent</th>
+          <th>Invited to Badges</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -139,6 +142,7 @@
                     : 'No invitation sent yet' 
               %>
             </td>
+            <td><%= u['badges'].join(', ') unless u['badges'].blank? %></td>
             <td>
               <%= link_to '<i class="icon-envelope"></i>'.html_safe, 
                   send_group_admin_invitation_path(@group, u['email']), :method => :post,
@@ -263,7 +267,7 @@
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
              data-bl-dyncol-width="12">
 
-            <%= render @group.badges if !@group.badges.empty? %>
+            <%= render @group.badges.asc(:name) if !@group.badges.empty? %>
 
         </div>
       </div>

@@ -135,6 +135,8 @@ class BadgesController < ApplicationController
         disabled: @already_added_users.include?(user)
       }
     end
+
+    @group_is_blank = (@learner_list.count <= 1)
   end
 
   # POST /group-url/badge-url/learners
@@ -156,7 +158,7 @@ class BadgesController < ApplicationController
           UserMailer.log_new(user, current_user, @group, @badge, new_learner_log).deliver 
         end
       end
-    end
+    end unless params[:usernames].blank?
 
     respond_to do |format|
       format.html { redirect_to group_badge_path(@group, @badge)+'#learners', 

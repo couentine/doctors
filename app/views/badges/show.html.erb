@@ -342,6 +342,48 @@
 
 <% if @group.public? || @current_user_is_admin || @current_user_is_member %>
 
+  <!-- === NEW BADGE TUTORIAL === -->
+
+  <% if @current_user_is_expert && \
+    (@badge.info_versions.blank? || @badge.learner_logs.blank? || (@entries.count <= 1)) %>
+    
+    <%
+      tutorial1_complete = !@badge.info_versions.blank?
+      tutorial1_outerclass = (tutorial1_complete) ? 'item-complete' : ''
+      tutorial1_innerclass = (tutorial1_complete) ? 'fa fa-check-square-o' : 'fa fa-square-o'
+      tutorial2_complete = !@badge.learner_logs.blank?
+      tutorial2_outerclass = (tutorial2_complete) ? 'item-complete' : ''
+      tutorial2_innerclass = (tutorial2_complete) ? 'fa fa-check-square-o' : 'fa fa-square-o'
+      tutorial3_complete = @entries.count > 1
+      tutorial3_outerclass = (tutorial3_complete) ? 'item-complete' : ''
+      tutorial3_innerclass = (tutorial3_complete) ? 'fa fa-check-square-o' : 'fa fa-square-o'
+    %>
+
+    <div class="row">
+      <div class="well span7 offset2">
+        <i class="fa fa-info-circle header-icon"></i>
+        <h3>To finish setting up this badge...</h3>
+        <ul>
+          <li class="<%= tutorial1_outerclass %>">
+            <i class="<%= tutorial1_innerclass %>"></i>
+            Build out a checklist in the badge wiki
+            <a href="/badgelist/help/badge-checklist" target="_blank">(Read more)</a>
+          </li>
+          <li class="<%= tutorial2_outerclass %>">
+            <i class="<%= tutorial2_innerclass %>"></i>
+            Add learners to the badge
+            <a href="/badgelist/help/add-learners" target="_blank">(Read more)</a>
+          </li>
+          <li class="<%= tutorial3_outerclass %>">
+            <i class="<%= tutorial3_innerclass %>"></i>
+            Have one of your learners or experts post a learning log entry
+            <a href="/badgelist/help/post-log-entries" target="_blank">(Read more)</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
   <!-- === TAB CONTENT === -->
 
   <div class="tab-content">

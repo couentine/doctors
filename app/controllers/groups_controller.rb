@@ -190,12 +190,19 @@ class GroupsController < ApplicationController
     found_user = invited_users.detect { |u| u["email"] == email}
 
     if found_user
+      # Query for the badges if param is included
+      if found_user["badges"].blank?
+        @badges = []
+      else
+        @badges = @group.badges.where(:url.in => found_user["badges"])
+      end
+
       if params[:type] == 'admin'
         NewUserMailer.group_admin_add(found_user["email"], found_user["name"], 
-                                      current_user, @group).deliver
+                                      current_user, @group, @badges).deliver
       else
         NewUserMailer.group_member_add(found_user["email"], found_user["name"], 
-                                      current_user, @group).deliver
+                                      current_user, @group, @badges).deliver
       end
       found_user[:invite_date] = Time.now
 
@@ -236,6 +243,7 @@ class GroupsController < ApplicationController
 
   # GET /group-url/members/add?type=member
   # GET /group-url/admins/add?type=admin
+  # :badges[] => ["badge-url1","badge-url2"] >> Sets which badges should be checked by default
   def add_users
     if params[:type] == 'admin'
       @type = :admin
@@ -244,11 +252,22 @@ class GroupsController < ApplicationController
       @type = :member
       @form_path = create_group_members_path(@group)
     end
+
+    # Query for the badges if param is included
+    badge_urls = params["badges"] || []
+    @badge_list = []
+    @group.badges.asc(:name).each do |badge|
+      @badge_list << {
+        badge: badge,
+        selected: badge_urls.include?(badge.url)
+      }
+    end
   end
 
   # PUT /group-url/members?type=member
   # PUT /group-url/admins?type=admin
   # :emails => '"Bob Smith" <bob@example.com>, another@example.com \n yet@example.com'
+  # :badges[] => ["badge-url1","badge-url2"] >> Users with be added/invited to these
   # :notify_by_email => boolean
   # State variables for output: 
   #   @group, @type, @invalid_emails, @upgraded_member_emails, @new_member_emails,
@@ -263,6 +282,13 @@ class GroupsController < ApplicationController
     @skipped_admin_emails = [] # skipped because either...
                                # type=admin >> They are already admins
                                # type=member >> Admins cannot be down-graded
+
+    # Query for the badges if param is included
+    if params["badges"].blank?
+      @badges = []
+    else
+      @badges = @group.badges.where(:url.in => params["badges"])
+    end
 
     # Parse the emails using the UsersHelper function
     parsed_emails = parse_emails(params[:emails])
@@ -287,9 +313,11 @@ class GroupsController < ApplicationController
           users_to_add.each do |user|
             if @group.has_admin?(user)
               @skipped_admin_emails << user.email
+              @badges.each { |badge| badge.add_learner user }
             else
               @group.admins << user
-              UserMailer.group_admin_add(user, current_user, @group).deliver if @notify_by_email
+              @badges.each { |badge| badge.add_learner user }
+              UserMailer.group_admin_add(user, current_user, @group, @badges).deliver if @notify_by_email
               if @group.has_member?(user)
                 @group.members.delete(user)
                 @upgraded_member_emails << user.email
@@ -302,11 +330,14 @@ class GroupsController < ApplicationController
           users_to_add.each do |user|
             if @group.has_member?(user)
               @skipped_member_emails << user.email
+              @badges.each { |badge| badge.add_learner user }
             elsif @group.has_admin?(user)
               @skipped_admin_emails << user.email
+              @badges.each { |badge| badge.add_learner user }
             else
               @group.members << user
-              UserMailer.group_member_add(user, current_user, @group).deliver if @notify_by_email
+              @badges.each { |badge| badge.add_learner user }
+              UserMailer.group_member_add(user, current_user, @group, @badges).deliver if @notify_by_email
               @new_member_emails << user.email
             end
           end
@@ -325,6 +356,7 @@ class GroupsController < ApplicationController
       end
       emails_to_invite.each do |email|
         invited_user = {:email => email, :name => name_from_email[email], :invite_date => invite_date }
+        invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
 
         if @group.has_invited_admin?(email)
           @skipped_admin_emails << email
@@ -338,7 +370,7 @@ class GroupsController < ApplicationController
           end
           @group.invited_admins << invited_user
           NewUserMailer.group_admin_add(email, name_from_email[email],
-                                        current_user, @group).deliver if @notify_by_email
+                                        current_user, @group, @badges).deliver if @notify_by_email
         else
           if @group.has_invited_member?(email)
             @skipped_member_emails << email
@@ -346,7 +378,7 @@ class GroupsController < ApplicationController
             @group.invited_members << invited_user
             @new_member_emails << email
             NewUserMailer.group_member_add(email, name_from_email[email],
-                                           current_user, @group).deliver if @notify_by_email
+                                           current_user, @group, @badges).deliver if @notify_by_email
           end
         end
       end

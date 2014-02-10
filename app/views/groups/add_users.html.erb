@@ -26,6 +26,7 @@
     <%= form_tag(@form_path, method: :post, id: "group-add-users-form", class: 'form-horizontal') do %>
 
       <div class="form-body">
+
         <div class="control-group">
           <%= label_tag :emails, "New #{@type.to_s.capitalize} Emails", class: "control-label" %>
           <div class="controls">
@@ -38,6 +39,26 @@
                 class: "notify-by-email"%>
           </div>
         </div>
+
+        <% unless @badge_list.blank? %>
+          <div class="control-group">
+            <%= label_tag :badges, "(Optional) Invite to badges", class: "control-label" %>
+            <div class="controls">
+              <ul class="unstyled">
+                <% @badge_list.each do |item| %>
+                  <li>
+                    <label class="checkbox">
+                      <%= check_box_tag 'badges[]', item[:badge].url, item[:selected] %> 
+                      <%= item[:badge].name %>
+                    </label>
+                  </li>
+                <% end %>
+              </ul>
+              <br/>
+            </div>
+          </div>
+        <% end %>
+
       </div>
       
       <div class="form-footer">

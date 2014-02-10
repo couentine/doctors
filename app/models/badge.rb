@@ -240,7 +240,7 @@ protected
   end
 
   def update_info_versions
-    if info_changed?
+    if info_changed? && !new_record? && (info != APP_CONFIG['default_badge_info'])
       current_version_row = { :info => info, :user => current_user, 
                               :username => current_username, :updated_at => Time.now,
                               :updated_at_text => Time.now.strftime("%-m/%-d/%y at %l:%M%P") }

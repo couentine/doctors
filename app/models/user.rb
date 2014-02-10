@@ -256,19 +256,31 @@ protected
   def convert_group_invitations
     # First query for groups where we have been invited as an admin
     Group.where(:invited_admins.elem_match => { :email => email }).entries.each do |group|
+      # First add group membership
       group.admins << self
       group.reload
       invited_item = group.invited_admins.detect { |u| u["email"] == unconfirmed_email}
       group.invited_admins.delete(invited_item) if invited_item
       group.save
+
+      # Then add to any badges
+      group.badges.where(:url.in => invited_item["badges"]).each do |badge|
+        badge.add_learner self
+      end unless invited_item["badges"].blank?
     end
     # Then query for groups where we have been invited as a normal member
     Group.where(:invited_members.elem_match => { :email => email }).entries.each do |group|
+      # First add group membership
       group.members << self
       group.reload
       invited_item = group.invited_members.detect { |u| u["email"] == unconfirmed_email}
       group.invited_members.delete(invited_item) if invited_item
       group.save
+
+      # Then add to any badges
+      group.badges.where(:url.in => invited_item["badges"]).each do |badge|
+        badge.add_learner self
+      end unless invited_item["badges"].blank?
     end
   end
 

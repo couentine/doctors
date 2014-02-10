@@ -49,9 +49,10 @@ defaults: &defaults
 
   default_badge_info: |
     <h3>Build a badge checklist...</h3>
-    You can use the badge wiki page to build a checklist of items which need to be mastered in 
-    order for learners to earn the badge. &nbsp;Click the "Edit badge wiki" button to get started. 
-    &nbsp;Below is an example of what a checklist might look like.<br>
+    You can use the badge wiki page to build a checklist of items which must be mastered to earn
+    the badge. &nbsp;Click the "Edit badge wiki" button to get started.
+    <br><br>
+    <i>Example Checklist</i><br>
     <ul>
     <li>#rocket-construction - Put a hash symbol before a string of text to create a clickable link 
     to another page in your badge wiki.</li>

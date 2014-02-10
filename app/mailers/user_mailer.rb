@@ -1,8 +1,8 @@
 class UserMailer < ActionMailer::Base
   include EmailTools
 
-  def group_admin_add(to_user, from_user, group)
-    @to_user, @from_user, @group = to_user, from_user, group
+  def group_admin_add(to_user, from_user, group, badges)
+    @to_user, @from_user, @group, @badges = to_user, from_user, group, badges
 
     mail(
       :subject  => "You're now an admin of #{group.name}",
@@ -13,8 +13,8 @@ class UserMailer < ActionMailer::Base
     )
   end
 
-  def group_member_add(to_user, from_user, group)
-    @to_user, @from_user, @group = to_user, from_user, group
+  def group_member_add(to_user, from_user, group, badges)
+    @to_user, @from_user, @group, @badges = to_user, from_user, group, badges
 
     mail(
       :subject  => "Welcome to #{group.name}!",
