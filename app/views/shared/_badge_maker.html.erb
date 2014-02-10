@@ -88,29 +88,31 @@
     var curBadgeColor2 = "<%= @badge.image_color2 %>";
     var curColor2IsCustom = false
 
-    // Copy the current info into the DOM
-    $("#badge_image_frame").val(curBadgeFrame);
-    $("#badge_image_icon").val(curBadgeIcon);
-    if ($("#badge_image_icon").val() == null) { 
-      // then we need to add this text as an option and log that the icon state is text
-      $("#badge_image_icon").append("<option value='" + curBadgeIcon + "'>Custom Text</option>");
+    <% if !@badge.new_record? || !@badge.errors.blank? %>
+      // Copy the current info into the DOM
+      $("#badge_image_frame").val(curBadgeFrame);
       $("#badge_image_icon").val(curBadgeIcon);
-      curIconIsText = true;
-    }
-    $("#badge_image_color1").val(curBadgeColor1);
-    if ($("#badge_image_color1").val() == null) { 
-      // then we need to add this color as an option and log that the color is custom
-      $("#badge_image_color1").append("<option value='" + curBadgeColor1 + "'>Custom Color</option>");
+      if ($("#badge_image_icon").val() == null) { 
+        // then we need to add this text as an option and log that the icon state is text
+        $("#badge_image_icon").append("<option value='" + curBadgeIcon + "'>Custom Text</option>");
+        $("#badge_image_icon").val(curBadgeIcon);
+        curIconIsText = true;
+      }
       $("#badge_image_color1").val(curBadgeColor1);
-      curColor1IsCustom = true;
-    }
-    $("#badge_image_color2").val(curBadgeColor2);
-    if ($("#badge_image_color2").val() == null) {
-      // then we need to add this color as an option and log that the color is custom
-      $("#badge_image_color2").append("<option value='" + curBadgeColor2 + "'>Custom Color</option>");
+      if ($("#badge_image_color1").val() == null) { 
+        // then we need to add this color as an option and log that the color is custom
+        $("#badge_image_color1").append("<option value='" + curBadgeColor1 + "'>Custom Color</option>");
+        $("#badge_image_color1").val(curBadgeColor1);
+        curColor1IsCustom = true;
+      }
       $("#badge_image_color2").val(curBadgeColor2);
-      curColor2IsCustom = true;
-    }
+      if ($("#badge_image_color2").val() == null) {
+        // then we need to add this color as an option and log that the color is custom
+        $("#badge_image_color2").append("<option value='" + curBadgeColor2 + "'>Custom Color</option>");
+        $("#badge_image_color2").val(curBadgeColor2);
+        curColor2IsCustom = true;
+      }
+    <% end %>
     
     // First build the frame list
     sourceList = $("#badge_image_frame"); 
