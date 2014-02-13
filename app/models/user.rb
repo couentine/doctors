@@ -23,6 +23,7 @@ class User
   field :username,            type: String
   field :username_with_caps,  type: String
   field :flags,               type: Array
+  field :admin,               type: Boolean, default: false
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,

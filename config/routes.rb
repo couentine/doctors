@@ -13,6 +13,11 @@ BadgeList::Application.routes.draw do
   match 'i' => 'badge_maker#show', via: :get, as: :badge_image
   match 'c' => 'static_pages#colors', via: :get
 
+  # === ADMIN PATHS === #
+  scope '/a' do
+    resources :users, :only => [:index]
+  end
+
   # === MANUAL GROUP PATHS === #
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group
   match ':group_id/leave' => 'groups#leave', via: :delete, as: :leave_group

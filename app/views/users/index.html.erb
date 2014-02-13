@@ -1,0 +1,59 @@
+<% 
+  provide(:title, "All Users")
+%>
+
+<!-- === PAGE HEADER === -->
+
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="header-card admin-header-card">
+      <div class="white-background no-tabs">&nbsp;</div>
+
+      <div class="primary-header span6">
+        <span class="header-text">
+          <h1>Badge List Admin Tools</h1>
+        </span>
+      </div>
+
+      <div class="secondary-header span6">
+        <span class="header-text">
+          <h1>All Non-Sample Users</h1>
+          <h2>
+            Showing <%= ((@page.to_i - 1) * @page_size.to_i) + 1 %>
+            - <%= [(@page.to_i * @page_size.to_i), @users.count].min %>
+            of <%= @users.count %>
+          </h2>  
+        </span>            
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === ENTRIES LIST === -->
+
+<% if !@users.blank? %>
+  
+  <div class="row">
+    <div class="span12">
+      <div class="pagination-header">
+        <div class="pagination"><%= paginate @users %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="users" 
+      data-bl-dyncol-width="12">
+        <%= render @users %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12">
+      <div class="pagination-footer">
+        <div class="pagination"><%= paginate @users %></div>
+      </div>
+    </div>
+  </div>
+
+<% end %>
