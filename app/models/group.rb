@@ -34,11 +34,11 @@ class Group
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
-            format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" },
+            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :url, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
-            format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" },
+            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }

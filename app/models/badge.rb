@@ -46,12 +46,12 @@ class Badge
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH },
             uniqueness: { scope: :group },
-            format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" },
+            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :url, presence: true, length: { within: 2..MAX_URL_LENGTH },
             uniqueness: { scope: :group },
-            format: { with: /\A[\w-]+\Z/, message: "only allows url-friendly characters" },
+            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
