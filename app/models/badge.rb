@@ -163,7 +163,8 @@ class Badge
         Entry.where(:log.in => attached_log_ids).order_by(:updated_at.desc).page(page).per(page_size)
       else
         Entry.or({:log.in => attached_log_ids, :private => false}, {:log.in => owned_log_ids}, \
-          {:creator => filter_user}).order_by(:updated_at.desc).page(page).per(page_size)
+          {:log.in => attached_log_ids, :creator => filter_user})\
+          .order_by(:updated_at.desc).page(page).per(page_size)
       end
     else
       if filter_user && filter_user.expert_of?(self)
@@ -172,7 +173,8 @@ class Badge
       else
         Entry.where(:tags => tag_name.downcase)\
           .or({:log.in => attached_log_ids, :private => false}, {:log.in => owned_log_ids}, \
-          {:creator => filter_user}).order_by(:updated_at.desc).page(page).per(page_size)
+          {:log.in => attached_log_ids, :creator => filter_user}).\
+          order_by(:updated_at.desc).page(page).per(page_size)
       end
     end
   end
