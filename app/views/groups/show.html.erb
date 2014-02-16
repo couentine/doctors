@@ -2,7 +2,7 @@
   provide(:title, @group.name)
 %>
 
-<% if @current_user_is_admin || @current_user_is_member || @group.open? %>
+<% if @current_user_is_admin || @current_user_is_member || @badge_list_admin || @group.open? %>
   <% 
     provide(:show_subheader, true)
     provide(:subheader_image, group_image_url_for(@group)) 
@@ -19,8 +19,12 @@
       <li class="collapsible">
         <%= link_to '<i class="icon-plus-sign icon-white"></i> Join Group'.html_safe, 
             join_group_path(@group), method: :post %>
+        <% if @badge_list_admin %>
+          <span class="divider">|</span>
+        <% end %>
       </li>
-    <% else %>
+    <% end %>
+    <% if @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
       <li class="collapsible">
         <div class="dropdown">
           <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
@@ -30,7 +34,7 @@
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdown-subheader-settings">
-            <% if @current_user_is_admin %>
+            <% if @current_user_is_admin || @badge_list_admin %>
               <li>
                 <%= link_to '<i class="icon-pencil"></i> Edit Group'.html_safe, edit_group_path %>
               </li>
@@ -42,7 +46,7 @@
                   data: { confirm: 'Are you absolutely sure you want to leave this learning group?' }) %>
               </li>
             <% end %>
-            <% if @current_user_is_admin %>
+            <% if @current_user_is_admin || @badge_list_admin %>
               <li class="divider"></li>
               <li>
                   <%= link_to '<i class="icon-remove"></i> Delete Group'.html_safe, 
@@ -212,7 +216,7 @@
         </ul>
       </div>
 
-      <% if @group.public? || @current_user_is_admin || @current_user_is_member %>
+      <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
         <div class="card-tabs">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#badges" data-toggle="tab">Badges</a></li>
@@ -225,7 +229,7 @@
   </div>
 </div>
 
-<% if @group.public? || @current_user_is_admin || @current_user_is_member %>
+<% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 
   <!-- === TAB CONTENT === -->
 
@@ -237,7 +241,7 @@
 
       <div class="row">
         <div class="span12">
-          <% if @current_user_is_admin %>
+          <% if @current_user_is_admin || @badge_list_admin %>
             <div class="tab-header">
               <%= link_to '<i class="icon-plus"></i> New Badge'.html_safe,
                   new_group_badge_path(@group), class: 'btn btn-small' %>
@@ -251,7 +255,7 @@
               <p class="lead">No badges yet!</p>
               <p>
                 <%= 
-                  if @current_user_is_admin
+                  if @current_user_is_admin || @badge_list_admin
                     link_to '<i class="fa fa-plus"></i> Create a badge'.html_safe,
                     new_group_badge_path(@group), class: 'btn btn-success' 
                   end
@@ -334,7 +338,7 @@
               <p class="lead">No members yet!</p>
               <p>
                 <%= 
-                  if @current_user_is_admin
+                  if @current_user_is_admin || @badge_list_admin
                     link_to '<i class="fa fa-plus"></i> Add some members'.html_safe,
                     add_group_members_path(@group), class: 'btn btn-success' 
                   end
@@ -363,7 +367,7 @@
       <div class="row">
         <div class="span12">
           
-          <% if @current_user_is_admin %>
+          <% if @current_user_is_admin || @badge_list_admin %>
             <div class="tab-header">
               
               <%= link_to '<i class="icon-plus"></i> Add Admins'.html_safe,

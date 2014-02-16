@@ -121,7 +121,8 @@ class Entry
   # Uses the return value of the visibility method to determine if this user can see the log entry
   # NOTE: It's ok if user is nil
   def visible_to?(user)
-    if (self.visibility == :anonymous) || (user == self.creator) || (user == self.log.user)
+    if (self.visibility == :anonymous) || (user == self.creator) || (user == self.log.user) \
+      || (user.admin?)
       return true
     elsif user && (self.visibility != :users)
       if self.visibility == :experts

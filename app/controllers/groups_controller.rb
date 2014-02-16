@@ -399,17 +399,19 @@ private
     @group = Group.find(params[:id] || params[:group_id]) || not_found
     @current_user_is_admin = current_user && @group.has_admin?(current_user)
     @current_user_is_member = current_user && @group.has_member?(current_user)
+    @badge_list_admin = current_user && current_user.admin?
   end
 
   def group_admin
-    unless @group.has_admin?(current_user)
+    if !@group.has_admin?(current_user) && !(current_user && current_user.admin?)
       flash[:error] = "You must be an admin of #{@group.name} to do that!"
       redirect_to @group
     end 
   end
 
   def group_member_or_admin
-    if !@group.has_member?(current_user) && !@group.has_admin?(current_user)
+    if !@group.has_member?(current_user) && !@group.has_admin?(current_user) \
+      && !(current_user && current_user.admin?)
       flash[:error] = "You must be a member or admin of #{@group.name} to do that!"
       redirect_to @group
     end

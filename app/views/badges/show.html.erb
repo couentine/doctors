@@ -13,17 +13,20 @@
   <li class="active"><%= @badge.url_with_caps %></li>
 <% end %>
 
-<% if @current_user_is_admin || @current_user_is_member || @group.open? %>
+<% if @current_user_is_admin || @current_user_is_member || @group.open? || @badge_list_admin %>
   <% content_for :subheader_actions do %>
-    <% if !@current_user_is_expert && !@current_user_is_learner %>
+    <% if (@current_user_is_admin || @current_user_is_member || @group.open?) \
+      && !@current_user_is_expert && !@current_user_is_learner %>
       <li class="collapsible">
         <%= link_to '<i class="icon-plus icon-white"></i> Join Badge'.html_safe, 
             group_badge_logs_path(@group, @badge), method: :post %>
-        <% if @current_user_is_admin %>
+        <% if @current_user_is_admin || @badge_list_admin %>
           <span class="divider">|</span>
         <% end %>
       </li>
-    <% else %>
+    <% end %>
+
+    <% if @current_user_is_expert && @current_user_is_learner %>
       <li  class="collapsible">
         <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
             [@group, @badge, @log] %>
@@ -36,7 +39,8 @@
       </li>
     <% end %>
 
-    <% if @current_user_is_expert || @current_user_is_learner || @current_user_is_admin  %>
+    <% if @current_user_is_expert || @current_user_is_learner || @current_user_is_admin \
+      || @badge_list_admin  %>
       <li class="collapsible">
         <div class="dropdown">
           <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
@@ -53,7 +57,7 @@
                   '#edit-membership', tabindex: -1, data: { toggle: 'modal' } %>
               </li>
             <% end %>
-            <% if @current_user_is_expert %>
+            <% if @current_user_is_expert || @badge_list_admin %>
               <li>
                 <%= link_to '<i class="icon-wrench"></i> Edit the badge itself'.html_safe, 
                   edit_group_badge_path(@group, @badge) %>
@@ -62,7 +66,7 @@
             <% if @current_user_is_admin && (@current_user_is_expert || @current_user_is_learner) %>
               <li class="divider"></li>
             <% end %>
-            <% if @current_user_is_admin %>
+            <% if @current_user_is_admin || @badge_list_admin %>
               <li>
                 <%= link_to '<i class="icon-remove"></i> Delete Badge'.html_safe, 
                   [@group, @badge], method: :delete,
@@ -89,7 +93,7 @@
   <% end %>
 <% end unless @badge.image_attributions.blank? %>
 
-<% if @current_user_is_expert %>
+<% if @current_user_is_expert || @badge_list_admin %>
 
   <!-- === BADGE INFO VERSIONS === -->
 
@@ -323,7 +327,7 @@
         </span>
       </div>
 
-      <% if @group.public? || @current_user_is_admin || @current_user_is_member %>
+      <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
         <div class="card-tabs">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#wiki" data-toggle="tab">Wiki</a></li>
@@ -340,11 +344,11 @@
   </div>
 </div>
 
-<% if @group.public? || @current_user_is_admin || @current_user_is_member %>
+<% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 
   <!-- === NEW BADGE TUTORIAL === -->
 
-  <% if @current_user_is_expert && \
+  <% if (@current_user_is_expert || @badge_list_admin) && \
     (@badge.info_versions.blank? || @badge.learner_logs.blank? || (@entries.count <= 1)) %>
     
     <%
@@ -392,7 +396,7 @@
 
     <div class="tab-pane active" id="wiki">
 
-      <% if @current_user_is_expert %>
+      <% if @current_user_is_expert || @badge_list_admin %>
         <div class="row">
           <div class="span12">
             <div class="tab-header">
@@ -464,7 +468,7 @@
 
       <div class="row">
         <div class="span12">
-          <% if @current_user_is_expert %>
+          <% if @current_user_is_expert || @badge_list_admin %>
             <div class="tab-header">
 
               <%= link_to '<i class="icon-plus"></i> Add Learners'.html_safe,
@@ -509,7 +513,7 @@
               <p class="lead">No learners yet!</p>
               <p>
                 <%= 
-                  if @current_user_is_admin
+                  if @current_user_is_admin || @badge_list_admin
                     link_to '<i class="icon-plus"></i> Add some learners'.html_safe,
                     add_badge_learners_path(@group, @badge), class: 'btn btn-success' 
                   end
@@ -538,7 +542,7 @@
 
         <div class="row">
           <div class="span12">
-            <% if @current_user_is_expert %>
+            <% if @current_user_is_expert || @badge_list_admin %>
               <div class="tab-header">
 
                 <% unless @badge.new_expert_logs.blank? %>

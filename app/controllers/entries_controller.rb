@@ -160,6 +160,7 @@ private
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @current_user_is_log_owner = current_user && (current_user == @log.user)
+    @badge_list_admin = current_user && current_user.admin?
   end
 
   def find_all_records
@@ -182,21 +183,21 @@ private
   end
 
   def entry_creator
-    unless @current_user_is_entry_creator
+    unless @current_user_is_entry_creator || @badge_list_admin
       flash[:error] = "That action is restricted to the entry creator."
       redirect_to [@group, @badge, @log, @entry]
     end
   end
 
   def log_owner_or_entry_creator
-    unless @current_user_is_log_owner || @current_user_is_entry_creator
+    unless @current_user_is_log_owner || @current_user_is_entry_creator || @badge_list_admin
       flash[:error] = "That action is restricted to the log owner or the entry creator."
       redirect_to [@group, @badge, @log, @entry]
     end
   end
 
   def badge_expert_or_log_owner
-    unless @current_user_is_expert || @current_user_is_log_owner
+    unless @current_user_is_expert || @current_user_is_log_owner || @badge_list_admin
       flash[:error] = "That action is restricted to badge experts and the log owner."
       redirect_to [@group, @badge, @log]
     end

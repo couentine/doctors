@@ -157,7 +157,8 @@ class Log
   # Filters out private entries based on the permissions of the passed filter_user
   # NOTE: Uses pagination
   def posts(filter_user, page = 1, page_size = APP_CONFIG['page_size_normal'])
-    if filter_user && ((filter_user == user) || (!detached_log && filter_user.expert_of?(badge)))
+    if filter_user && ((filter_user == user) || (!detached_log && filter_user.expert_of?(badge)) \
+      || filter_user.admin?)
       entries.all(type: 'post').order_by(:updated_at.desc).page(page).per(page_size)
     else
       entries.all(type: 'post', private: false).order_by(:updated_at.desc).page(page).per(page_size)

@@ -171,7 +171,8 @@ class User
     logs.each do |log|
       target_map = (log.validation_status == 'validated') ? expert_log_map : learner_log_map
       if (log.badge != nil) && ((filter_user == self) || (log.public? && log.show_on_profile)\
-        || (filter_user && (filter_user.member_of?(log.badge.group) || filter_user.admin_of?(log.badge.group))))
+        || (filter_user && (filter_user.admin? \
+          || filter_user.member_of?(log.badge.group) || filter_user.admin_of?(log.badge.group))))
         
         if target_map.has_key?(log.badge.group)
           target_map[log.badge.group] << log
@@ -189,7 +190,8 @@ class User
       if !source[:groups].blank?
         source[:groups].each do |group|
           if (filter_user == self) || group.public? \
-            || (filter_user && (group.has_member?(filter_user) || group.has_admin?(filter_user)))
+            || (filter_user && (filter_user.admin? \
+              || group.has_member?(filter_user) || group.has_admin?(filter_user)))
 
             learner_logs = (learner_log_map.has_key?(group)) ? learner_log_map[group] : []
             expert_logs = (expert_log_map.has_key?(group)) ? expert_log_map[group] : []

@@ -21,14 +21,14 @@
   </li>
 <% end %>
 
-<% if @current_user_is_expert || @current_user_is_learner %>
+<% if @current_user_is_expert || @current_user_is_learner || @badge_list_admin %>
   <% content_for :subheader_actions do %>
 
-    <% if !@current_user_is_log_owner %>
+    <% if !@current_user_is_log_owner && !@current_user_log.nil? %>
       <li  class="collapsible">
         <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
             [@group, @badge, @current_user_log] %>
-        <% if @current_user_is_log_owner || @current_user_is_expert %>
+        <% if @current_user_is_expert || @badge_list_admin %>
           <span class="divider">|</span>
         <% end %>
       </li>
@@ -62,7 +62,7 @@
       </li>
     <% end %>
 
-    <% if @current_user_is_log_owner %>
+    <% if @current_user_is_log_owner || @badge_list_admin %>
       <li class="collapsible">
         <div class="dropdown">
           <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
@@ -106,7 +106,7 @@
   <% end %>
 <% end %>
 
-<% if @current_user_is_log_owner %>
+<% if @current_user_is_log_owner || @badge_list_admin %>
 
   <!-- === LOG WIKI VERSIONS === -->
 
@@ -332,7 +332,7 @@
         </span>
       </div>
 
-      <% if @log.public? || @current_user_is_admin || @current_user_is_member %>
+      <% if @log.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
         <div class="card-tabs">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#wiki" data-toggle="tab">Wiki</a></li>
@@ -356,7 +356,7 @@
 </div>
 
 
-<% if @log.public? || @current_user_is_admin || @current_user_is_member %>
+<% if @log.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 
   <!-- === TAB CONTENT === -->
 
@@ -368,10 +368,10 @@
       <div class="row">
         <div class="span12">
 
-          <% if @current_user_is_log_owner %>
+          <% if @current_user_is_log_owner || @badge_list_admin %>
             <div class="tab-header">
 
-              <% if @current_user_is_log_owner %>
+              <% if @current_user_is_log_owner || @badge_list_admin %>
                 <a tabindex="-1" href="#edit-log-wiki" data-toggle="modal" class="btn btn-small" >
                   <i class="fa fa-pencil"></i> Edit your wiki
                 </a>

@@ -25,23 +25,25 @@
   </li>
 <% end %>
 
-<% if @current_user_is_expert || @current_user_is_learner %>
+<% if @current_user_is_expert || @current_user_is_learner || @badge_list_admin %>
   <% content_for :subheader_actions do %>
 
-    <li  class="collapsible">
-      <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
-          [@group, @badge, @current_user_log] %>
-      <span class="divider">|</span>
-    </li>
-    <li  class="collapsible">
-      <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
-          new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
-      <% if @current_user_is_entry_creator %>
+    <% if @current_user_is_expert || @current_user_is_learner %>
+      <li  class="collapsible">
+        <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
+            [@group, @badge, @current_user_log] %>
         <span class="divider">|</span>
-      <% end %>
-    </li>
+      </li>
+      <li  class="collapsible">
+        <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
+            new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
+        <% if @current_user_is_entry_creator %>
+          <span class="divider">|</span>
+        <% end %>
+      </li>
+    <% end %>
 
-    <% if @current_user_is_entry_creator %>
+    <% if @current_user_is_entry_creator || @badge_list_admin %>
       <li class="collapsible">
         <div class="dropdown">
           <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 

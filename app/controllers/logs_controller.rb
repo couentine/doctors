@@ -129,6 +129,7 @@ private
     @current_user_is_member = current_user && current_user.member_of?(@group)
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
+    @badge_list_admin = current_user && current_user.admin?
   end
 
   def find_all_records
@@ -144,14 +145,14 @@ private
   end
 
   def log_owner
-    unless @current_user_is_log_owner
+    unless @current_user_is_log_owner || @badge_list_admin
       flash[:error] = "That action is restricted to the log owner."
       redirect_to [@group, @badge, @log]
     end
   end
 
   def group_admin_or_log_owner
-    unless @current_user_is_admin || @current_user_is_log_owner
+    unless @current_user_is_admin || @current_user_is_log_owner || @badge_list_admin
       flash[:error] = "That action is restricted to group admins or the log owner."
       redirect_to [@group, @badge, @log]
     end
