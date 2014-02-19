@@ -1,0 +1,28 @@
+<% 
+  provide(:title, "Admin Tools")
+  provide(:show_subheader, true)
+%>
+
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to "<i class='fa fa-user'></i> Users".html_safe, "/a/users" %>
+    <span class="divider">|</span>
+  </li>
+  <li>
+    <%= link_to "<i class='fa fa-group'></i> Groups".html_safe, "/a/groups" %>
+    <span class="divider">|</span>
+  </li>
+  <li>
+    <%= link_to "<i class='fa fa-shield'></i> Badges".html_safe, "/a/badges" %>
+  </li>
+<% end %>
+
+<div id="admin-tools">
+  
+  <div class="page-header">
+    <h1>Badge List Admin Tools</h1>
+  </div>
+  
+  <p>Select the tool you'd like to use from the sub-header above.</p>
+
+</div>

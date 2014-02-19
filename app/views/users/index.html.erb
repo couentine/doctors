@@ -10,19 +10,28 @@
       <div class="white-background no-tabs">&nbsp;</div>
 
       <div class="primary-header span6">
+        <span class="header-image" >
+          <i class="fa fa-user"></i>
+        </span>
         <span class="header-text">
-          <h1>Badge List Admin Tools</h1>
+          <h1>Badge List Users</h1>
+          <h2>Admin Tools</h2>
         </span>
       </div>
 
       <div class="secondary-header span6">
         <span class="header-text">
-          <h1>All Non-Sample Users</h1>
           <h2>
             Showing <%= ((@page.to_i - 1) * @page_size.to_i) + 1 %>
             - <%= [(@page.to_i * @page_size.to_i), @users.count].min %>
             of <%= @users.count %>
-          </h2>  
+          </h2>
+          <% unless @exclude_flags.blank? %>
+            <h3>
+              Excluding Flags: 
+              <%= @exclude_flags.join ", " %>
+            </h3>
+          <% end %>
         </span>            
       </div>
     </div>
@@ -42,9 +51,37 @@
   </div>
 
   <div class="row">
-    <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="users" 
-      data-bl-dyncol-width="12">
-        <%= render @users %>
+    <div class="span12">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Signup Date</th>
+              <th>Signin Count</th>
+              <th>Last Signin</th>
+              <th>Groups Made</th>
+              <th>Badges Made</th>
+              <th>Entries</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @users.each do |user| %>
+              <tr>
+                <td>
+                  <%= gravatar_for user, class: "img-circle", size: 20 %> 
+                  <%= user.name %> 
+                  (<%= user.username_with_caps %>)
+                </td>
+                <td><%= user.created_at.to_s :full_date %></td>
+                <td><%= user.sign_in_count %></td>
+                <td><%= user.last_sign_in_at.to_s :short_date_time %></td>
+                <td><%= user.created_groups.count unless user.created_groups.nil? %></td>
+                <td><%= user.created_badges.count unless user.created_badges.nil? %></td>
+                <td><%= user.created_entries.count unless user.created_entries.nil? %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
     </div>
   </div>
 

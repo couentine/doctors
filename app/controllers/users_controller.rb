@@ -5,12 +5,16 @@ class UsersController < ApplicationController
 
   # GET /a/users
   # GET /a/users.json
-  # Accepts page parameters: page, page_size
+  # Accepts page parameters: page, page_size, sort_by, sort_order, exclude_flags[]
   def index
     # Grab the current page of users
     @page = params[:page] || 1
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
-    @users = User.where(:flags.ne => "sample_data").asc(:name).page(@page).per(@page_size)
+    @exclude_flags = params[:exclude_flags] || %w(sample_data internal-data)
+    @sort_by = params[:sort_by] || "name"
+    @sort_order = params[:sort_order] || "asc"
+    @users = User.where(:flags.nin => @exclude_flags).order_by("#{@sort_by} #{@sort_order}")\
+      .page(@page).per(@page_size)
 
     respond_to do |format|
       format.html # index.html.erb

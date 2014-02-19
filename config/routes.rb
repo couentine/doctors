@@ -17,6 +17,7 @@ BadgeList::Application.routes.draw do
   scope '/a' do
     resources :users, :only => [:index]
   end
+  match 'a' => 'admin_pages#index', via: :get
 
   # === MANUAL GROUP PATHS === #
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group
