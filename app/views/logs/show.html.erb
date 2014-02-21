@@ -95,7 +95,7 @@
                   method: :put, data: { confirm: "Are you sure you want to send a request to all "\
                   + "of the badge experts asking for them to validate your learning log? \n\n"\
                   + "TIP: Before submitting your request it's a good idea to update "\
-                  + "your personal wiki and post final evidence to your learning log." } %>
+                  + "your personal profile and post final evidence to your learning log." } %>
               </li>
             <% end %>
           </ul>
@@ -133,17 +133,17 @@
               $('#log_wiki').siblings("iframe").contents().find("body").html(logWikiVersions[$(this).val()].info);
           });
         } else
-          $('#edit-log-wiki div.form-footer').hide();
+          $('#edit-log-profile div.form-footer').hide();
       });
     </script>
 
   <!-- === EDIT LOG WIKI MODAL === -->
 
-  <div id="edit-log-wiki" class="modal full-screen hide fade" tabindex="-1" role="dialog" 
+  <div id="edit-log-profile" class="modal full-screen hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Edit Log Wiki</h3>
+      <h3 id="mimm-label">Edit your profile</h3>
     </div>
 
     <div class="modal-body">
@@ -175,7 +175,7 @@
 
     <div class="modal-footer">
       <button class="btn" aria-hidden="true" 
-       onclick="$('#edit-log-wiki .bl-modal-form form').submit();">
+       onclick="$('#edit-log-profile .bl-modal-form form').submit();">
         Save
       </button>
       <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
@@ -335,7 +335,7 @@
       <% if @log.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
         <div class="card-tabs">
           <ul class="nav nav-tabs">
-            <li class="active"><a href="#wiki" data-toggle="tab">Wiki</a></li>
+            <li class="active"><a href="#profile" data-toggle="tab">Profile</a></li>
             <% if !@validations.empty? || (@log.validation_status == 'validated') \
               || (@log.validation_status == 'requested') %>
               <li>
@@ -364,7 +364,7 @@
 
     <!-- === WIKI TAB === -->
 
-    <div class="tab-pane active" id="wiki">
+    <div class="tab-pane active" id="profile">
       <div class="row">
         <div class="span12">
 
@@ -372,12 +372,12 @@
             <div class="tab-header">
 
               <% if @current_user_is_log_owner || @badge_list_admin %>
-                <a tabindex="-1" href="#edit-log-wiki" data-toggle="modal" class="btn btn-small" >
-                  <i class="fa fa-pencil"></i> Edit your wiki
+                <a tabindex="-1" href="#edit-log-profile" data-toggle="modal" class="btn btn-small" >
+                  <i class="fa fa-pencil"></i> Edit your profile
                 </a>
               <% end %>
             
-              <h2>Personal Wiki</h2>
+              <h2>Profile</h2>
             
             </div>
           <% end %>

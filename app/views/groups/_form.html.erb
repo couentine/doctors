@@ -34,11 +34,14 @@
   <%= f.error_notification %>
   <div class="form-body">
     <%= f.input :name, label: 'Group Name', placeholder: 'NASA Astronaut Training',
-                autofocus: true, input_html: { class: 'input-xlarge' } %>
+      autofocus: true, input_html: { class: 'input-xlarge', data: { toggle: 'tooltip',
+        title: 'What is your organization, team or group called?' } } %>
     
     <%= f.input :url_with_caps, wrapper: :prepend, label: 'Group URL' do %>
       <%= content_tag :span, "badgelist.com/", class: "add-on" %>
-      <%= f.input_field :url_with_caps, placeholder: 'nasa-crew', class: 'input-medium' %>
+      <%= f.input_field :url_with_caps, placeholder: 'nasa-crew', class: 'input-medium', 
+        data: { toggle: 'tooltip',
+        title: 'Pick a unique URL for your learning group' } %>
     <% end %>
 
     <%= f.input :type, label: 'Group Type', as: :radio_buttons,

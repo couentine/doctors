@@ -5,14 +5,17 @@
 
   <div class="form-body">
     
-    <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics',
-        input_html: {class: 'input-xlarge'}, autofocus: true %>
+    <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics', autofocus: true,
+      input_html: { class: 'input-xlarge', data: { toggle: 'tooltip',
+      title: 'Try to pick a name that is both catchy and descriptive' } } %>
     <%= f.input :url_with_caps, wrapper: :prepend, label: 'Badge URL' do %>
       <%= content_tag :span, "badgelist.com/#{@group.url_with_caps}/", class: "add-on" %>
-      <%= f.input_field :url_with_caps, placeholder: 'et-physics', class: 'input-small' %>
+      <%= f.input_field :url_with_caps, placeholder: 'et-physics', class: 'input-small', 
+        data: { toggle: 'tooltip', title: 'Pick a unique URL for the badge' } %>
     <% end %>
     <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
-        :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH } } %>
+        :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH,
+        toggle: 'tooltip', title: 'Explain clearly what badge earners have accomplished' } } %>
 
     <!-- === BADGE IMAGE MAKER === -->
 

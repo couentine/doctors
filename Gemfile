@@ -18,6 +18,8 @@ gem 'mini_magick'
 
 gem 'font-awesome-sass'
 
+# gem 'mixpanel-ruby'
+
 # Pagination
 
 gem 'kaminari'

@@ -15,7 +15,7 @@
     <span class="divider">/</span>
   </li>
   <li class="active">
-    <%= "#{ (@tag_exists) ? 'Edit' : 'Create' } Tag Wiki Page: #{@tag.name_with_caps}" %>
+    <%= "#{ (@tag_exists) ? 'Edit' : 'Create' } Topic Page: #{@tag.name_with_caps}" %>
   </li>
 <% end %>
 
@@ -26,9 +26,9 @@
     
     <div class="form-header">
       <% if @tag_exists %>
-        <h1>Edit tag wiki page for #<%= @tag.name_with_caps %></h1>
+        <h1>Edit topic page for #<%= @tag.name_with_caps %></h1>
       <% else %>
-        <h1>Create tag wiki page for #<%= @tag.name_with_caps %></h1>
+        <h1>Create topic page for #<%= @tag.name_with_caps %></h1>
       <% end %>
 
       <div class="form-image" 
@@ -45,7 +45,7 @@
 
       <div class="form-body" style="float: none">
         
-        <%= f.input :wiki, as: :text, label: 'Wiki Page Body', 
+        <%= f.input :wiki, as: :text, label: 'Page Body', 
           input_html: { class: "huge-text-area rich-text-area" } %>
 
         <%= f.input :name_with_caps, as: :hidden %>

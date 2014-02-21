@@ -38,7 +38,7 @@ class TagsController < ApplicationController
       if @tag_exists
         if @tag.update_attributes(params[:tag])
           format.html { redirect_to [@group, @badge, @tag], 
-            notice: 'Tag wiki page was successfully updated.' }
+            notice: 'Topic page was successfully updated.' }
           format.json { head :no_content }
         else
           format.html { render action: "edit" }
@@ -48,7 +48,7 @@ class TagsController < ApplicationController
         @tag.badge = @badge
         if @tag.save
           format.html { redirect_to [@group, @badge, @tag], 
-            notice: 'Tag wiki page was successfully created.' }
+            notice: 'Topic page was successfully created.' }
           format.json { head :no_content }
         else
           format.html { render action: "edit" }
@@ -64,7 +64,7 @@ class TagsController < ApplicationController
     @tag.destroy
 
     respond_to do |format|
-      format.html { redirect_to [@group, @badge], notice: 'Tag wiki page was deleted.' }
+      format.html { redirect_to [@group, @badge], notice: 'Topic page was deleted.' }
       format.json { head :no_content }
     end
   end
@@ -103,7 +103,7 @@ private
   def badge_expert_or_learner
     unless @current_user_is_expert || @current_user_is_learner
       redirect_to [@group, @badge], 
-        error: "You must be an expert or learner of the badge to edit tag wiki pages."
+        error: "You must be an expert or learner of the badge to edit topic pages."
     end
   end  
 

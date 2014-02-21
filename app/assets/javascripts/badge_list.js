@@ -43,7 +43,19 @@ $(document).ready(function() {
 function checkForTooltips() {
   $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip],'
     + 'img[data-toggle=tooltip],abbr[data-toggle=tooltip],i[data-toggle=tooltip],'
-    + 'a[rel=tooltip],span[rel=tooltip],li[rel=tooltip]').tooltip();
+    + 'a[rel=tooltip],span[rel=tooltip],li[rel=tooltip]').tooltip({
+      container: 'body'
+    });
+  
+  // Do the text form tooltips (positioned right if big, bottom if small)
+  var placement = ($(window).width() < 768) ? 'bottom' : 'right';
+  $('.bl-form input[data-toggle=tooltip],.bl-form textarea[data-toggle=tooltip]').tooltip({
+      container: '.bl-form',
+      trigger: 'focus',
+      placement: placement
+    });
+  // Now activate the tooltip for the default focus element (if applicable)
+  $('input[data-toggle=tooltip]:focus').tooltip('show');
 }
 
 // This checks the page for items with data-mark-overflow

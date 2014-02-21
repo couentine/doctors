@@ -491,6 +491,9 @@ div.bl-form,div.bl-modal-form {
     font-weight: bold;
     color: $light-text-color;
   }
+  .tooltip-inner { background-color: $secondary-dark; }
+  .tooltip.right .tooltip-arrow { border-right-color: $secondary-dark; }
+  .tooltip.bottom .tooltip-arrow { border-bottom-color: $secondary-dark; }
   
   @media (max-width: 767px) {
     #group_url_with_caps { width: 120px; }

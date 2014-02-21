@@ -22,7 +22,7 @@ class User
   field :name,                type: String
   field :username,            type: String
   field :username_with_caps,  type: String
-  field :flags,               type: Array
+  field :flags,               type: Array, default: [], pre_processed: true
   field :admin,               type: Boolean, default: false
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
@@ -79,8 +79,8 @@ class User
 
   # === CALLBACKS === #
 
-  before_validation :set_default_values, on: :create
   before_validation :update_caps_field
+  before_create :set_signup_flags
   after_create :convert_group_invitations
 
   # === CLASS METHODS === #
@@ -104,6 +104,18 @@ class User
 
   def to_param
     username
+  end
+
+  def set_flag(flag)
+    self.flags << flag unless flags.include? flag
+  end
+
+  def clear_flag(flag)
+    self.flags.delete flag if flags.include? flag
+  end
+
+  def has_flag?(flag)
+    flags.include? flag
   end
 
   # Returns boolean if the object is understood, otherwise returns nil
@@ -242,15 +254,23 @@ class User
 
 protected
 
-  def set_default_values
-    self.flags ||= []
-  end
-
   def update_caps_field
     if username_with_caps.nil?
       self.username = nil
     else
       self.username = username_with_caps.downcase
+    end
+  end
+
+  def set_signup_flags
+    self.flags = [] if flags.nil?
+
+    if Group.where(:invited_admins.elem_match => { :email => email }).count > 0
+      set_flag 'invited-admin'
+    elsif Group.where(:invited_members.elem_match => { :email => email }).count > 0
+      set_flag 'invited-member'
+    else
+      set_flag 'organic-admin'
     end
   end
 

@@ -48,29 +48,12 @@ defaults: &defaults
    - validations
 
   default_badge_info: |
-    <h3>Build a badge checklist...</h3>
-    You can use the badge wiki page to build a checklist of items which must be mastered to earn
-    the badge. &nbsp;Click the "Edit badge wiki" button to get started.
-    <br><br>
-    <i>Example Checklist</i><br>
-    <ul>
-    <li>#rocket-construction - Put a hash symbol before a string of text to create a clickable link 
-    to another page in your badge wiki.</li>
-    <li>#crew-selection - It's important to build trust and cooperation amongst your crew.</li>
-    <li>#launch-location - Selecting a good location takes a lot of coordination.</li>
-    <li>#launch-timing - Calculating your orbital trajectories properly is absolutely crucial.</li>
-    <li>#mission-control - A dependable base for communications is important.</li>
-    <li>#mid-air-maneuvering - Rocket ships are notoriously challenging to pilot effectively.</li>
-    <li>#zero-gravity - Be prepared for the weightless void of orbit.</li>
-    </ul>-----<br>
-    <h3>Want some help?</h3>
-    Clicking the little orange question mark in the top left corner of the Badge List page will 
-    take you to the Badge List Helper badge, where you can learn more about the app.
+    <h3>Getting started...</h3>
+    Explain the purpose of this badge and what people need to do to earn it.
   
   default_log_wiki: |
-    I'm new here.<br>
-    -----<br>
-    I haven't added any information to my wiki yet.
+    <h3>About me...</h3>
+    Tell the badge community a little about yourself.
 
 development:
   <<: *defaults
