@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <table>
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">
+            <%= link_to image_tag(group_badge_url(@group, @badge, format: :png), size: "100x100", \
+              alt: @badge.name), group_badge_url(@group, @badge) %>
+          </td>
+          <td style="padding: 10px; vertical-align: top;">
+            <p>
+              You have been issued the <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
+              badge in Badge List. Congratulations! 
+              This badge is part of the <%= link_to @group.name, group_url(@group) %> learning group.
+            </p>
+            <p>
+              To claim your badge you need to create a new Badge List account using the link below. 
+              (Be sure to sign up with the same email address.)
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr/>
+
+    <p>
+      <strong>Claim your badge &amp; create a Badge List account:</strong> 
+      <a href="<%= "#{new_user_registration_url}?email=#{@to_email}&name=#{@to_name}" %>">
+        <%= new_user_registration_url %>
+      </a><br/>
+    </p>
+    <hr/>
+    <p>
+      <i>
+        This email was sent automatically by the Badge List app.
+        Badge List is a badge-based tool for tracking learning progress. 
+        If you take no action you will not receive any further emails about this invitation.
+      </i>
+    </p>
+  </body>
+</html>

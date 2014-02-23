@@ -45,4 +45,16 @@ namespace :db do
 
   end  
 
+  task set_thresholds: :environment do
+    print "Updating #{Group.count} groups"
+    Group.each do |group|
+      if group.validation_threshold > 1
+        group.validation_threshold = 1
+        group.timeless.save
+      end
+      print "."
+    end
+    puts " >> Done."
+  end
+
 end

@@ -56,7 +56,7 @@
           <%= link_to "<i class='icon-check icon-white'></i> Add Your Expertise".html_safe,
             new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
         <% else %>
-          <%= link_to "<i class='icon-check icon-white'></i> Validate This Log".html_safe,
+          <%= link_to "<i class='fa fa-shield'></i> Issue Badge".html_safe,
             new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
         <% end %>
       </li>

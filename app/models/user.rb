@@ -262,15 +262,32 @@ protected
     end
   end
 
+  # Sets one or more of the following flags: 
+  #   invited-member, invited-admin, invited-learner, invited-expert, organic-signup
   def set_signup_flags
     self.flags = [] if flags.nil?
+    is_organic = true
 
-    if Group.where(:invited_admins.elem_match => { :email => email }).count > 0
+    Group.where(:invited_admins.elem_match => { :email => email }).entries.each do |group|
       set_flag 'invited-admin'
-    elsif Group.where(:invited_members.elem_match => { :email => email }).count > 0
+      is_organic = false
+
+      invited_item = group.invited_admins.detect { |u| u["email"] == (email || unconfirmed_email) }
+      set_flag 'invited-learner' unless invited_item["badges"].blank?
+      set_flag 'invited-expert' unless invited_item["validations"].blank?
+    end
+
+    Group.where(:invited_members.elem_match => { :email => email }).entries.each do |group|
       set_flag 'invited-member'
-    else
-      set_flag 'organic-admin'
+      is_organic = false
+
+      invited_item = group.invited_members.detect { |u| u["email"] == (email || unconfirmed_email) }
+      set_flag 'invited-learner' unless invited_item["badges"].blank?
+      set_flag 'invited-expert' unless invited_item["validations"].blank?
+    end
+
+    if is_organic
+      set_flag 'organic-signup'
     end
   end
 
@@ -282,28 +299,64 @@ protected
       # First add group membership
       group.admins << self
       group.reload
-      invited_item = group.invited_admins.detect { |u| u["email"] == unconfirmed_email}
+      self.reload
+      invited_item = group.invited_admins.detect { |u| u["email"] == (email || unconfirmed_email)}
       group.invited_admins.delete(invited_item) if invited_item
       group.save
 
-      # Then add to any badges
+      # Then add to any badges (as learner)
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|
         badge.add_learner self
       end unless invited_item["badges"].blank?
+
+      # Then add to any badges (as learner)
+      group.badges.where(:url.in => invited_item["badges"]).each do |badge|
+        badge.add_learner self
+      end unless invited_item["badges"].blank?
+      
+      # Then add any validations
+      invited_item["validations"].each do |v|
+        badge = group.badges.find_by(url: v["badge"]) rescue nil
+        validating_user = User.find(v["user"]) rescue nil
+        summary, body = v["summary"], v["body"]
+
+        unless badge.nil? || validating_user.nil? || summary.blank? || body.blank?
+          log = badge.add_learner self # does nothing but return the log if already added as learner
+          log.add_validation validating_user, summary, body, true
+        end
+      end unless invited_item["validations"].blank?
     end
     # Then query for groups where we have been invited as a normal member
     Group.where(:invited_members.elem_match => { :email => email }).entries.each do |group|
       # First add group membership
       group.members << self
       group.reload
-      invited_item = group.invited_members.detect { |u| u["email"] == unconfirmed_email}
+      self.reload
+      invited_item = group.invited_members.detect { |u| u["email"] == (email || unconfirmed_email)}
       group.invited_members.delete(invited_item) if invited_item
       group.save
 
-      # Then add to any badges
+      # Then add to any badges (as learner)
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|
         badge.add_learner self
       end unless invited_item["badges"].blank?
+
+      # Then add to any badges (as learner)
+      group.badges.where(:url.in => invited_item["badges"]).each do |badge|
+        badge.add_learner self
+      end unless invited_item["badges"].blank?
+      
+      # Then add any validations
+      invited_item["validations"].each do |v|
+        badge = group.badges.find_by(url: v["badge"]) rescue nil
+        validating_user = User.find(v["user"]) rescue nil
+        summary, body = v["summary"], v["body"]
+
+        unless badge.nil? || validating_user.nil? || summary.blank? || body.blank?
+          log = badge.add_learner self # does nothing but return the log if already added as learner
+          log.add_validation validating_user, summary, body, true
+        end
+      end unless invited_item["validations"].blank?
     end
   end
 

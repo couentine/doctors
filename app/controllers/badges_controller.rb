@@ -1,12 +1,13 @@
 class BadgesController < ApplicationController
   
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy, 
-    :entries_index, :add_learners, :create_learners]
+    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save]
   prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy, 
-    :entries_index, :add_learners, :create_learners]
+    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save]
   before_filter :authenticate_user!, except: [:show, :entries_index]
   before_filter :group_admin, only: [:new, :create, :destroy]
-  before_filter :badge_expert, only: [:edit, :update, :add_learners, :create_learners]
+  before_filter :badge_expert, only: [:edit, :update, :add_learners, :create_learners, :issue_form, 
+    :issue_save]
 
   # === RESTFUL ACTIONS === #
 
@@ -164,6 +165,99 @@ class BadgesController < ApplicationController
       format.html { redirect_to group_badge_path(@group, @badge)+'#learners', 
         notice: "#{new_learner_count} learners were added to the badge." } 
       format.json { head :no_content }
+    end
+  end
+
+  # GET /group-url/badge-url/issue
+  # Accepts email param
+  def issue_form
+    @email = params[:email]
+    @summary = ''
+    @body = ''
+    @member_list = []
+    existing_expert_emails = @badge.expert_logs.map{ |log| log.user.email }
+
+    [@group.members, @group.admins].flatten.sort_by { |user| user.name }.each do |user|
+      @member_list << [user.email, user.name] unless existing_expert_emails.include? user.email
+    end
+
+    @member_list_is_blank = (@member_list.count < 1)
+  end
+
+  # POST /group-url/badge-url/issue?email=a@b.com&summary=text&body=&text
+  def issue_save
+    @email = params[:email].to_s.downcase
+    @summary = params[:summary]
+    @body = params[:body]
+    @member_list = []
+
+    # NOTE FOR IMPROVEMENT: If the threshold is above one the flash messages should be more clear.
+
+    if @email.blank?
+      flash[:error] = "You must enter the email of the person who will receive the badge."
+      render 'issue_form'
+    elsif @summary.blank?
+      flash[:error] = "You must enter a validation summary."
+      render 'issue_form'
+    elsif @summary.length > Badge::MAX_SUMMARY_LENGTH
+      flash[:error] = "The summary can't be longer than #{Badge::MAX_SUMMARY_LENGTH} characters."
+      render 'issue_form'
+    elsif @body.blank?
+      flash[:error] = "You must enter a validation body."
+      render 'issue_form'
+    else
+      user = User.find_by(email: @email) rescue nil
+      if user.nil?
+        # add them to the group invited members (but be sure not to create a dupe)
+        if @group.has_invited_member? @email
+          found_user = @group.invited_members.detect { |u| u["email"] == @email}
+          found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, user: current_user._id }
+        elsif @group.has_invited_admin? @email
+          found_user = @group.invited_admins.detect { |u| u["email"] == @email}
+          found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, user: current_user._id }
+        else
+          @group.invited_members << { email: @email, invite_date: Time.now, 
+            validations: [{ badge: @badge.url, summary: @summary, body: @body, user: current_user._id }] }
+        end
+
+        # send the email and then save the group (if there's no error sending the email)
+        begin
+          NewUserMailer.badge_issued(@email, nil, current_user, @group, @badge).deliver
+          @group.save!
+          redirect_to [@group, @badge], 
+            notice: "A notice of badge achievement was sent to #{@email}. " \
+            + "Note: The user will have to create a Badge List account to accept the badge."
+        rescue Exception => e
+          logger.error "+++badges_controller.issue_save: " \
+            + "There was an error sending an email to #{@email}. " \
+            + "Exception = #{e.inspect}+++"
+          flash[:error] = "There was an error issuing the badge to the following email address: #{@email}."
+          render 'issue_form'  
+        end
+      elsif user.expert_of? @badge
+        flash[:error] = "#{user.name} is already a badge expert! You can't issue them the badge twice."
+        render 'issue_form'
+      elsif user.learner_of? @badge
+        # add a validation
+        log = @badge.logs.find_by(user: user)
+        log.add_validation current_user, @summary, @body, true
+        redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
+          + "upgraded from a learner to an expert."
+      elsif user.member_of?(@group) || user.admin_of?(@group)
+        # create log and add validation
+        log = @badge.add_learner user
+        log.add_validation current_user, @summary, @body, true
+        redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
+          + "is now a badge expert."
+      else
+        # create membership, log and validation
+        @group.members << user
+        @group.save
+        log = @badge.add_learner user
+        log.add_validation current_user, @summary, @body, true
+        redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
+          + "added as a learning group member."
+      end
     end
   end
 

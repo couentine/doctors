@@ -270,7 +270,7 @@ protected
       logger.debug "+++back_validate_if_needed: log user = #{user.name}, validation count = #{validation_count}, validation_threshold = #{validation_threshold}+++"
       time_string = Time.now.to_s(:full_date_time)
       
-      if validation_threshold == 1
+      if badge.expert_logs.count <= 1
         summary = "Self-validation of badge creator"
         body = "#{user.name} created the badge on #{time_string}" \
           + " and was automatically added as an expert."

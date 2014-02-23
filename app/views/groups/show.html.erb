@@ -79,7 +79,7 @@
           <th>Name</th>
           <th>Email</th>
           <th>Invitation Sent</th>
-          <th>Invited to Badges</th>
+          <th>Badges</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -94,15 +94,29 @@
                     : 'No invitation sent yet' 
               %>
             </td>
-            <td><%= u['badges'].join(', ') unless u['badges'].blank? %></td>
             <td>
+              <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
+              <%= u['validations'].map{|v| "#{v['badge']} (Issued)"}\
+                .join(', ') unless u['validations'].blank? %>
+            </td>
+            <td>
+              <%
+                if u['validations'].blank?
+                  delete_confirmation_message = "Are you absolutely sure you want to revoke this " \
+                    + "user's invitation?"
+                else
+                  delete_confirmation_message = "Are you absolutely sure you want to revoke this " \
+                    + "user's invitation? (WARNING: This invited user has been issued badges. " \
+                    + "Those badge validations will be lost if you revoke the invitation.)"
+                end
+              %>
               <%= link_to '<i class="icon-envelope"></i>'.html_safe, 
                   send_group_member_invitation_path(@group, u['email']), :method => :post,
-                  title: 'Resend invitation email', data: { toggle: "tooltip", placement: "bottom"} %> 
+                  title: 'Resend invitation email' %> 
               <%= link_to '<i class="icon-remove"></i>'.html_safe, 
                   destroy_group_invited_member_path(@group, u['email']), :method => :delete,
-                  title: 'Revoke invitation', data: { toggle: "tooltip", placement: "bottom",
-                  confirm: "Are you absolutely sure you want to revoke this user's invitation?" } %>
+                  title: 'Revoke invitation', data: { 
+                  confirm: delete_confirmation_message } %>
             </td>
           </tr>
         <% end %>
@@ -131,7 +145,7 @@
           <th>Name</th>
           <th>Email</th>
           <th>Invitation Sent</th>
-          <th>Invited to Badges</th>
+          <th>Badges</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -146,15 +160,29 @@
                     : 'No invitation sent yet' 
               %>
             </td>
-            <td><%= u['badges'].join(', ') unless u['badges'].blank? %></td>
             <td>
+              <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
+              <%= u['validations'].map{|v| "#{v['badge']} (Issued)"}\
+                .join(', ') unless u['validations'].blank? %>
+            </td>
+            <td>
+              <%
+                if u['validations'].blank?
+                  delete_confirmation_message = "Are you absolutely sure you want to revoke this " \
+                    + "user's invitation?"
+                else
+                  delete_confirmation_message = "Are you absolutely sure you want to revoke this " \
+                    + "user's invitation? (WARNING: This invited user has been issued badges. " \
+                    + "Those badge validations will be lost if you revoke the invitation.)"
+                end
+              %>
               <%= link_to '<i class="icon-envelope"></i>'.html_safe, 
                   send_group_admin_invitation_path(@group, u['email']), :method => :post,
-                  title: 'Resend invitation email', data: { toggle: "tooltip", placement: "bottom"} %> 
+                  title: 'Resend invitation email' %> 
               <%= link_to '<i class="icon-remove"></i>'.html_safe, 
                   destroy_group_invited_admin_path(@group, u['email']), :method => :delete,
-                  title: 'Revoke invitation', data: { toggle: "tooltip", placement: "bottom",
-                  confirm: "Are you absolutely sure you want to revoke this user's invitation?" } %>
+                  title: 'Revoke invitation', data: { 
+                  confirm: delete_confirmation_message } %>
             </td>
           </tr>
         <% end %>

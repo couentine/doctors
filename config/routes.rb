@@ -56,8 +56,9 @@ BadgeList::Application.routes.draw do
         as: :add_badge_learners
   match ':group_id/:badge_id/learners' => 'badges#create_learners', via: :post,
         as: :create_badge_learners
-  match ':group_id/:badge_id/entries' => 'badges#entries_index', via: :get,
-        as: :badge_entries
+  match ':group_id/:badge_id/entries' => 'badges#entries_index', via: :get, as: :badge_entries
+  match ':group_id/:badge_id/issue' => 'badges#issue_form', via: :get, as: :badge_issue
+  match ':group_id/:badge_id/issue' => 'badges#issue_save', via: :post
 
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #
   match ':id/edit' => 'groups#edit', via: :get

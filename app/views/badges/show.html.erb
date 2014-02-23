@@ -503,6 +503,11 @@
             <% if @current_user_is_expert || @badge_list_admin %>
               <div class="tab-header">
 
+                <% unless @badge.current_validation_threshold > 1 %>
+                  <%= link_to '<i class="fa fa-shield"></i> Issue Badge'.html_safe,
+                      badge_issue_path(@group, @badge), class: 'btn btn-small' %>
+                <% end %>
+
                 <% unless @badge.new_expert_logs.blank? %>
                   <div class="btn-group">
                     <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 

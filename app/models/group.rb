@@ -27,10 +27,10 @@ class Group
   field :image_url,               type: String
   field :type,                    type: String
   field :customer_code,           type: String
-  field :validation_threshold,    type: Integer
-  field :invited_admins,          type: Array
-  field :invited_members,         type: Array
-  field :flags,                   type: Array
+  field :validation_threshold,    type: Integer, default: 1
+  field :invited_admins,          type: Array, default: []
+  field :invited_members,         type: Array, default: []
+  field :flags,                   type: Array, default: []
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
@@ -124,10 +124,6 @@ protected
   end
 
   def set_default_values
-    self.invited_admins ||= []
-    self.invited_members ||= []
-    self.validation_threshold ||= 2
-    self.flags ||= []
     if !website.blank? && !website.downcase.start_with?("http")
         self.website = "http://#{website}"
     end
