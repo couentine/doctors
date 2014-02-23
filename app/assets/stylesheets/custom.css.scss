@@ -1039,6 +1039,22 @@ form#group-add-users-form {
     line-height: 1.3em;
     margin: 0;
   }
+  h3 {
+    display: inline;
+    font-size: 13px;
+    font-weight: normal;
+    font-style: italic;
+    color: $light-text-color;
+    line-height: 1.3em;
+    margin: 0 0 0 5px;
+    position: relative;
+    top: -2px;
+
+    i.fa {
+      font-size: 16px;
+      color: $medium-text-color;
+    }
+  }
 
   .label,.badge { 
     float: right;
