@@ -37,27 +37,31 @@ private
   # and also sets the @page_view_count & @current_path variables
   def track_page_views
     @current_path = request.fullpath.split('?').first
+    
+    unless @current_path.include?(".png") || @current_path.include?(".json")
+      if current_user
+        current_user.page_views = [] if current_user.page_views.nil?
+        current_item = current_user.page_views[@current_path]
 
-    if current_user
-      current_user.page_views = [] if current_user.page_views.nil?
-      current_item = current_user.page_views[@current_path]
-
-      if current_item.nil?
-        @page_view_count = 0
-        current_item = { 'count' => 1, 'dates' => [Time.now] }
-        current_user.page_views[@current_path] = current_item
-      else
-        @page_view_count = current_item['count'] || 0
-        current_item['count'] = @page_view_count + 1
-        if current_item['dates'].nil?
-          current_item['dates'] = [Time.now]
+        if current_item.nil?
+          @page_view_count = 0
+          current_item = { 'count' => 1, 'dates' => [Time.now] }
+          current_user.page_views[@current_path] = current_item
         else
-          current_item['dates'] << Time.now
+          @page_view_count = current_item['count'] || 0
+          current_item['count'] = @page_view_count + 1
+          if current_item['dates'].nil?
+            current_item['dates'] = [Time.now]
+          else
+            current_item['dates'] << Time.now
+          end
+          current_user.page_views[@current_path] = current_item
         end
-        current_user.page_views[@current_path] = current_item
-      end
 
-      current_user.timeless.save if current_user.changed?
+        current_user.timeless.save if current_user.changed?
+      else
+        @page_view_count = 0
+      end
     else
       @page_view_count = 0
     end
