@@ -29,7 +29,7 @@
     <% if @current_user_is_expert || @current_user_is_learner %>
       <li  class="collapsible">
         <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
-            [@group, @badge, @log] %>
+            [@group, @badge, @log], id: 'view-your-log' %>
         <span class="divider">|</span>
       </li>
       <li class="collapsible">
@@ -93,7 +93,7 @@
   <% end %>
 <% end unless @badge.image_attributions.blank? %>
 
-<!-- === NEW BADGE TUTORIAL === -->
+<!-- === BADGE POPOVERS === -->
 
 <% if @current_user_is_expert %>
 
@@ -165,6 +165,26 @@
         return (header == "experts");
       } else return false;
     }
+
+  </script>
+
+<% elsif @current_user_is_learner && (@page_view_count == 0) %>
+
+  <script type="text/javascript">
+    
+    $(document).ready(function() {
+
+      $("#view-your-log").popover({
+        content: "<a class='pull-right' href='#' onclick=\"$('#view-your-log').popover('hide')\" "
+          + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
+          + "When you're ready, click here to get to your learning log.",
+        placement: "bottom",
+        trigger: "manual",
+        container: "header",
+        html: true
+      }).popover("show");
+
+    });
 
   </script>
 

@@ -24,6 +24,7 @@ class User
   field :username_with_caps,  type: String
   field :flags,               type: Array, default: [], pre_processed: true
   field :admin,               type: Boolean, default: false
+  field :page_views,          type: Hash, default: {}, pre_processed: true
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,

@@ -38,7 +38,7 @@
       <li class="collapsible">
         <% if @current_user_is_log_owner %>
           <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
-            new_group_badge_log_entry_path(@group, @badge, @log) %>
+            new_group_badge_log_entry_path(@group, @badge, @log), id: 'new-log-entry' %>
           <span class="divider">|</span>
         <% else %>
           <%= link_to "<i class='icon-plus-sign icon-white'></i> Post to This Log".html_safe,
@@ -104,6 +104,30 @@
     <% end %>
 
   <% end %>
+<% end %>
+
+<!-- === LOG POPOVERS === -->
+
+<% if @current_user_is_log_owner && (@page_view_count == 0) %>
+
+  <script type="text/javascript">
+    
+    $(document).ready(function() {
+
+      $("#new-log-entry").popover({
+        content: "<a class='pull-right' href='#' onclick=\"$('#new-log-entry').popover('hide')\" "
+          + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
+          + "When you’re ready, click here to post an entry to your log.",
+        placement: "bottom",
+        trigger: "manual",
+        container: "header",
+        html: true
+      }).popover("show");
+
+    });
+
+  </script>
+
 <% end %>
 
 <% if @current_user_is_log_owner || @badge_list_admin %>

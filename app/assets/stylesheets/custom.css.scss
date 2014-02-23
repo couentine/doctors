@@ -158,7 +158,10 @@ ul.dropdown-menu {
   border-color: $primary-light;
   .popover-content { 
     color: $dark-text-color;
-    background-color: $primary-really-light; 
+    background-color: $primary-really-light;
+
+    a,a:visited { color: $primary-light; }
+    a:focus,a:hover { color: $primary-dark; }
   }
 
   &.bottom {
