@@ -93,6 +93,79 @@
   <% end %>
 <% end unless @badge.image_attributions.blank? %>
 
+<!-- === NEW BADGE TUTORIAL === -->
+
+<%
+  tutorial1_complete = !@badge.info_versions.blank? # Edit the overview
+  tutorial2_complete = (@badge.expert_logs.count > 1) \
+    || (@badge.waiting_expert_emails.count > 0) # Issue the badge... or at least invite an expert
+
+  if !tutorial1_complete
+    current_tutorial = 1
+  elsif !tutorial2_complete
+    current_tutorial = 2
+  else
+    current_tutorial = nil
+  end 
+%>
+
+<script type="text/javascript">
+  
+  $(document).ready(function() {
+
+    <% if current_tutorial == 1 %>
+      $("#edit-overview").popover({
+        content: "Click here to add a description of the badge.",
+        placement: "bottom",
+        trigger: "manual",
+        container: "#overview"
+      }).popover("show");
+    <% elsif current_tutorial == 2 %>  
+      // First build the popovers
+      $("ul.nav-tabs").children().last().popover({
+        content: "Now click here to issue the badge.",
+        placement: "bottom",
+        trigger: "manual",
+        container: "body"
+      });
+      $("#issue-badge").popover({
+        content: "Click here to add another expert to the badge.",
+        placement: "bottom",
+        trigger: "manual",
+        container: "body"
+      });
+
+      // Then decide which one to show
+      if (expertsTabIsSelected()) $("#issue-badge").popover("show");
+      else $("ul.nav-tabs").children().last().popover("show");
+
+      // Then create an event handler to change which one is shown when the tab changes
+      $('.nav-tabs a').on('shown', function (e) {
+        if (e.target.hash == "#experts") {
+          $("ul.nav-tabs").children().last().popover("hide");
+          $("#issue-badge").popover("show");
+        } else {
+          $("#issue-badge").popover("hide");
+          $("ul.nav-tabs").children().last().popover("show");
+        }
+      })
+    <% end %>
+
+  });
+
+  // Checks the url and determines if the experts tab is currently selected
+  function expertsTabIsSelected() {
+    var url = document.location.toString();
+    
+    if (url.match('#')) {
+      var header = url.split('#')[1];
+      
+      return (header == "experts");
+    } else return false;
+  }
+
+</script>
+
 <% if @current_user_is_expert || @badge_list_admin %>
 
   <!-- === BADGE INFO VERSIONS === -->
@@ -358,7 +431,8 @@
         <div class="row">
           <div class="span12">
             <div class="tab-header">
-              <a tabindex="-1" href="#edit-badge-info" data-toggle="modal" class="btn btn-small" >
+              <a tabindex="-1" href="#edit-badge-info" data-toggle="modal" class="btn btn-small" 
+                id="edit-overview">
                 <i class="fa fa-pencil"></i> Edit overview
               </a>
 
@@ -504,8 +578,8 @@
               <div class="tab-header">
 
                 <% unless @badge.current_validation_threshold > 1 %>
-                  <%= link_to '<i class="fa fa-shield"></i> Issue Badge'.html_safe,
-                      badge_issue_path(@group, @badge), class: 'btn btn-small' %>
+                  <%= link_to '<i class="fa fa-shield"></i> Issue the badge'.html_safe,
+                      badge_issue_path(@group, @badge), class: 'btn btn-small', id: 'issue-badge' %>
                 <% end %>
 
                 <% unless @badge.new_expert_logs.blank? %>

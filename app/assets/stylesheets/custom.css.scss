@@ -154,6 +154,18 @@ ul.dropdown-menu {
 .tooltip {
   display: block;
 }
+.popover {
+  border-color: $primary-light;
+  .popover-content { 
+    color: $dark-text-color;
+    background-color: $primary-really-light; 
+  }
+
+  &.bottom {
+    .arrow { border-bottom-color: $primary-light; }
+    .arrow:after { border-bottom-color: $primary-really-light; }
+  }
+}
 .well {
   color: $dark-text-color;
   background-color: $light-white;

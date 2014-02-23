@@ -82,7 +82,13 @@
           link_to 'Add More Members', add_group_members_path(@group), class: 'btn' 
         end 
       %>
-      <%= link_to 'Done', @group, class: 'btn btn-info' %> 
+      <%= 
+        if !@badges.blank? && (@badges.count == 1)
+          link_to 'Done', [@group, @badges.first], class: 'btn btn-info' 
+        else
+          link_to 'Done', @group, class: 'btn btn-info' 
+        end
+      %> 
     </div>
 
   </div>

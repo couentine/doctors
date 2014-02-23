@@ -97,6 +97,14 @@ class Badge
     end
   end
 
+  # Returns the email addresses of all waiting experts
+  def waiting_expert_emails
+    [group.invited_admins, group.invited_members].flatten.find_all do |item| 
+      !item["validations"].blank? \
+        && item["validations"].map{|v| v["badge"]}.include?(url)
+    end.map{ |item| item["email"] }
+  end
+
   # Returns all learners who are currently requesting validation
   # or who have recently withdrawn their validation requests.
   # Reverse sorts logs by request/withdrawal date
