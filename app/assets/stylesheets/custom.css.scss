@@ -785,6 +785,66 @@ form#group-add-users-form {
   }
 }
 
+.modal.tutorial {
+  overflow-x: hidden;
+
+  .modal-body {
+    position: relative;
+
+    .tutorial-section {
+      float: left;
+
+      h4 {
+        margin-top: 0;
+        color: $dark-text-color;
+      }
+      h5 {
+        color: $tertiary-dark;
+        margin-top: 20px;
+      }
+      img {
+        display: block;
+        margin: 0 10px 0 0;
+        padding: 10px 0;
+        background-color: $really-light-gray;
+      }
+      ul {
+        display: block;
+        margin: 15px 0 5px 0;
+        font-size: 15px;
+        color: $dark-text-color;
+        list-style: none;
+
+        li {
+          display: block;
+          margin-top: 10px;
+
+          a,a:visited { color: dark-text-color; }
+          a:focus,a:hover {
+            text-decoration: none;
+            color: $tertiary-dark;
+          }
+        }
+      }
+    }
+  }
+
+  .modal-footer {
+    a.navigation-link,a.navigation-link:visited {
+      font-size: 30px;
+      font-weight: bold;
+      color: $tertiary-dark;
+      margin-right: 15px;
+
+      &.disabled { color: $medium-gray; }
+    }
+    a.navigation-link:hover {
+      text-decoration: none;
+      color: $dark-text-color;
+    }
+  }
+}
+
 @media (min-width: 768px) {
   .modal.full-screen {
     left: 305px !important;

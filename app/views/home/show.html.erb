@@ -19,6 +19,21 @@
   
 <% end %>
 
+<!-- === AUTO-SHOW TUTORIAL ON FIRST SIGN-ING === -->
+
+<% if (@page_view_count == 0) \
+  && (current_user.has_flag?('organic-signup') || current_user.has_flag?('invited-admin')) %>
+
+  <script type="text/javascript">
+    
+    $(document).ready(function() {
+      $('#admin-tutorial').modal('show');
+      console.log('trying to show.');
+    });
+
+  </script>
+
+<% end %>
 
 <!-- === PAGE HEADER === -->
 

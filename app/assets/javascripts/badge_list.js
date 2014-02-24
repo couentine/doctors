@@ -21,6 +21,7 @@ jQuery.fn.preventDoubleSubmission = function() {
 // Do on page load
 
 $(document).ready(function() {
+    setupAdminTutorial();
     checkForTooltips();
     disableLinks();
     addAnchorsToPaginateLinks();
@@ -37,6 +38,7 @@ $(document).ready(function() {
     $(window).on('resize', function() {
       if (hasDynamicColumns) checkDynamicColumns();
       checkResponsiveFormatting();
+      resizeAdminTutorial();
     });
 });
 
@@ -357,4 +359,63 @@ function updateDynamicColumnGroup(key, targetColCount) {
   // Finally we run through the children and add them to the appropriate columns
   for (var i in dcGroup.children)
     $(dcGroup.columns[i % targetColCount]).append(dcGroup.children[i]);
+}
+
+var tutorialStep;
+
+function setupAdminTutorial() {
+  // First resize all of the tutorial sections and the body itself
+  resizeAdminTutorial();
+
+  // Then build an event to show a tooltip when the tutorial is closed
+  $('#admin-tutorial').on('hidden', function() {
+    $('#show-admin-tutorial').tooltip({
+      title: "<a class='pull-right' href='#' onclick=\"$('#show-admin-tutorial').tooltip('hide')\" "
+        + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
+        + "Click to return to tutorial &nbsp; ",
+      placement: "bottom",
+      trigger: "manual",
+      container: "header",
+      html: true
+    }).tooltip("show");
+    setTimeout(function() {
+      $('#show-admin-tutorial').tooltip('hide');
+    }, 3000);
+  });
+
+  // Reset the tutorial when it's launched
+  $('#admin-tutorial').on('shown', function() {
+    tutorialStep = 1;
+    $('#admin-tutorial modal-body').css('left', '0');
+  });
+
+  // Build events for the back & next buttons
+  $('#admin-tutorial .back-button').click(function (e) {
+    e.preventDefault();
+    var totalSteps = $('#admin-tutorial .tutorial-section').length;
+    tutorialStep = Math.max(1, tutorialStep - 1);
+    var newLeft = -1 * ((tutorialStep - 1) * $('#admin-tutorial').width());
+    $('#admin-tutorial .modal-body').animate({left: newLeft}, 700);
+
+    if (tutorialStep == 1) $('#admin-tutorial .back-button').addClass('disabled');
+    if (tutorialStep < totalSteps) $('#admin-tutorial .next-button').removeClass('disabled');
+  });
+  $('#admin-tutorial .next-button').click(function (e) {
+    e.preventDefault();
+    var totalSteps = $('#admin-tutorial .tutorial-section').length;
+    tutorialStep = Math.min(totalSteps, tutorialStep + 1);
+    var newLeft = -1 * ((tutorialStep - 1) * $('#admin-tutorial').width());
+    $('#admin-tutorial .modal-body').animate({left: newLeft}, 700);
+
+    if (tutorialStep == totalSteps) $('#admin-tutorial .next-button').addClass('disabled');
+    if (tutorialStep > 1) $('#admin-tutorial .back-button').removeClass('disabled');
+  });
+}
+
+function resizeAdminTutorial() {
+  var totalSteps = $('#admin-tutorial .tutorial-section').length;
+  var modalWidth = $('#admin-tutorial').width();
+
+  $('#admin-tutorial .modal-body').width(totalSteps * modalWidth);
+  $('#admin-tutorial .tutorial-section').width(modalWidth);
 }
