@@ -45,7 +45,7 @@ $(document).ready(function() {
 function checkForTooltips() {
   $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip],'
     + 'img[data-toggle=tooltip],abbr[data-toggle=tooltip],i[data-toggle=tooltip],'
-    + 'a[rel=tooltip],span[rel=tooltip],li[rel=tooltip]').tooltip({
+    + 'a[rel=tooltip],span[rel=tooltip],li[rel=tooltip],button[data-toggle=tooltip]').tooltip({
       container: 'body'
     });
   
@@ -398,7 +398,11 @@ function setupAdminTutorial() {
     $('#admin-tutorial .modal-body').animate({left: newLeft}, 700);
 
     if (tutorialStep == 1) $('#admin-tutorial .back-button').addClass('disabled');
-    if (tutorialStep < totalSteps) $('#admin-tutorial .next-button').removeClass('disabled');
+    if (tutorialStep < totalSteps) {
+      $('#admin-tutorial .next-button').removeClass('disabled');
+      $('#admin-tutorial .close-tutorial').removeClass('btn-primary');
+      // $('#admin-tutorial .close-tutorial').popover('hide');
+    }
   });
   $('#admin-tutorial .next-button').click(function (e) {
     e.preventDefault();
@@ -407,7 +411,16 @@ function setupAdminTutorial() {
     var newLeft = -1 * ((tutorialStep - 1) * $('#admin-tutorial').width());
     $('#admin-tutorial .modal-body').animate({left: newLeft}, 700);
 
-    if (tutorialStep == totalSteps) $('#admin-tutorial .next-button').addClass('disabled');
+    if (tutorialStep == totalSteps) {
+      $('#admin-tutorial .next-button').addClass('disabled');
+      $('#admin-tutorial .close-tutorial').addClass('btn-primary');
+      // $('#admin-tutorial .close-tutorial').popover({
+      //     content: "Click here to get started.",
+      //     placement: "bottom",
+      //     trigger: "manual",
+      //     container: "body"
+      //   }).popover('show');
+    }
     if (tutorialStep > 1) $('#admin-tutorial .back-button').removeClass('disabled');
   });
 }
