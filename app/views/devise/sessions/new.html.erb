@@ -6,40 +6,52 @@
 
 <div class="row">
   
-  <div class="span7">
-    <div class="color-box secondary">
-      <h2>New to Badge List?</h2>
+  <div class="span6">
+    <div class="info-card text-card sign-in-info">
+      <h3>Badge List is the fastest, easiest way to build and issue Open Badges.</h3>
       <p>
-        It's time to put <b>badges</b> at the center of your 
-        <b><span id="rotate-words">learning</span></b>.
-        <br>
-        You can use Badge List to...
+        There’s no software to setup or configure and creating a badge takes less than 30 seconds. 
       </p>
+      <p class="button-paragraph">
+        <%= link_to "Get started now", new_user_registration_path, class: 'btn btn-warning' %>
+      </p>
+    </div>
+
+    <div class="info-card text-card sign-in-info">
+      <h3>New to Open Badges?</h3>
+      <p>
+        <iframe width="380" height="213" src="//www.youtube.com/embed/Xc4xDgNbl6Y" frameborder="0" allowfullscreen></iframe><br>
+        Video by the awesome 
+        <a href="http://www.youtube.com/user/lali2luni" target="_blank">Chloe Varelidi</a>.
+      </p>
+      <p class="button-paragraph">
+        <%= link_to "Put open badges to work", new_user_registration_path, class: 'btn btn-warning' %>
+      </p>
+    </div>
+    
+    <div class="info-card text-card sign-in-info">
+      <h3>Badge List’s advanced features make it ridiculously simple to do cool stuff.</h3><br>
       <ul>
-          <li>
-            <b>#</b> guide learning with a <a href="/badgelist/help/wikis">badge wiki</a>
-          </li>
-          <li>
-            <b>#</b> track progress with <a href="/badgelist/help/learning-logs">learning logs</a>
-          </li>
-          <li>
-            <b>#</b> enable <a href="/badgelist/help/social-learning">social learning</a>
-          </li>
-          <li>
-            <b>#</b> recognize achievements with  <a href="/badgelist/help/open-badges">Mozilla Open Badges</a>
-          </li>
+        <li>Track learner progress</li>
+        <li>Build a living knowledge base</li>
+        <li>Create a learning-focused social network for your organization</li>
       </ul>
-      <p>
-        
+      <p class="button-paragraph">
+        <%= link_to "Start a social network for learning", new_user_registration_path, 
+          class: 'btn btn-warning' %>
       </p>
-      <h3>
-        >> <a href="/badgelist/about/intro">Read more</a> 
-        or <%= link_to "create an account now", new_user_registration_path %>
-      </h3>
+    </div>
+    
+    <div class="info-card text-card sign-in-info">
+      <h3>Badge List is completely free for public learning groups.</h3>
+      <p class="button-paragraph">
+        <%= link_to "Create a public learning group now", new_user_registration_path, 
+          class: 'btn btn-warning' %>
+      </p>
     </div>
   </div>
 
-  <div class="span5">
+  <div class="span5 offset1">
     <div class="signin-box">
       
       <div class="signin-header">
