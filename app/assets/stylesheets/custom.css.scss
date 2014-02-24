@@ -1415,7 +1415,7 @@ div.entry-card {
         text-decoration: none;
         border-bottom: 1px dotted $tertiary-dark;
       }
-      a.linkified-image {
+      a.linkified-image,a.linkified-video {
         display: inline-block;
         margin: 5px 0;
         &:last-child { margin-bottom: 0; }
@@ -1527,7 +1527,7 @@ div.text-card {
     text-decoration: none;
     border-bottom: 1px dotted $tertiary-dark;
   }
-  a.linkified-image {
+  a.linkified-image,a.linkified-video {
     display: inline-block;
     margin: 10px 0;
     &:last-child { margin-bottom: 0; }
@@ -1658,7 +1658,7 @@ div.text-card {
       font-weight: bold;
       border-bottom: 1px dotted $tertiary-dark;
     }
-    a.linkified-image {
+    a.linkified-image,a.linkified-video {
       display: inline-block;
       margin: 10px 0;
       &:last-child { margin-bottom: 0; }
