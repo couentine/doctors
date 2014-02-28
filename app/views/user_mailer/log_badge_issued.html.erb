@@ -29,15 +29,15 @@
             <% else %>
             
               <p>
-                You have been issued the <%= link_to @badge.name, group_badge_url(@group, @badge) %> badge in 
+                You have been awarded the <%= link_to @badge.name, group_badge_url(@group, @badge) %> badge in 
                 Badge List. You are now one of the badge experts, congratulations! Being a badge expert 
                 allows you to issue the badge and help guide badge learners.
               </p>
               <p>
                 If you wish, you can now add this badge to your Mozilla Open Badges Backpack by visiting 
-                your user profile in Badge List. Also be aware that all non-private entries in your learning 
+                your user profile in Badge List. Also be aware that all non-private entries in your progress 
                 log are now visible and will be linked to the badge as public evidence of your achievment. 
-                (You can change the visibility of your learning log at any time by altering the visibility 
+                (You can change the visibility of your progress log at any time by altering the visibility 
                 options in Badge List.)
               </p>
             
@@ -51,7 +51,7 @@
     <hr/>
 
     <p>
-      <strong>Your Badge Learning Log:</strong> 
+      <strong>Your Badge Progress Log:</strong> 
       <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %> <br>
       <strong>Your User Profile:</strong> 
       <%= link_to user_url(@to_user), user_url(@to_user) %> 

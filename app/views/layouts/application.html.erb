@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= full_title(yield(:title)) %></title>
+    <% if content_for? :full_title %>
+      <title><%= yield(:full_title) %></title>
+    <% else %>
+      <title><%= full_title(yield(:title)) %></title>
+    <% end %>
+
     <%= render 'layouts/analytics' if Rails.env.production? %>
     <%= stylesheet_link_tag    "application", media: "all" %>
     <%= javascript_include_tag "application" %>

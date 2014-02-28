@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "Issue Badge - #{@badge.name}")
+  provide(:title, "Award Badge - #{@badge.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group))
   provide(:include_rich_text, true) 
@@ -36,6 +36,16 @@
         $("#member_list").append("<option value='*' class='select-hr'>+ Enter an email address</option>");
         
         $("#member_list").focus();
+      <% end %>
+
+      <% if @body.blank? %>
+        $('#toggle-body-entry').click(function() {
+          $('#body-entry-area').slideDown();
+          $(this).slideUp();
+        });
+      <% else %>
+        $('#toggle-body-entry').hide();
+        $('#body-entry-area').show();
       <% end %>
   });
 </script>
@@ -77,12 +87,13 @@
 
         </div>
       
-        <h3>Validation contents</h3>
+        <h3>Write a public explanation of why this person has earned the badge</h3>
 
         <div class="paragraph">
           <p>
-            In order to issue the badge you must write an "expert validation" which explains,
-            in your expert opinion, why this person has achieved the badge.
+            This explanation (called an <i>expert validation</i>) will be emailed to the badge 
+            recipient and attached to the badge as evidence of their achievement. It will be visible 
+            to everyone who can see the badge.
           </p>
         </div>
 
@@ -98,8 +109,13 @@
         <div class="control-group entry_body">
           <%= label_tag :body, "Body", class: "control-label" %>
           <div class="controls">
-            <%= text_area_tag :body, @body, class: "huge-text-area rich-text-area", 
-              id: 'entry_body' %>
+            <a class="btn btn-small" id="toggle-body-entry">
+              <i class="fa fa-plus"></i> Add body text
+            </a>
+            <div id="body-entry-area" style="display: none">
+              <%= text_area_tag :body, @body, class: "huge-text-area rich-text-area", 
+                id: 'entry_body' %>
+            </div>
           </div>
         </div>
           

@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "#{@tag.name_with_caps} - #{@badge.name}")
+  provide(:full_title, "#{@tag.name_with_caps} - #{@badge.name} - #{@group.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
 %>
@@ -27,7 +27,7 @@
       <span class="divider">|</span>
     </li>
     <li  class="collapsible">
-      <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
+      <%= link_to '<i class="icon-plus-sign icon-white"></i> New Post'.html_safe, 
           new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
       <% if @tag_exists %>
         <span class="divider">|</span>
@@ -35,32 +35,21 @@
     </li>
     
     <% if @tag_exists %>
-      <li>
-        <div class="dropdown">
-          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
-            role="button" data-toggle="dropdown" data-target="#">
-            Edit Topic Settings
-            <i class="icon-cog icon-white"></i>
-            <b class="caret"></b>
-          </a>
-          <ul class="dropdown-menu pull-right" role="menu" 
-            aria-labelledby="dropdown-subheader-settings">
-
-            <li>
-              <%= link_to "<i class='icon-pencil'></i> Edit topic page".html_safe, 
-                "#{@tag.name_with_caps}/edit" %>
-            </li>
-            <% if @current_user_is_expert %>
-              <li>
-                <%= link_to '<i class="icon-remove"></i> Delete topic page'.html_safe, 
-                  [@group, @badge, @tag], method: :delete, data: { 
-                  confirm: 'Are you sure you want to permanently delete the contents of this topic page?' } %>
-              </li>
-            <% end %>
-
-          </ul>
-        </div>
+      <li class="collapsible">
+        <%= link_to "<i class='fa fa-pencil'></i> Edit".html_safe, 
+          "#{@tag.name_with_caps}/edit" %>
+        <% if @current_user_is_expert %>
+          <span class="divider">|</span>
+        <% end %>
       </li>
+      
+      <% if @current_user_is_expert %>
+        <li class="collapsible">
+          <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
+            [@group, @badge, @tag], method: :delete, data: { 
+            confirm: 'Are you sure you want to permanently delete the contents of this topic page?' } %>
+        </li>
+      <% end %>
     <% end %>
 
   <% end %>

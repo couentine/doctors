@@ -1,5 +1,5 @@
 <% 
-  provide(:title, @badge.name)
+  provide(:title, "#{@badge.name} - #{@group.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
@@ -33,7 +33,7 @@
         <span class="divider">|</span>
       </li>
       <li class="collapsible">
-        <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
+        <%= link_to '<i class="icon-plus-sign icon-white"></i> New Post'.html_safe, 
             new_group_badge_log_entry_path(@group, @badge, @log) %>
         <span class="divider">|</span>
       </li>
@@ -117,7 +117,7 @@
 
       <% if current_tutorial == 1 %>
         $("#edit-overview").popover({
-          content: "Click here to add a description of the badge.",
+          content: "Click here to add a more detailed description of the badge.",
           placement: "bottom",
           trigger: "manual",
           container: "#overview"
@@ -125,29 +125,29 @@
       <% elsif current_tutorial == 2 %>  
         // First build the popovers
         $("ul.nav-tabs").children().last().popover({
-          content: "Now click here to issue the badge.",
+          content: "Now click here to award the badge.",
           placement: "bottom",
           trigger: "manual",
           container: "body"
         });
-        $("#issue-badge").popover({
-          content: "Click here to add another expert to the badge.",
+        $("#award-badge").popover({
+          content: "Click here to award the badge.",
           placement: "bottom",
           trigger: "manual",
           container: "body"
         });
 
         // Then decide which one to show
-        if (expertsTabIsSelected()) $("#issue-badge").popover("show");
+        if (expertsTabIsSelected()) $("#award-badge").popover("show");
         else $("ul.nav-tabs").children().last().popover("show");
 
         // Then create an event handler to change which one is shown when the tab changes
         $('.nav-tabs a').on('shown', function (e) {
           if (e.target.hash == "#experts") {
             $("ul.nav-tabs").children().last().popover("hide");
-            $("#issue-badge").popover("show");
+            $("#award-badge").popover("show");
           } else {
-            $("#issue-badge").popover("hide");
+            $("#award-badge").popover("hide");
             $("ul.nav-tabs").children().last().popover("show");
           }
         })
@@ -177,7 +177,7 @@
       $("#view-your-log").popover({
         content: "<a class='pull-right' href='#' onclick=\"$('#view-your-log').popover('hide')\" "
           + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
-          + "When you're ready, click here to get to your learning log.",
+          + "When you're ready, click here to get to your progress log.",
         placement: "bottom",
         trigger: "manual",
         container: "header",
@@ -289,7 +289,7 @@
             <tr>
               <td>
                 <%= link_to log.user.name, [log.badge.group, log.badge, log], 
-                  title: "View learning log"  %>
+                  title: "View progress log"  %>
               </td>
               <td><%= (log.date_withdrawn || log.date_requested).to_s(:full_date_time) %></td>
               <td>
@@ -326,7 +326,7 @@
             <tr>
               <td>
                 <%= link_to log.user.name, [log.badge.group, log.badge, log], 
-                  title: "View learning log"  %>
+                  title: "View progress log"  %>
               </td>
               <td><%= log.date_issued.to_s(:full_date_time) %></td>
               <td>
@@ -366,7 +366,7 @@
                 Resign badge membership
               </label>
               <div class="controls">
-                <%= link_to 'Resign from badge but keep learning log', 
+                <%= link_to 'Resign from badge but keep progress log', 
                   group_badge_log_path(@group, @badge, @log, log: { detached_log: true }), 
                   title: "You will no longer be a member of this badge", method: :put, 
                   class: 'btn brn-large', data: { toggle: 'tooltip', placement: 'bottom',
@@ -377,13 +377,13 @@
 
             <div class="control-group">
               <label class="control-label" for="delete-log">
-                Delete learning log and resign badge membership
+                Delete progress log and resign badge membership
               </label>
               <div class="controls">
-                <%= link_to 'Delete this learning log', [@group, @badge, @log], title: "Careful!",
+                <%= link_to 'Delete this progress log', [@group, @badge, @log], title: "Careful!",
                   method: :delete, class: 'btn btn-danger brn-large', 
                   data: { confirm: "Warning: This can't be undone. Are you absolutely sure you want to"\
-                  + " permanently delete your learning log?", toggle: 'tooltip', 
+                  + " permanently delete your progress log?", toggle: 'tooltip', 
                   placement: 'bottom' } %>
                 
               </div>
@@ -428,8 +428,8 @@
         <div class="card-tabs">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#overview" data-toggle="tab">Overview</a></li>
-            <li><a href="#entries" data-toggle="tab">
-              <span class="collapse-when-small">Recent </span>Entries</a>
+            <li><a href="#posts" data-toggle="tab">
+              <span class="collapse-when-small">Recent </span>Posts</a>
             </li>
             <li><a href="#learners" data-toggle="tab">Learners</a></li>
             <li><a href="#experts" data-toggle="tab">Experts</a></li>
@@ -483,25 +483,25 @@
 
     <!-- === ENTRIES TAB === -->
 
-    <div class="tab-pane" id="entries">
+    <div class="tab-pane" id="posts">
 
       <div class="row">
         <div class="span12">
 
           <div class="tab-header">
             <% if @current_user_is_expert || @current_user_is_learner %>
-              <%= link_to '<i class="icon-plus"></i> New Log Entry'.html_safe,
+              <%= link_to '<i class="icon-plus"></i> New Post'.html_safe,
                   new_group_badge_log_entry_path(@group, @badge, @log), class: 'btn btn-small' %>
             <% end %>
 
-            <h2>Recent Learning Log Entries</h2>
+            <h2>Recent Posts</h2>
           </div>
         
         </div>
       </div>
 
       <div class="row">
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
+        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="posts" 
           data-bl-dyncol-width="12">
 
           <%= render(@entries, show_badge: false, date_format: :ago) if !@entries.empty? %>
@@ -513,7 +513,7 @@
         <div class="span12">
 
           <div class="tab-footer">
-            <%= link_to 'See all of the learning log entries...', badge_entries_path(@group, @badge) %>
+            <%= link_to 'See all of the posts...', badge_entries_path(@group, @badge) %>
           </div>
         
         </div>
@@ -605,8 +605,8 @@
               <div class="tab-header">
 
                 <% unless @badge.current_validation_threshold > 1 %>
-                  <%= link_to '<i class="fa fa-shield"></i> Issue the badge'.html_safe,
-                      badge_issue_path(@group, @badge), class: 'btn btn-small', id: 'issue-badge' %>
+                  <%= link_to '<i class="fa fa-shield"></i> Award the badge'.html_safe,
+                      badge_issue_path(@group, @badge), class: 'btn btn-small', id: 'award-badge' %>
                 <% end %>
 
                 <% unless @badge.new_expert_logs.blank? %>

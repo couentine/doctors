@@ -47,7 +47,7 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "You've been issued the #{badge.name} badge!",
+      :subject  => "You've been awarded the #{badge.name} badge!",
       :to       => to_email_name,
       :from     => build_from_string(from_user),
       :reply_to => from_user.email_name,

@@ -217,7 +217,7 @@ protected
   def update_stati
     if validation_count_changed? || rejection_count_changed? || date_requested_changed? \
       || date_withdrawn_changed?
-
+      
       if currently_validated?
         # First update the validation status if needed
         if validation_status != 'validated'
@@ -242,11 +242,6 @@ protected
               self.validation_status = 'withdrawn'
             end
           end
-        elsif date_withdrawn_changed? && !date_withdrawn.nil?
-          self.validation_status = 'withdrawn'
-        elsif date_requested_changed? && !date_requested.nil?
-          self.validation_status = 'requested'
-          self.date_withdrawn = nil # In case this is not their first request
         end
         
         # Then update the issue status if needed
@@ -256,6 +251,11 @@ protected
           self.date_retracted = Time.now
           self.date_issued = nil
         end 
+      elsif date_withdrawn_changed? && !date_withdrawn.nil?
+        self.validation_status = 'withdrawn'
+      elsif date_requested_changed? && !date_requested.nil?
+        self.validation_status = 'requested'
+        self.date_withdrawn = nil # In case this is not their first request
       end 
     end
   end

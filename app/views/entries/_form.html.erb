@@ -1,3 +1,9 @@
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#entry_summary').focus();
+  });
+</script>
+
 <%= simple_form_for [@group, @badge, @log, @entry], html: {class: 'form-horizontal'} do |f| %>
   <%= f.error_notification %>
 
@@ -10,9 +16,11 @@
           ['<b>Not yet</b>, greater mastery is needed'.html_safe, false]
         ] %>
 
-        <p class="text-success">
-          <em><strong>Please explain your opinion. Include lots of detail!</strong></em>
-        </p>
+        <div class="paragraph">
+          <p>
+            <em><strong>Please explain your opinion. Include lots of detail!</strong></em>
+          </p>
+        </div>
 
     <% end %>
 
@@ -23,10 +31,12 @@
       input_html: { class: "huge-text-area rich-text-area" } %>
     
     <% if @entry.type != 'validation' %>
+      <% user_noun = (@current_user_is_log_owner) ? 'you' : @user.name %>
+
       <%= f.input :private, as: :radio_buttons, label: 'Who can see this post?',
         collection: [
-          ['<b>Public</b> - Stored as part of public learning log'.html_safe, false],
-          ['<b>Private</b> - Visible only to you and the badge experts'.html_safe, true]
+          ['<b>Public</b> - Visible to anyone who can see the progress log'.html_safe, false],
+          ["<b>Private</b> - Visible only to #{user_noun} and the badge experts".html_safe, true]
         ] %>
     <% end %>
 
@@ -39,10 +49,10 @@
       if (@entry.type == 'validation')
         save_button_text = (@entry.new_record?) ? 'Submit my validation' : 'Update my validation'
       else
-        save_button_text = (@entry.new_record?) ? 'Post to learning log' : 'Update my post'
+        save_button_text = (@entry.new_record?) ? 'Post to progress log' : 'Update my post'
       end
     %>
-    <%= f.button :submit, label: save_button_text, class: 'btn btn-primary' %>
+    <%= f.button :submit, save_button_text, class: 'btn btn-primary' %>
     <%= 
       if @entry.new_record?
         link_to "Cancel", [@group, @badge, @log], class: "btn"

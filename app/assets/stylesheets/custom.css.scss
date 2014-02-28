@@ -731,6 +731,11 @@ h2.form-header {
   .btn-group {
     margin-left: 10px;
   }
+  .btn-small {
+    i.fa {
+      font-size: 13.5px;
+    }
+  }
 }
 .rich-text-area {
   min-height: 300px;
@@ -1553,6 +1558,14 @@ div.text-card {
     p.button-paragraph {
       text-align: right;
       margin-bottom: 0;
+    }
+    a:not(.btn),a:visited:not(.btn) {
+      text-decoration: underline;
+      font-style: bold;
+      color: $dark-text-color;
+    }
+    a:hover:not(.btn),a:focus:not(.btn) {
+      color: $secondary-medium;
     }
   }
 }

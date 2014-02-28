@@ -37,8 +37,8 @@
     <% if @current_user_is_log_owner || @current_user_is_expert %>
       <li class="collapsible">
         <% if @current_user_is_log_owner %>
-          <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
-            new_group_badge_log_entry_path(@group, @badge, @log), id: 'new-log-entry' %>
+          <%= link_to '<i class="icon-plus-sign icon-white"></i> New Post'.html_safe, 
+            new_group_badge_log_entry_path(@group, @badge, @log), id: 'new-post' %>
           <span class="divider">|</span>
         <% else %>
           <%= link_to "<i class='icon-plus-sign icon-white'></i> Post to This Log".html_safe,
@@ -56,8 +56,12 @@
           <%= link_to "<i class='icon-check icon-white'></i> Add Your Expertise".html_safe,
             new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
         <% else %>
-          <%= link_to "<i class='fa fa-shield'></i> Issue Badge".html_safe,
+          <%= link_to "<i class='fa fa-shield'></i> Award Badge".html_safe,
             new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
+        <% end %>
+
+        <% if @badge_list_admin %>
+          <span class="divider">|</span>
         <% end %>
       </li>
     <% end %>
@@ -84,18 +88,18 @@
                 <%= link_to "<i class='icon-flag'></i>Withdraw validation request".html_safe,
                   group_badge_log_path(@group, @badge, @log, log: { date_withdrawn: Time.now }), 
                   method: :put, data: { confirm: "Are you sure you want to withdraw your request "\
-                  + "for expert validation of your learning log? \n\n"\
+                  + "for expert validation of your progress log? \n\n"\
                   + "TIP: After withdrawing your request, experts will still be able to add "\
                   + "validation but you will no longer be highlighted as a requester." } %>
               </li>
             <% elsif @log.validation_status != 'validated' %>
               <li>
-                <%= link_to "<i class='icon-flag'></i>Request expert validation".html_safe,
+                <%= link_to "<i class='fa fa-flag-checkered'></i> Request expert validation".html_safe,
                   group_badge_log_path(@group, @badge, @log, log: { date_requested: Time.now }), 
                   method: :put, data: { confirm: "Are you sure you want to send a request to all "\
-                  + "of the badge experts asking for them to validate your learning log? \n\n"\
+                  + "of the badge experts asking for them to validate your progress log? \n\n"\
                   + "TIP: Before submitting your request it's a good idea to update "\
-                  + "your personal profile and post final evidence to your learning log." } %>
+                  + "your personal profile and post final evidence to your progress log." } %>
               </li>
             <% end %>
           </ul>
@@ -114,10 +118,10 @@
     
     $(document).ready(function() {
 
-      $("#new-log-entry").popover({
-        content: "<a class='pull-right' href='#' onclick=\"$('#new-log-entry').popover('hide')\" "
+      $("#new-post").popover({
+        content: "<a class='pull-right' href='#' onclick=\"$('#new-post').popover('hide')\" "
           + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
-          + "When you’re ready, click here to post an entry to your log.",
+          + "When you’re ready, click here to post to your progress log.",
         placement: "bottom",
         trigger: "manual",
         container: "header",
@@ -212,7 +216,7 @@
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Edit learning log visiblity</h3>
+      <h3 id="mimm-label">Edit progress log visiblity</h3>
     </div>
 
     <div class="modal-body">
@@ -238,12 +242,12 @@
               <%= f.input :private_log, as: :radio_buttons, collection: [[false, 'Public'] , \
                 [true, "Private <p class='text-error'><small>(#{private_text})</small></p>".html_safe]],
                 label_method: :last, value_method: :first,
-                label: 'After you earn the badge your learning log will be' %>
+                label: 'After you earn the badge your progress log will be' %>
             <% else %>
               <%= f.input :private_log, as: :radio_buttons, collection: [[false, 'Public'] , \
                 [true, "Private <p class='text-error'><small>(#{private_text})</small></p>".html_safe]],
                 label_method: :last, value_method: :first, disabled: true,
-                label: 'After you earn the badge your learning log will be' %>
+                label: 'After you earn the badge your progress log will be' %>
             <% end %>
                 
 
@@ -251,13 +255,13 @@
 
             <div class="control-group">
               <label class="control-label" for="delete-log">
-                Delete learning log and resign badge membership
+                Delete progress log and resign badge membership
               </label>
               <div class="controls">
-                <%= link_to 'Delete this learning log', [@group, @badge, @log], title: "Careful!",
+                <%= link_to 'Delete this progress log', [@group, @badge, @log], title: "Careful!",
                   method: :delete, id: "delete-log", class: 'btn btn-danger brn-large', 
                   data: { confirm: "Warning: This can't be undone. Are you absolutely sure you want to"\
-                  + " permanently delete your learning log?", toggle: 'tooltip', 
+                  + " permanently delete your progress log?", toggle: 'tooltip', 
                   placement: 'bottom' } %>
                 
               </div>
@@ -314,7 +318,7 @@
         </span>
         <span class="header-text">
           <h1><%= link_to @user.name, @user, title: 'View user profile' %></h1>
-          <h2>Badge Learning Log</h2>  
+          <h2>Badge Progress Log</h2>  
           
           <ul class="bl-icon-list">
             <% if @log.validation_status == 'requested' %>
@@ -335,19 +339,19 @@
 
             <% if @log.public? %>
               <li data-toggle="tooltip" data-placement="bottom" 
-                title="Learning log is public.">
+                title="Progress log is public.">
                 <div style="background-image: url('<%= image_path 'public-small.png' %>')" >
                 </div>
               </li>
             <% elsif @log.private_log %>
               <li data-toggle="tooltip" data-placement="bottom" 
-                title="Learning log is private.">
+                title="Progress log is private.">
                 <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
                 </div>
               </li>
             <% else %>
               <li data-toggle="tooltip" data-placement="bottom" 
-                title="Learning log currently private, but will become public after validation.">
+                title="Progress log currently private, but will become public after validation.">
                 <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
                 </div>
               </li>
@@ -368,8 +372,7 @@
                 </a>
               </li>
             <% end %>
-            <li><a href="#entries" data-toggle="tab">
-              <span class="collapse-when-small">Learning Log </span>Entries</a>
+            <li><a href="#posts" data-toggle="tab">Posts</a>
             </li>
           </ul>
         </div>
@@ -473,7 +476,7 @@
                   Badge issued <%= @log.date_issued.to_s(:full_date) %>
                 </span>
                 <span class="badge badge-info show-when-small">
-                  Issued <%= @log.date_issued.to_s(:short_date) %>
+                  Awarded <%= @log.date_issued.to_s(:short_date) %>
                 </span>
               <% end %>
 
@@ -498,9 +501,9 @@
                     new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
                     class: 'btn btn-success' %>
                 <% elsif @current_user_is_log_owner %>
-                  Once experts weigh in on your learning log, their validations will appear here!
+                  Once experts weigh in on your progress log, their validations will appear here!
                 <% else %>
-                  This learning log hasn't yet been validated by any experts.
+                  This progress log hasn't yet been validated by any experts.
                 <% end %>
               </p>
             </div>
@@ -522,24 +525,24 @@
 
     <!-- === ENTRIES TAB === -->
 
-    <div class="tab-pane" id="entries">
+    <div class="tab-pane" id="posts">
       
       <% if @posts_by_month.blank? %>
 
         <div class="row">
           <div class="well span7 offset2">
-            <p class="lead">No entries yet...</p>
+            <p class="lead">No posts yet...</p>
             <p>
               <% if @current_user_is_log_owner %>
                 It's time to get posting!<br>
-                Click the button below to post your first learning log entry.<br><br>
-                <%= link_to "<i class='icon-plus icon-white'></i> New learning log entry".html_safe,
+                Click the button below to write your first post.<br><br>
+                <%= link_to "<i class='icon-plus icon-white'></i> New post".html_safe,
                   new_group_badge_log_entry_path(@group, @badge, @log), class: 'btn btn-success' %>
               <% elsif @current_user_is_expert %>
                 Looks like <%= @user.name %> hasn't posted anything yet.<br>
                 You can help them out by clicking the button below!<br><br>
                 <%= link_to \
-                  "<i class='icon-plus icon-white'></i> Post to this learner's log".html_safe,
+                  "<i class='icon-plus icon-white'></i> Post to this log".html_safe,
                   new_group_badge_log_entry_path(@group, @badge, @log), class: 'btn btn-success' %>
               <% else %>
                 Looks like <%= @user.name %> hasn't posted anything yet.
@@ -598,9 +601,9 @@
   
   <div class="row">
     <div class="well span7 offset2">
-      <p class="lead">This is a private learning log</p>
+      <p class="lead">This is a private progress log</p>
       <p>
-        The owner of this learning log has set it to be private.  
+        The owner of this progress log has set it to be private.  
         Its contents are only visible to members of the learning group.
       </p>
     </div>

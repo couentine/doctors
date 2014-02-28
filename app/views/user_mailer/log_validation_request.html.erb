@@ -5,21 +5,21 @@
   </head>
   <body>
     <p>
-      <%= @from_user.name %> has requested expert validation of their learning log for the 
+      <%= @from_user.name %> has requested expert validation of their progress log for the 
       <%= @badge.name %> badge in Badge List.
       To add your expertise, log into Badge List or click one of the links below. 
     </p>
     <p>
       <strong>Is it your first time? Adding your expertise is easy.</strong>
       <ol>
-        <li>Read through the learner's log</li>
+        <li>Review their log posts</li>
         <li>Click "Add my expertise"</li>
-        <li>Decide whether or not the learner has earned the badge</li>
-        <li>Write specific feedback and notes for the learner (and the eventual badge viewers)</li>
+        <li>Decide whether or not they have earned the badge</li>
+        <li>Write specific feedback and notes</li>
       </ol>
     </p>
     <p>
-      <strong><%= @from_user.name %>'s Learning Log:</strong> 
+      <strong><%= @from_user.name %>'s Progress Log:</strong> 
       <%= link_to group_badge_log_url(@group, @badge, @log), 
         group_badge_log_url(@group, @badge, @log) %> <br>
       <strong><%= @badge.name %>:</strong> 

@@ -48,7 +48,8 @@ defaults: &defaults
 
   default_badge_info: |
     <h3>Getting started...</h3>
-    Explain the purpose of this badge and what people need to do to earn it.
+    The badge overview is the first thing that new visitors to the badge will see. You can use it
+    to provide context, give instructions or share links to useful resources.
   
   default_log_wiki: |
     <h3>About me...</h3>

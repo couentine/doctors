@@ -8,7 +8,8 @@ class Group
   MAX_URL_LENGTH = 30
   MAX_LOCATION_LENGTH = 200
   TYPE_VALUES = ['open', 'closed', 'private']
-  CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem'] # add new customers here
+  CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem', 'london-21', 'tokyo-15',
+    'paris-99', 'budapest-54', 'chicago-67', 'santiago-12'] # add new customers here
 
   # === RELATIONSHIPS === #
 

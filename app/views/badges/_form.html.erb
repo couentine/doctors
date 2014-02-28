@@ -1,13 +1,43 @@
+<script>
 
+  $(document).ready(function() {
+    <% if @badge.new_record? %>
+      // If this is a new record then auto set the URL as they type
+      $('#badge_name').keyup(function() {
+        $('#badge_url_with_caps').val(parameterizeText($(this).val()));
+      });
+    <% end %>
+  });
+
+  function toggleExtraInfo() {
+    if ($('#form-extra-info').is(':visible')) {
+      $('#form-extra-info').slideUp();
+      $('#form-extra-info-toggle').val('Show Extra Info')
+      $('#group_name').focus()
+    } else {
+      $('#form-extra-info').slideDown();
+      $('#form-extra-info-toggle').val('Hide Extra Info')
+      $('#group_location').focus()
+    }
+  }
+
+  // Converts "Test text like  this" > "Text-text-like-this"
+  var MAX_URL_LENGTH = <%= Badge::MAX_URL_LENGTH %>;
+  function parameterizeText(s) {
+    if (s == null) return '';
+    else return s.replace(/[^\w.-]/g, ' ').replace(/ +/g, ' ').replace(/ /g, '-').trunc(MAX_URL_LENGTH);
+  }
+
+</script>
 
 <%= simple_form_for [@group, @badge], html: {class: 'form-horizontal'} do |f| %>
   <%= f.error_notification %>
 
   <div class="form-body">
     
-    <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics', autofocus: true,
+    <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics Expert', autofocus: true,
       input_html: { class: 'input-xlarge', data: { toggle: 'tooltip',
-      title: 'Try to pick a name that is both catchy and descriptive' } } %>
+      title: 'Examples: Excel Spreadsheet Ninja, 2014 Hackathon Attendee, Acme Community Leader' } } %>
     <%= f.input :url_with_caps, wrapper: :prepend, label: 'Badge URL' do %>
       <%= content_tag :span, "badgelist.com/#{@group.url_with_caps}/", class: "add-on" %>
       <%= f.input_field :url_with_caps, placeholder: 'et-physics', class: 'input-small', 

@@ -3,7 +3,7 @@
     <tr class="card-body-row">
       <td class="card-image" style="background-image: url('<%= gravatar_url_for log.user, :size => 150 %>')">
         <%= link_to '&nbsp;'.html_safe, [log.badge.group, log.badge, log], 
-          title: "View learning log", class: 'image-link' %>
+          title: "View progress log", class: 'image-link' %>
       </td>
       <td class="card-body">
         <span class="card-headline">
@@ -17,14 +17,14 @@
                     method: :put, class: "log-card-delete", title: 'Remove from badge', 
                     data: { toggle: "tooltip", placement: "bottom", 
                     confirm: "Are you absolutely sure you want to revoke this user's"\
-                    + " badge membership?\n\nNote: The user's learning log will NOT be deleted, only"\
+                    + " badge membership?\n\nNote: The user's progress log will NOT be deleted, only"\
                     + " their membership in the badge." }
               end 
             %>
           </span>
 
           <h2><%= link_to log.user.name, [log.badge.group, log.badge, log], 
-            title: "View learning log" %></h2>
+            title: "View progress log" %></h2>
           <h3><%= log.user.username %></h3>
         </span>
         <span class="card-content">
@@ -33,7 +33,7 @@
             
               <% if log.entries.count > 0 %>
                 <li data-toggle="tooltip" data-placement="bottom" 
-                  title="<%= log.entries.count %> learning log entries">
+                  title="<%= log.entries.count %> posts">
                   <%= log.entries.count %>
                   <div style="background-image: url('<%= image_path 'log-small.png' %>')" ></div>
                 </li>

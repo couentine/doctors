@@ -5,7 +5,7 @@ class Entry
 
   # === CONSTANTS === #
   
-  MAX_SUMMARY_LENGTH = 140
+  MAX_SUMMARY_LENGTH = 100
   TYPE_VALUES = ['post', 'validation']
   
   # === RELATIONSHIPS === #

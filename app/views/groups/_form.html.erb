@@ -14,6 +14,13 @@
       else
         $('#customer-code-wrapper').slideUp();
     })
+
+    <% if @group.new_record? %>
+      // If this is a new record then auto set the URL as they type
+      $('#group_name').keyup(function() {
+        $('#group_url_with_caps').val(parameterizeText($(this).val()));
+      });
+    <% end %>
   });
 
   function toggleExtraInfo() {
@@ -26,6 +33,13 @@
       $('#form-extra-info-toggle').val('Hide Extra Info')
       $('#group_location').focus()
     }
+  }
+
+  // Converts "Test text like  this" > "Text-text-like-this"
+  var MAX_URL_LENGTH = <%= Group::MAX_URL_LENGTH %>;
+  function parameterizeText(s) {
+    if (s == null) return '';
+    else return s.replace(/[^\w.-]/g, ' ').replace(/ +/g, ' ').replace(/ /g, '-').trunc(MAX_URL_LENGTH);
   }
 
 </script>

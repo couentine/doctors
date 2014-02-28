@@ -29,7 +29,7 @@ class UserMailer < ActionMailer::Base
     @to_user, @group, @badge, @log = to_user, group, badge, log
     @to_creator = (to_user == @badge.creator)
 
-    subject = (@to_creator) ? "You've created and earned a new badge" : "You've been issued a badge"
+    subject = (@to_creator) ? "You've created and earned a new badge" : "You've been awarded a badge"
     mail(
       :subject  => subject,
       :to       => to_user.email_name,
@@ -78,7 +78,7 @@ class UserMailer < ActionMailer::Base
     @to_user, @from_user, @group, @badge, @log = to_user, from_user, group, badge, log
 
     mail(
-      :subject  => "Learning Validation Request",
+      :subject  => "Validation Request for #{badge.name}",
       :to       => to_user.email_name,
       :from     => build_from_string(from_user),
       :reply_to => from_user.email_name,

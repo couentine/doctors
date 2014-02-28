@@ -202,9 +202,6 @@ class BadgesController < ApplicationController
     elsif @summary.length > Badge::MAX_SUMMARY_LENGTH
       flash[:error] = "The summary can't be longer than #{Badge::MAX_SUMMARY_LENGTH} characters."
       render 'issue_form'
-    elsif @body.blank?
-      flash[:error] = "You must enter a validation body."
-      render 'issue_form'
     else
       user = User.find_by(email: @email) rescue nil
       if user.nil?

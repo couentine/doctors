@@ -1,17 +1,26 @@
 <div id="rich-text-toolbar" style="display: none;" class="rich-text-toolbar">
   <div class="btn-group">
-    <a class="btn btn-small" title="Bold (Ctrl+B)" data-wysihtml5-command="bold"><b>Bold</b></a>
-    <a class="btn btn-small" title="Italic (Ctrl+I)" data-wysihtml5-command="italic"><i>Italic</i></a>
-    <a class="btn btn-small" title="Underline (Ctrl+U)" data-wysihtml5-command="underline"><u>Underline</u></a>
+    <a class="btn btn-small" title="Bold selected text (Ctrl+B)" data-toggle="tooltip" 
+      tabindex="-1" data-wysihtml5-command="bold"><b>Bold</b></a>
+    <a class="btn btn-small" title="Italic selected text (Ctrl+I)" data-toggle="tooltip" 
+      tabindex="-1" data-wysihtml5-command="italic"><i>Italic</i></a>
+    <a class="btn btn-small" title="Underline selected text (Ctrl+U)" data-toggle="tooltip" 
+      tabindex="-1" data-wysihtml5-command="underline"><u>Underline</u></a>
   </div>
 
   <div class="btn-group">
-    <a class="btn btn-small" title="Heading" data-wysihtml5-command="formatBlock" 
-       data-wysihtml5-command-value="h3">Heading</a>
+    <a class="btn btn-small" title="Toggle current line as heading" data-toggle="tooltip" 
+      tabindex="-1" data-wysihtml5-command="formatBlock" data-wysihtml5-command-value="h3">Heading</a>
    </div>
 
   <div class="btn-group">
-    <a class="btn btn-small" title="Bulleted List" data-wysihtml5-command="insertUnorderedList"><i class="icon-list"></i></a>
-    <a class="btn btn-small" title="Numbered List" data-wysihtml5-command="insertOrderedList">#</a>
+    <a class="btn btn-small" title="Toggle bulleted list" data-toggle="tooltip" 
+      tabindex="-1" data-wysihtml5-command="insertUnorderedList"><i class="fa fa-list-ul"></i></a>
+    <a class="btn btn-small" title="Toggle numbered list" data-toggle="tooltip" 
+      tabindex="-1" data-wysihtml5-command="insertOrderedList"><i class="fa fa-list-ol"></i></a>
+    <a class="btn btn-small" title="Outdent list item" data-toggle="tooltip" 
+      tabindex="-1" data-wysihtml5-command="outdent"><i class="fa fa-outdent"></i></a>
+    <a class="btn btn-small" title="Indent list item" data-toggle="tooltip" 
+      tabindex="-1" data-wysihtml5-command="indent"><i class="fa fa-indent"></i></a>
   </div>
 </div>

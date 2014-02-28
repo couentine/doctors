@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "#{@user.name} Entry ##{@entry.entry_number} - #{@badge.name}")
+  provide(:full_title, "#{@entry.summary} - #{@badge.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
@@ -21,7 +21,7 @@
     <span class="divider">/</span>
   </li>
   <li class="active">
-    <%= "Entry ##{@entry.entry_number}" %>
+    <%= "Post ##{@entry.entry_number}" %>
   </li>
 <% end %>
 
@@ -35,7 +35,7 @@
         <span class="divider">|</span>
       </li>
       <li  class="collapsible">
-        <%= link_to '<i class="icon-plus-sign icon-white"></i> New Log Entry'.html_safe, 
+        <%= link_to '<i class="icon-plus-sign icon-white"></i> New Post'.html_safe, 
             new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
         <% if @current_user_is_entry_creator %>
           <span class="divider">|</span>
@@ -45,28 +45,14 @@
 
     <% if @current_user_is_entry_creator || @badge_list_admin %>
       <li class="collapsible">
-        <div class="dropdown">
-          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
-            role="button" data-toggle="dropdown" data-target="#">
-            Entry Settings
-            <i class="icon-cog icon-white"></i>
-            <b class="caret"></b>
-          </a>
-          <ul class="dropdown-menu pull-right" role="menu" 
-            aria-labelledby="dropdown-subheader-settings">
-
-            <li>
-              <%= link_to "<i class='icon-pencil'></i> Edit this entry".html_safe,
-                edit_group_badge_log_entry_path(@group, @badge, @log, @entry) %>
-            </li>
-            <li>
-              <%= link_to '<i class="icon-remove"></i> Delete this entry'.html_safe, 
-                [@group, @badge, @log, @entry], method: :delete, data: { 
-                confirm: 'Are you sure you want to permanently delete this learning log entry?' } %>
-            </li>
-
-          </ul>
-        </div>
+        <%= link_to "<i class='fa fa-pencil'></i> Edit".html_safe,
+          edit_group_badge_log_entry_path(@group, @badge, @log, @entry) %>
+        <span class="divider">|</span>
+      </li>
+      <li class="collapsible">
+        <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
+          [@group, @badge, @log, @entry], method: :delete, data: { 
+          confirm: 'Are you sure you want to permanently delete this post?' } %>
       </li>
     <% end %>
 
@@ -112,7 +98,7 @@
         <% end %>
 
         <h1>
-          <abbr title="Badge learning log entry #<%= @entry.entry_number %>">#<%= @entry.entry_number %></abbr>.
+          <abbr title="Badge post #<%= @entry.entry_number %>">#<%= @entry.entry_number %></abbr>.
           <%= @entry.summary %>
         </h1>
         

@@ -18,6 +18,16 @@ jQuery.fn.preventDoubleSubmission = function() {
   return this;
 };
 
+// Add string truncation function
+String.prototype.truncWithDots = String.prototype.trunc ||
+  function(n){
+      return this.length>n ? this.substr(0,n-1)+'&hellip;' : this;
+  };
+String.prototype.trunc = String.prototype.trunc ||
+  function(n){
+      return this.length>n ? this.substr(0,n-1) : this;
+  };
+
 // Do on page load
 
 $(document).ready(function() {
@@ -135,6 +145,9 @@ function registerAllRichTextAreas() {
     // Then register the static text areas / register an event for the modal ones
     $('textarea.rich-text-area').each(function() { registerRichTextArea(this, true); });
     $('.modal').on('shown', function (e) { findAndRegisterModalRichTextAreas(this); })
+
+    // Now register the tooltips
+    checkForTooltips();
   }
 }
 

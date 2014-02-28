@@ -33,15 +33,15 @@
 
       <% if @entry.type == 'validation' %>
         <% if @current_user_is_log_owner %>
-          <h1>Add self validation to your learning log</h1>
+          <h1>Add self validation to your progress log</h1>
         <% else %>
-          <h1>Add validation to <%= @user.name %>'s learning log</h1>
+          <h1>Add validation to <%= @user.name %>'s progress log</h1>
         <% end %>
       <% else %>
         <% if @current_user_is_log_owner %>
-          <h1>Post an entry to your learning log</h1>
+          <h1>Post to your progress log</h1>
         <% else %>
-          <h1>Post an entry to <%= @user.name %>'s learning log</h1>
+          <h1>Post to <%= @user.name %>'s progress log</h1>
         <% end %>
       <% end %>
       <div class="form-image" 

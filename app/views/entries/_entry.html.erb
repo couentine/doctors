@@ -65,7 +65,7 @@
         <td class="headline-right">
           <%= link_to gravatar_for(entry.log.user, class: "img-circle #{entry.log_user_type}"), 
             [entry.log.badge.group, entry.log.badge, entry.log],
-            title: "View #{entry.log.user.name}'s learning log" %>
+            title: "View #{entry.log.user.name}'s progress log" %>
           <abbr class="username <%= entry.log_user_type %>" data-toggle="tooltip" data-placement="bottom"
             title="<%= "#{entry.log.user.name} (#{entry.log_user_type.capitalize} at time of #{entry.type})" %>" >
             <%= entry.log.user.username %>
