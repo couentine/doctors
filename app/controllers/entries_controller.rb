@@ -26,8 +26,10 @@ class EntriesController < ApplicationController
   # GET /group-url/badge-url/u/username/entries/new => NEW POST
   # GET /group-url/badge-url/u/username/entries/new?type=validation => NEW VALIDATION
   # GET /group-url/badge-url/u/username/entries/new.json
+  # Accepts "tag" parameter
   def new
     @type = params[:type] || 'post'
+    summary = (params[:tag].nil?) ? '' : " ##{params[:tag]}"
 
     if @type == 'validation'
       @entry = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
@@ -35,13 +37,13 @@ class EntriesController < ApplicationController
       if @validation_already_exists
         render :edit
       else
-        @entry = Entry.new
+        @entry = Entry.new(summary: summary)
         @entry.private = false
         @entry.type = 'validation'
         render :new
       end
     else
-      @entry = Entry.new
+      @entry = Entry.new(summary: summary)
       @entry.type = 'post'
       privacy_count = cookies[:log_privacy_count]
       @entry.private = privacy_count && (privacy_count.to_i > 2) # They have to pick private twice in a row

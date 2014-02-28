@@ -37,7 +37,7 @@
     <% if @current_user_is_log_owner || @current_user_is_expert %>
       <li class="collapsible">
         <% if @current_user_is_log_owner %>
-          <%= link_to '<i class="icon-plus-sign icon-white"></i> New Post'.html_safe, 
+          <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
             new_group_badge_log_entry_path(@group, @badge, @log), id: 'new-post' %>
           <span class="divider">|</span>
         <% else %>

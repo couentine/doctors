@@ -32,7 +32,7 @@ module StringTools
           tags << stripped_tag.downcase 
           tags_with_caps << stripped_tag
         end
-        "<a class='linkified-tag' href='/#{group.url}/#{badge.url}/#{stripped_tag.downcase}'>#{tag}</a>"
+        "<a class='linkified-tag' href='/#{group.url}/#{badge.url}/#{stripped_tag}'>#{tag}</a>"
       end.gsub(HTTP_URL_REGEX) { |url| make_tag_for url }
       # Removing this for now... it double tags some things
       # .gsub(NON_HTTP_URL_REGEX) { |url| make_tag_for "http://#{url}" }

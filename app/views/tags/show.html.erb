@@ -27,7 +27,7 @@
       <span class="divider">|</span>
     </li>
     <li  class="collapsible">
-      <%= link_to '<i class="icon-plus-sign icon-white"></i> New Post'.html_safe, 
+      <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
           new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
       <% if @tag_exists %>
         <span class="divider">|</span>
@@ -55,7 +55,7 @@
   <% end %>
 <% end %>
 
-<!-- === TAG WIKI === -->
+<!-- === TOPIC PAGE === -->
 
 <div class="row add-top-margin">
 
@@ -127,25 +127,56 @@
   </div>
 </div>
 
-<!-- === ENTRIES SECTION === -->
+<% if !@entries.blank? || @current_user_is_learner || @current_user_is_expert %>
 
-<% unless @entries.blank? %>
+  <!-- === TOPIC DISCUSSION === -->
 
   <div class="row add-top-margin">
     <div class="span12">
       <div class="tab-header">
+        <% unless @entries.blank? %>
+          <%= link_to '<i class="fa fa-comment"></i> Post to discussion'.html_safe,
+            new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
+            class: 'btn btn-small' %>
+          <% end %>
+
         <h2>Topic discussion</h2>
       </div>
     </div>
   </div>
 
   <div class="row">
-    <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
-      data-bl-dyncol-width="12">
+    
+    <% if @entries.blank? %>
 
-      <%= render(@entries, show_badge: false, date_format: :ago) %>
+      <div class="well span7 offset2">
+        <p class="lead">This discussion is empty...</p>
+        
+        <% if @current_user_is_expert || @current_user_is_learner %>
+          <p>
+            To add to this discussion just include the topic tag 
+            <b>#<%= @tag.name_with_caps %></b> 
+            anywhere in the summary or body of a post.
+          </p>
+          <p>
+            <%= link_to '<i class="fa fa-comment"></i> Start the discussion'.html_safe,
+              new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
+              class: 'btn btn-success' %>
+          </p>
+        <% end %>
+      </div>
 
-    </div>
+    <% else %>
+
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
+        data-bl-dyncol-width="12">
+
+        <%= render(@entries, show_badge: false, date_format: :ago) %>
+
+      </div>
+    
+    <% end %>
+
   </div>
 
 <% end %>

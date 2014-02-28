@@ -146,8 +146,17 @@ protected
     if body_changed?
       linkified_result = linkify_text(body, log.badge.group, log.badge)
       self.body_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
-      self.tags = linkified_result[:tags]
       self.tags_with_caps = linkified_result[:tags_with_caps]
+      
+      # The entry tags should be a concatenation of the summary and body tags
+      summary_tags = linkify_text(summary, log.badge.group, log.badge)[:tags]
+      body_tags = linkified_result[:tags]
+      self.tags = [summary_tags, body_tags].flatten.uniq
+    elsif summary_changed?
+      # The entry tags should be a concatenation of the summary and body tags
+      summary_tags = linkify_text(summary, log.badge.group, log.badge)[:tags]
+      body_tags = linkify_text(body, log.badge.group, log.badge)[:tags]
+      self.tags = [summary_tags, body_tags].flatten.uniq
     end
   end
 
