@@ -6,6 +6,7 @@ class Tag
   # === CONSTANTS === #
   
   MAX_NAME_LENGTH = 50
+  EDITABILITY_VALUES = ['learners', 'experts']
 
   # === RELATIONSHIPS === #
 
@@ -17,6 +18,7 @@ class Tag
   field :name_with_caps,      type: String
   field :display_name,        type: String
 
+  field :editability,         type: String, default: 'learners'
   field :wiki,                type: String
   field :wiki_versions,       type: Array
   field :wiki_sections,       type: Array
@@ -25,41 +27,48 @@ class Tag
 
   field :current_user,        type: String # used when logging wiki_versions
   field :current_username,    type: String # used when logging wiki_versions
-  field :flags,               type: Array
+  field :flags,               type: Array, default: []
 
-  validates :name, presence: true, length: { within: 2..MAX_NAME_LENGTH }, 
-            uniqueness: { scope: :badge }, exclusion: { in: APP_CONFIG['blocked_url_slugs'],
-            message: "%{value} is a specially reserved url." }            
   validates :badge, presence: true
+  validates :name, presence: true, length: { within: 2..MAX_NAME_LENGTH }, 
+    uniqueness: { scope: :badge }, exclusion: { in: APP_CONFIG['blocked_url_slugs'],
+    message: "%{value} is a specially reserved url." }
+  validates :display_name, presence: true
+  validates :editability, inclusion: { in: EDITABILITY_VALUES, 
+    message: "%{value} is not a valid type of editability" }
 
   # Which fields are accessible?
-  attr_accessible :name_with_caps, :wiki
+  attr_accessible :display_name, :wiki, :editability
 
   # === CALLBACKS === #
 
-  before_validation :set_default_values, on: :create
-  before_validation :update_caps_field
+  before_validation :update_validated_fields
+  after_validation :copy_name_field_errors
   after_validation :update_wiki_sections
   after_validation :update_wiki_versions # DO store the first value since it comes from the user
+  after_save :update_badge_display_name
 
   # === TAG METHODS === #
 
   def to_param
-    name
+    name_with_caps
   end
 
 protected
 
-  def set_default_values
-    self.flags ||= []
-  end
-
-  def update_caps_field
-    if name_with_caps.nil?
+  def update_validated_fields
+    if display_name.nil?
       self.name = nil
+      self.name_with_caps = nil
     else
+      self.name_with_caps = tagify_string display_name
       self.name = name_with_caps.downcase
     end
+  end
+
+  # Takes any errors from name to display_name
+  def copy_name_field_errors
+    self.errors[:display_name] = self.errors[:name] if self.errors[:display_name].blank?
   end
 
   def update_wiki_sections
@@ -85,4 +94,15 @@ protected
     end
   end
 
+  # When the display name changes, this callback goes up to the badge and if the tag exists
+  # in the badge topic list it will change it there as well
+  def update_badge_display_name
+    if display_name_changed? && !badge.topics.empty?
+      topic_item = badge.topics.detect { |t| t['tag_name'] == name }
+      if topic_item && (topic_item['tag_display_name'] != display_name)
+        topic_item['tag_display_name'] = display_name
+        badge.save
+      end
+    end
+  end
 end

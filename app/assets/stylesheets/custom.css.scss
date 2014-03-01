@@ -182,7 +182,7 @@ ul.dropdown-menu {
   box-shadow: none;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  padding: 10px;
+  padding: 15px 20px;
   text-align: left !important;
   
   h3 {
@@ -568,7 +568,7 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
         p { 
           margin: 5px 0 0 0; 
           a,a:visited {
-            color: $medium-text-color;
+            color: $light-text-color;
             text-decoration: underline;
           }
           a:focus,a:hover {
@@ -576,7 +576,13 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
             text-decoration: underline;
           }
         }
-
+        span.input-mock {
+          display: inline-block;
+          margin: 5px 0 0 0; 
+          font-size: 14px;
+          color: $medium-text-color;
+          font-style: italic;
+        }
         input[type="text"],textarea,input[type="url"] {
           border-radius: 0;
           border-top: none;
@@ -683,13 +689,6 @@ div.bl-form {
   h1 { font-size: 26px; }
   h2 { font-size: 20px; }
   h3 { font-size: 18px; }
-  
-  @media (max-width: 767px) {
-    .form-image { 
-      height: 75px !important; 
-      width: 75px !important; 
-    }
-  }
 
   form {
     padding-right: 15px;
@@ -707,14 +706,39 @@ div.bl-form {
       width: 100px;
       height: 100px;
       float: right;
+      text-align: center;
       margin: 20px 25px -55px 0;
-      border: 1px solid $medium-gray;
       border-radius: 500px;
-      box-shadow: inset -1px 1px 7px 0 $card-shadow-color;
-      background-size: 85% 85%;
+      background-size: 70% 70%;
       background-position: center center;
       background-repeat: no-repeat;
-      background-color: $light-white;
+      background-color: $secondary-really-light;
+      overflow: hidden;
+
+      i.fa {
+        font-size: 70px;
+        color: $light-white;
+        position: relative;
+        top: 15px;
+      }
+
+      &.frameless {
+        background-size: 100% 100%;
+        border-radius: 0;
+        background-color: transparent;
+      }
+    }
+    
+    @media (max-width: 767px) {
+      .form-image { 
+        height: 75px; 
+        width: 75px; 
+
+        i.fa { 
+          font-size: 51px; 
+          top: 12px;
+        }
+      }
     }
   }
 
@@ -740,7 +764,7 @@ div.bl-form {
     width: 98%;
     text-align: right;
     padding: 1.8%;
-  }
+  } 
 }
 
 div.bl-form-no-labels label {
@@ -788,9 +812,7 @@ h2.form-header {
 .control-group.entry_body,.control-group.tag_wiki {
   width: 100%;
 }
-.control-group.tag_wiki {
-  margin-top: 55px;
-}
+
 #badge-versions {
   width: 340px;
 }
@@ -1139,7 +1161,7 @@ form#group-add-users-form {
   }
   h3 {
     display: inline;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: normal;
     font-style: italic;
     color: $light-text-color;

@@ -1,11 +1,44 @@
 class TagsController < ApplicationController
+  include StringTools
 
-  prepend_before_filter :find_all_records
+  prepend_before_filter :find_parent_records, only: :index
+  prepend_before_filter :find_all_records, except: :index
   before_filter :authenticate_user!, only: [:edit, :update, :destroy]
   before_filter :can_view_tag, only: [:show]
   before_filter :badge_expert_or_learner, only: [:edit, :update]
 
+  # === CONSTANTS === #
+
+  TAG_EDITABILITY_OPTIONS = [
+    ['Badge experts and badge learners', 'learners'],
+    ['Only badge experts', 'experts']
+  ]
+
   # === RESTFUL ACTIONS === #
+
+  def index
+    @topics = []
+    tag_names = []
+
+    @badge.tags.each do |tag|
+      tag_names << tag.name
+      @topics << tag
+    end
+
+    @badge.topics.each do |topic_item|
+      unless tag_names.include? topic_item[:tag_name]
+        cur_tag = Tag.new
+        cur_tag.name = topic_item[:tag_name]
+        cur_tag.name_with_caps = topic_item[:tag_name_with_caps]
+        cur_tag.display_name = topic_item[:tag_display_name]
+
+        @topics << cur_tag
+      end
+    end
+
+    @topics.sort_by! { |topic| topic.display_name || topic.name || 'z' }
+  end
+
 
   # Accepts page parameters: page, page_size
   # GET /group-url/badge-url/tag-name
@@ -25,7 +58,7 @@ class TagsController < ApplicationController
 
   # GET /group-url/badge-url/tag-name/edit
   def edit
-    # Nothing to do here
+    @tag_editability_options = TAG_EDITABILITY_OPTIONS
   end
 
   # PUT /group-url/badge-url/tag-name
@@ -33,6 +66,7 @@ class TagsController < ApplicationController
   def update
     @tag.current_user = current_user
     @tag.current_username = current_user.username
+    @tag_editability_options = TAG_EDITABILITY_OPTIONS
 
     respond_to do |format|
       if @tag_exists
@@ -71,7 +105,7 @@ class TagsController < ApplicationController
 
 private
 
-  def find_all_records
+  def find_parent_records
     @group = Group.find(params[:group_id].to_s.downcase) || not_found
     @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase) || not_found
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
@@ -79,6 +113,10 @@ private
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil if current_user
+  end
+  
+  def find_all_records
+    find_parent_records
 
     # Try to find the tag
     @tag = @badge.tags.find_by(name: (params[:tag_id] || params[:id]).to_s.downcase) rescue nil
@@ -87,7 +125,10 @@ private
     # If the tag doesn't exist yet then create one in case the user wants to edit it
     if !@tag_exists
       if params[:tag].nil?
-        @tag = Tag.new(name_with_caps: (params[:tag_id] || params[:id]))
+        @tag = Tag.new
+        @tag.name_with_caps = params[:tag_id] || params[:id]
+        @tag.name = @tag.name_with_caps.downcase
+        @tag.display_name = @badge.tag_display_name(@tag.name) || detagify_string(@tag.name_with_caps)
       else
         @tag = Tag.new(params[:tag])
       end

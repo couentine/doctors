@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "#{@badge.name} - All Entries")
+  provide(:title, "#{@badge.name} - All Topic Pages")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
 %>
@@ -14,7 +14,7 @@
     <span class="divider">/</span>
   </li>
   <li class="active">
-    All Progress Log Entries
+    All Topic Pages
   </li>
 <% end %>
 
@@ -69,12 +69,7 @@
 
       <div class="secondary-header span6">
         <span class="header-text">
-          <h1>All Progress Log Entries</h1>
-          <h2>
-            Showing <%= ((@page.to_i - 1) * @page_size.to_i) + 1 %>
-            - <%= [(@page.to_i * @page_size.to_i), @entries.count].min %>
-            of <%= @entries.count %>
-          </h2>  
+          <h1>All Topic Pages</h1>
         </span>            
       </div>
     </div>
@@ -83,27 +78,19 @@
 
 <!-- === ENTRIES LIST === -->
 
-<% if !@entries.blank? %>
-  
-  <div class="row">
-    <div class="span12">
-      <div class="pagination-header">
-        <div class="pagination"><%= paginate @entries %></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
-      data-bl-dyncol-width="12">
-        <%= render(@entries, show_badge: false) %>
-    </div>
-  </div>
+<% if !@topics.blank? %>
 
   <div class="row">
     <div class="span12">
-      <div class="pagination-footer">
-        <div class="pagination"><%= paginate @entries %></div>
+      <div class="info-card text-card topic-list-card">
+        <ul>
+          <% @badge.topics.each do |topic| %>
+            <li>
+              <%= link_to "<i class='fa fa-book'></i> #{topic['tag_display_name']}".html_safe, 
+                group_badge_path(@group, @badge) + "/" + topic['tag_name_with_caps'] %>
+            </li>
+          <% end %>
+        </ul>
       </div>
     </div>
   </div>

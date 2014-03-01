@@ -210,6 +210,13 @@ class Badge
     validation_threshold
   end
 
+  # Returns the display name of a topic from the topic list
+  # Pass the downcased topic tag
+  def tag_display_name(tag_name)
+    topic_item = topics.detect { |t| t['tag_name'] == tag_name }
+    (topic_item.nil?) ? nil : topic_item['tag_display_name']
+  end
+
 protected
   
   def set_default_values

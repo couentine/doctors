@@ -1,5 +1,5 @@
 <% 
-  provide(:full_title, "#{@tag.name_with_caps} - #{@badge.name} - #{@group.name}")
+  provide(:full_title, "#{@tag.display_name} - #{@badge.name} - #{@group.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
 %>
@@ -14,7 +14,7 @@
     <span class="divider">/</span>
   </li>
   <li class="active">
-    <%= @tag.name_with_caps %>
+    <%= @tag.display_name %>
   </li>
 <% end %>
 
@@ -74,7 +74,7 @@
         </span>
 
         <h1>
-          #<%= @tag.name_with_caps %>
+          <%= @tag.display_name %>
         </h1>
         
         <% if @tag_exists %>
@@ -141,6 +141,7 @@
           <% end %>
 
         <h2>Topic discussion</h2>
+        <h3><i class="fa fa-tag"></i> #<%= @tag.name_with_caps %></h3>
       </div>
     </div>
   </div>

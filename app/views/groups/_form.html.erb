@@ -39,7 +39,8 @@
   var MAX_URL_LENGTH = <%= Group::MAX_URL_LENGTH %>;
   function parameterizeText(s) {
     if (s == null) return '';
-    else return s.replace(/[^\w.-]/g, ' ').replace(/ +/g, ' ').replace(/ /g, '-').trunc(MAX_URL_LENGTH);
+    else return s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').replace(/ +/g, ' ')
+      .replace(/ /g, '-').trunc(MAX_URL_LENGTH);
   }
 
 </script>

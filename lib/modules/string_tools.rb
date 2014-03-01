@@ -76,7 +76,17 @@ module StringTools
       nil
     else
       topic_display_name.strip\
-        .gsub(/\./, '').gsub(/[^ A-Za-z0-9]/, ' ').gsub(/ {2,}/, ' ').strip.gsub(/ /, '-')
+        .gsub(/['\.]/, '').gsub(/[^ A-Za-z0-9]/, ' ').gsub(/ {2,}/, ' ').strip.gsub(/ /, '-')
+    end
+  end
+
+  # Turns a tag into a topic display name
+  # Example: "Example-Topic-Name" -> "Example Topic Name"
+  def detagify_string(tag_string)
+    if tag_string.nil?
+      nil
+    else
+      tag_string.strip.gsub(/[^A-Za-z0-9]/, ' ').gsub(/ {2,}/, ' ')
     end
   end
 

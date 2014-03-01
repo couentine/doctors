@@ -40,6 +40,7 @@ defaults: &defaults
    - new
    - show
    - support
+   - topics
    - update
    - user
    - users
