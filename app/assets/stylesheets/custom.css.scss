@@ -5,16 +5,19 @@ $bodyBackground: $body-background-color;
 $grayMediumLight: #eaeaea;
 
 $primary-medium: #FF7C1C;
+$primary-white: desaturate(lighten($primary-medium, 53%), 5%);
 $primary-really-light: desaturate(lighten($primary-medium, 40%), 5%);
 $primary-light: desaturate(lighten($primary-medium, 10%), 7%);
 $primary-dark: saturate(darken($primary-medium, 10%), 7%);
 
 $secondary-medium: #A8CB17;
+$secondary-white: desaturate(lighten($secondary-medium, 53%), 5%);
 $secondary-really-light: desaturate(lighten($secondary-medium, 40%), 5%);
 $secondary-light: desaturate(lighten($secondary-medium, 10%), 7%);
 $secondary-dark: saturate(darken($secondary-medium, 10%), 7%);
 
 $tertiary-medium: #4BC1DD;
+$tertiary-white: desaturate(lighten($tertiary-medium, 53%), 5%);
 $tertiary-really-light: desaturate(lighten($tertiary-medium, 40%), 5%);
 $tertiary-light: desaturate(lighten($tertiary-medium, 10%), 7%);
 $tertiary-dark: saturate(darken($tertiary-medium, 10%), 7%);
@@ -103,6 +106,7 @@ a.btn:visited {
 }
 .btn {
   background-image: none;
+  border-radius: 2px;
   
   &.btn-success {
     background-color: $secondary-medium;
@@ -171,12 +175,15 @@ ul.dropdown-menu {
 }
 .well {
   color: $dark-text-color;
-  background-color: $light-white;
-  border: 1px dashed $secondary-medium;
+  background-color: $secondary-white;
+  border: none;
+  border-left: 3px solid $secondary-dark;
+  border-radius: 1px;
   box-shadow: none;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   padding: 10px;
+  text-align: left !important;
   
   h3 {
     font-size: 16px;
@@ -219,6 +226,8 @@ ul.dropdown-menu {
   
   &.well-lead {
     padding: 19px;
+    color: $secondary-dark;
+
     ul { font-size: 21px; }
     i.header-icon { font-size: 70px; }
   }
@@ -497,7 +506,7 @@ footer {
 /* === FORMS === */
 
 /* General Form Elements */
-div.bl-form,div.bl-modal-form {
+div.bl-form,div.bl-modal-form,div.bl-inline-form {
   .control-group { 
     float: left; 
     min-width: 55%;
@@ -628,6 +637,30 @@ p.button-info-block {
   a:focus,a:hover {
     color: $tertiary-dark;
     text-decoration: underline;
+  }
+}
+
+/* Inline Forms Only */
+div.bl-inline-form {
+  background-color: $light-white;
+  padding: 15px 15px 1px 15px;
+  margin-bottom: 30px;
+  border-radius: 5px;
+  box-shadow: inset -1px 1px 7px 0 $card-shadow-color;
+
+  .control-group {
+    float: none;
+
+    .control-label {
+      color: $tertiary-dark;
+      margin-bottom: 10px;
+      font-size: 16px
+    }
+  }
+
+  @media (max-width: 767px) {
+    .control-label { margin-left: 0; }
+    .controls { margin-left: 0; }
   }
 }
 
@@ -1135,7 +1168,7 @@ form#group-add-users-form {
 }
 .tab-header {
   margin: 0 0 30px 0;
-  border-bottom: 1px dashed $light-text-color;
+  border-bottom: 3px solid $light-gray;
 }
 .tab-footer {
   margin: 20px 0 0 0;
@@ -1566,6 +1599,29 @@ div.text-card {
     }
     a:hover:not(.btn),a:focus:not(.btn) {
       color: $secondary-medium;
+    }
+  }
+}
+
+div.topic-list-card {
+  ul {
+    margin-left: 0;
+    font-size: 20px;
+    color: $tertiary-medium;
+    list-style: none;
+
+    li {
+      margin-bottom: 15px;
+      
+      &:last-child { margin-bottom: 0; }
+    }
+    a,a:visited {
+      color: $tertiary-medium;
+    }
+    a:hover,a:focus {
+      color: $dark-text-color;
+      text-decoration: none;
+      border-bottom: 1px dotted $dark-text-color;
     }
   }
 }

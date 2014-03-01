@@ -14,7 +14,7 @@
     <%= link_to @badge.url, [@group, @badge] %>
     <span class="divider">/</span>
   </li>
-  <li class="active">Issue Badge</li>
+  <li class="active">Award Badge</li>
 <% end %>
 
 <script type="text/javascript">
@@ -54,7 +54,7 @@
   <div class="bl-form bl-form-entry span10 offset1">
     
     <div class="form-header">
-      <h1>Issue the badge</h1>
+      <h1>Award the badge</h1>
       <div class="form-image" 
            style="background-image: url('<%= group_badge_path(@group, @badge, format: :png) %>')">
         &nbsp;
@@ -128,7 +128,7 @@
       </div>
       
       <div class="form-footer">
-        <%= button_tag "Issue badge", type: 'submit', class: 'btn btn-primary' %>
+        <%= button_tag "Award badge", type: 'submit', class: 'btn btn-primary' %>
         <%= link_to "Cancel", [@group, @badge], class: "btn" %>
       </div>
 

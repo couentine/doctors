@@ -15,6 +15,7 @@ class Tag
   
   field :name,                type: String
   field :name_with_caps,      type: String
+  field :display_name,        type: String
 
   field :wiki,                type: String
   field :wiki_versions,       type: Array

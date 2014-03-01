@@ -30,6 +30,9 @@ class Badge
   field :info_tags,           type: Array
   field :info_tags_with_caps, type: Array
 
+  field :topic_list_text,     type: String
+  field :topics,              type: Array, default: []
+
   field :image_frame,         type: String
   field :image_icon,          type: String
   field :image_color1,        type: String
@@ -60,7 +63,7 @@ class Badge
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :image_frame, :image_icon, :image_color1,
-    :image_color2, :icon_search_text
+    :image_color2, :icon_search_text, :topic_list_text
   
   # === CALLBACKS === #
 
@@ -69,12 +72,21 @@ class Badge
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
   before_save :build_badge_image
+  before_save :update_topics
   after_create :add_creator_as_expert
 
   # === BADGE METHODS === #
 
   def to_param
     url
+  end
+
+  def has_overview?
+    !info_versions.blank?
+  end
+
+  def has_topics?
+    !topics.blank?
   end
 
   # Returns all non-validated logs, sorted by user's name
@@ -260,6 +272,29 @@ protected
       elsif info_versions.last[:info] != info
         self.info_versions << current_version_row
       end
+    end
+  end
+
+  def update_topics
+    if topic_list_text_changed?
+      self.topics = []
+      existing_topics = [] # used to dedupe the list
+
+      topic_list_text.split(/\r?\n|,/).each do |tag_display_name|
+        unless tag_display_name.blank?
+          tag_name_with_caps = tagify_string tag_display_name
+          tag_name = tag_name_with_caps.downcase
+          
+          unless existing_topics.include? tag_name
+            self.topics << {
+              'tag_name' => tag_name,
+              'tag_name_with_caps' => tag_name_with_caps,
+              'tag_display_name' => tag_display_name
+            }
+            existing_topics << tag_name
+          end
+        end
+      end unless topic_list_text.blank?
     end
   end
 

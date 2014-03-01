@@ -43,6 +43,7 @@ $(document).ready(function() {
     registerLocationHashEvents();
     registerAllRichTextAreas();
     createCharacterCounts();
+    registerToggleLinks();
     $('form:not(.allow-double-submission)').preventDoubleSubmission();
 
     $(window).on('resize', function() {
@@ -444,4 +445,16 @@ function resizeAdminTutorial() {
 
   $('#admin-tutorial .modal-body').width(totalSteps * modalWidth);
   $('#admin-tutorial .tutorial-section').width(modalWidth);
+}
+
+function registerToggleLinks() {
+  $('a[data-toggle=custom]').click(function() {
+    var showSelector = $(this).data('show');
+    var hideSelector = $(this).data('hide');
+    var focusSelector = $(this).data('focus');
+
+    if (showSelector != null) $(showSelector).slideDown();
+    if (hideSelector != null) $(hideSelector).slideUp();
+    if (focusSelector != null) $(focusSelector).focus();
+  });
 }

@@ -280,7 +280,7 @@
 
           <% if @group.badges.empty? %>
             <div class="well span7 offset2">
-              <p class="lead">No badges yet!</p>
+              <h3>No badges yet!</h3>
               <p>
                 Badges let you recognize experts. A badge can also help you track the progress 
                 of those working to achieve it.  Click the button below to get started.
@@ -367,7 +367,7 @@
 
           <% if @group.members.empty? %>
             <div class="well span7 offset2">
-              <p class="lead">No members yet!</p>
+              <h3>No members yet!</h3>
               <p>
                 <%= 
                   if @current_user_is_admin || @badge_list_admin
@@ -466,7 +466,7 @@
   
   <div class="row">
     <div class="well span7 offset2">
-      <p class="lead">This is a private learning group</p>
+      <h3>This is a private learning group</h3>
       <p>
         The contents of this learning group are only visible to members.
       </p>

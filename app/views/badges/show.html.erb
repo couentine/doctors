@@ -98,7 +98,8 @@
 <% if @current_user_is_expert %>
 
   <%
-    tutorial1_complete = !@badge.info_versions.blank? # Edit the overview
+    # tutorial1_complete = !@badge.info_versions.blank? # Edit the overview >> NOW WOULD BE @badge.has_overview?
+    tutorial1_complete = true
     tutorial2_complete = (@badge.expert_logs.count > 1) \
       || (@badge.waiting_expert_emails.count > 0) # Issue the badge... or at least invite an expert
 
@@ -125,7 +126,7 @@
       <% elsif current_tutorial == 2 %>  
         // First build the popovers
         $("ul.nav-tabs").children().last().popover({
-          content: "Now click here to award the badge.",
+          content: "When you're ready, click here to award the badge.",
           placement: "bottom",
           trigger: "manual",
           container: "body"
@@ -217,54 +218,9 @@
               $('#badge_info').siblings("iframe").contents().find("body").html(badgeInfoVersions[$(this).val()].info);
           });
         } else
-          $('#edit-badge-info div.form-footer').hide();
+          $('#badge-versions-section').hide();
       });
     </script>
-
-  <!-- === EDIT BADGE INFO MODAL === -->
-
-  <div id="edit-badge-info" class="modal full-screen hide fade" tabindex="-1" role="dialog" 
-   aria-labelledby="mimm-label" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Edit Badge Overview</h3>
-    </div>
-
-    <div class="modal-body">
-      <div class="bl-modal-form">
-
-        <div class="form-body">
-          <%= form_for [@group, @badge], url: group_badge_path(@group, @badge), method: :put,
-              id: 'edit-badge-info-form' do |f| %>
-            <%= f.text_area :info, class: "huge-text-area modal-rich-text-area", 
-                autofocus: true %><br />
-          <% end %>
-        </div>
-
-        <div class="form-footer">
-          <div class="control-group">
-            <label class="control-label">Restore Previous Versions</label>
-            <div class="controls">
-              <select id="badge-versions">
-                <option value="-1">--- Browse previous versions ---</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-
-      </div>
-
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn" aria-hidden="true" 
-       onclick="$('#edit-badge-info .bl-modal-form form').submit();">
-        Save
-      </button>
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    </div>
-  </div>
   
   <!-- === VALIDATION REQUESTS MODAL === -->
 
@@ -427,12 +383,24 @@
       <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
         <div class="card-tabs">
           <ul class="nav nav-tabs">
-            <li class="active"><a href="#overview" data-toggle="tab">Overview</a></li>
-            <li><a href="#posts" data-toggle="tab">
-              <span class="collapse-when-small">Recent </span>Posts</a>
-            </li>
-            <li><a href="#learners" data-toggle="tab">Learners</a></li>
-            <li><a href="#experts" data-toggle="tab">Experts</a></li>
+            <% if @badge.has_overview? || @badge.has_topics? || @current_user_is_expert || @badge_list_admin %>
+            
+              <li class="active"><a href="#overview" data-toggle="tab">Overview</a></li>
+              <li><a href="#posts" data-toggle="tab">
+                <span class="collapse-when-small">Recent </span>Posts</a>
+              </li>
+              <li><a href="#learners" data-toggle="tab">Learners</a></li>
+              <li><a href="#experts" data-toggle="tab">Experts</a></li>
+            
+            <% else %>
+            
+              <li class="active"><a href="#posts" data-toggle="tab">
+                <span class="collapse-when-small">Recent </span>Posts</a>
+              </li>
+              <li><a href="#learners" data-toggle="tab">Learners</a></li>
+              <li><a href="#experts" data-toggle="tab">Experts</a></li>
+
+            <% end %>
           </ul>
         </div>
       <% end %>
@@ -447,43 +415,178 @@
 
   <div class="tab-content">
 
-    <!-- === OVERVIEW TAB === -->
+    <% if @badge.has_overview? || @badge.has_topics? || @current_user_is_expert || @badge_list_admin %>
 
-    <div class="tab-pane active" id="overview">
+      <!-- === OVERVIEW TAB === -->
 
-      <% if @current_user_is_expert || @badge_list_admin %>
-        <div class="row">
-          <div class="span12">
-            <div class="tab-header">
-              <a tabindex="-1" href="#edit-badge-info" data-toggle="modal" class="btn btn-small" 
-                id="edit-overview">
-                <i class="fa fa-pencil"></i> Edit overview
-              </a>
+      <div class="tab-pane active" id="overview">
+      
+        <!-- === BADGE OVERVIEW === -->
 
-              <h2>Badge Overview</h2>
-              <h3 class="collapse-when-small">
-                <i class="fa fa-key"></i> Only editable by badge experts
-              </h3>
+        <% if @current_user_is_expert || @badge_list_admin %>
+          <div class="row">
+            <div class="span12">
+              <div class="tab-header">
+                <a tabindex="-1" class="btn btn-small" id="edit-overview" data-toggle="custom" 
+                  data-hide="#edit-overview,#overview-row" 
+                  data-focus="#badge_info" data-show="#overview-inline-form">
+                    <i class="fa fa-pencil"></i> Edit overview
+                </a>
+
+                <h2>Badge Overview</h2>
+                <h3 class="collapse-when-small">
+                  <i class="fa fa-key"></i> Only editable by badge experts
+                </h3>
+              </div>
             </div>
           </div>
-        </div>
-      <% end %>
+        <% end %>
 
-      <div class="row">
-        <div class="span12">
-          <% @badge.info_sections.each do |section_text| %>
-            <div class="info-card text-card">
-              <%= section_text.html_safe %>
+        <div class="row" id="overview-row">
+          <% if @badge.has_overview? %>
+            <div class="span12">
+              <% @badge.info_sections.each do |section_text| %>
+                <div class="info-card text-card">
+                  <%= section_text.html_safe %>
+                </div>
+              <% end unless @badge.info_sections.nil? %>
             </div>
-          <% end unless @badge.info_sections.nil? %>
+          
+          <% else %>
+
+            <div class="well span7 offset2">
+              <h3>Add a badge overview here</h3>
+              <p>
+                If you like, you can use this section to provide more detail on the badge. 
+                (This section is hidden from non-experts if you don't fill it in.)
+              </p>
+            </div>
+          
+          <% end %>
         </div>
+        
+        <% if @current_user_is_expert || @badge_list_admin %>
+
+          <!-- === EDIT BADGE OVERVIEW INTERFACE === -->
+
+          <div class="bl-inline-form" id="overview-inline-form" style="display: none">              
+            <%= simple_form_for [@group, @badge], id: 'edit-badge-info-form' do |f| %>
+
+              <div class="form-body">
+                <%= f.input :info, as: :text, label: 'Edit Badge Overview', 
+                  input_html: { class: "huge-text-area rich-text-area" } %>
+                
+                <div class="control-group" id="badge-versions-section">
+                  <label class="control-label">Restore Previous Versions</label>
+                  <div class="controls">
+                    <select id="badge-versions">
+                      <option value="-1">--- Browse previous versions ---</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-footer">
+                <%= f.button :submit, 'Save changes', class: 'btn btn-primary' %>
+                <a class="btn" data-toggle="custom"  data-hide="#overview-inline-form" 
+                  data-show="#edit-overview,#overview-row">Cancel</a>
+              </div>
+
+            <% end %>
+
+          </div>
+
+        <% end %>
+
+        <!-- === TOPIC LIST === -->
+
+        <% if @badge.has_topics? || @current_user_is_expert || @badge_list_admin %>
+          <div class="row">
+            <div class="span12">
+              <div class="tab-header">
+                <% if @current_user_is_expert || @badge_list_admin %>
+                  <a tabindex="-1" class="btn btn-small" id="edit-topic-list" data-toggle="custom" 
+                    data-hide="#edit-topic-list,#topic-list-row" 
+                    data-focus="#badge_topic_list_text" data-show="#topic-list-inline-form">
+                      <i class="fa fa-pencil"></i> Edit topic list
+                  </a>
+                <% end %>
+
+                <h2>Topic List</h2>
+                
+                <% if @current_user_is_expert || @badge_list_admin %>
+                  <h3 class="collapse-when-small">
+                    <i class="fa fa-key"></i> Only editable by badge experts
+                  </h3>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" id="topic-list-row">
+            <% if @badge.has_topics? %>
+
+              <div class="span12">
+                <div class="info-card text-card topic-list-card">
+                  <ul>
+                    <% @badge.topics.each do |topic| %>
+                      <li>
+                        <%= link_to "<i class='fa fa-book'></i> #{topic['tag_display_name']}".html_safe, 
+                          group_badge_path(@group, @badge) + "/" + topic['tag_name_with_caps'] %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+
+            <% else %>
+
+              <div class="well span7 offset2">
+                <h3>Add topic pages here</h3>
+                <p>
+                  You can use this section to add a list of important badge topics. Each topic has its
+                  own page and discussion thread.
+                  (This section is hidden from non-experts if you don't fill it in.)
+                </p>
+              </div>
+            <% end %>
+          </div>
+
+          <% if @current_user_is_expert || @badge_list_admin %>
+
+            <!-- === EDIT TOPIC LIST INTERFACE === -->
+
+            <div class="bl-inline-form" id="topic-list-inline-form" style="display: none">              
+              <%= simple_form_for [@group, @badge], id: 'edit-topic-list-form' do |f| %>
+
+                <div class="form-body">
+                  <%= f.input :topic_list_text, as: :text, label: 'Edit Topic List', 
+                    placeholder: "Enter a list of topics, one per line.",
+                    input_html: { class: "input-xlarge", rows: 7 } %>
+                </div>
+
+                <div class="form-footer">
+                  <%= f.button :submit, 'Save changes', class: 'btn btn-primary' %>
+                  <a class="btn" data-toggle="custom"  data-hide="#topic-list-inline-form" 
+                    data-show="#edit-topic-list,#topic-list-row">Cancel</a>
+                </div>
+
+              <% end %>
+
+            </div>
+
+          <% end %>
+
+        <% end %>
+
       </div>
 
-    </div>
+    <% end %>
 
     <!-- === ENTRIES TAB === -->
 
-    <div class="tab-pane" id="posts">
+    <div class="tab-pane <%= !(@badge.has_overview? || @badge.has_topics? || @current_user_is_expert \
+      || @badge_list_admin) ? 'active' : '' %>" id="posts">
 
       <div class="row">
         <div class="span12">
@@ -569,7 +672,7 @@
 
           <% if @badge.learner_logs.empty? %>
             <div class="well span7 offset2">
-              <p class="lead">No learners yet!</p>
+              <h3>No learners yet!</h3>
               <p>
                 <%= 
                   if @current_user_is_admin || @badge_list_admin
@@ -663,7 +766,7 @@
   
   <div class="row">
     <div class="well span7 offset2">
-      <p class="lead">This is a private badge</p>
+      <h3>This is a private badge</h3>
       <p>
         This badge belongs to a private learning group. 
         Its contents are only visible to members.

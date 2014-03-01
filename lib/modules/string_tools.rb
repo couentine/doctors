@@ -69,4 +69,15 @@ module StringTools
     return_text
   end
 
+  # Turns a topic display name into a tag by removing special characters and spaces
+  # Example: "Example Topic! Name" -> "Example-Topic-Name"
+  def tagify_string(topic_display_name)
+    if topic_display_name.nil?
+      nil
+    else
+      topic_display_name.strip\
+        .gsub(/\./, '').gsub(/[^ A-Za-z0-9]/, ' ').gsub(/ {2,}/, ' ').strip.gsub(/ /, '-')
+    end
+  end
+
 end
