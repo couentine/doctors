@@ -57,4 +57,15 @@ namespace :db do
     puts " >> Done."
   end
 
+  task update_tag_fields: :environment do
+    print "Updating #{Tag.count} tags"
+    Tag.each do |tag|
+      tag.display_name = tag.name_with_caps.gsub(/[^A-Za-z0-9]/, ' ').gsub(/ {2,}/, ' ') if tag.display_name.blank?
+      tag.editability = 'learners' if tag.editability.blank?
+      tag.timeless.save if tag.changed?
+      print "."
+    end
+    puts " >> Done."
+  end
+
 end
