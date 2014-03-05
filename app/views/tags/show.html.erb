@@ -134,11 +134,11 @@
   <div class="row add-top-margin">
     <div class="span12">
       <div class="tab-header">
-        <% unless @entries.blank? %>
+        <% if !@entries.blank? && (@current_user_is_learner || @current_user_is_expert) %>
           <%= link_to '<i class="fa fa-comment"></i> Post to discussion'.html_safe,
             new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
             class: 'btn btn-small' %>
-          <% end %>
+        <% end %>
 
         <h2>Topic discussion</h2>
         <h3><i class="fa fa-tag"></i> #<%= @tag.name_with_caps %></h3>

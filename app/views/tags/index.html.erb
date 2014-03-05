@@ -68,30 +68,48 @@
       </div>
 
       <div class="secondary-header span6">
-        <span class="header-text">
-          <h1>All Topic Pages</h1>
-        </span>            
+        <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
+          <span class="header-text">
+            <h1>All Topic Pages</h1>
+          </span>     
+        <% end %>       
       </div>
     </div>
   </div>
 </div>
 
-<!-- === ENTRIES LIST === -->
+<% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 
-<% if !@topics.blank? %>
+  <!-- === ENTRIES LIST === -->
 
-  <div class="row">
-    <div class="span12">
-      <div class="info-card text-card topic-list-card">
-        <ul>
-          <% @badge.topics.each do |topic| %>
-            <li>
-              <%= link_to "<i class='fa fa-book'></i> #{topic['tag_display_name']}".html_safe, 
-                group_badge_path(@group, @badge) + "/" + topic['tag_name_with_caps'] %>
-            </li>
-          <% end %>
-        </ul>
+  <% if !@topics.blank? %>
+
+    <div class="row">
+      <div class="span12">
+        <div class="info-card text-card topic-list-card">
+          <ul>
+            <% @topics.each do |topic| %>
+              <li>
+                <%= link_to "<i class='fa fa-book'></i> #{topic.display_name}".html_safe, 
+                  group_badge_path(@group, @badge) + "/" + topic.name_with_caps %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
       </div>
+    </div>
+
+  <% end %>
+
+<% else %>
+  
+  <div class="row">
+    <div class="well span7 offset2">
+      <h3>This is a private badge</h3>
+      <p>
+        This badge belongs to a private learning group. 
+        Its contents are only visible to members.
+      </p>
     </div>
   </div>
 

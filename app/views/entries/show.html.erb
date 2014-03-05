@@ -72,7 +72,7 @@
   // Converts hashtags to anchor tags
   function linkHashtags(text) {
     return text.replace(
-      /#([a-zA-Z0-9]+)/g,
+      /#([_a-zA-Z0-9-]+)/g,
         "<a class='linkified-tag' href='<%= group_badge_path(@group, @badge) %>"
           + "/$1'>#$1</a>"
       );

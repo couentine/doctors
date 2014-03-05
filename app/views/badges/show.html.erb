@@ -506,7 +506,7 @@
               <div class="tab-header">
                 <% if @current_user_is_expert || @badge_list_admin %>
                   <a tabindex="-1" class="btn btn-small" id="edit-topic-list" data-toggle="custom" 
-                    data-hide="#edit-topic-list,#topic-list-row" 
+                    data-hide="#edit-topic-list,#topic-list-row,#topic-footer-row" 
                     data-focus="#badge_topic_list_text" data-show="#topic-list-inline-form">
                       <i class="fa fa-pencil"></i> Edit topic list
                   </a>
@@ -523,9 +523,9 @@
             </div>
           </div>
 
-          <div class="row" id="topic-list-row">
-            <% if @badge.has_topics? %>
+          <% if @badge.has_topics? %>
 
+            <div class="row" id="topic-list-row">
               <div class="span12">
                 <div class="info-card text-card topic-list-card">
                   <ul>
@@ -538,9 +538,21 @@
                   </ul>
                 </div>
               </div>
+            </div>
 
-            <% else %>
+            <div class="row" id="topic-footer-row">
+              <div class="span12">
 
+                <div class="tab-footer">
+                  <%= link_to 'Browse all topic pages...', badge_topics_path(@group, @badge) %>
+                </div>
+              
+              </div>
+            </div>
+
+          <% else %>
+
+            <div class="row" id="topic-list-row">
               <div class="well span7 offset2">
                 <h3>Add topic pages here</h3>
                 <p>
@@ -549,8 +561,9 @@
                   (This section is hidden from non-experts if you don't fill it in.)
                 </p>
               </div>
-            <% end %>
-          </div>
+            </div>
+
+          <% end %>
 
           <% if @current_user_is_expert || @badge_list_admin %>
 
@@ -568,7 +581,7 @@
                 <div class="form-footer">
                   <%= f.button :submit, 'Save changes', class: 'btn btn-primary' %>
                   <a class="btn" data-toggle="custom"  data-hide="#topic-list-inline-form" 
-                    data-show="#edit-topic-list,#topic-list-row">Cancel</a>
+                    data-show="#edit-topic-list,#topic-list-row,#topic-footer-row">Cancel</a>
                 </div>
 
               <% end %>

@@ -26,11 +26,11 @@ class TagsController < ApplicationController
     end
 
     @badge.topics.each do |topic_item|
-      unless tag_names.include? topic_item[:tag_name]
+      if !topic_item['tag_name'].blank? && !tag_names.include?(topic_item['tag_name'])
         cur_tag = Tag.new
-        cur_tag.name = topic_item[:tag_name]
-        cur_tag.name_with_caps = topic_item[:tag_name_with_caps]
-        cur_tag.display_name = topic_item[:tag_display_name]
+        cur_tag.name = topic_item['tag_name']
+        cur_tag.name_with_caps = topic_item['tag_name_with_caps']
+        cur_tag.display_name = topic_item['tag_display_name']
 
         @topics << cur_tag
       end

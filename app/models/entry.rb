@@ -143,20 +143,18 @@ protected
   end
 
   def update_body_sections
-    if body_changed?
-      linkified_result = linkify_text(body, log.badge.group, log.badge)
-      self.body_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
-      self.tags_with_caps = linkified_result[:tags_with_caps]
+    if body_changed? || summary_changed?
+      body_result = linkify_text(body, log.badge.group, log.badge)
+      summary_result = linkify_text(summary, log.badge.group, log.badge)
+      
+      if body_changed?
+        self.body_sections = body_result[:text].split(SECTION_DIVIDER_REGEX)
+      end
       
       # The entry tags should be a concatenation of the summary and body tags
-      summary_tags = linkify_text(summary, log.badge.group, log.badge)[:tags]
-      body_tags = linkified_result[:tags]
-      self.tags = [summary_tags, body_tags].flatten.uniq
-    elsif summary_changed?
-      # The entry tags should be a concatenation of the summary and body tags
-      summary_tags = linkify_text(summary, log.badge.group, log.badge)[:tags]
-      body_tags = linkify_text(body, log.badge.group, log.badge)[:tags]
-      self.tags = [summary_tags, body_tags].flatten.uniq
+      self.tags = [body_result[:tags], summary_result[:tags]].flatten.uniq
+      self.tags_with_caps = [body_result[:tags_with_caps], summary_result[:tags_with_caps]]\
+        .flatten.uniq
     end
   end
 
