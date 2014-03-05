@@ -61,6 +61,9 @@ BadgeList::Application.routes.draw do
   match ':group_id/:badge_id/issue' => 'badges#issue_form', via: :get, as: :badge_issue
   match ':group_id/:badge_id/issue' => 'badges#issue_save', via: :post
 
+  # === MANUAL TAG PATHS === #
+  match ':group_id/:badge_id/:tag_id/restore' => 'tags#restore', via: :post, as: :tag_restore
+
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #
   match ':id/edit' => 'groups#edit', via: :get
   match ':group_id/:id/edit' => 'badges#edit', via: :get

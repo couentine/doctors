@@ -126,10 +126,14 @@
       <% elsif current_tutorial == 2 %>  
         // First build the popovers
         $("ul.nav-tabs").children().last().popover({
-          content: "When you're ready, click here to award the badge.",
+          content: "<a class='pull-right' href='#' "
+            + "onclick=\"$('ul.nav-tabs').children().last().popover('hide')\" "
+            + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
+            + "When you're ready, click here to award the badge. ",
           placement: "bottom",
           trigger: "manual",
-          container: "body"
+          container: "body",
+          html: true
         });
         $("#award-badge").popover({
           content: "Click here to award the badge.",
@@ -421,6 +425,20 @@
 
       <div class="tab-pane active" id="overview">
       
+        <% if !@badge.has_overview? && @current_user_is_expert %>
+        
+          <!-- === BADGE OVERVIEW VISIBILITY ALERT === -->
+
+          <div class="alert alert-gray">
+            <i class="fa fa-eye-slash"></i> 
+            <b>Overview Tab Currently Hidden:</b> 
+            The overview tab is currently only visible to badge experts. 
+            Once you add content to either of the sections below the tab will become visible to 
+            everyone who can see the badge.
+          </div>
+
+        <% end %>
+
         <!-- === BADGE OVERVIEW === -->
 
         <% if @current_user_is_expert || @badge_list_admin %>

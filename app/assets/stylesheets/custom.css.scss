@@ -154,6 +154,10 @@ ul.dropdown-menu {
     background-color: $tertiary-really-light;
     border-color: $tertiary-light;
   }
+  &.alert-gray {
+    background-color: $light-gray;
+    border-color: $medium-gray;
+  }
 }
 .tooltip {
   display: block;
@@ -185,12 +189,13 @@ ul.dropdown-menu {
   padding: 15px 20px;
   text-align: left !important;
   
-  h3 {
-    font-size: 16px;
+  h3,h4 {
     color: $secondary-dark;
     line-height: 1.2em;
     margin: 0 0 10px 0;
   }
+  h3 { font-size: 16px; }
+  h4 { font-size: 12px; }
   ul {
     margin: 0 0 0 10px;
     list-style: none;
@@ -230,6 +235,20 @@ ul.dropdown-menu {
 
     ul { font-size: 21px; }
     i.header-icon { font-size: 70px; }
+  }
+}
+.well.tertiary {
+  background-color: $tertiary-white;
+  border-left: 3px solid $tertiary-dark;
+
+  h3,h4 { color: $tertiary-dark; }
+  ul {
+    li { 
+      a:focus,a:hover { color: $tertiary-dark; }
+    }
+  }
+  i.header-icon {
+    color: $tertiary-really-light;
   }
 }
 .badge-success { background-color: $secondary-light; }
@@ -1690,13 +1709,9 @@ div.topic-list-card {
        clear: both;
     }
 
-    h1 {
-      display: inline;
-      padding: 0 7px 4px 7px;
-      background-color: $really-light-gray;
-      font-size: 26px;
-      font-weight: bold;
+    h1,h2,h3,h4 {
       line-height: 1.4em;
+      margin-right: 10px;
 
       a,a:visited {
         color: $dark-text-color;
@@ -1708,8 +1723,25 @@ div.topic-list-card {
         text-decoration: none;
         border-bottom: 1px dotted $primary-dark; 
       }
+    }
+    h1 {
+      display: inline;
+      padding: 0 7px 4px 7px;
+      font-weight: bold;
+      background-color: $really-light-gray;
+      font-size: 26px;
       
       @media (max-width: 767px) { font-size: 24px; }
+    }
+    h2 {
+      display: inline-block;
+      padding: 0;
+      font-weight: normal;
+      font-style: italic;
+      font-size: 14px;
+      color: $light-text-color;
+      
+      i.fa { font-size: 16px; }
     }
     ul {
       display: block;
@@ -1722,8 +1754,18 @@ div.topic-list-card {
         font-style: italic;
         font-size: 11px;
 
-        i {
-          opacity: 0.55;
+        a,a:visited {
+          color: $medium-text-color;
+          text-decoration: none;
+          border-bottom: 1px dotted $medium-text-color;
+        }
+        a:focus,a:hover {
+          color: $dark-text-color;
+          text-decoration: none;
+          border-bottom: 1px solid $dark-text-color; 
+        }
+        i.fa {
+          font-size: 14px;
         }
       }
     }

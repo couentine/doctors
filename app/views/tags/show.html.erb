@@ -18,23 +18,39 @@
   </li>
 <% end %>
 
-<% if @current_user_is_expert || @current_user_is_learner %>
+<% if @current_user_is_expert || @current_user_is_learner || @group.open? || @badge_list_admin \
+  || @current_user_is_admin || @current_user_is_member %>
+
   <% content_for :subheader_actions do %>
 
-    <li  class="collapsible">
-      <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
-          [@group, @badge, @current_user_log] %>
-      <span class="divider">|</span>
-    </li>
-    <li  class="collapsible">
-      <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
-          new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
-      <% if @tag_exists %>
-        <span class="divider">|</span>
-      <% end %>
-    </li>
+    <% if @current_user_is_expert || @current_user_is_learner %>
     
-    <% if @tag_exists %>
+      <li  class="collapsible">
+        <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
+            [@group, @badge, @current_user_log] %>
+        <span class="divider">|</span>
+      </li>
+      <li  class="collapsible">
+        <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
+            new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps) %>
+        <% if @tag_exists && @can_edit_tag %>
+          <span class="divider">|</span>
+        <% end %>
+      </li>
+
+    <% elsif @current_user_is_admin || @current_user_is_member || @group.open? %>
+    
+      <li class="collapsible">
+        <%= link_to '<i class="icon-plus icon-white"></i> Join Badge'.html_safe, 
+            group_badge_logs_path(@group, @badge), method: :post %>
+        <% if @tag_exists && @badge_list_admin %>
+          <span class="divider">|</span>
+        <% end %>
+      </li>
+
+    <% end %>
+    
+    <% if @tag_exists && @can_edit_tag %>
       <li class="collapsible">
         <%= link_to "<i class='fa fa-pencil'></i> Edit".html_safe, 
           "#{@tag.name_with_caps}/edit" %>
@@ -42,18 +58,81 @@
           <span class="divider">|</span>
         <% end %>
       </li>
+    <% end %>
       
-      <% if @current_user_is_expert %>
-        <li class="collapsible">
-          <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
-            [@group, @badge, @tag], method: :delete, data: { 
-            confirm: 'Are you sure you want to permanently delete the contents of this topic page?' } %>
-        </li>
-      <% end %>
+    <% if @tag_exists && @current_user_is_expert %>
+      <li class="collapsible">
+        <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
+          [@group, @badge, @tag], method: :delete, data: { 
+          confirm: 'Are you sure you want to permanently delete the contents of this topic page?' } %>
+      </li>
     <% end %>
 
   <% end %>
 <% end %>
+
+<!-- === TOPIC VERSION LIST === -->
+
+<% if @show_version_list %>
+
+  <div class="well tertiary span9 offset1">
+    <i class="fa fa-book header-icon"></i>
+
+    <h3>Browsing previous versions of the topic page</h3>
+    
+    <p>
+      Currently viewing version <%= @current_version %> 
+      created by <%= @current_version_info['username'] %> 
+      on <%= @current_version_info['updated_at_text'] %>.
+    </p>
+    
+    <p>
+      <% if @can_edit_tag && !@version_list.blank? && (@current_version != @version_list.count) %>
+        <%= link_to 'Restore this version', 
+          tag_restore_path(@group, @badge, @tag, v: @current_version), method: :post,
+          class: 'btn btn-primary btn-small' %>
+      <% end %>
+
+      <%= link_to 'Close version browser', [@group, @badge, @tag], class: 'btn btn-small' %>
+    </p>
+
+    <!-- <h4>Version history</h4> -->
+
+    <% unless @version_list.blank? %>
+      <table class="table table-striped version-list">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Version Info</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% @version_list.each_with_index do |version_info, i| %>
+            <tr>
+              <td><b><%= (i + 1).to_s %></b></td>
+              <td>
+                Created by <%= version_info['username'] %> 
+                on <%= version_info['updated_at_text'] %>
+              </td>
+              <td>
+                <% if (i + 1) == @current_version %>
+                  (Currently viewing this version)
+                <% else %>
+                  <%= link_to "View this version", group_badge_tag_path(@group, @badge, @tag, v: (i + 1)),
+                    class: 'btn btn-mini' %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+
+<% end %>
+
 
 <!-- === TOPIC PAGE === -->
 
@@ -76,27 +155,37 @@
         <h1>
           <%= @tag.display_name %>
         </h1>
-        
-        <% if @tag_exists %>
-          <ul>
-            <li>
-              <i class="icon-time" title="Creation date"></i> 
-              <%= @tag.created_at.to_s(:full_date_time) %>
-            </li>
-            <% if @tag.updated_at != @tag.created_at %>
-              <li>
-                <i class="icon-info-sign"></i> 
-                <% if @tag.updated_at <= Time.now %>
-                  <%= "Last updated #{time_ago_in_words(@tag.updated_at)} ago" %>
-                <% else %>
-                  <%= "Last updated #{time_ago_in_words(@tag.updated_at)} from now" %>
-                <% end %>
-              </li>
+
+        <% if !@show_version_list %>
+          <h2>
+            <i class="fa fa-key"></i> 
+            <% if @tag.editability == 'experts' %>
+              Only editable by badge experts
+            <% else %>
+              Editable by badge experts &amp; learners
             <% end %>
-            <li>
-              <i class="icon-file"></i> This is version <%= @version %> of the topic page
-            </li>
-          </ul>
+          </h2>
+          
+          <% if @tag_exists %>
+            <ul>
+              <% if @current_version == 1 %>
+                <li>
+                  <i class="fa fa-calendar"></i> 
+                  <%= "Created #{@tag.created_at.to_s(:full_date)} by #{@tag.current_username}" %>
+                </li>
+              <% else %>
+                <li>
+                  <i class="fa fa-clock-o"></i> 
+                  <%= "Last updated #{@tag.updated_at.to_s(:full_date_time)} by #{@tag.current_username}" %>
+                </li>
+                <li>
+                  <i class="fa fa-files-o"></i> This is version <%= @current_version %>
+                  (<%= link_to "Browse previous versions",
+                    group_badge_tag_path(@group, @badge, @tag, v: '') %>)
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
         <% end %>
 
       </div>
@@ -112,7 +201,7 @@
 
           <div class="section-container alert">
               This topic hasn't had a page created for it yet.
-              <% if @current_user_is_expert || @current_user_is_learner %>
+              <% if @can_edit_tag %>
                 <br><br>
                 <%= link_to \
                   "<i class='icon-plus-sign icon-white'></i> Create topic page".html_safe,
@@ -127,7 +216,7 @@
   </div>
 </div>
 
-<% if !@entries.blank? || @current_user_is_learner || @current_user_is_expert %>
+<% if !@show_version_list && (!@entries.blank? || @current_user_is_learner || @current_user_is_expert) %>
 
   <!-- === TOPIC DISCUSSION === -->
 
