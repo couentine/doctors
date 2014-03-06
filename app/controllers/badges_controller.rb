@@ -42,8 +42,8 @@ class BadgesController < ApplicationController
 
     @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
     @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
-    @badge.word_for_expert = @expert_words.first
-    @badge.word_for_learner = @learner_words.first
+    @badge.word_for_expert = EXPERT_WORDS.first # values are singularized in page
+    @badge.word_for_learner = LEARNER_WORDS.first # values are singularized in page
 
     respond_to do |format|
       format.html # new.html.erb
