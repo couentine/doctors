@@ -68,4 +68,16 @@ namespace :db do
     puts " >> Done."
   end
 
+  task update_badge_fields: :environment do
+    print "Updating #{Badge.count} badges"
+    Badge.each do |badge|
+      badge.word_for_expert = 'expert' if badge.word_for_expert.blank?
+      badge.word_for_learner = 'learner' if badge.word_for_learner.blank?
+      badge.progress_tracking_enabled = true
+      badge.timeless.save if badge.changed?
+      print "."
+    end
+    puts " >> Done."
+  end
+
 end

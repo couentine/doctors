@@ -864,6 +864,7 @@ div.control-group.badge-roles {
       td {
         font-size: 13px;
         padding-bottom: 10px;
+        padding-right: 15px;
 
         select {
           font-size: 13px;
@@ -894,7 +895,6 @@ div.control-group.badge-roles {
         width: 250px;
         font-weight: bold;
         color: $medium-text-color;
-        padding-right: 15px;
         text-align: right;
         vertical-align: middle;
       }
