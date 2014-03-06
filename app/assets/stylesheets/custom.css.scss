@@ -164,6 +164,14 @@ ul.dropdown-menu {
 }
 .popover {
   border-color: $primary-light;
+  .popover-title {
+    color: $primary-white;
+    background-color: $primary-light;
+    font-weight: bold;
+
+    a,a:visited { color: $primary-white; }
+    a:focus,a:hover { color: $dark-text-color; }
+  }
   .popover-content { 
     color: $dark-text-color;
     background-color: $primary-really-light;
@@ -251,6 +259,21 @@ ul.dropdown-menu {
     color: $tertiary-really-light;
   }
 }
+.well.gray {
+  background-color: $light-white;
+  border-left: none;
+
+  h3,h4 { color: $medium-text-color; }
+  ul {
+    li { 
+      a:focus,a:hover { color: $secondary-dark; }
+    }
+  }
+  i.header-icon {
+    color: $really-light-gray;
+  }
+}
+
 .badge-success { background-color: $secondary-light; }
 .badge-warning { background-color: $primary-light; }
 .badge-info { background-color: $tertiary-light; }
@@ -834,6 +857,66 @@ h2.form-header {
 
 #badge-versions {
   width: 340px;
+}
+div.control-group.badge-roles {
+  .controls table {
+    tr {
+      td {
+        font-size: 13px;
+        padding-bottom: 10px;
+
+        select {
+          font-size: 13px;
+          padding: 2px;
+          border-radius: 0;
+          border: none;
+          border-bottom: 1px solid $medium-gray;
+          width: auto;
+        }
+        abbr {
+          color: $medium-text-color;
+          font-size: 11px;
+          font-weight: normal;
+          border-bottom: 1px dotted $medium-text-color;
+          cursor: pointer;
+          line-height: 2.5em;
+        }
+        abbr:hover {
+          color: $dark-text-color;
+          border-bottom: 1px dotted $dark-text-color;
+        }
+        abbr:focus {
+          color: $tertiary-dark;
+          border-bottom: 1px dotted $tertiary-dark;
+        }
+      }
+      td:first-child { 
+        width: 250px;
+        font-weight: bold;
+        color: $medium-text-color;
+        padding-right: 15px;
+        text-align: right;
+        vertical-align: middle;
+      }
+    }
+    tr.learner-word-row {
+      border-radius: 5px;
+      background-color: $secondary-really-light;
+
+      &.control-row {
+        td { 
+          text-align: center; 
+          padding-bottom: 7px;
+        }
+      }
+      &.value-row {
+        td { padding-top: 7px; }
+      }
+      &.disabled {
+        background-color: $really-light-gray;
+      }
+    }
+  }
 }
 
 /* Add users form */

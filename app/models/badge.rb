@@ -8,6 +8,7 @@ class Badge
   MAX_NAME_LENGTH = 50
   MAX_URL_LENGTH = 20
   MAX_SUMMARY_LENGTH = 140
+  MAX_TERM_LENGTH = 15
   RECENT_DATE_THRESHOLD = 10.days # Used to filter "recent" activity & changes
 
   # === RELATIONSHIPS === #
@@ -19,32 +20,35 @@ class Badge
 
   # === FIELDS & VALIDATIONS === #
 
-  field :name,                type: String
-  field :url,                 type: String
-  field :url_with_caps,       type: String
-  field :summary,             type: String
+  field :name,                        type: String
+  field :url,                         type: String
+  field :url_with_caps,               type: String
+  field :summary,                     type: String
+  field :word_for_expert,             type: String, default: 'expert'
+  field :word_for_learner,            type: String, default: 'learner'
+  field :progress_tracking_enabled,   type: Boolean, default: true
   
-  field :info,                type: String
-  field :info_sections,       type: Array
-  field :info_versions,       type: Array
-  field :info_tags,           type: Array
-  field :info_tags_with_caps, type: Array
+  field :info,                        type: String
+  field :info_sections,               type: Array
+  field :info_versions,               type: Array
+  field :info_tags,                   type: Array
+  field :info_tags_with_caps,         type: Array
 
-  field :topic_list_text,     type: String
-  field :topics,              type: Array, default: []
+  field :topic_list_text,             type: String
+  field :topics,                      type: Array, default: []
 
-  field :image_frame,         type: String
-  field :image_icon,          type: String
-  field :image_color1,        type: String
-  field :image_color2,        type: String
-  field :image_url,           type: String # RETIRED field
-  field :image,               type: Moped::BSON::Binary # stores the actual badge image
-  field :image_attributions,  type: Array
-  field :icon_search_text,    type: String # stores what the user searched for b4 picking the icon
+  field :image_frame,                 type: String
+  field :image_icon,                  type: String
+  field :image_color1,                type: String
+  field :image_color2,                type: String
+  field :image_url,                   type: String # RETIRED field
+  field :image,                       type: Moped::BSON::Binary # stores the actual badge image
+  field :image_attributions,          type: Array
+  field :icon_search_text,            type: String # stores what the user searched for b4 picking the icon
 
-  field :current_user,        type: String # used when logging info_versions
-  field :current_username,    type: String # used when logging info_versions
-  field :flags,               type: Array
+  field :current_user,                type: String # used when logging info_versions
+  field :current_username,            type: String # used when logging info_versions
+  field :flags,                       type: Array
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH },
@@ -58,12 +62,14 @@ class Badge
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
+  validates :word_for_expert, presence: true, length: { within: 3..MAX_TERM_LENGTH }
+  validates :word_for_learner, length: { maximum: MAX_TERM_LENGTH }
   validates :group, presence: true
   validates :creator, presence: true
 
   # Which fields are accessible?
-  attr_accessible :name, :url_with_caps, :summary, :info, :image_frame, :image_icon, :image_color1,
-    :image_color2, :icon_search_text, :topic_list_text
+  attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
+    :image_frame, :image_icon, :image_color1, :image_color2, :icon_search_text, :topic_list_text
   
   # === CALLBACKS === #
 
@@ -72,6 +78,7 @@ class Badge
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
   before_save :build_badge_image
+  before_save :update_terms
   before_save :update_topics
   after_create :add_creator_as_expert
 
@@ -79,6 +86,10 @@ class Badge
 
   def to_param
     url
+  end
+
+  def tracks_progress?
+    return progress_tracking_enabled.nil? || (progress_tracking_enabled == true)
   end
 
   def has_overview?
@@ -278,6 +289,24 @@ protected
         self.info_versions = [current_version_row]
       elsif info_versions.last[:info] != info
         self.info_versions << current_version_row
+      end
+    end
+  end
+
+  def update_terms
+    if word_for_expert_changed?
+      self.word_for_expert = word_for_expert.gsub(/[^ A-Za-z]/, ' ').gsub(/ {2,}/, ' ')\
+        .strip.downcase.singularize
+    end
+
+    if word_for_learner_changed?
+      if word_for_learner.blank?
+        self.progress_tracking_enabled = false
+        self.word_for_learner = nil
+      else 
+        self.progress_tracking_enabled = true
+        self.word_for_learner = word_for_learner.gsub(/[^ A-Za-z]/, ' ').gsub(/ {2,}/, ' ')\
+          .strip.downcase.singularize
       end
     end
   end

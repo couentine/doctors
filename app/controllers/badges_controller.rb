@@ -9,6 +9,11 @@ class BadgesController < ApplicationController
   before_filter :badge_expert, only: [:edit, :update, :add_learners, :create_learners, :issue_form, 
     :issue_save]
 
+  # === CONSTANTS === #
+
+  EXPERT_WORDS = %w(expert master guide guru jedi)
+  LEARNER_WORDS = %w(learner trainee student novice padawan)
+
   # === RESTFUL ACTIONS === #
 
   # GET /group-url/badge-url
@@ -35,6 +40,11 @@ class BadgesController < ApplicationController
   def new
     @badge = Badge.new(group: @group)
 
+    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
+    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
+    @badge.word_for_expert = @expert_words.first
+    @badge.word_for_learner = @learner_words.first
+
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @badge }
@@ -43,7 +53,12 @@ class BadgesController < ApplicationController
 
   # GET /group-url/badge-url/edit
   def edit
-    # badge is found by find_records, so nothing to do here
+    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
+    @expert_words << @badge.word_for_expert.pluralize \
+      if !@expert_words.include? @badge.word_for_expert.pluralize
+    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
+    @learner_words << @badge.word_for_learner.pluralize \
+      if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
   end
 
   # POST /group-url/badges
@@ -54,6 +69,13 @@ class BadgesController < ApplicationController
     @badge.creator = current_user
     @badge.current_user = current_user
     @badge.current_username = current_user.username
+
+    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
+    @expert_words << @badge.word_for_expert.pluralize \
+      if !@expert_words.include? @badge.word_for_expert.pluralize
+    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
+    @learner_words << @badge.word_for_learner.pluralize \
+      if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
 
     respond_to do |format|
       if @badge.save
@@ -73,6 +95,13 @@ class BadgesController < ApplicationController
   def update
     @badge.current_user = current_user
     @badge.current_username = current_user.username
+
+    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
+    @expert_words << @badge.word_for_expert.pluralize \
+      if !@expert_words.include? @badge.word_for_expert.pluralize
+    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
+    @learner_words << @badge.word_for_learner.pluralize \
+      if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
     
     respond_to do |format|
       if @badge.update_attributes(params[:badge])

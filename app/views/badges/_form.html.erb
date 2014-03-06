@@ -1,5 +1,7 @@
 <script>
 
+var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
+
   $(document).ready(function() {
     <% if @badge.new_record? %>
       // If this is a new record then auto set the URL as they type
@@ -7,6 +9,68 @@
         $('#badge_url_with_caps').val(parameterizeText($(this).val()));
       });
     <% end %>
+
+    // Create events to add custom badge terms
+    
+    $("#badge_word_for_expert").append("<option value disabled='disabled'>-----</option>");
+    $("#badge_word_for_expert").append("<option value='*' class='select-hr'>+ Add Word</option>");
+    $("#badge_word_for_expert").change(function() {
+      if ($(this).val() == "*") {
+        var customValue = prompt("People who have earned the badge are called 'badge _____'", 'learners');
+
+        if ((customValue != null) && (customValue.trim().length > MAX_TERM_LENGTH)) {
+          alert('Your word must be less than ' + (MAX_TERM_LENGTH+1) + ' characters. Please try again.');
+          $(this).val('expert');
+        } else if ((customValue != null) && (customValue.trim() != '')) {
+          customValue = customValue.trim();
+          $(this).append("<option value='" + customValue + "'>" + customValue + "</option>");
+          $(this).val(customValue);
+          $(this).focus();
+        } else {
+          $(this).val('expert');
+        }
+      }
+    });
+
+    $("#badge_word_for_learner").children().first().text("< None >") // Label the blank value
+    $("#badge_word_for_learner").append("<option value disabled='disabled'>-----</option>");
+    $("#badge_word_for_learner").append("<option value='*' class='select-hr'>+ Add Word</option>");
+    $("#badge_word_for_learner").change(function() {
+      if ($(this).val() == "*") {
+        var customValue = prompt("People tracking their progress towards earning the badge are "
+          + "called 'badge _____'", 'experts');
+
+        if ((customValue != null) && (customValue.trim().length > MAX_TERM_LENGTH)) {
+          alert('Your word must be less than ' + (MAX_TERM_LENGTH+1) + ' characters. Please try again.');
+          $(this).val('learner');
+        } else if ((customValue != null) && (customValue.trim() != '')) {
+          customValue = customValue.trim();
+          $(this).append("<option value='" + customValue + "'>" + customValue + "</option>");
+          $(this).val(customValue);
+          $(this).focus();
+        } else {
+          $(this).val('learner');
+        }
+      }
+    });
+
+    // Add popover
+    $("#progress-tracking-explanation").popover({
+      title: "<a class='pull-right' href='#' "
+        + "onclick=\"$('#progress-tracking-explanation').popover('hide')\" "
+        + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
+        + "What is progress tracking?",
+      content: "Badge List allows you to add people to a badge before they’ve earned it so that "
+        + "they can post entries to a progress log.<br><br>"
+        + "This functionality is <i>optional</i>.  "
+        + "It’s up to you to decide whether keeping track of progress is an important part of "
+        + "this badge.  You can change this setting at any time.",
+      placement: "bottom",
+      trigger: "click",
+      container: "body",
+      html: true
+    });
+
   });
 
   function toggleExtraInfo() {
@@ -18,6 +82,28 @@
       $('#form-extra-info').slideDown();
       $('#form-extra-info-toggle').val('Hide Extra Info')
       $('#group_location').focus()
+    }
+  }
+
+  function toggleProgressTracking() {
+    var buttonElement = $('#toggle-progress-tracking');
+    var selectElement = $('#badge_word_for_learner');
+
+    if (buttonElement.data('status') == 'on') {
+      selectElement.data('previous-value', selectElement.val());
+      selectElement.val(null);
+      buttonElement.text('Turn on progress tracking for this badge');
+      buttonElement.data('status', 'off');
+      $('.learner-word-row').addClass('disabled');
+      // $('.learner-word-row.value-row select').prop('disabled', true);
+    } else {
+      var previousValue = selectElement.data('previous-value');
+      if (previousValue == null) previousValue = 'learner';
+      selectElement.val(previousValue);
+      buttonElement.text('Turn off progress tracking for this badge');
+      buttonElement.data('status', 'on');
+      $('.learner-word-row').removeClass('disabled');
+      // $('.learner-word-row.value-row select').prop('disabled', false);
     }
   }
 
@@ -47,6 +133,43 @@
     <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
         :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH,
         toggle: 'tooltip', title: 'Explain clearly what badge earners have accomplished' } } %>
+
+    <!-- === BADGE ROLE NAMES === -->
+
+    <div class="control-group badge-roles">
+      <label class="control-label">Pick words to describe</label>
+      <div class="controls">
+        <table>
+          <tr>
+            <td>People who've earned the badge: </td>
+            <td>
+              <%= f.input_field :word_for_expert, as: :select, collection: @expert_words,
+                include_blank: false, label_method: 'titleize', value_method: 'singularize' %>
+            </td>
+          </tr>
+          <tr class="learner-word-row value-row <%= (@badge.tracks_progress?) ? '' : 'disabled' %>">
+            <td>People working to earn the badge &amp; tracking progress: </td>
+            <td>
+              <%= f.input_field :word_for_learner, as: :select, collection: @learner_words,
+                include_blank: true, label_method: 'titleize', value_method: 'singularize' %>
+            </td>
+          </tr>
+          <tr class="learner-word-row control-row <%= (@badge.tracks_progress?) ? '' : 'disabled' %>">
+            <td colspan="2">
+              <button type="button" id="toggle-progress-tracking" class="btn btn-small" 
+                data-status="<%= (@badge.tracks_progress?) ? 'on' : 'off' %>" 
+                onclick="toggleProgressTracking();">
+                Turn <%= (@badge.tracks_progress?) ? 'off' : 'on' %> progress tracking for this badge
+              </button><br>
+              <abbr id="progress-tracking-explanation">
+                About Progress Tracking
+                <i class="fa fa-question-circle"></i>
+              </abbr>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
 
     <!-- === BADGE IMAGE MAKER === -->
 
