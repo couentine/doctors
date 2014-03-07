@@ -51,6 +51,10 @@ var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
         } else {
           $(this).val('learner');
         }
+      } else if (($(this).val() == "") && ($('#toggle-progress-tracking').data('status') == 'on')) {
+        toggleProgressTracking();
+      } else if (($(this).val() != "") && ($('#toggle-progress-tracking').data('status') == 'off')) {
+        toggleProgressTracking();
       }
     });
 
@@ -60,8 +64,8 @@ var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
         + "onclick=\"$('#progress-tracking-explanation').popover('hide')\" "
         + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
         + "What is progress tracking?",
-      content: "Badge List allows you to add people to a badge before they’ve earned it so that "
-        + "they can post entries to a progress log.<br><br>"
+      content: "Badge List helps you track the progress of people working to earn the badge by "
+        + "letting them post entries to a progress log.<br><br>"
         + "This functionality is <i>optional</i>.  "
         + "It’s up to you to decide whether keeping track of progress is an important part of "
         + "this badge.  You can change this setting at any time.",
@@ -91,15 +95,15 @@ var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
 
     if (buttonElement.data('status') == 'on') {
       selectElement.data('previous-value', selectElement.val());
-      selectElement.val(null);
+      selectElement.val("");
       buttonElement.text('Turn on progress tracking for this badge');
       buttonElement.data('status', 'off');
       $('.learner-word-row').addClass('disabled');
       // $('.learner-word-row.value-row select').prop('disabled', true);
     } else {
       var previousValue = selectElement.data('previous-value');
-      if (previousValue == null) previousValue = 'learner';
-      selectElement.val(previousValue);
+      if ((previousValue == null) || (previousValue == "")) previousValue = 'learner';
+      if (selectElement.val() == "") selectElement.val(previousValue);
       buttonElement.text('Turn off progress tracking for this badge');
       buttonElement.data('status', 'on');
       $('.learner-word-row').removeClass('disabled');
@@ -148,7 +152,7 @@ var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
             </td>
           </tr>
           <tr class="learner-word-row value-row <%= (@badge.tracks_progress?) ? '' : 'disabled' %>">
-            <td>People working to earn the badge &amp; tracking progress: </td>
+            <td>People working to earn the badge: </td>
             <td>
               <%= f.input_field :word_for_learner, as: :select, collection: @learner_words,
                 include_blank: true, label_method: 'titleize', value_method: 'singularize' %>
