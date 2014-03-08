@@ -111,10 +111,10 @@
 
                     <h2><%= link_to log.badge.name, [log.badge.group, log.badge] %></h2><br>
                     <% if log.validation_status == 'validated' %>
-                      <h3>Expert since <%= log.date_issued.to_s(:full_date) %></h3><br>
+                      <h3><%= log.badge.expert.capitalize %> since <%= log.date_issued.to_s(:full_date) %></h3><br>
                     <% else %>
                       <h3>
-                        Learner since 
+                        <%= log.badge.learner.capitalize %> since 
                         <%= (log.date_started || log.created_at).to_s(:full_date) %>
                       </h3><br>
                     <% end %>

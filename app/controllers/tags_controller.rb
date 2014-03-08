@@ -8,13 +8,6 @@ class TagsController < ApplicationController
   before_filter :can_edit_tag, only: [:edit, :update, :restore]
   before_filter :badge_expert, only: [:destroy]
 
-  # === CONSTANTS === #
-
-  TAG_EDITABILITY_OPTIONS = [
-    ['Badge experts and badge learners', 'learners'],
-    ['Only badge experts', 'experts']
-  ]
-
   # === RESTFUL ACTIONS === #
 
   def index
@@ -87,7 +80,7 @@ class TagsController < ApplicationController
 
   # GET /group-url/badge-url/tag-name/edit
   def edit
-    @tag_editability_options = TAG_EDITABILITY_OPTIONS
+    # Nothing to do here.
   end
 
   # PUT /group-url/badge-url/tag-name
@@ -95,7 +88,6 @@ class TagsController < ApplicationController
   def update
     @tag.current_user = current_user
     @tag.current_username = current_user.username
-    @tag_editability_options = TAG_EDITABILITY_OPTIONS
 
     respond_to do |format|
       if @tag_exists
@@ -176,6 +168,22 @@ private
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil if current_user
     @badge_list_admin = current_user && current_user.admin?
+
+    # Define badge terminology shortcuts
+    @expert = @badge.expert
+    @experts = @badge.experts
+    @Expert = @badge.Expert
+    @Experts = @badge.Experts
+    @learner = @badge.learner
+    @learners = @badge.learners
+    @Learner = @badge.Learner
+    @Learners = @badge.Learners
+    @show_progress = @badge.tracks_progress?
+
+    @tag_editability_options = [
+      ["#{@Experts} and #{@Learners}", 'learners'],
+      ["Only #{@Experts}", 'experts']
+    ]
   end
   
   def find_all_records

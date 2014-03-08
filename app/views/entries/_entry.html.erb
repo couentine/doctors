@@ -65,9 +65,9 @@
         <td class="headline-right">
           <%= link_to gravatar_for(entry.log.user, class: "img-circle #{entry.log_user_type}"), 
             [entry.log.badge.group, entry.log.badge, entry.log],
-            title: "View #{entry.log.user.name}'s progress log" %>
+            title: "View #{entry.log.user.name}'s #{entry.log.badge.progress_log}", data: { toggle: 'tooltip' } %>
           <abbr class="username <%= entry.log_user_type %>" data-toggle="tooltip" data-placement="bottom"
-            title="<%= "#{entry.log.user.name} (#{entry.log_user_type.capitalize} at time of #{entry.type})" %>" >
+            title="<%= entry.log.user.name %>" >
             <%= entry.log.user.username %>
           </abbr>
         </td>
@@ -101,7 +101,7 @@
               <%= "#{time_ago_in_words(entry.updated_at).capitalize} from now" %>
             <% end %>
           <% elsif date_format == :learner_week %>
-            <%= "Learner Week #{entry.learner_week_updated_at}" %> / 
+            <%= "Week #{entry.learner_week_updated_at}" %> / 
           <% else %>
             <%= entry.updated_at.to_s(:full_date_time) %>
           <% end %>
@@ -115,10 +115,10 @@
               title='Only visible to members now, visible to public when badge is issued'></i>
           <% elsif entry.visibility == :experts %>
             <i class='icon-lock' data-toggle='tooltip' 
-              title='Only visible to badge experts'></i>
+              title='Only visible to <%= entry.log.badge.experts %>'></i>
           <% else %>
             <i class='icon-warning-sign' data-toggle='tooltip' 
-              title='Only visible to log owner / entry creator'></i>
+              title='Only visible to <%= entry.log.badge.log %> owner and entry creator'></i>
           <% end %>
         </td>
       </tr>

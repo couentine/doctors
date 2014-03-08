@@ -35,13 +35,13 @@
         <% if @current_user_is_log_owner %>
           <h1>Update your self validation</h1>
         <% else %>
-          <h1>Update your validation of <%= @user.name %>'s learning log</h1>
+          <h1>Update your validation of <%= @user.name %>'s <%= @badge.progress_log %></h1>
         <% end %>
       <% else %>
         <% if @current_user_is_log_owner %>
           <h1>Update your post</h1>
         <% else %>
-          <h1>Update your post on <%= @user.name %>'s learning log</h1>
+          <h1>Update your post on <%= @user.name %>'s progress log</h1>
         <% end %>
       <% end %>
       <div class="form-image">

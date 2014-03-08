@@ -20,7 +20,7 @@
 
 <% if @current_user_is_admin || @current_user_is_member || @group.open? %>
   <% content_for :subheader_actions do %>
-    <% if !@current_user_is_expert && !@current_user_is_learner %>
+    <% if @show_progress && !@current_user_is_expert && !@current_user_is_learner %>
       <li class="collapsible">
         <%= link_to '<i class="icon-plus icon-white"></i> Join Badge'.html_safe, 
             group_badge_logs_path(@group, @badge), method: :post %>
@@ -28,7 +28,7 @@
           <span class="divider">|</span>
         <% end %>
       </li>
-    <% else %>
+    <% elsif @current_user_is_expert || @current_user_is_learner %>
       <li  class="collapsible">
         <%= link_to '<i class="icon-user icon-white"></i> Your Log'.html_safe, 
             [@group, @badge, @log] %>

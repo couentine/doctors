@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "Add learners - #{@group.name}") 
+  provide(:title, "Add #{@learners} - #{@group.name}") 
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
 %>
@@ -13,14 +13,14 @@
     <%= link_to @badge.url, [@group, @badge] %>
     <span class="divider">/</span>
   </li>
-  <li class="active">Add Badge Learners</li>
+  <li class="active">Add Badge <%= @Learners %></li>
 <% end %>
 
 <div class="row">
   <div class="bl-form bl-form-members span10 offset1">
     
     <div class="form-header">
-      <h1>Add badge learners</h1>
+      <h1>Add <%= @learners %> to badge</h1>
       <div class="form-image">
         <i class="fa fa-users"></i>
       </div>
@@ -30,7 +30,7 @@
       <div class="form-body">
         <h3>Your learning group is empty...</h3>
         <p>
-          Before you can add learners to this badge you need to add some folks to the learning group.
+          Before you can add <%= @learners %> to this badge you need to add some folks to the learning group.
           <br><br>
           <%= link_to "<i class='fa fa-plus'></i> Invite learning group members".html_safe,
             add_group_members_path(@group, badges: [@badge.url]), class: "btn btn-primary" %>
@@ -74,14 +74,14 @@
           <div class="controls">
             <label class="checkbox">
               <%= check_box_tag :notify_by_email, "1", true %> 
-              Notify new learners by email
+              Notify new <%= @learners %> by email
             </label>
           </div>
         </div>
         
         <div class="form-footer">
-          <%= button_tag "Add new learners", type: 'submit', class: 'btn btn-primary' %>
-          <%= link_to 'Cancel', group_badge_path(@group, @badge)+'#learners', class: 'btn' %> 
+          <%= button_tag "Add new #{@learners}", type: 'submit', class: 'btn btn-primary' %>
+          <%= link_to 'Cancel', group_badge_path(@group, @badge)+"##{@learners.parameterize}", class: 'btn' %> 
         </div>
 
       <% end %>

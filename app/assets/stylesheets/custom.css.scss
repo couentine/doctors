@@ -1076,6 +1076,10 @@ form#group-add-users-form {
       float: right; 
       margin: 0 0 0 20px;
     }
+
+    &.no-tabs { 
+      margin-right: 20px; 
+    }
   }
   .primary-header,.secondary-header {
     position: relative;

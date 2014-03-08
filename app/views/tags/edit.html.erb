@@ -21,7 +21,7 @@
 
 <!-- === PAGE-SPECIFIC SCRIPTS === -->
 
-<% if @current_user_is_expert %>
+<% if @current_user_is_expert && @show_progress %>
   <script>
     var originalTagName = "<%= @tag.name %>";
 
@@ -95,17 +95,19 @@
           </div>
         <% end %>
 
-        <div class="control-group">
-          <label class="control-label">Topic Tag</label>
-          <div class="controls">
-            <span class="input-mock" id="discussion-tag">#<%= @tag.name_with_caps %></span>
+        <% if @show_progress %>
+          <div class="control-group">
+            <label class="control-label">Topic Tag</label>
+            <div class="controls">
+              <span class="input-mock" id="discussion-tag">#<%= @tag.name_with_caps %></span>
+            </div>
           </div>
-        </div>
+        <% end %>
         
         <%= f.input :wiki, as: :text, label: 'Page Body', 
           input_html: { class: "huge-text-area rich-text-area" } %>
 
-        <% if @current_user_is_expert %>
+        <% if @current_user_is_expert && @show_progress %>
           <%= f.input :editability, label: 'Who can edit the topic page?', as: :radio_buttons,
             collection: @tag_editability_options %>
         <% end %>

@@ -6,15 +6,15 @@
   <body>
     <p>
       <% if @from_self %>
-        You've joined the <%= @badge.name %> badge in Badge List as a learner.
+        You've joined the <%= @badge.name %> badge in Badge List as a badge <%= @badge.learner %>.
       <% else %>
-        You've been added as a learner to the <%= @badge.name %> badge in Badge List. 
+        You've been added as a badge <%= @badge.learner %> to the <%= @badge.name %> badge in Badge List. 
       <% end %>
       This badge is part of the <%= @group.name %> learning group.
       To begin adding entries to your learning log you can login to Badge List as normal or click on the link below.
     </p>
     <p>
-      <strong>Your Progress Log and Profile:</strong> 
+      <strong>Your <%= @badge.progress_log %>:</strong> 
       <%= link_to group_badge_log_url(@group, @badge, @log), 
         group_badge_log_url(@group, @badge, @log) %> <br>
       <strong><%= @badge.name %>:</strong> 

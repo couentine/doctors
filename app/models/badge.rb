@@ -82,6 +82,22 @@ class Badge
   before_save :update_topics
   after_create :add_creator_as_expert
 
+  # === BADGE TERMINOLOGY METHODS === #
+  # These are shortcuts to the various inflections of the word_for_xxx fields
+
+  def expert; word_for_expert || 'expert'; end
+  def experts; expert.pluralize; end
+  def Expert; expert.titleize; end
+  def Experts; experts.titleize; end
+
+  def learner; word_for_learner || 'learner'; end
+  def learners; learner.pluralize; end
+  def Learner; learner.titleize; end
+  def Learners; learners.titleize; end
+
+  def log; (tracks_progress?) ? 'log' : 'profile'; end
+  def progress_log; (tracks_progress?) ? 'progress log' : 'badge profile'; end
+
   # === BADGE METHODS === #
 
   def to_param
@@ -93,7 +109,7 @@ class Badge
   end
 
   def has_overview?
-    !info_versions.blank?
+    !info_versions.blank? && !info.blank?
   end
 
   def has_topics?

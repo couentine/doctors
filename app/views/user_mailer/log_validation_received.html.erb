@@ -18,13 +18,23 @@
       <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %>
     </p>
 
+    <hr>
+
     <p>
       <strong><u>Content of the Validation</u></strong>
     </p>
-    <p>
-      <%= (@entry.body_sections.join '<br>-----------------------<br>').html_safe %>
-    </p>
 
+    <p><b>Summary:</b> <%= @entry.summary %></p>
+    
+    <% unless @entry.body.blank? %>
+      <p><b>Body:</b></p>
+      <p>
+        <%= (@entry.body_sections.join '</p><hr><p>').html_safe %>
+      </p>
+    <% end %>
+
+    <hr>
+    
     <p>
       <i>
         This email was sent automatically by the Badge List app.

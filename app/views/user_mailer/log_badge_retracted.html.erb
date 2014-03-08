@@ -5,25 +5,23 @@
   </head>
   <body>
     <p>
-      One or more of the badge experts for the <%= @badge.name %> badge have given you a negative 
+      One or more of the <%= @badge.experts %> for the <%= @badge.name %> badge have given you a negative 
       validation. (This means they offered the opinion that you have not yet mastered the badge.) 
       Due to this change, your previously issued badge has temporarily been retracted. For now you 
-      are no longer one of the badge experts.
+      are no longer one of the badge <%= @badge.experts %>.
     </p>
     <p>
       How do you get the badge back? Not to worry! There are two ways. You can get the dissenting 
-      expert(s) to change their negative validations to positive validations. If possible, you can 
-      also get additional badge experts to weigh in. Once your validation balance is once again over 
+      <%= @badge.expert %>(s) to change their negative validations to positive validations. If possible, you can 
+      also get additional <%= @badge.experts %> to weigh in. Once your validation balance is once again over 
       the threshold 
       (currently <%= pluralize @badge.current_validation_threshold, 'validation' %>) 
-      you will be re-issued the badge. The first step is to check your progress log and read through 
-      the feedback offered by the dissenting expert(s).
+      you will be re-issued the badge. The first step is to check your <%= @badge.progress_log %> and read through 
+      the feedback offered by the dissenting <%= @badge.expert %>(s).
     </p>
     <p>
-      <strong>Your Progress Log:</strong> 
-      <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %> <br>
-      <strong>Your User Profile:</strong> 
-      <%= link_to user_url(@to_user), user_url(@to_user) %> 
+      <strong>Your <%= @badge.progress_log.titleize %>:</strong> 
+      <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %>
     </p>
     <p>
       <i>

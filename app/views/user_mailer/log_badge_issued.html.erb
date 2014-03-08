@@ -18,8 +18,8 @@
             
               <p>
                 You have created a new badge in the <%= link_to @group.name, group_url(@group) %> learning group. 
-                You have automatically been added as an expert of the <%= @badge.name %> badge.
-                Being a badge expert allows you to issue the badge and help guide badge learners.
+                You are now the founding <%= @badge.expert %> of the <%= @badge.name %> badge.
+                Being a badge <%= @badge.expert %> allows you to issue the badge to others.
               </p>
               <p>
                 If you wish, you can now add this badge to your Mozilla Open Badges Backpack by visiting 
@@ -30,14 +30,17 @@
             
               <p>
                 You have been awarded the <%= link_to @badge.name, group_badge_url(@group, @badge) %> badge in 
-                Badge List. You are now one of the badge experts, congratulations! Being a badge expert 
-                allows you to issue the badge and help guide badge learners.
+                Badge List. You are now one of the badge <%= @badge.experts %>, congratulations! Being a badge <%= @badge.expert %> 
+                allows you to issue the badge to others.
               </p>
               <p>
                 If you wish, you can now add this badge to your Mozilla Open Badges Backpack by visiting 
-                your user profile in Badge List. Also be aware that all non-private entries in your progress 
-                log are now visible and will be linked to the badge as public evidence of your achievment. 
-                (You can change the visibility of your progress log at any time by altering the visibility 
+                your user profile in Badge List. 
+                <% if @badge.tracks_progress? %>
+                  Also be aware that all non-private entries in your progress log are now visible 
+                  and will be linked to the badge as public evidence of your achievment. 
+                <% end %>
+                (You can change the visibility of your <%= @badge.progress_log %> at any time by altering the visibility 
                 options in Badge List.)
               </p>
             
@@ -51,10 +54,8 @@
     <hr/>
 
     <p>
-      <strong>Your Badge Progress Log:</strong> 
-      <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %> <br>
-      <strong>Your User Profile:</strong> 
-      <%= link_to user_url(@to_user), user_url(@to_user) %> 
+      <strong>Your <%= @badge.progress_log.titleize %>:</strong> 
+      <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %>
     </p>
     <p>
       <i>

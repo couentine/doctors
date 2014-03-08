@@ -16,13 +16,13 @@ class Log
 
   # === FIELDS & VALIDATIONS === #
 
-  field :validation_status,       type: String
-  field :issue_status,            type: String
-  field :show_on_profile,         type: Boolean
-  field :private_log,             type: Boolean
-  field :detached_log,            type: Boolean
+  field :validation_status,       type: String, default: 'incomplete'
+  field :issue_status,            type: String, default: 'unissued'
+  field :show_on_profile,         type: Boolean, default: true
+  field :private_log,             type: Boolean, default: false
+  field :detached_log,            type: Boolean, default: false
 
-  field :wiki,                    type: String
+  field :wiki,                    type: String, default: APP_CONFIG['default_log_wiki']
   field :wiki_sections,           type: Array
   field :wiki_versions,           type: Array
   field :tags,                    type: Array
@@ -36,12 +36,12 @@ class Log
   field :date_originally_issued,  type: Time
   field :date_sent_to_backpack,   type: Time
 
-  field :validation_count,        type: Integer
-  field :rejection_count,         type: Integer
-  field :next_entry_number,       type: Integer
+  field :validation_count,        type: Integer, default: 0
+  field :rejection_count,         type: Integer, default: 0
+  field :next_entry_number,       type: Integer, default: 1
   field :current_user,            type: String # used when logging wiki_versions
   field :current_username,        type: String # used when logging wiki_versions
-  field :flags,                   type: Array
+  field :flags,                   type: Array, default: []
 
   validates :badge, presence: true
   validates :user, presence: true
@@ -67,6 +67,10 @@ class Log
 
   def to_param
     user? ? user.username : _id
+  end
+
+  def has_profile?
+    !wiki_versions.blank? && !wiki.blank?
   end
 
   # Returns true if log is currently public
@@ -201,16 +205,6 @@ protected
   
   def set_default_values
     self.date_started ||= Time.now
-    self.validation_status ||= 'incomplete'
-    self.issue_status ||= 'unissued'
-    self.show_on_profile = true if show_on_profile.nil?
-    self.private_log = false if private_log.nil?
-    self.detached_log = false if detached_log.nil?
-    self.wiki ||= APP_CONFIG['default_log_wiki']
-    self.validation_count ||= 0
-    self.rejection_count ||= 0
-    self.next_entry_number = 1 if self.next_entry_number.nil?
-    self.flags ||= []
   end
 
   # Updates validation & issue status values
@@ -273,7 +267,7 @@ protected
       if badge.expert_logs.count <= 1
         summary = "Self-validation of badge creator"
         body = "#{user.name} created the badge on #{time_string}" \
-          + " and was automatically added as an expert."
+          + " and was automatically awarded the badge."
         self.add_validation(user, summary, body, true)
       else
         badge.logs.find_all do |log| 
@@ -305,7 +299,7 @@ protected
   end
 
   def update_wiki_versions
-    if wiki_changed?
+    if wiki_changed? && (wiki != APP_CONFIG['default_log_wiki'])
       current_version_row = { :wiki => wiki, :user => current_user, 
                               :username => current_username, :updated_at => Time.now,
                               :updated_at_text => Time.now.strftime("%-m/%-d/%y at %l:%M%P") }

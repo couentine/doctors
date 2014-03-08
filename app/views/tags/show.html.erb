@@ -26,19 +26,24 @@
     <% if @current_user_is_expert || @current_user_is_learner %>
     
       <li  class="collapsible">
-        <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
+        <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <span class="divider">|</span>
-      </li>
-      <li  class="collapsible">
-        <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
-            new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps) %>
-        <% if @tag_exists && @can_edit_tag %>
+        <% if @show_progress || (@tag_exists && @can_edit_tag) %>
           <span class="divider">|</span>
         <% end %>
       </li>
 
-    <% elsif @current_user_is_admin || @current_user_is_member || @group.open? %>
+      <% if @show_progress %>
+        <li  class="collapsible">
+          <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
+              new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps) %>
+          <% if @tag_exists && @can_edit_tag %>
+            <span class="divider">|</span>
+          <% end %>
+        </li>
+      <% end %>
+
+    <% elsif @show_progress && (@current_user_is_admin || @current_user_is_member || @group.open?) %>
     
       <li class="collapsible">
         <%= link_to '<i class="icon-plus icon-white"></i> Join Badge'.html_safe, 
@@ -159,10 +164,12 @@
         <% if !@show_version_list %>
           <h2>
             <i class="fa fa-key"></i> 
-            <% if @tag.editability == 'experts' %>
-              Only editable by badge experts
+            <% if !@show_progress %>
+              Editable by all <%= @experts %>
+            <% elsif @tag.editability == 'experts' %>
+              Only editable by <%= @experts %>
             <% else %>
-              Editable by badge experts &amp; learners
+              Editable by <%= @experts %> &amp; <%= @learners %>
             <% end %>
           </h2>
           
@@ -216,7 +223,8 @@
   </div>
 </div>
 
-<% if !@show_version_list && (!@entries.blank? || @current_user_is_learner || @current_user_is_expert) %>
+<% if @show_progress && !@show_version_list \
+  && (!@entries.blank? || @current_user_is_learner || @current_user_is_expert) %>
 
   <!-- === TOPIC DISCUSSION === -->
 

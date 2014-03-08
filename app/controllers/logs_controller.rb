@@ -62,7 +62,7 @@ class LogsController < ApplicationController
         @log = @badge.add_learner(current_user) # retreive their existing badge OR create new one
         is_error = @log.new_record?
         if is_error
-          message = 'An error occured while trying to create a learning log for you.' 
+          message = 'An error occured while trying to create a progress log for you.' 
         else
           UserMailer.log_new(current_user, current_user, @group, @badge, @log).deliver
         end
@@ -95,7 +95,7 @@ class LogsController < ApplicationController
     respond_to do |format|
       if @log.update_attributes(params[:log])
         format.html { redirect_to [@group, @badge, @log], 
-          notice: 'Learning log was successfully updated.' }
+          notice: "#{@badge.progress_log.capitalize} was successfully updated." }
         format.json { head :no_content }
       else
         format.html { render action: "edit" }
@@ -130,6 +130,17 @@ private
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @badge_list_admin = current_user && current_user.admin?
+
+    # Define badge terminology shortcuts
+    @expert = @badge.expert
+    @experts = @badge.experts
+    @Expert = @badge.Expert
+    @Experts = @badge.Experts
+    @learner = @badge.learner
+    @learners = @badge.learners
+    @Learner = @badge.Learner
+    @Learners = @badge.Learners
+    @show_progress = @badge.tracks_progress?
   end
 
   def find_all_records

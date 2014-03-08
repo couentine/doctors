@@ -163,6 +163,17 @@ private
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @current_user_is_log_owner = current_user && (current_user == @log.user)
     @badge_list_admin = current_user && current_user.admin?
+
+    # Define badge terminology shortcuts
+    @expert = @badge.expert
+    @experts = @badge.experts
+    @Expert = @badge.Expert
+    @Experts = @badge.Experts
+    @learner = @badge.learner
+    @learners = @badge.learners
+    @Learner = @badge.Learner
+    @Learners = @badge.Learners
+    @show_progress = @badge.tracks_progress?
   end
 
   def find_all_records

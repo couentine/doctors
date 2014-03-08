@@ -30,17 +30,21 @@
 
     <% if @current_user_is_expert || @current_user_is_learner %>
       <li  class="collapsible">
-        <%= link_to '<i class="icon-user icon-white"></i> View Your Log'.html_safe, 
+        <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
         <span class="divider">|</span>
       </li>
-      <li  class="collapsible">
-        <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
-            new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
-        <% if @current_user_is_entry_creator %>
-          <span class="divider">|</span>
-        <% end %>
-      </li>
+
+      <% if @show_progress %>
+        <li  class="collapsible">
+          <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
+              new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
+          <% if @current_user_is_entry_creator %>
+            <span class="divider">|</span>
+          <% end %>
+        </li>
+      <% end %>
+      
     <% end %>
 
     <% if @current_user_is_entry_creator || @badge_list_admin %>
@@ -98,28 +102,46 @@
           <%= link_to gravatar_for(@entry.log.user, \
             class: "img-circle #{@entry.log_user_type}", size: 200), 
             [@entry.log.badge.group, @entry.log.badge, @entry.log],
-            title: "View #{@entry.log.user.name}'s learning log",
+            title: "View #{@entry.log.user.name}'s #{@badge.progress_log}",
             data: { toggle: 'tooltip', placement: 'left' } %>
           <span class="username">
-            <abbr title="<%= "#{@entry.log_user_type.capitalize} at time of #{@entry.type}" %>" 
-            class="<%= @entry.log_user_type %>" data-toggle="tooltip"
-            data-placement="bottom"><%= @entry.log.user.name %></abbr>
+            <% 
+              if @entry.log_user_type == :expert
+                word_to_use = @expert.capitalize
+              else
+                word_to_use = @learner.capitalize
+              end
+            %>
+            
+            <% if @show_progress %>
+              <abbr title="<%= "#{word_to_use} at time of #{@entry.type}" %>" 
+              class="<%= @entry.log_user_type %>" data-toggle="tooltip"
+              data-placement="bottom"><%= @entry.log.user.name %></abbr>
+            <% else %>
+              <%= @entry.log.user.name %>
+            <% end %>
           </span>
         </span>
 
         <% if @entry.creator != @entry.log.user %>
           <span class="creator-user-link">
+            <% 
+              if @entry.entry_creator_type == :expert
+                word_to_use = @expert.capitalize
+              else
+                word_to_use = @learner.capitalize
+              end
+            %>
             <%= link_to gravatar_for(@entry.creator, \
               class: "img-circle #{@entry.entry_creator_type}"), 
               [@entry.log.badge.group, @entry.log.badge, @entry.log],
-              title: "Posted by #{@entry.creator.name} (#{@entry.entry_creator_type.capitalize} at time of #{@entry.type})",
+              title: "Posted by #{@entry.creator.name} (#{word_to_use} at time of #{@entry.type})",
               data: { toggle: 'tooltip', placement: 'left' } %>
             <span class="arrow">&#9654;</span>
           </span>
         <% end %>
 
         <h1>
-          <abbr title="Badge post #<%= @entry.entry_number %>">#<%= @entry.entry_number %></abbr>.
           <%= @entry.summary %>
         </h1>
         
@@ -147,10 +169,10 @@
               Only visible to members now, visible to public when badge is issued
             <% elsif @entry.visibility == :experts %>
               <i class='icon-lock'></i> 
-              Only visible to badge experts
+              Only visible to <%= @experts %>
             <% else %>
               <i class='icon-warning-sign'></i> 
-              Only visible to log owner / entry creator
+              Only visible to <%= @badge.log %> owner and entry creator
             <% end %>
           </li>
         </ul>
@@ -158,10 +180,10 @@
       </div>
       
       <div class="body-section">
-        <% if @entry.type == 'validation' %>
+        <% if (@entry.type == 'validation') && @show_progress %>
           <span class="validation-result <%= @entry.log_validated ? 'yes' : 'no' %>">
-            <strong>Learning Validated:</strong> 
-            <%= @entry.log_validated ? "Yes &#10003;".html_safe : "No &#10007;".html_safe %>
+            <strong>Validation:</strong> 
+            <%= @entry.log_validated ? "Positive &#10003;".html_safe : "Negative &#10007;".html_safe %>
           </span>
         <% end %>
 

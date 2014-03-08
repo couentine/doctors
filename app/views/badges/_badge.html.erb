@@ -21,11 +21,13 @@
                   title: group_badge_path(badge.group, badge) %></li>
         </ul>
         <ul class="right-foot">
-          <li data-toggle="tooltip" data-placement="bottom" title="Badge Learners">
-            <i class="fa fa-users"></i> 
-            <%= badge.learner_logs.count %>
-          </li>
-          <li data-toggle="tooltip" data-placement="bottom" title="Badge Experts">
+          <% if badge.tracks_progress? %>
+            <li data-toggle="tooltip" data-placement="bottom" title="<%= badge.Learners %>">
+              <i class="fa fa-users"></i> 
+              <%= badge.learner_logs.count %>
+            </li>
+          <% end %>
+          <li data-toggle="tooltip" data-placement="bottom" title="<%= badge.Experts %>">
             <i class="fa fa-trophy"></i>
             <%= badge.expert_logs.count %>
           </li>

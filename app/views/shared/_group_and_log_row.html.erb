@@ -8,13 +8,13 @@
       <ul>
         <% group_and_log_row[:expert_logs].each do |log| %>
           <li>
-            <%= link_to "#{log.badge.name} (Expert#{'/Detached' if log.detached_log})", 
+            <%= link_to "#{log.badge.name} (#{log.badge.Expert}#{'/Detached' if log.detached_log})", 
               [log.badge.group, log.badge] %>
             </li>
         <% end %>
         <% group_and_log_row[:learner_logs].each do |log| %>
           <li>
-            <%= link_to "#{log.badge.name} (Learner#{'/Detached' if log.detached_log})", 
+            <%= link_to "#{log.badge.name} (#{log.badge.Learner}#{'/Detached' if log.detached_log})", 
               [log.badge.group, log.badge] %>
           </li>
         <% end %>

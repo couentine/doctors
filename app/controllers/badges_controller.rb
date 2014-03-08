@@ -306,6 +306,17 @@ private
     if @current_user_is_learner || @current_user_is_expert
       @log = @badge.logs.find_by(user: current_user)
     end
+
+    # Define badge terminology shortcuts
+    @expert = @badge.expert
+    @experts = @badge.experts
+    @Expert = @badge.Expert
+    @Experts = @badge.Experts
+    @learner = @badge.learner
+    @learners = @badge.learners
+    @Learner = @badge.Learner
+    @Learners = @badge.Learners
+    @show_progress = @badge.tracks_progress?
   end
 
   def group_admin
