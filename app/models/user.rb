@@ -1,12 +1,14 @@
 class User
   include Mongoid::Document
   include Mongoid::Timestamps
+  include JSONFilter
 
   # === CONSTANTS === #
   
   MIN_PASSWORD_LENGTH = 6 # Note: This is just for use in tests & not actually tied to anything
   MAX_NAME_LENGTH = 200
   MAX_USERNAME_LENGTH = 15
+  JSON_FIELDS = [:name, :username, :username_with_caps]
 
   # === RELATIONSHIP === #
 
@@ -25,6 +27,9 @@ class User
   field :flags,               type: Array, default: [], pre_processed: true
   field :admin,               type: Boolean, default: false
   field :page_views,          type: Hash, default: {}, pre_processed: true
+
+  field :identity_hash,       type: String
+  field :identity_salt,       type: String
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
@@ -83,6 +88,7 @@ class User
   before_validation :update_caps_field
   before_create :set_signup_flags
   after_create :convert_group_invitations
+  before_save :update_identity_hash
 
   # === CLASS METHODS === #
 
@@ -253,6 +259,11 @@ class User
     end
   end
 
+  def manually_update_identity_hash
+    self.identity_salt = SecureRandom.hex
+    self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+  end
+
 protected
 
   def update_caps_field
@@ -358,6 +369,13 @@ protected
           log.add_validation validating_user, summary, body, true
         end
       end unless invited_item["validations"].blank?
+    end
+  end
+
+  def update_identity_hash
+    if email_changed?
+      self.identity_salt = SecureRandom.hex
+      self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
     end
   end
 

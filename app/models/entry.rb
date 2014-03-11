@@ -1,12 +1,15 @@
 class Entry
   include Mongoid::Document
   include Mongoid::Timestamps
+  include JSONFilter
   include StringTools
 
   # === CONSTANTS === #
   
   MAX_SUMMARY_LENGTH = 100
   TYPE_VALUES = ['post', 'validation']
+  JSON_FIELDS = [:log, :creator, :entry_number, :summary, :type, :log_validated, :body_sections,
+    :tags, :tags_with_caps]
   
   # === RELATIONSHIPS === #
 

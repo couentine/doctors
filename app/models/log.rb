@@ -1,12 +1,17 @@
 class Log
   include Mongoid::Document
   include Mongoid::Timestamps
+  include JSONFilter
   include StringTools
 
   # === CONSTANTS === #
   
   VALIDATION_STATUS_VALUES = ['incomplete', 'requested', 'withdrawn', 'validated']
   ISSUE_STATUS_VALUES = ['unissued', 'issued', 'retracted']
+  JSON_FIELDS = [:user, :validation_status, :issue_status]
+  JSON_METHODS = [:recipient, :verify]
+  JSON_MOCK_FIELDS = { 'uid' => :_id,  'badge' => :badge_url, 'issuedOn' => :date_issued_stamp,
+    'image' => :badge_image_url, 'evidence' => :evidence_url }
   
   # === RELATIONSHIPS === #
 
@@ -62,6 +67,23 @@ class Log
   before_save :update_stati
   after_save :back_validate_if_needed
   after_save :send_notifications
+
+  # === LOG MOCK FIELD METHODS === #
+  # These are used to mock the presence of certain fields in the JSON output.
+
+  def date_issued_stamp; (date_issued.nil?) ? '' : date_issued.to_i; end
+  def badge_url; "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}.json"; end
+  def badge_image_url; "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}.png"; end
+  def evidence_url
+    "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/u/#{user.username}"
+  end
+  def recipient
+    { type: 'email', hashed: true, salt: user.identity_salt, identity: user.identity_hash }
+  end
+  def verify
+    { type: 'hosted', 
+      url: "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/u/#{user.username}.json" }
+  end
 
   # === LOG METHODS === #
 

@@ -16,7 +16,7 @@ class EntriesController < ApplicationController
   def show
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @entry }
+      format.json { render json: @entry, filter_user: current_user }
     end
   end
 

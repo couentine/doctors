@@ -32,7 +32,7 @@ class GroupsController < ApplicationController
   def show
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @group }
+      format.json { render json: @group, filter_user: current_user }
     end
   end
 
@@ -44,7 +44,7 @@ class GroupsController < ApplicationController
 
     respond_to do |format|
       format.html # new.html.erb
-      format.json { render json: @group }
+      format.json { render json: @group, filter_user: current_user }
     end
   end
 
@@ -64,7 +64,7 @@ class GroupsController < ApplicationController
       if @group.save
         format.html { redirect_to @group, 
                       notice: 'Learning Group was successfully created.' }
-        format.json { render json: @group, status: :created, location: @group }
+        format.json { render json: @group, status: :created, location: @group, filter_user: current_user }
       else
         format.html { render action: "new" }
         format.json { render json: @group.errors, status: :unprocessable_entity }

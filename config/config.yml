@@ -59,11 +59,14 @@ defaults: &defaults
 development:
   <<: *defaults
   from_email: knowledgestreem@gmail.com
+  root_url: 'http://localhost:3000'
 
 test:
   <<: *defaults
   from_email: knowledgestreem@gmail.com
+  root_url: 'http://localhost:3000'
 
 production:
   <<: *defaults
   from_email: app@badgelist.com
+  root_url: 'http://www.badgelist.com'

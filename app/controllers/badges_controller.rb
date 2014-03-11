@@ -31,7 +31,7 @@ class BadgesController < ApplicationController
           send_data @badge.image.encode('ISO-8859-1'), type: "image/png", disposition: "inline"
         end
       end
-      format.json { render json: @badge }
+      format.json { render json: @badge, filter_user: current_user }
     end
   end
 
@@ -47,7 +47,7 @@ class BadgesController < ApplicationController
 
     respond_to do |format|
       format.html # new.html.erb
-      format.json { render json: @badge }
+      format.json { render json: @badge, filter_user: current_user }
     end
   end
 
@@ -80,7 +80,7 @@ class BadgesController < ApplicationController
     respond_to do |format|
       if @badge.save
         format.html { redirect_to group_badge_path(@group, @badge), notice: 'Badge was successfully created.' }
-        format.json { render json: @badge, status: :created, location: @badge }
+        format.json { render json: @badge, status: :created, location: @badge, filter_user: current_user }
       else
         flash[:error] = "There was an error creating the badge."
         format.html { render action: "new" }
@@ -145,7 +145,7 @@ class BadgesController < ApplicationController
 
     respond_to do |format|
       format.html # entries_index.html.erb
-      format.json { render json: @badge }
+      format.json { render json: @badge, filter_user: current_user }
     end
   end
 

@@ -1,6 +1,7 @@
 class Badge
   include Mongoid::Document
   include Mongoid::Timestamps
+  include JSONFilter
   include StringTools
 
   # === CONSTANTS === #
@@ -10,6 +11,9 @@ class Badge
   MAX_SUMMARY_LENGTH = 140
   MAX_TERM_LENGTH = 15
   RECENT_DATE_THRESHOLD = 10.days # Used to filter "recent" activity & changes
+  JSON_FIELDS = [:group, :name, :summary, :word_for_expert, :word_for_learner]
+  JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
+    'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps }
 
   # === RELATIONSHIPS === #
 
@@ -81,6 +85,13 @@ class Badge
   before_save :update_terms
   before_save :update_topics
   after_create :add_creator_as_expert
+
+  # === BADGE MOCK FIELD METHODS === #
+  # These are used to mock the presence of certain fields in the JSON output.
+
+  def image_as_url; "#{APP_CONFIG['root_url']}/#{group.url}/#{url}.png"; end
+  def criteria_url; "#{APP_CONFIG['root_url']}/#{group.url}/#{url}"; end
+  def issuer_url; "#{APP_CONFIG['root_url']}/#{group.url}.json"; end
 
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields

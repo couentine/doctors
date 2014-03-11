@@ -1,12 +1,15 @@
 class Tag
   include Mongoid::Document
   include Mongoid::Timestamps
+  include JSONFilter
   include StringTools
 
   # === CONSTANTS === #
   
   MAX_NAME_LENGTH = 50
   EDITABILITY_VALUES = ['learners', 'experts']
+  JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :wiki_sections,
+    :tags, :tags_with_caps]
 
   # === RELATIONSHIPS === #
 

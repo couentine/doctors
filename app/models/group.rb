@@ -1,6 +1,7 @@
 class Group
   include Mongoid::Document
   include Mongoid::Timestamps
+  include JSONFilter
 
   # === CONSTANTS === #
 
@@ -8,6 +9,10 @@ class Group
   MAX_URL_LENGTH = 30
   MAX_LOCATION_LENGTH = 200
   TYPE_VALUES = ['open', 'closed', 'private']
+  JSON_FIELDS = [:name, :location, :type]
+  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :website, 'image' => :image_url,
+    'email' => :primary_email }
+
   CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem', 'london-21', 'tokyo-15',
     'paris-99', 'budapest-54', 'chicago-67', 'santiago-12'] # add new customers here
 
@@ -62,7 +67,12 @@ class Group
   before_validation :update_caps_field
   before_create :add_creator_to_admins
 
-  # === CLASS METHODS === #
+  # === GROUP MOCK FIELD METHODS === #
+  # These are used to mock the presence of certain fields in the JSON output.
+
+  def primary_email; (!creator.nil?) ? creator.email : nil; end
+
+  # === BADGE METHODS === #
 
   # This will find by ObjectId OR by URL
   def self.find(input)

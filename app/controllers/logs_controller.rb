@@ -22,7 +22,7 @@ class LogsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @log }
+      format.json { render json: @log, filter_user: current_user }
     end
   end
 

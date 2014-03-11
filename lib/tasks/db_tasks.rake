@@ -80,4 +80,14 @@ namespace :db do
     puts " >> Done."
   end
 
+  task update_identity_hashes: :environment do
+    print "Updating #{User.count} users"
+    User.each do |user|
+      user.manually_update_identity_hash
+      user.timeless.save if user.changed?
+      print "."
+    end
+    puts " >> Done."
+  end
+
 end

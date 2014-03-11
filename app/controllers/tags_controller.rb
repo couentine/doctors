@@ -74,7 +74,7 @@ class TagsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @tag }
+      format.json { render json: @tag, filter_user: current_user }
     end
   end
 
