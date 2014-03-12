@@ -82,7 +82,7 @@ class Log
   end
   def verify
     { type: 'hosted', 
-      url: "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/u/#{user.username}.json" }
+      url: "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/o/#{user.username}.json" }
   end
 
   # === LOG METHODS === #

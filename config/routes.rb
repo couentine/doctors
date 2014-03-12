@@ -60,6 +60,11 @@ BadgeList::Application.routes.draw do
   match ':group_id/:badge_id/topics' => 'tags#index', via: :get, as: :badge_topics
   match ':group_id/:badge_id/issue' => 'badges#issue_form', via: :get, as: :badge_issue
   match ':group_id/:badge_id/issue' => 'badges#issue_save', via: :post
+  
+
+  # === MANUAL LOG PATHS === #
+  match ':group_id/:badge_id/o/:id' => 'logs#show', via: :get, as: :open_badge_assertion,
+    defaults: { f: 'ob1' }
 
   # === MANUAL TAG PATHS === #
   match ':group_id/:badge_id/:tag_id/restore' => 'tags#restore', via: :post, as: :tag_restore

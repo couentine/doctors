@@ -11,7 +11,7 @@ class LogsController < ApplicationController
 
   # Accepts page parameters: page, page_size
   # GET /group-url/badge-url/u/username
-  # GET /group-url/badge-url/u/username.json
+  # GET /group-url/badge-url/u/username.json?f=ob1
   def show
     # Grab the current page of posts & all of the validations
     @page = params[:page] || 1
@@ -20,9 +20,27 @@ class LogsController < ApplicationController
     @posts_by_month = @log.posts_by_month(current_user, @page, @page_size)
     @validations = @log.validations
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @log, filter_user: current_user }
+    @presentation_format = params[:f]
+
+    if @presentation_format == 'ob1'
+      if @log.issue_status == 'retracted'
+        respond_to do |format|
+          format.json { render json: { revoked: true }, status: :gone }
+        end
+      elsif @log.issue_status == 'issued'
+        respond_to do |format|
+          format.json { render json: @log }
+        end
+      else
+        respond_to do |format|
+          format.json { head :not_found }
+        end
+      end
+    else
+      respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @log, filter_user: current_user }
+      end
     end
   end
 
