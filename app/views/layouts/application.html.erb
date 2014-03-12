@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <% if content_for? :full_title %>
       <title><%= yield(:full_title) %></title>
     <% else %>
       <title><%= full_title(yield(:title)).html_safe %></title>
+    <% end %>
+
+    <% if content_for? :include_ob_issuer %>
+      <script src="https://backpack.openbadges.org/issuer.js"></script>
+      <script type="text/javascript">
+        var obIssuerPresent = true;
+      </script>
     <% end %>
 
     <%= render 'layouts/analytics' if Rails.env.production? %>
@@ -14,6 +22,7 @@
     <%= render 'layouts/shim' %>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
+
   <body class="<%= "with-subheader" if content_for?(:show_subheader) \
     %> <%= yield(:body_class) if content_for?(:body_class) %>" >
     <%= render 'layouts/header' %>
@@ -30,4 +39,5 @@
       <%= render 'shared/rich_text_toolbar' %>
     <% end %>
   </body>
+
 </html>

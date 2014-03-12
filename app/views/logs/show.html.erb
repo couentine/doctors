@@ -3,6 +3,7 @@
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
+  provide(:include_ob_issuer, true)
 %>
 
 <% content_for :subheader_links do %>
@@ -47,6 +48,14 @@
             <span class="divider">|</span>
           <% end %>
         <% end %>
+      </li>
+    <% end %>
+
+    <% if @show_sharing %>
+      <li class="collapsible">
+        <%= link_to '<i class="fa fa-share"></i> Share Badge'.html_safe, '#badge-sharing', 
+          id: 'share-badge', data: { toggle: 'modal' } %>
+        <span class="divider">|</span>
       </li>
     <% end %>
 
@@ -110,13 +119,44 @@
   <% end %>
 <% end %>
 
-<!-- === LOG POPOVERS === -->
+<!-- === LOG SPECIFIC SCRIPTS === -->
 
-<% if @current_user_is_log_owner && (@page_view_count == 0) && @show_progress %>
+<script type="text/javascript">
 
-  <script type="text/javascript">
+  $(document).ready(function() {
     
-    $(document).ready(function() {
+    <% if @show_sharing %>
+      
+      var assertionURL = "<%= @log.assertion_url %>";
+
+      $('#export-to-backpack').click(function() {
+        console.log("Assertion URL = " + assertionURL);
+        $('#badge-sharing').modal('hide');
+        OpenBadges.issue([assertionURL], function(errors, successes) {
+          if ((errors != null) && (errors.length > 0) && (errors[0].reason != 'DENIED')) {
+            $('#badge-sharing-error').modal('show');
+            $('#badge-sharing-error-text').html("Assertion URL = " + errors[0].url 
+              + ", Reason = " + errors[0].reason);
+          }
+        });
+      });
+
+    <% end %>
+
+    <% if @show_sharing && @first_view_after_issued %>
+
+      $("#share-badge").popover({
+        content: "<a class='pull-right' href='#' onclick=\"$('#view-your-log').popover('hide')\" "
+          + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
+          + "You've been awarded the badge, congratulations!<br><br>"
+          + "When you're ready, click here to share your achievement.",
+        placement: "bottom",
+        trigger: "manual",
+        container: "header",
+        html: true
+      }).popover("show");
+
+    <% elsif @current_user_is_log_owner && (@page_view_count == 0) && @show_progress %>
 
       $("#new-post").popover({
         content: "<a class='pull-right' href='#' onclick=\"$('#new-post').popover('hide')\" "
@@ -128,11 +168,11 @@
         html: true
       }).popover("show");
 
-    });
+    <% end %>
 
-  </script>
+  });
 
-<% end %>
+</script>
 
 <% if @current_user_is_log_owner || @badge_list_admin %>
 
@@ -213,6 +253,68 @@
        onclick="$('#log-visibility-form').submit();">
         Save
       </button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+<% end %>
+
+<% if @show_sharing %>
+
+  <!-- === BADGE SHARING MODAL === -->
+
+  <div id="badge-sharing" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Share your badge achievement</h3>
+    </div>
+
+    <div class="modal-body">
+      <p>
+        You've earned the badge, congratulations! Now you can share your accomplishment by exporting
+        the badge to your Mozilla Backpack. Once the badge is in your backpack you will be able to 
+        display it alongside other Open Badges and share it out to other social networks.
+      </p>
+      <p>&nbsp;</p>
+      <p>
+        <a href="#" id="export-to-backpack" class="btn btn-large btn-success">
+          Export this badge to your Mozilla Backpack
+        </a>
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+  <!-- === BADGE SHARING ERROR MODAL === -->
+
+  <div id="badge-sharing-error" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Oh no!</h3>
+    </div>
+
+    <div class="modal-body">
+      <p>
+        It looks like there was an error sharing your badge. This could be due to a problem with
+        Mozilla's system or it could be due to a bug in Badge List. We humbly apologize for the 
+        inconvenience and ask you to try again later.
+      </p>
+      <p>
+        In the meantime please feel free to send an email to <b>help@badgelist.com</b> if you'd 
+        like our help resolving this issue. (Be sure to include the error text below.) Thanks!
+      </p>
+      <p>
+        <b>Error Text:</b> 
+        <span id="badge-sharing-error-text"></span>
+      </p>
+    </div>
+
+    <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
   </div>

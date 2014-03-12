@@ -21,6 +21,7 @@ class LogsController < ApplicationController
     @validations = @log.validations
 
     @presentation_format = params[:f]
+    @first_view_after_issued = @current_user_is_log_owner && @log.has_flag?('first_view_after_issued')
 
     if @presentation_format == 'ob1'
       if @log.issue_status == 'retracted'
@@ -37,6 +38,11 @@ class LogsController < ApplicationController
         end
       end
     else
+      if @first_view_after_issued
+        @log.clear_flag 'first_view_after_issued'
+        @log.timeless.save
+      end
+
       respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @log, filter_user: current_user }
@@ -167,6 +173,9 @@ private
     @user = User.find(params[:id].to_s.downcase) || not_found # find user by username
     @log = @user.logs.find_by(badge: @badge) || not_found
     @current_user_is_log_owner = current_user && (@user == current_user)
+    if @current_user_is_log_owner
+      @show_sharing = (@log.issue_status == 'issued')
+    end
     if current_user
       @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil
       @validation = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil

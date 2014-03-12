@@ -74,21 +74,33 @@ class Log
   def date_issued_stamp; (date_issued.nil?) ? '' : date_issued.to_i; end
   def badge_url; "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}.json"; end
   def badge_image_url; "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}.png"; end
+  def assertion_url
+    "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/o/#{user.username}.json"
+  end
   def evidence_url
     "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/u/#{user.username}"
   end
   def recipient
     { type: 'email', hashed: true, salt: user.identity_salt, identity: user.identity_hash }
   end
-  def verify
-    { type: 'hosted', 
-      url: "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/o/#{user.username}.json" }
-  end
+  def verify; { type: 'hosted', url: assertion_url }; end
 
   # === LOG METHODS === #
 
   def to_param
     user? ? user.username : _id
+  end
+
+  def set_flag(flag)
+    self.flags << flag unless flags.include? flag
+  end
+
+  def clear_flag(flag)
+    self.flags.delete flag if flags.include? flag
+  end
+
+  def has_flag?(flag)
+    flags.include? flag
   end
 
   def has_profile?
@@ -245,6 +257,8 @@ protected
           self.issue_status = 'issued'
           self.date_issued ||= Time.now
           self.date_retracted = nil
+
+          set_flag 'first_view_after_issued'
         end
       elsif rejection_count.to_i > 0 # you can be validated w/ 0 count, but not rejected w/ 0 count
         # First update the validation status if needed

@@ -21,6 +21,7 @@ class BadgesController < ApplicationController
   # GET /group-url/badge-url.json
   def show
     @entries = @badge.entries(current_user)
+    @first_view_after_issued = @log && @log.has_flag?('first_view_after_issued')
 
     respond_to do |format|
       format.html # show.html.erb

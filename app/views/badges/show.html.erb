@@ -159,6 +159,17 @@
             $("ul.nav-tabs").children().last().popover("show");
           }
         })
+      <% elsif @first_view_after_issued %>
+        $("#view-your-log").popover({
+          content: "<a class='pull-right' href='#' onclick=\"$('#view-your-log').popover('hide')\" "
+            + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
+            + "You've been awarded the badge, congratulations! "
+            + "When you're ready, click here to share your achievement.",
+          placement: "bottom",
+          trigger: "manual",
+          container: "header",
+          html: true
+        }).popover("show");
       <% end %>
 
     });
@@ -176,21 +187,25 @@
 
   </script>
 
-<% elsif @current_user_is_learner && (@page_view_count == 0) %>
+<% elsif @current_user_is_learner %>
 
   <script type="text/javascript">
     
     $(document).ready(function() {
 
-      $("#view-your-log").popover({
-        content: "<a class='pull-right' href='#' onclick=\"$('#view-your-log').popover('hide')\" "
-          + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
-          + "When you're ready, click here to get to your <%= @badge.progress_log %>.",
-        placement: "bottom",
-        trigger: "manual",
-        container: "header",
-        html: true
-      }).popover("show");
+      <% if @page_view_count == 0 %>
+
+        $("#view-your-log").popover({
+          content: "<a class='pull-right' href='#' onclick=\"$('#view-your-log').popover('hide')\" "
+            + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
+            + "When you're ready, click here to get to your <%= @badge.progress_log %>.",
+          placement: "bottom",
+          trigger: "manual",
+          container: "header",
+          html: true
+        }).popover("show");
+      
+      <% end %>
 
     });
 
