@@ -218,7 +218,7 @@
                           <h3><%= log.badge.expert.capitalize %> since <%= log.date_issued.to_s(:full_date) %></h3><br>
                         <% else %>
                           <h3>
-                            <%= @log.badge.learner.capitalize %> since 
+                            <%= log.badge.learner.capitalize %> since 
                             <%= (log.date_started || log.created_at).to_s(:full_date) %>
                           </h3><br>
                         <% end %>
