@@ -146,7 +146,7 @@
     <% if @show_sharing && @first_view_after_issued %>
 
       $("#share-badge").popover({
-        content: "<a class='pull-right' href='#' onclick=\"$('#view-your-log').popover('hide')\" "
+        content: "<a class='pull-right' href='#' onclick=\"$('#share-badge').popover('hide')\" "
           + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
           + "You've been awarded the badge, congratulations!<br><br>"
           + "When you're ready, click here to share your achievement.",
