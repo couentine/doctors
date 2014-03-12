@@ -69,8 +69,10 @@
               <tr>
                 <td>
                   <%= gravatar_for user, class: "img-circle", size: 20 %> 
-                  <%= user.name %> 
-                  (<%= user.username_with_caps %>)
+                  <a href="<%= user_path(user) %>">
+                    <%= user.name %> 
+                    (<%= user.username_with_caps %>)
+                  </a>
                 </td>
                 <td><%= user.created_at.to_s :full_date %></td>
                 <td><%= user.sign_in_count %></td>
