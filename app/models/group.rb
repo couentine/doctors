@@ -10,7 +10,7 @@ class Group
   MAX_LOCATION_LENGTH = 200
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type]
-  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :website, 'image' => :image_url,
+  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 'image' => :image_url,
     'email' => :primary_email }
 
   CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem', 'london-21', 'tokyo-15',
@@ -71,6 +71,7 @@ class Group
   # These are used to mock the presence of certain fields in the JSON output.
 
   def primary_email; (!creator.nil?) ? creator.email : nil; end
+  def issuer_website; (website.blank?) ? "#{APP_CONFIG['root_url']}/#{url}" : website; end
 
   # === BADGE METHODS === #
 
