@@ -382,6 +382,18 @@ ul.dropdown-menu {
   &.red-dark { background-color: $red-dark; }
 }
 
+/* === CODE HIGHLIGHTING === */
+
+code {
+  display: block;
+  background-color: $really-light-gray;
+  border-radius: 5px;
+  border: 1px solid $light-gray;
+  padding: 10px;
+  margin: 10px 0;
+  color: $dark-text-color;
+}
+
 /* === HEADER === */
 
 ul.nav.header-left {

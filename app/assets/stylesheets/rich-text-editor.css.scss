@@ -1,0 +1,17 @@
+$medium-gray: #ccc;
+$light-gray: #eaeaea;
+$really-light-gray: #eee;
+
+$light-white: #fff;
+$medium-white: #fbfcfc;
+$dark-white: #f6f6f6;
+
+body.wysihtml5-editor {  
+  code {
+    display: block;
+    background-color: $light-white;
+    border-radius: 5px;
+    border: 1px solid $light-gray;
+    padding: 10px;
+  }
+}

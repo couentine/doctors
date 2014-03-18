@@ -11,6 +11,10 @@
   <div class="btn-group">
     <a class="btn btn-small" title="Toggle current line as heading" data-toggle="tooltip" 
       tabindex="-1" data-wysihtml5-command="formatBlock" data-wysihtml5-command-value="h3">Heading</a>
+    <a class="btn btn-small" title="Insert a section break" data-toggle="tooltip" tabindex="-1" 
+      data-wysihtml5-command="insertHTML" data-wysihtml5-command-value="<br>-----<br><br>">
+      Section
+    </a>
    </div>
 
   <div class="btn-group">
@@ -23,4 +27,13 @@
     <a class="btn btn-small" title="Indent list item" data-toggle="tooltip" 
       tabindex="-1" data-wysihtml5-command="indent"><i class="fa fa-indent"></i></a>
   </div>
+
+  <div class="btn-group">
+    <a class="btn btn-small" title="Insert a block of programming code that will be specially formatted" 
+      data-toggle="tooltip" tabindex="-1" data-wysihtml5-command="insertHTML" 
+      data-wysihtml5-command-value="<br><code>// Type any sort of HTML or programming code here.<br>
+      // It will be automatically formatted to make it look pretty.</code><br><br>">
+      <i class="fa fa-code"></i>
+    </a>
+   </div>
 </div>

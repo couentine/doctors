@@ -15,8 +15,8 @@ gem 'browser_details'
 gem 'exception_notification'
 
 gem 'mini_magick'
-
 gem 'font-awesome-sass'
+# gem 'rouge'
 
 # gem 'mixpanel-ruby'
 

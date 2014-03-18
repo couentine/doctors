@@ -44,6 +44,7 @@ $(document).ready(function() {
     registerAllRichTextAreas();
     createCharacterCounts();
     registerToggleLinks();
+    addSyntaxHighlighting();
     $('form:not(.allow-double-submission)').preventDoubleSubmission();
 
     $(window).on('resize', function() {
@@ -128,7 +129,7 @@ function createCharacterCounts() {
 
 // Registers rich text areas with wysihtml5
 var wysihtml5ParserRules = {
-  tags: { h3: {}, strong: {}, b: {}, i: {}, em: {}, br: {}, ul: {}, ol: {}, li: {} }
+  tags: { h3: {}, strong: {}, b: {}, i: {}, em: {}, br: {}, ul: {}, ol: {}, li: {}, code: {} }
 };
 
 function registerAllRichTextAreas() {
@@ -166,7 +167,28 @@ function registerRichTextArea(textAreaElement, addGrow) {
     parserRules: wysihtml5ParserRules,
     autoLink: false,
     useLineBreaks: true,
-    cleanUp: true
+    cleanUp: true,
+    stylesheets: ["<%= asset_path('rich-text-editor.css') %>"]
+  });
+
+  // Custom event handler for TAB and SHIFT-TAB
+  $(editor.composer.iframe).contents().find('body').on("keydown",function(e) {
+    var keyCode = e.keyCode || e.which;
+    if (keyCode == 9) {
+      e.preventDefault();
+      if (e.shiftKey) editor.composer.commands.exec('outdent');
+      else editor.composer.commands.exec('indent');
+    }
+  });
+  
+  // Custom event handler for pasting into a code block
+  editor.on("paste:composer", function() {
+    $(editor.composer.iframe).contents().find('body').children('code').children('code')
+      .each(function() {
+      var e = $(this);
+      e.parent().append(e.html() + '<br>');
+      e.remove();
+    });
   });
 
   //if (addGrow) $(textAreaElement).siblings("iframe").autosize({append: "\n"});
@@ -457,4 +479,8 @@ function registerToggleLinks() {
     if (hideSelector != null) $(hideSelector).slideUp();
     if (focusSelector != null) $(focusSelector).focus();
   });
+}
+
+function addSyntaxHighlighting() {
+  $('code').addClass('prettyprint');
 }

@@ -6,6 +6,7 @@ module StringTools
   IMG_REGEX = /(?:png|jpe?g|gif|svg)$|^img:/i
   HASHTAG_REGEX = /#[\w-]+/
   SECTION_DIVIDER_REGEX = /-+\s*<br *\/?>\s*/i
+  CODE_BLOCK_REGEX = /<code[^>]*>(.*)<\/code[^>]*>/im
   
   LINKS_TO_TRANSLATE = [
     [/youtube.com.*(?:\/|v=)([^&$]+)/,
@@ -34,6 +35,7 @@ module StringTools
         end
         "<a class='linkified-tag' href='/#{group.url}/#{badge.url}/#{stripped_tag}'>#{tag}</a>"
       end.gsub(HTTP_URL_REGEX) { |url| make_tag_for url }
+
       # Removing this for now... it double tags some things
       # .gsub(NON_HTTP_URL_REGEX) { |url| make_tag_for "http://#{url}" }
 
