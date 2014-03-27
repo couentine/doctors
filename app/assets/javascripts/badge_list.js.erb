@@ -168,7 +168,7 @@ function registerRichTextArea(textAreaElement, addGrow) {
     autoLink: false,
     useLineBreaks: true,
     cleanUp: true,
-    stylesheets: ["<%= asset_path('rich-text-editor.css') %>"]
+    stylesheets: ["<%= asset_path('rich-text-editor', type: :stylesheet) %>"]
   });
 
   // Custom event handler for TAB and SHIFT-TAB
