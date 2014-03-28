@@ -1,3 +1,77 @@
+<script type="text/javascript">
+  
+  $(document).ready(function() {
+    $('#do-image-insert').click(function() {
+      var imageURL = $('#image-url').val();
+      var editor = richTextEditors[$('#insert-image').data('editor-index')];
+
+      if ((imageURL != null) && (imageURL.trim() != ''))
+        editor.composer.commands.exec('insertHTML', "<br>img:" + imageURL.trim() + "<br><br>");
+      
+      $('#insert-image').modal('hide');
+      editor.composer.element.focus();
+    });
+  });
+
+  // This extracts the editor-index from the link element and passes it to the modal
+  function showImageInsertModal(linkElement) {
+    $('#insert-image').data('editor-index', $(linkElement).data('editor-index'));
+    $('#insert-image').modal('show');
+    setTimeout("$('#image-url').focus()", 1000);
+  }
+
+</script>
+
+<!-- === IMAGE INSERTION MODAL === -->
+
+<div id="insert-image" class="modal hide fade" tabindex="-1" role="dialog" 
+ aria-labelledby="mimm-label" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="mimm-label">Insert an image</h3>
+  </div>
+
+  <div class="modal-body">
+    <div class="bl-modal-form">
+      <div class="form-body">
+        <form class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="image-url">Image URL</label>
+            <div class="controls">
+              <input type="text" id="image-url" placeholder="Paste the URL of the image here"
+                class="input-xlarge" >
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="image-url">Upload an image</label>
+            <div class="controls">
+              <ol>
+                <li>
+                  Use 
+                  <a href="http://postimage.org" title="Open PostImage in a new tab"
+                    target="_blank">
+                    PostImage.org
+                  </a> 
+                  to upload the image
+                </li> 
+                <li>
+                  Copy the <b>Direct Link</b> to your clipboard and paste it into the box above
+                </li>
+              </ol>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-primary" id="do-image-insert">Insert Image</button>
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+  </div>
+</div>
+
 <div id="rich-text-toolbar" style="display: none;" class="rich-text-toolbar">
   <div class="btn-group">
     <a class="btn btn-small" title="Bold selected text (Ctrl+B)" data-toggle="tooltip" 
@@ -29,6 +103,10 @@
   </div>
 
   <div class="btn-group">
+    <a class="btn btn-small" data-toggle="tooltip" tabindex="-1" title="Insert an image"
+      onclick="showImageInsertModal(this)">
+      <i class="fa fa-picture-o"></i>
+    </a>
     <a class="btn btn-small" title="Insert a block of programming code that will be specially formatted" 
       data-toggle="tooltip" tabindex="-1" data-wysihtml5-command="insertHTML" 
       data-wysihtml5-command-value="<br><code>// Type any sort of HTML or programming code here.<br>

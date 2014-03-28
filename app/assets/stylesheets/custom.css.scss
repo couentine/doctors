@@ -631,6 +631,18 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
             text-decoration: underline;
           }
         }
+        ol,ul {
+          li {
+            a,a:visited {
+              color: $dark-text-color;
+              text-decoration: underline;
+            }
+            a:focus,a:hover {
+              color: $medium-text-color;
+              text-decoration: underline;
+            }
+          }
+        }
         span.input-mock {
           display: inline-block;
           margin: 5px 0 0 0; 

@@ -30,6 +30,8 @@ String.prototype.trunc = String.prototype.trunc ||
 
 // Do on page load
 
+var richTextEditors = [];
+
 $(document).ready(function() {
     setupAdminTutorial();
     checkForTooltips();
@@ -190,6 +192,15 @@ function registerRichTextArea(textAreaElement, addGrow) {
       e.remove();
     });
   });
+
+  // Add the editor to the array and store the index in the iframe
+  // NOTE: This is inefficient since it runs through the whole list multiple times
+  richTextEditors.push(editor);
+  setTimeout(function() {
+    for (var i=0; i < richTextEditors.length; i++) {
+      $(richTextEditors[i].toolbar.container).find('a.btn').data('editor-index', i);
+    }
+  }, 1000);
 
   //if (addGrow) $(textAreaElement).siblings("iframe").autosize({append: "\n"});
 }
