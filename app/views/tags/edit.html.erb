@@ -87,6 +87,7 @@
           <%= f.input :display_name, label: 'Topic Name', autofocus: true, 
             placeholder: 'Orbital Trajectories' %>
         <% else %>
+          <%= f.input :display_name, as: :hidden %>
           <div class="control-group">
             <label class="control-label">Topic Name</label>
             <div class="controls">
