@@ -73,5 +73,7 @@ module BadgeList
     # For devise
     config.assets.initialize_on_precompile = false
 
+    config.assets.precompile += %w( rich-text-editor.css )
+
   end
 end
