@@ -381,6 +381,35 @@ ul.dropdown-menu {
   &.red-light { background-color: $red-light; }
   &.red-dark { background-color: $red-dark; }
 }
+.text-color {
+  &.primary-medium { color: $primary-medium; }
+  &.primary-really-light { color: $primary-really-light; }
+  &.primary-light { color: $primary-light; }
+  &.primary-dark { color: $primary-dark; }
+  &.secondary-medium { color: $secondary-medium; }
+  &.secondary-really-light { color: $secondary-really-light; }
+  &.secondary-light { color: $secondary-light; }
+  &.secondary-dark { color: $secondary-dark; }
+  &.tertiary-medium { color: $tertiary-medium; }
+  &.tertiary-really-light { color: $tertiary-really-light; }
+  &.tertiary-light { color: $tertiary-light; }
+  &.tertiary-dark { color: $tertiary-dark; }
+  &.green-medium { color: $green-medium; }
+  &.green-really-light { color: $green-really-light; }
+  &.green-light { color: $green-light; }
+  &.green-dark { color: $green-dark; }
+  &.red-medium { color: $red-medium; }
+  &.red-really-light { color: $red-really-light; }
+  &.red-light { color: $red-light; }
+  &.red-dark { color: $red-dark; }
+}
+
+
+li.highlight {
+  background-color: $secondary-dark;
+  padding: 0px 6px;
+  border-radius: 3px;
+}
 
 /* === CODE HIGHLIGHTING === */
 
@@ -527,11 +556,6 @@ header.navbar {
       }
     }
   }
-}
-li.highlight {
-  background-color: $secondary-dark;
-  padding: 0px 6px;
-  border-radius: 3px;
 }
 
 /* === FOOTER === */

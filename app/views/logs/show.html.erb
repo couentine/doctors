@@ -364,46 +364,30 @@
         </span>
         <span class="header-text">
           <h1><%= link_to @user.name, @user, title: 'View Badge List user profile' %></h1>
-          <h2><%= @badge.progress_log.titleize %></h2>  
-          
-          <ul class="bl-icon-list">
-            <% if @log.validation_status == 'requested' %>
-              <li data-toggle="tooltip" data-placement="bottom" title=
-                "Requested validation on <%= @log.date_requested.to_s(:full_date) %>">
-                <div style="background-image: url('<%= image_path 'flag-orange-small.png' %>')" 
-                  class="full-opacity">
-                </div>
-              </li>
-            <% end %>
-
-            <% if @log.validation_status == 'validated' %>
-              <li data-toggle="tooltip" data-placement="bottom" 
-                title="Badge awarded on <%= @log.date_issued.to_s(:full_date) %>">
-                <div style="background-image: url('<%= image_path 'issued-small.png' %>')" ></div>
-              </li>
-            <% end %>
-
-            <% if @log.public? %>
-              <li data-toggle="tooltip" data-placement="bottom" 
-                title="<%= @badge.progress_log.capitalize %> is public.">
-                <div style="background-image: url('<%= image_path 'public-small.png' %>')" >
-                </div>
-              </li>
-            <% elsif @log.private_log %>
-              <li data-toggle="tooltip" data-placement="bottom" 
-                title="<%= @badge.progress_log.capitalize %> is private.">
-                <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
-                </div>
-              </li>
-            <% else %>
-              <li data-toggle="tooltip" data-placement="bottom" 
-                title="<%= @badge.progress_log.capitalize %> currently private, but will 
-                  become public after validation.">
-                <div style="background-image: url('<%= image_path 'private-small.png' %>')" >
-                </div>
-              </li>
-            <% end %>
-          </ul>
+          <h2>
+            <%= 
+              if @log.validation_status == 'validated'
+                "#{@Expert} <i class='fa fa-trophy'></i>".html_safe
+              else
+                @Learner
+              end
+            %>
+          </h2>  
+          <h3>
+            <%= 
+              if @log.validation_status == 'validated'
+                "Awarded badge on #{@log.date_issued.to_s(:full_date)}"
+              else
+                "Joined badge on #{@log.date_started.to_s(:full_date)}"
+              end
+            %>
+          </h3>
+          <% if @log.validation_status == 'requested' %>
+            <h3><span class="text-color primary-medium">
+              <i class="fa fa-flag-checkered"></i>
+              Requested validation on <%= @log.date_requested.to_s(:full_date) %>
+            </span></h3>
+          <% end %>
         </span>
       </div>
 
