@@ -16,8 +16,8 @@
 
   <% content_for :subheader_actions do %>
     <% if @group.open? && !@current_user_is_admin && !@current_user_is_member %>
-      <li class="collapsible">
-        <%= link_to '<i class="icon-plus-sign icon-white"></i> Join Group'.html_safe, 
+      <li class="collapsible highlight">
+        <%= link_to '<i class="fa fa-plus-circle"></i> Join Group'.html_safe, 
             join_group_path(@group), method: :post %>
         <% if @badge_list_admin %>
           <span class="divider">|</span>

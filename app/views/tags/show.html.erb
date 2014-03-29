@@ -45,8 +45,8 @@
 
     <% elsif @show_progress && (@current_user_is_admin || @current_user_is_member || @group.open?) %>
     
-      <li class="collapsible">
-        <%= link_to '<i class="icon-plus icon-white"></i> Join Badge'.html_safe, 
+      <li class="collapsible highlight">
+        <%= link_to '<i class="fa fa-plus-circle"></i> Join Badge'.html_safe, 
             group_badge_logs_path(@group, @badge), method: :post %>
         <% if @tag_exists && @badge_list_admin %>
           <span class="divider">|</span>

@@ -509,6 +509,9 @@ header.navbar {
         span.divider {
           margin: 0 5px;
         }
+        i.fa {
+          font-size: 14px;
+        }
       }
       li.active { color: $light-text-color; }
     }
@@ -524,6 +527,11 @@ header.navbar {
       }
     }
   }
+}
+li.highlight {
+  background-color: $secondary-dark;
+  padding: 0px 6px;
+  border-radius: 3px;
 }
 
 /* === FOOTER === */

@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   before_filter :track_page_views
+  after_filter :store_location
 
   # unless Rails.application.config.consider_all_requests_local
     # rescue_from Exception, with: :render_500
@@ -29,6 +30,17 @@ class ApplicationController < ActionController::Base
       format.html { render template: 'errors/internal_server_error', layout: 'layouts/application', status: 500 }
       format.all { render nothing: true, status: 500}
     end
+  end
+
+  def store_location
+    # store last url as long as it isn't a /users path
+    if request.format == "text/html" || request.content_type == "text/html"
+      session[:previous_url] = request.fullpath unless request.fullpath =~ /\/users/
+    end
+  end
+
+  def after_sign_in_path_for(resource)
+    session[:previous_url] || root_path
   end
 
 private
