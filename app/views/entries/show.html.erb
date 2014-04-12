@@ -147,12 +147,12 @@
         
         <ul>
           <li>
-            <i class="icon-time" title="Creation date"></i> 
+            <i class="fa fa-clock-o" title="Creation date"></i> 
             <%= @entry.created_at.to_s(:full_date_time) %>
           </li>
           <% if @entry.updated_at != @entry.created_at %>
             <li>
-              <i class="icon-info-sign"></i>
+              <i class="fa fa-info-circle"></i>
               <% if @entry.updated_at <= Time.now %>
                 <%= "Last updated #{time_ago_in_words(@entry.updated_at)} ago" %>
               <% else %>
@@ -162,16 +162,16 @@
           <% end %>
           <li>
             <% if @entry.visibility == :anonymous %>
-              <i class='icon-eye-open'></i> 
+              <i class='fa fa-eye'></i> 
               Visible to public
             <% elsif @entry.visibility == :members %>
-              <i class='icon-eye-close'></i> 
+              <i class='fa fa-eye-slash'></i> 
               Only visible to members now, visible to public when badge is issued
             <% elsif @entry.visibility == :experts %>
-              <i class='icon-lock'></i> 
+              <i class='fa fa-lock'></i> 
               Only visible to <%= @experts %>
             <% else %>
-              <i class='icon-warning-sign'></i> 
+              <i class='fa fa-warning'></i> 
               Only visible to <%= @badge.log %> owner and entry creator
             <% end %>
           </li>
