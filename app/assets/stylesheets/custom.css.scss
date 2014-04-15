@@ -148,6 +148,7 @@ ul.dropdown-menu {
   border-color: $primary-light;
   border-style: dashed;
   color: $medium-text-color;
+  font-size: 14px;
   
   &.alert-error {
     background-color: $red-really-light;
@@ -422,19 +423,6 @@ li.highlight {
   border-radius: 3px;
 }
 
-/* === CODE HIGHLIGHTING === */
-
-code {
-  display: block;
-  background-color: $really-light-gray;
-  border-radius: 5px;
-  border: 1px solid $light-gray;
-  padding: 10px;
-  margin: 10px 0;
-  color: $dark-text-color;
-  overflow-x: auto;
-}
-
 /* === HEADER === */
 
 ul.nav.header-left {
@@ -573,15 +561,15 @@ header.navbar {
 
 footer {
   margin-top: 60px;
-  background-color: $light-white;
-  border: 2px solid $light-gray;
-  color: $medium-text-color;
-  padding: 10px 15px;
+  background-color: $medium-gray;
+  color: $light-white;
+  padding: 5px 10px;
   text-align: center;
-  border-radius: 20px;
+  border-radius: 50px;
+  font-size: 14px;
   
   a,a:visited { 
-    color: $medium-text-color;
+    color: $light-white;
     text-decoration: none;
     font-weight: bold;
   }
@@ -1930,6 +1918,8 @@ div.topic-list-card {
       width: 100px; 
       margin: -72px 0 10px 10px;
       text-align: center;
+      font-size: 14px;
+      line-height: 1.3em;
 
       @media (max-width: 767px) {
         width: 55px; 
@@ -1957,6 +1947,8 @@ div.topic-list-card {
       width: 100px; 
       margin-top: -65px;
       text-align: center;
+      font-size: 14px;
+      line-height: 1.3em;
     }
   }
 }
@@ -2301,6 +2293,29 @@ div.topic-list-card {
   }
 }
 
+.sign-in-info {
+  border-top: 4px solid $secondary-medium;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  border-radius: 1px;
+
+  h3 {
+    color: $secondary-medium;
+  }
+  p.button-paragraph {
+    text-align: right;
+    margin-bottom: 0;
+  }
+  a:not(.btn),a:visited:not(.btn) {
+    text-decoration: underline;
+    font-style: bold;
+    color: $dark-text-color;
+  }
+  a:hover:not(.btn),a:focus:not(.btn) {
+    color: $secondary-medium;
+  }
+}
+
 /* === BADGE IMAGE MAKER === */
 
 .badge-maker {
@@ -2528,13 +2543,15 @@ div.topic-list-card {
 /* === (Used in Profiles, Overviews, Topic Pages and Posts) === */
 
 .body-section, .text-card {
-  padding: 20px 30px 30px 30px;
+  padding: 30px;
 
   h1,h2,h3 {
     font-size: 22px;
     color: $dark-text-color;
     line-height: 1.8em;
-    margin: 15px 0;
+    margin: 35px 0 10px 0;
+    border-bottom: 1px solid $medium-gray;
+    font-weight: 800;
   }
   h1:first-child,h2:first-child,h3:first-child {
     margin-top: 0;
@@ -2550,31 +2567,61 @@ div.topic-list-card {
     border-bottom: 1px dotted $tertiary-dark;
   }
   a.linkified-image,a.linkified-video {
-    display: inline-block;
-    margin: 10px 0;
+    display: block;
+    margin: 10px -30px;
+    text-align: center;
+    background-color: $really-light-gray;
+    border-left: 4px solid $medium-gray;
+
     &:last-child { margin-bottom: 0; }
 
     img {
       max-width: 100%;
-      max-height: 300px;
+      max-height: 90%;
       display: inline-block;
-      border-radius: 10px;
-      border: 1px solid $really-light-gray;
     }
   }
+  ul,ol {
+    display: block;
+    margin: 10px 0 10px -30px;
+    border-left: 4px solid $light-gray;
+    font-size: 16px;
+
+
+    li {
+      margin-left: 50px;
+      line-height: 1.8em;
+    }
+
+    ul,ol {
+      border-left: none;
+      margin: 0 0 0 40px;
+    }
+  }
+  code {
+    display: block;
+    margin: 10px -30px;
+    padding: 10px 30px;
+    background-color: $really-light-gray;
+    border: none;
+    border-left: 4px solid $medium-gray;
+    border-radius: 0;
+    color: $dark-text-color;
+    overflow-x: auto;
+    font-size: 16px;
+    line-height: 1.4em;
+  }
+
   .section-container {
     display: block;
-    border-top: 1px solid $light-gray;
-    padding: 10px 0;
-    margin: 10px 0 0 0;
+    border-top: 4px solid $medium-gray;
+    margin-bottom: 35px;
   }
   .section-container:first-child { 
     border: none; 
-    padding-top: 0;
-    margin-top: 0;
   }
   .section-container:last-child { 
-    padding-bottom: 0;
+    margin-bottom: 0;
   }
 
   .validation-result {
@@ -2582,36 +2629,5 @@ div.topic-list-card {
     
     &.yes { color: $green-medium; }
     &.no { color: $red-medium; }
-  }
-}
-
-.text-card {
-  border-top: 4px solid $tertiary-dark;
-
-  h1,h2,h3 {
-    color: $tertiary-dark;
-  }
-
-  &.sign-in-info {
-    border-top: 4px solid $secondary-medium;
-    margin-top: 30px;
-    margin-bottom: 20px;
-    border-radius: 1px;
-
-    h3 {
-      color: $secondary-medium;
-    }
-    p.button-paragraph {
-      text-align: right;
-      margin-bottom: 0;
-    }
-    a:not(.btn),a:visited:not(.btn) {
-      text-decoration: underline;
-      font-style: bold;
-      color: $dark-text-color;
-    }
-    a:hover:not(.btn),a:focus:not(.btn) {
-      color: $secondary-medium;
-    }
   }
 }

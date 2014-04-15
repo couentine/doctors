@@ -47,6 +47,7 @@ $(document).ready(function() {
     createCharacterCounts();
     registerToggleLinks();
     addSyntaxHighlighting();
+    addVideoIcons();
     $('form:not(.allow-double-submission)').preventDoubleSubmission();
 
     $(window).on('resize', function() {
@@ -494,4 +495,8 @@ function registerToggleLinks() {
 
 function addSyntaxHighlighting() {
   $('code').addClass('prettyprint');
+}
+
+function addVideoIcons() {
+  // $('a.linkified-video').append("<i class='fa fa-play-circle-o overlay-icon'></i>");
 }
