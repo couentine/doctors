@@ -53,11 +53,11 @@
             <% end %>
             <% if show_badge %>
               <%= link_to \
-                "##{entry.entry_number}. " + ((entry.summary.length>90) ? "#{entry.summary[0..90]}..." : entry.summary), 
+                ((entry.summary.length>90) ? "#{entry.summary[0..90]}..." : entry.summary), 
                 [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
             <% else %>
               <%= link_to \
-                "##{entry.entry_number}. #{entry.summary}", 
+                entry.summary, 
                 [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
             <% end %>
           </h2>

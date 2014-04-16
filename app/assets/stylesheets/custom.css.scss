@@ -520,7 +520,8 @@ header.navbar {
 
       li {
         display: inline-block;
-        font-size: 12px;
+        font-size: 13px;
+        line-height: 1.2em;
         color: $light-white;
         a,a:visited,span.divider { 
           color: $light-white; 
@@ -1548,7 +1549,7 @@ div.entry-card {
     img.gravatar.learner { border: 2px solid $secondary-light; }
     img.gravatar.expert { border: 2px solid $tertiary-light; }
     h2 {
-      font-size: 14px;
+      font-size: 24px;
       line-height: 1.4em;
 
       a,a:visited {
@@ -1620,104 +1621,6 @@ div.entry-card {
     }
   }
 
-  td.card-body {
-    overflow: hidden;
-    position: relative;
-
-    div.card-body-inner {
-      max-height: 650px;
-      padding: 5px 10px 15px 10px;
-      position: relative;
-      
-      a.linkified-url,a.linkified-url:visited,a.linkified-tag,a.linkified-tag:visited {
-        font-weight: bold;
-        position: initial;
-      }
-      a.linkified-url:hover,a.linkified-url:focus,a.linkified-tag:hover,a.linkified-tag:focus {
-        color: $tertiary-medium;
-        text-decoration: none;
-        border-bottom: 1px dotted $tertiary-dark;
-      }
-      a.linkified-image,a.linkified-video {
-        display: inline-block;
-        margin: 5px 0;
-        &:last-child { margin-bottom: 0; }
-
-        img {
-          max-width: 100%;
-          max-height: 300px;
-          display: inline-block;
-          border-radius: 10px;
-          border: 1px solid $really-light-gray;
-        }
-      }
-      h1,h2,h3,h4,h5 {
-        font-size: 18px;
-        font-weight: bold;
-        color: $medium-text-color;
-        line-height: 1.4em;
-        margin: 10px 0;
-      }
-      h1:first-child,h2:first-child,h3:first-child,h4:first-child,h5:first-child {
-        margin-top: 0;
-      }
-      .section-container { 
-        display: block;
-        border-top: 1px solid $really-light-gray; 
-        margin: 5px 0;
-        padding: 5px 0;
-        font-size: 11px;
-
-        -ms-word-break: break-all;
-        word-break: break-all;
-        word-break: break-all;
-        -webkit-hyphens: auto;
-        -moz-hyphens: auto;
-        hyphens: auto;
-
-      }
-      div:first-child { 
-        border-top: none; 
-        margin-top: 0;
-        padding-top: 0;
-      }
-      div:last-child { margin-bottom: 0; }
-      .card-body-footer {
-        border-top: 1px solid $light-gray;
-        padding-top: 10px;
-        font-size: 11px;
-        line-height: 11px;
-        color: $light-text-color;
-
-        label {
-          display: inline-block;
-          font-size: 11px;
-
-          i { opacity: 0.55; }
-        }
-        a,a:visited {
-          color: $dark-text-color;
-          font-weight: normal;
-        }
-        a:hover,a:focus {
-          color: $tertiary-medium;
-          font-weight: normal;
-          text-decoration: none;
-          border-bottom: 1px dotted $tertiary-dark;
-        }
-      }
-    }
-    div.overflow-mark {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 60%);
-      padding: 30px 0 20px 0;
-      text-align: center;
-    }
-  }
-
   tr.card-footline-row td {
     font-size: 11px;
     padding: 5px 10px;
@@ -1732,12 +1635,15 @@ div.entry-card {
 div.topic-list-card {
   ul {
     margin-left: 0;
+    border-left: none;
     font-size: 20px;
     color: $tertiary-medium;
     list-style: none;
 
     li {
       margin-bottom: 15px;
+      margin-left: 0;
+      line-height: 1.2em;
       
       &:last-child { margin-bottom: 0; }
     }
@@ -2542,13 +2448,13 @@ div.topic-list-card {
 /* ===             RICH TEXT CONTENT FORMATTING             === */
 /* === (Used in Profiles, Overviews, Topic Pages and Posts) === */
 
-.body-section, .text-card {
+.body-section, .text-card, .entry-card td.card-body .card-body-inner {
   padding: 30px;
 
   h1,h2,h3 {
     font-size: 22px;
     color: $dark-text-color;
-    line-height: 1.8em;
+    line-height: 1.5em;
     margin: 35px 0 10px 0;
     border-bottom: 1px solid $medium-gray;
     font-weight: 800;
@@ -2629,5 +2535,68 @@ div.topic-list-card {
     
     &.yes { color: $green-medium; }
     &.no { color: $red-medium; }
+  }
+}
+
+div.entry-card td.card-body {
+  overflow: hidden;
+  position: relative;
+
+  div.card-body-inner {
+    max-height: 650px;
+    padding: 5px 10px 15px 10px;
+    position: relative;
+    
+    h1,h2,h3,h4,h5 {
+      font-size: 18px;
+    }
+    ul,ol {
+      font-size: 14px;
+    }
+
+    .section-container {
+      font-size: 14px;
+      line-height: 1.6em;
+      text-align: justify;
+      margin-bottom: 20px;
+
+      @media (max-width: 767px) {
+        line-height: 1.5em;
+      }
+    }
+    div:last-child { margin-bottom: 0; }
+    .card-body-footer {
+      border-top: 1px solid $light-gray;
+      padding-top: 10px;
+      font-size: 11px;
+      line-height: 11px;
+      color: $light-text-color;
+
+      label {
+        display: inline-block;
+        font-size: 11px;
+
+        i { opacity: 0.55; }
+      }
+      a,a:visited {
+        color: $dark-text-color;
+        font-weight: normal;
+      }
+      a:hover,a:focus {
+        color: $tertiary-medium;
+        font-weight: normal;
+        text-decoration: none;
+        border-bottom: 1px dotted $tertiary-dark;
+      }
+    }
+  }
+  div.overflow-mark {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 60%);
+    padding: 30px 0 20px 0;
+    text-align: center;
   }
 }
