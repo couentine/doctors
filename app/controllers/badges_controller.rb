@@ -186,7 +186,13 @@ class BadgesController < ApplicationController
         new_learner_count += 1
         
         if @notify_by_email
-          UserMailer.log_new(user, current_user, @group, @badge, new_learner_log).deliver 
+          begin
+            UserMailer.log_new(user, current_user, @group, @badge, new_learner_log).deliver 
+          rescue Exception => e
+            logger.error "+++badges_controller.create_learners: " \
+            + "There was an error sending an email to #{user}. " \
+            + "Exception = #{e.inspect}+++"
+          end
         end
       end
     end unless params[:usernames].blank?

@@ -33,7 +33,10 @@
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-header-currentuser">
-            <li><a href="<%= url_for(current_user) %>"><i class="icon-user"></i> View your profile</a></li>
+            <li>
+              <a href="<%= url_for(current_user) %>"><i class="icon-user"></i> 
+              Account overview</a>
+            </li>
             <% if current_user.admin? %>
               <li><a href="/a"><i class="fa fa-cogs"></i> Admin tools</a></li>
             <% end %>

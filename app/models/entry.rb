@@ -125,7 +125,7 @@ class Entry
   # NOTE: It's ok if user is nil
   def visible_to?(user)
     if (self.visibility == :anonymous) || (user == self.creator) || (user == self.log.user) \
-      || (user.admin?)
+      || (!user.nil? && (user.admin?))
       return true
     elsif user && (self.visibility != :users)
       if self.visibility == :experts

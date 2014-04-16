@@ -176,6 +176,9 @@ ul.dropdown-menu {
 }
 .popover {
   border-color: $primary-light;
+  font-size: 14px;
+  line-height: 1.5em;
+  
   .popover-title {
     color: $primary-white;
     background-color: $primary-light;

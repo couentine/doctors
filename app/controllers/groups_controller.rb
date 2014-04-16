@@ -91,11 +91,20 @@ class GroupsController < ApplicationController
   # DELETE /group-url
   # DELETE /group-url.json
   def destroy
-    @group.destroy
+    if @group.badges.count == 0
+      @group.destroy
 
-    respond_to do |format|
-      format.html { redirect_to root_url }
-      format.json { head :no_content }
+      respond_to do |format|
+        format.html { redirect_to root_url }
+        format.json { head :no_content }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to @group, 
+          alert: 'There was a problem deleting this learning group. ' \
+          + 'You must first individually delete each of the badges in the group.' }
+        format.json { head :no_content }
+      end
     end
   end
 
@@ -141,7 +150,9 @@ class GroupsController < ApplicationController
     end
 
     # Then detach any logs
-    current_user.logs.find_all { |log| log.badge.group == @group }.each do |log_to_detach|
+    current_user.logs.find_all do |log| 
+      !log.badge.nil? && (log.badge.group == @group) 
+    end.each do |log_to_detach|
       log_to_detach.detached_log = true
       log_to_detach.save!
     end
