@@ -31,7 +31,7 @@ class Group
   field :location,                type: String
   field :website,                 type: String
   field :image_url,               type: String
-  field :type,                    type: String
+  field :type,                    type: String, default: 'private'
   field :customer_code,           type: String
   field :validation_threshold,    type: Integer, default: 1
   field :invited_admins,          type: Array, default: []
@@ -52,9 +52,6 @@ class Group
   validates :image_url, url: true
   validates :type, inclusion: { in: TYPE_VALUES, 
                                 message: "%{value} is not a valid Group Type" }
-  validates :customer_code, presence: { message: "is required for private Groups" }, if: :private?
-  validates :customer_code, inclusion: { in: CUSTOMER_CODE_VALUES, 
-            allow_nil: true, message: "%{value} is not a valid customer code" }, if: :private?
   validates :creator, presence: true
 
   # Which fields are accessible?

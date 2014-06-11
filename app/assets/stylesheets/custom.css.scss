@@ -731,6 +731,21 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           .help-inline { color: $red-medium; font-style: italic; }
         }
       }
+
+      &.radio_buttons .controls label.radio {
+        font-size: 20px;
+        margin-bottom: 20px;
+
+        b {
+          display: block;
+          margin-bottom: 5px;
+        }
+        span {
+          display: block;
+          font-size: 16px;
+          line-height: 1.6em;
+        }
+      }
     }
   }
 }

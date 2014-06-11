@@ -1,20 +1,6 @@
 <script>
 
   $(document).ready(function() {
-    // Show or hide the customer code based on initial value of group type
-    if ($('input[name="group[type]"]:checked').val() == 'private')
-      $('#customer-code-wrapper').show();
-    else
-      $('#customer-code-wrapper').hide();
-
-    // Setup the event handler to maintain the appropriate visibility
-    $('input[name="group[type]"]').change(function(){
-      if ($(this).val() == 'private')
-        $('#customer-code-wrapper').slideDown();
-      else
-        $('#customer-code-wrapper').slideUp();
-    })
-
     <% if @group.new_record? %>
       // If this is a new record then auto set the URL as they type
       $('#group_name').keyup(function() {
@@ -59,34 +45,29 @@
         title: 'Pick a unique URL for your learning group' } %>
     <% end %>
 
-    <%= f.input :type, label: 'Group Type', as: :radio_buttons,
+    <%= f.input :type, label: 'Group Type', as: :radio_buttons, label_html: { class: 'hidden' },
                 collection: @group_type_options %>
 
-    <%= f.input :customer_code, label: 'Customer Code',
-                hint: ("A customer code is required for private learning groups "\
-                + "(<a href='/badgelist/about/pricing' target='_blank'>View pricing info</a>)").html_safe,
-                input_html: { class: 'input-small' },
-                wrapper_html: { id: 'customer-code-wrapper' } %>
-    
-    <h2>
-      Extra information (optional)
-      <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
-        value="<%= (@group.new_record? && @group.errors.blank?) ? 'Show Extra Info' : 'Hide Extra Info' %>" 
-        onclick="toggleExtraInfo()" />
-    </h2> 
+    <% unless @group.new_record? %>
+      <h2>
+        Extra information (optional)
+        <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
+          value="<%= (@group.new_record? && @group.errors.blank?) ? 'Show Extra Info' : 'Hide Extra Info' %>" 
+          onclick="toggleExtraInfo()" />
+      </h2>
 
-    <div id="form-extra-info" 
-         style="<%= (@group.new_record? && @group.errors.blank?) ? 'display:none' : '' %>">
-      <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
-                  input_html: { class: 'input-xlarge' } %>
+      <div id="form-extra-info" style="display:none">
+        <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
+                    input_html: { class: 'input-xlarge' } %>
 
-      <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
-                  input_html: { class: 'input-xlarge' } %>
+        <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
+                    input_html: { class: 'input-xlarge' } %>
 
-      <%= f.input :image_url, label: 'Group Image URL', 
-                  placeholder: 'http://nasa.gov/logo.png',
-                  input_html: { class: 'input-xlarge' } %>
-    </div>
+        <%= f.input :image_url, label: 'Group Image URL', 
+                    placeholder: 'http://nasa.gov/logo.png',
+                    input_html: { class: 'input-xlarge' } %>
+      </div>
+    <% end %>
   </div>  
   
   <div class="form-footer add-top-margin">
