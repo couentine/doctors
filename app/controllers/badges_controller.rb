@@ -245,9 +245,11 @@ class BadgesController < ApplicationController
         # add them to the group invited members (but be sure not to create a dupe)
         if @group.has_invited_member? @email
           found_user = @group.invited_members.detect { |u| u["email"] == @email}
+          found_user[:validations] = [] unless found_user.include? :validations
           found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, user: current_user._id }
         elsif @group.has_invited_admin? @email
           found_user = @group.invited_admins.detect { |u| u["email"] == @email}
+          found_user[:validations] = [] unless found_user.include? :validations
           found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, user: current_user._id }
         else
           @group.invited_members << { email: @email, invite_date: Time.now, 
