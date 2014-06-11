@@ -148,8 +148,33 @@ ul.dropdown-menu {
   border-color: $primary-light;
   border-style: dashed;
   color: $medium-text-color;
-  font-size: 14px;
+  font-size: 16px;
   
+  h3 {
+    font-size: 26px; 
+    line-height: 1.2em;
+  }
+  ul {
+    list-style: none;
+    margin-left: 20px;
+    margin-top: 5px;
+
+    li { 
+      font-size: 16px;
+      margin-bottom: 4px;
+      line-height: 1.6em;
+    }
+  }
+
+  a.btn {
+    display: block;
+    text-align: left;
+    font-size: 16px;
+    padding: 10px 0;
+    line-height: 1.6em;
+  }
+  a.btn,a.btn:visited { color: $tertiary-medium; }
+
   &.alert-error {
     background-color: $red-really-light;
     border-color: $red-medium;
@@ -212,13 +237,17 @@ ul.dropdown-menu {
   padding: 15px 20px;
   text-align: left !important;
   
+  p { 
+    font-size: 16px;
+    line-height: 1.4em;
+  }
   h3,h4 {
     color: $secondary-dark;
     line-height: 1.2em;
     margin: 0 0 10px 0;
   }
-  h3 { font-size: 16px; }
-  h4 { font-size: 12px; }
+  h3 { font-size: 26px; }
+  h4 { font-size: 16px; }
   ul {
     margin: 0 0 0 10px;
     list-style: none;
@@ -259,34 +288,34 @@ ul.dropdown-menu {
     ul { font-size: 21px; }
     i.header-icon { font-size: 70px; }
   }
-}
-.well.tertiary {
-  background-color: $tertiary-white;
-  border-left: 3px solid $tertiary-dark;
+  &.tertiary {
+    background-color: $tertiary-white;
+    border-left: 3px solid $tertiary-dark;
 
-  h3,h4 { color: $tertiary-dark; }
-  ul {
-    li { 
-      a:focus,a:hover { color: $tertiary-dark; }
+    h3,h4 { color: $tertiary-dark; }
+    ul {
+      li { 
+        a:focus,a:hover { color: $tertiary-dark; }
+      }
+    }
+    i.header-icon {
+      color: $tertiary-really-light;
     }
   }
-  i.header-icon {
-    color: $tertiary-really-light;
-  }
-}
-.well.gray {
-  background-color: $light-white;
-  border-left: none;
+  &.gray {
+    background-color: $light-white;
+    border-left: none;
 
-  h3,h4 { color: $medium-text-color; }
-  ul {
-    li { 
-      a:focus,a:hover { color: $secondary-dark; }
+    h3,h4 { color: $medium-text-color; }
+    ul {
+      li { 
+        a:focus,a:hover { color: $secondary-dark; }
+      }
     }
-  }
-  i.header-icon {
-    color: $really-light-gray;
-  }
+    i.header-icon {
+      color: $really-light-gray;
+    }
+}
 }
 
 .badge-success { background-color: $secondary-light; }
@@ -1404,6 +1433,8 @@ div.tab-content {
 
 
 div.tab-pane {
+  margin-bottom: 30px;
+
   div.well {
     float: left;
     text-align: center;

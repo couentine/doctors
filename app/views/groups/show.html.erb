@@ -63,6 +63,18 @@
   <% end %>
 <% end %>
 
+<script type="text/javascript">
+    
+  $(document).ready(function() {
+    $('#toggle-package-details').click(function(e) {
+      $("#package-details").slideDown();
+      $(this).slideUp();
+      e.preventDefault();
+    });
+  });
+
+</script>
+
 <!-- === MANAGE MEMBERS MODAL === -->
 
 <div id="manage-invited-members" class="modal hide fade" tabindex="-1" role="dialog" 
@@ -201,8 +213,6 @@
 <div class="row add-top-margin">
   <div class="span12">
     <div class="header-card group-header-card">
-      <div class="white-background">&nbsp;</div>
-
       <div class="span6 primary-header">
         <span class="header-image" >
           <%= group_image_tag_for @group %>
@@ -244,222 +254,227 @@
         </ul>
       </div>
 
-      <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
-        <div class="card-tabs">
-          <ul class="nav nav-tabs">
-            <li class="active"><a href="#badges" data-toggle="tab">Badges</a></li>
-            <li><a href="#members" data-toggle="tab">Members</a></li>
-            <li><a href="#admins" data-toggle="tab">Admins</a></li>
-          </ul>
-        </div>
-      <% end %>
     </div>
   </div>
 </div>
 
 <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 
-  <!-- === TAB CONTENT === -->
+  <% if @current_user_is_admin && !@group.badges.empty? && (current_user.sign_in_count <= 3) %>
+  
+    <!-- === NEW GROUP PACKAGE DETAILS TUTORIAL === -->
 
-  <div class="tab-content">
+    <div class="alert alert-info">
+      <h3>
+        <i class="fa fa-support"></i> 
+        Want some help?
+      </h3> 
+      Our team can help you develop the perfect badging system for your organization.
+      <a href="#" id="toggle-package-details" class="btn btn-link">
+        Quick start packages start at $150.
+      </a>
+      <span style="display:none" id="package-details">
+        <ul>
+          <li><b>Launch Package</b> - Three 45 minute 1-on-1 sessions - $150</li>
+          <li><b>Navigator Package</b> - Zero-to-launch guidance up to 3 hours/week - $230/week</li>
+          <li><b>Mission Control Package</b> - We project manage everything - $90/hour</li>
+        </ul>
+        <a href="mailto:hello@badgelist.com" id="toggle-package-details" class="btn btn-link">
+          <i class="fa fa-envelope"></i> Email us to get started.
+        </a>
+      </span>
+    </div>
 
-    <!-- === BADGES TAB === -->
+  <% end %>
 
-    <div class="tab-pane active" id="badges">
+  <!-- === BADGES TAB === -->
 
-      <div class="row">
-        <div class="span12">
-          <% if @current_user_is_admin || @badge_list_admin %>
-            <div class="tab-header">
-              <%= link_to '<i class="icon-plus"></i> New Badge'.html_safe,
-                  new_group_badge_path(@group), class: 'btn btn-small' %>
+  <div class="tab-pane active" id="badges">
 
-              <h2>All Badges</h2>
-            </div>
-          <% end %>
+    <div class="row">
+      <div class="span12">
+        <% if @current_user_is_admin || @badge_list_admin %>
+          <div class="tab-header">
+            <%= link_to '<i class="icon-plus"></i> New Badge'.html_safe,
+                new_group_badge_path(@group), class: 'btn btn-small' %>
 
-          <% if @group.badges.empty? %>
-            <div class="well span7 offset2">
-              <h3>No badges yet!</h3>
-              <p>
-                Badges let you recognize experts. A badge can also help you track the progress 
-                of those working to achieve it.  Click the button below to get started.
-              </p>
-              <p>
-                <%= 
-                  if @current_user_is_admin || @badge_list_admin
-                    link_to '<i class="fa fa-plus"></i> Create a badge'.html_safe,
-                    new_group_badge_path(@group), class: 'btn btn-success' 
-                  end
-                %>
-              </p>
-            </div>
-          <% end %>
-        </div>
-      </div>
+            <h2>Badges</h2>
+          </div>
+        <% end %>
 
-      <div class="row">
-        
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
-             data-bl-dyncol-width="12">
-
-            <%= render @group.badges.asc(:url) if !@group.badges.empty? %>
-
-        </div>
+        <% if @group.badges.empty? %>
+          <div class="well span7 offset2">
+            <h3>Got skills?</h3>
+            <p>
+              Badges help you recognize experts. A badge can also help you collect evidence from 
+              your learners.
+            </p>
+            <p>
+              <%= 
+                if @current_user_is_admin || @badge_list_admin
+                  link_to '<i class="fa fa-plus"></i> Create a badge'.html_safe,
+                  new_group_badge_path(@group), class: 'btn btn-success' 
+                end
+              %>
+            </p>
+          </div>
+        <% end %>
       </div>
     </div>
 
-    <!-- === MEMBERS TAB === -->
+    <div class="row">
+      
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
+           data-bl-dyncol-width="12">
 
-    <div class="tab-pane" id="members">
+          <%= render @group.badges.asc(:url) if !@group.badges.empty? %>
 
-      <div class="row">
-        <div class="span12">
-            
-          <% if @current_user_is_admin %>
-            <div class="tab-header">
+      </div>
+    </div>
+  </div>
 
-              <%= link_to '<i class="icon-plus"></i> Add Members'.html_safe,
-                  add_group_members_path(@group), class: 'btn btn-small' %>
+  <!-- === MEMBERS TAB === -->
 
-              <% unless @group.invited_members.blank? %>
-                <div class="btn-group">
-                  <a href="#" class="btn btn-small btn-link dropdown-toggle" data-toggle="dropdown">
-                    Waiting on <%= @group.invited_members.count %> new members 
-                    <span class="caret"></span>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <% @group.invited_members.take(10).each do |u| %>
-                      <li>
-                        <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
-                          <%= if u['name']
-                                "#{u['name']} <#{u['email']}>"
-                              else
-                                u['email']
-                              end %>
-                        </a>
-                      </li>
-                    <% end %>
+  <div class="tab-pane" id="members">
 
-                    <% if @group.invited_members.count > 10 %>
-                      <li>
-                        <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
-                          <%= (@group.invited_members.count - 10).to_s %> more...
-                        </a>
-                      </li>
-                    <% end %>
+    <div class="row">
+      <div class="span12">
+          
+        <% if @current_user_is_admin %>
+          <div class="tab-header">
 
-                    <li class="divider"></li>
+            <%= link_to '<i class="icon-plus"></i> Invite Members'.html_safe,
+                add_group_members_path(@group), class: 'btn btn-small' %>
+
+            <% unless @group.invited_members.blank? %>
+              <div class="btn-group">
+                <a href="#" class="btn btn-small btn-link dropdown-toggle" data-toggle="dropdown">
+                  Waiting on <%= @group.invited_members.count %> new members 
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <% @group.invited_members.take(10).each do |u| %>
                     <li>
                       <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
-                        <i class="icon-wrench"></i>  Manage Invited Members
+                        <%= if u['name']
+                              "#{u['name']} <#{u['email']}>"
+                            else
+                              u['email']
+                            end %>
                       </a>
                     </li>
-                  </ul>
-                </div>
-              <% end %>
-              
-              <h2>Active Members</h2>
+                  <% end %>
+
+                  <% if @group.invited_members.count > 10 %>
+                    <li>
+                      <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
+                        <%= (@group.invited_members.count - 10).to_s %> more...
+                      </a>
+                    </li>
+                  <% end %>
+
+                  <li class="divider"></li>
+                  <li>
+                    <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
+                      <i class="icon-wrench"></i>  Manage Invited Members
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            <% end %>
             
-            </div>
+            <h2>Members</h2>
           
-          <% end %>
+          </div>
+        
+        <% end %>
 
-          <% if @group.members.empty? %>
-            <div class="well span7 offset2">
-              <h3>No members yet!</h3>
-              <p>
-                <%= 
-                  if @current_user_is_admin || @badge_list_admin
-                    link_to '<i class="fa fa-plus"></i> Add some members'.html_safe,
-                    add_group_members_path(@group), class: 'btn btn-success' 
-                  end
-                %>
-              </p>
-            </div>
-          <% end %>
+        <% if @group.members.empty? %>
+          <div class="well span7 offset2 gray">
+            <h3>Got members?</h3>
+            <p>Next Step: Invite them.</p>
+          </div>
+        <% end %>
 
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
-             data-bl-dyncol-width="12">
-
-            <%= render @group.members.sort_by{|u| u.name} if !@group.members.empty? %>
-
-        </div>
       </div>
     </div>
 
-    <!-- === ADMINS TAB === -->
+    <div class="row">
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
+           data-bl-dyncol-width="12">
 
-    <div class="tab-pane" id="admins">
+          <%= render @group.members.sort_by{|u| u.name} if !@group.members.empty? %>
 
-      <div class="row">
-        <div class="span12">
-          
-          <% if @current_user_is_admin || @badge_list_admin %>
-            <div class="tab-header">
-              
-              <%= link_to '<i class="icon-plus"></i> Add Admins'.html_safe,
-                  add_group_admins_path(@group), class: 'btn btn-small' %>
+      </div>
+    </div>
+  </div>
 
-              <% unless @group.invited_admins.blank? %>
-                <div class="btn-group">
-                  <a href="#" class="btn btn-small btn-link dropdown-toggle" data-toggle="dropdown">
-                    Waiting on <%= @group.invited_admins.count %> new admins 
-                    <span class="caret"></span>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <% @group.invited_admins.take(10).each do |u| %>
-                      <li>
-                        <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
-                          <%= if u['name']
-                                "#{u['name']} <#{u['email']}>"
-                              else
-                                u['email']
-                              end %>
-                        </a>
-                      </li>
-                    <% end %>
+  <!-- === ADMINS TAB === -->
 
-                    <% if @group.invited_admins.count > 10 %>
-                      <li>
-                        <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
-                          <%= (@group.invited_admins.count - 10).to_s %> more...
-                        </a>
-                      </li>
-                    <% end %>
+  <div class="tab-pane" id="admins">
 
-                    <li class="divider"></li>
+    <div class="row">
+      <div class="span12">
+        
+        <% if @current_user_is_admin || @badge_list_admin %>
+          <div class="tab-header">
+            
+            <%= link_to '<i class="icon-plus"></i> Add Admins'.html_safe,
+                add_group_admins_path(@group), class: 'btn btn-small' %>
+
+            <% unless @group.invited_admins.blank? %>
+              <div class="btn-group">
+                <a href="#" class="btn btn-small btn-link dropdown-toggle" data-toggle="dropdown">
+                  Waiting on <%= @group.invited_admins.count %> new admins 
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <% @group.invited_admins.take(10).each do |u| %>
                     <li>
                       <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
-                        <i class="icon-wrench"></i>  Manage Invited Admins
+                        <%= if u['name']
+                              "#{u['name']} <#{u['email']}>"
+                            else
+                              u['email']
+                            end %>
                       </a>
                     </li>
-                  </ul>
-                </div>
-              <% end %>
-              
-              <h2>Active Admins</h2>
+                  <% end %>
+
+                  <% if @group.invited_admins.count > 10 %>
+                    <li>
+                      <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
+                        <%= (@group.invited_admins.count - 10).to_s %> more...
+                      </a>
+                    </li>
+                  <% end %>
+
+                  <li class="divider"></li>
+                  <li>
+                    <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
+                      <i class="icon-wrench"></i>  Manage Invited Admins
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            <% end %>
             
-            </div>
-          <% end %>
-        </div>
-      </div>
-
-      <div class="row">
-
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="admins" 
-             data-bl-dyncol-width="12">
-
-          <%= render @group.admins.sort_by{|u| u.name} %>
-        
-        </div>
+            <h2>Group Admins</h2>
+          
+          </div>
+        <% end %>
       </div>
     </div>
 
+    <div class="row">
+
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="admins" 
+           data-bl-dyncol-width="12">
+
+        <%= render @group.admins.sort_by{|u| u.name} %>
+      
+      </div>
+    </div>
   </div>
 
 <% else %>
