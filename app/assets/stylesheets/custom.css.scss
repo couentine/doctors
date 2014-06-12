@@ -2261,29 +2261,6 @@ div.topic-list-card {
   }
 }
 
-.sign-in-info {
-  border-top: 4px solid $secondary-medium;
-  margin-top: 30px;
-  margin-bottom: 20px;
-  border-radius: 1px;
-
-  h3 {
-    color: $secondary-medium;
-  }
-  p.button-paragraph {
-    text-align: right;
-    margin-bottom: 0;
-  }
-  a:not(.btn),a:visited:not(.btn) {
-    text-decoration: underline;
-    font-style: bold;
-    color: $dark-text-color;
-  }
-  a:hover:not(.btn),a:focus:not(.btn) {
-    color: $secondary-medium;
-  }
-}
-
 /* === BADGE IMAGE MAKER === */
 
 .badge-maker {
@@ -2660,5 +2637,75 @@ div.entry-card td.card-body {
     background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 60%);
     padding: 30px 0 20px 0;
     text-align: center;
+  }
+}
+
+.sign-in-info {
+  border: none;
+  margin: 30px 0 20px 0;
+  border-radius: 50px;
+  border-right: 8px solid $light-gray;
+  border-bottom: 2px solid $light-gray;
+  font-size: 16px;
+  line-height: 1.4em;
+  background-color: $light-white;
+  padding: 25px 30px;
+
+  h3 {
+    margin: 0 0 10px 0;
+  }
+  ul {
+    font-size: 20px;
+    margin-left: -30px;
+    padding-left: 57px;
+    border-left: 6px solid $secondary-light;
+    
+    li {
+      line-height: 1.3em;
+      margin-bottom: 10px;
+    }
+  }
+  p {
+    font-size: 16px;
+    line-height: 1.5em;
+    margin: 15px 0px;
+  }
+
+  p.button-paragraph {
+    text-align: right;
+    margin: 20px 0 0 0;
+
+    .btn {
+      border-radius: 500px;
+      text-shadow: none;
+      font-weight: bold;
+
+      &.btn-success {
+        color: $white !important;
+        border: 2px solid $secondary-medium;
+        background-color: $secondary-light;
+
+        &:hover, &:focus { background-color: $secondary-medium; }
+      }
+    }
+  }
+  p.i-paragraph {
+    color: $light-text-color;
+
+    i.fa {
+      font-size: 30px;
+      position: relative;
+      top: 4px;
+      margin-left: 3px;
+      margin-right: 8px;
+    }
+  }
+  a:not(.btn),a:visited:not(.btn) {
+    color: $dark-text-color;
+    border-bottom: 2px dotted $secondary-light;
+  }
+  a:hover:not(.btn),a:focus:not(.btn) {
+    color: $secondary-medium;
+    text-decoration: none;
   }
 }

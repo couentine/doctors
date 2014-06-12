@@ -7,51 +7,40 @@
 <div class="row">
   
   <div class="span6">
-    <div class="info-card text-card sign-in-info">
-      <h3>Badge List is the fastest, easiest way to build and issue Open Badges.</h3>
+    <div class="sign-in-info">
+      <h3>Badge List is designed to help you...</h3>
+      <ul>
+        <li>
+          Build, host and award 
+          <a href="http://openbadges.org" target="blank">Mozilla Open Badges</a>
+        </li>
+        <li>Collect and organize learning evidence</li>
+      </ul>
       <p>
-        There’s no software to setup or configure and creating a badge takes less than 30 seconds. 
+        Using Badge List is really easy. After signing in you'll be walked through the process of 
+        creating your perfect badging system. Getting started will take you less than 3 minutes.
       </p>
       <p class="button-paragraph">
-        <%= link_to "Get started now", new_user_registration_path, class: 'btn btn-warning' %>
+        <%= link_to "Create your learning group now", new_user_registration_path, 
+          class: 'btn btn-success btn-large' %>
       </p>
     </div>
 
-    <div class="info-card text-card sign-in-info">
-      <h3>New to Open Badges?</h3>
-      <p>
-        <iframe width="380" height="213" src="//www.youtube.com/embed/HgLLq7ybDtc" frameborder="0" allowfullscreen></iframe><br>
-        Video by the awesome 
-        <a href="http://www.youtube.com/user/ChicagoArtDept" target="_blank">Chicago Art Department</a>.
-      </p>
-      <p class="button-paragraph">
-        <%= link_to "Put open badges to work", new_user_registration_path, class: 'btn btn-warning' %>
-      </p>
-    </div>
-    
-    <div class="info-card text-card sign-in-info">
-      <h3>Badge List’s advanced features make it ridiculously simple to do cool stuff.</h3><br>
+    <div class="sign-in-info">
+      <h3>Pricing</h3>
       <ul>
-        <li>Track learner progress</li>
-        <li>Build a living knowledge base</li>
-        <li>Create a learning-focused social network for your organization</li>
+        <li>Public learning groups are free forever.</li>
+        <li>Private groups are free for up to 5 users.  Each additional user is $1 per month.</li>
       </ul>
-      <p class="button-paragraph">
-        <%= link_to "Start a social network for learning", new_user_registration_path, 
-          class: 'btn btn-warning' %>
+      <p class="i-paragraph">
+        <i class="fa fa-gift"></i>
+        We offer 50 free private users to public school teachers.
       </p>
     </div>
-    
-    <div class="info-card text-card sign-in-info">
-      <h3>Badge List is completely free for public learning groups.</h3>
-      <p>
-        And pricing for private learning groups 
-        <a href="/badgelist/about/pricing">starts at $10 per month</a>.
-      </p>
-      <p class="button-paragraph">
-        <%= link_to "Create a public learning group now", new_user_registration_path, 
-          class: 'btn btn-warning' %>
-      </p>
+
+    <div class="sign-in-info">
+      <h3>Questions?</h3>
+      <p>Email us at <a href="mailto:hello@badgelist.com">hello@badgelist.com</a>.</p>
     </div>
   </div>
 
