@@ -594,15 +594,16 @@ header.navbar {
 
 footer {
   margin-top: 60px;
-  background-color: $medium-gray;
-  color: $light-white;
+  background-color: $light-gray;
+  color: $light-text-color;
   padding: 5px 10px;
   text-align: center;
-  border-radius: 50px;
+  border-radius: 10px;
+  border-top: 4px solid $medium-gray;
   font-size: 14px;
   
   a,a:visited { 
-    color: $light-white;
+    color: $light-text-color;
     text-decoration: none;
     font-weight: bold;
   }
@@ -612,7 +613,9 @@ footer {
     border-bottom: 1px dashed $primary-medium;
   }
   hr {
-    margin: 5px 0;
+    margin: 10px 0;
+    border-top: none;
+    border-bottom: 1px solid $medium-gray;
   }
 }
 
@@ -1391,7 +1394,6 @@ form#group-add-users-form {
 
     i.fa {
       font-size: 16px;
-      color: $medium-text-color;
     }
   }
 
@@ -1415,13 +1417,34 @@ form#group-add-users-form {
   border-radius: 2px;
 
   .btn {
-    color: $light-text-color !important;
     border-color: transparent;
     background-color: white;
+    text-shadow: none;
+
+    &:not(.time-sensitive) { color: $light-text-color !important; }
+  }
+
+  &.empty {
+    border: 2px dashed $light-gray;
+    background-color: $light-white;
+    color: $light-text-color;
+    border-radius: 10px;
+    margin-bottom: 0;
+
+    .btn {
+      background-color: $medium-gray;
+      color: $light-white !important;
+    }
+  }
+  &.merge-with-card {
+    margin-bottom: 0;
+    position: relative;
+    top: 4px;
+    z-index: 10;
   }
 }
 .tab-footer {
-  margin: 20px 0 0 0;
+  margin: 20px 0;
   padding: 10px 9px;
   background-color: $light-gray;
   text-align: center;
@@ -1709,7 +1732,7 @@ div.topic-list-card {
     li {
       margin-bottom: 15px;
       margin-left: 0;
-      line-height: 1.2em;
+      line-height: 1.7em;
       
       &:last-child { margin-bottom: 0; }
     }
@@ -1720,6 +1743,16 @@ div.topic-list-card {
       color: $dark-text-color;
       text-decoration: none;
       border-bottom: 1px dotted $dark-text-color;
+    }
+    a.btn {
+      margin-left: 15px;
+      background-color: $tertiary-light;
+      color: $light-white;
+      border: 2px solid $tertiary-medium;
+      border-radius: 500px;
+      text-shadow: none;
+      position: relative;
+      top: -4px;
     }
   }
 }
@@ -2502,6 +2535,7 @@ div.topic-list-card {
     border-bottom: 1px solid $medium-gray;
     font-weight: 800;
   }
+  h3:last-child { border-bottom: none; }
   h1:first-child,h2:first-child,h3:first-child {
     margin-top: 0;
   }
@@ -2579,6 +2613,11 @@ div.topic-list-card {
     &.yes { color: $green-medium; }
     &.no { color: $red-medium; }
   }
+}
+
+div.text-card {
+  border-color: $really-light-gray;
+  box-shadow: none;
 }
 
 div.entry-card td.card-body {
