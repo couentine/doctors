@@ -35,8 +35,8 @@
 
       <%= f.input :private, as: :radio_buttons, label: 'Who can see this post?',
         collection: [
-          ['<b>Public</b> - Visible to anyone who can see the progress log'.html_safe, false],
-          ["<b>Private</b> - Visible only to #{user_noun} and the badge experts".html_safe, true]
+          ["<b>Public</b> <span>Visible to anyone who can see the group</span>".html_safe, false],
+          ["<b>Private</b> <span>Visible only to #{user_noun} and the badge experts</span>".html_safe, true]
         ] %>
     <% end %>
 
@@ -49,7 +49,7 @@
       if (@entry.type == 'validation')
         save_button_text = (@entry.new_record?) ? 'Submit my validation' : 'Update my validation'
       else
-        save_button_text = (@entry.new_record?) ? 'Post to progress log' : 'Update my post'
+        save_button_text = (@entry.new_record?) ? 'Post evidence' : 'Update my evidence'
       end
     %>
     <%= f.button :submit, save_button_text, class: 'btn btn-primary' %>

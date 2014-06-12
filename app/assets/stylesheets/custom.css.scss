@@ -78,7 +78,7 @@ p,ol,ul,td {
   font-size: 16px;
   line-height: 18px;
 }
-
+ul.dropdown-menu, ul.nav { font-size: 13px; }
 
 ::selection {
   background: $primary-light;
@@ -166,7 +166,7 @@ ul.dropdown-menu {
     }
   }
 
-  a.btn {
+  a.btn:not(.ignore) {
     display: block;
     text-align: left;
     font-size: 16px;
@@ -1645,12 +1645,14 @@ div.badge-card {
     }
     ul {
       list-style: none;
+      margin-left: 15px;
 
       li {
         margin-bottom: 5px;
         line-height: 1.4em;
 
         a:visited { color: $dark-text-color; }
+        i.fa { margin-right: 5px; }
       }
     }
   }

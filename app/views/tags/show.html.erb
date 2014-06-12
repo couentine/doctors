@@ -28,20 +28,10 @@
       <li  class="collapsible">
         <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <% if @show_progress || (@tag_exists && @can_edit_tag) %>
+        <% if @tag_exists && @can_edit_tag %>
           <span class="divider">|</span>
         <% end %>
       </li>
-
-      <% if @show_progress %>
-        <li  class="collapsible">
-          <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
-              new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps) %>
-          <% if @tag_exists && @can_edit_tag %>
-            <span class="divider">|</span>
-          <% end %>
-        </li>
-      <% end %>
 
     <% elsif @show_progress && (@current_user_is_admin || @current_user_is_member || @group.open?) %>
     
@@ -69,7 +59,7 @@
       <li class="collapsible">
         <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
           [@group, @badge, @tag], method: :delete, data: { 
-          confirm: 'Are you sure you want to permanently delete the contents of this topic page?' } %>
+          confirm: 'Are you sure you want to permanently delete the contents of this page?' } %>
       </li>
     <% end %>
 
@@ -83,7 +73,7 @@
   <div class="well tertiary span9 offset1">
     <i class="fa fa-book header-icon"></i>
 
-    <h3>Browsing previous versions of the topic page</h3>
+    <h3>Browsing previous versions of the page</h3>
     
     <p>
       Currently viewing version <%= @current_version %> 
@@ -207,12 +197,12 @@
         <% else %>
 
           <div class="section-container alert">
-              This topic hasn't had a page created for it yet.
+              This requirement hasn't had a page created for it yet.
               <% if @can_edit_tag %>
                 <br><br>
                 <%= link_to \
-                  "<i class='icon-plus-sign icon-white'></i> Create topic page".html_safe,
-                  "#{@tag.name_with_caps}/edit", class: 'btn btn-success' %>
+                  "<i class='icon-plus-sign icon-white'></i> Create requirement page".html_safe,
+                  "#{@tag.name_with_caps}/edit", class: 'btn btn-large btn-success ignore' %>
               <% end %>
           </div>
         
@@ -232,12 +222,12 @@
     <div class="span12">
       <div class="tab-header">
         <% if !@entries.blank? && (@current_user_is_learner || @current_user_is_expert) %>
-          <%= link_to '<i class="fa fa-comment"></i> Post to discussion'.html_safe,
+          <%= link_to '<i class="fa fa-comment"></i> Post Evidence'.html_safe,
             new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
             class: 'btn btn-small' %>
         <% end %>
 
-        <h2>Topic discussion</h2>
+        <h2>Posted evidence</h2>
         <h3><i class="fa fa-tag"></i> #<%= @tag.name_with_caps %></h3>
       </div>
     </div>
@@ -247,19 +237,15 @@
     
     <% if @entries.blank? %>
 
-      <div class="well span7 offset2">
-        <h3>This discussion is empty...</h3>
+      <div class="well span7 offset2 gray empty">
+        <h3>No one has submitted evidence for this requirement yet...</h3>
         
         <% if @current_user_is_expert || @current_user_is_learner %>
+          <p>&nbsp;</p>
           <p>
-            To add to this discussion just include the topic tag 
-            <b>#<%= @tag.name_with_caps %></b> 
-            anywhere in the summary or body of a post.
-          </p>
-          <p>
-            <%= link_to '<i class="fa fa-comment"></i> Start the discussion'.html_safe,
+            <%= link_to '<i class="fa fa-comment"></i> Post your evidence'.html_safe,
               new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
-              class: 'btn btn-success' %>
+              class: 'btn btn-primary' %>
           </p>
         <% end %>
       </div>

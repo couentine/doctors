@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "Edit Topic (#{@tag.display_name}) - #{@badge.name}")
+  provide(:title, "Edit Page (#{@tag.display_name}) - #{@badge.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true) 
@@ -15,7 +15,7 @@
     <span class="divider">/</span>
   </li>
   <li class="active">
-    <%= "#{ (@tag_exists) ? 'Edit' : 'Create' } Topic Page: #{@tag.display_name}" %>
+    <%= "#{ (@tag_exists) ? 'Edit' : 'Create' } Requirement Page: #{@tag.display_name}" %>
   </li>
 <% end %>
 
@@ -64,9 +64,9 @@
     
     <div class="form-header">
       <% if @tag_exists %>
-        <h1>Edit topic page</h1>
+        <h1>Edit requirement page</h1>
       <% else %>
-        <h1>Create topic page</h1>
+        <h1>Create requirement page</h1>
       <% end %>
 
       <div class="form-image">
@@ -84,12 +84,12 @@
       <div class="form-body" style="float: none">
 
         <% if @current_user_is_expert %>
-          <%= f.input :display_name, label: 'Topic Name', autofocus: true, 
+          <%= f.input :display_name, label: 'Requirement Name', autofocus: true, 
             placeholder: 'Orbital Trajectories' %>
         <% else %>
           <%= f.input :display_name, as: :hidden %>
           <div class="control-group">
-            <label class="control-label">Topic Name</label>
+            <label class="control-label">Requirement Name</label>
             <div class="controls">
               <span class="input-mock"><%= @tag.display_name %></span> 
             </div>
@@ -98,7 +98,7 @@
 
         <% if @show_progress %>
           <div class="control-group">
-            <label class="control-label">Topic Tag</label>
+            <label class="control-label">Tag</label>
             <div class="controls">
               <span class="input-mock" id="discussion-tag">#<%= @tag.name_with_caps %></span>
             </div>
@@ -109,14 +109,14 @@
           input_html: { class: "huge-text-area rich-text-area" } %>
 
         <% if @current_user_is_expert && @show_progress %>
-          <%= f.input :editability, label: 'Who can edit the topic page?', as: :radio_buttons,
+          <%= f.input :editability, label: 'Who can edit this page?', as: :radio_buttons,
             collection: @tag_editability_options %>
         <% end %>
 
       </div>
       
       <div class="form-footer">
-        <% save_button_text = (@tag_exists) ? 'Save changes' : 'Create topic page' %>
+        <% save_button_text = (@tag_exists) ? 'Save changes' : 'Create page' %>
         <%= f.button :submit, save_button_text, class: 'btn btn-primary' %>
         <%= link_to "Cancel", "../#{@tag.name_with_caps}", class: "btn" %>
       </div>

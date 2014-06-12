@@ -97,9 +97,9 @@ class EntriesController < ApplicationController
       end
     else
       if (@type == 'validation') && @validation_already_exists
-        notice = "Your existing learning log validation was updated."
+        notice = "Your validation was updated."
       else
-        notice = "Your learning log #{@type} was created."
+        notice = "Your #{@type} was created."
       end
 
       redirect_to [@group, @badge, @log, @entry], notice: notice
@@ -123,7 +123,7 @@ class EntriesController < ApplicationController
         format.json { head :no_content }
       elsif @entry.update_attributes(params[:entry])
         format.html do
-          redirect_to [@group, @badge, @log, @entry], notice: 'Entry was successfully updated.'
+          redirect_to [@group, @badge, @log, @entry], notice: 'Post was successfully updated.'
         end
         format.json { head :no_content }
       else

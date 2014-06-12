@@ -194,7 +194,7 @@
 
       <% unless @entry.tags.blank? %>
         <div class="footer-section">
-          <label><i class="icon-tags"></i> Topics:</label> 
+          <label><i class="icon-tags"></i> Tags:</label> 
           <% @entry.tags_with_caps.each do |tag| %>
             <% comma = (tag == @entry.tags_with_caps.last) ? '' : ', ' %>
             <%= link_to tag, "/#{@group.url_with_caps}/#{@badge.url_with_caps}/#{tag}" %><%= comma %>

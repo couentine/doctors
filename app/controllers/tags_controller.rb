@@ -93,7 +93,7 @@ class TagsController < ApplicationController
       if @tag_exists
         if @tag.update_attributes(params[:tag])
           format.html do
-            flash[:notice] = 'Topic page was successfully updated.'
+            flash[:notice] = 'Requirement page was successfully updated.'
             redirect_to [@group, @badge, @tag]
           end
           format.json { head :no_content }
@@ -105,7 +105,7 @@ class TagsController < ApplicationController
         @tag.badge = @badge
         if @tag.save
           format.html do
-            flash[:notice] = 'Topic page was successfully created.'
+            flash[:notice] = 'Requirement page was successfully created.'
             redirect_to [@group, @badge, @tag]
           end
           format.json { head :no_content }
@@ -124,7 +124,7 @@ class TagsController < ApplicationController
 
     respond_to do |format|
       format.html do
-        flash[:notice] = 'Topic page was deleted.'
+        flash[:notice] = 'Requirement page was deleted.'
         redirect_to [@group, @badge]
       end
       format.json { head :no_content }
