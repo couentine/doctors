@@ -80,7 +80,8 @@ class BadgesController < ApplicationController
 
     respond_to do |format|
       if @badge.save
-        format.html { redirect_to group_badge_path(@group, @badge), notice: 'Badge was successfully created.' }
+        format.html { redirect_to @group, 
+          notice: "The '#{@badge.name}' badge was successfully created." }
         format.json { render json: @badge, status: :created, location: @badge, filter_user: current_user }
       else
         flash[:error] = "There was an error creating the badge."

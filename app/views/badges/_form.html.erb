@@ -1,6 +1,6 @@
 <script>
 
-var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
+  var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
 
   $(document).ready(function() {
     <% if @badge.new_record? %>
@@ -129,7 +129,9 @@ var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
     <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics Expert', autofocus: true,
       input_html: { class: 'input-xlarge', data: { toggle: 'tooltip',
       title: 'Examples: Excel Spreadsheet Ninja, 2014 Hackathon Attendee, Acme Community Leader' } } %>
-    <%= f.input :url_with_caps, wrapper: :prepend, label: 'Badge URL' do %>
+    <%= f.input :url_with_caps, wrapper: :prepend, label: 'Badge URL', \
+      wrapper_html: { class: (@badge.new_record? ? 'hidden' : '') } do %>
+
       <%= content_tag :span, "badgelist.com/#{@group.url_with_caps}/", class: "add-on" %>
       <%= f.input_field :url_with_caps, placeholder: 'et-physics', class: 'input-small', 
         data: { toggle: 'tooltip', title: 'Pick a unique URL for the badge' } %>
@@ -138,46 +140,58 @@ var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
         :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH,
         toggle: 'tooltip', title: 'Explain clearly what badge earners have accomplished' } } %>
 
-    <!-- === BADGE ROLE NAMES === -->
-
-    <div class="control-group badge-roles">
-      <label class="control-label">Pick words to describe</label>
-      <div class="controls">
-        <table>
-          <tr>
-            <td>People who've earned the badge: </td>
-            <td>
-              <%= f.input_field :word_for_expert, as: :select, collection: @expert_words,
-                include_blank: false, label_method: 'titleize', value_method: 'singularize' %>
-            </td>
-          </tr>
-          <tr class="learner-word-row value-row <%= (@badge.tracks_progress?) ? '' : 'disabled' %>">
-            <td>People working to earn the badge: </td>
-            <td>
-              <%= f.input_field :word_for_learner, as: :select, collection: @learner_words,
-                include_blank: true, label_method: 'titleize', value_method: 'singularize' %>
-            </td>
-          </tr>
-          <tr class="learner-word-row control-row <%= (@badge.tracks_progress?) ? '' : 'disabled' %>">
-            <td colspan="2">
-              <button type="button" id="toggle-progress-tracking" class="btn btn-small" 
-                data-status="<%= (@badge.tracks_progress?) ? 'on' : 'off' %>" 
-                onclick="toggleProgressTracking();">
-                Turn <%= (@badge.tracks_progress?) ? 'off' : 'on' %> progress tracking for this badge
-              </button><br>
-              <abbr id="progress-tracking-explanation">
-                About Progress Tracking
-                <i class="fa fa-question-circle"></i>
-              </abbr>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-
     <!-- === BADGE IMAGE MAKER === -->
 
     <%= render 'shared/badge_maker' %>
+
+    <%= f.input :topic_list_text, as: :text, label: 'Required Evidence', input_html: { 
+      placeholder: 'Enter a list of requirements needed to earn the badge. (One per line.)' } %>
+
+    <% unless @badge.new_record? %>
+      <h2>
+        Advanced Settings
+        <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
+          value="Show Advanced Settings" onclick="toggleExtraInfo()" />
+      </h2>
+
+      <div id="form-extra-info" style="display:none">
+        <!-- === BADGE ROLE NAMES === -->
+        <div class="control-group badge-roles">
+          <label class="control-label">Pick words to describe</label>
+          <div class="controls">
+            <table>
+              <tr>
+                <td>People who've earned the badge: </td>
+                <td>
+                  <%= f.input_field :word_for_expert, as: :select, collection: @expert_words,
+                    include_blank: false, label_method: 'titleize', value_method: 'singularize' %>
+                </td>
+              </tr>
+              <tr class="learner-word-row value-row <%= (@badge.tracks_progress?) ? '' : 'disabled' %>">
+                <td>People working to earn the badge: </td>
+                <td>
+                  <%= f.input_field :word_for_learner, as: :select, collection: @learner_words,
+                    include_blank: true, label_method: 'titleize', value_method: 'singularize' %>
+                </td>
+              </tr>
+              <tr class="learner-word-row control-row <%= (@badge.tracks_progress?) ? '' : 'disabled' %>">
+                <td colspan="2">
+                  <button type="button" id="toggle-progress-tracking" class="btn btn-small" 
+                    data-status="<%= (@badge.tracks_progress?) ? 'on' : 'off' %>" 
+                    onclick="toggleProgressTracking();">
+                    Turn <%= (@badge.tracks_progress?) ? 'off' : 'on' %> progress tracking for this badge
+                  </button><br>
+                  <abbr id="progress-tracking-explanation">
+                    About Progress Tracking
+                    <i class="fa fa-question-circle"></i>
+                  </abbr>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    <% end %>
 
   </div>
   
