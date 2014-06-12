@@ -75,7 +75,7 @@ body {
 }
 p,ol,ul,td {
   font-family: 'Open Sans', Verdana, Arial !important;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 18px;
 }
 
@@ -1478,6 +1478,10 @@ div.tab-pane {
   div.well {
     float: left;
     text-align: center;
+
+    &.empty {
+      margin-top: 20px;
+    }
   }
 }
 
@@ -1618,6 +1622,10 @@ div.user-card,div.log-card {
 
 div.badge-card {
   margin: 80px 15px 0 0;
+  border-radius: 20px;
+  border-color: $light-gray;
+  border-top: 8px solid $medium-gray;
+
   tr.card-image-row {
     text-align: center;
 
@@ -1629,6 +1637,22 @@ div.badge-card {
   }
   td.card-body {
     padding: 3% 3% 2% 3%;
+
+    h4 {
+      font-size: 16px;
+      line-height: 1.3em;
+      margin: 20px 0 10px 0;
+    }
+    ul {
+      list-style: none;
+
+      li {
+        margin-bottom: 5px;
+        line-height: 1.4em;
+
+        a:visited { color: $dark-text-color; }
+      }
+    }
   }
 }
 

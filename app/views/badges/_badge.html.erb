@@ -1,6 +1,6 @@
 <div class="info-card badge-card" data-bl-dyncol="child">
   <table>
-    <tr class="card-image-row white-striped-background">
+    <tr class="card-image-row">
       <td>
         <%= link_to image_tag(group_badge_path(badge.group, badge, format: :png)), 
           group_badge_path(badge.group, badge), title: badge.name %><br/>
@@ -11,7 +11,21 @@
         <span class="card-headline">
           <%= link_to badge.name, group_badge_path(badge.group, badge), title: badge.name %>
         </span>
-        <span class="card-text"><%= badge.summary %></span>
+        <span class="card-text">
+          <p><%= badge.summary %></p>
+          
+          <% if badge.has_topics? %>
+            <h4>Required Evidence</h4>
+            <ul>
+              <% badge.topics.each do |topic| %>
+                <li>
+                  <%= link_to "<i class='fa fa-book'></i> #{topic['tag_display_name']}".html_safe, 
+                    group_badge_path(badge.group, badge) + "/" + topic['tag_name_with_caps'] %>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </span>
       </td>
     </tr>
     <tr class="card-footline-row">

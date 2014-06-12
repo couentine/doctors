@@ -340,7 +340,7 @@
     <div class="row">
       <div class="span12">
           
-        <div class="tab-header">
+        <div class="tab-header <%= (@group.members.empty?) ? 'empty' : '' %>">
           <% if @current_user_is_admin || @badge_list_admin %>
             <%= link_to '<i class="fa fa-plus"></i> Invite Members'.html_safe,
                 add_group_members_path(@group), class: 'btn btn-small' %>
@@ -386,24 +386,25 @@
           <h2>Members</h2>
         </div>
 
-        <% if @group.members.empty? %>
-          <div class="well span7 offset2 gray">
-            <h3>Got members?</h3>
-            <p>Next Step: Invite them.</p>
-          </div>
-        <% end %>
-
       </div>
     </div>
 
-    <div class="row">
-      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
-           data-bl-dyncol-width="12">
-
-          <%= render @group.members.sort_by{|u| u.name} if !@group.members.empty? %>
-
+    <% if @group.members.empty? %>
+      <div class="well span7 offset2 gray empty">
+        <h3>Got members?</h3>
+        <p>Next Step: Invite them.</p>
       </div>
-    </div>
+    <% else %>
+      <div class="row">
+        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
+             data-bl-dyncol-width="12">
+
+            <%= render @group.members.sort_by{|u| u.name} if !@group.members.empty? %>
+
+        </div>
+      </div>
+    <% end %>
+
   </div>
 
   <!-- === ADMINS TAB === -->
