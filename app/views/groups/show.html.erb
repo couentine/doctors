@@ -212,7 +212,7 @@
 
 <div class="row add-top-margin">
   <div class="span12">
-    <div class="header-card group-header-card">
+    <div class="header-card group-header-card no-tabs">
       <div class="span6 primary-header">
         <span class="header-image" >
           <%= group_image_tag_for @group %>
@@ -235,7 +235,7 @@
         </span>
       </div>
 
-      <div class="span6 secondary-header">
+      <div class="span6 secondary-header no-tabs">
         <ul>
           <% unless @group.location.blank? %>
             <li>
@@ -293,14 +293,14 @@
 
     <div class="row">
       <div class="span12">
-        <% if @current_user_is_admin || @badge_list_admin %>
-          <div class="tab-header">
-            <%= link_to '<i class="icon-plus"></i> New Badge'.html_safe,
+        <div class="tab-header">
+          <% if @current_user_is_admin || @badge_list_admin %>
+            <%= link_to '<i class="fa fa-plus"></i> New Badge'.html_safe,
                 new_group_badge_path(@group), class: 'btn btn-small' %>
+          <% end %>
 
-            <h2>Badges</h2>
-          </div>
-        <% end %>
+          <h2>Badges</h2>
+        </div>
 
         <% if @group.badges.empty? %>
           <div class="well span7 offset2">
@@ -340,10 +340,9 @@
     <div class="row">
       <div class="span12">
           
-        <% if @current_user_is_admin %>
-          <div class="tab-header">
-
-            <%= link_to '<i class="icon-plus"></i> Invite Members'.html_safe,
+        <div class="tab-header">
+          <% if @current_user_is_admin || @badge_list_admin %>
+            <%= link_to '<i class="fa fa-plus"></i> Invite Members'.html_safe,
                 add_group_members_path(@group), class: 'btn btn-small' %>
 
             <% unless @group.invited_members.blank? %>
@@ -382,12 +381,10 @@
                 </ul>
               </div>
             <% end %>
-            
-            <h2>Members</h2>
-          
-          </div>
-        
-        <% end %>
+          <% end %>
+
+          <h2>Members</h2>
+        </div>
 
         <% if @group.members.empty? %>
           <div class="well span7 offset2 gray">
@@ -416,10 +413,10 @@
     <div class="row">
       <div class="span12">
         
-        <% if @current_user_is_admin || @badge_list_admin %>
-          <div class="tab-header">
+        <div class="tab-header">
+          <% if @current_user_is_admin || @badge_list_admin %>
             
-            <%= link_to '<i class="icon-plus"></i> Add Admins'.html_safe,
+            <%= link_to '<i class="fa fa-plus"></i> Add Admins'.html_safe,
                 add_group_admins_path(@group), class: 'btn btn-small' %>
 
             <% unless @group.invited_admins.blank? %>
@@ -458,11 +455,10 @@
                 </ul>
               </div>
             <% end %>
+          <% end %>
             
-            <h2>Group Admins</h2>
-          
-          </div>
-        <% end %>
+          <h2>Group Admins</h2>
+        </div>
       </div>
     </div>
 

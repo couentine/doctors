@@ -774,6 +774,7 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           font-size: 16px;
           line-height: 1.6em;
         }
+        small { color: $light-text-color; }
       }
     }
   }
@@ -1339,9 +1340,12 @@ form#group-add-users-form {
     }
   }  
 
+  @media (min-width: 768px) {
+    &.no-tabs { border-bottom: 20px solid white; }
+  }
   @media (max-width: 767px) {
     float: none;
-    
+
     .card-tabs { float: none; }
     .secondary-header span.header-image {
       margin-right: 20px;
@@ -1401,7 +1405,16 @@ form#group-add-users-form {
 }
 .tab-header {
   margin: 0 0 30px 0;
-  border-bottom: 3px solid $light-gray;
+  border-bottom: 4px solid $medium-gray;
+  background-color: $light-gray;
+  color: $light-text-color;
+  border-radius: 2px;
+
+  .btn {
+    color: $light-text-color !important;
+    border-color: transparent;
+    background-color: white;
+  }
 }
 .tab-footer {
   margin: 20px 0 0 0;

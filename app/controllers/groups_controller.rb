@@ -18,7 +18,8 @@ class GroupsController < ApplicationController
 
   GROUP_TYPE_OPTIONS = [
     ['<b>Private</b> <span>You choose who can join the group.<br>'.html_safe \
-      + 'Free for up to 5 users, $1/user/month after that.</span>'.html_safe, 'private'],
+      + 'Free for up to 5 users, $1/user/month after that.<br>'.html_safe \
+      + '<small>(We offer 50 free users to public school teachers.)</small></span>'.html_safe, 'private'],
     ['<b>Public</b> <span>Anyone can join.<br>'.html_safe \
       + 'Free for unlimited users.</span>'.html_safe, 'open']
   ]
