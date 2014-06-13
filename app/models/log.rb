@@ -230,6 +230,31 @@ class Log
     return_list
   end
 
+  # Returns the topic list from the badge, augmented with the number of entries which are tagged
+  # with that topic AND created by the log owner
+  # NOTE: Each item in the return list has a new string key called 'post_count'
+  def post_counts_by_topic
+    topic_list = badge.topics
+    topic_item_map = {}
+    
+    unless topic_list.empty?
+      # First build out the return list and build a hash that maps to the topic list item
+      topic_list.each do |item|
+        topic_item_map[item['tag_name']] = item # map our way back to this item
+        item['post_count'] = 0 # initialize the post count
+      end
+
+      # Now run through all of the posts and count them against any topics which are in our list
+      entries.all(type: 'post').each do |post|
+        post.tags.each do |topic|
+          topic_item_map[topic]['post_count'] += 1 if topic_item_map.has_key? topic
+        end
+      end
+    end
+
+    topic_list # return value
+  end
+
   # Returns all entries with type = 'validation', sorted from newest to oldest
   def validations
     entries.all(type: 'validation').order_by(:updated_at.desc)

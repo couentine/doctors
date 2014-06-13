@@ -35,18 +35,12 @@
       </li>
     <% end %>
 
-    <% if (@current_user_is_log_owner || @current_user_is_expert) && @show_progress %>
+    <% if @show_progress && !@current_user_is_log_owner %>
       <li class="collapsible">
-        <% if @current_user_is_log_owner %>
-          <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
-            new_group_badge_log_entry_path(@group, @badge, @log), id: 'new-post' %>
+        <%= link_to "<i class='icon-plus-sign icon-white'></i> Post to This Log".html_safe,
+          new_group_badge_log_entry_path(@group, @badge, @log) %>
+        <% if @validation.nil? || @badge_list_admin %>
           <span class="divider">|</span>
-        <% else %>
-          <%= link_to "<i class='icon-plus-sign icon-white'></i> Post to This Log".html_safe,
-            new_group_badge_log_entry_path(@group, @badge, @log) %>
-          <% if @validation.nil? || @badge_list_admin %>
-            <span class="divider">|</span>
-          <% end %>
         <% end %>
       </li>
     <% end %>
@@ -150,18 +144,6 @@
           + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
           + "You've been awarded the badge, congratulations!<br><br>"
           + "When you're ready, click here to share your achievement.",
-        placement: "bottom",
-        trigger: "manual",
-        container: "header",
-        html: true
-      }).popover("show");
-
-    <% elsif @current_user_is_log_owner && (@page_view_count == 0) && @show_progress %>
-
-      $("#new-post").popover({
-        content: "<a class='pull-right' href='#' onclick=\"$('#new-post').popover('hide')\" "
-          + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
-          + "When you’re ready, click here to post to your progress log.",
         placement: "bottom",
         trigger: "manual",
         container: "header",
@@ -325,18 +307,13 @@
 <!-- === PAGE HEADER === -->
 
 <% 
-  show_profile = @log.has_profile? || @current_user_is_log_owner 
   show_validations = !@validations.empty? || (@log.validation_status == 'validated') \
         || (@log.validation_status == 'requested') || !@show_progress
-  show_tabs = (show_profile && show_validations) \
-    || (show_profile && @show_progress) \
-    || (show_validations && @show_progress)
 %>
 
 <div class="row add-top-margin">
   <div class="span12">
-    <div class="header-card log-header-card">
-      <div class="white-background <%= (show_tabs) ? '' : 'no-tabs' %>">&nbsp;</div>
+    <div class="header-card log-header-card no-tabs">
 
       <div class="primary-header span6">
         <span class="header-image">
@@ -356,7 +333,7 @@
         </span>
       </div>
 
-      <div class="secondary-header span6 <%= (show_tabs) ? '' : 'no-tabs' %>">
+      <div class="secondary-header span6 no-tabs">
         <span class="header-image">
           <a href="<%= user_path(@user) %>" title="View user profile">
             <%= gravatar_for @user, size: 150, class: "img-circle" %>
@@ -391,31 +368,6 @@
         </span>
       </div>
 
-      <% if show_tabs \
-        && (@log.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin) %>
-
-        <div class="card-tabs">
-          <ul class="nav nav-tabs">
-            <% if show_profile %>
-              <li class="active"><a href="#profile" data-toggle="tab">Profile</a></li>
-            <% end %>
-
-            <% if show_validations %>
-              <li class="<%= (show_profile) ? '' : 'active' %>">
-                <a href="#validations" data-toggle="tab">Validation</a>
-              </li>
-            <% end %>
-            
-            <% if @show_progress %>
-              <li class="<%= (!show_profile && !show_validations) ? 'active' : '' %>">
-                <a href="#posts" data-toggle="tab">Posts</a>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-
-      <% end %>
-
     </div>
   </div>
 </div>
@@ -423,300 +375,176 @@
 
 <% if @log.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 
-  <!-- === TAB CONTENT === -->
+  <% if @show_progress && (@badge.has_topics? || @current_user_is_log_owner) %>
 
-  <div class="tab-content">
+    <!-- === REQUIREMENTS TAB === -->
 
-    <% if show_profile %>
+    <div class="tab-pane" id="requirements">
 
-      <!-- === PROFILE TAB === -->
-
-      <div class="tab-pane active" id="profile">
-
-        <% if !@log.has_profile? %>
-        
-          <!-- === PROFILE VISIBILITY ALERT === -->
-
-          <div class="alert alert-gray">
-            <i class="fa fa-eye-slash"></i> 
-            <b>Profile Tab Currently Hidden:</b> 
-            Until you add content to your profile below, the Profile tab will be hidden from other people.
+      <div class="row">
+        <div class="span12">
+          <div class="tab-header merge-with-card <%= (@badge.has_topics?) ? '' : 'empty' %>">
+            <h2>Learning Evidence</h2>
           </div>
-
-        <% end %>
-
-        <% if @current_user_is_log_owner || @badge_list_admin %>
-          <div class="row">
-            <div class="span12">
-
-            <% 
-              you = (@current_user_is_log_owner) ? 'you' : @user.name
-              your = (@current_user_is_log_owner) ? 'your' : "#{@user.name}'s"
-            %>
-
-              <div class="tab-header">
-
-                <% if @current_user_is_log_owner || @badge_list_admin %>
-                  <a tabindex="-1" href="#" class="btn btn-small" data-toggle="custom" 
-                    id="edit-profile" data-hide="#edit-profile,#profile-row" 
-                    data-show="#profile-inline-form" data-focus="#log_wiki">
-
-                    <i class="fa fa-pencil"></i> Edit <%= your %> profile
-                  </a>
-                <% end %>
-              
-                <h2>Badge Profile</h2>
-                <h3 class="collapse-when-small">
-                  <i class="fa fa-key"></i> Only editable by <%= you %>
-                </h3>
-              
-              </div>
-
-            </div>
-          </div>
-        <% end %>
-
-        <div class="row" id="profile-row">
-          
-          <% if @log.has_profile? %>
-
-            <div class="span12">
-              <% @log.wiki_sections.each do |section_text| %>
-                <div class="info-card text-card">
-                  <%= section_text.html_safe %>
-                </div>
-              <% end unless @log.wiki_sections.nil? %>
-            </div>
-
-          <% else %>
-
-            <div class="well gray span7 offset2">
-              <h3>Add a badge profile here</h3>
-              <p>
-                If you like, you can use this area to share some info about yourself and your 
-                relationship to this badge. 
-                (The profile tab is hidden from other people if you don't fill it in.)
-              </p>
-            </div>
-
-          <% end %>
-
         </div>
-
-        <% if @current_user_is_log_owner %>
-
-          <!-- === EDIT PROFILE INTERFACE === -->
-
-          <div class="bl-inline-form" id="profile-inline-form" style="display: none">              
-            <%= simple_form_for [@group, @badge, @log], id: 'edit-profile-form' do |f| %>
-
-              <div class="form-body">
-                <%= f.input :wiki, as: :text, label: 'Edit Badge Profile', 
-                  input_html: { class: "huge-text-area rich-text-area" } %>
-              </div>
-
-              <div class="form-footer">
-                <%= f.button :submit, 'Save changes', class: 'btn btn-primary' %>
-                <a class="btn" data-toggle="custom"  data-hide="#profile-inline-form" 
-                  data-show="#edit-profile,#profile-row">Cancel</a>
-              </div>
-
-            <% end %>
-
-          </div>
-
-        <% end %>
-
-
       </div>
 
-    <% end %>
+      <% if @badge.has_topics? %>
 
-    <!-- === VALIDATIONS TAB === -->
-
-    <% if show_validations %>
-
-      <div class="tab-pane <%= (show_profile) ? '' : 'active' %>" id="validations">
-        
-        <div class="row">
+        <div class="row" id="topic-list-row">
           <div class="span12">
-            <div class="tab-header">
+            <div class="info-card text-card topic-list-card">
+              <ul>
+                <% @log.post_counts_by_topic.each do |topic| %>
+                  <li>
+                    <%= link_to "<i class='fa fa-book'></i> #{topic['tag_display_name']} ".html_safe, 
+                      group_badge_path(@group, @badge) + "/" + topic['tag_name_with_caps'] \
+                      + "?u=" + @user.username %>
+                    <%=
+                      " <span class='separator'>&raquo;</span> <span class='post-count'>".html_safe \
+                      + "#{pluralize topic['post_count'], 'item'} posted" \
+                      + "</span>".html_safe if topic['post_count'] > 0
+                    %>
+                    <%= 
+                      link_to "<i class='fa fa-comment'></i> Post Evidence".html_safe, 
+                        new_group_badge_log_entry_path(@group, @badge, @log, \
+                        tag: topic['tag_name_with_caps']), class: 'btn btn-mini' \
+                      if @current_user_is_log_owner && (topic['post_count'] == 0)
+                    %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
 
-              <% if @current_user_is_log_owner %>
-                <% if @validation.nil? %>
+      <% else # NOTE: In this case, you can only see this section if you're the log owner. %>
+
+        <div class="row">
+          <div class="well span7 offset2 gray empty">
+            <h4>This badge doesn't have any requirements yet!</h4>
+            <p>
+              You won't be able to post learning evidence until the badge creators add some
+              requirements to the badge.
+            </p>
+          </div>
+        </div>
+
+      <% end %>
+
+    </div>
+
+  <% end %>
+
+  <!-- === VALIDATIONS TAB === -->
+
+  <% if show_validations %>
+
+    <div class="tab-pane" id="validations">
+      
+      <div class="row">
+        <div class="span12">
+          <div class="tab-header">
+
+            <% if @current_user_is_log_owner %>
+              <% if @validation.nil? %>
+                <!-- REMOVING THIS FOR NOW... it allows learners to self issue
                   <%= link_to "<i class='icon-check'></i> Add self validation".html_safe,
                     new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
                     class: 'btn btn-small' %>
-                <% else %>
-                  <%= link_to "<i class='icon-pencil'></i> Update self validation".html_safe,
-                    edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
-                    class: 'btn btn-small' %>
-                <% end %>
-              <% elsif @current_user_is_expert %>
-                <% if @validation.nil? %>
-                  <%= link_to "<i class='icon-check'></i> Add your expertise".html_safe,
-                    new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
-                    class: 'btn btn-small' %>
-                <% else %>
-                  <%= link_to "<i class='icon-pencil'></i> Update your validation".html_safe,
-                    edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
-                    class: 'btn btn-small' %>
-                <% end %>
+                -->
+              <% else %>
+                <%= link_to "<i class='icon-pencil'></i> Update self validation".html_safe,
+                  edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
+                  class: 'btn btn-small' %>
               <% end %>
-
-            
-              <% if @log.validation_count < @badge.current_validation_threshold %>
-                <span class="badge badge-success collapse-when-small">
-                  Current validation threshold is <%= @badge.current_validation_threshold %>
-                </span>
-                <span class="badge badge-success show-when-small">
-                  Threshold is <%= @badge.current_validation_threshold %>
-                </span>
+            <% elsif @current_user_is_expert %>
+              <% if @validation.nil? %>
+                <%= link_to "<i class='icon-check'></i> Add your expertise".html_safe,
+                  new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
+                  class: 'btn btn-small' %>
+              <% else %>
+                <%= link_to "<i class='icon-pencil'></i> Update your validation".html_safe,
+                  edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
+                  class: 'btn btn-small' %>
               <% end %>
+            <% end %>
 
-              <% if @log.validation_status == 'requested' %>
-                <span class="badge badge-warning collapse-when-small">
-                  Validation requested <%= @log.date_requested.to_s(:full_date) %>
-                </span>
-                <span class="badge badge-warning show-when-small">
-                  Requested <%= @log.date_requested.to_s(:short_date) %>
-                </span>
-              <% elsif @log.validation_status == 'validated' %>
-                <span class="badge badge-info collapse-when-small">
-                  Badge awarded <%= @log.date_issued.to_s(:full_date) %>
-                </span>
-                <span class="badge badge-info show-when-small">
-                  Awarded <%= @log.date_issued.to_s(:short_date) %>
-                </span>
-              <% end %>
+          
+            <% if @log.validation_count < @badge.current_validation_threshold %>
+              <span class="badge badge-success collapse-when-small">
+                Current validation threshold is <%= @badge.current_validation_threshold %>
+              </span>
+              <span class="badge badge-success show-when-small">
+                Threshold is <%= @badge.current_validation_threshold %>
+              </span>
+            <% end %>
 
-              <h2 class="collapse-when-small">Validation from Badge <%= @Experts %></h2>
-              <h2 class="show-when-small">Validations</h2>
-            
-            </div>
+            <% if @log.validation_status == 'requested' %>
+              <span class="badge badge-warning collapse-when-small">
+                Validation requested <%= @log.date_requested.to_s(:full_date) %>
+              </span>
+              <span class="badge badge-warning show-when-small">
+                Requested <%= @log.date_requested.to_s(:short_date) %>
+              </span>
+            <% elsif @log.validation_status == 'validated' %>
+              <span class="badge badge-info collapse-when-small">
+                Badge awarded <%= @log.date_issued.to_s(:full_date) %>
+              </span>
+              <span class="badge badge-info show-when-small">
+                Awarded <%= @log.date_issued.to_s(:short_date) %>
+              </span>
+            <% end %>
+
+            <h2 class="collapse-when-small">Validation from Badge <%= @Experts %></h2>
+            <h2 class="show-when-small">Validations</h2>
+          
           </div>
         </div>
-          
-        <% if @validations.empty? %>
-
-          <div class="row">
-            <div class="well span7 offset2">
-              <p class="lead">No validations yet...</p>
-              <p>
-                <% if @current_user_is_expert %>
-                  This <%= @learner %> needs validations! To add your expertise, click the button
-                  below and let the <%= @learner %> know whether or not your believe they have mastered
-                  the badge.<br><br>
-                  <%= link_to "<i class='icon-check icon-white'></i> Add your expertise".html_safe,
-                    new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
-                    class: 'btn btn-success' %>
-                <% elsif @current_user_is_log_owner %>
-                  Once <%= @experts %> weigh in on your progress log, their validations will appear here!
-                <% else %>
-                  This progress log hasn't yet been validated by any <%= @experts %>.
-                <% end %>
-              </p>
-            </div>
-          </div>
-
-        <% else %>
-
-          <div class="row">
-            <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="validations" 
-            data-bl-dyncol-width="12">
-              <%= render(@validations, show_badge: false, date_format: :full) %>
-            </div>
-          </div>
-
-        <% end %>
-
       </div>
-
-    <% end %>
-
-    <% if @show_progress %>
-
-      <!-- === ENTRIES TAB === -->
-
-      <div class="tab-pane <%= (!show_profile && !show_validations) ? 'active' : '' %>" id="posts">
         
-        <% if @posts_by_month.blank? %>
+      <% if @validations.empty? %>
 
-          <div class="row">
-            <div class="well span7 offset2">
-              <p class="lead">No posts yet...</p>
-              <p>
-                <% if @current_user_is_log_owner %>
-                  It's time to get posting!<br>
-                  Click the button below to write your first post.<br><br>
-                  <%= link_to "<i class='icon-plus icon-white'></i> New post".html_safe,
-                    new_group_badge_log_entry_path(@group, @badge, @log), class: 'btn btn-success' %>
-                <% elsif @current_user_is_expert %>
-                  Looks like <%= @user.name %> hasn't posted anything yet.<br>
-                  You can help them out by clicking the button below!<br><br>
-                  <%= link_to \
-                    "<i class='icon-plus icon-white'></i> Post to this log".html_safe,
-                    new_group_badge_log_entry_path(@group, @badge, @log), class: 'btn btn-success' %>
-                <% else %>
-                  Looks like <%= @user.name %> hasn't posted anything yet.
-                <% end %>
-              </p>
-            </div>
+        <div class="row">
+          <div class="well span7 offset2">
+            <h3>No validations yet...</h3>
+            <p>
+              <% if @current_user_is_expert %>
+                This <%= @learner %> needs validations! To add your expertise, click the button
+                below and let the <%= @learner %> know whether or not your believe they have mastered
+                the badge.<br><br>
+                <%= link_to "<i class='icon-check icon-white'></i> Add your expertise".html_safe,
+                  new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
+                  class: 'btn btn-success' %>
+              <% elsif @current_user_is_log_owner %>
+                Once <%= @experts %> weigh in on your progress log, their validations will appear here!
+              <% else %>
+                This progress log hasn't yet been validated by any <%= @experts %>.
+              <% end %>
+            </p>
           </div>
+        </div>
 
-        <% else %>
+      <% else %>
 
-          <div class="row">
-            <div class="span12">
-              <div class="pagination-header">
-                <div class="pagination"><%= paginate @posts %></div>
-              </div>
-            </div>
+        <div class="row">
+          <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="validations" 
+          data-bl-dyncol-width="12">
+            <%= render(@validations, show_badge: false, date_format: :full) %>
           </div>
+        </div>
 
-          <% @posts_by_month.each do |month_item| %>
-         
-            <div class="row">
-              <div class="span12">
-                <div class="tab-header">
-                  <h2><%= month_item[:label] %></h2>
-                </div>
-              </div>
-            </div>
-          
-            <div class="row">
-              <div class="span12" data-bl-dyncol="parent" 
-                data-bl-dyncol-group="posts.<%= month_item[:label].parameterize %>" 
-                data-bl-dyncol-width="12">
-                  <% entries = month_item[:posts] %>
-                  <%= render entries, show_badge: false, date_format: :full if !entries.nil? %>
-              </div>
-            </div>
+      <% end %>
 
-          <% end %>
+    </div>
 
-          <div class="row">
-            <div class="span12">
-              <div class="pagination-footer">
-                <div class="pagination"><%= paginate @posts %></div>
-              </div>
-            </div>
-          </div>
-
-        <% end %>
-      
-      </div>
-
-    <% end %>
-
-  </div>
-
+  <% end %>
 
 <% else %>
   
   <div class="row">
     <div class="well span7 offset2">
-      <p class="lead">This is a private <%= @badge.progress_log %></p>
+      <h4>This is a private <%= @badge.progress_log %></h4>
       <p>
         The owner of this <%= @badge.log %> has set it to be private.  
         Its contents are only visible to members of the learning group.

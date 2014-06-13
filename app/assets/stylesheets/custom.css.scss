@@ -318,6 +318,7 @@ ul.dropdown-menu {
 }
 }
 
+.badge { text-shadow: none; }
 .badge-success { background-color: $secondary-light; }
 .badge-warning { background-color: $primary-light; }
 .badge-info { background-color: $tertiary-light; }
@@ -1810,6 +1811,15 @@ div.topic-list-card {
       margin-left: 0;
       line-height: 1.7em;
       
+      .separator { 
+        color: $light-text-color; 
+        margin: 0 5px;
+      }
+      .post-count { 
+        color: $light-text-color; 
+        font-size: 16px;
+      }
+
       &:last-child { margin-bottom: 0; }
     }
     a,a:visited {
