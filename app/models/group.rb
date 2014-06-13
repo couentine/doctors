@@ -107,6 +107,10 @@ class Group
     (type == 'open')
   end
 
+  def user_count
+    admins.count + members.count
+  end
+
   def has_member?(user)
     members.include?(user)
   end

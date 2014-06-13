@@ -156,6 +156,10 @@ class User
     !log.nil? && !log.detached_log && log.validation_status == 'validated'
   end
 
+  def find_log(badge)
+    logs.find_by(badge: badge) rescue nil
+  end
+
   # Returns the date which this user's badge was issued (or nil if they are not an expert)
   def expert_date(badge)
     log = logs.find_by(badge: badge) rescue nil

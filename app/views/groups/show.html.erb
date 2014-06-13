@@ -249,7 +249,10 @@
             </li>
           <% end %>
           <li>
-            <i class="icon-time"></i> Created on <%= @group.created_at.to_s(:full_date) %>
+            <i class="fa fa-clock-o"></i> Created on <%= @group.created_at.to_s(:full_date) %>
+          </li>
+          <li>
+            <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> in group
           </li>
         </ul>
       </div>

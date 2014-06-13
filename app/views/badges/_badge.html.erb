@@ -1,7 +1,17 @@
-<div class="info-card badge-card" data-bl-dyncol="child">
+<div class="info-card badge-card <%= (current_user && current_user.expert_of?(badge)) ? 'awarded' : '' %>" 
+  data-bl-dyncol="child">
   <table>
     <tr class="card-image-row">
       <td>
+        <% if current_user && current_user.expert_of?(badge) %>
+          <div class="big-icon awarded">
+            <i class="fa fa-check-circle"></i>
+          </div>
+        <% elsif current_user && current_user.learner_of?(badge) %>
+          <div class="big-icon">
+            <i class="fa fa-flag"></i>
+          </div>
+        <% end %>
         <%= link_to image_tag(group_badge_path(badge.group, badge, format: :png)), 
           group_badge_path(badge.group, badge), title: badge.name %><br/>
       </td>
@@ -16,11 +26,19 @@
           
           <% if badge.has_topics? %>
             <h4>Required Evidence</h4>
-            <ul>
+            <ul class="topic-list">
               <% badge.topics.each do |topic| %>
                 <li>
                   <%= link_to "<i class='fa fa-book'></i> #{topic['tag_display_name']}".html_safe, 
                     group_badge_path(badge.group, badge) + "/" + topic['tag_name_with_caps'] %>
+                  <%= 
+                    link_to "<i class='fa fa-comment'></i> Post".html_safe, 
+                      new_group_badge_log_entry_path(badge.group, badge, \
+                      current_user.find_log(badge), tag: topic['tag_name_with_caps']), 
+                      class: 'btn btn-mini' \
+                    if current_user && \
+                      (current_user.learner_of?(badge) || current_user.expert_of?(badge))
+                  %>
                 </li>
               <% end %>
             </ul>
@@ -31,8 +49,18 @@
     <tr class="card-footline-row">
       <td class="card-footline">
         <ul class="left-foot">
-          <li><%= link_to badge.url, group_badge_path(badge.group, badge), 
-                  title: group_badge_path(badge.group, badge) %></li>
+          <% if current_user && current_user.expert_of?(badge) %>
+            <li class="foot-text"><%= badge.Expert %></li>
+          <% elsif current_user && current_user.learner_of?(badge) %>
+            <li class="foot-text"><%= badge.Learner %></li>
+          <% elsif badge.tracks_progress? && current_user \
+            && (badge.group.open? || current_user.member_of?(badge.group) \
+              || current_user.admin_of?(badge.group)) %>
+            <li>
+                <%= link_to '<i class="fa fa-plus-circle"></i> Join Badge'.html_safe, 
+                    group_badge_logs_path(badge.group, badge), method: :post, class: 'btn btn-mini' %>
+            </li>
+          <% end %>
         </ul>
         <ul class="right-foot">
           <% if badge.tracks_progress? %>

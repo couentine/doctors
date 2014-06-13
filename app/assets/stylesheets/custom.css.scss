@@ -1562,6 +1562,10 @@ div.info-card {
       margin: 0 4px;
       cursor: default;
     }
+    li.foot-text { 
+      font-size: 14px; 
+      padding-left: 6px;
+    }
   }
   td.card-footline {
     padding: 2%;
@@ -1634,6 +1638,19 @@ div.badge-card {
       height: 110px;
       margin-top: -55px;
     }
+
+    .big-icon {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+
+      i.fa {
+        font-size: 30px;
+        color: $medium-gray;
+      }
+
+      &.awarded i.fa { color: $green-medium; }
+    }
   }
   td.card-body {
     padding: 3% 3% 2% 3%;
@@ -1653,9 +1670,42 @@ div.badge-card {
 
         a:visited { color: $dark-text-color; }
         i.fa { margin-right: 5px; }
+
+        .btn-mini {
+          border-radius: 500px;
+          text-shadow: none;
+          background-color: $really-light-gray;
+          color: $medium-gray;
+          border: 1px solid $light-gray;
+          position: relative;
+          top: -3px;
+          margin-left: 5px;
+          
+          i.fa { margin-right: 0; }
+
+          &:visited { color: $medium-gray; }
+          &:hover, &:focus {
+            color: $light-white;
+            background-color: $tertiary-light;
+            border-color: $tertiary-medium;
+          }
+        }
       }
     }
   }
+  td.card-footline {
+    .btn-mini {
+      border-radius: 500px;
+      text-shadow: none;
+      background-color: $light-text-color;
+      color: $light-white;
+      border: none;
+      position: relative;
+      top: -2px;
+    }
+  }
+
+  &.awarded { border-top: 8px solid $green-medium; }
 }
 
 div.entry-card.validation { border-top: 4px solid $primary-light; }

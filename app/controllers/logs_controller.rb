@@ -104,7 +104,7 @@ class LogsController < ApplicationController
           notice: message }
         format.json { render json: @log.errors, status: :unprocessable_entity }
       else
-        format.html { redirect_to [@group, @badge, @log], notice: message }
+        format.html { redirect_to [@group, @badge], notice: message }
         format.json { render json: @log, status: :created, location: [@group, @badge, @log] }
       end
     end
