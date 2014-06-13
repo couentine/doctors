@@ -212,51 +212,64 @@
 
 <div class="row add-top-margin">
   <div class="span12">
-    <div class="header-card group-header-card no-tabs">
-      <div class="span6 primary-header">
-        <span class="header-image" >
-          <%= group_image_tag_for @group %>
-        </span>
-        <span class="header-text">
-          <h1><%= @group.name %></h1>
-          <h2><%= @group.url_with_caps %></h2>
-          <h3>
-            <%=
-              case @group.type
-                when "open"
-                  "<i class='icon-globe'></i> Open Learning Group".html_safe
-                when "closed"
-                  "<i class='icon-eye-open'></i> Public Learning Group (Closed Membership)".html_safe
-                when "private"
-                  "<i class='icon-lock'></i> Private Learning Group".html_safe
-              end
-            %>
-          </h3>
-        </span>
+    <div class="header-bar group-header-bar">
+
+      <div class="header-image">
+        <%= group_image_tag_for @group %>
       </div>
 
-      <div class="span6 secondary-header no-tabs">
-        <ul>
-          <% unless @group.location.blank? %>
-            <li>
-              <i class="icon-map-marker"></i> <%= @group.location %>
-            </li>
-          <% end %>
-          <% unless @group.website.blank? %>
-            <li>
-              <i class="icon-share"></i> 
-              <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
-            </li>
-          <% end %>
-          <li>
-            <i class="fa fa-clock-o"></i> Created on <%= @group.created_at.to_s(:full_date) %>
-          </li>
-          <li>
-            <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> in group
-          </li>
-        </ul>
-      </div>
+      <div class="info-bar">
+        <table class="info-table">
+          <tbody>
+            <tr>
+              
+              <td class="left-panel">
+                <h1><%= @group.name %></h1>
+                <h2><%= @group.url_with_caps %></h2>
+                <h3>
+                  <%=
+                    case @group.type
+                      when "open"
+                        "<i class='fa fa-globe'></i> Open Learning Group".html_safe
+                      when "closed"
+                        "<i class='fa fa-eye'></i> Public Learning Group (Closed Membership)".html_safe
+                      when "private"
+                        "<i class='fa fa-lock'></i> Private Learning Group".html_safe
+                    end
+                  %>
+                </h3>
+              </td>
+              
+              <td class="separator"><span>&nbsp;</span></td>
+              
+              <td class="right-panel">
+                <ul>
+                  <% unless @group.location.blank? %>
+                    <li>
+                      <i class="fa fa-map-marker"></i> <%= @group.location %>
+                    </li>
+                  <% end %>
+                  <% unless @group.website.blank? %>
+                    <li>
+                      <i class="fa fa-external-link"></i> 
+                      <a href="<%= @group.website %>" target="_blank"><%= @group.website %></a>
+                    </li>
+                  <% end %>
+                  <% if @group.location.blank? || @group.website.blank? %>
+                    <li>
+                      <i class="fa fa-clock-o"></i> Created on <%= @group.created_at.to_s(:full_date) %>
+                    </li>
+                  <% end %>
+                  <li>
+                    <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> in group
+                  </li>
+                </ul>
+              </td>
 
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
