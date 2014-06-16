@@ -313,61 +313,67 @@
 
 <div class="row add-top-margin">
   <div class="span12">
-    <div class="header-card log-header-card no-tabs">
-
-      <div class="primary-header span6">
-        <span class="header-image">
-          <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), 
-            [@group, @badge], title: 'View badge' %>
-        </span>
-        <span class="header-text">
-          <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
-          <h2>
-            <%= link_to @group.url_with_caps, @group, 
-              title: @group.name %>/<%= link_to @badge.url_with_caps, [@group, @badge], 
-              title: "View badge" %>
-          </h2>
-          <h3>
-            <%= @badge.summary %>
-          </h3>
-        </span>
-      </div>
-
-      <div class="secondary-header span6 no-tabs">
-        <span class="header-image">
-          <a href="<%= user_path(@user) %>" title="View user profile">
-            <%= gravatar_for @user, size: 150, class: "img-circle" %>
-          </a>
-        </span>
-        <span class="header-text">
-          <h1><%= link_to @user.name, @user, title: 'View Badge List user profile' %></h1>
-          <h2>
-            <%= 
-              if @log.validation_status == 'validated'
-                "#{@Expert} <i class='fa fa-trophy'></i>".html_safe
-              else
-                @Learner
-              end
-            %>
-          </h2>  
-          <h3>
-            <%= 
-              if @log.validation_status == 'validated'
-                "Awarded badge on #{@log.date_issued.to_s(:full_date)}"
-              else
-                "Joined badge on #{@log.date_started.to_s(:full_date)}"
-              end
-            %>
-          </h3>
-          <% if @log.validation_status == 'requested' %>
-            <h3><span class="text-color primary-medium">
-              <i class="fa fa-flag-checkered"></i>
-              Requested validation on <%= @log.date_requested.to_s(:full_date) %>
-            </span></h3>
-          <% end %>
-        </span>
-      </div>
-
+    <div class="header-bar log-header-bar">
+      <table class="info-table">
+        <tbody>
+          <tr>
+            <td class="left-image with-right-image">
+              <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), 
+                [@group, @badge], title: 'View badge' %>
+            </td>
+            <td class="left-panel with-right-image hidden-phone">
+              <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
+              <h2>
+                <%= link_to @group.url_with_caps, @group, 
+                  title: @group.name %>/<%= link_to @badge.url_with_caps, [@group, @badge], 
+                  title: "View badge" %>
+              </h2>
+              <h3>
+                <%= @badge.summary %>
+              </h3>
+            </td>
+            
+            <td class="separator hidden-phone"><span>&nbsp;</span></td>
+            
+            <td class="right-panel with-right-image ">
+              <h1><%= link_to @user.name, @user, title: 'View Badge List user profile' %></h1>
+              <h2>
+                <%= 
+                  if @log.validation_status == 'validated'
+                    "<i class='fa fa-trophy'></i> #{@Expert}".html_safe
+                  else
+                    @Learner
+                  end
+                %>
+              </h2>  
+              <h3>
+                <i class="fa fa-clock-o"></i>
+                <%= 
+                  if @log.validation_status == 'validated'
+                    "Awarded badge on #{@log.date_issued.to_s(:full_date)}"
+                  else
+                    "Joined badge on #{@log.date_started.to_s(:full_date)}"
+                  end
+                %>
+              </h3>
+              <% if @log.validation_status == 'requested' %>
+                <h3><span class="text-color primary-medium">
+                  <i class="fa fa-flag-checkered"></i>
+                  Requested validation on <%= @log.date_requested.to_s(:full_date) %>
+                </span></h3>
+              <% end %>
+            </td>
+            
+            <td class="right-image">
+              <span class="header-image">
+                <a href="<%= user_path(@user) %>" title="View user profile">
+                  <%= gravatar_for @user, size: 150, class: "img-circle" %>
+                </a>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

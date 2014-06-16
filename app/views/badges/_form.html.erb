@@ -140,12 +140,13 @@
         :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH,
         toggle: 'tooltip', title: 'Explain clearly what badge earners have accomplished' } } %>
 
+    <%= f.input :topic_list_text, as: :text, label: 'Required Evidence', input_html: { 
+      placeholder: 'Enter a list of requirements needed to earn the badge. (One per line.)' } %>
+      
     <!-- === BADGE IMAGE MAKER === -->
 
     <%= render 'shared/badge_maker' %>
 
-    <%= f.input :topic_list_text, as: :text, label: 'Required Evidence', input_html: { 
-      placeholder: 'Enter a list of requirements needed to earn the badge. (One per line.)' } %>
 
     <% unless @badge.new_record? %>
       <h2>

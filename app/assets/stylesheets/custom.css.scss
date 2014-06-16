@@ -1147,94 +1147,124 @@ form#group-add-users-form {
 
 /* === HEADER BARS === */
 
-.header-bar{
+.header-bar {
   margin-bottom: 40px;
+  border-radius: 4px;
+  background-color: $light-white;
+  color: $medium-text-color;
+  border: 2px solid $really-light-gray;
 
-  .header-image {
-    display: block;
-    float: left;
-    height: 150px;
-    margin: -25px 0 50px 0;
-    border-radius: 40px;
-    background-color: $really-light-gray;
-    border-left: 8px solid $medium-gray;
-    border-right: 8px solid $medium-gray;
+  h1,h2,h3,h4 { 
+    line-height: 1.2em;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  h1 {
+    font-size: 26px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  h2 {
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: normal;
+  }
+  h3 {
+    font-size: 14px;
+    font-weight: normal;
+  }
+  ul {
+    list-style: none;
+    color: $medium-text-color;
+    margin-top: 15px;
+    margin-left: 0;
+    margin-bottom: 0;
+    font-size: 14px;
 
-    img {
-      display: block;
-      margin: 10px;
-      height: 130px;
+    li {
+      padding-top: 4px;
+      padding-bottom: 4px;
+      line-height: 1.4em;
     }
-
+  }
+  a,a:visited { color: $medium-text-color; }
+  a:focus,a:hover { 
+    color: $dark-text-color;
+    text-decoration: none;
+    border-bottom: 1px dashed $dark-text-color;
   }
 
-  .info-bar {
-    display: block;
-    border-radius: 500px;
-    background-color: $light-white;
-    color: $medium-text-color;
-    margin-top: 25px;
-    height: 100px;
-    border-right: 8px solid $really-light-gray;
-    border-bottom: 1px solid $really-light-gray;
+  table.info-table {
+    position: relative;
+    width: 100%;
 
-    h1,h2,h3,h4 { 
-      line-height: 1em;
-      margin-left: 20px;
-      margin-right: 20px;
-    }
-    h1 {
-      font-size: 26px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    h2 {
-      margin-bottom: 10px;
-      font-size: 20px;
-      font-weight: normal;
-    }
-    h3 {
-      font-size: 14px;
-      font-weight: normal;
-    }
-    ul {
-      list-style: none;
-      color: $medium-text-color;
-      margin-left: 0;
-      font-size: 14px;
+    td.left-image, td.right-image {
+      padding: 15px;
+      width: 120px;
 
-      li {
-        padding-bottom: 7px;
-        line-height: 1.4em;
-
-        &:last-child { padding-bottom: 0; }
+      img { 
+        display: block; 
+        width: 120px;
       }
     }
-    a,a:visited { color: $medium-text-color; }
-    a:focus,a:hover { 
-      color: $dark-text-color;
-      text-decoration: none;
-      border-bottom: 1px dashed $dark-text-color;
-    }
+    td.left-image { background-color: $really-light-gray; }
+    td.left-panel {
+      padding-right: 50px;
+      vertical-align: top;
+      width: 50%;
 
+      &.with-right-image  {
+        width: 35%;
+        padding-right: 0;
+      }
+    }
+    td.separator {
+      span {
+        position: absolute;
+        top: 15px;
+        bottom: 15px;
+        width: 6px;
+        background-color: $light-text-color;
+      }
+    }
+    td.right-panel {
+      vertical-align: top;
+      padding-left: 20px;
+
+      ul { color: $light-text-color; }
+      a,a:visited { color: $light-text-color; }
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 979px) {
     table.info-table {
-      td.left-panel {
-        padding-right: 50px;
+      td.left-panel:not(.with-right-image) { width: 40%; }
+      td.left-image.with-right-image, td.right-image {
+        width: 80px; 
+        
+        img { width: 80px; }
       }
-      td.right-panel {
-        padding-left: 20px;
-
-        ul { color: $light-text-color; }
-        a,a:visited { color: $light-text-color; }
+    }
+  }
+  @media (max-width: 767px) {
+    table.info-table {
+      td.left-image, td.right-image { 
+        width: 80px; 
+        
+        img { width: 80px; }
       }
-      td.separator {
-        span {
-          display: block;
-          height: 80px;
-          width: 6px;
-          background-color: $light-text-color;
-        }
+      td.left-panel { 
+        width: auto; 
+        padding-right: 15px;
       }
+      td.right-panel {  
+        padding-left: 0;
+      }
+    }
+  }
+  @media (max-width: 480px) {
+    td.left-image.with-right-image {
+      display: none;
     }
   }
 }

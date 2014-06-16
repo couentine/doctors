@@ -260,24 +260,26 @@
 
 <div class="row add-top-margin">
   <div class="span12">
-    <div class="header-card badge-header-card no-tabs">
-
-      <div class="primary-header span12">
-        <span class="header-image" >
-          <%= image_tag group_badge_path(@group, @badge, format: :png) %>
-        </span>
-        <span class="header-text">
-          <h1><%= @badge.name %></h1>
-          <h2>
-            <%= link_to @group.url_with_caps, @group, 
-              title: @group.name %>/<%= @badge.url_with_caps %>
-          </h2>
-          <h3>
-            <%= @badge.summary %>
-          </h3>
-        </span>
-      </div>
-
+    <div class="header-bar badge-header-bar">
+      <table class="info-table">
+        <tbody>
+          <tr>
+            <td class="left-image">
+              <%= image_tag group_badge_path(@group, @badge, format: :png) %>
+            </td>
+            <td class="single-panel">
+              <h1><%= @badge.name %></h1>
+              <h2>
+                <%= link_to @group.url_with_caps, @group, 
+                  title: @group.name %>/<%= @badge.url_with_caps %>
+              </h2>
+              <h3>
+                <%= @badge.summary %>
+              </h3>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
