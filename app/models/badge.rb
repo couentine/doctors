@@ -187,7 +187,8 @@ class Badge
   # date_started: Defaults to nil. If set, overrides the log.date_started fields
   # Return value = the newly created/reattached log
   def add_learner(user, date_started = nil)
-    the_log = Badge.logs.find_by(user: user) rescue nil
+    the_log = logs.find_by(user: user) rescue nil
+    logger.info "The Log = #{the_log.inspect}"
 
     if the_log
       if the_log.detached_log

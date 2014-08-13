@@ -90,4 +90,112 @@ namespace :db do
     puts " >> Done."
   end
 
+  task list_dupe_logs: :environment do
+    puts "Listing dupe logs..."
+    log_to_keep, kept_is_issued, kept_entry_count = nil, nil, nil
+    
+    Badge.each do |badge|
+      user_log_map = {} # maps from user to list of logs
+      
+      badge.logs.each do |log|
+        if user_log_map.include? log.user
+          user_log_map[log.user] << log
+        else
+          user_log_map[log.user] = [log]
+        end
+      end
+      
+      user_log_map.each do |user, logs|
+        if logs.count > 1
+          log_to_keep, kept_is_issued, kept_entry_count = nil, false, 0
+          
+          logs.each do |log|
+            keep_me = false
+
+            if log_to_keep.nil?
+              keep_me = true
+            elsif kept_is_issued # then we can only keep other issued logs with higher counts
+              keep_me = true if !log.date_issued.nil? && (log.entries.count > kept_entry_count)
+            elsif !log.date_issued.nil? || (log.entries.count > kept_entry_count)
+              keep_me = true
+            end
+
+            if keep_me
+              log_to_keep = log
+              kept_is_issued = !log.date_issued.nil?
+              kept_entry_count = log.entries.count
+            end
+          end
+          
+          logs.each do |log|
+            print "#{badge.group.url}/#{badge.url}/#{user.username}/#{log.id} = #{log.entries.count}, #{(log.date_issued.nil?) ? 'learner' : 'expert'} >> "
+            if log_to_keep == log
+              puts "KEEP"
+            else
+              puts "DELETE"
+            end
+          end
+        end
+      end
+    end
+
+    puts " >> Done."
+  end
+
+  task delete_dupe_logs: :environment do
+    puts "Deleting duplicate logs..."
+    log_to_keep, kept_is_issued, kept_entry_count = nil, nil, nil
+    
+    Badge.each do |badge|
+      user_log_map = {} # maps from user to list of logs
+      
+      badge.logs.each do |log|
+        if user_log_map.include? log.user
+          user_log_map[log.user] << log
+        else
+          user_log_map[log.user] = [log]
+        end
+      end
+      
+      user_log_map.each do |user, logs|
+        if logs.count > 1
+          log_to_keep, kept_is_issued, kept_entry_count = nil, false, 0
+          
+          logs.each do |log|
+            keep_me = false
+
+            if log_to_keep.nil?
+              keep_me = true
+            elsif kept_is_issued # then we can only keep other issued logs with higher counts
+              keep_me = true if !log.date_issued.nil? && (log.entries.count > kept_entry_count)
+            elsif !log.date_issued.nil? || (log.entries.count > kept_entry_count)
+              keep_me = true
+            end
+
+            if keep_me
+              log_to_keep = log
+              kept_is_issued = !log.date_issued.nil?
+              kept_entry_count = log.entries.count
+            end
+          end
+          
+          logs.each do |log|
+            print "#{badge.group.url}/#{badge.url}/#{user.username}/#{log.id} = #{log.entries.count}, #{(log.date_issued.nil?) ? 'learner' : 'expert'} >> "
+            if log_to_keep == log
+              puts "KEEPING"
+            else
+              if log.delete
+                puts "DELETED"
+              else
+                puts "ERROR DELETING"
+              end
+            end
+          end
+        end
+      end
+    end
+
+    puts " >> Done."
+  end
+
 end

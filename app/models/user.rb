@@ -324,11 +324,6 @@ protected
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|
         badge.add_learner self
       end unless invited_item["badges"].blank?
-
-      # Then add to any badges (as learner)
-      group.badges.where(:url.in => invited_item["badges"]).each do |badge|
-        badge.add_learner self
-      end unless invited_item["badges"].blank?
       
       # Then add any validations
       invited_item["validations"].each do |v|
@@ -357,11 +352,6 @@ protected
         badge.add_learner self
       end unless invited_item["badges"].blank?
 
-      # Then add to any badges (as learner)
-      group.badges.where(:url.in => invited_item["badges"]).each do |badge|
-        badge.add_learner self
-      end unless invited_item["badges"].blank?
-      
       # Then add any validations
       invited_item["validations"].each do |v|
         badge = group.badges.find_by(url: v["badge"]) rescue nil
