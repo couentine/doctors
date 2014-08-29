@@ -1,5 +1,21 @@
 class BadgeMaker
 
+  # === HOW TO LOAD NEW ICONS === #
+  #
+  # Do this in your dev environment then deploy after done.
+  #
+  # 1) Download a bunch of the zip files from the noun project.
+  # 2) Expand them all so that they are in their own subdirectories (named 'icon_1234')
+  # 3) Copy all of the icon folders into NEW_ICONS_INBOX
+  # 4) Fire up the rails console and type >> BadgeMaker.process_new_icons
+  # 5) Check NEW_ICONS_OUTBOX to see the results and repeat steps as needed.
+  #    NOTE: To manually specify name or key add a line to the license.txt file that look like...
+  #          name="Manual Icon Name" OR key="manual-icon-key"
+  # 6) Copy the icons and index.yaml into the icons directory
+  # 7) Fire up the app ($ rails s) and make sure it all works (this will also sort the index.yaml)
+  # 8) Deploy to production
+
+  
   # === CONSTANTS === #
 
   THUMBNAIL_SIZE = 50
@@ -316,8 +332,9 @@ class BadgeMaker
       end
     end
 
-    # The last step is outputing the YAML file
-    File.open("#{NEW_ICONS_OUTBOX}/icons/index.yml", 'w') {|f| f.write new_icon_index.to_yaml }
+    # The last step is outputing the YAML files
+    File.open("#{NEW_ICONS_OUTBOX}/icons/index.yml", 'w') {|f| f.write updated_icon_index.to_yaml }
+    File.open("#{NEW_ICONS_OUTBOX}/icons/new_index.yml", 'w') {|f| f.write new_icon_index.to_yaml }
   end
 
 private

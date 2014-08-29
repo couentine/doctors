@@ -683,3 +683,300 @@ pilates:
     author_url: 
     org_name: The Noun Project
     org_url: http://www.thenounproject.com
+fireworks:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Fireworks
+    author_name: Natalie Doud
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+leaf:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Leaf
+    author_name: Mark Caron
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+map:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Map
+    author_name: Stefan Zoll
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+gear:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Gear
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+mug:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Mug
+    author_name: Dmitry Baranovskiy
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+syringe:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Syringe
+    author_name: richard pasqua
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+peace-sign:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Peace Sign
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+worker:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Worker
+    author_name: Juan Pablo Bravo
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+magnifying-glass:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Magnifying Glass
+    author_name: gwenaelle georget
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+eagle:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Eagle
+    author_name: Oscar Yáñez
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+cupcake:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Cupcake
+    author_name: Andrew McKinley
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+network:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Network
+    author_name: Brennan Novak
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+monkey:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Monkey
+    author_name: Monika Ciapala
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+microphone:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Microphone
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+light-bulb:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Light Bulb
+    author_name: Dani Rolli
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+submarine:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Submarine
+    author_name: Luke Anthony Firth
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+cake:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Cake
+    author_name: Yazmin Alanis
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+calculator:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Calculator
+    author_name: Nicolò Bertoncin
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+sword:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Sword
+    author_name: Nicolò Mondonico
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+biohazard:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Biohazard
+    author_name: Shailendra Chouhan
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+cloud:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Cloud
+    author_name: Leszek Pietrzak
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+refresh:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Refresh
+    author_name: Naomi Atkinson
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+compass:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Compass
+    author_name: Alessandro Suraci
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+selfie:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Selfie
+    author_name: Matt Brooks
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+sand-clock:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Sand Clock
+    author_name: Parmelyn
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+relation:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: relation
+    author_name: gilbert bages
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+life-saver:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Life Saver
+    author_name: sagit milshtein
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+mobile-notification-network:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Mobile Notification, Network
+    author_name: Yamini Chandra
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+target:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Target
+    author_name: Yamini Chandra
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+alarm:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Alarm
+    author_name: Yamini Chandra
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+coffin:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Coffin
+    author_name: Sergi Delgado
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+butterfly:
+  attribution:
+    type: public
+    item_type: icon
+    item_name: Butterfly
+    author_name: 
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
+binoculars:
+  attribution:
+    type: attribution
+    item_type: icon
+    item_name: Binoculars
+    author_name: Creatorid'immagine
+    author_url: 
+    org_name: The Noun Project
+    org_url: http://www.thenounproject.com
