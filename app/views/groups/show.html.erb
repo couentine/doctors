@@ -66,14 +66,40 @@
 <script type="text/javascript">
     
   $(document).ready(function() {
-    $('#toggle-package-details').click(function(e) {
-      $("#package-details").slideDown();
+    $('#toggle-talk-with-us').click(function(e) {
+      $("#talk-with-us").slideDown();
       $(this).slideUp();
+      $(".focus-first").focus();
       e.preventDefault();
     });
   });
 
 </script>
+
+<style type="text/css">
+  
+  #talk-with-us {
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    margin-top: 20px;
+    margin-bottom: 5px;
+  }
+  #talk-with-us label {
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  #talk-with-us input[type=text], #talk-with-us textarea {
+    border-radius: 0;
+  }
+  #talk-with-us .help-block {
+    font-size: 15px;
+    font-style: italic;
+    color: #1EB3D7;
+    margin-top: -5px;
+    margin-bottom: 15px;
+  }
+
+</style>
 
 <!-- === MANAGE MEMBERS MODAL === -->
 
@@ -270,27 +296,32 @@
 
   <% if @current_user_is_admin && !@group.badges.empty? && (current_user.sign_in_count <= 3) %>
   
-    <!-- === NEW GROUP PACKAGE DETAILS TUTORIAL === -->
+    <!-- === NEW GROUP TALK WITH US FORM === -->
 
     <div class="alert alert-info">
       <h3>
-        <i class="fa fa-support"></i> 
-        Want some help?
+        <i class="fa fa-phone"></i> 
+        We'd love to talk with you
       </h3> 
-      Our team can help you develop the perfect badging system for your organization.
-      <a href="#" id="toggle-package-details" class="btn btn-link">
-        Quick start packages start at $150.
+      We want to hear more about what you're trying to do with badges and see if we can help.
+      If you'll join us for a 15 minute discussion we'll give you 
+      <b>50 private users free for 4 months</b>.
+      <a href="#" id="toggle-talk-with-us" class="btn btn-link">
+        Click here to talk with us 
+        <i class="fa fa-angle-double-right"></i>
       </a>
-      <span style="display:none" id="package-details">
-        <ul>
-          <li><b>Launch Package</b> - Three 45 minute 1-on-1 sessions - $150</li>
-          <li><b>Navigator Package</b> - Zero-to-launch guidance up to 3 hours/week - $230/week</li>
-          <li><b>Mission Control Package</b> - We project manage everything - $90/hour</li>
-        </ul>
-        <a href="mailto:hello@badgelist.com" id="toggle-package-details" class="btn btn-link">
-          <i class="fa fa-envelope"></i> Email us to get started.
-        </a>
-      </span>
+      <form style="display:none" id="talk-with-us">
+        <label>Describe what you're trying to accomplish with badges:</label>
+        <textarea rows="3" name="goals" class="input-xxlarge focus-first"></textarea>
+        
+        <label>When will you be available in the next week for a 15 minute call?</label>
+        <input type="text" name="availability" class="input-xxlarge">
+        <span class="help-block">
+          Please include your timezone along with a few specific days and times.
+        </span>
+
+        <button type="submit" class="btn btn-primary btn-large">Send request</button>
+      </form>
     </div>
 
   <% end %>
