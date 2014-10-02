@@ -6,7 +6,7 @@ class FormsController < ApplicationController
 
   # === CONSTANTS === #
 
-  TARGET_EMAIL = "ryan.hank@gmail.com" # This is where the email notifications are sent.
+  TARGET_EMAIL = "hello@badgelist.com" # This is where the email notifications are sent.
 
   # POST /f/talk-with-us?goals={text}&availability={text}
   # This form allows the current user to schedule a time to talk with us.
