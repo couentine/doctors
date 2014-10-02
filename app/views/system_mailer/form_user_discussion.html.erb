@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h2>A Badge List user has requested a discussion</h2>
+    <ul>
+      <li><b>User:</b> <%= link_to @from_user.name, user_url(@from_user) %></li>
+      <li><b>Email:</b> <%= @from_user.email %></li>
+    </ul>
+    <hr/>
+    <p><b>What they are trying to accomplish:</b> <%= @goals %></p>
+    <p><b>When they are available to talk:</b> <%= @availability %></p>
+    <hr/>
+    <p>
+      <i>
+        This email was sent automatically by the Badge List app.
+        Badge List is a badge-based tool for tracking learning progress. 
+        If you take no action you will not receive any further emails about this invitation.
+      </i>
+    </p>
+  </body>
+</html>

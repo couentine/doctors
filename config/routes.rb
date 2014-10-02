@@ -18,6 +18,10 @@ BadgeList::Application.routes.draw do
     resources :users, :only => [:index]
   end
   match 'a' => 'admin_pages#index', via: :get
+  
+  # === MANUAL FORM PATHS === #
+  match 'f/talk-with-us' => 'forms#user_discussion', via: :post
+  # match 'f/contact-us' => 'forms#contact_us', via: :post
 
   # === MANUAL GROUP PATHS === #
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group

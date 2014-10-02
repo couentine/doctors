@@ -78,6 +78,11 @@
 
 <style type="text/css">
   
+  #user-discussion-response { position: relative; }
+  #user-discussion-response .spinner { 
+    margin-top: 240px;
+    border-width: 80px;
+  }
   #talk-with-us {
     padding-top: 20px;
     border-top: 1px solid #ddd;
@@ -294,15 +299,21 @@
 
 <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 
-  <% if @current_user_is_admin && !@group.badges.empty? && (current_user.sign_in_count <= 3) %>
+  <% if @current_user_is_admin && !@group.badges.empty? \
+    && (current_user.sign_in_count <= 3) && !current_user.has_flag?("form-user-discussion") %>
   
     <!-- === NEW GROUP TALK WITH US FORM === -->
 
-    <div class="alert alert-info">
+    <div class="alert alert-info" id="user-discussion-response">
+      <div class="spinner-wrapper" id="user-discussion-spinner" style="display: none">
+        <div class="spinner"></div>
+      </div>
+
       <h3>
         <i class="fa fa-phone"></i> 
         We'd love to talk with you
       </h3> 
+      
       We want to hear more about what you're trying to do with badges and see if we can help.
       If you'll join us for a 15 minute discussion we'll give you 
       <b>50 private users free for 4 months</b>.
@@ -310,7 +321,8 @@
         Click here to talk with us 
         <i class="fa fa-angle-double-right"></i>
       </a>
-      <form style="display:none" id="talk-with-us">
+
+      <%= form_tag('/f/talk-with-us', remote: true, style: 'display: none', id: 'talk-with-us') do %>
         <label>Describe what you're trying to accomplish with badges:</label>
         <textarea rows="3" name="goals" class="input-xxlarge focus-first"></textarea>
         
@@ -320,8 +332,11 @@
           Please include your timezone along with a few specific days and times.
         </span>
 
-        <button type="submit" class="btn btn-primary btn-large">Send request</button>
-      </form>
+        <button type="submit" class="btn btn-primary btn-large" 
+        onclick="$('#user-discussion-spinner').show()">
+          Send request
+        </button>
+      <% end %>
     </div>
 
   <% end %>
