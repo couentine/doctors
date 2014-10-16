@@ -50,7 +50,7 @@ private
   def track_page_views
     @current_path = request.fullpath.split('?').first
     
-    unless @current_path.include?(".png") || @current_path.include?(".json")
+    unless @current_path.include?(".") # this discludes .json, .png AND anything with a dot in it
       if current_user
         current_user.page_views = [] if current_user.page_views.nil?
         current_item = current_user.page_views[@current_path]
