@@ -264,6 +264,11 @@ class BadgesController < ApplicationController
           redirect_to [@group, @badge], 
             notice: "A notice of badge achievement was sent to #{@email}. " \
             + "Note: The user will have to create a Badge List account to accept the badge."
+        rescue Postmark::InvalidMessageError
+          logger.error "+++badges_controller.issue_save: " \
+            + "There was an INVALID MESSAGE ERROR while sending an email to #{@email}."
+          flash[:error] = "There was an error issuing the badge to the following email address: #{@email}."
+          render 'issue_form' 
         rescue Exception => e
           logger.error "+++badges_controller.issue_save: " \
             + "There was an error sending an email to #{@email}. " \
