@@ -49,6 +49,8 @@ class Badge
   field :image,                       type: Moped::BSON::Binary # stores the actual badge image
   field :image_attributions,          type: Array
   field :icon_search_text,            type: String # stores what the user searched for b4 picking the icon
+  field :uploaded_image,              type: String # powered by the carrierwave gem
+  mount_uploader :uploaded_image,     ImageUploader
 
   field :current_user,                type: String # used when logging info_versions
   field :current_username,            type: String # used when logging info_versions
@@ -73,7 +75,8 @@ class Badge
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
-    :image_frame, :image_icon, :image_color1, :image_color2, :icon_search_text, :topic_list_text
+    :image_frame, :image_icon, :image_color1, :image_color2, :icon_search_text, :topic_list_text,
+    :uploaded_image
   
   # === CALLBACKS === #
 

@@ -21,6 +21,8 @@ gem 'font-awesome-rails'
 
 # gem 'mixpanel-ruby'
 
+gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+
 # Pagination
 
 gem 'kaminari'
