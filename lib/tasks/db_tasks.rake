@@ -208,7 +208,8 @@ namespace :db do
         value["dates"].each do |view_time|
           month_key = view_time.to_s(:year_month)
           user.active_months << month_key unless user.active_months.include?(month_key)
-          user.last_active_at = view_time if view_time > user.last_active_at
+          user.last_active_at = view_time if user.last_active_at.nil? \
+            || (view_time > user.last_active_at)
         end
       end
       
