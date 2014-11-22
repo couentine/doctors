@@ -29,6 +29,8 @@ class User
   field :admin,               type: Boolean, default: false
   field :page_views,          type: Hash, default: {}, pre_processed: true
   field :form_submissions,    type: Array
+  field :last_active_at,      type: Time
+  field :active_months,       type: Array
 
   field :identity_hash,       type: String
   field :identity_salt,       type: String

@@ -58,7 +58,7 @@
               <th>Name</th>
               <th>Signup Date</th>
               <th>Signin Count</th>
-              <th>Last Signin</th>
+              <th>Last Active</th>
               <th>Groups Made</th>
               <th>Badges Made</th>
               <th>Entries</th>
@@ -76,7 +76,7 @@
                 </td>
                 <td><%= user.created_at.to_s :full_date %></td>
                 <td><%= user.sign_in_count %></td>
-                <td><%= user.last_sign_in_at.to_s :short_date_time %></td>
+                <td><%= user.last_active_at.to_s :short_date_time %></td>
                 <td><%= user.created_groups.count unless user.created_groups.nil? %></td>
                 <td><%= user.created_badges.count unless user.created_badges.nil? %></td>
                 <td><%= user.created_entries.count unless user.created_entries.nil? %></td>

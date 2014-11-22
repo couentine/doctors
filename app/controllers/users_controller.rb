@@ -11,7 +11,7 @@ class UsersController < ApplicationController
     @page = params[:page] || 1
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
     @exclude_flags = params[:exclude_flags] || %w(sample_data internal-data)
-    @sort_by = params[:sort_by] || "last_sign_in_at"
+    @sort_by = params[:sort_by] || "last_active_at"
     @sort_order = params[:sort_order] || "desc"
     @users = User.where(:flags.nin => @exclude_flags).order_by("#{@sort_by} #{@sort_order}")\
       .page(@page).per(@page_size)

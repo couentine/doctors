@@ -37,6 +37,7 @@ class Group
   field :invited_admins,          type: Array, default: []
   field :invited_members,         type: Array, default: []
   field :flags,                   type: Array, default: []
+  field :monthly_active_users,    type: Hash, default: {}, pre_processed: true
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
@@ -73,6 +74,7 @@ class Group
   # === BADGE METHODS === #
 
   # This will find by ObjectId OR by URL
+  # It will also update the monthly_active_users property if applicable
   def self.find(input)
     group = nil
 
@@ -82,6 +84,11 @@ class Group
 
     if group.nil?
       group = Group.find_by(url: input.to_s.downcase) rescue nil
+    end
+
+    if group && current_user
+      current_month_key = Time.now.to_s(:year_month)
+      # Left off here... FIXME
     end
 
     group
