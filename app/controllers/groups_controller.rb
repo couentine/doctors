@@ -407,6 +407,7 @@ private
   def find_group
     # Note: Downcase is handled by group model
     @group = Group.find(params[:id] || params[:group_id]) || not_found
+    @group.log_active_user current_user # log monthly active user if applicable
     @current_user_is_admin = current_user && @group.has_admin?(current_user)
     @current_user_is_member = current_user && @group.has_member?(current_user)
     @badge_list_admin = current_user && current_user.admin?

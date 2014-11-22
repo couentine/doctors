@@ -198,4 +198,28 @@ namespace :db do
     puts " >> Done."
   end
 
+  task overwrite_user_active_months: :environment do
+    print "Updating #{User.count} users"
+    
+    User.each do |user|
+      user.active_months = [] if user.active_months.nil?
+      
+      user.page_views.each do |key, value|
+        value["dates"].each do |view_time|
+          month_key = view_time.to_s(:year_month)
+          user.active_months << month_key unless user.active_months.include?(month_key)
+          user.last_active_at = view_time if view_time > user.last_active_at
+        end
+      end
+      
+      if user.changed?
+        user.active_months.sort!
+        user.timeless.save
+      end
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end

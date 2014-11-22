@@ -154,6 +154,7 @@ private
 
   def find_parent_records
     @group = Group.find(params[:group_id].to_s.downcase) || not_found
+    @group.log_active_user current_user # log monthly active user if applicable
     @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase) || not_found
     @user = User.find(params[:log_id].to_s.downcase) || not_found # find user by username
     @log = @user.logs.find_by(badge: @badge) || not_found

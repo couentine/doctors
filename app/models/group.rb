@@ -74,7 +74,6 @@ class Group
   # === BADGE METHODS === #
 
   # This will find by ObjectId OR by URL
-  # It will also update the monthly_active_users property if applicable
   def self.find(input)
     group = nil
 
@@ -84,11 +83,6 @@ class Group
 
     if group.nil?
       group = Group.find_by(url: input.to_s.downcase) rescue nil
-    end
-
-    if group && current_user
-      current_month_key = Time.now.to_s(:year_month)
-      # Left off here... FIXME
     end
 
     group
@@ -134,6 +128,23 @@ class Group
   def has_invited_admin?(email)
     found_user = invited_admins.detect { |u| u["email"] == email}
     found_user != nil
+  end
+
+  # This function logs activity in the group by a user
+  # If the user is a member or admin of the group they will be counted as a monthly active user
+  def log_active_user(current_user)
+    if current_user && (has_member?(current_user) || has_admin?(current_user))
+      self.monthly_active_users = {} if monthly_active_users.nil?
+      
+      current_month_key = Time.now.to_s(:year_month)
+      if !monthly_active_users.has_key? current_month_key
+        self.monthly_active_users[current_month_key] = [current_user.username]
+        self.timeless.save
+      elsif !monthly_active_users[current_month_key].include? current_user.username
+        self.monthly_active_users[current_month_key] << current_user.username
+        self.timeless.save
+      end
+    end
   end
 
 protected
