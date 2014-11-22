@@ -6,6 +6,7 @@
 
 <%= simple_form_for(resource, :as => resource_name, :url => password_path(resource_name), :html => { :method => :put }) do |f| %>
   <%= f.error_notification %>
+  <%= f.hidden_field :reset_password_token %>
 
   <div class="form-inputs bl-form-large bl-form-no-labels">
     <%= f.input :password, :required => true, :autofocus => true, :placeholder => 'New password', :input_html => { :class => 'input-xlarge' } %>
