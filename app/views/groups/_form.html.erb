@@ -65,6 +65,12 @@
         <%= f.input :image_url, label: 'Group Image URL', 
                     placeholder: 'http://nasa.gov/logo.png',
                     input_html: { class: 'input-xlarge' } %>
+
+        <% if @badge_list_admin %>
+          <%= f.input :user_limit, label: '(ADMIN) User Limit', 
+              placeholder: 'Private group allowed size',
+              input_html: { class: 'input-mini' } %>
+        <% end %>
       </div>
     <% end %>
   </div>  

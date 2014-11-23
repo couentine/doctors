@@ -286,7 +286,31 @@
                   <i class="fa fa-clock-o"></i> Created on <%= @group.created_at.to_s(:full_date) %>
                 </li>
                 <li>
-                  <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> in group
+                  <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> 
+                  <% unless @group.active_user_count.nil? %>
+                    (<%= @group.active_user_count %> active this month)
+                    
+                    <% if @current_user_is_admin && (@group.type=='private') && @group.user_limit %>
+                      <br>
+                      <% if @group.active_user_count > @group.user_limit %>
+                        <span class="user-limit error">
+                          <b>WARNING:</b> 
+                          You are over your limit of <%= @group.user_limit%> 
+                          monthly active users.
+                        </span>
+                      <% elsif @group.active_user_count > (@group.user_limit - 2) %>
+                        <span class="user-limit warning">
+                          You are near your limit of <%= @group.user_limit%> 
+                          monthly active users.
+                        </span>
+                      <% else %>
+                        <span class="user-limit success">
+                          Your limit is <%= @group.user_limit%> 
+                          monthly active users.
+                        </span>
+                      <% end %>
+                    <% end %>
+                  <% end %>
                 </li>
               </ul>
             </td>

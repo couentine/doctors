@@ -1832,6 +1832,16 @@ div.badge-card {
 
   &.awarded { border-top: 8px solid $green-medium; }
 }
+span.user-limit {
+  display: block;
+  margin-top: 5px;
+  font-size: 13px;
+  font-style: italic;
+
+  &.success { color: $green-medium; }
+  &.warning { color: $primary-medium; }
+  &.error { color: $red-medium; }
+}
 
 div.entry-card.validation { border-top: 4px solid $primary-light; }
 div.entry-card {

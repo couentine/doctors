@@ -38,6 +38,8 @@ class Group
   field :invited_members,         type: Array, default: []
   field :flags,                   type: Array, default: []
   field :monthly_active_users,    type: Hash, default: {}, pre_processed: true
+  field :active_user_count,       type: Integer
+  field :user_limit,              type: Integer, default: 5 # only for private groups
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
@@ -57,7 +59,7 @@ class Group
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
-    :validation_threshold
+    :validation_threshold, :user_limit
 
   # === CALLBACKS === #
 
@@ -139,9 +141,14 @@ class Group
       current_month_key = Time.now.to_s(:year_month)
       if !monthly_active_users.has_key? current_month_key
         self.monthly_active_users[current_month_key] = [current_user.username]
-        self.timeless.save
       elsif !monthly_active_users[current_month_key].include? current_user.username
         self.monthly_active_users[current_month_key] << current_user.username
+      end
+      
+      if self.changed?
+        if monthly_active_users.has_key?(current_month_key)
+          self.active_user_count = monthly_active_users[current_month_key].count
+        end
         self.timeless.save
       end
     end
