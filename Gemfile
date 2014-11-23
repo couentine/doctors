@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+ruby '2.1.2'
 
 gem 'rails', '3.2.14'
 
@@ -9,21 +10,21 @@ gem 'bson_ext', '1.9.2'
 
 gem 'bootstrap-sass', '2.3.2.2'
 gem 'faker'
-gem 'simple_form'
+gem 'simple_form', '~> 2.1.1'
 
 gem 'browser_details'
 gem 'exception_notification'
 
-gem 'mini_magick'
+gem 'mini_magick', '~> 3.8.1'
 # gem 'font-awesome-sass'
-gem 'font-awesome-rails'
+gem 'font-awesome-rails', '~> 4.2.0.0'
 # gem 'rouge'
 
 # gem 'mixpanel-ruby'
 
 # Pagination
 
-gem 'kaminari'
+gem 'kaminari', '~> 0.16.1'
 gem 'kaminari-bootstrap', '~> 0.1.3'
 
 
@@ -33,7 +34,7 @@ gem 'postmark-rails', '~> 0.5.2'
 
 # Users
 
-gem 'devise'
+gem 'devise', '~> 3.3.0'
 
 
 group :development, :test do
@@ -59,7 +60,7 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
-gem 'jquery-rails'
+gem 'jquery-rails', '~> 3.1.2'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
