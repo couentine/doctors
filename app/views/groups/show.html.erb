@@ -290,7 +290,9 @@
                   <% unless @group.active_user_count.nil? %>
                     (<%= @group.active_user_count %> active this month)
                     
-                    <% if @current_user_is_admin && (@group.type=='private') && @group.user_limit %>
+                    <% if (@current_user_is_admin || @badge_list_admin) \
+                         && (@group.type=='private') && @group.user_limit %>
+                      
                       <br>
                       <% if @group.active_user_count > @group.user_limit %>
                         <span class="user-limit error">
