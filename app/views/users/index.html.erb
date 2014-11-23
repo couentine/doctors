@@ -55,7 +55,8 @@
         <table class="table table-striped table-hover">
           <thead>
             <tr>
-              <th>Name</th>
+              <th>User</th>
+              <th>Email</th>
               <th>Signup Date</th>
               <th>Signin Count</th>
               <th>Last Active</th>
@@ -71,13 +72,15 @@
                 <td>
                   <%= gravatar_for user, class: "img-circle", size: 20 %> 
                   <a href="<%= user_path(user) %>">
-                    <%= user.name %> 
-                    (<%= user.username_with_caps %>)
+                    <%= user.name %>
                   </a>
                 </td>
-                <td><%= user.created_at.to_s :full_date %></td>
+                <td><%= user.email %></td>
+                <td><%= user.created_at.to_s :short_date %></td>
                 <td><%= user.sign_in_count %></td>
-                <td><%= user.last_active_at.to_s :short_date_time %></td>
+                <td>
+                  <%= user.last_active_at.to_s :short_date_time unless user.last_active_at.nil? %>
+                </td>
                 <td><%= user.active_months.join(', ') unless user.active_months.nil? %></td>
                 <td><%= user.created_groups.count unless user.created_groups.nil? %></td>
                 <td><%= user.created_badges.count unless user.created_badges.nil? %></td>
