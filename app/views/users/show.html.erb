@@ -68,10 +68,10 @@
           <h2><%= @user.username_with_caps %></h2>
           <h3>
             <i class="icon-time"></i>
-            <% if @user.created_at < (Time.now - 3.months) %>
-              <%= "Badge List member since #{@user.created_at.to_s(:full_date)}" %>
-            <% else %>
+            <% if @user.created_at.to_date < BL_LAUNCH_DATE %>
               <%= "Badge List member since the beginning of time" %>
+            <% else %>
+              <%= "Badge List member since #{@user.created_at.to_s(:full_date)}" %>
             <% end %>
           </h3>
         </span>
