@@ -328,42 +328,84 @@
   <% if @current_user_is_admin && !@group.badges.empty? \
     && (current_user.sign_in_count <= 3) && !current_user.has_flag?("form-user-discussion") %>
   
-    <!-- === NEW GROUP TALK WITH US FORM === -->
+    <% if @group.public? %>
 
-    <div class="alert alert-info" id="user-discussion-response">
-      <div class="spinner-wrapper" id="user-discussion-spinner" style="display: none">
-        <div class="spinner"></div>
-      </div>
+      <!-- === NEW GROUP TALK WITH US FORM (PUBLIC) === -->
 
-      <h3>
-        <i class="fa fa-phone"></i> 
-        We'd love to talk with you
-      </h3> 
-      
-      We want to hear more about what you're trying to do with badges and see if we can help.
-      If you'll join us for a 15 minute discussion we'll give you 
-      <b>50 private users free for 4 months</b>.
-      <a href="#" id="toggle-talk-with-us" class="btn btn-link">
-        Click here to talk with us 
-        <i class="fa fa-angle-double-right"></i>
-      </a>
+      <div class="alert alert-info" id="user-discussion-response">
+        <div class="spinner-wrapper" id="user-discussion-spinner" style="display: none">
+          <div class="spinner"></div>
+        </div>
 
-      <%= form_tag('/f/talk-with-us', remote: true, style: 'display: none', id: 'talk-with-us') do %>
-        <label>Describe what you're trying to accomplish with badges:</label>
-        <textarea rows="3" name="goals" class="input-xxlarge focus-first"></textarea>
+        <h3>
+          <i class="fa fa-phone"></i> 
+          We'd love to talk with you
+        </h3> 
         
-        <label>When will you be available in the next week for a 15 minute call?</label>
-        <input type="text" name="availability" class="input-xxlarge">
-        <span class="help-block">
-          Please include your timezone along with a few specific days and times.
-        </span>
+        We want to hear more about what you're trying to do with badges and see if we can help.
+        <a href="#" id="toggle-talk-with-us" class="btn btn-link">
+          Click here to talk with us 
+          <i class="fa fa-angle-double-right"></i>
+        </a>
 
-        <button type="submit" class="btn btn-primary btn-large" 
-        onclick="$('#user-discussion-spinner').show()">
-          Send request
-        </button>
-      <% end %>
-    </div>
+        <%= form_tag('/f/talk-with-us', remote: true, style: 'display: none', id: 'talk-with-us') do %>
+          <label>Describe what you're trying to accomplish with badges:</label>
+          <textarea rows="3" name="goals" class="input-xxlarge focus-first"></textarea>
+          
+          <label>When will you be available in the next week for a 15 minute call?</label>
+          <input type="text" name="availability" class="input-xxlarge">
+          <span class="help-block">
+            Please include your timezone along with a few specific days and times.
+          </span>
+
+          <button type="submit" class="btn btn-primary btn-large" 
+          onclick="$('#user-discussion-spinner').show()">
+            Send request
+          </button>
+        <% end %>
+      </div>
+    
+    <% else %>
+
+      <!-- === NEW GROUP TALK WITH US FORM (PUBLIC) === -->
+
+      <div class="alert alert-info" id="user-discussion-response">
+        <div class="spinner-wrapper" id="user-discussion-spinner" style="display: none">
+          <div class="spinner"></div>
+        </div>
+
+        <h3>
+          <i class="fa fa-phone"></i> 
+          We'd love to talk with you
+        </h3> 
+        
+        We want to hear more about what you're trying to do with badges and see if we can help.
+        If you'll join us for a 20 minute discussion we'll give you 
+        <b>20 private users free for 2 months</b>.
+        <a href="#" id="toggle-talk-with-us" class="btn btn-link">
+          Click here to talk with us 
+          <i class="fa fa-angle-double-right"></i>
+        </a>
+
+        <%= form_tag('/f/talk-with-us', remote: true, style: 'display: none', id: 'talk-with-us') do %>
+          <label>Describe what you're trying to accomplish with badges:</label>
+          <textarea rows="3" name="goals" class="input-xxlarge focus-first"></textarea>
+          
+          <label>When will you be available in the next week for a 15 minute call?</label>
+          <input type="text" name="availability" class="input-xxlarge">
+          <span class="help-block">
+            Please include your timezone along with a few specific days and times.
+          </span>
+
+          <button type="submit" class="btn btn-primary btn-large" 
+          onclick="$('#user-discussion-spinner').show()">
+            Send request
+          </button>
+        <% end %>
+      </div>
+    
+    <% end %>
+
 
   <% end %>
 
