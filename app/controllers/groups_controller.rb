@@ -13,6 +13,8 @@ class GroupsController < ApplicationController
   before_filter :group_member_or_admin, only: [:leave]
   before_filter :group_admin, only: [:edit, :update, :destroy, :destroy_user, 
     :destroy_invited_user, :add_users, :create_users]
+  before_filter :badge_list_admin, only: [:index]
+
 
   # === CONSTANTS === #
 
@@ -25,6 +27,25 @@ class GroupsController < ApplicationController
   ]
 
   # === RESTFUL ACTIONS === #
+
+  # GET /a/groups
+  # GET /a/groups.json
+  # Accepts page parameters: page, page_size, sort_by, sort_order, exclude_flags[]
+  def index
+    # Grab the current page of groups
+    @page = params[:page] || 1
+    @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
+    @exclude_flags = params[:exclude_flags] || %w(sample_data internal-data)
+    @sort_by = params[:sort_by] || "members"
+    @sort_order = params[:sort_order] || "desc"
+    @groups = Group.where(:flags.nin => @exclude_flags).order_by("#{@sort_by} #{@sort_order}")\
+      .page(@page).per(@page_size)
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: @groups, filter_user: current_user }
+    end
+  end
 
   # GET /group-url
   # GET /group-url.json
@@ -426,6 +447,12 @@ private
       flash[:error] = "You must be a member or admin of #{@group.name} to do that!"
       redirect_to @group
     end
+  end
+
+  def badge_list_admin
+    unless current_user && current_user.admin?
+      redirect_to '/'
+    end  
   end
 
 end

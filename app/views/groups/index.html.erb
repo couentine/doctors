@@ -1,19 +1,120 @@
-<% provide(:title, "Your Learning Groups") %>
+<% 
+  provide(:title, "All Groups")
+%>
 
-<div class="page-header">
-  <h1>
-    Your learning groups
-    <%= link_to 'New Group', new_group_path, class: "btn btn-primary", id: "new-group-button" %>
-  </h1>
+<!-- === PAGE HEADER === -->
+
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="header-card admin-header-card">
+      <div class="white-background no-tabs">&nbsp;</div>
+
+      <div class="primary-header span6">
+        <span class="header-image" >
+          <i class="fa fa-user"></i>
+        </span>
+        <span class="header-text">
+          <h1>Badge List Groups</h1>
+          <h2>Admin Tools</h2>
+        </span>
+      </div>
+
+      <div class="secondary-header span6">
+        <span class="header-text">
+          <h2>
+            Showing <%= ((@page.to_i - 1) * @page_size.to_i) + 1 %>
+            - <%= [(@page.to_i * @page_size.to_i), @groups.count].min %>
+            of <%= @groups.count %>
+          </h2>
+          <% unless @exclude_flags.blank? %>
+            <h3>
+              Excluding Flags: 
+              <%= @exclude_flags.join ", " %>
+            </h3>
+          <% end %>
+        </span>            
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- === ENTRIES LIST === -->
 
-<% if @groups.empty? %>
-  <p>You don't have any learning groups yet.</p>
-<% else %>
-  <ul>
-    <% @groups.each do |group| %>
-      <li><%= link_to group.name, group %></li>
-    <% end %>
-  </ul>
+<% if !@groups.blank? %>
+  
+  <div class="row">
+    <div class="span12">
+      <div class="pagination-header">
+        <div class="pagination"><%= paginate @groups %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Created</th>
+              <th>Admins + Members</th>
+              <th>Active Users / Limit</th>
+              <th>User Activity History</th>
+              <th>Badges</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @groups.each do |group| %>
+              <tr>
+                <td>
+                  <a href="<%= group_path(group) %>">
+                    <%= group.name %>
+                  </a>
+                  (<%= group.type.capitalize %>)
+                </td>
+                <td>
+                  <%= group.created_at.to_s :short_date %> by
+                  <% if group.creator.nil? %>
+                    [ Deleted User ]
+                  <% else %>
+                    <a href="<%= user_path(group.creator) %>">
+                    <%= group.creator.name %>
+                  <% end %>
+                </td>
+                <td>
+                  <%= group.admins.count %>
+                  + <%= group.members.count %>
+                  = <%= group.admins.count + group.members.count %>
+                </td>
+                <td>
+                  <%= group.active_user_count || 0 %> / 
+                  <%= (group.public?) ? '&infin;'.html_safe : group.user_limit %>
+                </td>
+                <td>
+                  <% unless group.monthly_active_users.nil? %>
+                    <%
+                      flattened_map = []
+                      group.monthly_active_users.each_pair do |key, value|
+                        flattened_map << key + " = " + value.count.to_s
+                      end
+                    %>
+                    <%= flattened_map.join(', ') %>
+                  <% end %>
+                </td>
+                <td><%= group.badges.count unless group.badges.nil? %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12">
+      <div class="pagination-footer">
+        <div class="pagination"><%= paginate @groups %></div>
+      </div>
+    </div>
+  </div>
+
 <% end %>
