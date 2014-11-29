@@ -264,6 +264,25 @@
                       "<i class='fa fa-lock'></i> Private Learning Group".html_safe
                   end
                 %>
+
+                <% if (@current_user_is_admin || @badge_list_admin) \
+                     && (@group.type=='private') && @group.user_limit %>
+                  <br>
+                  
+                  <a href="/badgelist/about/pricing" class="label-link" 
+                  title="Click for Badge List pricing" 
+                  data-toggle="tooltip" data-placement="bottom">
+
+                    <% if @group.active_user_count > @group.user_limit %>
+                      <span class="label label-important"><%= @group.user_limit%> Users (OVER LIMIT)</span>
+                    <% elsif @group.active_user_count > (@group.user_limit - 2) %>
+                      <span class="label label-warning"><%= @group.user_limit%> Users (Close to Limit)</span>
+                    <% else %>
+                      <span class="label label-success"><%= @group.user_limit%> Users</span>
+                    <% end %>
+
+                  </a>
+                <% end %>
               </h3>
             </td>
             
@@ -289,29 +308,6 @@
                   <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> 
                   <% unless @group.active_user_count.nil? %>
                     (<%= @group.active_user_count %> active this month)
-                    
-                    <% if (@current_user_is_admin || @badge_list_admin) \
-                         && (@group.type=='private') && @group.user_limit %>
-                      
-                      <br>
-                      <% if @group.active_user_count > @group.user_limit %>
-                        <span class="user-limit error">
-                          <b>WARNING:</b> 
-                          You are over your limit of <%= @group.user_limit%> 
-                          monthly active users.
-                        </span>
-                      <% elsif @group.active_user_count > (@group.user_limit - 2) %>
-                        <span class="user-limit warning">
-                          You are near your limit of <%= @group.user_limit%> 
-                          monthly active users.
-                        </span>
-                      <% else %>
-                        <span class="user-limit success">
-                          Your limit is <%= @group.user_limit%> 
-                          monthly active users.
-                        </span>
-                      <% end %>
-                    <% end %>
                   <% end %>
                 </li>
               </ul>

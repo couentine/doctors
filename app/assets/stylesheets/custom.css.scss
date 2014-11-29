@@ -315,13 +315,18 @@ ul.dropdown-menu {
     i.header-icon {
       color: $really-light-gray;
     }
-}
+  }
 }
 
 .badge { text-shadow: none; }
 .badge-success { background-color: $secondary-light; }
 .badge-warning { background-color: $primary-light; }
 .badge-info { background-color: $tertiary-light; }
+
+.label { text-shadow: none; }
+.label-success { background-color: $secondary-medium; }
+.label-warning { background-color: $primary-medium; }
+.label-important { background-color: $red-medium; }
 
 /* === BOOTSTRAP-RELATED MANUAL RESPONSIVE WIDTHS === */
 
@@ -1187,6 +1192,11 @@ form#group-add-users-form {
       line-height: 1.4em;
     }
   }
+  .label {
+    margin-top: 10px;
+    padding: 3px 5px;
+  }
+  a.label-link:hover { text-decoration: none; border-bottom: none; }
   a,a:visited { color: $medium-text-color; }
   a:focus,a:hover { 
     color: $dark-text-color;
@@ -1831,16 +1841,6 @@ div.badge-card {
   }
 
   &.awarded { border-top: 8px solid $green-medium; }
-}
-span.user-limit {
-  display: block;
-  margin-top: 5px;
-  font-size: 13px;
-  font-style: italic;
-
-  &.success { color: $green-medium; }
-  &.warning { color: $primary-medium; }
-  &.error { color: $red-medium; }
 }
 
 div.entry-card.validation { border-top: 4px solid $primary-light; }
