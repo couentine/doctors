@@ -4,14 +4,14 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    <table>
+    <table style="border-spacing: 0;">
       <tbody>
         <tr>
-          <td style="vertical-align: top;">
+          <td style="border-top: 15px solid #FF7C1C;">
             <%= link_to image_tag(group_badge_url(@group, @badge, format: :png), size: "100x100", \
               alt: @badge.name), group_badge_url(@group, @badge) %>
           </td>
-          <td style="padding: 10px; vertical-align: top;">
+          <td style="padding: 10px; border-top: 15px solid #FF7C1C;">
             <p>
               You have been issued the <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
               badge in Badge List. Congratulations! 
@@ -26,21 +26,23 @@
       </tbody>
     </table>
 
-    <hr/>
+    <p style="text-align: center">
+      <a href="<%= "#{new_user_registration_url}?email=#{@to_email}&name=#{@to_name}" %>"
+        style="color: #fff; border: 2px solid #a8cb17; background-color: #bedf36; 
+        padding: 10px 25px; border-radius: 500px; text-decoration: none; font-size: 18px;">
+        
+        Claim your badge
 
-    <p>
-      <strong>Claim your badge &amp; create a Badge List account:</strong> 
-      <a href="<%= "#{new_user_registration_url}?email=#{@to_email}&name=#{@to_name}" %>">
-        <%= new_user_registration_url %>
-      </a><br/>
+      </a>
     </p>
-    <hr/>
-    <p>
-      <i>
-        This email was sent automatically by the Badge List app.
-        Badge List is a badge-based tool for tracking learning progress. 
-        If you take no action you will not receive any further emails about this invitation.
-      </i>
+    
+    <p style="margin-top: 40px; background-color: #eaeaea; color: #999; padding: 10px 15px;
+      text-align: center; font-size: 14px;">
+      
+      This email was sent automatically by the Badge List app.
+      Badge List is a badge-based tool for tracking learning progress. 
+      If you take no action you will not receive any further emails about this invitation.
+
     </p>
   </body>
 </html>
