@@ -23,6 +23,24 @@
     <%= render 'layouts/shim' %>
     <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <% if content_for? :include_metadata %>
+      <!-- === OPEN GRAPH METADATA === -->
+      <meta property="og:type" content="Article" />
+      <meta property="og:title" content="<%= yield(:metadata_title) %>" />
+      <meta property="og:description" content="<%= yield(:metadata_description) %>" />
+      <meta property="og:image" content="<%= yield(:metadata_image) %>" />
+      <meta property="og:site_name" content="<%= yield(:metadata_site_name) %>" />
+      <meta property="og:url" content="<%= yield(:metadata_url) %>" />
+      
+      <!-- === TWITTER CARD METADATA === -->
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:site" content="@badgelist" />
+      <meta name="twitter:title" content="<%= yield(:metadata_title) %>" />
+      <meta name="twitter:description" content="<%= yield(:metadata_description) %>" />
+      <meta name="twitter:image" content="<%= yield(:metadata_image) %>" />
+      <meta name="twitter:url" content="<%= yield(:metadata_url) %>" />
+    <% end %>
   </head>
 
   <body class="<%= "with-subheader" if content_for?(:show_subheader) \

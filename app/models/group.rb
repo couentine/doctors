@@ -154,6 +154,15 @@ class Group
     end
   end
 
+  # Returns URL of the group's logo (either from the image_url property or the Badge List default)
+  def logo_url
+    if image_url
+      image_url
+    else
+      "#{APP_CONFIG['root_url']}/assets/group-image-default.png"
+    end
+  end
+
 protected
 
 

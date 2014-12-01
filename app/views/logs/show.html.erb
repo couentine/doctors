@@ -4,6 +4,22 @@
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
   provide(:include_ob_issuer, true)
+
+  provide(:include_metadata, true)
+  if @log.validation_status == 'validated'
+    provide(:metadata_title, "#{@badge.name} awarded to #{@user.name}")
+    provide(:metadata_description, @badge.summary)
+    provide(:metadata_image, group_badge_url(@group, @badge, format: :png))
+    provide(:metadata_site_name, @group.name)
+    provide(:metadata_url, group_badge_log_url(@group, @badge, @log))
+  else
+    provide(:metadata_title, "Badge Progress Log for #{@user.name}")
+    provide(:metadata_description, "#{@user.name} joined the #{@badge.name} badge " \
+      + "on #{@log.date_started.to_s(:full_date)} and has not yet earned the badge.")
+    provide(:metadata_image, @group.logo_url)
+    provide(:metadata_site_name, @group.name)
+    provide(:metadata_url, group_badge_log_url(@group, @badge, @log))
+  end
 %>
 
 <% content_for :subheader_links do %>
