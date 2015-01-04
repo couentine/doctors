@@ -49,4 +49,9 @@ class ImageUploader < CarrierWave::Uploader::Base
   #   "something.jpg" if original_filename
   # end
 
+  # We need to set the cache_dir to the tmp directory so that this works on heroku
+  def cache_dir
+    "#{Rails.root}/tmp/uploads"
+  end
+
 end
