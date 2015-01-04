@@ -47,8 +47,11 @@ class Badge
   field :image_color2,                type: String
   field :image_url,                   type: String # RETIRED field
   field :image,                       type: Moped::BSON::Binary # stores the actual badge image
+                                                                # (either designed OR uploaded)
   field :image_attributions,          type: Array
   field :icon_search_text,            type: String # stores what the user searched for b4 picking the icon
+  field :uploaded_image,              type: String # powered by the carrierwave gem
+  mount_uploader :uploaded_image,     ImageUploader
 
   field :current_user,                type: String # used when logging info_versions
   field :current_username,            type: String # used when logging info_versions
@@ -73,7 +76,8 @@ class Badge
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
-    :image_frame, :image_icon, :image_color1, :image_color2, :icon_search_text, :topic_list_text
+    :image_frame, :image_icon, :image_color1, :image_color2, :icon_search_text, :topic_list_text,
+    :uploaded_image, :remove_uploaded_image, :uploaded_image_cache
   
   # === CALLBACKS === #
 
@@ -113,6 +117,11 @@ class Badge
 
   def to_param
     url
+  end
+
+  # Returns 'design' or 'upload' based on whether there is an uploaded badge image
+  def image_mode
+    (uploaded_image.blank?) ? 'design' : 'upload'
   end
 
   def tracks_progress?
@@ -290,7 +299,7 @@ protected
   end
 
   def build_badge_image
-    if self.new_record? || image_frame_changed? || image_icon_changed? || image_color1_changed?\
+    if image.nil? || image_frame_changed? || image_icon_changed? || image_color1_changed? \
       || image_color2_changed?
       # First build the image
       badge_image = BadgeMaker.build_image image_frame, image_icon, image_color1, image_color2

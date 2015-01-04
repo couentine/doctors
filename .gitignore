@@ -20,3 +20,6 @@ doc/
 .DS_store
 .idea
 .secret
+
+# Ignore upload files
+/public/uploads

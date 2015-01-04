@@ -26,7 +26,14 @@ class BadgesController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.png do
-        if @badge.image.nil?
+        if @badge.image_mode == 'upload'
+          content = @badge.uploaded_image.read
+          if stale?(etag: content, last_modified: @badge.updated_at.utc, public: true)
+            send_data content, type: @badge.uploaded_image.file.content_type, 
+              disposition: "inline"
+            expires_in 0, public: true
+          end
+        elsif @badge.image.nil?
           send_data BadgeMaker.build_image.to_blob, type: "image/png", disposition: "inline"
         else
           send_data @badge.image.encode('ISO-8859-1'), type: "image/png", disposition: "inline"
