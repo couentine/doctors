@@ -7,6 +7,7 @@
 <script type="text/javascript">
   
   var selectedElement = {}; // maps from targetSelector to currently selected element
+  var badgeImageModeOnStart = "<%= @badge.image_mode %>";
 
   $(document).ready(function() {
     buildUserInterface();
@@ -67,7 +68,7 @@
       <% if @badge.errors.blank? %>
         // Then select a random badge
         randomize();
-      <% else %>
+      <% elsif @badge.uploaded_image.blank? %>
         // Load the current badge
         updateBadgeImagePreview();
       <% end %>
@@ -366,13 +367,39 @@
   function toggleEditor(buttonElement) {
     if ($(buttonElement).data("visible")) {
       $("#badge-image-editor").slideUp();
-      $(buttonElement).text("Edit Badge Image");
+      $(buttonElement).html("<i class='fa fa-pencil'></i> Edit");
       $(buttonElement).data("visible", false);
     } else {
       $("#badge-image-editor").slideDown();
-      $(buttonElement).text("Hide Editor");
+      $(buttonElement).html("<i class='fa fa-angle-double-up'></i> Done");
       $(buttonElement).data("visible", true);
     }
+  }
+
+  function goUploadMode() {
+    $("#badge_remove_uploaded_image").val(false);
+    $("#badge-buttons-design").hide();
+    $("#badge-buttons-upload").show();
+    $("#badge-image-editor").slideUp();
+    $("#badge-image-uploader").slideDown();
+    $("#badge-image").attr("src", "<%= image_path('image-upload.png') %>");
+    $("#toggle-badge-image-editor")
+      .html("<i class='fa fa-pencil'></i> Edit"); // Just in case we're in edit mode
+  }
+
+  function removeUpload() {
+    // Blank out the upload if present and set the remove uploaded image hidden value
+    $("#badge_uploaded_image").val(""); 
+    if (badgeImageModeOnStart == "upload") {
+      // We only need to remove the image if there was an upload to start with
+      $("#badge_remove_uploaded_image").val(true);
+    }
+
+    $("#badge-buttons-upload").hide();
+    $("#badge-buttons-design").show();
+    $("#badge-image-uploader").slideUp();
+
+    updateBadgeImagePreview();
   }
 
 </script>
@@ -388,23 +415,75 @@
             <div class="spinner"></div>
           </div>
           <% if @badge.new_record? %>
-            <%= image_tag "blank.png", id: "badge-image" %>
+            <% if @badge.image_mode == 'design' %>
+              <%= image_tag "blank.png", id: "badge-image" %>
+            <% else %>
+              <%= image_tag "image-upload.png", id: "badge-image" %>
+            <% end %>
+          <% elsif !@badge.errors[:uploaded_image].blank? %>
+            <%= image_tag "image-upload.png", id: "badge-image" %>
           <% else %>
             <img src="<%= group_badge_path(@group, @badge, format: :png) %>" id="badge-image"/>
           <% end %>
         </span>
-        <button type="button" id="randomize-badge-image" class="btn btn-small" onclick="randomize()">
-          Randomize
-        </button>
-        <button type="button" id="toggle-badge-image-editor" class="btn btn-small"
-          onclick="toggleEditor(this)">
-          Edit
-        </button>
-        <button type="button" id="toggle-badge-image-uploader" class="btn btn-small">
-          Upload
-        </button>
+
+        <span id="badge-buttons-design" 
+          style="<%= (@badge.image_mode=='design') ? '' : 'display:none;' %>">
+          <span class="badge-button-line">
+            <i class="fa fa-circle"></i>
+          </span>
+          <div class="btn-group">
+            <button type="button" id="toggle-badge-image-editor" class="btn btn-small"
+              onclick="toggleEditor(this)">
+              <i class="fa fa-pencil"></i>
+              Edit
+            </button>
+            <button type="button" id="randomize-badge-image" class="btn btn-small" 
+              onclick="randomize()">
+              <i class="fa fa-refresh"></i>
+              Randomize
+            </button>
+          </div>
+
+          <button type="button" id="go-upload-mode" class="btn btn-small" onclick="goUploadMode()">
+            <i class="fa fa-upload"></i>
+            Upload Image File
+          </button>
+        </span>
+        
+        <span id="badge-buttons-upload"
+          style="<%= (@badge.image_mode=='upload') ? '' : 'display:none;' %>">
+          <span class="badge-button-line">
+            &nbsp;
+          </span>
+          <button type="button" id="delete-upload" class="btn btn-small" onclick="removeUpload()">
+            <i class="fa fa-remove"></i>
+            <%= (@badge.image_mode=='upload') ? 'Remove Uploaded Image' : 'Cancel Upload' %>
+          </button>
+        </span>
+        
       </div>
 
+      <div id="badge-image-uploader" 
+        style="<%= ((@badge.image_mode == 'upload') && !@badge.errors[:uploaded_image].blank?) ? \
+          '' : 'display:none' %>">
+        <div id="badge_image_uploader">
+          <%= f.input :uploaded_image, as: :file, label: 'Badge Image File',
+            hint: ("<p><b>Only PNG images are supported.</b><p>" \
+              + "<p>For best results use images which are 500 pixels in width and height.</p>" \
+              + "<p><b>Pro-Tips</b><ul>" \
+              + "<li><a href='https://www.openbadges.me/designer.html' target='_blank'>" \
+              + "MyKnowledgeMap's tool</a> has lots of icons.</li>" \
+              + "<li><a href='https://www.imagefu.com/create/badge' target='_blank'>" \
+              + "Imagefu Badge Maker</a> works well for text badges.</li>" \
+              + "</ul></p>").html_safe, 
+            input_html: { accept: 'image/png' },
+            label_html: { style: "display:none;" } %>
+          <%= f.input :uploaded_image_cache, as: :hidden %>
+          <%= f.input :remove_uploaded_image, as: :hidden %>
+        </div>
+      </div>
+      
       <div id="badge-image-editor" style="display:none">
 
         <div class="header-wrap">

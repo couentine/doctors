@@ -2513,27 +2513,110 @@ div.topic-list-card {
 .badge-maker {
 
   #badge-image-viewer {
+    position: relative;
+    width: 290px;
+    height: 100px;
+    margin-top: 10px;
+
+    .badge-button-line {
+      position: absolute;
+      top: 29px;
+      z-index: 1;
+      border-top: 4px solid $medium-gray;
+    }
     #badge-image-wrapper {
       width: 100px;
       height: 100px;
       margin-right: 10px;
       position: relative;
       display: inline-block;
+      z-index: 2;
+      float: left;
+      text-align: center;
       
       #badge-image {
-        width: 100px;
-        height: 100px;
+        max-width: 100px;
+        max-height: 100px;
       }
     }
-    
-    button {
-      margin-right: 5px;
-      &:last-child { margin-right: 0; }
+    #badge-buttons-design {
+      display: block;
+
+      .btn-group {
+        margin-top: 18px;
+        margin-bottom: 10px;
+        z-index: 2;
+      }
+      .badge-button-line {
+        left: 50px;
+        width: 100px;
+
+        .fa {
+          color: $medium-gray;
+          position: relative;
+          top: -16px;
+          font-size: 16px;
+          left: -4px;
+        }
+      }
+    }
+    #badge-buttons-upload {
+      display: block;
+
+      .btn {
+        margin-top: 18px;
+        margin-bottom: 10px;
+        z-index: 2;
+        position: relative;
+      }
+      .badge-button-line {
+        left: 83px;
+        width: 100px;
+      }
     }
   }
   
+  #badge-image-uploader {
+    margin-top: 20px;
+
+    h2 {
+      font-size: 16px;
+      margin: 0 0 10px 0;
+      display: inline-block;
+      width: auto;
+    }
+    p {
+      font-size: 12px;
+      line-height: 1.5em;
+      margin-top: 10px;
+      color: $tertiary-medium;
+    }
+    ul {
+      font-size: 12px;
+      color: $tertiary-medium;
+    }
+    a { color: $tertiary-medium; }
+    a:focus, a:hover { color: $tertiary-dark; }
+    .header-wrap {
+      display: block;
+      float: left;
+    }
+    .controls { margin: 0; }
+
+    #badge_uploaded_image {
+      line-height: 1.2em;
+      font-size: 16px;
+      padding: 8px 0 0 10px;
+      box-shadow: inset -1px 1px 7px 0 rgba(0, 0, 0, 0.1);
+      border: 1px solid $light-gray;
+      display: block;
+      max-width: 95%;
+    }
+  }
+
   #badge-image-editor {
     padding: 15px 0 0 0;
+    margin-top: 20px;
 
     h2 {
       margin: 0;
