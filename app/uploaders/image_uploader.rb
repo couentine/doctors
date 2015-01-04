@@ -7,7 +7,7 @@ class ImageUploader < CarrierWave::Uploader::Base
   include CarrierWave::MiniMagick
 
   # Choose what kind of storage to use for this uploader:
-  storage :file
+  storage :grid_fs
   # storage :fog
 
   # Override the directory where uploaded files will be stored.
@@ -48,10 +48,5 @@ class ImageUploader < CarrierWave::Uploader::Base
   # def filename
   #   "something.jpg" if original_filename
   # end
-
-  # We need to set the cache_dir to the tmp directory so that this works on heroku
-  def cache_dir
-    "#{Rails.root}/tmp/uploads"
-  end
 
 end
