@@ -140,11 +140,13 @@
         :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH,
         toggle: 'tooltip', title: 'Explain clearly what badge earners have accomplished' } } %>
 
-    <%= f.input :topic_list_text, as: :text, label: 'Required Evidence', input_html: { 
-      placeholder: 'Enter a list of short phrases. (One per line.)',
-      data: { toggle: 'tooltip', title: ("Each line item you type gets its own page " \
-        + "where you can write a full explanation and let badge members post evidence.").html_safe
-      } } %>
+    <%= f.input :topic_list_text, as: :text, label: 'Required Evidence', 
+      input_html: { 
+        title: ("Each line item you type gets its own page where you can write " \
+        + "a full explanation and let badge members post evidence.").html_safe,
+        placeholder: 'Enter a list of short phrases. (One per line.)',
+        data: { toggle: 'tooltip'} 
+      } %>
       
     <!-- === BADGE IMAGE MAKER === -->
 

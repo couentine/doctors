@@ -357,8 +357,13 @@
 
             <div class="form-body">
               <%= f.input :topic_list_text, as: :text, label: 'Edit Requirement List', 
-                placeholder: "Enter a list of requirements needed to earn the badge. (One per line.)",
-                input_html: { class: "input-xlarge", rows: 7 } %>
+                input_html: { 
+                  class: "input-xlarge", rows: 7,
+                  placeholder: 'Enter a list of short phrases. (One per line.)',
+                  title: ("Each line item you type gets its own page where you can write " \
+                  + "a full explanation and let badge members post evidence.").html_safe, 
+                  data: { toggle: 'tooltip' } 
+                } %>
             </div>
 
             <div class="form-footer">
