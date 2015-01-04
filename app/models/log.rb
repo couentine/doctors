@@ -11,7 +11,7 @@ class Log
   JSON_FIELDS = [:user, :validation_status, :issue_status]
   JSON_METHODS = [:recipient, :verify]
   JSON_MOCK_FIELDS = { 'uid' => :_id,  'badge' => :badge_url, 'issuedOn' => :date_issued_stamp,
-    'image' => :badge_image_url, 'evidence' => :evidence_url }
+    'evidence' => :evidence_url }
   
   # === RELATIONSHIPS === #
 
