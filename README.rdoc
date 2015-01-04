@@ -1,3 +1,4 @@
 == Badge List
 
-This is the first MVP version of Kstreem's new product.
+This repository stores the code that powers Badge List. It uses Mongoid for persistence and 
+the Postmark gem for email.
