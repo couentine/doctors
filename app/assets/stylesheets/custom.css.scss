@@ -649,7 +649,6 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
 
   @media (max-width: 767px) {
     #group_url_with_caps { width: 120px; }
-    #badge_url_with_caps { width: 120px; }
     .control-label {
       float: left;
       width: 80%; 
@@ -1035,6 +1034,55 @@ div.control-group.badge-roles {
         background-color: $really-light-gray;
       }
     }
+  }
+}
+
+/* Badge form url */
+#url-panel {
+  margin-left: 40px;
+  position: relative;
+  top: -15px;
+  color: $light-text-color;
+  line-height: 1.2em;
+  float: left;
+  min-width: 55%;
+
+  label { 
+    display: inline-block; 
+    font-size: 12px;
+    font-weight: bold;
+  }
+  a.btn, a.btn:visited { 
+    color: $secondary-medium; 
+    font-size: 12px;
+    padding: 0 7px;
+    position: relative;
+    top: -1px;
+  }
+  a.btn:focus, a.btn:hover { color: $secondary-dark; }
+  ul.unstyled {
+    display: inline-block;
+    li { display: inline-block; }
+  }
+
+  #url-preview {
+    font-size: 12px;
+  }
+  #badge_url_with_caps {
+    border-radius: 1px;
+    background-color: $secondary-really-light;
+    border: none;
+    font-size: 12px;
+    width: 160px;
+    margin-right: 3px;
+  }
+
+  @media (min-width: 768px) {
+    margin-left: 186px;
+    label { font-size: 14px; }
+    a.btn, a.btn:visited { font-size: 14px; }
+    #url-preview { font-size: 14px; }
+    #badge_url_with_caps { font-size: 14px; }
   }
 }
 

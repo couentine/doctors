@@ -52,7 +52,8 @@ class BadgesController < ApplicationController
     @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
     @badge.word_for_expert = EXPERT_WORDS.first # values are singularized in page
     @badge.word_for_learner = LEARNER_WORDS.first # values are singularized in page
-
+    @allow_url_editing = true;
+    
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @badge, filter_user: current_user }
@@ -67,6 +68,7 @@ class BadgesController < ApplicationController
     @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
     @learner_words << @badge.word_for_learner.pluralize \
       if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
+    @allow_url_editing = @badge.expert_logs.length < 2;
   end
 
   # POST /group-url/badges
@@ -77,6 +79,7 @@ class BadgesController < ApplicationController
     @badge.creator = current_user
     @badge.current_user = current_user
     @badge.current_username = current_user.username
+    @allow_url_editing = true;
 
     @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
     @expert_words << @badge.word_for_expert.pluralize \
@@ -111,6 +114,7 @@ class BadgesController < ApplicationController
     @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
     @learner_words << @badge.word_for_learner.pluralize \
       if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
+    @allow_url_editing = @badge.expert_logs.length < 2;
     
     respond_to do |format|
       if @badge.update_attributes(params[:badge])

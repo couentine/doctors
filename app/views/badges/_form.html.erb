@@ -3,10 +3,38 @@
   var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
 
   $(document).ready(function() {
-    <% if @badge.new_record? %>
-      // If this is a new record then auto set the URL as they type
+    <% if @allow_url_editing %>
+      // Auto set the URL as they type the name
       $('#badge_name').keyup(function() {
         $('#badge_url_with_caps').val(parameterizeText($(this).val()));
+        $('#url-preview-label').text(parameterizeText($(this).val()));
+        if (($('#badge_url_with_caps').val().length > 0) && !$("#url-panel").is(":visible"))
+          $("#url-panel").fadeIn();
+        else if (($('#badge_url_with_caps').val().length == 0) && $("#url-panel").is(":visible"))
+          $("#url-panel").fadeOut();
+      });
+
+      // Only allow url characters in the manual url box and update the label as they type
+      $('#badge_url_with_caps').keyup(function() {
+        $(this).val(parameterizeText($(this).val()));
+        $('#url-preview-label').text($(this).val());
+      });
+
+      $("#url-edit").click(function() {
+        $("#url-preview").hide();
+        $("#url-editor").show();
+        $('#badge_url_with_caps').focus();
+      });
+      $("#url-save").click(function() {
+        $("#url-editor").hide();
+        $("#url-preview").show();
+        $('#badge_summary').focus();
+      });
+      $("#url-cancel").click(function() {
+        $('#badge_url_with_caps').val(parameterizeText($("#badge_name").val()));
+        $('#url-preview-label').text(parameterizeText($("#badge_name").val()));
+        $("#url-editor").hide();
+        $("#url-preview").show();
       });
     <% end %>
 
@@ -112,11 +140,17 @@
   }
 
   // Converts "Test text like  this" > "Text-text-like-this"
-  var MAX_URL_LENGTH = <%= Badge::MAX_URL_LENGTH %>;
   function parameterizeText(s) {
-    if (s == null) return '';
-    else return s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').replace(/ +/g, ' ')
-      .replace(/ /g, '-').trunc(MAX_URL_LENGTH);
+    var returnValue = '';
+
+    if (s != null) 
+      returnValue = s.trim().replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ')
+        .replace(/ +/g, ' ').replace(/ /g, '-');
+    if (returnValue.substr(0, 1) == "-") returnValue = returnValue.substr(1)
+    if (returnValue.substr(returnValue.length - 1) == "-") 
+      returnValue = returnValue.substr(0, returnValue.length - 1)
+
+    return returnValue
   }
 
 </script>
@@ -127,15 +161,38 @@
   <div class="form-body">
     
     <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics Expert', autofocus: true,
-      input_html: { class: 'input-xlarge', data: { toggle: 'tooltip',
+      input_html: { class: 'input-xlarge', maxlength: Badge::MAX_NAME_LENGTH, 
+        data: { toggle: 'tooltip',
       title: 'Examples: Excel Spreadsheet Ninja, 2014 Hackathon Attendee, Acme Community Leader' } } %>
-    <%= f.input :url_with_caps, wrapper: :prepend, label: 'Badge URL', \
-      wrapper_html: { class: (@badge.new_record? ? 'hidden' : '') } do %>
+    
+    <div id="url-panel" style="<%= (@badge.new_record?) ? 'display: none;' : '' %>">
+      <label for="badge_url_with_caps">URL: </label>
+        
+      <span id="url-preview">
+        "<span id="url-preview-label"><%= @badge.url_with_caps %></span>"
+        <% if @allow_url_editing  %>
+          <a href="#" id="url-edit" class="btn btn-small btn-link">Edit</a>
+        <% else %>
+          <i class="fa fa-lock" data-toggle="tooltip" 
+          title="You cannot edit the URL after the badge has been awarded."></i>
+        <% end %>
+      </span>
+    
+      <% if @allow_url_editing  %>
+        <span id="url-editor" style="display: none;">
+          <%= f.text_field :url_with_caps %>
+          <ul class="unstyled">
+            <li><a href="#" id="url-save" class="btn btn-small btn-link">
+              <i class="fa fa-check"></i>
+            </a></li>
+            <li><a href="#" id="url-cancel" class="btn btn-small btn-link">
+              <i class="fa fa-remove"></i>
+            </a></li>
+          </ul>
+        </span>
+      <% end %>
+    </div>
 
-      <%= content_tag :span, "badgelist.com/#{@group.url_with_caps}/", class: "add-on" %>
-      <%= f.input_field :url_with_caps, placeholder: 'et-physics', class: 'input-small', 
-        data: { toggle: 'tooltip', title: 'Pick a unique URL for the badge' } %>
-    <% end %>
     <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
         :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH,
         toggle: 'tooltip', title: 'Explain clearly what badge earners have accomplished' } } %>

@@ -7,7 +7,7 @@ class Badge
   # === CONSTANTS === #
   
   MAX_NAME_LENGTH = 50
-  MAX_URL_LENGTH = 20
+  MAX_URL_LENGTH = 50
   MAX_SUMMARY_LENGTH = 140
   MAX_TERM_LENGTH = 15
   RECENT_DATE_THRESHOLD = 10.days # Used to filter "recent" activity & changes
