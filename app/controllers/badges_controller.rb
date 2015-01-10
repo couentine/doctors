@@ -6,8 +6,8 @@ class BadgesController < ApplicationController
     :entries_index, :add_learners, :create_learners, :issue_form, :issue_save]
   before_filter :authenticate_user!, except: [:show, :entries_index]
   before_filter :group_admin, only: [:new, :create, :destroy]
-  before_filter :badge_expert, only: [:edit, :update, :add_learners, :create_learners, :issue_form, 
-    :issue_save]
+  before_filter :badge_expert, only: [:add_learners, :create_learners, :issue_form, :issue_save]
+  before_filter :can_edit, only: [:edit, :update]
 
   # === CONSTANTS === #
 
@@ -53,6 +53,11 @@ class BadgesController < ApplicationController
     @badge.word_for_expert = EXPERT_WORDS.first # values are singularized in page
     @badge.word_for_learner = LEARNER_WORDS.first # values are singularized in page
     @allow_url_editing = true;
+
+    @badge_editability_options = [
+      ["All Badge Experts", 'experts'],
+      ["Only Group Admins", 'admins']
+    ]
     
     respond_to do |format|
       format.html # new.html.erb
@@ -69,6 +74,10 @@ class BadgesController < ApplicationController
     @learner_words << @badge.word_for_learner.pluralize \
       if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
     @allow_url_editing = @badge.expert_logs.length < 2;
+    @badge_editability_options = [
+      ["All Badge #{@badge.Experts}", 'experts'],
+      ["Only Group Admins", 'admins']
+    ]
   end
 
   # POST /group-url/badges
@@ -322,6 +331,7 @@ private
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)
     @badge_list_admin = current_user && current_user.admin?
+    @can_edit_badge = @current_user_is_admin || @badge_list_admin
   end
 
   def find_all_records
@@ -330,6 +340,8 @@ private
     @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase) || not_found
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
+    @can_edit_badge = @can_edit_badge \
+      || ((@badge.editability == 'experts') && @current_user_is_expert)
     if @current_user_is_learner || @current_user_is_expert
       @log = @badge.logs.find_by(user: current_user)
     end
@@ -356,6 +368,13 @@ private
   def badge_expert
     unless @current_user_is_expert || @badge_list_admin
       flash[:error] = "You must be a badge expert to do that!"
+      redirect_to [@group, @badge]
+    end 
+  end
+
+  def can_edit
+    unless @can_edit_badge
+      flash[:error] = "You do not have permission to edit this badge."
       redirect_to [@group, @badge]
     end 
   end

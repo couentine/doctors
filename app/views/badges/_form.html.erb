@@ -209,6 +209,10 @@
 
     <%= render 'shared/badge_maker', f: f %>
 
+    <% if @current_user_is_admin %>
+      <%= f.input :editability, label: 'Who can make changes to this badge?', as: :radio_buttons,
+        collection: @badge_editability_options %>
+    <% end %>
 
     <% unless @badge.new_record? %>
       <h2>

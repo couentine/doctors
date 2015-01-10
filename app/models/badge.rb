@@ -11,6 +11,7 @@ class Badge
   MAX_SUMMARY_LENGTH = 140
   MAX_TERM_LENGTH = 15
   RECENT_DATE_THRESHOLD = 10.days # Used to filter "recent" activity & changes
+  EDITABILITY_VALUES = ['experts', 'admins']
   JSON_FIELDS = [:group, :name, :summary, :word_for_expert, :word_for_learner]
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps }
@@ -31,6 +32,7 @@ class Badge
   field :word_for_expert,             type: String, default: 'expert'
   field :word_for_learner,            type: String, default: 'learner'
   field :progress_tracking_enabled,   type: Boolean, default: true
+  field :editability,                 type: String, default: 'experts'
   
   field :info,                        type: String
   field :info_sections,               type: Array
@@ -71,13 +73,15 @@ class Badge
   validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
   validates :word_for_expert, presence: true, length: { within: 3..MAX_TERM_LENGTH }
   validates :word_for_learner, length: { maximum: MAX_TERM_LENGTH }
+  validates :editability, inclusion: { in: EDITABILITY_VALUES, 
+    message: "%{value} is not a valid type of editability" }
   validates :group, presence: true
   validates :creator, presence: true
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
-    :image_frame, :image_icon, :image_color1, :image_color2, :icon_search_text, :topic_list_text,
-    :uploaded_image, :remove_uploaded_image, :uploaded_image_cache
+    :editability, :image_frame, :image_icon, :image_color1, :image_color2, :icon_search_text, 
+    :topic_list_text, :uploaded_image, :remove_uploaded_image, :uploaded_image_cache
   
   # === CALLBACKS === #
 

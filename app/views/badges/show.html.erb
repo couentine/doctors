@@ -52,7 +52,7 @@
                   '#edit-membership', tabindex: -1, data: { toggle: 'modal' } %>
               </li>
             <% end %>
-            <% if @current_user_is_expert || @badge_list_admin %>
+            <% if @can_edit_badge %>
               <li>
                 <%= link_to '<i class="icon-wrench"></i> Edit the badge itself'.html_safe, 
                   edit_group_badge_path(@group, @badge) %>
@@ -89,7 +89,7 @@
 <% end unless @badge.image_attributions.blank? %>
 
 
-<% if @current_user_is_expert || @badge_list_admin %>
+<% if @can_edit_badge %>
 
   <!-- === BADGE INFO VERSIONS === -->
 
@@ -119,7 +119,11 @@
           $('#badge-versions-section').hide();
       });
     </script>
-  
+
+<% end %>
+
+<% if @current_user_is_expert || @badge_list_admin %>
+
   <!-- === VALIDATION REQUESTS MODAL === -->
 
   <div id="validation-requests" class="modal hide fade" tabindex="-1" role="dialog" 
@@ -288,14 +292,14 @@
 
     <!-- === TOPIC LIST === -->
 
-  <% if @badge.has_topics? || @current_user_is_expert || @badge_list_admin %>
+  <% if @badge.has_topics? || @can_edit_badge %>
       
     <div class="tab-pane" id="requirements">
 
       <div class="row">
         <div class="span12">
           <div class="tab-header merge-with-card <%= (@badge.has_topics?) ? '' : 'empty' %>">
-            <% if @current_user_is_expert || @badge_list_admin %>
+            <% if @can_edit_badge %>
               <a tabindex="-1" class="btn btn-small" id="edit-topic-list" data-toggle="custom" 
                 data-hide="#edit-topic-list,#topic-list-row,#topic-footer-row" 
                 data-focus="#badge_topic_list_text" data-show="#topic-list-inline-form">
@@ -310,9 +314,11 @@
 
             <h2>Required Evidence</h2>
             
-            <% if @current_user_is_expert || @badge_list_admin %>
+            <% if @can_edit_badge || @current_user_is_expert %>
               <h3 class="collapse-when-small">
-                <% if @show_progress %>
+                <% if @badge.editability == "admins" %>
+                  <i class="fa fa-key"></i> Only editable by group admins
+                <% elsif @show_progress %>
                   <i class="fa fa-key"></i> Only editable by <%= @experts %>
                 <% else %>
                   <i class="fa fa-key"></i> Editable by all <%= @experts %>
@@ -348,7 +354,7 @@
 
       <% end %>
 
-      <% if @current_user_is_expert || @badge_list_admin %>
+      <% if @can_edit_badge %>
 
         <!-- === EDIT TOPIC LIST INTERFACE === -->
 
@@ -385,14 +391,14 @@
 
   <!-- === BADGE OVERVIEW === -->
 
-  <% if @badge.has_overview? || @current_user_is_expert || @badge_list_admin %>
+  <% if @badge.has_overview? || @can_edit_badge %>
 
     <div class="tab-pane" id="overview">
   
       <div class="row">
         <div class="span12">
           <div class="tab-header merge-with-card <%= (@badge.has_overview?) ? '' : 'empty' %>">
-            <% if @current_user_is_expert || @badge_list_admin %>
+            <% if @can_edit_badge %>
               <a tabindex="-1" class="btn btn-small" id="edit-overview" data-toggle="custom" 
                 data-hide="#edit-overview,#overview-row" 
                 data-focus="#badge_info" data-show="#overview-inline-form">
@@ -407,13 +413,18 @@
             <% end %>
 
             <h2>Badge Overview</h2>
-            <h3 class="collapse-when-small">
-              <% if @show_progress %>
-                <i class="fa fa-key"></i> Only editable by <%= @experts %>
-              <% else %>
-                <i class="fa fa-key"></i> Editable by all <%= @experts %>
-              <% end %>
-            </h3>
+
+            <% if @can_edit_badge || @current_user_is_expert %>
+              <h3 class="collapse-when-small">
+                <% if @badge.editability == "admins" %>
+                  <i class="fa fa-key"></i> Only editable by group admins
+                <% elsif @show_progress %>
+                  <i class="fa fa-key"></i> Only editable by <%= @experts %>
+                <% else %>
+                  <i class="fa fa-key"></i> Editable by all <%= @experts %>
+                <% end %>
+              </h3>
+            <% end %>
           </div>
         </div>
       </div>
@@ -432,7 +443,7 @@
         <% end %>
       </div>
 
-      <% if @current_user_is_expert || @badge_list_admin %>
+      <% if @can_edit_badge %>
 
         <!-- === EDIT BADGE OVERVIEW INTERFACE === -->
 
