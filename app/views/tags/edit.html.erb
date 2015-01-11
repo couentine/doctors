@@ -108,7 +108,8 @@
         <%= f.input :wiki, as: :text, label: 'Page Body', 
           input_html: { class: "huge-text-area rich-text-area" } %>
 
-        <% if @current_user_is_expert && @show_progress %>
+        <% if @show_progress\
+            && (@current_user_is_expert || @current_user_is_admin || @badge_list_admin) %>
           <%= f.input :editability, label: 'Who can edit this page?', as: :radio_buttons,
             collection: @tag_editability_options %>
         <% end %>
