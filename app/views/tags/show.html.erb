@@ -49,18 +49,18 @@
       <li class="collapsible">
         <%= link_to "<i class='fa fa-pencil'></i> Edit".html_safe, 
           "#{@tag.name_with_caps}/edit" %>
-        <% if @current_user_is_expert %>
+        <% if @current_user_is_expert || @current_user_is_admin || @badge_list_admin %>
           <span class="divider">|</span>
         <% end %>
       </li>
-    <% end %>
-      
-    <% if @tag_exists && @current_user_is_expert %>
-      <li class="collapsible">
-        <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
-          [@group, @badge, @tag], method: :delete, data: { 
-          confirm: 'Are you sure you want to permanently delete the contents of this page?' } %>
-      </li>
+        
+      <% if @current_user_is_admin || @current_user_is_expert || @badge_list_admin %>
+        <li class="collapsible">
+          <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
+            [@group, @badge, @tag], method: :delete, data: { 
+            confirm: 'Are you sure you want to permanently delete the contents of this page?' } %>
+        </li>
+      <% end %>
     <% end %>
 
   <% end %>
@@ -154,7 +154,9 @@
         <% if !@show_version_list %>
           <h2>
             <i class="fa fa-key"></i> 
-            <% if !@show_progress %>
+            <% if @tag.editability == 'admins' %>
+              Only editable by group admins
+            <% elsif !@show_progress %>
               Editable by all <%= @experts %>
             <% elsif @tag.editability == 'experts' %>
               Only editable by <%= @experts %>

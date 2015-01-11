@@ -7,7 +7,7 @@ class Tag
   # === CONSTANTS === #
   
   MAX_NAME_LENGTH = 50
-  EDITABILITY_VALUES = ['learners', 'experts']
+  EDITABILITY_VALUES = ['learners', 'experts', 'admins']
   JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :wiki_sections,
     :tags, :tags_with_caps]
 

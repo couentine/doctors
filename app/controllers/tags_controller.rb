@@ -185,6 +185,9 @@ private
       ["#{@Experts} and #{@Learners}", 'learners'],
       ["Only #{@Experts}", 'experts']
     ]
+    if @current_user_is_admin || @badge_list_admin
+      @tag_editability_options << ['Only Group Admins', 'admins'] 
+    end
   end
   
   def find_all_records
@@ -196,10 +199,12 @@ private
 
     # If the tag doesn't exist yet then create one in case the user wants to edit it
     if @tag_exists
-      @can_edit_tag = @current_user_is_expert \
-        || (@current_user_is_learner && (@tag.editability == 'learners'))
+      @can_edit_tag = @current_user_is_admin || @badge_list_admin \
+        || (@current_user_is_expert && (@tag.editability == 'experts')) \
+        || ((@current_user_is_learner || @current_user_is_expert) && (@tag.editability == 'learners'))
     else
-      @can_edit_tag = @current_user_is_expert || @current_user_is_learner
+      @can_edit_tag = @current_user_is_expert || @current_user_is_learner \
+        || @current_user_is_admin || @badge_list_admin
 
       if params[:tag].nil?
         @tag = Tag.new
@@ -220,17 +225,15 @@ private
   end
 
   def can_edit_tag
-    if !@current_user_is_expert && !@badge_list_admin \
-      && !(@current_user_is_learner && (@tag.editability == 'learners'))
-
-      flash[:error] = "This topic page is only editable by badge experts."
+    unless @can_edit_tag
+      flash[:error] = "You do not have permission to edit this requirement page."
       redirect_to [@group, @badge, @tag]
     end
   end
 
   def badge_expert
     unless @current_user_is_expert || @badge_list_admin
-      flash[:error] = "Only badge experts can delete topic pages."
+      flash[:error] = "Only badge experts can delete requirement pages."
       redirect_to [@group, @badge, @tag]
     end
   end
