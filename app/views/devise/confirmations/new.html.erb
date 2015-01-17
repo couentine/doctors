@@ -1,12 +1,46 @@
 <% provide(:title, 'Resend confirmation') %>
 
+<%
+  if !resource.errors['email'].blank? && !resource.errors['email'].first.blank? \
+      && resource.errors['email'].first.include?('already confirmed')
+    confirm_mode = 'email-confirmed'
+    header_text = 'Your account is already confirmed'
+  elsif resource.errors['confirmation_token'].blank?
+    confirm_mode = 'normal'
+    header_text = 'Resend account confirmation link'
+  else
+    confirm_mode = 'token-invalid'
+    header_text = 'Your confirmation link has expired'
+  end
+%>
+
 <div class="page-header">
-  <h1>Resend account confirmation link</h1>
+  <h1><%= header_text %></h1>
 </div>
 
-<%= simple_form_for(resource, :as => resource_name, :url => confirmation_path(resource_name), :html => { :method => :post }) do |f| %>
-  <%= f.error_notification %>
-  <%= f.full_error :confirmation_token %>
+<% if confirm_mode == 'email-confirmed' %>
+
+  <p class="text-info">Your email address has already been confirmed.</p>
+  <p class="text-info">
+    Please try <%= link_to 'signing in', new_user_session_path %> to your account.
+  </p>
+  <p class="text-info">
+    If you have forgotten your password please use the 
+    <%= link_to 'reset password tool', new_user_password_path %>.
+  </p>  
+
+<% else %>
+
+  <%= simple_form_for(resource, :as => resource_name, :url => confirmation_path(resource_name), :html => { :method => :post }) do |f| %>
+
+  <% if confirm_mode == 'token-invalid' %>
+    <p class="text-info">
+      The confirmation link you have clicked has either expired or already been used.
+      Please enter your email address below to receive a new one.
+    </p>
+  <% else %>
+    <%= f.full_error :confirmation_token %>
+  <% end %>
 
   <div class="form-inputs bl-form-large bl-form-no-labels">
     <%= f.input :email, :required => true, :autofocus => true, :placeholder => 'Your email', :input_html => { :class => 'input-xlarge' }  %>
@@ -15,5 +49,7 @@
   <div class="controls">
     <%= f.button :submit, "Resend the confirmation link", :class => 'btn-large btn-primary' %>
   </div>
-  
+    
+  <% end %>
+
 <% end %>
