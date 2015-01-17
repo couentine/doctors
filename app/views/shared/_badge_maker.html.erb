@@ -8,6 +8,8 @@
   
   var selectedElement = {}; // maps from targetSelector to currently selected element
   var badgeImageModeOnStart = "<%= @badge.image_mode %>";
+  var MAX_IMAGE_UPLOAD_SIZE = 2100000; // About 2 MB
+  var MAX_IMAGE_UPLOAD_DESCRIPTION = "2 megabytes";
 
   $(document).ready(function() {
     buildUserInterface();
@@ -62,6 +64,17 @@
     });
     $("#text-icon").keyup(function() {
       setTextIcon($(this).val());
+    });
+
+    // Check image file size after selection 
+    $('#badge_uploaded_image').bind('change', function() {
+      if ($(this).val().trim() != "") {
+        if (this.files[0].size > MAX_IMAGE_UPLOAD_SIZE) {
+          alert("The image you have selected is too big. The maximum supported file size is "
+            + MAX_IMAGE_UPLOAD_DESCRIPTION + ".");
+          $(this).val("");
+        }
+      }
     });
 
     <% if @badge.new_record? %>
@@ -470,7 +483,8 @@
         <div id="badge_image_uploader">
           <%= f.input :uploaded_image, as: :file, label: 'Badge Image File',
             hint: ("<p><b>Only PNG images are supported.</b><p>" \
-              + "<p>For best results use images which are 500 pixels in width and height.</p>" \
+              + "<p>For best results use square images " \
+              + "which are 500 pixels in width and height.</p>" \
               + "<p><b>Pro-Tips</b><ul>" \
               + "<li><a href='https://www.openbadges.me/designer.html' target='_blank'>" \
               + "MyKnowledgeMap's tool</a> has lots of icons.</li>" \
