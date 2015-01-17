@@ -2025,6 +2025,28 @@ div.topic-list-card {
   }
 }
 
+div.cta-card {
+  text-align: center;
+  border-color: $really-light-gray;
+  box-shadow: none;
+  margin: -42px 15px 30px 15px;
+  border-radius: 0 0 5px 5px;
+
+  a, a:visited {
+    display: block;
+    padding: 7px 10px;
+    background-color: $secondary-medium;
+    color: white;
+    border-radius: 0 0 5px 5px;
+    box-shadow: inset 0px 2px 7px $light-text-color;
+  }
+  a:hover, a:focus {
+    text-decoration: none;
+    background-color: $secondary-dark;
+    color: white;
+  }
+}
+
 /* === PAGE CARDS === */
 
 .entry-page-card.validation { 
