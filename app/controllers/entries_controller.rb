@@ -43,7 +43,7 @@ class EntriesController < ApplicationController
         render :new
       end
     else
-      @entry = Entry.new(summary: summary)
+      @entry = Entry.new(summary: summary, parent_tag: params[:tag])
       @entry.type = 'post'
       privacy_count = cookies[:log_privacy_count]
       @entry.private = privacy_count && (privacy_count.to_i > 2) # They have to pick private twice in a row
@@ -75,7 +75,7 @@ class EntriesController < ApplicationController
         @log_validated
     else
       @entry = @log.add_post current_user, params[:entry][:summary], params[:entry][:body],
-        params[:entry][:private]
+        params[:entry][:private], params[:entry][:parent_tag]
       
       # update the privacy count cookie (this controls whether private is default)
       log_privacy_count = cookies[:log_privacy_count] || 0

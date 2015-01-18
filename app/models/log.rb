@@ -171,10 +171,10 @@ class Log
   # Adds a post entry to the log and returns it
   # NOTE: Doesn't work for new records.
   # private = Boolean
-  def add_post(creator_user, summary, body, private = false)
+  def add_post(creator_user, summary, body, private = false, parent_tag = nil)
     unless new_record?
       # First create the post
-      entry = Entry.new(summary: summary, body: body, private: private)
+      entry = Entry.new(summary: summary, body: body, private: private, parent_tag: parent_tag)
       entry.type = 'post'
       entry.log = self
       entry.creator = creator_user

@@ -14,6 +14,7 @@ class Tag
   # === RELATIONSHIPS === #
 
   belongs_to :badge
+  has_many :entries
 
   # === FIELDS & VALIDATIONS === #
   

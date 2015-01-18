@@ -14,6 +14,7 @@ class Entry
   # === RELATIONSHIPS === #
 
   belongs_to :log
+  belongs_to :tag
   belongs_to :creator, inverse_of: :created_entries, class_name: "User"
 
   # === FIELDS & VALIDATIONS === #
@@ -23,6 +24,7 @@ class Entry
   field :private,             type: Boolean
   field :type,                type: String
   field :log_validated,       type: Boolean
+  field :parent_tag,          type: String
 
   field :body,                type: String
   field :body_versions,       type: Array
@@ -42,11 +44,12 @@ class Entry
                                 message: "%{value} is not a valid entry type" }
 
   # Which fields are accessible?
-  attr_accessible :summary, :private, :log_validated, :body
+  attr_accessible :parent_tag, :summary, :private, :log_validated, :body
 
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_save :process_parent_tag
   before_save :update_body_sections
   before_save :update_body_versions # DO store the first value since it comes from the user
   after_create :send_notifications
@@ -143,6 +146,23 @@ protected
   def set_default_values
     self.private = false if private.nil?
     self.entry_number ||= log.next_entry_number if log
+  end
+
+  # Sets tag relationship based on parent_tag string
+  def process_parent_tag
+    if !parent_tag.blank? && parent_tag_changed? && !log.badge.nil?
+      matched_tags = log.badge.tags.where(name: parent_tag.downcase)
+      if matched_tags.count > 0
+        self.tag = matched_tags.first
+      else
+        t = Tag.new
+        t.name_with_caps = parent_tag
+        t.name = parent_tag.downcase
+        t.display_name = log.badge.tag_display_name(t.name) || detagify_string(t.name_with_caps)
+        t.save
+        self.tag = t
+      end
+    end
   end
 
   def update_body_sections
