@@ -8,8 +8,8 @@ class Entry
   
   MAX_SUMMARY_LENGTH = 100
   TYPE_VALUES = ['post', 'validation']
-  JSON_FIELDS = [:log, :creator, :entry_number, :summary, :type, :log_validated, :body_sections,
-    :tags, :tags_with_caps]
+  JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, 
+    :body_sections, :tags, :tags_with_caps]
   
   # === RELATIONSHIPS === #
 
@@ -156,9 +156,21 @@ protected
         self.tag = matched_tags.first
       else
         t = Tag.new
+        t.badge = log.badge
         t.name_with_caps = parent_tag
         t.name = parent_tag.downcase
-        t.display_name = log.badge.tag_display_name(t.name) || detagify_string(t.name_with_caps)
+        t.wiki = ''
+        t.current_user = current_user
+        t.current_username = current_username
+        if log.badge.tag_display_name(t.name).nil?
+          t.display_name = detagify_string(t.name_with_caps)
+          # This tag was invented by the current user so leave the database default editability
+        else
+          t.display_name = log.badge.tag_display_name(t.name)
+          # This tag is one of the official requirements so set the editability same as the badge
+          t.editability = log.badge.editability
+        end
+        
         t.save
         self.tag = t
       end

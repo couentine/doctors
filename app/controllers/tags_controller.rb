@@ -210,7 +210,14 @@ private
         @tag = Tag.new
         @tag.name_with_caps = params[:tag_id] || params[:id]
         @tag.name = @tag.name_with_caps.downcase
-        @tag.display_name = @badge.tag_display_name(@tag.name) || detagify_string(@tag.name_with_caps)
+        if @badge.tag_display_name(@tag.name).nil?
+          @tag.display_name = detagify_string(@tag.name_with_caps)
+          # This tag was invented by the current user so leave the database default editability
+        else
+          @tag.display_name = @badge.tag_display_name(@tag.name)
+          # This tag is one of the official requirements so set the editability same as the badge
+          @tag.editability = @badge.editability
+        end
       else
         @tag = Tag.new(params[:tag])
       end
