@@ -51,6 +51,7 @@ class Tag
   after_validation :update_wiki_sections
   after_validation :update_wiki_versions # DO store the first value since it comes from the user
   after_save :update_badge_display_name
+  after_save :update_child_entries
 
   # === TAG METHODS === #
 
@@ -102,10 +103,23 @@ protected
   # in the badge topic list it will change it there as well
   def update_badge_display_name
     if display_name_changed? && !badge.topics.empty?
-      topic_item = badge.topics.detect { |t| t['tag_name'] == name }
-      if topic_item && (topic_item['tag_display_name'] != display_name)
+      topic_item = badge.topics.detect { |t| t['tag_name'] == name_was }
+      if topic_item
+        topic_item['tag_name'] = name
+        topic_item['tag_name_with_caps'] = name_with_caps
         topic_item['tag_display_name'] = display_name
-        badge.save
+        badge.timeless.save
+      end
+    end
+  end
+
+  # If the tag name changes we want to update the parent_tag field on all of the child entries.
+  # The parent_tag field isn't really used right now so this is mostly just to maintain consistency.
+  def update_child_entries
+    if name_with_caps_changed? && !entries.empty?
+      entries.each do |entry|
+        entry.parent_tag = name_with_caps
+        entry.timeless.save
       end
     end
   end

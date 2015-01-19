@@ -26,16 +26,6 @@
     var originalTagName = "<%= @tag.name %>";
 
     $(document).ready(function() {
-      <% if @tag_exists %>
-        // Create the warning tooltip
-        $('#discussion-tag').tooltip({
-          title: 'Warning: Changing the tag will seperate this page from any existing discussion items.',
-          placement: 'right',
-          container: 'body',
-          trigger: 'manual'
-        })
-      <% end %>
-
       // Setup the event handler to update the discussion tag
       $('#tag_display_name').keyup(function(){
         $('#discussion-tag').text("#" + tagifyString($(this).val()));
