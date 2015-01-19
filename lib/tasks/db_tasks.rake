@@ -223,4 +223,43 @@ namespace :db do
     puts " >> Done."
   end
 
+  task backpopulate_parent_tags: :environment do
+    print "Examining #{Entry.count} entries"
+    
+    Badge.each do |badge|
+      # First extract the topics from the badge
+      topic_list = []
+      topic_list_caps_map = {}
+      badge.topics.each do |t|
+        topic_list << t['tag_name']
+        topic_list_caps_map[t['tag_name']] = t['tag_name_with_caps']
+      end unless badge.topics.empty?
+
+      # Now loop through all entries in the badge and make sure they all have parent tags
+      badge.logs.each do |log|
+        log.entries.each do |entry|
+          if entry.parent_tag.blank? && !entry.tags.empty?
+            # The tags in the summary are processed last so go through in reverse
+            entry.tags.reverse.each do |tag|
+              if topic_list.include? tag
+                # Basically we just pick the first tag to also be found in the badge topic list
+                entry.parent_tag = topic_list_caps_map[tag]
+                break
+              end
+            end
+
+            # If none of the tags were in the badge topic list then just pick the last one
+            entry.parent_tag = entry.tags_with_caps.last if entry.parent_tag.blank?
+          end
+          
+          entry.timeless.save if entry.changed?
+          print "."
+        end
+      end
+
+    end
+
+    puts " >> Done."
+  end
+
 end
