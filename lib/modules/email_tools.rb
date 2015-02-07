@@ -9,9 +9,9 @@ module EmailTools
   #       in order to be compatible with postmark.
   def build_from_string(from_user = nil)
     if from_user.nil? || from_user.name.blank?
-      "Badge List <#{APP_CONFIG['from_email']}>"
+      "Badge List <#{ENV['from_email']}>"
     else
-      "#{from_user.name} <#{APP_CONFIG['from_email']}>"
+      "#{from_user.name} <#{ENV['from_email']}>"
     end
   end
 

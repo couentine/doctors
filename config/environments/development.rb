@@ -30,7 +30,8 @@ BadgeList::Application.configure do
   config.assets.debug = true
 
   # For devise
-  config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+  # MOVED this next line to application.rb, it uses an ENV variable now
+  # config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 
   # Send email through gmail for this environment
   config.action_mailer.delivery_method = :smtp

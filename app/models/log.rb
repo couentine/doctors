@@ -72,13 +72,13 @@ class Log
   # These are used to mock the presence of certain fields in the JSON output.
 
   def date_issued_stamp; (date_issued.nil?) ? '' : date_issued.to_i; end
-  def badge_url; "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}.json"; end
-  def badge_image_url; "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}.png"; end
+  def badge_url; "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}.json"; end
+  def badge_image_url; "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}.png"; end
   def assertion_url
-    "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/o/#{user.username}.json"
+    "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}/o/#{user.username}.json"
   end
   def evidence_url
-    "#{APP_CONFIG['root_url']}/#{badge.group.url}/#{badge.url}/u/#{user.username}"
+    "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}/u/#{user.username}"
   end
   def recipient
     { type: 'email', hashed: true, salt: user.identity_salt, identity: user.identity_hash }

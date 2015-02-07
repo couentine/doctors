@@ -62,7 +62,8 @@ BadgeList::Application.configure do
   config.active_support.deprecation = :notify
 
   # For devise
-  config.action_mailer.default_url_options = { :host => 'badgelist.com' }
+  # MOVED this next line to application.rb, it uses an ENV variable now
+  # config.action_mailer.default_url_options = { :host => 'badgelist.com' }
 
   # Configure postmark gem (for email delivery)
   config.action_mailer.delivery_method = :postmark
@@ -72,7 +73,7 @@ BadgeList::Application.configure do
   config.middleware.use ExceptionNotification::Rack,
     :email => {
       :email_prefix => "[BLA] ",
-      :sender_address => %{Badge List Alerts <app@badgelist.com>},
+      :sender_address => %{Badge List Alerts <#{ENV['from_email']}>},
       :exception_recipients => %w{hank@kstreem.com}
     }
 

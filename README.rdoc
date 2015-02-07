@@ -1,4 +1,0 @@
-== Badge List
-
-This repository stores the code that powers Badge List. It uses Mongoid for persistence and 
-the Postmark gem for email.

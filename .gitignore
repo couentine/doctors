@@ -23,3 +23,6 @@ doc/
 
 # Ignore upload files
 /public/uploads
+
+# Ignore foreman environment variable file
+.env

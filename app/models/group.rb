@@ -71,7 +71,7 @@ class Group
   # These are used to mock the presence of certain fields in the JSON output.
 
   def primary_email; (!creator.nil?) ? creator.email : nil; end
-  def issuer_website; (website.blank?) ? "#{APP_CONFIG['root_url']}/#{url}" : website; end
+  def issuer_website; (website.blank?) ? "#{ENV['root_url']}/#{url}" : website; end
 
   # === BADGE METHODS === #
 
@@ -159,7 +159,7 @@ class Group
     if image_url
       image_url
     else
-      "#{APP_CONFIG['root_url']}/assets/group-image-default.png"
+      "#{ENV['root_url']}/assets/group-image-default.png"
     end
   end
 

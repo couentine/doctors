@@ -97,9 +97,9 @@ class Badge
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
 
-  def image_as_url; "#{APP_CONFIG['root_url']}/#{group.url}/#{url}.png"; end
-  def criteria_url; "#{APP_CONFIG['root_url']}/#{group.url}/#{url}"; end
-  def issuer_url; "#{APP_CONFIG['root_url']}/#{group.url}.json"; end
+  def image_as_url; "#{ENV['root_url']}/#{group.url}/#{url}.png"; end
+  def criteria_url; "#{ENV['root_url']}/#{group.url}/#{url}"; end
+  def issuer_url; "#{ENV['root_url']}/#{group.url}.json"; end
 
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields
