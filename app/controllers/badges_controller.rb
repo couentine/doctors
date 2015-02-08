@@ -20,7 +20,6 @@ class BadgesController < ApplicationController
   # GET /group-url/badge-url.png => Serves the badge image as a PNG file
   # GET /group-url/badge-url.json
   def show
-    @entries = @badge.entries(current_user)
     @first_view_after_issued = @log && @log.has_flag?('first_view_after_issued')
 
     respond_to do |format|
@@ -163,7 +162,9 @@ class BadgesController < ApplicationController
     # Grab the current page of entries
     @page = params[:page] || 1
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
-    @entries = @badge.entries(current_user, nil, @page, @page_size)
+    # RETIRING THIS PAGE FOR NOW
+    # @entries = @badge.entries(current_user, nil, @page, @page_size)
+    @entries = []
 
     respond_to do |format|
       format.html # entries_index.html.erb

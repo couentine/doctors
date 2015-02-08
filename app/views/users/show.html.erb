@@ -77,182 +77,111 @@
         </span>
       </div>
 
-      <div class="card-tabs">
-        <ul class="nav nav-tabs">
-          <li class="active">
-            <a href="#activity" data-toggle="tab">Recent Activity</a>
-          </li>
-          <li>
-            <a href="#memberships" data-toggle="tab">Groups &amp; Badges</a>
-          </li>
-        </ul>
-      </div>
-
     </div>
   </div>
 </div>
 
-<!-- === TAB CONTENT === -->
+<!-- === MEMBERSHIPS === -->
 
-<div class="tab-content">
+<% if @group_and_log_list.blank? %>
 
-  <!-- === RECENT ACTIVITY TAB === -->
+  <div class="row">
+    <div class="well span7 offset2">
+      <p class="lead">No memberships yet...</p>
+      <p>
+        <% if @this_is_current_user %>
+          To get started you'll either need to create a new learning group 
+          or get someone else to invite you to one of theirs.<br><br>
 
-  <div class="tab-pane active" id="activity">
-    
-    <% if @entries.blank? %>
-
-      <div class="row">
-        <div class="well span7 offset2">
-          <p class="lead">No posts yet...</p>
-          <p>
-            <% if @this_is_current_user %>
-              It's time to get posting!
-            <% else %>
-              Looks like <%= @user.name %> hasn't posted anything that's visible to you.
-            <% end %>
-          </p>
-        </div>
-      </div>
-
-    <% else %>
-
-      <div class="row">
-        <div class="span12">
-          <div class="pagination-header">
-            <div class="pagination"><%= paginate @entries %></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
-          data-bl-dyncol-width="12">
-
-          <%= render(@entries, date_format: :ago) if !@entries.empty? %>
-
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="span12">
-          <div class="pagination-footer">
-            <div class="pagination"><%= paginate @entries %></div>
-          </div>
-        </div>
-      </div>
-
-    <% end %>
-
+          <%= link_to "<i class='icon-plus'></i> Create a new learning group".html_safe,
+            new_group_path, class: 'btn btn-success' %>
+        <% else %>
+          They look lonely. Maybe you could invite them to join one of your learning groups?
+        <% end %>
+      </p>
+    </div>
   </div>
 
-  <!-- === MEMBERSHIPS TAB === -->
+<% else %>
 
-  <div class="tab-pane" id="memberships">
+  <div class="row">
+    <div class="span12">
+      
+    <% @group_and_log_list.each do |row|
+         unless row[:group].name.nil?  %>
 
-    <% if @group_and_log_list.blank? %>
+      <div class="container-card group-container-card">
 
-      <div class="row">
-        <div class="well span7 offset2">
-          <p class="lead">No memberships yet...</p>
-          <p>
-            <% if @this_is_current_user %>
-              To get started you'll either need to create a new learning group 
-              or get someone else to invite you to one of theirs.<br><br>
+        <div class="white-striped-background"> &nbsp; </div>
 
-              <%= link_to "<i class='icon-plus'></i> Create a new learning group".html_safe,
-                new_group_path, class: 'btn btn-success' %>
-            <% else %>
-              They look lonely. Maybe you could invite them to join one of your learning groups?
-            <% end %>
-          </p>
-        </div>
-      </div>
+        <table>
+          <tr>
 
-    <% else %>
+            <td class="header-column">
+              <%= link_to group_image_tag_for(row[:group]), row[:group],
+                title: "View the learning group", class: "image-link" %><br>
+              <h2><%= link_to row[:group].name, row[:group],title: "View the learning group" %></h2>
+              <h3>
+                <% if @this_is_current_user %>
+                  You are 
+                <% else %>
+                  <%= @user.name %> is 
+                <% end %>
+                <% if row[:type] == :admin %>
+                  an <abbr data-toggle="tooltip" data-placement="right"
+                  title="Admins can create or delete badges and add new members.">admin</abbr>.
+                <% else %>
+                  a <abbr title="Members can join badges and view activity."
+                  data-toggle="tooltip" data-placement="right">member</abbr>.
+                <% end %>
+              </h3>
+            </td>
 
-      <div class="row">
-        <div class="span12">
-          
-        <% @group_and_log_list.each do |row|
-             unless row[:group].name.nil?  %>
+            <td class="body-column">
 
-          <div class="container-card group-container-card">
+              <% if (row[:expert_logs].count + row[:learner_logs].count) > 0 %>
+                <% [row[:expert_logs], row[:learner_logs]].flatten.each do |log| %>
+                  <div class="inner-row">
+                    <%= link_to image_tag(group_badge_path(log.badge.group, log.badge, format: :png)), 
+                      [log.badge.group, log.badge], 
+                      title: "View the badge", class: "image-link" %>
 
-            <div class="white-striped-background"> &nbsp; </div>
-
-            <table>
-              <tr>
-
-                <td class="header-column">
-                  <%= link_to group_image_tag_for(row[:group]), row[:group],
-                    title: "View the learning group", class: "image-link" %><br>
-                  <h2><%= link_to row[:group].name, row[:group],title: "View the learning group" %></h2>
-                  <h3>
-                    <% if @this_is_current_user %>
-                      You are 
+                    <h2><%= link_to log.badge.name, [log.badge.group, log.badge] %></h2><br>
+                    <% if log.validation_status == 'validated' %>
+                      <h3><%= log.badge.expert.capitalize %> since <%= log.date_issued.to_s(:full_date) %></h3><br>
                     <% else %>
-                      <%= @user.name %> is 
+                      <h3>
+                        <%= log.badge.learner.capitalize %> since 
+                        <%= (log.date_started || log.created_at).to_s(:full_date) %>
+                      </h3><br>
                     <% end %>
-                    <% if row[:type] == :admin %>
-                      an <abbr data-toggle="tooltip" data-placement="right"
-                      title="Admins can create or delete badges and add new members.">admin</abbr>.
-                    <% else %>
-                      a <abbr title="Members can join badges and view activity."
-                      data-toggle="tooltip" data-placement="right">member</abbr>.
-                    <% end %>
-                  </h3>
-                </td>
 
-                <td class="body-column">
-
-                  <% if (row[:expert_logs].count + row[:learner_logs].count) > 0 %>
-                    <% [row[:expert_logs], row[:learner_logs]].flatten.each do |log| %>
-                      <div class="inner-row">
-                        <%= link_to image_tag(group_badge_path(log.badge.group, log.badge, format: :png)), 
-                          [log.badge.group, log.badge], 
-                          title: "View the badge", class: "image-link" %>
-
-                        <h2><%= link_to log.badge.name, [log.badge.group, log.badge] %></h2><br>
-                        <% if log.validation_status == 'validated' %>
-                          <h3><%= log.badge.expert.capitalize %> since <%= log.date_issued.to_s(:full_date) %></h3><br>
+                    <ul>
+                      <li>
+                        <% if @this_is_current_user %>
+                          <%= link_to "<i class='icon-user'></i> View Your Log".html_safe,
+                            [log.badge.group, log.badge, log] %>
                         <% else %>
-                          <h3>
-                            <%= log.badge.learner.capitalize %> since 
-                            <%= (log.date_started || log.created_at).to_s(:full_date) %>
-                          </h3><br>
+                          <%= link_to "<i class='icon-user'></i> View Learning Log".html_safe,
+                            [log.badge.group, log.badge, log] %>
                         <% end %>
+                      </li>
+                    </ul>
+                  </div>
+                <% end %>
+              <% end %>
 
-                        <ul>
-                          <li>
-                            <% if @this_is_current_user %>
-                              <%= link_to "<i class='icon-user'></i> View Your Log".html_safe,
-                                [log.badge.group, log.badge, log] %>
-                            <% else %>
-                              <%= link_to "<i class='icon-user'></i> View Learning Log".html_safe,
-                                [log.badge.group, log.badge, log] %>
-                            <% end %>
-                          </li>
-                        </ul>
-                      </div>
-                    <% end %>
-                  <% end %>
+            </td>
 
-                </td>
+          </tr>
+        </table>
 
-              </tr>
-            </table>
-
-          </div>
-
-        <%  end
-        end %>
-
-        </div>
       </div>
 
-    <% end %>
+    <%  end
+    end %>
 
+    </div>
   </div>
 
-</div>
+<% end %>

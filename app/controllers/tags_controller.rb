@@ -43,8 +43,14 @@ class TagsController < ApplicationController
     # Query for entries with this tag
     @page = params[:page] || 1
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
-    @entries = @badge.entries(current_user, @tag.name_with_caps, @page, @page_size)
     @version_list = []
+    if @current_user_log
+      @entries = @tag.entries.where(:log.ne => @current_user_log).page(@page).per(@page_size)
+      @current_user_entries = @current_user_log.entries.where(tag: @tag).order_by(:updated_at.desc)
+    else
+      @entries = @tag.entries.page(@page).per(@page_size)
+      @current_user_entries = []
+    end
     
     # Now initialize version info
     @show_version_list = (@tag_exists && params.include?(:v) && !@tag.wiki_versions.blank?)
@@ -239,6 +245,15 @@ private
         @tag = Tag.new(params[:tag])
       end
     end
+
+    # Figure out if the current user can see the entries in this tag
+    # NOTE: If this group is private then the controller takes care of bouncing non-members
+    #       So we really only need to worry about the "secret" level of privacy. 
+    #       (But it's not that hard to be super accurate so we will be.)
+    @current_user_can_see_entries = \
+      ((@tag.privacy == 'secret') && (@current_user_is_expert || @current_user_is_admin)) \
+      || ((@tag.privacy == 'private') && (@current_user_is_member || @current_user_is_admin)) \
+      || (@tag.privacy == 'public')
   end
 
   def can_view_tag

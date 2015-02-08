@@ -161,18 +161,18 @@
             </li>
           <% end %>
           <li>
-            <% if @entry.visibility == :anonymous %>
+            <% if @entry.privacy == 'secret' %>
+              <i class='fa fa-user-secret'></i> 
+              Only visible to badge <%= @experts %> and group admins
+            <% elsif @entry.privacy == 'private' %>
+              <i class='fa fa-eye-slash'></i> 
+              Only visible to group members
+            <% elsif @group.private? %>
+              <i class='fa fa-link'></i> 
+              Visible to group members and anyone with the link
+            <% else %>
               <i class='fa fa-eye'></i> 
               Visible to public
-            <% elsif @entry.visibility == :members %>
-              <i class='fa fa-eye-slash'></i> 
-              Only visible to members now, visible to public when badge is issued
-            <% elsif @entry.visibility == :experts %>
-              <i class='fa fa-lock'></i> 
-              Only visible to <%= @experts %>
-            <% else %>
-              <i class='fa fa-warning'></i> 
-              Only visible to <%= @badge.log %> owner and entry creator
             <% end %>
           </li>
         </ul>

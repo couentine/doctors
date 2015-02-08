@@ -184,6 +184,21 @@
                     group_badge_tag_path(@group, @badge, @tag, v: '') %>)
                 </li>
               <% end %>
+              <li>
+                <% if @tag.privacy == 'secret' %>
+                  <i class='fa fa-user-secret'></i> 
+                  Evidence only visible to badge <%= @experts %> and group admins
+                <% elsif @tag.privacy == 'private' %>
+                  <i class='fa fa-eye-slash'></i> 
+                  Evidence only visible to group members
+                <% elsif @group.private? %>
+                  <i class='fa fa-link'></i> 
+                  Evidence visible to anyone with the link
+                <% else %>
+                  <i class='fa fa-eye'></i> 
+                  Evidence visible to public
+                <% end %>
+              </li>
             </ul>
           <% end %>
         <% end %>
@@ -216,54 +231,99 @@
   </div>
 </div>
 
-<% if @show_progress && !@show_version_list \
-  && (!@entries.blank? || @current_user_is_learner || @current_user_is_expert) %>
+<% if @show_progress && !@show_version_list %>
 
-  <!-- === TOPIC DISCUSSION === -->
+  <!-- === START EVIDENCE LISTS AREA === -->
 
-  <div class="row add-top-margin">
-    <div class="span12">
-      <div class="tab-header">
-        <% if !@entries.blank? && (@current_user_is_learner || @current_user_is_expert) %>
-          <%= link_to '<i class="fa fa-comment"></i> Post Evidence'.html_safe,
-            new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
-            class: 'btn btn-small' %>
-        <% end %>
+  <% if @current_user_log %>
 
-        <h2>Posted evidence</h2>
-        <h3><i class="fa fa-tag"></i> #<%= @tag.name_with_caps %></h3>
+    <!-- === CURRENT USER EVIDENCE === -->
+
+    <div class="row add-top-margin">
+      <div class="span12">
+        <div class="tab-header">
+          <% if !@current_user_entries.blank? %>
+            <%= link_to '<i class="fa fa-comment"></i> Post Evidence'.html_safe,
+              new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
+              class: 'btn btn-small' %>
+          <% end %>
+
+          <h2>Your evidence</h2>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-    
-    <% if @entries.blank? %>
+    <div class="row">
+      
+      <% if @current_user_entries.blank? %>
 
-      <div class="well span7 offset2 gray empty">
-        <h3>No one has submitted evidence for this requirement yet...</h3>
-        
-        <% if @current_user_is_expert || @current_user_is_learner %>
+        <div class="well span7 offset2 gray empty">
+          <h3>You haven't submitted any evidence for this requirement yet...</h3>
           <p>&nbsp;</p>
           <p>
             <%= link_to '<i class="fa fa-comment"></i> Post your evidence'.html_safe,
               new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
               class: 'btn btn-primary' %>
           </p>
-        <% end %>
+        </div>
+
+      <% else %>
+
+        <div class="span12">
+
+          <%= render(@current_user_entries, show_badge: false, date_format: :ago) %>
+
+        </div>
+      
+      <% end %>
+
+    </div>
+
+  <% end %>
+
+  <% if @current_user_can_see_entries %>
+
+    <!-- === TOPIC DISCUSSION === -->
+
+    <div class="row add-top-margin">
+      <div class="span12">
+        <div class="tab-header">
+          <% if @current_user_log %>
+            <h2>Evidence posted by others</h2>
+          <% else %>
+            <h2>All posted evidence</h2>
+          <% end %>
+        </div>
       </div>
+    </div>
 
-    <% else %>
+    <div class="row">
+      
+      <% if @entries.blank? %>
 
-      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
-        data-bl-dyncol-width="12">
+        <div class="well span7 offset2 gray empty">
+          <% if @current_user_entries.blank? %>
+            <h3>No one has submitted evidence for this requirement yet.</h3>
+          <% else %>
+            <h3>No one else has submitted evidence for this requirement yet.</h3>
+          <% end %>
+        </div>
 
-        <%= render(@entries, show_badge: false, date_format: :ago) %>
+      <% else %>
 
-      </div>
-    
-    <% end %>
+        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
+          data-bl-dyncol-width="12">
 
-  </div>
+          <%= render(@entries, show_badge: false, date_format: :ago) %>
+
+        </div>
+      
+      <% end %>
+
+    </div>
+
+  <% end %>
+
+  <!-- === END EVIDENCE LISTS AREA === -->
 
 <% end %>

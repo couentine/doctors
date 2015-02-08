@@ -24,7 +24,6 @@ class Log
   field :validation_status,       type: String, default: 'incomplete'
   field :issue_status,            type: String, default: 'unissued'
   field :show_on_profile,         type: Boolean, default: true
-  field :private_log,             type: Boolean, default: false
   field :detached_log,            type: Boolean, default: false
 
   field :wiki,                    type: String, default: APP_CONFIG['default_log_wiki']
@@ -56,7 +55,7 @@ class Log
                                 message: "%{value} is not a valid badge issue status" }
   
   # Which fields are accessible?
-  attr_accessible :show_on_profile, :private_log, :detached_log, :date_started, :date_requested, 
+  attr_accessible :show_on_profile, :detached_log, :date_started, :date_requested, 
     :date_withdrawn, :date_sent_to_backpack, :wiki
 
   # === CALLBACKS === #
@@ -105,12 +104,6 @@ class Log
 
   def has_profile?
     !wiki_versions.blank? && !wiki.blank?
-  end
-
-  # Returns true if log is currently public
-  # Public = Visible to everyone, Private = Visible to group admins & members
-  def public?
-    !private_log && (detached_log || badge.nil? || badge.group.public? || (validation_status == 'validated'))
   end
 
   # Adds or updates a validation entry to the log and returns it
@@ -170,11 +163,10 @@ class Log
 
   # Adds a post entry to the log and returns it
   # NOTE: Doesn't work for new records.
-  # private = Boolean
-  def add_post(creator_user, summary, body, private = false, parent_tag = nil)
+  def add_post(creator_user, summary, body, parent_tag = nil)
     unless new_record?
       # First create the post
-      entry = Entry.new(summary: summary, body: body, private: private, parent_tag: parent_tag)
+      entry = Entry.new(summary: summary, body: body, parent_tag: parent_tag)
       entry.type = 'post'
       entry.log = self
       entry.creator = creator_user
