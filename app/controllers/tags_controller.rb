@@ -190,6 +190,7 @@ private
     @Learners = @badge.Learners
     @show_progress = @badge.tracks_progress?
 
+    # Build editability options
     @tag_editability_options = [
       ["#{@Experts} and #{@Learners}", 'learners'],
       ["Only #{@Experts}", 'experts']
@@ -197,6 +198,13 @@ private
     if @current_user_is_admin || @badge_list_admin
       @tag_editability_options << ['Only Group Admins', 'admins'] 
     end
+    
+    # Build privacy options
+    @tag_privacy_options = [["<strong>Public</strong> - Everyone".html_safe, 'public']];
+    if (@group.private?)
+      @tag_privacy_options << ["<strong>Private</strong> - Only Group Members".html_safe, 'private']
+    end
+    @tag_privacy_options << ["<strong>Secret</strong> - Only Badge #{@Experts}".html_safe, 'secret']
   end
   
   def find_all_records

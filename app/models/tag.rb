@@ -8,8 +8,9 @@ class Tag
   
   MAX_NAME_LENGTH = 50
   EDITABILITY_VALUES = ['learners', 'experts', 'admins']
-  JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :wiki_sections,
-    :tags, :tags_with_caps]
+  PRIVACY_VALUES = ['public', 'private', 'secret']
+  JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :privacy, 
+    :wiki_sections, :tags, :tags_with_caps]
 
   # === RELATIONSHIPS === #
 
@@ -23,6 +24,7 @@ class Tag
   field :display_name,        type: String
 
   field :editability,         type: String, default: 'learners'
+  field :privacy,             type: String, default: 'public'
   field :wiki,                type: String
   field :wiki_versions,       type: Array
   field :wiki_sections,       type: Array
@@ -40,9 +42,11 @@ class Tag
   validates :display_name, presence: true
   validates :editability, inclusion: { in: EDITABILITY_VALUES, 
     message: "%{value} is not a valid type of editability" }
+  validates :privacy, inclusion: { in: PRIVACY_VALUES, 
+    message: "%{value} is not a valid type of privacy" }
 
   # Which fields are accessible?
-  attr_accessible :display_name, :wiki, :editability
+  attr_accessible :display_name, :wiki, :editability, :privacy
 
   # === CALLBACKS === #
 
