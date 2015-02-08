@@ -296,7 +296,7 @@
 
     <!-- === TOPIC LIST === -->
 
-  <% if @badge.has_topics? || @can_edit_badge %>
+  <% if @badge.has_topics? || (@can_edit_badge && @show_progress) %>
       
     <div class="tab-pane" id="requirements">
 
