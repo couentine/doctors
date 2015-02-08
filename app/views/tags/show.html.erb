@@ -59,8 +59,7 @@
           <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
             [@group, @badge, @tag], method: :delete, data: { 
             confirm: ('Are you sure you want to permanently delete the contents of this ' \
-              + 'requirement page? Doing this will "orphan" all evidence posted for this ' \
-              + 'requirement, but the evidence will NOT be deleted.') } %>
+              + 'requirement page?') } %>
         </li>
       <% end %>
     <% end %>

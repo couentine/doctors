@@ -120,12 +120,21 @@ class TagsController < ApplicationController
   # DELETE /group-url/badge-url/tag-name
   # DELETE /group-url/badge-url/tag-name.json
   def destroy
-    @tag.destroy
+    # We can only delete this tag if it has no child entries (otherwise they will be orphaned)
+    deletion_restricted = !@tag.entries.blank?
+    @tag.destroy unless deletion_restricted
 
     respond_to do |format|
       format.html do
-        flash[:notice] = 'Requirement page was deleted.'
-        redirect_to [@group, @badge]
+        if deletion_restricted
+          flash[:error] = 'You cannot delete this requirement page because evidence has been ' \
+            + 'posted to it. Try removing the requirement from the badge requirements list ' \
+            + 'instead. That will leave the requirement page in existence but remove it from view.'
+          redirect_to [@group, @badge, @tag]
+        else
+          flash[:notice] = 'Requirement page was deleted.'
+          redirect_to [@group, @badge]
+        end
       end
       format.json { head :no_content }
     end
