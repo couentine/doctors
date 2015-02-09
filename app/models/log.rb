@@ -183,68 +183,38 @@ class Log
     end
   end  
 
-  # Returns all entries with type = 'post', sorted from newest to oldest
-  # Filters out private entries based on the permissions of the passed filter_user
-  # NOTE: Uses pagination
-  def posts(filter_user, page = 1, page_size = APP_CONFIG['page_size_normal'])
-    if filter_user && ((filter_user == user) || (!detached_log && filter_user.expert_of?(badge)) \
-      || filter_user.admin?)
-      entries.all(type: 'post').order_by(:updated_at.desc).page(page).per(page_size)
-    else
-      entries.all(type: 'post', private: false).order_by(:updated_at.desc).page(page).per(page_size)
-    end
-  end
-
-  # Groups posts() return by month string (Ex: "January 2014", "This Month", "Last Month")
-  def posts_by_month(filter_user, page = 1, page_size = APP_CONFIG['page_size_normal'])
-    return_list = []
-    cur_item, cur_month_label, new_month_label = nil, nil, nil
-
-    self.posts(filter_user, page, page_size).each do |post|
-      # First set the label of the new post
-      new_month_label = post.updated_at.strftime('%B %Y')
-      if new_month_label == Date.today.strftime("%B %-d, %Y at %l:%M %p")
-        new_month_label = "This Month"
-      elsif new_month_label == (Date.today - 1.month).strftime("%B %-d, %Y at %l:%M %p")
-        new_month_label = "Last Month"
-      end
-
-      if cur_month_label == new_month_label
-        cur_item[:posts] << post
-      else
-        return_list << cur_item unless cur_item.nil? 
-        cur_item = { posts: [post], label: new_month_label }
-        cur_month_label = new_month_label
-      end
-    end
-
-    return_list << cur_item unless cur_item.nil? 
-    return_list
-  end
-
-  # Returns the topic list from the badge, augmented with the number of entries which are tagged
-  # with that topic AND created by the log owner
-  # NOTE: Each item in the return list has a new string key called 'post_count'
-  def post_counts_by_topic
-    topic_list = badge.topics
-    topic_item_map = {}
+  # Returns the full content of all of this log's posts, organized by topic
+  # Return value is a list of hash items, each with the following keys = {
+  #   'tag' => the_tag_record_itself || nil
+  #   'entries' => a_list_of_all_entries }
+  def posts_by_topic
+    topic_list = [] # this is the return list
+    topic_map = {} # this is a map to keep track of the list contents while we're building it
     
-    unless topic_list.empty?
-      # First build out the return list and build a hash that maps to the topic list item
-      topic_list.each do |item|
-        topic_item_map[item['tag_name']] = item # map our way back to this item
-        item['post_count'] = 0 # initialize the post count
+    if badge
+      # First build out the topic map so that it contains all of the badge topics
+      badge_topic_names = []
+      badge.topics.each { |topic| badge_topic_names << topic['tag_name'] }
+      badge.tags.where(:name.in => badge_topic_names).each do |tag|
+        topic_item = { 'tag' => tag, 'entries' => [] }
+        topic_list << topic_item
+        topic_map[tag] = topic_item
       end
 
-      # Now run through all of the posts and count them against any topics which are in our list
-      entries.all(type: 'post').each do |post|
-        post.tags.each do |topic|
-          topic_item_map[topic]['post_count'] += 1 if topic_item_map.has_key? topic
+      # Run through all of the posts and add them to the list
+      entries.where(type: 'post').each do |entry|
+        if topic_map.has_key? entry.tag
+          topic_map[entry.tag]['entries'] << entry
+        else
+          topic_item = { 'tag' => entry.tag, 'entries' => [entry] }
+          topic_list << topic_item
+          topic_map[entry.tag] = topic_item
         end
       end
     end
 
-    topic_list # return value
+    # return value = 
+    topic_list
   end
 
   # Returns all entries with type = 'validation', sorted from newest to oldest

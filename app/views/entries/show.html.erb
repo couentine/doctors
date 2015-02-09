@@ -141,6 +141,12 @@
           </span>
         <% end %>
 
+        <% if @parent_tag && @parent_tag.display_name %>
+          <h2>
+            <i class="fa fa-book" title="Requirement"></i> 
+            <%= link_to @parent_tag.display_name, [@group, @badge, @parent_tag] %>
+          </h2>
+        <% end %>
         <h1>
           <%= @entry.summary %>
         </h1>
