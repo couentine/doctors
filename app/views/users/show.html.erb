@@ -67,11 +67,8 @@
           <h1><%= @user.name %></h1>
           <h2><%= @user.username_with_caps %></h2>
           <h3>
-            <i class="icon-time"></i>
-            <% if @user.created_at.to_date < BL_LAUNCH_DATE %>
-              <%= "Badge List member since the beginning of time" %>
-            <% else %>
-              <%= "Badge List member since #{@user.created_at.to_s(:full_date)}" %>
+            <% ((@user.expert_logs.count || 0) / 5).to_i.times do |i| %>
+              <i class="fa fa-star"></i>
             <% end %>
           </h3>
         </span>
@@ -106,81 +103,51 @@
 
   <div class="row">
     <div class="span12">
-      
-    <% @group_and_log_list.each do |row|
-         unless row[:group].name.nil?  %>
+      <div class="container-card evidence-card">
+        <% @group_and_log_list.each do |row| %>
 
-      <div class="container-card group-container-card">
+          <table class="header-table">
+            <tr>
+              <td>
+                <%= link_to group_image_tag_for(row[:group]), row[:group],
+                  title: "View the learning group", class: "image-link" %>
+              </td>
+              <td>
+                <h2>
+                  <%= link_to row[:group].name, row[:group],title: "View the learning group" %>
+                </h2>
+                <h3>
+                  <% if row[:group].creator == @user %>
+                    Founder
+                  <% elsif row[:type] == :admin %>
+                    Admin
+                  <% else %>
+                    Member
+                  <% end %>
+                </h3>
+              </td>
+            </tr>
+          </table>
 
-        <div class="white-striped-background"> &nbsp; </div>
+          <div class="body-row">
+            <% row[:expert_logs].each do |log| %>
+              <div class="inner-row">
+                <%= link_to image_tag(group_badge_path(log.badge.group, log.badge, format: :png)), 
+                  [log.badge.group, log.badge], 
+                  title: "View the badge", class: "image-link" %>
 
-        <table>
-          <tr>
+                <h2><%= link_to log.badge.name, [log.badge.group, log.badge] %></h2>
+                <h3>
+                  <%= log.badge.expert.capitalize %> 
+                  since 
+                  <%= log.date_issued.to_s(:short_date) %>
+                </h3>
+              </div>
+            <% end unless row[:expert_logs].blank? %>
+          </div>
 
-            <td class="header-column">
-              <%= link_to group_image_tag_for(row[:group]), row[:group],
-                title: "View the learning group", class: "image-link" %><br>
-              <h2><%= link_to row[:group].name, row[:group],title: "View the learning group" %></h2>
-              <h3>
-                <% if @this_is_current_user %>
-                  You are 
-                <% else %>
-                  <%= @user.name %> is 
-                <% end %>
-                <% if row[:type] == :admin %>
-                  an <abbr data-toggle="tooltip" data-placement="right"
-                  title="Admins can create or delete badges and add new members.">admin</abbr>.
-                <% else %>
-                  a <abbr title="Members can join badges and view activity."
-                  data-toggle="tooltip" data-placement="right">member</abbr>.
-                <% end %>
-              </h3>
-            </td>
-
-            <td class="body-column">
-
-              <% if (row[:expert_logs].count + row[:learner_logs].count) > 0 %>
-                <% [row[:expert_logs], row[:learner_logs]].flatten.each do |log| %>
-                  <div class="inner-row">
-                    <%= link_to image_tag(group_badge_path(log.badge.group, log.badge, format: :png)), 
-                      [log.badge.group, log.badge], 
-                      title: "View the badge", class: "image-link" %>
-
-                    <h2><%= link_to log.badge.name, [log.badge.group, log.badge] %></h2><br>
-                    <% if log.validation_status == 'validated' %>
-                      <h3><%= log.badge.expert.capitalize %> since <%= log.date_issued.to_s(:full_date) %></h3><br>
-                    <% else %>
-                      <h3>
-                        <%= log.badge.learner.capitalize %> since 
-                        <%= (log.date_started || log.created_at).to_s(:full_date) %>
-                      </h3><br>
-                    <% end %>
-
-                    <ul>
-                      <li>
-                        <% if @this_is_current_user %>
-                          <%= link_to "<i class='icon-user'></i> View Your Log".html_safe,
-                            [log.badge.group, log.badge, log] %>
-                        <% else %>
-                          <%= link_to "<i class='icon-user'></i> View Learning Log".html_safe,
-                            [log.badge.group, log.badge, log] %>
-                        <% end %>
-                      </li>
-                    </ul>
-                  </div>
-                <% end %>
-              <% end %>
-
-            </td>
-
-          </tr>
-        </table>
-
+        <% end %> <!-- === # END: @group_and_log_list.each === -->
       </div>
-
-    <%  end
-    end %>
-
     </div>
   </div>
 

@@ -184,6 +184,10 @@ class User
     end
   end
 
+  def expert_logs
+    return logs.where(validation_status: 'validated')
+  end
+
   # Returns all group AND badge memberships.
   # Filters out private groups if filter_user is not also a member
   # Return array has one entry for each group = {
