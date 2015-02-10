@@ -117,9 +117,7 @@
                   <%= link_to row[:group].name, row[:group],title: "View the learning group" %>
                 </h2>
                 <h3>
-                  <% if row[:group].creator == @user %>
-                    Founder
-                  <% elsif row[:type] == :admin %>
+                  <% if row[:type] == :admin %>
                     Admin
                   <% else %>
                     Member
