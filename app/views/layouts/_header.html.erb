@@ -5,19 +5,13 @@
 
     <ul class="nav header-left">
       <li>
-        <%= link_to "BL", root_path, id: "logo", class: "brand", 
+        <%= link_to image_tag('badge-list-icon-50.png'), root_path, id: "logo", class: "brand", 
           title: "Badge List Home" %>
           <span class="divider"><i class="fa fa-caret-right"></i></span>
       </li>
       <li>
-        <a href="/" title="Home" data-toggle="tooltip" data-placement="bottom">
-          <i class="fa fa-home"></i>
-        </a>
-        <span class="divider"><i class="fa fa-caret-right"></i></span>
-      </li>
-      <li>
-        <a href="#admin-tutorial" class="smaller" data-toggle="modal" id="show-admin-tutorial">
-          <i class="fa fa-question" title="Badge List Tutorial" data-toggle="tooltip" 
+        <a href="/badgelist" class="smaller" data-toggle="modal" id="show-admin-tutorial">
+          <i class="fa fa-question" title="Badge List Help Group" data-toggle="tooltip" 
             data-placement="bottom"></i>
         </a>
       </li>
