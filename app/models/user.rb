@@ -201,10 +201,17 @@ class User
     learner_log_map, expert_log_map = {}, {} # maps from group to array of logs
     logs.each do |log|
       target_map = (log.validation_status == 'validated') ? expert_log_map : learner_log_map
-      if (log.badge != nil) && ((filter_user == self) || (log.public? && log.show_on_profile)\
-        || (filter_user && (filter_user.admin? \
-          || filter_user.member_of?(log.badge.group) || filter_user.admin_of?(log.badge.group))))
-        
+      if (log.badge != nil)                              \
+          && (                                            \
+            (filter_user == self)                          \
+            || log.show_on_profile                          \
+            || (filter_user                                  \
+                && (filter_user.admin?                        \
+                  || filter_user.member_of?(log.badge.group)   \
+                  || filter_user.admin_of?(log.badge.group)     \
+                )                                                \
+            )                                                     \
+          )
         if target_map.has_key?(log.badge.group)
           target_map[log.badge.group] << log
         else
