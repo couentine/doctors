@@ -491,13 +491,22 @@
               <% if @current_user_is_log_owner %>
                 <%= link_to '<i class="fa fa-comment"></i> Post Evidence'.html_safe,
                   new_group_badge_log_entry_path(@group, @badge, @current_user_log, 
-                    tag: topic_item['tag'].name), 
+                    tag: (topic_item['tag']) ? topic_item['tag'].name : '' ), 
                   class: 'btn btn-small' %>
               <% end %>
 
               <h2>
-                <%= link_to "<i class='fa fa-book'></i> #{topic_item['tag'].display_name}".html_safe,
-                  [@group, @badge, topic_item['tag']] %>
+                <% if topic_item['tag'] %>
+                  <%= link_to \
+                    "<i class='fa fa-book'></i> #{topic_item['tag'].display_name}".html_safe, \
+                    [@group, @badge, topic_item['tag']] \
+                  %>
+                <% else %>
+                  <%= link_to \
+                    "<i class='fa fa-simplybuilt'></i> Etcetera".html_safe, \
+                    [@group, @badge, topic_item['tag']] \
+                  %>
+                <% end %>
               </h2>
             </div>
           </div>

@@ -132,10 +132,10 @@
               <% row[:expert_logs].each do |log| %>
                 <div class="inner-row">
                   <%= link_to image_tag(group_badge_path(log.badge.group, log.badge, format: :png)), 
-                    [log.badge.group, log.badge], 
+                    [log.badge.group, log.badge, log], 
                     title: "View the badge", class: "image-link" %>
 
-                  <h2><%= link_to log.badge.name, [log.badge.group, log.badge] %></h2>
+                  <h2><%= link_to log.badge.name, [log.badge.group, log.badge, log] %></h2>
                   <h3>
                     <%= log.badge.expert.capitalize %> 
                     since 
