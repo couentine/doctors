@@ -106,21 +106,7 @@
             <%= entry.updated_at.to_s(:full_date_time) %>
           <% end %>
         </td>
-        <td class="right-foot">
-          <% if entry.visibility == :anonymous %>
-            <i class='icon-eye-open' data-toggle='tooltip' 
-              title='Visible to public'></i>
-          <% elsif entry.visibility == :members %>
-            <i class='icon-eye-close' data-toggle='tooltip' 
-              title='Only visible to members now, visible to public when badge is issued'></i>
-          <% elsif entry.visibility == :experts %>
-            <i class='icon-lock' data-toggle='tooltip' 
-              title='Only visible to <%= entry.log.badge.experts %>'></i>
-          <% else %>
-            <i class='icon-warning-sign' data-toggle='tooltip' 
-              title='Only visible to <%= entry.log.badge.log %> owner and entry creator'></i>
-          <% end %>
-        </td>
+        <td class="right-foot"></td>
       </tr>
     </table>
 

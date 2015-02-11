@@ -29,7 +29,6 @@ class EntriesController < ApplicationController
   # Accepts "tag" parameter
   def new
     @type = params[:type] || 'post'
-    summary = (params[:tag].nil?) ? '' : " ##{params[:tag]}"
 
     if @type == 'validation'
       @entry = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
@@ -38,16 +37,22 @@ class EntriesController < ApplicationController
         render :edit
       else
         @entry = Entry.new(summary: summary)
-        @entry.private = false
         @entry.type = 'validation'
         render :new
       end
     else
-      @entry = Entry.new(summary: summary, parent_tag: params[:tag])
+      # Create the entry
+      @parent_tag_name = params[:tag]
+      @entry = Entry.new(parent_tag: @parent_tag_name)
       @entry.type = 'post'
-      privacy_count = cookies[:log_privacy_count]
-      @entry.private = privacy_count && (privacy_count.to_i > 2) # They have to pick private twice in a row
-      @entry.private = false if @entry.private.nil?
+      
+      # Query the parent tag if present
+      @parent_tag = nil
+      if !@parent_tag_name.blank?
+        matched_tags = @badge.tags.where(name: @parent_tag_name.downcase)
+        @parent_tag = matched_tags.first if matched_tags.count > 0
+      end
+
       render :new
     end
   end
@@ -67,7 +72,7 @@ class EntriesController < ApplicationController
       # First determine if the validation already exists
       existing_entry = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
       @validation_already_exists = !existing_entry.nil? # only used to set the flash message
-      logger.debug "+++create: params[:entry][:log_validated] = #{params[:entry][:log_validated]}+++"
+      # logger.debug "+++create: params[:entry][:log_validated] = #{params[:entry][:log_validated]}+++"
       @log_validated = (params[:entry][:log_validated] == 'true')
 
       # Now add the validation using the standard field (thus preventing duplicates)
@@ -75,14 +80,7 @@ class EntriesController < ApplicationController
         @log_validated
     else
       @entry = @log.add_post current_user, params[:entry][:summary], params[:entry][:body],
-        params[:entry][:private], params[:entry][:parent_tag]
-      
-      # update the privacy count cookie (this controls whether private is default)
-      log_privacy_count = cookies[:log_privacy_count] || 0
-      delta = (@entry.private) ? 1 : -1
-      # don't let the count go below zero or above 4
-      # FIXME: log_privacy_count = [[0, log_privacy_count+delta].max, 4].min.to_i
-      # cookies.permanent[:log_privacy_count] = log_privacy_count.to_s
+        params[:entry][:parent_tag]
     end
 
     
@@ -181,6 +179,7 @@ private
     find_parent_records
 
     @entry = @log.entries.find_by(entry_number: (params[:entry_id] || params[:id])) || not_found
+    @parent_tag = @entry.tag
     @current_user_is_entry_creator = current_user && (current_user.id == @entry.creator_id)
     @visible_to_current_user = @entry.visible_to?(current_user)
 
@@ -191,7 +190,7 @@ private
 
   def visible_to_current_user
     unless @visible_to_current_user
-      flash[:error] = "Oops! it looks like you don't have access to this learning log entry."
+      flash[:error] = "Oops! it looks like you don't have access to this item."
       redirect_to [@group, @badge, @log]
     end
   end

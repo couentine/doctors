@@ -21,7 +21,7 @@ class Entry
 
   field :entry_number,        type: Integer
   field :summary,             type: String
-  field :private,             type: Boolean
+  field :private,             type: Boolean, default: false
   field :type,                type: String
   field :log_validated,       type: Boolean
   field :parent_tag,          type: String
@@ -44,7 +44,7 @@ class Entry
                                 message: "%{value} is not a valid entry type" }
 
   # Which fields are accessible?
-  attr_accessible :parent_tag, :summary, :private, :log_validated, :body
+  attr_accessible :parent_tag, :summary, :log_validated, :body
 
   # === CALLBACKS === #
 
@@ -109,42 +109,33 @@ class Entry
     end
   end
 
-  # Returns a symbol representing the widest group to which this post is visible
-  # NOTE: A post is ALWAYS visible to the creator and log owner (the :users).
-  # Return values = [:users, :experts, :members, :anonymous]
-  def visibility
-    if self.private
-      return (log.detached_log) ? :users : :experts
-    elsif log.public?
-      return :anonymous
-    elsif log.detached_log
-      return :users
+  # Returns the privacy level of the parent tag OR if the parent tag is unset, returns 'public'
+  def privacy
+    if tag.nil? || tag.badge.nil? # We need to have these refs to manage any sort of privacy
+      return 'public'
     else
-      return :members
+      return tag.privacy
     end
   end
 
-  # Uses the return value of the visibility method to determine if this user can see the log entry
+  # Uses the group and tag visibility to determine if this user can see the log entry
+  # The entry is always visible to its creator and the owner of the log
   # NOTE: It's ok if user is nil
   def visible_to?(user)
-    if (self.visibility == :anonymous) || (user == self.creator) || (user == self.log.user) \
-      || (!user.nil? && (user.admin?))
+    if !user.nil? && ((user == log.user) || (user == creator))
       return true
-    elsif user && (self.visibility != :users)
-      if self.visibility == :experts
-        return user.expert_of?(self.log.badge)
-      else # :members
-        return user.member_of?(self.log.badge.group) || user.admin_of?(self.log.badge.group)
-      end
-    else # anonymous user / users only visibility
-      return false
-    end 
+    elsif privacy == 'secret'
+      return !user.nil? && (user.expert_of?(tag.badge) || user.admin_of?(tag.badge.group))
+    elsif privacy == 'private'
+      return !user.nil? && (user.member_of?(tag.badge.group) || user.admin_of?(tag.badge.group))
+    else
+      return true
+    end
   end
 
 protected
   
   def set_default_values
-    self.private = false if private.nil?
     self.entry_number ||= log.next_entry_number if log
   end
 
@@ -170,7 +161,6 @@ protected
           # This tag is one of the official requirements so set the editability same as the badge
           t.editability = log.badge.editability
         end
-        
         t.save
         self.tag = t
       end

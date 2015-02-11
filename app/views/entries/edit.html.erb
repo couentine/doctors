@@ -27,6 +27,22 @@
   <li class="active">Edit <%= @entry.type.capitalize %></li>
 <% end %>
 
+<% if @parent_tag %>
+  <!-- === PARENT TAG INFO === -->
+
+  <div class="well secondary span9 offset1">
+    <i class="fa fa-book header-icon"></i>
+    <h4>This evidence is linked to</h4>
+    <h3><%= "##{@parent_tag.name_with_caps}" %></h3>
+    <p>
+      <%= link_to 'Click here to view requirement page', [@group, @badge, @parent_tag], 
+        target: '_blank', class: 'btn btn-success' %>
+    </p>
+  </div>
+<% end %>
+
+<!-- === ENTRY FORM === -->
+
 <div class="row">
   <div class="bl-form bl-form-entry span10 offset1">
     

@@ -218,39 +218,6 @@ class Badge
     the_log
   end
 
-  # Returns all entries (posts AND validations), sorted from newest to oldest
-  # Filters out private entries based on the permissions of the passed filter_user
-  # Also selects only entries which contain tag_name (if supplied)
-  # NOTE: Uses pagination
-  def entries(filter_user, tag_name = nil, page = 1, page_size = APP_CONFIG['page_size_normal'])
-    attached_log_ids = []
-    owned_log_ids = []
-    logs.each do |log| 
-      attached_log_ids << log.id unless log.detached_log
-      owned_log_ids << log.id if log.user == filter_user
-    end
-
-    if tag_name.nil?
-      if filter_user && (filter_user.expert_of?(self) || filter_user.admin?)
-        Entry.where(:log.in => attached_log_ids).order_by(:updated_at.desc).page(page).per(page_size)
-      else
-        Entry.or({:log.in => attached_log_ids, :private => false}, {:log.in => owned_log_ids}, \
-          {:log.in => attached_log_ids, :creator => filter_user})\
-          .order_by(:updated_at.desc).page(page).per(page_size)
-      end
-    else
-      if filter_user && (filter_user.expert_of?(self) || filter_user.admin?)
-        Entry.where(:log.in => attached_log_ids, :tags => tag_name.downcase)\
-          .order_by(:updated_at.desc).page(page).per(page_size)
-      else
-        Entry.where(:tags => tag_name.downcase)\
-          .or({:log.in => attached_log_ids, :private => false}, {:log.in => owned_log_ids}, \
-          {:log.in => attached_log_ids, :creator => filter_user}).\
-          order_by(:updated_at.desc).page(page).per(page_size)
-      end
-    end
-  end
-
   # Returns the ACTUAL validation threshold based on the group settings AND the badge expert count
   def current_validation_threshold
     validation_threshold = expert_logs.count

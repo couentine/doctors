@@ -241,36 +241,6 @@ class User
     the_list.sort_by{ |item| item[:group].name }
   end
 
-  # Returns all entries created by this user, sorted from newest to oldest
-  # Filters out entries which are not visible to the passed filter_user
-  # (Incorporates both log visibility and entry visiblity)
-  # NOTE: Uses pagination and includes both posts AND validations
-  def entries(filter_user, page=1, page_size = APP_CONFIG['page_size_normal'])
-    if (filter_user == self)
-      created_entries.desc(:updated_at).page(page).per(page_size)
-    else
-      # First run through this users logs and figure out the visibility of each
-      include_private_entries = []
-      only_public_entries = []
-      logs.where(:show_on_profile => true).each do |log| 
-        only_public_entries << log.id if log.public? && !log.badge.nil?
-
-        if filter_user && !log.badge.nil? && !log.detached_log
-          if filter_user.expert_of?(log.badge)
-            include_private_entries << log.id
-          elsif !log.public? && \
-            (filter_user.member_of?(log.badge.group) || filter_user.admin_of?(log.badge.group))
-            only_public_entries << log.id
-          end
-        end 
-      end
-
-      created_entries.or({:creator => filter_user}, {:log.in => include_private_entries}, \
-      {:private => false, :log.in => only_public_entries})\
-      .desc(:updated_at).page(page).per(page_size)
-    end
-  end
-
   def manually_update_identity_hash
     self.identity_salt = SecureRandom.hex
     self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)

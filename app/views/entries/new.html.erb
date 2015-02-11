@@ -23,13 +23,36 @@
   <li class="active">New <%= @entry.type.capitalize %></li>
 <% end %>
 
+<% if !@parent_tag_name.blank? %>
+  <!-- === PARENT TAG INFO === -->
+
+  <div class="well secondary span9 offset1">
+    <i class="fa fa-book header-icon"></i>
+
+    <% if @parent_tag %>
+      <h4>Posting evidence to</h4>
+      <h3><%= "##{@parent_tag.name_with_caps}" %></h3>
+      <p>
+        <%= link_to 'Click here to view requirement page', [@group, @badge, @parent_tag], 
+          target: '_blank', class: 'btn btn-success' %>
+      </p>
+    <% else %>
+      <h4>Posting evidence to:</h4>
+      <h3><%= "##{@parent_tag_name}" %></h3>
+      <p>
+        This is a new requirement that doesn't have a page yet. It will be created when you post
+        this evidence.
+      </p>
+    <% end %>
+  </div>
+<% end %>
+
+<!-- === ENTRY FORM === -->
+
 <div class="row">
   <div class="bl-form bl-form-entry span10 offset1">
     
     <div class="form-header">
-      <% if @entry.type == 'validation' %>
-      <% else %>
-      <% end %>
 
       <% if @entry.type == 'validation' %>
         <% if @current_user_is_log_owner %>

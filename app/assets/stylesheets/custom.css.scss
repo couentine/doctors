@@ -2197,6 +2197,12 @@ div.cta-card {
   margin: 50px 0 20px 0;
 
   .header-section {
+    h2 {
+      display: block;
+      color: $dark-text-color;
+      margin-top: -10px;
+    }
+
     .creator-user-link { 
       float: right; 
       width: 77px;
