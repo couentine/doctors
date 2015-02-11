@@ -512,7 +512,7 @@ span#header-currentuser-name {
 
 header.navbar {
   border-top: 4px solid $primary-medium;
-  box-shadow: 0px 1px 7px 0 $card-shadow-color;
+  box-shadow: 0px 2px 15px 0 rgba(0, 0, 0, 0.35);
 }
 .navbar-inner {
   background-color: $medium-white;
