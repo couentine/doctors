@@ -478,10 +478,12 @@
   <% if @badge.has_topics? %>
 
     <% @log.posts_by_topic.each do |topic_item| %>
-      <% if @current_user_is_log_owner || (topic_item['tag'].privacy == 'public') \
-        || ((topic_item['tag'].privacy == 'private') \
+      <% if @current_user_is_log_owner                        \
+        || topic_item['tag'].nil?                              \
+        || (topic_item['tag'].privacy == 'public')              \
+        || ((topic_item['tag'].privacy == 'private')             \
           && (@current_user_is_member || @current_user_is_admin)) \
-        || ((topic_item['tag'].privacy == 'secret') \
+        || ((topic_item['tag'].privacy == 'secret')                \
           && (@current_user_is_expert || @current_user_is_admin))
       %>
 
