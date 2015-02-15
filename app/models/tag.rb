@@ -7,6 +7,7 @@ class Tag
   # === CONSTANTS === #
   
   MAX_NAME_LENGTH = 50
+  MAX_SUMMARY_LENGTH = 50
   EDITABILITY_VALUES = ['learners', 'experts', 'admins']
   PRIVACY_VALUES = ['public', 'private', 'secret']
   JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :privacy, 
@@ -25,6 +26,7 @@ class Tag
 
   field :editability,         type: String, default: 'learners'
   field :privacy,             type: String, default: 'public'
+  field :summary,             type: String
   field :wiki,                type: String
   field :wiki_versions,       type: Array
   field :wiki_sections,       type: Array
@@ -40,13 +42,14 @@ class Tag
     uniqueness: { scope: :badge }, exclusion: { in: APP_CONFIG['blocked_url_slugs'],
     message: "%{value} is a specially reserved url." }
   validates :display_name, presence: true
+  validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
   validates :editability, inclusion: { in: EDITABILITY_VALUES, 
     message: "%{value} is not a valid type of editability" }
   validates :privacy, inclusion: { in: PRIVACY_VALUES, 
     message: "%{value} is not a valid type of privacy" }
 
   # Which fields are accessible?
-  attr_accessible :display_name, :wiki, :editability, :privacy
+  attr_accessible :display_name, :summary, :wiki, :editability, :privacy
 
   # === CALLBACKS === #
 
@@ -72,6 +75,11 @@ protected
     else
       self.name_with_caps = tagify_string display_name
       self.name = name_with_caps.downcase
+    end
+
+    # This should make it impossible to ever trigger the max summary length validation
+    if summary && (summary.length > MAX_SUMMARY_LENGTH)
+      summary = summary[0, MAX_SUMMARY_LENGTH]
     end
   end
 
