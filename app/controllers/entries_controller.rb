@@ -36,7 +36,7 @@ class EntriesController < ApplicationController
       if @validation_already_exists
         render :edit
       else
-        @entry = Entry.new(summary: summary)
+        @entry = Entry.new
         @entry.type = 'validation'
         render :new
       end
