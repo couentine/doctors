@@ -7,7 +7,7 @@ class Tag
   # === CONSTANTS === #
   
   MAX_NAME_LENGTH = 50
-  MAX_SUMMARY_LENGTH = 50
+  MAX_SUMMARY_LENGTH = 300
   EDITABILITY_VALUES = ['learners', 'experts', 'admins']
   PRIVACY_VALUES = ['public', 'private', 'secret']
   JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :privacy, 
@@ -79,7 +79,7 @@ protected
 
     # This should make it impossible to ever trigger the max summary length validation
     if summary && (summary.length > MAX_SUMMARY_LENGTH)
-      summary = summary[0, MAX_SUMMARY_LENGTH]
+      self.summary = summary[0, MAX_SUMMARY_LENGTH]
     end
   end
 

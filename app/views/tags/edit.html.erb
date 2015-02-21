@@ -23,21 +23,6 @@
 
 <% if @current_user_is_expert && @show_progress %>
   <script>
-    var originalTagName = "<%= @tag.name %>";
-
-    $(document).ready(function() {
-      // Setup the event handler to update the discussion tag
-      $('#tag_display_name').keyup(function(){
-        $('#discussion-tag').text("#" + tagifyString($(this).val()));
-        <% if @tag_exists %>
-          if (tagifyString($(this).val()).toLowerCase() != originalTagName)
-            $('#discussion-tag').tooltip('show');
-          else
-            $('#discussion-tag').tooltip('hide');
-        <% end %>
-      })
-    });
-
     // Converts "Test text like  this" > "Text-text-like-this"
     function tagifyString(s) {
       if (s == null) return '';
@@ -85,16 +70,10 @@
             </div>
           </div>
         <% end %>
-
-        <% if @show_progress %>
-          <div class="control-group">
-            <label class="control-label">Tag</label>
-            <div class="controls">
-              <span class="input-mock" id="discussion-tag">#<%= @tag.name_with_caps %></span>
-            </div>
-          </div>
-        <% end %>
         
+        <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
+          :'character-count' => true, :'max-length' => Tag::MAX_SUMMARY_LENGTH } } %>
+
         <%= f.input :wiki, as: :text, label: 'Page Body', 
           input_html: { class: "huge-text-area rich-text-area" } %>
 

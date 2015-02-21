@@ -168,16 +168,11 @@
           
           <% if @tag_exists %>
             <ul>
-              <% if @current_version == 1 %>
-                <li>
-                  <i class="fa fa-calendar"></i> 
-                  <%= "Created #{@tag.created_at.to_s(:full_date)} by #{@tag.current_username}" %>
-                </li>
-              <% else %>
-                <li>
-                  <i class="fa fa-clock-o"></i> 
-                  <%= "Last updated #{@tag.updated_at.to_s(:full_date_time)} by #{@tag.current_username}" %>
-                </li>
+              <li>
+                <i class="fa fa-clock-o"></i> 
+                <%= "Last updated #{@tag.updated_at.to_s(:full_date_time)} by #{@tag.current_username}" %>
+              </li>
+              <% if @can_edit_tag && (@current_version > 1) %>
                 <li>
                   <i class="fa fa-files-o"></i> This is version <%= @current_version %>
                   (<%= link_to "Browse previous versions",
@@ -208,6 +203,12 @@
       <div class="body-section">
         <% if @tag_exists %>
           
+          <% if @tag.summary %>
+            <div class="section-container lead">
+              <%= @tag.summary %>
+            </div>
+          <% end %>
+
           <% @tag.wiki_sections.each do |section_text| %>
             <div class="section-container"><%= section_text.html_safe %></div>
           <% end %>

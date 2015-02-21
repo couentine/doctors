@@ -957,7 +957,7 @@ h2.form-header {
 }
 
 /* Specific Form Fields */
-#badge_summary,#entry_summary {
+#badge_summary,#entry_summary,#tag_summary {
   width: 300px;
   height: 6em;
 }
@@ -3102,9 +3102,11 @@ div.cta-card {
   .section-container {
     display: block;
     border-top: 4px solid $medium-gray;
-    margin-bottom: 35px;
+    padding-top: 20px;
+    margin-bottom: 20px;
   }
   .section-container:first-child { 
+    padding-top: 0;
     border: none; 
   }
   .section-container:last-child { 

@@ -33,8 +33,7 @@
       <h4>Posting evidence to</h4>
       <h3><%= "##{@parent_tag.name_with_caps}" %></h3>
       <p>
-        <%= link_to 'Click here to view requirement page', [@group, @badge, @parent_tag], 
-          target: '_blank', class: 'btn btn-success' %>
+        <%= @parent_tag.summary %>
       </p>
     <% else %>
       <h4>Posting evidence to:</h4>
