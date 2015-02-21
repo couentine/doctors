@@ -8,6 +8,7 @@ class Tag
   
   MAX_NAME_LENGTH = 50
   MAX_SUMMARY_LENGTH = 300
+  TYPE_VALUES = ['requirement', 'wiki']
   EDITABILITY_VALUES = ['learners', 'experts', 'admins']
   PRIVACY_VALUES = ['public', 'private', 'secret']
   JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :privacy, 
@@ -23,6 +24,8 @@ class Tag
   field :name,                type: String
   field :name_with_caps,      type: String
   field :display_name,        type: String
+  field :type,                type: String, default: 'wiki'
+  field :sort_order,          type: Integer
 
   field :editability,         type: String, default: 'learners'
   field :privacy,             type: String, default: 'public'
@@ -42,6 +45,7 @@ class Tag
     uniqueness: { scope: :badge }, exclusion: { in: APP_CONFIG['blocked_url_slugs'],
     message: "%{value} is a specially reserved url." }
   validates :display_name, presence: true
+  validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid type" }
   validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
   validates :editability, inclusion: { in: EDITABILITY_VALUES, 
     message: "%{value} is not a valid type of editability" }
@@ -49,7 +53,7 @@ class Tag
     message: "%{value} is not a valid type of privacy" }
 
   # Which fields are accessible?
-  attr_accessible :display_name, :summary, :wiki, :editability, :privacy
+  attr_accessible :display_name, :type, :sort_order, :summary, :wiki, :editability, :privacy
 
   # === CALLBACKS === #
 
@@ -57,7 +61,6 @@ class Tag
   after_validation :copy_name_field_errors
   after_validation :update_wiki_sections
   after_validation :update_wiki_versions # DO store the first value since it comes from the user
-  after_save :update_badge_display_name
   after_save :update_child_entries
 
   # === TAG METHODS === #
@@ -94,6 +97,8 @@ protected
       self.wiki_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
       self.tags = linkified_result[:tags]
       self.tags_with_caps = linkified_result[:tags_with_caps]
+    elsif wiki_sections.nil?
+      self.wiki_sections = []
     end
   end
 
@@ -111,20 +116,6 @@ protected
     end
   end
 
-  # When the display name changes, this callback goes up to the badge and if the tag exists
-  # in the badge topic list it will change it there as well
-  def update_badge_display_name
-    if display_name_changed? && !badge.topics.empty?
-      topic_item = badge.topics.detect { |t| t['tag_name'] == name_was }
-      if topic_item
-        topic_item['tag_name'] = name
-        topic_item['tag_name_with_caps'] = name_with_caps
-        topic_item['tag_display_name'] = display_name
-        badge.timeless.save
-      end
-    end
-  end
-
   # If the tag name changes we want to update the parent_tag field on all of the child entries.
   # The parent_tag field isn't really used right now so this is mostly just to maintain consistency.
   def update_child_entries
@@ -133,6 +124,15 @@ protected
         entry.parent_tag = name_with_caps
         entry.timeless.save
       end
+    end
+  end
+
+  # NOTE: DISABLING FOR NOW BECAUSE CAUSES INFINITE LOOP FROM badge.update_topics
+  # When the display name changes for a requirement, this callback updates the badge
+  def update_badge_topic_list_text
+    if display_name_changed? && (type == 'requirement')
+      badge.refresh_topic_list_text
+      badge.timeless.save
     end
   end
 end

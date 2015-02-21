@@ -471,11 +471,11 @@
 
 <% end %>
 
-<% if @show_progress && (@badge.has_topics? || @current_user_is_log_owner) %>
+<% if @show_progress && (@badge.has_requirements? || @current_user_is_log_owner) %>
 
   <!-- === EVIDENCE === -->
 
-  <% if @badge.has_topics? %>
+  <% if @badge.has_requirements? %>
 
     <% @log.posts_by_topic.each do |topic_item| %>
       <% if @current_user_is_log_owner                        \

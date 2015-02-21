@@ -296,19 +296,19 @@
 
     <!-- === TOPIC LIST === -->
 
-  <% if @badge.has_topics? || (@can_edit_badge && @show_progress) %>
+  <% if @badge.has_requirements? || (@can_edit_badge && @show_progress) %>
       
     <div class="tab-pane" id="requirements">
 
       <div class="row">
         <div class="span12">
-          <div class="tab-header merge-with-card <%= (@badge.has_topics?) ? '' : 'empty' %>">
+          <div class="tab-header merge-with-card <%= (@badge.has_requirements?) ? '' : 'empty' %>">
             <% if @can_edit_badge %>
               <a tabindex="-1" class="btn btn-small" id="edit-topic-list" data-toggle="custom" 
                 data-hide="#edit-topic-list,#topic-list-row,#topic-footer-row" 
                 data-focus="#badge_topic_list_text" data-show="#topic-list-inline-form">
                   
-                  <% if @badge.has_topics? %>
+                  <% if @badge.has_requirements? %>
                     <i class="fa fa-pencil"></i> Edit the requirement list
                   <% else %>
                     <i class="fa fa-plus"></i> Add a requirement list
@@ -333,24 +333,24 @@
         </div>
       </div>
 
-      <% if @badge.has_topics? %>
+      <% if @badge.has_requirements? %>
 
         <div class="row" id="topic-list-row">
           <div class="span12">
             <div class="info-card text-card topic-list-card">
               <ul>
-                <% @badge.topics.each do |topic| %>
+                <% @badge.requirements.each do |tag| %>
                   <li>
-                    <%= link_to "<i class='fa fa-book'></i> #{topic['tag_display_name']}".html_safe, 
-                      group_badge_path(@group, @badge) + "/" + topic['tag_name_with_caps'] %>
+                    <%= link_to "<i class='fa fa-book'></i> #{tag.display_name}".html_safe, 
+                      group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
                     <%= 
                       link_to "<i class='fa fa-comment'></i> Post Evidence".html_safe, 
                         new_group_badge_log_entry_path(@group, @badge, @log, \
-                        tag: topic['tag_name_with_caps']), class: 'btn btn-mini' \
+                        tag: tag.name_with_caps), class: 'btn btn-mini' \
                       if @current_user_is_learner || @current_user_is_expert
                     %>
                   </li>
-                <% end %>
+                <% end unless @badge.requirements.blank? %>
               </ul>
             </div>
           </div>

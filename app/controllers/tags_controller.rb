@@ -11,26 +11,7 @@ class TagsController < ApplicationController
   # === RESTFUL ACTIONS === #
 
   def index
-    @topics = []
-    tag_names = []
-
-    @badge.tags.each do |tag|
-      tag_names << tag.name
-      @topics << tag
-    end
-
-    @badge.topics.each do |topic_item|
-      if !topic_item['tag_name'].blank? && !tag_names.include?(topic_item['tag_name'])
-        cur_tag = Tag.new
-        cur_tag.name = topic_item['tag_name']
-        cur_tag.name_with_caps = topic_item['tag_name_with_caps']
-        cur_tag.display_name = topic_item['tag_display_name']
-
-        @topics << cur_tag
-      end
-    end
-
-    @topics.sort_by! { |topic| topic.display_name || topic.name || 'z' }
+    @topics = @badge.wikis
   end
 
 
@@ -233,14 +214,7 @@ private
         @tag = Tag.new
         @tag.name_with_caps = params[:tag_id] || params[:id]
         @tag.name = @tag.name_with_caps.downcase
-        if @badge.tag_display_name(@tag.name).nil?
-          @tag.display_name = detagify_string(@tag.name_with_caps)
-          # This tag was invented by the current user so leave the database default editability
-        else
-          @tag.display_name = @badge.tag_display_name(@tag.name)
-          # This tag is one of the official requirements so set the editability same as the badge
-          @tag.editability = @badge.editability
-        end
+        @tag.display_name = detagify_string(@tag.name_with_caps)
       else
         @tag = Tag.new(params[:tag])
       end

@@ -193,9 +193,7 @@ class Log
     
     if badge
       # First build out the topic map so that it contains all of the badge topics
-      badge_topic_names = []
-      badge.topics.each { |topic| badge_topic_names << topic['tag_name'] }
-      badge.tags.where(:name.in => badge_topic_names).each do |tag|
+      badge.requirements.each do |tag|
         topic_item = { 'tag' => tag, 'entries' => [] }
         topic_list << topic_item
         topic_map[tag] = topic_item

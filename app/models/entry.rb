@@ -153,14 +153,7 @@ protected
         t.wiki = ''
         t.current_user = current_user
         t.current_username = current_username
-        if log.badge.tag_display_name(t.name).nil?
-          t.display_name = detagify_string(t.name_with_caps)
-          # This tag was invented by the current user so leave the database default editability
-        else
-          t.display_name = log.badge.tag_display_name(t.name)
-          # This tag is one of the official requirements so set the editability same as the badge
-          t.editability = log.badge.editability
-        end
+        t.display_name = detagify_string(t.name_with_caps)
         t.save
         self.tag = t
       end

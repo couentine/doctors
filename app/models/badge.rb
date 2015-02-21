@@ -41,7 +41,7 @@ class Badge
   field :info_tags_with_caps,         type: Array
 
   field :topic_list_text,             type: String
-  field :topics,                      type: Array, default: []
+  field :topics,                      type: Array, default: [] # RETIRED field
 
   field :image_frame,                 type: String
   field :image_icon,                  type: String
@@ -136,8 +136,22 @@ class Badge
     !info_versions.blank? && !info.blank?
   end
 
-  def has_topics?
-    !topics.blank?
+  def has_requirements?
+    !requirements.blank?
+  end
+
+  def has_wikis?
+    !wikis.blank?
+  end
+
+  # Return tags with type = 'requirement' sorted by sort_order
+  def requirements
+    tags.where(type: 'requirement').order_by(:sort_order.asc)
+  end
+
+  # Return all non-requiremetn tags sorted by name
+  def wikis
+    tags.where(:type.ne => 'requirement').order_by(:name.asc)
   end
 
   # Returns all non-validated logs, sorted by user's name
@@ -229,11 +243,13 @@ class Badge
     validation_threshold
   end
 
-  # Returns the display name of a topic from the topic list
-  # Pass the downcased topic tag
-  def tag_display_name(tag_name)
-    topic_item = topics.detect { |t| t['tag_name'] == tag_name }
-    (topic_item.nil?) ? nil : topic_item['tag_display_name']
+  # Refresh the topic_list_text from the requirements list
+  def refresh_topic_list_text
+    if has_requirements?
+      self.topic_list_text = requirements.map{ |tag| tag.display_name }.join("\n")
+    else
+      self.topic_list_text = ''
+    end
   end
 
 protected
@@ -321,24 +337,46 @@ protected
 
   def update_topics
     if topic_list_text_changed?
-      self.topics = []
-      existing_topics = [] # used to dedupe the list
+      # First build a map of current tags
+      badge_tags = {}
+      tags.each { |tag| badge_tags[tag.name] = tag }
 
+      # Now run through the topic list and process name changes while building new requirement list
+      new_requirement_name_list = []
+      sort_index = 0
       topic_list_text.split(/\r?\n|,/).each do |tag_display_name|
         unless tag_display_name.blank?
+          sort_index += 1
           tag_name_with_caps = tagify_string tag_display_name
           tag_name = tag_name_with_caps.downcase
+          new_requirement_name_list << tag_name
           
-          unless existing_topics.include? tag_name
-            self.topics << {
-              'tag_name' => tag_name,
-              'tag_name_with_caps' => tag_name_with_caps,
-              'tag_display_name' => tag_display_name
-            }
-            existing_topics << tag_name
+          if badge_tags.has_key? tag_name
+            badge_tags[tag_name].type = 'requirement'
+            badge_tags[tag_name].sort_order = sort_index
+            badge_tags[tag_name].display_name = tag_display_name
+            badge_tags[tag_name].name_with_caps = tag_name_with_caps
+            badge_tags[tag_name].save if badge_tags[tag_name].changed?
+          else
+            new_tag = Tag.new()
+            new_tag.badge = self
+            new_tag.type = 'requirement'
+            new_tag.sort_order = sort_index
+            new_tag.name = tag_name
+            new_tag.display_name = tag_display_name
+            new_tag.name_with_caps = tag_name_with_caps
+            new_tag.save
           end
         end
       end unless topic_list_text.blank?
+
+      # Finally run through and de-mote any old requirements which are no longer in the list
+      requirements.each do |tag|
+        unless new_requirement_name_list.include? tag.name
+          tag.type = 'wiki'
+          tag.save
+        end
+      end
     end
   end
 

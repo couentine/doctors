@@ -223,6 +223,7 @@ namespace :db do
     puts " >> Done."
   end
 
+  # WARNING >> The badge topics field has been retired and replaced by the requirements method.
   task backpopulate_parent_tags: :environment do
     print "Examining #{Entry.count} entries"
     

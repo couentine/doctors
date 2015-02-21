@@ -24,17 +24,17 @@
         <span class="card-text">
           <p><%= badge.summary %></p>
           
-          <% if badge.has_topics? %>
+          <% if badge.has_requirements? %>
             <h4>Required Evidence</h4>
             <ul class="topic-list">
-              <% badge.topics.each do |topic| %>
+              <% badge.requirements.each do |tag| %>
                 <li>
-                  <%= link_to "<i class='fa fa-book'></i> #{topic['tag_display_name']}".html_safe, 
-                    group_badge_path(badge.group, badge) + "/" + topic['tag_name_with_caps'] %>
+                  <%= link_to "<i class='fa fa-book'></i> #{tag.display_name}".html_safe, 
+                    group_badge_path(badge.group, badge) + "/" + tag.name_with_caps %>
                   <%= 
                     link_to "<i class='fa fa-comment'></i> Post".html_safe, 
                       new_group_badge_log_entry_path(badge.group, badge, \
-                      current_user.find_log(badge), tag: topic['tag_name_with_caps']), 
+                      current_user.find_log(badge), tag: tag.name_with_caps), 
                       class: 'btn btn-mini' \
                     if current_user && \
                       (current_user.learner_of?(badge) || current_user.expert_of?(badge))
