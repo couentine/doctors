@@ -596,6 +596,11 @@ header.navbar {
       }
     }
   }
+
+  @media (max-width: 767px) {
+    .subheader-breadcrumbs ul li { display: none; }
+    .subheader-breadcrumbs ul li.active { display: inline-block; }
+  }
 }
 
 /* === FOOTER === */
