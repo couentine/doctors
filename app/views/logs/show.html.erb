@@ -247,15 +247,15 @@
 
     <div class="modal-body">
       <p>
-        You've earned the badge, congratulations! Now you can share your accomplishment by exporting
-        the badge to your Mozilla Backpack. Once the badge is in your backpack you will be able to 
-        display it alongside other Open Badges and share it out to other social networks.
-      </p>
-      <p>&nbsp;</p>
-      <p>
         <a href="#" id="export-to-backpack" class="btn btn-large btn-success">
           Export this badge to your Mozilla Backpack
         </a>
+      </p>
+      <p>&nbsp;</p>
+      <p>
+        <strong>NOTE:</strong> You'll only be able to export this badge to a backpack linked to 
+        the same email address
+        (<strong><%= current_user.email%></strong>).
       </p>
     </div>
 
