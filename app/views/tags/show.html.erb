@@ -59,7 +59,7 @@
           <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, 
             [@group, @badge, @tag], method: :delete, data: { 
             confirm: ('Are you sure you want to permanently delete the contents of this ' \
-              + 'requirement page?') } %>
+              + 'page?') } %>
         </li>
       <% end %>
     <% end %>
@@ -67,106 +67,115 @@
   <% end %>
 <% end %>
 
-<!-- === TOPIC VERSION LIST === -->
+<% if @tag_exists %>
 
-<% if @show_version_list %>
+  <!-- === TOPIC VERSION LIST === -->
 
-  <div class="well tertiary span9 offset1">
-    <i class="fa fa-book header-icon"></i>
+  <% if @show_version_list %>
 
-    <h3>Browsing previous versions of the page</h3>
-    
-    <p>
-      Currently viewing version <%= @current_version %> 
-      created by <%= @current_version_info['username'] %> 
-      on <%= @current_version_info['updated_at_text'] %>.
-    </p>
-    
-    <p>
-      <% if @can_edit_tag && !@version_list.blank? && (@current_version != @version_list.count) %>
-        <%= link_to 'Restore this version', 
-          tag_restore_path(@group, @badge, @tag, v: @current_version), method: :post,
-          class: 'btn btn-primary btn-small' %>
+    <div class="well tertiary span9 offset1">
+      <% if @tag.type == 'requirement' %>
+        <i class="fa fa-pencil-square header-icon"></i>
+      <% else %>
+        <i class="fa fa-file header-icon"></i>
       <% end %>
 
-      <%= link_to 'Close version browser', [@group, @badge, @tag], class: 'btn btn-small' %>
-    </p>
+      <h3>Browsing previous versions of the page</h3>
+      
+      <p>
+        Currently viewing version <%= @current_version %> 
+        created by <%= @current_version_info['username'] %> 
+        on <%= @current_version_info['updated_at_text'] %>.
+      </p>
+      
+      <p>
+        <% if @can_edit_tag && !@version_list.blank? && (@current_version != @version_list.count) %>
+          <%= link_to 'Restore this version', 
+            tag_restore_path(@group, @badge, @tag, v: @current_version), method: :post,
+            class: 'btn btn-primary btn-small' %>
+        <% end %>
 
-    <!-- <h4>Version history</h4> -->
+        <%= link_to 'Close version browser', [@group, @badge, @tag], class: 'btn btn-small' %>
+      </p>
 
-    <% unless @version_list.blank? %>
-      <table class="table table-striped version-list">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Version Info</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      <!-- <h4>Version history</h4> -->
 
-        <tbody>
-          <% @version_list.each_with_index do |version_info, i| %>
+      <% unless @version_list.blank? %>
+        <table class="table table-striped version-list">
+          <thead>
             <tr>
-              <td><b><%= (i + 1).to_s %></b></td>
-              <td>
-                Created by <%= version_info['username'] %> 
-                on <%= version_info['updated_at_text'] %>
-              </td>
-              <td>
-                <% if (i + 1) == @current_version %>
-                  (Currently viewing this version)
-                <% else %>
-                  <%= link_to "View this version", group_badge_tag_path(@group, @badge, @tag, v: (i + 1)),
-                    class: 'btn btn-mini' %>
-                <% end %>
-              </td>
+              <th>#</th>
+              <th>Version Info</th>
+              <th>Actions</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
-    <% end %>
-  </div>
+          </thead>
 
-<% end %>
-
-
-<!-- === TOPIC PAGE === -->
-
-<div class="row add-top-margin">
-
-  <div class="span12">
-    <div class="page-card tag-page-card">
-
-      <div class="header-section">
-
-        <span class="badge-link">
-          <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), [@group, @badge],
-            title: "Return to the badge page",
-            data: { toggle: 'tooltip', placement: 'left' } %>
-          <span class="badgename">
-            <%= @badge.name %>
-          </span>
-        </span>
-
-        <h1>
-          <%= @tag.display_name %>
-        </h1>
-
-        <% if !@show_version_list %>
-          <h2>
-            <i class="fa fa-key"></i> 
-            <% if @tag.editability == 'admins' %>
-              Only editable by group admins
-            <% elsif !@show_progress %>
-              Editable by all <%= @experts %>
-            <% elsif @tag.editability == 'experts' %>
-              Only editable by <%= @experts %>
-            <% else %>
-              Editable by <%= @experts %> &amp; <%= @learners %>
+          <tbody>
+            <% @version_list.each_with_index do |version_info, i| %>
+              <tr>
+                <td><b><%= (i + 1).to_s %></b></td>
+                <td>
+                  Created by <%= version_info['username'] %> 
+                  on <%= version_info['updated_at_text'] %>
+                </td>
+                <td>
+                  <% if (i + 1) == @current_version %>
+                    (Currently viewing this version)
+                  <% else %>
+                    <%= link_to "View this version", group_badge_tag_path(@group, @badge, @tag, v: (i + 1)),
+                      class: 'btn btn-mini' %>
+                  <% end %>
+                </td>
+              </tr>
             <% end %>
-          </h2>
-          
-          <% if @tag_exists %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+
+  <% end %>
+
+  <!-- === TOPIC PAGE === -->
+
+  <div class="row add-top-margin">
+
+    <div class="span12">
+      <div class="page-card tag-page-card">
+
+        <div class="header-section">
+
+          <span class="badge-link">
+            <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), [@group, @badge],
+              title: "Return to the badge page",
+              data: { toggle: 'tooltip', placement: 'left' } %>
+            <span class="badgename">
+              <%= @badge.name %>
+            </span>
+          </span>
+
+          <h1>
+            <% if @tag.type == 'requirement' %>
+              <i class="fa fa-pencil-square"></i>
+            <% else %>
+              <i class="fa fa-file"></i>
+            <% end %>
+            <%= @tag.display_name %>
+          </h1>
+
+          <% if !@show_version_list %>
+            <h2>
+              <i class="fa fa-key"></i> 
+              <% if @tag.editability == 'admins' %>
+                Only editable by group admins
+              <% elsif !@show_progress %>
+                Editable by all <%= @experts %>
+              <% elsif @tag.editability == 'experts' %>
+                Only editable by <%= @experts %>
+              <% else %>
+                Editable by <%= @experts %> &amp; <%= @learners %>
+              <% end %>
+            </h2>
+            
             <ul>
               <li>
                 <i class="fa fa-clock-o"></i> 
@@ -179,30 +188,29 @@
                     group_badge_tag_path(@group, @badge, @tag, v: '') %>)
                 </li>
               <% end %>
-              <li>
-                <% if @tag.privacy == 'secret' %>
-                  <i class='fa fa-user-secret'></i> 
-                  Evidence only visible to badge <%= @experts %> and group admins
-                <% elsif @tag.privacy == 'private' %>
-                  <i class='fa fa-eye-slash'></i> 
-                  Evidence only visible to group members
-                <% elsif @group.private? %>
-                  <i class='fa fa-link'></i> 
-                  Evidence visible to anyone with the link
-                <% else %>
-                  <i class='fa fa-eye'></i> 
-                  Evidence visible to public
-                <% end %>
-              </li>
+              <% if @tag.type == 'requirement' %>
+                <li>
+                  <% if @tag.privacy == 'secret' %>
+                    <i class='fa fa-user-secret'></i> 
+                    Evidence only visible to badge <%= @experts %> and group admins
+                  <% elsif @tag.privacy == 'private' %>
+                    <i class='fa fa-eye-slash'></i> 
+                    Evidence only visible to group members
+                  <% elsif @group.private? %>
+                    <i class='fa fa-link'></i> 
+                    Evidence visible to anyone with the link
+                  <% else %>
+                    <i class='fa fa-eye'></i> 
+                    Evidence visible to public
+                  <% end %>
+                </li>
+              <% end %>
             </ul>
           <% end %>
-        <% end %>
 
-      </div>
-      
-      <div class="body-section">
-        <% if @tag_exists %>
-          
+        </div>
+        
+        <div class="body-section">          
           <% if @tag.summary %>
             <div class="section-container lead">
               <%= @tag.summary %>
@@ -212,119 +220,130 @@
           <% @tag.wiki_sections.each do |section_text| %>
             <div class="section-container"><%= section_text.html_safe %></div>
           <% end %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <% if @show_progress && !@show_version_list %>
+
+    <!-- === START EVIDENCE LISTS AREA === -->
+
+    <% if @current_user_log && (@tag.type == 'requirement') %>
+
+      <!-- === CURRENT USER EVIDENCE === -->
+
+      <div class="row add-top-margin">
+        <div class="span12">
+          <div class="tab-header">
+            <% if !@current_user_entries.blank? %>
+              <%= link_to '<i class="fa fa-comment"></i> Post Evidence'.html_safe,
+                new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
+                class: 'btn btn-small' %>
+            <% end %>
+
+            <h2>Your evidence</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        
+        <% if @current_user_entries.blank? %>
+
+          <div class="well span7 offset2 gray empty">
+            <h3>You haven't submitted any evidence for this requirement yet...</h3>
+            <p>&nbsp;</p>
+            <p>
+              <%= link_to '<i class="fa fa-comment"></i> Post your evidence'.html_safe,
+                new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
+                class: 'btn btn-primary' %>
+            </p>
+          </div>
 
         <% else %>
 
-          <div class="section-container alert">
-              This requirement hasn't had a page created for it yet.
-              <% if @can_edit_tag %>
-                <br><br>
-                <%= link_to \
-                  "<i class='icon-plus-sign icon-white'></i> Create requirement page".html_safe,
-                  "#{@tag.name_with_caps}/edit", class: 'btn btn-large btn-success ignore' %>
-              <% end %>
+          <div class="span12">
+
+            <%= render(@current_user_entries, show_badge: false, date_format: :ago) %>
+
           </div>
         
         <% end %>
+
       </div>
 
-    </div>
-  </div>
-</div>
+    <% end %>
 
-<% if @show_progress && !@show_version_list %>
+    <% if @current_user_can_see_entries %>
 
-  <!-- === START EVIDENCE LISTS AREA === -->
+      <!-- === TOPIC DISCUSSION === -->
 
-  <% if @current_user_log %>
-
-    <!-- === CURRENT USER EVIDENCE === -->
-
-    <div class="row add-top-margin">
-      <div class="span12">
-        <div class="tab-header">
-          <% if !@current_user_entries.blank? %>
-            <%= link_to '<i class="fa fa-comment"></i> Post Evidence'.html_safe,
-              new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
-              class: 'btn btn-small' %>
-          <% end %>
-
-          <h2>Your evidence</h2>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      
-      <% if @current_user_entries.blank? %>
-
-        <div class="well span7 offset2 gray empty">
-          <h3>You haven't submitted any evidence for this requirement yet...</h3>
-          <p>&nbsp;</p>
-          <p>
-            <%= link_to '<i class="fa fa-comment"></i> Post your evidence'.html_safe,
-              new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
-              class: 'btn btn-primary' %>
-          </p>
-        </div>
-
-      <% else %>
-
+      <div class="row add-top-margin">
         <div class="span12">
-
-          <%= render(@current_user_entries, show_badge: false, date_format: :ago) %>
-
-        </div>
-      
-      <% end %>
-
-    </div>
-
-  <% end %>
-
-  <% if @current_user_can_see_entries %>
-
-    <!-- === TOPIC DISCUSSION === -->
-
-    <div class="row add-top-margin">
-      <div class="span12">
-        <div class="tab-header">
-          <% if @current_user_log %>
-            <h2>Evidence posted by others</h2>
-          <% else %>
-            <h2>All posted evidence</h2>
-          <% end %>
+          <div class="tab-header">
+            <% if @current_user_log %>
+              <h2>Evidence posted by others</h2>
+            <% else %>
+              <h2>All posted evidence</h2>
+            <% end %>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="row">
-      
-      <% if @entries.blank? %>
+      <div class="row">
+        
+        <% if @entries.blank? %>
 
-        <div class="well span7 offset2 gray empty">
-          <% if @current_user_entries.blank? %>
-            <h3>No one has submitted evidence for this requirement yet.</h3>
-          <% else %>
-            <h3>No one else has submitted evidence for this requirement yet.</h3>
-          <% end %>
-        </div>
+          <div class="well span7 offset2 gray empty">
+            <% if @current_user_entries.blank? %>
+              <h3>No one has submitted evidence for this requirement yet.</h3>
+            <% else %>
+              <h3>No one else has submitted evidence for this requirement yet.</h3>
+            <% end %>
+          </div>
 
-      <% else %>
+        <% else %>
 
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
-          data-bl-dyncol-width="12">
+          <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
+            data-bl-dyncol-width="12">
 
-          <%= render(@entries, show_badge: false, date_format: :ago) %>
+            <%= render(@entries, show_badge: false, date_format: :ago) %>
 
-        </div>
-      
-      <% end %>
+          </div>
+        
+        <% end %>
 
-    </div>
+      </div>
+
+    <% end %>
+
+    <!-- === END EVIDENCE LISTS AREA === -->
 
   <% end %>
 
-  <!-- === END EVIDENCE LISTS AREA === -->
+<% else %>
+
+    <!-- === NO PAGE HAS BEEN CREATED YET === -->
+    
+    <div class="row add-top-margin">
+
+      <div class="well secondary span9 offset1 add-top-margin">
+        <i class="fa fa-question-circle header-icon"></i>
+
+        <h4>No page has been created for...</h4>
+        <h3>"<%= @tag.display_name %>"</h3>
+        
+        <% if @can_edit_tag %>
+          <p>
+            <%= link_to \
+              "<i class='fa fa-file'></i> Create new wiki page here".html_safe,
+              "#{@tag.name_with_caps}/edit", class: 'btn btn-large btn-success ignore' %>
+          </p>
+        <% end %>
+      </div>
+      
+    </div>
 
 <% end %>

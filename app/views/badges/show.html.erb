@@ -339,18 +339,37 @@
           <div class="span12">
             <div class="info-card text-card topic-list-card">
               <ul>
-                <% @badge.requirements.each do |tag| %>
-                  <li>
-                    <%= link_to "<i class='fa fa-book'></i> #{tag.display_name}".html_safe, 
-                      group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
-                    <%= 
-                      link_to "<i class='fa fa-comment'></i> Post Evidence".html_safe, 
-                        new_group_badge_log_entry_path(@group, @badge, @log, \
-                        tag: tag.name_with_caps), class: 'btn btn-mini' \
-                      if @current_user_is_learner || @current_user_is_expert
+                <% if @current_user_is_learner || @current_user_is_expert %>
+                  
+                  <% requirements_complete = @log.requirements_complete %>
+                  <% @badge.requirements.each do |tag| %>
+                    <%
+                      if requirements_complete[tag]
+                        icon_text = "<i class='fa fa-check-square-o'></i>"
+                      else
+                        icon_text = "<i class='fa fa-square-o'></i>"
+                      end
                     %>
-                  </li>
-                <% end unless @badge.requirements.blank? %>
+                    <li>
+                      <%= link_to "#{icon_text} #{tag.display_name}".html_safe, \
+                        group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
+                      <%= link_to "<i class='fa fa-comment'></i> Post Evidence".html_safe, \
+                          new_group_badge_log_entry_path(@group, @badge, @log, \
+                          tag: tag.name_with_caps), class: 'btn btn-mini' %>
+                    </li>
+                  <% end %>
+                
+                <% else %>
+
+                  <% @badge.requirements.each do |tag| %>
+                    <li>
+                      <%= link_to \
+                        "<i class='fa fa-pencil-square'></i> #{tag.display_name}".html_safe, 
+                        group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
+                    </li>
+                  <% end %>
+                
+                <% end %>
               </ul>
             </div>
           </div>
@@ -484,6 +503,26 @@
 
   <% end %>
 
+  <!-- === BADGE WIKI === -->
+
+  <% if @badge.has_wikis? || @can_edit_badge %>
+
+    <div class="tab-pane" id="wiki">
+  
+      <div class="row">
+        <div class="span12">
+          <div class="tab-header no-border solo-header <%= (@badge.has_wikis?) ? '' : 'empty' %>">
+            <%= link_to "<i class='fa fa-book'></i> View Badge Wiki".html_safe,
+              group_badge_path(@group, @badge) + '/topics', class: "btn btn-small" %>
+
+            <h2>Badge Wiki</h2>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  <% end %>
 
   <!-- === EXPERTS TAB === -->
 

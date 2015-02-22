@@ -215,6 +215,27 @@ class Log
     topic_list
   end
 
+  # Returns a map with keys = each of the badge requirement tag ids
+  # and values = true / false indicating whether that requirement is complete
+  def requirements_complete
+    requirement_map = {} # this is a map to keep track of the list contents while we're building it
+    
+    if badge
+      # First initialize the topic map with everything set to false
+      badge.requirements.each { |tag| requirement_map[tag] = false }
+
+      # Then run through and log any entries which've been posted to the requirements
+      entries.where(type: 'post').each do |entry|
+        if entry.tag && requirement_map.has_key?(entry.tag)
+          requirement_map[entry.tag] = true
+        end
+      end
+    end
+
+    # return value = 
+    requirement_map
+  end
+
   # Returns all entries with type = 'validation', sorted from newest to oldest
   def validations
     entries.all(type: 'validation').order_by(:updated_at.desc)

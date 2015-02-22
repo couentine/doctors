@@ -263,4 +263,56 @@ namespace :db do
     puts " >> Done."
   end
 
+  # Runs through and makes sure all tags have the appropriate metadata
+  task fix_badge_tags: :environment do
+    print "Updating #{Badge.count} badges"
+
+    Badge.each do |badge|
+      # First build a map of current tags
+      badge_tags = {}
+      badge.tags.each { |tag| badge_tags[tag.name] = tag }
+
+      # Now run through the topic list and process name changes while building new requirement list
+      new_requirement_name_list = []
+      sort_index = 0
+      badge.topic_list_text.split(/\r?\n|,/).each do |tag_display_name|
+        unless tag_display_name.blank?
+          sort_index += 1
+          tag_name_with_caps = tagify_string tag_display_name
+          tag_name = tag_name_with_caps.downcase
+          new_requirement_name_list << tag_name
+          
+          if badge_tags.has_key? tag_name
+            badge_tags[tag_name].type = 'requirement'
+            badge_tags[tag_name].sort_order = sort_index
+            badge_tags[tag_name].display_name = tag_display_name
+            badge_tags[tag_name].name_with_caps = tag_name_with_caps
+            badge_tags[tag_name].timeless.save if badge_tags[tag_name].changed?
+          else
+            new_tag = Tag.new()
+            new_tag.badge = badge
+            new_tag.type = 'requirement'
+            new_tag.sort_order = sort_index
+            new_tag.name = tag_name
+            new_tag.display_name = tag_display_name
+            new_tag.name_with_caps = tag_name_with_caps
+            new_tag.timeless.save
+          end
+        end
+      end unless badge.topic_list_text.blank?
+
+      # Finally run through and make sure that any extra tags have a value for type
+      badge.tags.each do |tag|
+        unless new_requirement_name_list.include? tag.name
+          tag.type = 'wiki'
+          tag.timeless.save if tag.changed?
+        end
+      end
+
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end

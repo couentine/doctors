@@ -93,6 +93,7 @@ class Badge
   before_save :update_terms
   before_save :update_topics
   after_create :add_creator_as_expert
+  after_save :update_requirement_editability
 
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -376,6 +377,16 @@ protected
           tag.type = 'wiki'
           tag.save
         end
+      end
+    end
+  end
+
+  # If the badge editability is changed this method propogates that change to the requirement tags
+  def update_requirement_editability
+    if editability_changed?
+      requirements.each do |tag|
+        tag.editability = self.editability
+        tag.timeless.save
       end
     end
   end

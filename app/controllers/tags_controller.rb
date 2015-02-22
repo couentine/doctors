@@ -60,7 +60,13 @@ class TagsController < ApplicationController
     end
 
     respond_to do |format|
-      format.html # show.html.erb
+      format.html do 
+        if (@tag.name == 'topics') && !@tag_exists
+          @topics = @badge.wikis
+          render :index
+        end
+        # else: show.html.erb
+      end
       format.json { render json: @tag, filter_user: current_user }
     end
   end
@@ -224,10 +230,11 @@ private
     # NOTE: If this group is private then the controller takes care of bouncing non-members
     #       So we really only need to worry about the "secret" level of privacy. 
     #       (But it's not that hard to be super accurate so we will be.)
-    @current_user_can_see_entries = \
-      ((@tag.privacy == 'secret') && (@current_user_is_expert || @current_user_is_admin)) \
-      || ((@tag.privacy == 'private') && (@current_user_is_member || @current_user_is_admin)) \
-      || (@tag.privacy == 'public')
+    @current_user_can_see_entries = (@tag.type == 'requirement') && ( \
+        ((@tag.privacy == 'secret') && (@current_user_is_expert || @current_user_is_admin)) \
+        || ((@tag.privacy == 'private') && (@current_user_is_member || @current_user_is_admin)) \
+        || (@tag.privacy == 'public') \
+      )
   end
 
   def can_view_tag

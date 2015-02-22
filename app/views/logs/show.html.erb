@@ -106,9 +106,7 @@
                 <%= link_to "<i class='fa fa-flag-checkered'></i> Request validation".html_safe,
                   group_badge_log_path(@group, @badge, @log, log: { date_requested: Time.now }), 
                   method: :put, data: { confirm: "Are you sure you want to send a request to all "\
-                  + "of the #{@experts} asking for them to validate your progress log? \n\n"\
-                  + "TIP: Before submitting your request it's a good idea to update "\
-                  + "your personal profile and post final evidence to your progress log." } %>
+                  + "of the #{@experts} asking for them to validate your progress log?" } %>
               </li>
             <% end %>
           </ul>
@@ -498,17 +496,21 @@
               <% end %>
 
               <h2>
-                <% if topic_item['tag'] %>
-                  <%= link_to \
-                    "<i class='fa fa-book'></i> #{topic_item['tag'].display_name}".html_safe, \
-                    [@group, @badge, topic_item['tag']] \
-                  %>
-                <% else %>
-                  <%= link_to \
-                    "<i class='fa fa-simplybuilt'></i> Etcetera".html_safe, \
-                    [@group, @badge, topic_item['tag']] \
-                  %>
-                <% end %>
+                <%
+                  if topic_item['tag']
+                    topic_text = topic_item['tag'].display_name
+                    if topic_item['entries'].blank?
+                      icon_text = "<i class='fa fa-square-o'></i>"
+                    else
+                      icon_text = "<i class='fa fa-check-square-o'></i>"
+                    end
+                  else
+                    topic_text = 'Etcetera'
+                    icon_text = "<i class='fa fa-simplybuilt'></i>"
+                  end
+                %>
+                <%= link_to "#{icon_text} #{topic_text}".html_safe, \
+                  [@group, @badge, topic_item['tag']] %>
               </h2>
             </div>
           </div>

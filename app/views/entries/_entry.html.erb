@@ -81,7 +81,7 @@
             
             <% unless entry.tags.blank? %>
               <div class="card-body-footer">
-                <label><i class="fa fa-book"></i> Tags:</label> 
+                <label><i class="fa fa-tags"></i> Tags:</label> 
                 <% entry.tags_with_caps.each do |tag| %>
                   <% comma = (tag == entry.tags_with_caps.last) ? '' : ', ' %>
                   <%= link_to tag, \

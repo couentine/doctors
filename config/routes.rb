@@ -62,7 +62,7 @@ BadgeList::Application.routes.draw do
   match ':group_id/:badge_id/learners' => 'badges#create_learners', via: :post,
         as: :create_badge_learners
   match ':group_id/:badge_id/entries' => 'badges#entries_index', via: :get, as: :badge_entries
-  match ':group_id/:badge_id/topics' => 'tags#index', via: :get, as: :badge_topics
+  # match ':group_id/:badge_id/topics' => 'tags#index', via: :get, as: :badge_topics
   match ':group_id/:badge_id/issue' => 'badges#issue_form', via: :get, as: :badge_issue
   match ':group_id/:badge_id/issue' => 'badges#issue_save', via: :post
   

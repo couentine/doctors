@@ -53,6 +53,7 @@ class Entry
   before_save :update_body_sections
   before_save :update_body_versions # DO store the first value since it comes from the user
   after_create :send_notifications
+  after_create :request_validation_if_complete
   after_destroy :check_log_validation_counts
   
   # === ENTRY METHODS === #
@@ -196,6 +197,22 @@ protected
       if (type == 'validation') && (log.user != creator)
         UserMailer.log_validation_received(log.user, creator, \
           log.badge.group, log.badge, log, self).deliver 
+      end
+    end
+  end
+
+  # This method checks to see if all of the requirements are complete and if so requests validation
+  # (only if validation has not previously been requested or withdrawn)
+  def request_validation_if_complete
+    if log.date_requested.nil? && log.date_withdrawn.nil?
+      everything_complete = true
+      log.requirements_complete.each do |tag, complete|
+        everything_complete = everything_complete && complete
+      end
+      
+      if everything_complete
+        log.date_requested = Time.now
+        log.save # this will send out the validation request email
       end
     end
   end

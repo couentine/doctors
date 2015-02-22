@@ -84,6 +84,11 @@ protected
     if summary && (summary.length > MAX_SUMMARY_LENGTH)
       self.summary = summary[0, MAX_SUMMARY_LENGTH]
     end
+
+    # Editability for requirements must always match the badge editability
+    if (type == 'requirement') && badge
+      self.editability = badge.editability
+    end
   end
 
   # Takes any errors from name to display_name

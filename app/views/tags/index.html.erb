@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "#{@badge.name} - All Topic Pages")
+  provide(:title, "#{@badge.name} - Badge Wiki")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
 %>
@@ -14,7 +14,7 @@
     <span class="divider">/</span>
   </li>
   <li class="active">
-    All Topic Pages
+    Badge Wiki
   </li>
 <% end %>
 
@@ -75,7 +75,7 @@
       <div class="secondary-header span6">
         <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
           <span class="header-text">
-            <h1>All Topic Pages</h1>
+            <h1>Badge Wiki</h1>
           </span>     
         <% end %>       
       </div>
@@ -87,7 +87,23 @@
 
   <!-- === ENTRIES LIST === -->
 
-  <% if !@topics.blank? %>
+  <% if @topics.blank? %>
+  
+    <div class="row">
+      <div class="well tertiary span7 offset2">
+        <h3>No wiki pages yet...</h3>
+        <p>
+          No wiki pages have been created yet for this badge.
+        </p>
+        <p>
+          To create a wiki page just type any sub-url of the badge into your browser's location bar
+          (such as "<%= "/#{@group.url}/#{@badge.url}/example-page" %>"), then click the 
+          <strong>"Create new wiki page here"</strong> button.
+        </p>
+      </div>
+    </div>
+
+  <% else %>
 
     <div class="row">
       <div class="span12">
@@ -95,7 +111,7 @@
           <ul>
             <% @topics.each do |topic| %>
               <li>
-                <%= link_to "<i class='fa fa-book'></i> #{topic.display_name}".html_safe, 
+                <%= link_to "<i class='fa fa-file'></i> #{topic.display_name}".html_safe, 
                   group_badge_path(@group, @badge) + "/" + topic.name_with_caps %>
               </li>
             <% end %>

@@ -92,9 +92,8 @@ textarea {
   resize: vertical;
 }
 
-.add-top-margin {
-  margin-top: 30px;
-}
+.add-top-margin { margin-top: 30px; }
+.no-border { border: none !important; }
 
 @media (min-width: 768px) {
   .show-when-small {
@@ -1623,23 +1622,23 @@ form#group-add-users-form {
     &:not(.time-sensitive) { color: $light-text-color !important; }
   }
 
-  &.empty {
-    border: 2px dashed $light-gray;
-    background-color: $light-white;
-    color: $light-text-color;
-    border-radius: 10px;
-    margin-bottom: 0;
-
-    .btn {
-      background-color: $medium-gray;
-      color: $light-white !important;
-    }
-  }
   &.merge-with-card {
     margin-bottom: 0;
     position: relative;
     top: 4px;
     z-index: 10;
+  }
+  &.empty {
+    border: 2px dashed $light-gray;
+    background-color: $light-white;
+    color: $light-text-color;
+    border-radius: 10px;
+    margin-bottom: 30px;
+
+    .btn {
+      background-color: $medium-gray;
+      color: $light-white !important;
+    }
   }
 }
 .tab-footer {
@@ -2126,6 +2125,8 @@ div.cta-card {
       font-weight: bold;
       background-color: $really-light-gray;
       font-size: 40px;
+
+      .fa { color: $medium-gray; }
       
       @media (max-width: 767px) { font-size: 26px; }
     }

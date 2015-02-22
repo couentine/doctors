@@ -15,21 +15,8 @@
     <span class="divider">/</span>
   </li>
   <li class="active">
-    <%= "#{ (@tag_exists) ? 'Edit' : 'Create' } Requirement Page: #{@tag.display_name}" %>
+    <%= "#{ (@tag_exists) ? 'Edit' : 'Create' } Page: #{@tag.display_name}" %>
   </li>
-<% end %>
-
-<!-- === PAGE-SPECIFIC SCRIPTS === -->
-
-<% if @current_user_is_expert && @show_progress %>
-  <script>
-    // Converts "Test text like  this" > "Text-text-like-this"
-    function tagifyString(s) {
-      if (s == null) return '';
-      else return s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').replace(/ +/g, ' ')
-        .trim().replace(/ /g, '-');
-    }
-  </script>
 <% end %>
 
 <!-- === FORM AREA === -->
@@ -38,14 +25,16 @@
   <div class="bl-form bl-form-tag span10 offset1">
     
     <div class="form-header">
-      <% if @tag_exists %>
-        <h1>Edit requirement page</h1>
-      <% else %>
-        <h1>Create requirement page</h1>
-      <% end %>
+      <h1>
+        <%= (@tag_exists) ? "Edit #{@tag.type} page" : "Create #{@tag.type} page" %>
+      </h1>
 
       <div class="form-image">
-        <i class="fa fa-book"></i>
+        <% if @tag.type == 'requirement' %>
+          <i class="fa fa-pencil-square"></i>
+        <% else %>
+          <i class="fa fa-file"></i>
+        <% end %>
       </div>
     </div>
 
@@ -59,8 +48,9 @@
       <div class="form-body" style="float: none">
 
         <% if @current_user_is_expert %>
-          <%= f.input :display_name, label: 'Requirement Name', autofocus: true, 
-            placeholder: 'Orbital Trajectories' %>
+          <%= f.input :display_name, autofocus: true, 
+            label: (@tag.type == 'requirement') ? 'Requirement Name' : 'Page Title', 
+            placeholder: 'Orbital Trajectories', input_html: { maxlength: Tag::MAX_NAME_LENGTH } %>
         <% else %>
           <%= f.input :display_name, as: :hidden %>
           <div class="control-group">
@@ -77,12 +67,13 @@
         <%= f.input :wiki, as: :text, label: 'Page Body', 
           input_html: { class: "huge-text-area rich-text-area" } %>
 
-        <% if @current_user_is_expert || @current_user_is_admin || @badge_list_admin %>
+        <% if (@tag.type == 'requirement') \
+            && (@current_user_is_expert || @current_user_is_admin || @badge_list_admin) %>
           <%= f.input :privacy, label: 'Who can view evidence posted for this requirement?', 
             as: :radio_buttons, collection: @tag_privacy_options %>
         <% end %>
 
-        <% if @show_progress\
+        <% if @show_progress && (@tag.type != 'requirement') \
             && (@current_user_is_expert || @current_user_is_admin || @badge_list_admin) %>
           <%= f.input :editability, label: 'Who can edit this page?', as: :radio_buttons,
             collection: @tag_editability_options %>
