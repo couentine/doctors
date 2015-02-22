@@ -177,17 +177,19 @@
             </h2>
             
             <ul>
-              <li>
-                <i class="fa fa-clock-o"></i> 
-                <% if @tag.updated_at %>
-                  <%= "Last updated #{@tag.updated_at.to_s(:full_date_time)}" %>
-                <% else %>
-                  <%= "Created #{@tag.created_at.to_s(:full_date_time)}" %>
-                <% end %>
-                <% if @tag.current_username %>
-                  <%= "by #{@tag.current_username}" %> 
-                <% end %>
-              </li>
+              <% if @tag.updated_at || @tag.created_at %>
+                <li>
+                  <i class="fa fa-clock-o"></i> 
+                  <% if @tag.updated_at %>
+                    <%= "Last updated #{@tag.updated_at.to_s(:full_date_time)}" %>
+                  <% else %>
+                    <%= "Created #{@tag.created_at.to_s(:full_date_time)}" %>
+                  <% end %>
+                  <% if @tag.current_username %>
+                    <%= "by #{@tag.current_username}" %> 
+                  <% end %>
+                </li>
+              <% end %>
               <% if @can_edit_tag && (@current_version > 1) %>
                 <li>
                   <i class="fa fa-files-o"></i> This is version <%= @current_version %>
