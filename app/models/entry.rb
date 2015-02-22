@@ -204,7 +204,7 @@ protected
   # This method checks to see if all of the requirements are complete and if so requests validation
   # (only if validation has not previously been requested or withdrawn)
   def request_validation_if_complete
-    if log.date_requested.nil? && log.date_withdrawn.nil?
+    if log.date_issued.nil? && log.date_requested.nil? && log.date_withdrawn.nil?
       everything_complete = true
       log.requirements_complete.each do |tag, complete|
         everything_complete = everything_complete && complete
