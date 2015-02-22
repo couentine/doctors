@@ -179,7 +179,14 @@
             <ul>
               <li>
                 <i class="fa fa-clock-o"></i> 
-                <%= "Last updated #{@tag.updated_at.to_s(:full_date_time)} by #{@tag.current_username}" %>
+                <% if @tag.updated_at %>
+                  <%= "Last updated #{@tag.updated_at.to_s(:full_date_time)}" %>
+                <% else %>
+                  <%= "Created #{@tag.created_at.to_s(:full_date_time)}" %>
+                <% end %>
+                <% if @tag.current_username %>
+                  <%= "by #{@tag.current_username}" %> 
+                <% end %>
               </li>
               <% if @can_edit_tag && (@current_version > 1) %>
                 <li>
