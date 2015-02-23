@@ -65,11 +65,7 @@
         <% end %>
       <% end %>
       <div class="form-image">
-        <% if @parent_tag %>
-          <i class="fa <%= @parent_tag.format_icon %>"></i>
-        <% else %>
-          <i class="fa fa-pencil"></i>
-        <% end %>
+        <i class="fa <%= @entry.format_icon %>"></i>
       </div>
     </div>
 

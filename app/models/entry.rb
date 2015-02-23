@@ -8,7 +8,7 @@ class Entry
   
   MAX_SUMMARY_LENGTH = 100
   TYPE_VALUES = ['post', 'validation']
-  FORMAT_VALUES = ['text', 'link', 'image', 'tweet']
+  FORMAT_VALUES = ['text', 'link', 'image', 'tweet', 'code']
   JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, 
     :body_sections, :tags, :tags_with_caps]
   
@@ -24,11 +24,12 @@ class Entry
   field :summary,                         type: String
   field :private,                         type: Boolean, default: false
   field :type,                            type: String
-  field :format,                          type: String
+  field :format,                          type: String, default: 'text'
   field :log_validated,                   type: Boolean
   field :parent_tag,                      type: String
 
   field :body,                            type: String
+  field :link_url,                        type: String
   field :body_versions,                   type: Array
   field :body_sections,                   type: Array
   field :tags,                            type: Array
@@ -45,11 +46,9 @@ class Entry
   validates :entry_number, presence: true, uniqueness: { scope: :log }
   validates :summary, presence: true, length: { within: 3..MAX_SUMMARY_LENGTH }
   validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid entry type" }
-  validates :format, inclusion: { in: FORMAT_VALUES, 
-    message: "%{value} is not a valid entry format" }
 
   # Which fields are accessible?
-  attr_accessible :parent_tag, :summary, :log_validated, :body
+  attr_accessible :parent_tag, :summary, :format, :log_validated, :body, :link_url, :uploaded_image
 
   # === CALLBACKS === #
 
@@ -57,7 +56,6 @@ class Entry
   before_save :process_parent_tag
   before_save :update_body_sections
   before_save :update_body_versions # DO store the first value since it comes from the user
-  before_create :set_format
   after_create :send_notifications
   after_create :request_validation_if_complete
   after_destroy :check_log_validation_counts
@@ -66,6 +64,22 @@ class Entry
 
   def to_param
     entry_number || _id
+  end
+
+  # Returns the font awesome icon code for this tag's format (ex: "fa-camera")
+  def format_icon
+    case format
+    when 'link'
+      icon_text = 'fa-link'
+    when 'tweet'
+      icon_text = 'fa-twitter'
+    when 'image'
+      icon_text = 'fa-camera'
+    when 'code'
+      icon_text = 'fa-code'
+    else
+      icon_text = 'fa-pencil'
+    end
   end
 
   # Returns a number representing the updated_at date relative to the learner's start date
@@ -144,6 +158,7 @@ protected
   
   def set_default_values
     self.entry_number ||= log.next_entry_number if log
+    self.format = tag.format if format.nil? && tag
   end
 
   # Sets tag relationship based on parent_tag string
@@ -152,6 +167,7 @@ protected
       matched_tags = log.badge.tags.where(name: parent_tag.downcase)
       if matched_tags.count > 0
         self.tag = matched_tags.first
+        self.format = tag.format
       else
         t = Tag.new
         t.badge = log.badge
@@ -195,10 +211,6 @@ protected
         self.body_versions << current_version_row
       end
     end
-  end
-
-  def set_format
-    self.format = tag.format if tag
   end
 
   def send_notifications

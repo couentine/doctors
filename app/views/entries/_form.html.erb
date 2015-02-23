@@ -21,16 +21,45 @@
             <em><strong>Please explain your opinion. Include lots of detail!</strong></em>
           </p>
         </div>
-
     <% end %>
 
     <%= f.input :summary, as: :text, label: 'Summary', auto_focus: true, input_html: { data: {
       :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
       cols: '200', rows: '5' } %>
-    <%= f.input :body, as: :text, label: 'Body', 
-      input_html: { class: "huge-text-area rich-text-area" } %>
+
+    <% if @entry.format == 'link' %>
+
+      <!-- === WEB LINK === -->
+      <%= f.input :link_url, label: 'Link URL', input_html: { title: 'Paste a web URL', 
+        placeholder: 'http://example.org/web-link.html', class: 'input-xlarge', 
+        data: { toggle: 'tooltip' } } %>
+
+    <% elsif @entry.format == 'tweet' %>
+
+      <!-- === TWITTER LINK === -->
+      <%= f.input :link_url, label: 'Tweet URL', input_html: { class: 'input-xlarge',
+        placeholder: 'https://twitter.com/example/status/9876543210',
+        title: 'To get the URL of a tweet click on it, then click "Details" along the bottom.', 
+        data: { toggle: 'tooltip' } } %>
+    
+    <% elsif @entry.format == 'image' %>
+      
+      <!-- === IMAGE === -->
+      <%= f.input :uploaded_image, as: :file, label: 'Upload an Image',
+        input_html: { accept: 'image/*' } %>
+      <%= f.input :uploaded_image_cache, as: :hidden %>
+      <%= f.input :remove_uploaded_image, as: :hidden %>
+
+    <% else %>
+    
+      <!-- === FREE TEXT RESPONSE === -->
+      <%= f.input :body, as: :text, label: 'Body', 
+        input_html: { class: "huge-text-area rich-text-area" } %>
+    
+    <% end %>
 
     <%= f.input :type, as: :hidden %>
+    <%= f.input :format, as: :hidden %>
     <%= f.input :parent_tag, as: :hidden %>
 
   </div>

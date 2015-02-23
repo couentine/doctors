@@ -188,7 +188,8 @@ private
       ['Free Text Response', 'text'],
       ['Web Link', 'link'],
       ['Twitter Link', 'tweet'],
-      ['Image Upload', 'image']
+      ['Image Upload', 'image'],
+      ['Code Snippet', 'code']
     ]
 
     # Build editability options

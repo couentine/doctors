@@ -82,15 +82,20 @@ class EntriesController < ApplicationController
       @entry = @log.add_validation current_user, params[:entry][:summary], params[:entry][:body],
         @log_validated
     else
-      @entry = @log.add_post current_user, params[:entry][:summary], params[:entry][:body],
-        params[:entry][:parent_tag]
+      @entry = Entry.new(params[:entry])
+      @entry.type = 'post'
+      @entry.log = @log
+      @entry.creator = current_user
+      @entry.current_user = current_user
+      @entry.current_username = current_user.username
+      @entry.save
     end
 
     
     # Now do the redirect
     if @entry.errors.count > 0
       if @entry.new_record?
-        flash[:error] = "There was an error creating your #{@type}."
+        flash[:error] = "There was an error creating your #{@type}. #{@entry.errors.inspect}"
         render :new
       else
         flash[:error] = "There was an error updating your #{@type}."

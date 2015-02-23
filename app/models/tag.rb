@@ -9,7 +9,7 @@ class Tag
   MAX_NAME_LENGTH = 50
   MAX_SUMMARY_LENGTH = 300
   TYPE_VALUES = ['requirement', 'wiki']
-  FORMAT_VALUES = ['text', 'link', 'image', 'tweet']
+  FORMAT_VALUES = ['text', 'link', 'image', 'tweet', 'code']
   EDITABILITY_VALUES = ['learners', 'experts', 'admins']
   PRIVACY_VALUES = ['public', 'private', 'secret']
   JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :privacy, 
@@ -82,6 +82,8 @@ class Tag
       icon_text = 'fa-twitter'
     when 'image'
       icon_text = 'fa-camera'
+    when 'code'
+      icon_text = 'fa-code'
     else
       icon_text = 'fa-pencil'
     end
