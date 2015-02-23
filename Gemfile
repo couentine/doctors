@@ -23,6 +23,8 @@ gem 'font-awesome-rails', '~> 4.3'
 # gem 'mixpanel-ruby'
 
 gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+# gem 'carrierwave'
+gem 'fog'
 
 # Pagination
 

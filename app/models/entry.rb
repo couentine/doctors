@@ -19,22 +19,24 @@ class Entry
 
   # === FIELDS & VALIDATIONS === #
 
-  field :entry_number,        type: Integer
-  field :summary,             type: String
-  field :private,             type: Boolean, default: false
-  field :type,                type: String
-  field :log_validated,       type: Boolean
-  field :parent_tag,          type: String
+  field :entry_number,                    type: Integer
+  field :summary,                         type: String
+  field :private,                         type: Boolean, default: false
+  field :type,                            type: String
+  field :log_validated,                   type: Boolean
+  field :parent_tag,                      type: String
 
-  field :body,                type: String
-  field :body_versions,       type: Array
-  field :body_sections,       type: Array
-  field :tags,                type: Array
-  field :tags_with_caps,      type: Array
+  field :body,                            type: String
+  field :body_versions,                   type: Array
+  field :body_sections,                   type: Array
+  field :tags,                            type: Array
+  field :tags_with_caps,                  type: Array
 
-  field :current_user,        type: String
-  field :current_username,    type: String
-  field :flags,                 type: Array
+  field :current_user,                    type: String
+  field :current_username,                type: String
+  field :flags,                           type: Array
+
+  mount_uploader :uploaded_image,         S3Uploader
 
   validates :log, presence: true
   validates :creator, presence: true
