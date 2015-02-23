@@ -8,6 +8,7 @@ class Entry
   
   MAX_SUMMARY_LENGTH = 100
   TYPE_VALUES = ['post', 'validation']
+  FORMAT_VALUES = ['text', 'link', 'image', 'tweet']
   JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, 
     :body_sections, :tags, :tags_with_caps]
   
@@ -23,6 +24,7 @@ class Entry
   field :summary,                         type: String
   field :private,                         type: Boolean, default: false
   field :type,                            type: String
+  field :format,                          type: String
   field :log_validated,                   type: Boolean
   field :parent_tag,                      type: String
 
@@ -42,8 +44,9 @@ class Entry
   validates :creator, presence: true
   validates :entry_number, presence: true, uniqueness: { scope: :log }
   validates :summary, presence: true, length: { within: 3..MAX_SUMMARY_LENGTH }
-  validates :type, inclusion: { in: TYPE_VALUES, 
-                                message: "%{value} is not a valid entry type" }
+  validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid entry type" }
+  validates :format, inclusion: { in: FORMAT_VALUES, 
+    message: "%{value} is not a valid entry format" }
 
   # Which fields are accessible?
   attr_accessible :parent_tag, :summary, :log_validated, :body
@@ -54,6 +57,7 @@ class Entry
   before_save :process_parent_tag
   before_save :update_body_sections
   before_save :update_body_versions # DO store the first value since it comes from the user
+  before_create :set_format
   after_create :send_notifications
   after_create :request_validation_if_complete
   after_destroy :check_log_validation_counts
@@ -191,6 +195,10 @@ protected
         self.body_versions << current_version_row
       end
     end
+  end
+
+  def set_format
+    self.format = tag.format if tag
   end
 
   def send_notifications

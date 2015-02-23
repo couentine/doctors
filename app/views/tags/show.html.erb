@@ -75,7 +75,7 @@
 
     <div class="well tertiary span9 offset1">
       <% if @tag.type == 'requirement' %>
-        <i class="fa fa-pencil-square header-icon"></i>
+        <i class="fa <%= @tag.format_icon %> header-icon"></i>
       <% else %>
         <i class="fa fa-file header-icon"></i>
       <% end %>
@@ -155,7 +155,10 @@
 
           <h1>
             <% if @tag.type == 'requirement' %>
-              <i class="fa fa-pencil-square"></i>
+              <span class='fa-stack single-stack'>
+                <i class='fa fa-square fa-stack-2x'></i>
+                <i class='fa <%= @tag.format_icon %> fa-stack-1x fa-inverse'></i>
+              </span>
             <% else %>
               <i class="fa fa-file"></i>
             <% end %>
@@ -247,7 +250,7 @@
         <div class="span12">
           <div class="tab-header">
             <% if !@current_user_entries.blank? %>
-              <%= link_to '<i class="fa fa-comment"></i> Post Evidence'.html_safe,
+              <%= link_to "<i class='fa #{@tag.format_icon}'></i> Post Evidence".html_safe,
                 new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
                 class: 'btn btn-small' %>
             <% end %>
@@ -265,7 +268,7 @@
             <h3>You haven't submitted any evidence for this requirement yet...</h3>
             <p>&nbsp;</p>
             <p>
-              <%= link_to '<i class="fa fa-comment"></i> Post your evidence'.html_safe,
+              <%= link_to "<i class='fa #{@tag.format_icon}'></i> Post your evidence".html_safe,
                 new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: @tag.name_with_caps), 
                 class: 'btn btn-primary' %>
             </p>

@@ -50,7 +50,10 @@ class EntriesController < ApplicationController
       @parent_tag = nil
       if !@parent_tag_name.blank?
         matched_tags = @badge.tags.where(name: @parent_tag_name.downcase)
-        @parent_tag = matched_tags.first if matched_tags.count > 0
+        if matched_tags.count > 0
+          @parent_tag = matched_tags.first
+          @entry.format = @parent_tag.format
+        end
       end
 
       render :new

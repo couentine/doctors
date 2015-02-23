@@ -353,7 +353,7 @@
                     <li>
                       <%= link_to "#{icon_text} #{tag.display_name}".html_safe, \
                         group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
-                      <%= link_to "<i class='fa fa-comment'></i> Post Evidence".html_safe, \
+                      <%= link_to "<i class='fa #{tag.format_icon}'></i> Post Evidence".html_safe, \
                           new_group_badge_log_entry_path(@group, @badge, @log, \
                           tag: tag.name_with_caps), class: 'btn btn-mini' %>
                     </li>
@@ -362,9 +362,14 @@
                 <% else %>
 
                   <% @badge.requirements.each do |tag| %>
+                    <%
+                      icon_text = "<span class='fa-stack single-stack'>" \
+                        + "<i class='fa fa-square fa-stack-2x'></i>"      \
+                        + "<i class='fa #{tag.format_icon} fa-stack-1x fa-inverse'></i></span>"
+                    %>
                     <li>
                       <%= link_to \
-                        "<i class='fa fa-pencil-square'></i> #{tag.display_name}".html_safe, 
+                        "#{icon_text} #{tag.display_name}".html_safe, 
                         group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
                     </li>
                   <% end %>

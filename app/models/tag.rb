@@ -9,6 +9,7 @@ class Tag
   MAX_NAME_LENGTH = 50
   MAX_SUMMARY_LENGTH = 300
   TYPE_VALUES = ['requirement', 'wiki']
+  FORMAT_VALUES = ['text', 'link', 'image', 'tweet']
   EDITABILITY_VALUES = ['learners', 'experts', 'admins']
   PRIVACY_VALUES = ['public', 'private', 'secret']
   JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :privacy, 
@@ -25,6 +26,7 @@ class Tag
   field :name_with_caps,      type: String
   field :display_name,        type: String
   field :type,                type: String, default: 'wiki'
+  field :format,              type: String, default: 'text'
   field :sort_order,          type: Integer
 
   field :editability,         type: String, default: 'learners'
@@ -46,6 +48,7 @@ class Tag
     message: "%{value} is a specially reserved url." }
   validates :display_name, presence: true
   validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid type" }
+  validates :format, inclusion: { in: FORMAT_VALUES, message: "%{value} is not a valid format" }
   validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
   validates :editability, inclusion: { in: EDITABILITY_VALUES, 
     message: "%{value} is not a valid type of editability" }
@@ -53,7 +56,8 @@ class Tag
     message: "%{value} is not a valid type of privacy" }
 
   # Which fields are accessible?
-  attr_accessible :display_name, :type, :sort_order, :summary, :wiki, :editability, :privacy
+  attr_accessible :display_name, :type, :format, :sort_order, :summary, :wiki, :editability, 
+    :privacy
 
   # === CALLBACKS === #
 
@@ -67,6 +71,20 @@ class Tag
 
   def to_param
     name_with_caps
+  end
+
+  # Returns the font awesome icon code for this tag's format (ex: "fa-camera")
+  def format_icon
+    case format
+    when 'link'
+      icon_text = 'fa-link'
+    when 'tweet'
+      icon_text = 'fa-twitter'
+    when 'image'
+      icon_text = 'fa-camera'
+    else
+      icon_text = 'fa-pencil'
+    end
   end
 
 protected

@@ -106,6 +106,18 @@ textarea {
   }
 }
 
+/* === FONT AWESOME OVERRIDES === */
+
+.fa-stack.single-stack {
+  width: 1em;
+  height: 1em;
+  line-height: 1em;
+  top: -2px;
+
+  .fa-stack-2x { font-size: 1em; }
+  .fa-stack-1x { font-size: 0.6em; }
+}
+
 /* === BOOTSTRAP OVERRIDES === */
 
 a:not(.btn):hover {
@@ -2127,6 +2139,7 @@ div.cta-card {
       font-size: 40px;
 
       .fa { color: $medium-gray; }
+      .fa.fa-inverse { color: $really-light-gray; }
       
       @media (max-width: 767px) { font-size: 26px; }
     }

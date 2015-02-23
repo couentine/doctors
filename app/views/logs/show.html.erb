@@ -489,7 +489,14 @@
           <div class="span12">
             <div class="tab-header">
               <% if @current_user_is_log_owner %>
-                <%= link_to '<i class="fa fa-comment"></i> Post Evidence'.html_safe,
+                <%
+                  if topic_item['tag']
+                    format_icon = topic_item['tag'].format_icon
+                  else
+                    format_icon = 'fa-comment'
+                  end
+                %>
+                <%= link_to "<i class='fa #{format_icon}'></i> Post Evidence".html_safe,
                   new_group_badge_log_entry_path(@group, @badge, @current_user_log, 
                     tag: (topic_item['tag']) ? topic_item['tag'].name : '' ), 
                   class: 'btn btn-small' %>

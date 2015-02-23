@@ -27,8 +27,6 @@
   <!-- === PARENT TAG INFO === -->
 
   <div class="well secondary span9 offset1">
-    <i class="fa fa-pencil-square header-icon"></i>
-
     <% if @parent_tag %>
       <h4>Posting evidence to</h4>
       <h3><%= "##{@parent_tag.name_with_caps}" %></h3>
@@ -67,7 +65,11 @@
         <% end %>
       <% end %>
       <div class="form-image">
-        <i class="fa fa-comment"></i>
+        <% if @parent_tag %>
+          <i class="fa <%= @parent_tag.format_icon %>"></i>
+        <% else %>
+          <i class="fa fa-pencil"></i>
+        <% end %>
       </div>
     </div>
 

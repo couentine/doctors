@@ -183,6 +183,14 @@ private
     @Learners = @badge.Learners
     @show_progress = @badge.tracks_progress?
 
+    # Build format options
+    @tag_format_options = [
+      ['Free Text Response', 'text'],
+      ['Web Link', 'link'],
+      ['Twitter Link', 'tweet'],
+      ['Image Upload', 'image']
+    ]
+
     # Build editability options
     @tag_editability_options = [
       ["#{@Experts} and #{@Learners}", 'learners'],

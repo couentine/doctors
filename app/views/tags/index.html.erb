@@ -32,17 +32,7 @@
       <li  class="collapsible">
         <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <% if @show_progress %>
-          <span class="divider">|</span>
-        <% end %>
       </li>
-      
-      <% if @show_progress %>
-        <li class="collapsible">
-          <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
-              [@group, @badge, @current_user_log] %>
-        </li>
-      <% end %>
     <% end %>
   <% end %>
 <% end %>

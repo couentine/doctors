@@ -29,10 +29,15 @@
             <ul class="topic-list">
               <% badge.requirements.each do |tag| %>
                 <li>
-                  <%= link_to "<i class='fa fa-pencil-square'></i> #{tag.display_name}".html_safe, 
+                  <%
+                    icon_text = "<span class='fa-stack single-stack'>" \
+                      + "<i class='fa fa-square fa-stack-2x'></i>"      \
+                      + "<i class='fa #{tag.format_icon} fa-stack-1x fa-inverse'></i></span>"
+                  %>
+                  <%= link_to "#{icon_text} #{tag.display_name}".html_safe, 
                     group_badge_path(badge.group, badge) + "/" + tag.name_with_caps %>
                   <%= 
-                    link_to "<i class='fa fa-comment'></i> Post".html_safe, 
+                    link_to "<i class='fa #{tag.format_icon}'></i> Post".html_safe, 
                       new_group_badge_log_entry_path(badge.group, badge, \
                       current_user.find_log(badge), tag: tag.name_with_caps), 
                       class: 'btn btn-mini' \

@@ -29,22 +29,15 @@
   <% content_for :subheader_actions do %>
 
     <% if @current_user_is_expert || @current_user_is_learner %>
+      
       <li  class="collapsible">
         <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <span class="divider">|</span>
+        <% if @current_user_is_entry_creator %>
+          <span class="divider">|</span>
+        <% end %>
       </li>
 
-      <% if @show_progress %>
-        <li  class="collapsible">
-          <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
-              new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
-          <% if @current_user_is_entry_creator %>
-            <span class="divider">|</span>
-          <% end %>
-        </li>
-      <% end %>
-      
     <% end %>
 
     <% if @current_user_is_entry_creator || @badge_list_admin %>
