@@ -161,28 +161,6 @@ class Log
     end
   end
 
-  # Adds a post entry to the log and returns it
-  # NOTE: Doesn't work for new records.
-  def add_post(creator_user, summary, body, parent_tag = nil)
-    unless new_record?
-      # First create the post
-      entry = Entry.new(summary: summary, body: body, parent_tag: parent_tag)
-      entry.type = 'post'
-      entry.log = self
-      entry.creator = creator_user
-      entry.current_user = creator_user
-      entry.current_username = creator_user.username
-      entry.save
-
-      # Then update the next entry number
-      self.next_entry_number += 1
-      self.save
-      return entry
-    else
-      return nil
-    end
-  end  
-
   # Returns the full content of all of this log's posts, organized by topic
   # Return value is a list of hash items, each with the following keys = {
   #   'tag' => the_tag_record_itself || nil

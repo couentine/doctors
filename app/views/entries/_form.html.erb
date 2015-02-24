@@ -23,10 +23,6 @@
         </div>
     <% end %>
 
-    <%= f.input :summary, as: :text, label: 'Summary', auto_focus: true, input_html: { data: {
-      :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
-      cols: '200', rows: '5' } %>
-
     <% if @entry.format == 'link' %>
 
       <!-- === WEB LINK === -->
@@ -34,6 +30,11 @@
         placeholder: 'http://example.org/web-link.html', class: 'input-xlarge', 
         data: { toggle: 'tooltip' } } %>
 
+      <%= f.input :summary, as: :text, label: 'Description', auto_focus: true, input_html: { data: {
+        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+        cols: '200', rows: '5' } %>
+
+    
     <% elsif @entry.format == 'tweet' %>
 
       <!-- === TWITTER LINK === -->
@@ -50,8 +51,32 @@
       <%= f.input :uploaded_image_cache, as: :hidden %>
       <%= f.input :remove_uploaded_image, as: :hidden %>
 
+      <%= f.input :summary, as: :text, label: 'Caption (Optional)', auto_focus: true, 
+        input_html: { data: {
+        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+        cols: '200', rows: '5' } %>
+
+    <% elsif @entry.format == 'code' %>
+
+      <!-- === CODE SNIPPET RESPONSE === -->
+      <%= f.input :body, as: :text, label: 'Code', input_html: { auto_focus: true, 
+        class: "huge-text-area code-text-area" } %>  
+      <%= javascript_include_tag "ace" %>
+      <%= javascript_include_tag "theme-clouds" %>
+      <script>
+          var editor = ace.edit("entry_body");
+      </script>
+
+      <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
+        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+        cols: '200', rows: '5' } %>
+
     <% else %>
-    
+      
+      <%= f.input :summary, as: :text, label: 'Summary', auto_focus: true, input_html: { data: {
+        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+        cols: '200', rows: '5' } %>
+
       <!-- === FREE TEXT RESPONSE === -->
       <%= f.input :body, as: :text, label: 'Body', 
         input_html: { class: "huge-text-area rich-text-area" } %>

@@ -955,6 +955,11 @@ h2.form-header {
 }
 
 /* Rich Text Areas */
+.code-text-area, .ace_editor {
+  position: relative;
+  height: 300px;
+}
+
 .rich-text-toolbar {
   width: 90%;
   padding: 0 10px 10px 0;

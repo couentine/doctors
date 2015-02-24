@@ -7,6 +7,7 @@ module StringTools
   HASHTAG_REGEX = /#[\w-]+/
   SECTION_DIVIDER_REGEX = /-+\s*<br *\/?>\s*/i
   CODE_BLOCK_REGEX = /<code[^>]*>(.*)<\/code[^>]*>/im
+  TWITTER_URL_REGEX = /\A\s*(https?:\/\/)?(www\.)?twitter\.com\/.*\z/i
   
   LINKS_TO_TRANSLATE = [
     [/youtube.com.*(?:\/|v=)([^&$]+)/,
