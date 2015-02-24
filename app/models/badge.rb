@@ -91,9 +91,9 @@ class Badge
   before_save :update_info_versions, on: :update # Don't store the first (default) value
   before_save :build_badge_image
   before_save :update_terms
-  before_save :update_topics
   after_create :add_creator_as_expert
   after_save :update_requirement_editability
+  after_save :update_topics
 
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
