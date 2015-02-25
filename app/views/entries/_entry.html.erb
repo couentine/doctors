@@ -75,9 +75,8 @@
       <tr class="card-body-row">
         <td class="card-body" colspan="3">
           <div class="card-body-inner" data-mark-overflow="true">
-            <% entry.body_sections.each do |section_text| %>
-              <div class="section-container"><%= section_text.html_safe %></div>
-            <% end %>
+            <!-- === ENTRY CONTENT PARTIAL === -->
+            <%= render "shared/entry_content_small", entry: entry %>
             
             <% unless entry.tags.blank? %>
               <div class="card-body-footer">

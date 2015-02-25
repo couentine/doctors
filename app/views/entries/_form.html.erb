@@ -26,11 +26,12 @@
     <% if @entry.format == 'link' %>
 
       <!-- === WEB LINK === -->
-      <%= f.input :link_url, label: 'Link URL', input_html: { title: 'Paste a web URL', 
+      <%= f.input :link_url, label: 'Link URL', auto_focus: true, 
+        input_html: { title: 'Paste a web URL', 
         placeholder: 'http://example.org/web-link.html', class: 'input-xlarge', 
         data: { toggle: 'tooltip' } } %>
 
-      <%= f.input :summary, as: :text, label: 'Description', auto_focus: true, input_html: { data: {
+      <%= f.input :summary, as: :text, label: 'Description', input_html: { data: {
         :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
         cols: '200', rows: '5' } %>
 
@@ -38,7 +39,7 @@
     <% elsif @entry.format == 'tweet' %>
 
       <!-- === TWITTER LINK === -->
-      <%= f.input :link_url, label: 'Tweet URL', input_html: { class: 'input-xlarge',
+      <%= f.input :link_url, label: 'Tweet URL', input_html: { class: 'input-xxlarge',
         placeholder: 'https://twitter.com/example/status/9876543210',
         title: 'To get the URL of a tweet click on it, then click "Details" along the bottom.', 
         data: { toggle: 'tooltip' } } %>
@@ -51,7 +52,7 @@
       <%= f.input :uploaded_image_cache, as: :hidden %>
       <%= f.input :remove_uploaded_image, as: :hidden %>
 
-      <%= f.input :summary, as: :text, label: 'Caption (Optional)', auto_focus: true, 
+      <%= f.input :summary, as: :text, label: 'Caption (Optional)', 
         input_html: { data: {
         :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
         cols: '200', rows: '5' } %>
@@ -59,15 +60,41 @@
     <% elsif @entry.format == 'code' %>
 
       <!-- === CODE SNIPPET RESPONSE === -->
-      <%= f.input :body, as: :text, label: 'Code', input_html: { auto_focus: true, 
-        class: "huge-text-area code-text-area" } %>  
-      <%= javascript_include_tag "ace" %>
-      <%= javascript_include_tag "theme-clouds" %>
+
+      <%= f.input :body, as: :text, label: 'Code', 
+        input_html: { class: "huge-text-area code-text-area" } %>  
+      <%= javascript_include_tag "ace/ace.js" %>
       <script>
           var editor = ace.edit("entry_body");
-      </script>
+          editor.setTheme("ace/theme/idle_fingers");
+          editor.getSession().setMode("ace/mode/javascript"); // Good looking default
+          editor.getSession().setUseWorker(false);
+          editor.setOptions({ maxLines: Infinity, minLines: 20 });
 
-      <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
+          $(document).ready(function() {
+            // Update the code format when the select list changes
+            $("#entry_code_format").change(function() { 
+              editor.getSession().setMode("ace/mode/" + $(this).val()) 
+              editor.getSession().setUseWorker(true);
+            });
+
+            // Update the input element body each time the code changes
+            editor.getSession().on('change', function() {
+              $("#entry_body").val(editor.getValue());
+            });
+            
+            // Focus and scroll to the editor
+            $(editor).focus();
+            $(window).scrollTo(editor);
+          });
+      </script>
+      
+      <%= f.input :body, as: :hidden %>
+
+      <%= f.input :code_format, as: :select, label: 'Code Language', 
+        collection: @code_language_options %>
+
+      <%= f.input :summary, as: :text, label: 'Description', input_html: { data: {
         :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
         cols: '200', rows: '5' } %>
 

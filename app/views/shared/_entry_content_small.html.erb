@@ -1,0 +1,40 @@
+<!-- === ENTRY CONTENT PARTIAL === -->
+
+<% if entry.format == 'link' %>
+
+  <!-- === WEB LINK === -->
+  <div class="panel panel-entry-content panel-entry-content-link">
+    <%= link_to "<i class='fa fa-link'></i> #{entry.link_url}".html_safe, entry.link_url %>
+  </div>
+
+<% elsif entry.format == 'tweet' %>
+
+  <!-- === TWITTER LINK === -->
+  <div class="panel panel-entry-content panel-entry-content-link panel-entry-content-tweet">
+    <%= link_to "<i class='fa fa-twitter'></i> View on Twitter".html_safe, entry.link_url %>
+  </div>
+
+<% elsif entry.format == 'image' %>
+  
+  <!-- === IMAGE === -->
+  <div class="panel panel-entry-content panel-entry-content-image">
+    <%= image_tag entry.uploaded_image_url(:preview) if entry.uploaded_image? %>
+  </div>
+
+<% elsif entry.format == 'code' %>
+
+  <!-- === CODE SNIPPET RESPONSE === -->
+  <div class="panel panel-entry-content panel-entry-content-code">
+    <pre class="prettyprint"><%= entry.body %></pre>
+  </div>
+
+<% else %>
+  
+  <!-- === FREE TEXT RESPONSE === -->
+  <div class="panel panel-entry-content panel-entry-content-text">
+    <% entry.body_sections.each do |section_text| %>
+      <div class="section-container"><%= section_text.html_safe %></div>
+    <% end unless entry.body_sections.blank? %>
+  </div>
+
+<% end %>

@@ -353,9 +353,10 @@
                     <li>
                       <%= link_to "#{icon_text} #{tag.display_name}".html_safe, \
                         group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
-                      <%= link_to "<i class='fa #{tag.format_icon}'></i> Post Evidence".html_safe, \
-                          new_group_badge_log_entry_path(@group, @badge, @log, \
-                          tag: tag.name_with_caps), class: 'btn btn-mini' %>
+                      <%= link_to "<i class='fa #{tag.format_icon}'></i> ".html_safe \
+                        + "Post #{tag.format.to_s.capitalize}", \
+                        new_group_badge_log_entry_path(@group, @badge, @log, \
+                        tag: tag.name_with_caps), class: 'btn btn-mini' %>
                     </li>
                   <% end %>
                 

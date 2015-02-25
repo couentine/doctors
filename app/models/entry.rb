@@ -31,6 +31,7 @@ class Entry
 
   field :body,                            type: String
   field :link_url,                        type: String
+  field :code_format,                     type: String
   field :body_versions,                   type: Array, default: []
   field :body_sections,                   type: Array, default: []
   field :tags,                            type: Array, default: []
@@ -58,7 +59,8 @@ class Entry
     if: :tweet_is_required?
 
   # Which fields are accessible?
-  attr_accessible :parent_tag, :summary, :format, :log_validated, :body, :link_url, :uploaded_image
+  attr_accessible :parent_tag, :summary, :format, :log_validated, :body, :link_url, \
+    :code_format, :uploaded_image
 
   # === CALLBACKS === #
 
@@ -66,7 +68,6 @@ class Entry
   before_save :process_parent_tag
   before_save :process_content_changes
   before_save :update_body_versions # DO store the first value since it comes from the user
-  before_save :get_tweet_text
   after_create :update_log
   after_create :send_notifications
   after_destroy :check_log_validation_counts
@@ -212,15 +213,21 @@ protected
         t.display_name = detagify_string(t.name_with_caps)
         t.save
         self.tag = t
+        self.format = tag.format
       end
+    end
+    
+    # Now manually fire the process_content_changes (we can't be sure of the timing)
+    if (format == 'tweet') && link_url_changed?
+      self.summary = "This is an #example tweet from @twitter." 
+      self.process_content_changes
     end
   end
 
   # Linkifies summary and body, pulls tweet bodies from twitter
   def process_content_changes
-    if body_changed? || summary_changed? || (link_url_changed? && (format == 'tweet'))
+    if body_changed? || summary_changed? || link_url_changed?
       # First get the tweet body from the twitter api (FIXME)
-      summary = "This is an #example tweet from @twitter." if format == 'tweet'
       
       # Then linkify summary and body (and split body into sections)
       summary_result = linkify_text(summary, log.badge.group, log.badge)

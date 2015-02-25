@@ -496,7 +496,8 @@
                     format_icon = 'fa-comment'
                   end
                 %>
-                <%= link_to "<i class='fa #{format_icon}'></i> Post Evidence".html_safe,
+                <%= link_to "<i class='fa #{format_icon}'></i> ".html_safe \
+                  + "Post #{topic_item['tag'].format.to_s.capitalize}",
                   new_group_badge_log_entry_path(@group, @badge, @current_user_log, 
                     tag: (topic_item['tag']) ? topic_item['tag'].name : '' ), 
                   class: 'btn btn-small' %>

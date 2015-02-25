@@ -78,6 +78,12 @@ p,ol,ul,td {
   font-size: 16px;
   line-height: 18px;
 }
+h1,h2,h3,h4,h5,h6 {
+  img {
+    max-height: 1em;
+    border-radius: 500px;
+  }
+}
 ul.dropdown-menu, ul.nav { font-size: 13px; }
 
 ::selection {
@@ -338,6 +344,12 @@ ul.dropdown-menu {
 .label-success { background-color: $secondary-medium; }
 .label-warning { background-color: $primary-medium; }
 .label-important { background-color: $red-medium; }
+
+.input-xxlarge { 
+  @media (min-width: 768px) {
+    max-width: 60%;
+  }
+}
 
 /* === BOOTSTRAP-RELATED MANUAL RESPONSIVE WIDTHS === */
 
@@ -957,8 +969,21 @@ h2.form-header {
 /* Rich Text Areas */
 .code-text-area, .ace_editor {
   position: relative;
-  height: 300px;
+  height: 250px;
+
+  @media (min-width: 768px) { 
+    width: 517px;
+    height: 300px;
+    left: -150px;
+  }
+  @media (min-width: 980px) { width: 696px; height: 400px; }
+  @media (min-width: 1200px) { width: 885px; height: 500px; }
 }
+.panel-entry-content .ace_editor {
+  width: 97%;
+  left: 0;
+}
+#entry_body_toolbar.rich-text-toolbar .advanced-buttons { display: none; }
 
 .rich-text-toolbar {
   width: 90%;
@@ -1921,6 +1946,42 @@ div.badge-card {
   }
 
   &.awarded { border-top: 8px solid $green-medium; }
+}
+
+/* === ENTRIES ===*/
+.panel-entry-content-link {
+  text-align: center;
+  margin-bottom: 15px;
+
+  a {
+    display: inline-block;
+    background-color: $primary-light;
+    border-radius: 500px;
+    text-align: center;
+    font-size: 20px;
+    padding: 15px 25px;
+    color: white !important;
+    font-weight: bold;
+    word-break: break-word;
+    line-height: 1.4em; 
+    border: 2px solid transparent;
+
+    &:hover, &.focus {
+      color: white;
+      background-color: $primary-medium;
+      border-color: $primary-dark;
+      text-decoration: none;
+    } 
+  }
+}
+.panel-entry-content-tweet a {
+  background-color: $tertiary-light;
+  &:hover, &.focus {
+    color: white;
+    background-color: $tertiary-medium;
+    border-color: $tertiary-dark;
+    text-decoration: none;
+  } 
 }
 
 div.entry-card.validation { border-top: 4px solid $primary-light; }

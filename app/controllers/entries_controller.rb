@@ -181,6 +181,46 @@ private
     @Learner = @badge.Learner
     @Learners = @badge.Learners
     @show_progress = @badge.tracks_progress?
+
+    # Build code language options
+    @code_language_options = [['abap', 'abap'], ['abc', 'abc'],  
+      ['actionscript', 'actionscript'], ['ada', 'ada'],  ['apache conf', 'apache_conf'], 
+      ['applescript', 'applescript'], ['asciidoc', 'asciidoc'],  ['assembly x86', 'assembly_x86'], 
+      ['autohotkey', 'autohotkey'], ['batchfile', 'batchfile'],  ['behaviour', 'behaviour'], 
+      ['c9search', 'c9search'], ['c cpp', 'c_cpp'],  ['cirru', 'cirru'], ['clojure', 'clojure'], 
+      ['cobol', 'cobol'], ['coffee', 'coffee'],  ['coffee worker', 'coffee_worker'], 
+      ['coldfusion', 'coldfusion'], ['csharp', 'csharp'],  ['css', 'css'], 
+      ['css worker', 'css_worker'], ['curly', 'curly'], ['d', 'd'],  
+      ['dart', 'dart'], ['diff', 'diff'], ['django', 'django'], ['dockerfile', 'dockerfile'],  
+      ['dot', 'dot'], ['eiffel', 'eiffel'], ['ejs', 'ejs'], ['elixir', 'elixir'],  ['elm', 'elm'], 
+      ['erlang', 'erlang'], ['forth', 'forth'], ['ftl', 'ftl'],  ['gcode', 'gcode'], 
+      ['gherkin', 'gherkin'], ['gitignore', 'gitignore'],  ['glsl', 'glsl'], ['golang', 'golang'], 
+      ['groovy', 'groovy'], ['haml', 'haml'],  ['handlebars', 'handlebars'], ['haskell', 'haskell'],
+      ['haxe', 'haxe'],  ['html', 'html'], ['html completions', 'html_completions'], 
+      ['html ruby', 'html_ruby'],  ['html worker', 'html_worker'], ['ini', 'ini'], ['io', 'io'], 
+      ['jack', 'jack'],  ['jade', 'jade'], ['java', 'java'], ['javascript', 'javascript'],  
+      ['javascript worker', 'javascript_worker'], ['json', 'json'],  ['json worker', 'json_worker'],
+      ['jsoniq', 'jsoniq'], ['jsp', 'jsp'], ['jsx', 'jsx'],  ['julia', 'julia'], ['latex', 'latex'],
+      ['lean', 'lean'], ['less', 'less'],  ['liquid', 'liquid'], ['lisp', 'lisp'], 
+      ['livescript', 'livescript'],  ['logiql', 'logiql'], ['lsl', 'lsl'], ['lua', 'lua'], 
+      ['lua worker', 'lua_worker'],  ['luapage', 'luapage'], ['lucene', 'lucene'], 
+      ['makefile', 'makefile'],  ['markdown', 'markdown'], ['mask', 'mask'],  
+      ['matching brace outdent', 'matching_brace_outdent'],  
+      ['matching parens outdent', 'matching_parens_outdent'], ['matlab', 'matlab'],  ['mel', 'mel'],
+      ['mushcode', 'mushcode'], ['mysql', 'mysql'], ['nix', 'nix'],  ['objectivec', 'objectivec'], 
+      ['ocaml', 'ocaml'], ['pascal', 'pascal'],  ['perl', 'perl'], ['pgsql', 'pgsql'], 
+      ['php', 'php'], ['php worker', 'php_worker'],  ['plain text', 'plain_text'], 
+      ['powershell', 'powershell'], ['praat', 'praat'],  ['prolog', 'prolog'], 
+      ['properties', 'properties'], ['protobuf', 'protobuf'],  ['python', 'python'], ['r', 'r'], 
+      ['rdoc', 'rdoc'], ['rhtml', 'rhtml'],  ['ruby', 'ruby'], ['rust', 'rust'], ['sass', 'sass'], 
+      ['scad', 'scad'],  ['scala', 'scala'], ['scheme', 'scheme'], ['scss', 'scss'], ['sh', 'sh'], 
+      ['sjs', 'sjs'], ['smarty', 'smarty'], ['snippets', 'snippets'],  
+      ['soy template', 'soy_template'], ['space', 'space'], ['sql', 'sql'],  ['stylus', 'stylus'], 
+      ['svg', 'svg'], ['tcl', 'tcl'], ['tex', 'tex'],  ['text', 'text'], ['textile', 'textile'], 
+      ['toml', 'toml'], ['twig', 'twig'],  ['typescript', 'typescript'], ['vala', 'vala'], 
+      ['vbscript', 'vbscript'],  ['velocity', 'velocity'], ['verilog', 'verilog'], ['vhdl', 'vhdl'], 
+      ['xml', 'xml'],  ['xml worker', 'xml_worker'], ['xquery', 'xquery'], 
+      ['xquery worker', 'xquery_worker'], ['yaml', 'yaml']];
   end
 
   def find_all_records
