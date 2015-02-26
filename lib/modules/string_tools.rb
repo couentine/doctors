@@ -8,6 +8,7 @@ module StringTools
   SECTION_DIVIDER_REGEX = /-+\s*<br *\/?>\s*/i
   CODE_BLOCK_REGEX = /<code[^>]*>(.*)<\/code[^>]*>/im
   TWITTER_URL_REGEX = /\A\s*(https?:\/\/)?(www\.)?twitter\.com\/.*\z/i
+  TWEET_ID_REGEX = /\A\s*(https?:\/\/)?(www\.)?twitter\.com\/.*status\/(\d{3,})\s*\z/i
   
   LINKS_TO_TRANSLATE = [
     [/youtube.com.*(?:\/|v=)([^&$]+)/,
@@ -91,6 +92,18 @@ module StringTools
     else
       tag_string.strip.gsub(/[^A-Za-z0-9]/, ' ').gsub(/ {2,}/, ' ')
     end
+  end
+
+  # Extracts tweet id (integer) from tweet url or returns 0
+  def extract_tweet_id(tweet_url)
+    tweet_id = 0
+    
+    if !tweet_url.blank?
+      url_parts = tweet_url.match(TWEET_ID_REGEX) # id is part 3
+      tweet_id = url_parts[3].to_i
+    end
+
+    tweet_id
   end
 
 end

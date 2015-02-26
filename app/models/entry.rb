@@ -31,6 +31,7 @@ class Entry
 
   field :body,                            type: String
   field :link_url,                        type: String
+  field :link_metadata,                   type: Hash, default: {}, pre_processed: true
   field :code_format,                     type: String
   field :body_versions,                   type: Array, default: []
   field :body_sections,                   type: Array, default: []
@@ -217,9 +218,46 @@ protected
       end
     end
     
-    # Now manually fire the process_content_changes (we can't be sure of the timing)
-    if (format == 'tweet') && link_url_changed?
-      self.summary = "This is an #example tweet from @twitter." 
+    # Now attempt to pull down the tweet body using the twitter API
+    if (format == 'tweet') && link_url_changed? && !link_url.blank?
+      begin
+        tweet_id = extract_tweet_id(link_url)
+        tweet = $twitter.status(tweet_id)
+        self.summary = tweet.text
+
+        # Now that we have the tweet, let's store some metadata
+        self.link_metadata = {
+          'tweet_id' => tweet.id,
+          'tweet_favorite_count' => tweet.favorite_count,
+          'tweet_filter_level' => tweet.filter_level,
+          'tweet_in_reply_to_screen_name' => tweet.in_reply_to_screen_name,
+          'tweet_in_reply_to_status_id' => tweet.in_reply_to_status_id,
+          'tweet_in_reply_to_user_id' => tweet.in_reply_to_user_id,
+          'tweet_lang' => tweet.lang,
+          'tweet_retweet_count' => tweet.retweet_count,
+          'tweet_source' => tweet.source,
+          'tweet_text' => tweet.text,
+          'tweet_user_id' => tweet.user.id,
+          'tweet_user_screen_name' => tweet.user.screen_name,
+          'tweet_user_connections' => tweet.user.connections,
+          'tweet_user_description' => tweet.user.description,
+          'tweet_user_favourites_count' => tweet.user.favourites_count,
+          'tweet_user_followers_count' => tweet.user.followers_count,
+          'tweet_user_friends_count' => tweet.user.friends_count,
+          'tweet_user_lang' => tweet.user.lang,
+          'tweet_user_listed_count' => tweet.user.listed_count,
+          'tweet_user_location' => tweet.user.location,
+          'tweet_user_name' => tweet.user.name,
+          'tweet_user_statuses_count' => tweet.user.statuses_count,
+          'tweet_user_time_zone' => tweet.user.time_zone,
+          'tweet_user_utc_offset' => tweet.user.utc_offset,
+        }
+      rescue Exception => e
+        # Nothing found so rather than throw an error we'll just set the summary to an error value.
+        self.summary = "No tweet found! Please check the link and try again." 
+      end
+
+      # Now manually fire the process_content_changes (we can't be sure of the timing)
       self.process_content_changes
     end
   end

@@ -4,14 +4,15 @@
 
   <!-- === WEB LINK === -->
   <div class="panel panel-entry-content panel-entry-content-link">
-    <%= link_to entry.link_url, entry.link_url %>
+    <%= link_to entry.link_url, entry.link_url, target: '_blank' %>
   </div>
 
 <% elsif entry.format == 'tweet' %>
 
   <!-- === TWITTER LINK === -->
   <div class="panel panel-entry-content panel-entry-content-link panel-entry-content-tweet">
-    <%= link_to "<i class='fa fa-twitter'></i> View on Twitter".html_safe, entry.link_url %>
+    <%= link_to "<i class='fa fa-twitter'></i> View on Twitter".html_safe, entry.link_url, \
+      target: '_blank' %>
   </div>
 
 <% elsif entry.format == 'image' %>
