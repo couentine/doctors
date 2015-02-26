@@ -39,13 +39,24 @@
     <% elsif @entry.format == 'tweet' %>
 
       <!-- === TWITTER LINK === -->
-      <%= f.input :link_url, label: 'Tweet URL', input_html: { class: 'input-xxlarge',
+      <%= f.input :link_url, label: 'Tweet URL', auto_focus: true,
+        input_html: { class: 'input-xxlarge',
         placeholder: 'https://twitter.com/example/status/9876543210',
         title: 'To get the URL of a tweet click on it, then click "Details" along the bottom.', 
         data: { toggle: 'tooltip' } } %>
 
-      <a href="https://twitter.com/intent/tweet?screen_name=BadgeList" class="twitter-mention-button" data-size="large" data-related="BadgeList">Tweet to @BadgeList</a>
-      <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+      <div id="tweet-button">
+        <p class="help-block">
+          To get the url of an existing tweet, click on the tweet and then click the "Details"
+          link in the footer if it appears. Then just copy and paste the url from your browser.
+        </p>
+      </div>
+
+      <script type="text/javascript">
+        $(document).ready(function() {
+          $("#entry_link_url").focus();
+        });
+      </script>
     
     <% elsif @entry.format == 'image' %>
       

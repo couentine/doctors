@@ -378,6 +378,26 @@ ul.dropdown-menu {
   }
 }
 
+/* === TWITTER === */
+
+#tweet-button {
+  text-align: center;
+  padding: 0 20px;
+
+  .help-block {
+    margin-bottom: 20px;
+  }
+
+  #widget a.btn {
+    border: 1px solid $secondary-medium;
+    background-image: none;
+    border-radius: 500px;
+    background-color: $secondary-medium;
+    color: white;
+    text-shadow: none;
+  }
+}
+
 /* === RE-USABLE COMPONENTS === */
 
 /* CSS Spinner */
