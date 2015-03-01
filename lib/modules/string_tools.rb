@@ -59,7 +59,7 @@ module StringTools
       end
     end
 
-    logger.debug "+++make_tag_for: url=#{url}, the_id=#{the_id.inspect}, return_text=#{return_text}+++"
+    # logger.debug "+++make_tag_for: url=#{url}, the_id=#{the_id.inspect}, return_text=#{return_text}+++"
 
     if the_id.nil?
       if url[IMG_REGEX]
