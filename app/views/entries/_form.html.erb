@@ -174,7 +174,7 @@
 
       <%= f.input :body, as: :text, label: 'Code', 
         input_html: { class: "huge-text-area code-text-area" } %>  
-      <%= javascript_include_tag "ace/ace.js" %>
+      <%= javascript_include_tag "ace.js" %>
       <script>
           var editor = ace.edit("entry_body");
           editor.setTheme("ace/theme/idle_fingers");
