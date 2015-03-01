@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require_tree .
 //= require_tree ../../../vendor/assets/javascripts/ace
+//= require ../../../vendor/assets/javascripts/ace/ace.js
 // Loads all Bootstrap javascripts
 //= require bootstrap
 //= require wysihtml5-0.3.0.min.js
