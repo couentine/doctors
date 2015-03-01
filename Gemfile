@@ -11,6 +11,7 @@ gem 'bson_ext', '1.9.2'
 gem 'bootstrap-sass', '2.3.2.2'
 gem 'faker'
 gem 'simple_form', '~> 2.1.1'
+gem 'ace-rails-ap'
 
 gem 'browser_details'
 gem 'exception_notification'

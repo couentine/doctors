@@ -19,5 +19,6 @@
 //= require jquery.autosize.min.js
 //= require jquery.wordrotator.min
 //= require browser_details
-//= require ace
+//= require ace/ace
+//= require ace/worker-html
 //= require badge_list
