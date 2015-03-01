@@ -81,9 +81,10 @@ function checkForOverflowMarks() {
   var entryURL;
   $("div[data-mark-overflow='true']").each(function() {
     if (($(this).height()+"px") == $(this).css('max-height')) {
-      entryURL = $(this).closest("table").find("td.headline-middle h2 a").prop("href");
-      if ($(this).closest("td").find("div.overflow-mark").length == 0)
-        $(this).after("<div class='overflow-mark'><a href='" + entryURL + "'>Read more...</a></div>");
+      entryURL = $(this).closest(".entry-card").find(".header-action a").prop("href");
+      if ($(this).closest(".entry-card").find("div.overflow-mark").length == 0)
+        $(this).after("<div class='overflow-mark'><a href='" + entryURL + "'>"
+          + "<i class='fa fa-chevron-down'></i></a></div>");
     } else $(this).closest("td").remove("div.overflow-mark");
   });
 }
@@ -215,15 +216,20 @@ function checkForLocationHash() {
   
   if (url.match('#')) {
     var header = url.split('#')[1];
-    if ($('.nav-tabs a[href=#'+header+']').length > 0) {
-      $('.nav-tabs a[href=#'+header+']').tab('show');
-    } else if ($('#'+header).length > 0) {
-      $('#'+header).modal('show');
-      $('#'+header).find('textarea.modal-rich-text-area').each(function() {
-        registerRichTextArea(this);
-      });
+    if (($('#'+header).length > 0)) {
+      if ($('#'+header).hasClass('modal')) {
+        // Then this is a modal
+        $('#'+header).modal('show');
+        $('#'+header).find('textarea.modal-rich-text-area').each(function() {
+          registerRichTextArea(this);
+        });
+      } else {
+        // Then scroll to the right part of the page (the default scroll is off due to the navbar)
+        $(window).scrollTop($("#"+header).offset().top - $("header.navbar").height() - 30);
+        console.log($("#"+header).offset().top - $("header.navbar").height() - 30);
+      }
     }
-  } 
+  }
 }
 
 // Changes the location hash when modals & tabs are toggled
@@ -255,7 +261,8 @@ function checkResponsiveFormatting() {
     var availableWidth = $("#subheader").width()-90;
 
     // First check if we're actually out of space
-    if (($("#subheader ul.breadcrumb").width() + $("ul.subheader-actions").width()) > availableWidth) {
+    if (($("#subheader ul.breadcrumb").width() 
+        + $("ul.subheader-actions").width()) > availableWidth) {
       // Sub-header formatting (right side)
       if ($("ul.subheader-actions").width() > (availableWidth*0.3)) {
         var newHTMLContent; var textContent;
@@ -325,7 +332,8 @@ var hasDynamicColumns = false;
 
 function getTargetColCount(availableWidth) {
   var target;
-  for (target=0; (dcThresholds[target]!=null) && (availableWidth>=dcThresholds[target]); target++) {}
+  for (target=0; (dcThresholds[target]!=null) 
+    && (availableWidth>=dcThresholds[target]); target++) {}
   return target;
 }
 

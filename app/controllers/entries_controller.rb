@@ -88,14 +88,19 @@ class EntriesController < ApplicationController
       @entry.creator = current_user
       @entry.current_user = current_user
       @entry.current_username = current_user.username
-      @entry.save
+      
+      begin
+        @entry.save # This commits the save to S3 for images and thus can error out
+      rescue Exception => e
+        @entry.errors[:base] << "There was an error saving your #{@type}. Please try again later."
+      end
     end
 
     
     # Now do the redirect
     if @entry.errors.count > 0
       if @entry.new_record?
-        flash[:error] = "There was an error creating your #{@type}. #{@entry.errors.inspect}"
+        flash[:error] = "There was an error creating your #{@type}."
         render :new
       else
         flash[:error] = "There was an error updating your #{@type}."
@@ -108,7 +113,7 @@ class EntriesController < ApplicationController
         notice = "Your #{@type} was created."
       end
 
-      redirect_to [@group, @badge, @log, @entry], notice: notice
+      redirect_to [@group, @badge, @log], notice: notice
     end
   end
 

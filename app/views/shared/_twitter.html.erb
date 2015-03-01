@@ -1,3 +1,8 @@
+<!--
+  NOTE: This is currently archived. It turns out that the web intents library doesn't let you
+        actually access the tweet ids, so I'm snoozing this for now.
+-->
+
 <script>window.twttr = (function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0],
     t = window.twttr || {};
@@ -18,8 +23,8 @@
 <script>
   var tw;
   twttr.ready(function (twttr) {
-    twttr.widgets.createMentionButton(
-      'BadgeList',
+    twttr.widgets.createShareButton(
+      'http://badgelist.com/test',
       document.getElementById('tweet-button'),
       {
         count: 'none',
@@ -34,12 +39,12 @@
         var tweetId = intentEvent.data.source_tweet_id;
         var screenName = intentEvent.data.screen_name;
         $("#entry_link_url").val("https://twitter.com/" + screenName + "/status/" + tweetId);
-        console.log("https://twitter.com/" + screenName + "/status/" + tweetId);
-        console.log(intentEvent.data);
-        console.log(intentEvent.data.tweet_id);
-        console.log(intentEvent.data.source_tweet_id);
-        console.log(intentEvent.data.screen_name);
-        console.log(intentEvent.data.user_id);
+        // console.log("https://twitter.com/" + screenName + "/status/" + tweetId);
+        // console.log(intentEvent.data);
+        // console.log(intentEvent.data.tweet_id);
+        // console.log(intentEvent.data.source_tweet_id);
+        // console.log(intentEvent.data.screen_name);
+        // console.log(intentEvent.data.user_id);
         tw = intentEvent.target;
       }
     );

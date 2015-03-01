@@ -1,9 +1,7 @@
 <%
   # OPTIONS:
-  #   show_badge >> Is the badge image shown? >> default = true
   #   date_format >> How is the date displayed? >> options = :full, :ago, :learner_week >> default = :full
 
-  show_badge = true if show_badge.nil?
   date_format ||= :full
 
   # Force preload of important variables
@@ -13,56 +11,34 @@
 %>
 
 
-<div class="info-card entry-card <%= entry.category %>" data-bl-dyncol="child">
-  
-  <% if !entry.log.nil? && !entry.log.badge.nil? && !entry.log.badge.group.nil? %>
+<% if !entry.log.nil? && !entry.log.badge.nil? && !entry.log.badge.group.nil? %>
 
-    <table>
-      <tr class="card-headline-row <%= (show_badge) ? 'with-badge' : 'no-badge' %>">
-        <td class="headline-left">
-          <% if show_badge %>
-            <%= link_to image_tag(group_badge_path(entry.log.badge.group, entry.log.badge, format: :png)), 
-              group_badge_path(entry.log.badge.group, 
-              entry.log.badge), title: entry.log.badge.name, data: { toggle: 'tooltip', 
-                placement: 'right' } %>
-          <% end %>
-        </td>
-        <td class="headline-middle">
-          <h2>
-            <% if entry.creator != entry.log.user %>
-              <span class="creator-gravatar">
-                <img src="<%= gravatar_url_for entry.creator %>" 
-                  class="gravatar img-circle <%= entry.entry_creator_type %>"
-                  title="Posted by <%= entry.creator.name %>" data-placement="bottom"
-                  data-toggle="tooltip">
-                
-                <% if (entry.type == 'validation') && entry.log_validated %>
-                  <span class="validation-result positive" title="Learning was positively validated"
-                    data-toggle="tooltip">
-                    &#10003;
-                  </span>
-                <% elsif (entry.type == 'validation') && !entry.log_validated %>
-                  <span class="validation-result negative" title="Learning was negatively validated"
-                    data-toggle="tooltip">
-                    &#10007;
-                  </span>
-                <% else %>
-                  <span class="arrow">&#9654;</span>
-                <% end %>
-              </span>
-            <% end %>
-            <% if show_badge %>
-              <%= link_to \
-                ((entry.summary.length>90) ? "#{entry.summary[0..90]}..." : entry.summary), 
-                [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
-            <% else %>
-              <%= link_to \
-                entry.summary, 
-                [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
-            <% end %>
-          </h2>
-        </td>
-        <td class="headline-right">
+  <div class="info-card entry-card <%= entry.category %> <%= entry.format %>" 
+    data-bl-dyncol="child">
+
+    <div class="card-headline-row">
+      <% if !entry.linkified_summary.blank? %>
+        <h2><%= entry.linkified_summary.html_safe %></h2>
+      <% elsif !entry.summary.blank? %>
+        <h2><%= entry.summary %></h2>
+      <% else %>
+        <h2 class="empty">Posted Image</h2>
+      <% end %>
+
+      <span class='header-action'>
+        <%= link_to "<i class='fa fa-chevron-circle-right'></i>".html_safe, 
+          [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
+      </span>
+    </div>
+
+    <div class="card-body-row">
+      <div class="card-body-inner" data-mark-overflow="true">
+        <!-- === ENTRY CONTENT PARTIAL === -->
+        <%= render "shared/entry_content_small", entry: entry %>
+      </div>
+      
+      <div class="card-footline-row">      
+        <span class="log-gravatar">
           <%= link_to gravatar_for(entry.log.user, class: "img-circle #{entry.log_user_type}"), 
             [entry.log.badge.group, entry.log.badge, entry.log],
             title: "View #{entry.log.user.name}'s #{entry.log.badge.progress_log}", data: { toggle: 'tooltip' } %>
@@ -70,29 +46,32 @@
             title="<%= entry.log.user.name %>" >
             <%= entry.log.user.username %>
           </abbr>
-        </td>
-      </tr>
-      <tr class="card-body-row">
-        <td class="card-body" colspan="3">
-          <div class="card-body-inner" data-mark-overflow="true">
-            <!-- === ENTRY CONTENT PARTIAL === -->
-            <%= render "shared/entry_content_small", entry: entry %>
+        </span>
+        
+        <% if entry.creator != entry.log.user %>
+          <span class="creator-gravatar">
+            <img src="<%= gravatar_url_for entry.creator %>" 
+              class="gravatar img-circle <%= entry.entry_creator_type %>"
+              title="Posted by <%= entry.creator.name %>" data-placement="bottom"
+              data-toggle="tooltip">
             
-            <% unless entry.tags.blank? %>
-              <div class="card-body-footer">
-                <label><i class="fa fa-tags"></i> Tags:</label> 
-                <% entry.tags_with_caps.each do |tag| %>
-                  <% comma = (tag == entry.tags_with_caps.last) ? '' : ', ' %>
-                  <%= link_to tag, \
-                    "/#{entry.log.badge.group.url}/#{entry.log.badge.url}/#{tag}" %><%= comma %>
-                <% end %>
-              </div>
+            <% if (entry.type == 'validation') && entry.log_validated %>
+              <span class="validation-result positive" title="Learning was positively validated"
+                data-toggle="tooltip">
+                &#10003;
+              </span>
+            <% elsif (entry.type == 'validation') && !entry.log_validated %>
+              <span class="validation-result negative" title="Learning was negatively validated"
+                data-toggle="tooltip">
+                &#10007;
+              </span>
+            <% else %>
+              <span class="arrow">&#9654;</span>
             <% end %>
-          </div>
-        </td>
-      </tr>
-      <tr class="card-footline-row">
-        <td class="left-foot" colspan="2">
+          </span>
+        <% end %>
+
+        <span class="left-foot">
           <% if date_format == :ago %>
             <% if entry.updated_at <= Time.now %>
               <%= "#{time_ago_in_words(entry.updated_at).capitalize} ago" %>
@@ -104,15 +83,10 @@
           <% else %>
             <%= entry.updated_at.to_s(:full_date_time) %>
           <% end %>
-        </td>
-        <td class="right-foot"></td>
-      </tr>
-    </table>
+        </span>
+      </div>
+    </div>
 
-  <% else %>
-
-    <p><%= "Error displaying entry with id: #{entry.id}" %></p>
-
-  <% end %>
+  </div>
     
-</div>
+<% end %>

@@ -1,5 +1,10 @@
 <% 
-  provide(:full_title, "#{@entry.summary} - #{@badge.name}")
+  if @entry.summary.blank?
+    provide(:full_title, \
+      "Post ##{@entry.entry_number} (#{@user.username_with_caps}) - #{@badge.name}")
+  else
+    provide(:full_title, "#{@entry.summary} - #{@badge.name}")
+  end
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
@@ -119,10 +124,14 @@
             <%= link_to @parent_tag.display_name, [@group, @badge, @parent_tag] %>
           </h2>
         <% end %>
-        <h1>
-          <%= (@entry.linkified_summary.blank?) ? \
-            @entry.summary : @entry.linkified_summary.html_safe %>
-        </h1>
+        
+        <% if !@entry.linkified_summary.blank? %>
+          <h1><%= @entry.linkified_summary.html_safe %></h1>
+        <% elsif !@entry.summary.blank? %>
+          <h1><%= @entry.summary %></h1>
+        <% else %>
+          <h1 class="empty">Posted Image</h1>
+        <% end %>
         
         <ul>
           <li>

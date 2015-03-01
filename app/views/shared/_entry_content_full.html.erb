@@ -1,5 +1,3 @@
-<!-- === ENTRY CONTENT PARTIAL === -->
-
 <% if entry.format == 'link' %>
 
   <!-- === WEB LINK === -->
@@ -19,7 +17,12 @@
   
   <!-- === IMAGE === -->
   <div class="panel panel-entry-content panel-entry-content-image">
-    <%= image_tag entry.uploaded_image_url(:full) if entry.uploaded_image? %>
+    <% if entry.uploaded_image? %>
+      <%= link_to image_tag(entry.uploaded_image_url(:full)), entry.uploaded_image_url(:full),
+        target: '_blank' %>
+    <% else %>
+      <i class="fa fa-exclamation-circle"></i>
+    <% end %>
   </div>
 
 <% elsif entry.format == 'code' %>

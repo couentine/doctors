@@ -121,7 +121,21 @@
 
 <script type="text/javascript">
 
+  var $root;
+
   $(document).ready(function() {
+
+    // Register smooth scroll links
+    $root = $('html, body');
+    $('a.smooth-scroll').click(function() {
+        var element = $.attr(this, 'href');
+        $root.animate({
+            scrollTop: $(element).offset().top - $("header.navbar").height() - 30
+        }, 700, function () {
+            window.location.hash = element;
+        });
+        return false;
+    });
     
     <% if @show_sharing %>
       
@@ -461,7 +475,7 @@
     <div class="row">
       <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="validations" 
       data-bl-dyncol-width="12">
-        <%= render(@validations, show_badge: false, date_format: :full) %>
+        <%= render(@validations, show_badge: false, date_format: :ago) %>
       </div>
     </div>
 
@@ -475,6 +489,52 @@
 
   <% if @badge.has_requirements? %>
 
+    <!-- === TABLE OF CONTENTS === -->
+
+    <div class="row add-top-margin">
+      <div class="span12">
+        <div class="tab-header merge-with-card">
+          <% if @current_user_is_log_owner %>
+            <h2>Your Posted Evidence</h2>
+          <% else %>
+            <h2>Evidence Posted by <%= @user.name %></h2>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" id="topic-list-row">
+      <div class="span12">
+        <div class="info-card text-card topic-list-card">
+          <ul>
+            <% requirements_complete = @log.requirements_complete %>
+            <% @badge.requirements.each do |tag| %>
+              <%
+                if requirements_complete[tag]
+                  icon_text = "<i class='fa fa-check-square-o'></i>"
+                else
+                  icon_text = "<i class='fa fa-square-o'></i>"
+                end
+              %>
+              <li>
+                <a href="#t-<%= tag.name %>" class="smooth-scroll">
+                  <%= "#{icon_text} #{tag.display_name}".html_safe %>
+                </a>
+                <% if @current_user_is_log_owner %>
+                  <%= link_to "<i class='fa #{tag.format_icon}'></i> ".html_safe \
+                    + "Post #{tag.format.to_s.capitalize}", \
+                    new_group_badge_log_entry_path(@group, @badge, @log, \
+                    tag: tag.name_with_caps), class: 'btn btn-mini' %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- === ACTUAL EVIDENCE === -->
+
     <% @log.posts_by_topic.each do |topic_item| %>
       <% if @current_user_is_log_owner                        \
         || topic_item['tag'].nil?                              \
@@ -485,7 +545,7 @@
           && (@current_user_is_expert || @current_user_is_admin))
       %>
 
-        <div class="row add-top-margin">
+        <div class="row add-top-margin" id="t-<%= topic_item['tag'].name %>">
           <div class="span12">
             <div class="tab-header">
               <% if @current_user_is_log_owner %>

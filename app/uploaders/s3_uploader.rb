@@ -5,7 +5,7 @@ class S3Uploader < CarrierWave::Uploader::Base
   storage :fog
 
   def store_dir
-    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+    "u/#{model.class.to_s.underscore}/#{model.id}"
   end
 
   version :thumb do
@@ -13,7 +13,7 @@ class S3Uploader < CarrierWave::Uploader::Base
   end
   
   version :preview do 
-    process :resize_to_fit => [300, 300]
+    process :resize_to_fit => [700, 700]
   end
   
   version :full do 

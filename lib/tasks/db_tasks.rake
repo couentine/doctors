@@ -315,4 +315,26 @@ namespace :db do
     puts " >> Done."
   end
 
+  # Updates linkified summaries on any entries which are missing them
+  task backpopulate_linkified_summaries: :environment do
+    print "Examining #{Entry.count} entries"
+    
+    Entry.each do |entry|
+      if entry.summary && entry.linkified_summary.blank? && entry.log && entry.log.badge
+        summary_result = linkify_text(entry.summary, entry.log.badge.group, entry.log.badge)
+        entry.linkified_summary = summary_result[:text]
+        body_result = linkify_text(entry.body, entry.log.badge.group, entry.log.badge)
+        entry.tags = [body_result[:tags], summary_result[:tags]].flatten.uniq
+        entry.tags_with_caps = [body_result[:tags_with_caps], summary_result[:tags_with_caps]]\
+          .flatten.uniq
+        
+        entry.timeless.save if entry.changed?
+      end
+
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end
