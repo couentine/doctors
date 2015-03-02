@@ -36,7 +36,7 @@
     <% if @current_user_is_expert || @current_user_is_learner %>
       
       <li  class="collapsible">
-        <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
+        <%= link_to "<i class='fa fa-user'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
         <% if @current_user_is_entry_creator %>
           <span class="divider">|</span>
@@ -181,7 +181,7 @@
 
       <% unless @entry.tags.blank? %>
         <div class="footer-section">
-          <label><i class="icon-tags"></i> Tags:</label> 
+          <label><i class="fa fa-tags"></i> Tags:</label> 
           <% @entry.tags_with_caps.each do |tag| %>
             <% comma = (tag == @entry.tags_with_caps.last) ? '' : ', ' %>
             <%= link_to tag, "/#{@group.url_with_caps}/#{@badge.url_with_caps}/#{tag}" %><%= comma %>

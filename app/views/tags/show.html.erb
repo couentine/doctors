@@ -26,7 +26,7 @@
     <% if @current_user_is_expert || @current_user_is_learner %>
     
       <li  class="collapsible">
-        <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
+        <%= link_to "<i class='fa fa-user'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
         <% if @tag_exists && @can_edit_tag %>
           <span class="divider">|</span>

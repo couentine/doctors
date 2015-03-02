@@ -13,7 +13,7 @@
 <% content_for :subheader_actions do %>
 
   <li class="collapsible">
-    <%= link_to '<i class="icon-plus-sign icon-white"></i> New Learning Group'.html_safe, 
+    <%= link_to '<i class="fa fa-plus-circle"></i> New Learning Group'.html_safe, 
       new_group_path %>
   </li>
   
@@ -60,7 +60,7 @@
         <li><strong>Step 2:</strong> Build badges<br></li>
         <li><Strong>Step 3:</Strong> Invite learners to share evidence</li>
       </ul><br>
-      <%= link_to "<i class='icon-plus icon-white'></i> Create a new learning group".html_safe,
+      <%= link_to "<i class='fa fa-plus'></i> Create a new learning group".html_safe,
         new_group_path, class: 'btn btn-large btn-success pull-right' %>
     </div>
   </div>
@@ -121,10 +121,10 @@
                     <ul>
                       <li>
                         <% if @this_is_current_user %>
-                          <%= link_to "<i class='icon-user'></i> View Your Log".html_safe,
+                          <%= link_to "<i class='fa fa-user'></i> View Your Log".html_safe,
                             [log.badge.group, log.badge, log] %>
                         <% else %>
-                          <%= link_to "<i class='icon-user'></i> View Learning Log".html_safe,
+                          <%= link_to "<i class='fa fa-user'></i> View Learning Log".html_safe,
                             [log.badge.group, log.badge, log] %>
                         <% end %>
                       </li>

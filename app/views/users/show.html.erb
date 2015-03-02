@@ -23,20 +23,20 @@
           <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
             role="button" data-toggle="dropdown" data-target="#">
             Account Settings
-            <i class="icon-cog icon-white"></i>
+            <i class="fa fa-cog"></i>
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdown-subheader-settings">
             <li>
               <a href="<%= edit_user_registration_path %>">
-                <i class="icon-edit"></i> Change account details
+                <i class="fa fa-edit"></i> Change account details
               </a>
             </li>
             <li>
               <a href="https://en.gravatar.com/connect/?source=_signup" target="_blank" data-toggle="tooltip" 
                 data-placement="bottom" 
                 title="Badge List uses Gravatar to display your profile picture.">
-                <i class="icon-picture"></i> Change your profile picture
+                <i class="fa fa-picture-o"></i> Change your profile picture
               </a>
             </li>            
           </ul>
@@ -90,7 +90,7 @@
           To get started you'll either need to create a new learning group 
           or get someone else to invite you to one of theirs.<br><br>
 
-          <%= link_to "<i class='icon-plus'></i> Create a new learning group".html_safe,
+          <%= link_to "<i class='fa fa-plus'></i> Create a new learning group".html_safe,
             new_group_path, class: 'btn btn-success' %>
         <% else %>
           They look lonely. Maybe you could invite them to join one of your learning groups?
