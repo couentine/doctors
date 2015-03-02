@@ -31,7 +31,7 @@
 
       <div class="form-image">
         <% if @tag.type == 'requirement' %>
-          <i class="fa fa-pencil-square"></i>
+          <i class="fa <%= @tag.format_icon %>"></i>
         <% else %>
           <i class="fa fa-file"></i>
         <% end %>
@@ -61,6 +61,9 @@
           </div>
         <% end %>
         
+        <%= f.input :format, as: :select, label: 'Evidence Format', include_blank: false,
+          collection: @tag_format_options %>
+
         <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
           :'character-count' => true, :'max-length' => Tag::MAX_SUMMARY_LENGTH } } %>
 

@@ -23,6 +23,8 @@ gem 'font-awesome-rails', '~> 4.3'
 # gem 'mixpanel-ruby'
 
 gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+# gem 'carrierwave'
+gem 'fog'
 
 # Pagination
 
@@ -31,13 +33,13 @@ gem 'kaminari-bootstrap', '~> 0.1.3'
 
 
 # Email
-
 gem 'postmark-rails', '~> 0.5.2'
 
 # Users
-
 gem 'devise', '~> 3.3.0'
 
+# Twitter
+gem 'twitter'
 
 group :development, :test do
   gem 'rspec-rails', '~> 2.0'

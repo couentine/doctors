@@ -31,7 +31,6 @@
   <!-- === PARENT TAG INFO === -->
 
   <div class="well secondary span9 offset1">
-    <i class="fa fa-pencil-square header-icon"></i>
     <h4>This evidence is linked to</h4>
     <h3><%= "##{@parent_tag.name_with_caps}" %></h3>
     <p>
@@ -60,7 +59,7 @@
         <% end %>
       <% end %>
       <div class="form-image">
-        <i class="fa fa-comment"></i>
+        <i class="fa <%= @entry.format_icon %>"></i>
       </div>
     </div>
 

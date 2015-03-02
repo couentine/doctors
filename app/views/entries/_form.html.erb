@@ -1,11 +1,4 @@
-<script type="text/javascript">
-  $(document).ready(function() {
-    $('#entry_summary').focus();
-  });
-</script>
-
 <%= simple_form_for [@group, @badge, @log, @entry], html: {class: 'form-horizontal'} do |f| %>
-  <%= f.error_notification %>
 
   <div class="form-body">
     <% if @entry.type == 'validation' %>
@@ -21,16 +14,216 @@
             <em><strong>Please explain your opinion. Include lots of detail!</strong></em>
           </p>
         </div>
-
     <% end %>
 
-    <%= f.input :summary, as: :text, label: 'Summary', auto_focus: true, input_html: { data: {
-      :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
-      cols: '200', rows: '5' } %>
-    <%= f.input :body, as: :text, label: 'Body', 
-      input_html: { class: "huge-text-area rich-text-area" } %>
+    <% if @entry.format == 'link' %>
+
+      <!-- === WEB LINK === -->
+
+      <%= f.input :link_url, label: 'Link URL', auto_focus: true, 
+        input_html: { title: 'Paste a web URL', 
+        placeholder: 'http://example.org/web-link.html', class: 'input-xlarge', 
+        data: { toggle: 'tooltip' } } %>
+
+      <%= f.input :summary, as: :text, label: 'Description', input_html: { data: {
+        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+        cols: '200', rows: '5' } %>
+
+      <script type="text/javascript">
+        $(document).ready(function() { $("#entry_link_url").focus() });
+      </script>
+
+    
+    <% elsif @entry.format == 'tweet' %>
+
+      <!-- === TWITTER LINK === -->
+
+      <ul id="tweet-input-selection"
+          style="<%= (@entry.errors[:link_url].blank?) ? '' : 'display: none;' %>">
+        <li>
+          <a href="#" class="btn btn-success btn-large" id="show-tweet-input-existing">
+            <i class="fa fa-link"></i>
+            Post an existing tweet
+          </a>
+        </li>
+        <li>
+          <a href="#" class="btn btn-primary btn-large" id="show-tweet-input-new">
+            <i class="fa fa-twitter"></i>
+            Post a new tweet right now
+          </a>
+        </li>
+      </ul>
+
+      <div id="tweet-input-existing" 
+          style="<%= (@entry.errors[:link_url].blank?) ? 'display: none;' : '' %>">
+        <%= f.input :link_url, label: 'Tweet URL', auto_focus: true,
+          input_html: { class: 'input-xxlarge',
+          placeholder: 'https://twitter.com/example/status/9876543210',
+          title: 'Copy and paste the tweet URL here.', 
+          data: { toggle: 'tooltip' } } %>
+
+        <div class="control-group">
+          <div class="controls help-info">
+            To get the url of an existing tweet, click on the tweet and then click the "Details"
+            link in the footer if it appears. Then just copy and paste the url from your browser's
+            location  bar.
+          </div>
+        </div>
+      </div>
+
+      <div id="tweet-input-new" style="display: none;">
+
+        <div class="control-group">
+          <label class="optional control-label">Instructions</label>
+          <div class="controls help-info">
+            Clicking the button below will open a new Twitter window.
+            After you tweet, click "View it on Twitter" and then copy the url from your browser's
+            location bar and return to this window.
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <% twitter_url = \
+              "http://twitter.com/intent/tweet?original_referer=http://badgelist.com" \
+              + "&related=BadgeList&tw_p=tweetbutton"; %>
+
+            <a href="<%= twitter_url %>" class="btn btn-primary btn-large" id="go-to-twitter"
+                target="_blank">
+              <i class="fa fa-twitter"></i>
+              Go to Twitter <i class="fa fa-angle-double-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <script type="text/javascript">
+        var twitterWindow;
+
+        $(document).ready(function() { 
+          
+          $("#show-tweet-input-existing").click(function(e) {
+            $("#tweet-input-selection").slideUp();
+            $("#tweet-input-existing").slideDown();
+            e.preventDefault();
+          });
+          
+          $("#show-tweet-input-new").click(function(e) {
+            $("#tweet-input-selection").slideUp();
+            $("#tweet-input-new").slideDown();
+            e.preventDefault();
+          });
+
+          $("#go-to-twitter").click(function() {
+            $("#tweet-input-new").slideUp();
+            $("#tweet-input-existing").slideDown();
+          });
+
+        });
+      </script>
+    
+    <% elsif @entry.format == 'image' %>
+      
+      <!-- === IMAGE UPLOAD === -->
+
+      <%= f.input :uploaded_image, as: :file, label: 'Upload an Image',
+        input_html: { accept: 'image/*' } %>
+      <%= f.input :uploaded_image_cache, as: :hidden %>
+      <%= f.input :remove_uploaded_image, as: :hidden %>
+
+      <div class="control-group image_upload_button">
+        <label class="optional control-label">Upload an Image</label>
+        <div class="controls">
+          <a href="#" class="btn btn-success btn-large" id="select-image-file">
+            <i class="fa fa-file-image-o"></i>
+            Select an image file
+          </a>
+        </div>
+      </div>
+
+      <%= f.input :summary, as: :text, label: 'Caption (Optional)', 
+        input_html: { data: {
+        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+        cols: '200', rows: '5' } %>
+
+      <script type="text/javascript">
+        $(document).ready(function() {
+
+          // Clicking the pretty button clicks on the file input element instead
+          $("#select-image-file").click(function(e) {
+            $("#entry_uploaded_image").click();
+            e.preventDefault();
+          });
+          
+          // Update the display of the button when the file input element changes
+          $("#entry_uploaded_image").change(function() {
+            if ($(this).val())
+              $("#select-image-file").html("<i class='fa fa-file-image-o'></i> " 
+                + $(this).val().replace(/c:\\fakepath\\/gi, "")
+                + " <i class='fa fa-check'></i>");
+            else
+              $("#select-image-file").html("<i class='fa fa-file-image-o'></i> " 
+                + "Select an image file");
+          });
+
+        });
+      </script>
+
+    <% elsif @entry.format == 'code' %>
+
+      <!-- === CODE SNIPPET RESPONSE === -->
+
+      <%= f.input :body, as: :text, label: 'Code', 
+        input_html: { class: "huge-text-area code-text-area" } %>  
+      
+      <%= render 'shared/ace', element_id: 'entry_body', ace_theme: 'idle_fingers',
+        code_format: (@entry.code_format || 'javascript'), use_worker: false, read_only: false  %>
+
+      <script>
+          $(document).ready(function() {
+            // Update the code format when the select list changes
+            $("#entry_code_format").change(function() { 
+              aceEditor.getSession().setMode("ace/mode/" + $(this).val()) 
+              aceEditor.getSession().setUseWorker(true);
+            });
+
+            // Update the input element body each time the code changes
+            aceEditor.getSession().on('change', function() {
+              $("#entry_body").val(aceEditor.getValue());
+            });
+            
+            // Focus and scroll to the editor
+            $(aceEditor).focus();
+          });
+      </script>
+      
+      <%= f.input :body, as: :hidden %>
+
+      <%= f.input :code_format, as: :select, label: 'Code Language', 
+        collection: @code_language_options %>
+
+      <%= f.input :summary, as: :text, label: 'Description', input_html: { data: {
+        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+        cols: '200', rows: '5' } %>
+
+    <% else %>
+      
+      <!-- === FREE TEXT RESPONSE === -->
+
+      <%= f.input :summary, as: :text, label: 'Summary', auto_focus: true, input_html: { data: {
+        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+        cols: '200', rows: '5' } %>
+
+      <%= f.input :body, as: :text, label: 'Body', 
+        input_html: { class: "huge-text-area rich-text-area" } %>
+
+      <script type="text/javascript">
+        $(document).ready(function() { $("#entry_summary").focus() });
+      </script>
+    
+    <% end %>
 
     <%= f.input :type, as: :hidden %>
+    <%= f.input :format, as: :hidden %>
     <%= f.input :parent_tag, as: :hidden %>
 
   </div>

@@ -12,7 +12,7 @@
               # Output the little "X" that allows admins to remove learners from the badge
               if (log.validation_status != 'validated') && current_user && @current_user_is_admin  \
                 && (current_user != log.user)
-                  link_to '<i class="icon-remove"></i>'.html_safe, 
+                  link_to '<i class="fa fa-remove"></i>'.html_safe, 
                     group_badge_log_path(log.badge.group, log.badge, log, log: { detached_log: true } ), 
                     method: :put, class: "log-card-delete", title: 'Remove from badge', 
                     data: { toggle: "tooltip", placement: "bottom", 

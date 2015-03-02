@@ -11,6 +11,7 @@ defaults: &defaults
    - add
    - admin
    - admins
+   - assets
    - badge
    - badges
    - create
@@ -38,6 +39,7 @@ defaults: &defaults
    - member
    - members
    - new
+   - perm_assets
    - show
    - support
    - update

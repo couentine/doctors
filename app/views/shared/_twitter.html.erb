@@ -1,0 +1,53 @@
+<!--
+  NOTE: This is currently archived. It turns out that the web intents library doesn't let you
+        actually access the tweet ids, so I'm snoozing this for now.
+-->
+
+<script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+ 
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+ 
+  return t;
+}(document, "script", "twitter-wjs"));</script>
+
+<script>
+  var tw;
+  twttr.ready(function (twttr) {
+    twttr.widgets.createShareButton(
+      'http://badgelist.com/test',
+      document.getElementById('tweet-button'),
+      {
+        count: 'none',
+        size: 'large',
+        related: 'BadgeList'
+      }
+    ).then(function (el) { console.log("Button c.") });
+
+    twttr.events.bind(
+      'tweet',
+      function (intentEvent) {
+        var tweetId = intentEvent.data.source_tweet_id;
+        var screenName = intentEvent.data.screen_name;
+        $("#entry_link_url").val("https://twitter.com/" + screenName + "/status/" + tweetId);
+        // console.log("https://twitter.com/" + screenName + "/status/" + tweetId);
+        // console.log(intentEvent.data);
+        // console.log(intentEvent.data.tweet_id);
+        // console.log(intentEvent.data.source_tweet_id);
+        // console.log(intentEvent.data.screen_name);
+        // console.log(intentEvent.data.user_id);
+        tw = intentEvent.target;
+      }
+    );
+  });
+
+</script>

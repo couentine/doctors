@@ -1,0 +1,22 @@
+<%
+  # String Parameters: code_format, element_id, ace_theme
+  # Boolean Parameters: use_worker, read_only
+%>
+
+<%= javascript_include_tag "/perm_assets/ace/ace.js" %>
+<script>
+    var codeFormat = "<%= code_format %>";
+    var elementId = "<%= element_id %>";
+    var aceTheme = "<%= ace_theme %>";
+    var useWorker = <%= use_worker %>;
+    var readOnly = <%= read_only %>;
+
+    ace.config.set("workerPath", "/perm_assets/ace");
+
+    var aceEditor = ace.edit(elementId);
+    aceEditor.setTheme("ace/theme/" + aceTheme);
+    aceEditor.getSession().setMode("ace/mode/" + codeFormat);
+    aceEditor.getSession().setUseWorker(useWorker);
+    aceEditor.setOptions({ maxLines: Infinity, minLines: 20 });
+    aceEditor.setReadOnly(readOnly);
+</script>

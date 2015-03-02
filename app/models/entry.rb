@@ -6,8 +6,9 @@ class Entry
 
   # === CONSTANTS === #
   
-  MAX_SUMMARY_LENGTH = 100
+  MAX_SUMMARY_LENGTH = 140
   TYPE_VALUES = ['post', 'validation']
+  FORMAT_VALUES = ['text', 'link', 'image', 'tweet', 'code']
   JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, 
     :body_sections, :tags, :tags_with_caps]
   
@@ -19,47 +20,101 @@ class Entry
 
   # === FIELDS & VALIDATIONS === #
 
-  field :entry_number,        type: Integer
-  field :summary,             type: String
-  field :private,             type: Boolean, default: false
-  field :type,                type: String
-  field :log_validated,       type: Boolean
-  field :parent_tag,          type: String
+  field :entry_number,                    type: Integer
+  field :summary,                         type: String
+  field :linkified_summary,               type: String
+  field :private,                         type: Boolean, default: false
+  field :type,                            type: String
+  field :format,                          type: String, default: 'text'
+  field :log_validated,                   type: Boolean
+  field :parent_tag,                      type: String
 
-  field :body,                type: String
-  field :body_versions,       type: Array
-  field :body_sections,       type: Array
-  field :tags,                type: Array
-  field :tags_with_caps,      type: Array
+  field :body,                            type: String
+  field :link_url,                        type: String
+  field :link_metadata,                   type: Hash, default: {}, pre_processed: true
+  field :code_format,                     type: String
+  field :body_versions,                   type: Array, default: []
+  field :body_sections,                   type: Array, default: []
+  field :tags,                            type: Array, default: []
+  field :tags_with_caps,                  type: Array, default: []
 
-  field :current_user,        type: String
-  field :current_username,    type: String
-  field :flags,                 type: Array
+  field :current_user,                    type: String
+  field :current_username,                type: String
+  field :flags,                           type: Array
 
+  mount_uploader :uploaded_image,         S3Uploader
+
+  # === UNIVERSAL VALIDATIONS === #
   validates :log, presence: true
   validates :creator, presence: true
   validates :entry_number, presence: true, uniqueness: { scope: :log }
-  validates :summary, presence: true, length: { within: 3..MAX_SUMMARY_LENGTH }
-  validates :type, inclusion: { in: TYPE_VALUES, 
-                                message: "%{value} is not a valid entry type" }
+  validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid entry type" }
+
+  # === FORMAT-SPECIFIC VALIDATIONS === #
+  validates :summary, presence: true, length: { within: 3..MAX_SUMMARY_LENGTH }, \
+    if: :summary_is_required?
+  validates :body, presence: true, if: :body_is_required?
+  validates :link_url, presence: true, if: :link_is_required?
+  validates :uploaded_image, presence: true, if: :image_is_required?
+  validates :link_url, format: { with: TWITTER_URL_REGEX, message: "must be a valid Twitter url" },\
+    if: :tweet_is_required?
 
   # Which fields are accessible?
-  attr_accessible :parent_tag, :summary, :log_validated, :body
+  attr_accessible :parent_tag, :summary, :format, :log_validated, :body, :link_url, \
+    :code_format, :uploaded_image
 
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
   before_save :process_parent_tag
-  before_save :update_body_sections
+  before_save :process_content_changes
   before_save :update_body_versions # DO store the first value since it comes from the user
+  after_create :update_log
   after_create :send_notifications
-  after_create :request_validation_if_complete
   after_destroy :check_log_validation_counts
   
   # === ENTRY METHODS === #
 
   def to_param
     entry_number || _id
+  end
+
+  # Validation methods
+  def summary_is_required?
+    ['text', nil, 'link', 'code'].include? format
+  end
+  
+  def body_is_required?
+    format == 'code'
+  end
+  
+  def link_is_required?
+    ['link', 'tweet'].include? format
+  end
+  
+  def image_is_required?
+    format == 'image'
+  end
+  
+  def tweet_is_required?
+    format == 'tweet'
+  end
+  
+
+  # Returns the font awesome icon code for this tag's format (ex: "fa-camera")
+  def format_icon
+    case format
+    when 'link'
+      icon_text = 'fa-link'
+    when 'tweet'
+      icon_text = 'fa-twitter'
+    when 'image'
+      icon_text = 'fa-camera'
+    when 'code'
+      icon_text = 'fa-code'
+    else
+      icon_text = 'fa-pencil'
+    end
   end
 
   # Returns a number representing the updated_at date relative to the learner's start date
@@ -138,6 +193,7 @@ protected
   
   def set_default_values
     self.entry_number ||= log.next_entry_number if log
+    self.format = tag.format if format.nil? && tag
   end
 
   # Sets tag relationship based on parent_tag string
@@ -146,6 +202,7 @@ protected
       matched_tags = log.badge.tags.where(name: parent_tag.downcase)
       if matched_tags.count > 0
         self.tag = matched_tags.first
+        self.format = tag.format
       else
         t = Tag.new
         t.badge = log.badge
@@ -157,18 +214,64 @@ protected
         t.display_name = detagify_string(t.name_with_caps)
         t.save
         self.tag = t
+        self.format = tag.format
       end
+    end
+    
+    # Now attempt to pull down the tweet body using the twitter API
+    if (format == 'tweet') && link_url_changed? && !link_url.blank?
+      begin
+        tweet_id = extract_tweet_id(link_url)
+        tweet = $twitter.status(tweet_id)
+        self.summary = tweet.text
+
+        # Now that we have the tweet, let's store some metadata
+        self.link_metadata = {
+          'tweet_id' => tweet.id,
+          'tweet_favorite_count' => tweet.favorite_count,
+          'tweet_filter_level' => tweet.filter_level,
+          'tweet_in_reply_to_screen_name' => tweet.in_reply_to_screen_name,
+          'tweet_in_reply_to_status_id' => tweet.in_reply_to_status_id,
+          'tweet_in_reply_to_user_id' => tweet.in_reply_to_user_id,
+          'tweet_lang' => tweet.lang,
+          'tweet_retweet_count' => tweet.retweet_count,
+          'tweet_source' => tweet.source,
+          'tweet_text' => tweet.text,
+          'tweet_user_id' => tweet.user.id,
+          'tweet_user_screen_name' => tweet.user.screen_name,
+          'tweet_user_connections' => tweet.user.connections,
+          'tweet_user_description' => tweet.user.description,
+          'tweet_user_favourites_count' => tweet.user.favourites_count,
+          'tweet_user_followers_count' => tweet.user.followers_count,
+          'tweet_user_friends_count' => tweet.user.friends_count,
+          'tweet_user_lang' => tweet.user.lang,
+          'tweet_user_listed_count' => tweet.user.listed_count,
+          'tweet_user_location' => tweet.user.location,
+          'tweet_user_name' => tweet.user.name,
+          'tweet_user_statuses_count' => tweet.user.statuses_count,
+          'tweet_user_time_zone' => tweet.user.time_zone,
+          'tweet_user_utc_offset' => tweet.user.utc_offset,
+        }
+      rescue Exception => e
+        # Nothing found so rather than throw an error we'll just set the summary to an error value.
+        self.summary = "No tweet found! Please check the link and try again." 
+      end
+
+      # Now manually fire the process_content_changes (we can't be sure of the timing)
+      self.process_content_changes
     end
   end
 
-  def update_body_sections
-    if body_changed? || summary_changed?
-      body_result = linkify_text(body, log.badge.group, log.badge)
-      summary_result = linkify_text(summary, log.badge.group, log.badge)
+  # Linkifies summary and body, pulls tweet bodies from twitter
+  def process_content_changes
+    if body_changed? || summary_changed? || link_url_changed?
+      # First get the tweet body from the twitter api (FIXME)
       
-      if body_changed?
-        self.body_sections = body_result[:text].split(SECTION_DIVIDER_REGEX)
-      end
+      # Then linkify summary and body (and split body into sections)
+      summary_result = linkify_text(summary, log.badge.group, log.badge)
+      self.linkified_summary = summary_result[:text] if summary_changed?
+      body_result = linkify_text(body, log.badge.group, log.badge)
+      self.body_sections = body_result[:text].split(SECTION_DIVIDER_REGEX) if body_changed?
       
       # The entry tags should be a concatenation of the summary and body tags
       self.tags = [body_result[:tags], summary_result[:tags]].flatten.uniq
@@ -183,7 +286,7 @@ protected
                               :username => current_username, :updated_at => Time.now,
                               :updated_at_text => Time.now.strftime("%-m/%-d/%y at %l:%M%P") }
 
-      if body_versions.nil? || (body_versions.length == 0)
+      if body_versions.blank?
         self.body_versions = [current_version_row]
       elsif body_versions.last[:body] != body
         self.body_versions << current_version_row
@@ -191,28 +294,33 @@ protected
     end
   end
 
+  # This method takes care of updating the log as needed.
+  def update_log
+    if log
+      # First increment the entry number counter
+      log.next_entry_number += 1
+      
+      # Then check if all of the requirements are complete.
+      # If so we will automatically request validation as long as it hasn't been done before
+      if (log.validation_status!='validated') && log.date_requested.nil? && log.date_withdrawn.nil?
+        everything_complete = true
+        log.requirements_complete.each do |tag, complete|
+          everything_complete = everything_complete && complete
+        end
+        log.date_requested = Time.now if everything_complete
+      end
+      
+      log.save
+    end
+  end
+
+
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
     if created_at > (Time.now - 2.hours)
       if (type == 'validation') && (log.user != creator)
         UserMailer.log_validation_received(log.user, creator, \
           log.badge.group, log.badge, log, self).deliver 
-      end
-    end
-  end
-
-  # This method checks to see if all of the requirements are complete and if so requests validation
-  # (only if validation has not previously been requested or withdrawn)
-  def request_validation_if_complete
-    if log.date_issued.nil? && log.date_requested.nil? && log.date_withdrawn.nil?
-      everything_complete = true
-      log.requirements_complete.each do |tag, complete|
-        everything_complete = everything_complete && complete
-      end
-      
-      if everything_complete
-        log.date_requested = Time.now
-        log.save # this will send out the validation request email
       end
     end
   end

@@ -17,4 +17,13 @@ when deploying.
 root_domain=localhost:5000
 root_url=http://localhost:5000
 from_email=knowledgestreem@gmail.com
+s3_key=ABC123
+s3_secret=ABC123
+s3_region=us-east-1
+s3_asset_url=https://s3-us-east-1.amazonaws.com
+s3_bucket_name=bl-staging
+twitter_consumer_key=abc123
+twitter_consumer_secret=abc123
+twitter_access_token=abc123
+twitter_access_secret=abc123
 ```

@@ -28,14 +28,14 @@
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-header-currentuser">
             <li>
-              <a href="<%= url_for(current_user) %>"><i class="icon-user"></i> 
+              <a href="<%= url_for(current_user) %>"><i class="fa fa-user"></i> 
               Account overview</a>
             </li>
             <% if current_user.admin? %>
               <li><a href="/a"><i class="fa fa-cogs"></i> Admin tools</a></li>
             <% end %>
             <li class="divider"></li>
-            <li><%= link_to "<i class='icon-remove'></i> Sign out".html_safe, destroy_user_session_path, :method => :delete %></li>
+            <li><%= link_to "<i class='fa fa-remove'></i> Sign out".html_safe, destroy_user_session_path, :method => :delete %></li>
           </ul>
         </li>
       </ul>

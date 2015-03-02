@@ -19,7 +19,7 @@
 
     <% if @current_user_is_expert || @current_user_is_learner %>
       <li  class="collapsible">
-        <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
+        <%= link_to "<i class='fa fa-user'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @log], id: 'view-your-log' %>
         <span class="divider">|</span>
       </li>
@@ -32,20 +32,20 @@
           <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
             role="button" data-toggle="dropdown" data-target="#">
             Badge Settings
-            <i class="icon-cog icon-white"></i>
+            <i class="fa fa-cog"></i>
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu pull-right" role="menu" 
             aria-labelledby="dropdown-subheader-settings">
             <% if @current_user_is_expert || @current_user_is_learner %>
               <li>
-                <%= link_to '<i class="icon-pencil"></i> Change your badge membership'.html_safe, 
+                <%= link_to '<i class="fa fa-pencil"></i> Change your badge membership'.html_safe, 
                   '#edit-membership', tabindex: -1, data: { toggle: 'modal' } %>
               </li>
             <% end %>
             <% if @can_edit_badge %>
               <li>
-                <%= link_to '<i class="icon-wrench"></i> Edit the badge itself'.html_safe, 
+                <%= link_to '<i class="fa fa-wrench"></i> Edit the badge itself'.html_safe, 
                   edit_group_badge_path(@group, @badge) %>
               </li>
             <% end %>
@@ -54,7 +54,7 @@
             <% end %>
             <% if @current_user_is_admin || @badge_list_admin %>
               <li>
-                <%= link_to '<i class="icon-remove"></i> Delete Badge'.html_safe, 
+                <%= link_to '<i class="fa fa-remove"></i> Delete Badge'.html_safe, 
                   [@group, @badge], method: :delete,
                   data: { confirm: 'WARNING: THIS WILL PERMANENTLY DESTROY DATA. Are you absolutely sure you want to permanently delete this badge?' } %>
               </li>
@@ -142,7 +142,7 @@
               </td>
               <td><%= (log.date_withdrawn || log.date_requested).to_s(:full_date_time) %></td>
               <td>
-                FIXME: <%= link_to '<i class="icon-plus"></i> Add your expertise'.html_safe, 
+                FIXME: <%= link_to '<i class="fa fa-plus"></i> Add your expertise'.html_safe, 
                     [log.badge.group, log.badge, log] %> 
               </td>
             </tr>
@@ -179,7 +179,7 @@
               </td>
               <td><%= log.date_issued.to_s(:full_date_time) %></td>
               <td>
-                FIXME: <%= link_to '<i class="icon-plus"></i> Add your expertise'.html_safe, 
+                FIXME: <%= link_to '<i class="fa fa-plus"></i> Add your expertise'.html_safe, 
                     [log.badge.group, log.badge, log] %> 
               </td>
             </tr>
@@ -353,18 +353,24 @@
                     <li>
                       <%= link_to "#{icon_text} #{tag.display_name}".html_safe, \
                         group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
-                      <%= link_to "<i class='fa fa-comment'></i> Post Evidence".html_safe, \
-                          new_group_badge_log_entry_path(@group, @badge, @log, \
-                          tag: tag.name_with_caps), class: 'btn btn-mini' %>
+                      <%= link_to "<i class='fa #{tag.format_icon}'></i> ".html_safe \
+                        + "Post #{tag.format.to_s.capitalize}", \
+                        new_group_badge_log_entry_path(@group, @badge, @log, \
+                        tag: tag.name_with_caps), class: 'btn btn-mini' %>
                     </li>
                   <% end %>
                 
                 <% else %>
 
                   <% @badge.requirements.each do |tag| %>
+                    <%
+                      icon_text = "<span class='fa-stack single-stack'>" \
+                        + "<i class='fa fa-square fa-stack-2x'></i>"      \
+                        + "<i class='fa #{tag.format_icon} fa-stack-1x fa-inverse'></i></span>"
+                    %>
                     <li>
                       <%= link_to \
-                        "<i class='fa fa-pencil-square'></i> #{tag.display_name}".html_safe, 
+                        "#{icon_text} #{tag.display_name}".html_safe, 
                         group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
                     </li>
                   <% end %>

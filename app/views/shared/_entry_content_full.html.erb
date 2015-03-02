@@ -1,0 +1,47 @@
+<% if entry.format == 'link' %>
+
+  <!-- === WEB LINK === -->
+  <div class="panel panel-entry-content panel-entry-content-link">
+    <%= link_to entry.link_url, entry.link_url, target: '_blank' %>
+  </div>
+
+<% elsif entry.format == 'tweet' %>
+
+  <!-- === TWITTER LINK === -->
+  <div class="panel panel-entry-content panel-entry-content-link panel-entry-content-tweet">
+    <%= link_to "<i class='fa fa-twitter'></i> View on Twitter".html_safe, entry.link_url, \
+      target: '_blank' %>
+  </div>
+
+<% elsif entry.format == 'image' %>
+  
+  <!-- === IMAGE === -->
+  <div class="panel panel-entry-content panel-entry-content-image">
+    <% if entry.uploaded_image? %>
+      <%= link_to image_tag(entry.uploaded_image_url(:full)), entry.uploaded_image_url(:full),
+        target: '_blank' %>
+    <% else %>
+      <i class="fa fa-exclamation-circle"></i>
+    <% end %>
+  </div>
+
+<% elsif entry.format == 'code' %>
+
+  <!-- === CODE SNIPPET RESPONSE === -->
+  <div class="panel panel-entry-content panel-entry-content-code">
+    <pre id="entry_body"><%= entry.body %></pre>
+
+    <%= render 'shared/ace', element_id: 'entry_body', ace_theme: 'tomorrow',
+      code_format: (entry.code_format || 'javascript'), use_worker: false, read_only: true  %>
+  </div>
+
+<% else %>
+  
+  <!-- === FREE TEXT RESPONSE === -->
+  <div class="panel panel-entry-content panel-entry-content-text">
+    <% entry.body_sections.each do |section_text| %>
+      <div class="section-container"><%= section_text.html_safe %></div>
+    <% end unless entry.body_sections.blank? %>
+  </div>
+
+<% end %>

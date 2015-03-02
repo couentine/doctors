@@ -1,5 +1,10 @@
 <% 
-  provide(:full_title, "#{@entry.summary} - #{@badge.name}")
+  if @entry.summary.blank?
+    provide(:full_title, \
+      "Post ##{@entry.entry_number} (#{@user.username_with_caps}) - #{@badge.name}")
+  else
+    provide(:full_title, "#{@entry.summary} - #{@badge.name}")
+  end
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
@@ -29,22 +34,15 @@
   <% content_for :subheader_actions do %>
 
     <% if @current_user_is_expert || @current_user_is_learner %>
+      
       <li  class="collapsible">
-        <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
+        <%= link_to "<i class='fa fa-user'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <span class="divider">|</span>
+        <% if @current_user_is_entry_creator %>
+          <span class="divider">|</span>
+        <% end %>
       </li>
 
-      <% if @show_progress %>
-        <li  class="collapsible">
-          <%= link_to '<i class="fa fa-comment"></i> New Post'.html_safe, 
-              new_group_badge_log_entry_path(@group, @badge, @current_user_log) %>
-          <% if @current_user_is_entry_creator %>
-            <span class="divider">|</span>
-          <% end %>
-        </li>
-      <% end %>
-      
     <% end %>
 
     <% if @current_user_is_entry_creator || @badge_list_admin %>
@@ -62,27 +60,6 @@
 
   <% end %>
 <% end %>
-
-<!-- === PAGE-SPECIFIC JAVASCRIPT === -->
-
-<script type="text/javascript">
-  
-  $(document).ready(function() {
-    $('h1').each(function() {
-      $(this).html(linkHashtags($(this).html()));
-    });
-  });
-
-  // Converts hashtags to anchor tags
-  function linkHashtags(text) {
-    return text.replace(
-      /#([_a-zA-Z0-9-]+)/g,
-        "<a class='linkified-tag' href='<%= group_badge_path(@group, @badge) %>"
-          + "/$1'>#$1</a>"
-      );
-  } 
-
-</script>
 
 <!-- === PAGE HEADER === -->
 
@@ -147,9 +124,14 @@
             <%= link_to @parent_tag.display_name, [@group, @badge, @parent_tag] %>
           </h2>
         <% end %>
-        <h1>
-          <%= @entry.summary %>
-        </h1>
+        
+        <% if !@entry.linkified_summary.blank? %>
+          <h1><%= @entry.linkified_summary.html_safe %></h1>
+        <% elsif !@entry.summary.blank? %>
+          <h1><%= @entry.summary %></h1>
+        <% else %>
+          <h1 class="empty">Posted Image</h1>
+        <% end %>
         
         <ul>
           <li>
@@ -193,14 +175,13 @@
           </span>
         <% end %>
 
-        <% @entry.body_sections.each do |section_text| %>
-          <div class="section-container"><%= section_text.html_safe %></div>
-        <% end %>
+        <!-- === ENTRY CONTENT PARTIAL === -->
+        <%= render "shared/entry_content_full", entry: @entry %>
       </div>
 
       <% unless @entry.tags.blank? %>
         <div class="footer-section">
-          <label><i class="icon-tags"></i> Tags:</label> 
+          <label><i class="fa fa-tags"></i> Tags:</label> 
           <% @entry.tags_with_caps.each do |tag| %>
             <% comma = (tag == @entry.tags_with_caps.last) ? '' : ', ' %>
             <%= link_to tag, "/#{@group.url_with_caps}/#{@badge.url_with_caps}/#{tag}" %><%= comma %>
