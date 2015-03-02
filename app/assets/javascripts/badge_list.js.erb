@@ -260,7 +260,29 @@ function checkResponsiveFormatting() {
   if (($("#subheader").length > 0) && ($("#subheader ul.breadcrumb").length > 0)) {
     var availableWidth = $("#subheader").width()-90;
 
-    // First check if we're actually out of space
+    // First check if we're at the smallest breakpoint so we can reformat the breadcrumbs
+    if (($("#subheader").width() < 768) && ($("#subheader a.back-link").length == 0)) {
+      // Get the "last" breadcrumb to have a link in it
+      var backLinkText; var backLinkURL;
+      if ($("#subheader ul.breadcrumb li a").length > 0) {
+        var backLink = $("#subheader ul.breadcrumb li a").last();
+        backLinkText = "Back to " + backLink.text();
+        backLinkURL = backLink.attr("href");
+      } else {
+        backLinkText = "Back to Home";
+        backLinkURL = "/";
+      }
+
+      // Now hide the breadcrumbs and the group image and create only a back link
+      $("#subheader ul.breadcrumb li").hide();
+      $(".subheader-breadcrumbs img").hide();
+      $("#subheader ul.breadcrumb").append(
+        "<li><a class='back-link' href='" + backLinkURL + "'>"
+          + "<i class='fa fa-chevron-left'></i> " + backLinkText + "</a></li>"
+      );
+    }
+    
+    // Then check if we're actually out of space
     if (($("#subheader ul.breadcrumb").width() 
         + $("ul.subheader-actions").width()) > availableWidth) {
       // Sub-header formatting (right side)

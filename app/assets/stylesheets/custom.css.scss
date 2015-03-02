@@ -620,10 +620,10 @@ header.navbar {
     }
   }
 
-  @media (max-width: 767px) {
-    .subheader-breadcrumbs ul li { display: none; }
-    .subheader-breadcrumbs ul li.active { display: inline-block; }
-  }
+  // @media (max-width: 767px) {
+  //   .subheader-breadcrumbs ul li { display: none; }
+  //   .subheader-breadcrumbs ul li.active { display: inline-block; }
+  // }
 }
 
 /* === FOOTER === */
@@ -967,7 +967,10 @@ div.bl-form {
   }
   #go-to-twitter { border-radius: 500px; }
 
-  .control-group.entry_uploaded_image { display: none; }
+  .control-group.entry_uploaded_image { 
+    position: absolute; 
+    top: -200px;
+  }
   .control-group.image_upload_button { position: relative; }
 }
 
@@ -1388,7 +1391,7 @@ form#group-add-users-form {
     }
   }
   @media (max-width: 480px) {
-    td.left-image.with-right-image {
+    td.right-image.with-left-image {
       display: none;
     }
   }
