@@ -361,8 +361,8 @@ validation-medium.png: validation-medium-3deed9b0855e79d1e333d3017f5e46b1.png
 validation-medium/index.png: validation-medium-3deed9b0855e79d1e333d3017f5e46b1.png
 validation-small.png: validation-small-794c335b81756ccbe6537bfc63f73da4.png
 validation-small/index.png: validation-small-794c335b81756ccbe6537bfc63f73da4.png
-application.js: application-0df21031fb3284cab433e9c6e5691df6.js
-application/index.js: application-0df21031fb3284cab433e9c6e5691df6.js
+application.js: application-163daae9c94ccb250b2edccb63d6ede1.js
+application/index.js: application-163daae9c94ccb250b2edccb63d6ede1.js
 application.css: application-bfd218cf713a6e1230c7e9b002bc8ee7.css
 application/index.css: application-bfd218cf713a6e1230c7e9b002bc8ee7.css
 rich-text-editor.css: rich-text-editor-0acf9335320768a7e1ef85767e633377.css

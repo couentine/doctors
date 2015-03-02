@@ -2,7 +2,6 @@ GEM
   remote: https://rubygems.org/
   specs:
     CFPropertyList (2.3.0)
-    ace-rails-ap (3.0.2)
     actionmailer (3.2.14)
       actionpack (= 3.2.14)
       mail (~> 2.5.4)
@@ -322,7 +321,6 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
-  ace-rails-ap
   better_errors (= 1.1.0)
   binding_of_caller
   bootstrap-sass (= 2.3.2.2)

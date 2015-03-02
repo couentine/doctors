@@ -174,29 +174,26 @@
 
       <%= f.input :body, as: :text, label: 'Code', 
         input_html: { class: "huge-text-area code-text-area" } %>  
-      <%= javascript_include_tag "ace/ace.js" %>
-      <script>
-          var editor = ace.edit("entry_body");
-          editor.setTheme("ace/theme/idle_fingers");
-          editor.getSession().setMode("ace/mode/javascript"); // Good looking default
-          editor.getSession().setUseWorker(false);
-          editor.setOptions({ maxLines: Infinity, minLines: 20 });
+      
+      <%= render 'shared/ace', element_id: 'entry_body', ace_theme: 'idle_fingers',
+        code_format: (@entry.code_format || 'javascript'), use_worker: false, read_only: false  %>
 
+      <script>
           $(document).ready(function() {
             // Update the code format when the select list changes
             $("#entry_code_format").change(function() { 
-              editor.getSession().setMode("ace/mode/" + $(this).val()) 
-              editor.getSession().setUseWorker(true);
+              aceEditor.getSession().setMode("ace/mode/" + $(this).val()) 
+              aceEditor.getSession().setUseWorker(true);
             });
 
             // Update the input element body each time the code changes
-            editor.getSession().on('change', function() {
-              $("#entry_body").val(editor.getValue());
+            aceEditor.getSession().on('change', function() {
+              $("#entry_body").val(aceEditor.getValue());
             });
             
             // Focus and scroll to the editor
-            $(editor).focus();
-            $(window).scrollTo(editor);
+            $(aceEditor).focus();
+            $(window).scrollTo(aceEditor);
           });
       </script>
       
