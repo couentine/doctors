@@ -1,8 +1,15 @@
+<%
+  entry_count = log.entries.count
+  badge = log.badge
+  group = badge.group
+  user = log.user 
+%>
+
 <div class="info-card log-card fixed-height" data-bl-dyncol="child">
   <table>
     <tr class="card-body-row">
-      <td class="card-image" style="background-image: url('<%= gravatar_url_for log.user, :size => 150 %>')">
-        <%= link_to '&nbsp;'.html_safe, [log.badge.group, log.badge, log], 
+      <td class="card-image" style="background-image: url('<%= gravatar_url_for user, :size => 150 %>')">
+        <%= link_to '&nbsp;'.html_safe, [group, badge, log], 
           title: "View progress log", class: 'image-link' %>
       </td>
       <td class="card-body">
@@ -11,9 +18,9 @@
             <%=
               # Output the little "X" that allows admins to remove learners from the badge
               if (log.validation_status != 'validated') && current_user && @current_user_is_admin  \
-                && (current_user != log.user)
+                && (current_user != user)
                   link_to '<i class="fa fa-remove"></i>'.html_safe, 
-                    group_badge_log_path(log.badge.group, log.badge, log, log: { detached_log: true } ), 
+                    group_badge_log_path(group, badge, log, log: { detached_log: true } ), 
                     method: :put, class: "log-card-delete", title: 'Remove from badge', 
                     data: { toggle: "tooltip", placement: "bottom", 
                     confirm: "Are you absolutely sure you want to revoke this user's"\
@@ -23,66 +30,32 @@
             %>
           </span>
 
-          <h2><%= link_to log.user.name, [log.badge.group, log.badge, log], 
+          <h2><%= link_to user.name, [group, badge, log], 
             title: "View progress log" %></h2>
-          <h3><%= log.user.username %></h3>
+          <h3><%= user.username %></h3>
         </span>
         <span class="card-content">
           <ul class="metric-list">
-            <% if (log.validation_count+log.entries.count) > 0 %>
-            
-              <% if log.badge.tracks_progress? %>
-
-                <% if log.entries.count > 0 %>
-                  <li data-toggle="tooltip" data-placement="bottom" 
-                    title="<%= log.entries.count %> posts">
-                    <%= log.entries.count %>
-                    <div style="background-image: url('<%= image_path 'log-small.png' %>')" ></div>
-                  </li>
-                  <% entry_days_ago = ((Time.now - log.entries.last.updated_at) / 3600 / 24).to_i %>
-                  <li data-toggle="tooltip" data-placement="bottom"
-                    title="Most recent post was <%= entry_days_ago %> days ago">
-                    <%= entry_days_ago %>
-                    <div style="background-image: url('<%= image_path 'clock-small.png' %>')" ></div>
-                  </li>
-                <% end %>
-                
-                <% if log.validation_count > 0 %>
-                  <li data-toggle="tooltip" data-placement="bottom" 
-                    title="Learning validated by <%= pluralize log.validation_count, log.badge.expert %>" >
-                    <%= log.validation_count %>
-                    <div style="background-image: url('<%= image_path 'validation-small.png' %>')" ></div>
-                  </li>
-                <% end %>
-
-              <% end %>
+            <% if (log.validation_count + entry_count) > 0 %>
               
-              <% if log.validation_status == 'validated' %>
-                <% if log.user == log.badge.creator %>
-                  <li data-toggle="tooltip" data-placement="bottom" title="Badge creator">
-                    &nbsp;&nbsp;
-                    <div style="background-image: url('<%= image_path 'badge-small.png' %>')" ></div>
-                  </li>
-                <% elsif !log.badge.tracks_progress? %>
-                  <li data-toggle="tooltip" data-placement="bottom" 
-                    title="Badge awardee">
-                    &nbsp;&nbsp;
-                    <div style="background-image: url('<%= image_path 'issued-small.png' %>')" ></div>
-                  </li>
-                <% elsif log.date_issued.to_date == log.badge.created_at.to_date %>
-                  <li data-toggle="tooltip" data-placement="bottom" 
-                    title="One of the original badge <%= log.badge.experts %>">
-                    &nbsp;&nbsp;
-                    <div style="background-image: url('<%= image_path 'issued-small.png' %>')" ></div>
-                  </li>
-                <% else %>  
-                  <li data-toggle="tooltip" data-placement="bottom" title=
-                 "Badge achieved in <%= ((log.date_issued - log.date_started) / 3600 / 24).to_i %> days">
-                    &nbsp;&nbsp;
-                    <div style="background-image: url('<%= image_path 'issued-small.png' %>')" ></div>
-                  </li>
-                <% end %>
+              <% is_creator = (user.id == badge.creator_id) %>
+              <% if is_creator %>
+                <i data-toggle="tooltip" data-placement="bottom" title="Badge creator" 
+                  class="fa fa-shield fa-solid-gold"></i>
               <% end %>
+
+              <% if badge.tracks_progress? %>
+
+                <% entry_count.times do |i| %>
+                  <i class="fa fa-star"></i>
+                <% end if entry_count > 0 %>
+
+                <% (log.validation_count - (is_creator ? 1:0)).times do |i| %>
+                  <i data-toggle="tooltip" data-placement="bottom" title="1 Expert Validation" 
+                    class="fa fa-star fa-gold"></i>
+                <% end if log.validation_count > 0 %>
+
+              <% end %> 
               
             <% else %>
               <li> &nbsp; </li> <!-- This ensures that the card is the right height when empty. -->
@@ -91,7 +64,7 @@
         </span>
         <span class="card-footline">
           <% if log.validation_status == 'validated' %>
-            <% if log.user == log.badge.creator %>
+            <% if user == badge.creator_id %>
               Created badge on <%= log.created_at.to_s(:short_date) %>
             <% elsif log.date_issued.to_date == Date.today.to_date %>
               Awarded the badge today

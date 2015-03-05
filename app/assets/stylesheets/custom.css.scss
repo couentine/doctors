@@ -123,6 +123,9 @@ textarea {
   .fa-stack-2x { font-size: 1em; }
   .fa-stack-1x { font-size: 0.6em; }
 }
+.fa-gold {
+  color: $primary-light;
+}
 
 /* === BOOTSTRAP OVERRIDES === */
 
@@ -1877,6 +1880,9 @@ div.user-card,div.log-card {
   }
   span.card-content {
     display: block;
+    .fa-star { color: $light-text-color; }
+    .fa-gold { color: $medium-text-color; }
+    .fa-solid-gold { color: $primary-light; }
   }
 }
 .user-card.fixed-height {

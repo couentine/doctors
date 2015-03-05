@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 ruby '2.1.2'
 
 gem 'rails', '3.2.14'
+gem 'thin'
 
 # HANK
 
@@ -45,6 +46,7 @@ group :development, :test do
   gem 'rspec-rails', '~> 2.0'
   gem "better_errors", '1.1.0'
   gem "binding_of_caller"
+  gem 'rack-mini-profiler'
 end
 
 group :test do

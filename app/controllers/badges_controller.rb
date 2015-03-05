@@ -2,7 +2,7 @@ class BadgesController < ApplicationController
   
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy, 
     :entries_index, :add_learners, :create_learners, :issue_form, :issue_save]
-  prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy, 
+  prepend_before_filter :find_all_records, only: [:edit, :update, :destroy, 
     :entries_index, :add_learners, :create_learners, :issue_form, :issue_save]
   before_filter :authenticate_user!, except: [:show, :entries_index]
   before_filter :group_admin, only: [:new, :create, :destroy]
@@ -20,11 +20,18 @@ class BadgesController < ApplicationController
   # GET /group-url/badge-url.png => Serves the badge image as a PNG file
   # GET /group-url/badge-url.json
   def show
-    @first_view_after_issued = @log && @log.has_flag?('first_view_after_issued')
+    # Performance Note: The badge show action is executed every time a badge image is displayed.
 
     respond_to do |format|
-      format.html # show.html.erb
+      format.html do # show.html.erb
+        find_all_records
+        @first_view_after_issued = @log && @log.has_flag?('first_view_after_issued')
+      end
       format.png do
+        @group = Group.find(params[:group_id]) || not_found
+        @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase) \
+          || not_found
+
         if @badge.image_mode == 'upload' && @badge.uploaded_image && @badge.uploaded_image.file \
             && @badge.uploaded_image.file.content_type
           content = @badge.uploaded_image.read
@@ -32,10 +39,10 @@ class BadgesController < ApplicationController
             send_data content, type: @badge.uploaded_image.file.content_type, disposition: "inline"
             expires_in 0, public: true
           end
-        elsif @badge.image.nil?
-          send_data BadgeMaker.build_image.to_blob, type: "image/png", disposition: "inline"
-        else
-          send_data @badge.image.encode('ISO-8859-1'), type: "image/png", disposition: "inline"
+        elsif !@badge.image.nil?
+          if stale?(etag: @badge.image, last_modified: @badge.updated_at.utc, public: true)
+            send_data @badge.image.encode('ISO-8859-1'), type: "image/png", disposition: "inline"
+          end
         end
       end
       format.json { render json: @badge, filter_user: current_user }

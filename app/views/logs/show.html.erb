@@ -393,12 +393,6 @@
 
         <% if @current_user_is_log_owner %>
           <% if @validation.nil? %>
-            <!-- REMOVING THIS FOR NOW... it allows learners to self issue
-              <%= link_to "<i class='icon-check'></i> Add self validation".html_safe,
-                new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
-                class: 'btn btn-small' %>
-            -->
-          <% else %>
             <%= link_to "<i class='icon-pencil'></i> Update self validation".html_safe,
               edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
               class: 'btn btn-small' %>
@@ -413,16 +407,6 @@
               edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
               class: 'btn btn-small' %>
           <% end %>
-        <% end %>
-
-      
-        <% if @log.validation_count < @badge.current_validation_threshold %>
-          <span class="badge badge-success collapse-when-small">
-            Current validation threshold is <%= @badge.current_validation_threshold %>
-          </span>
-          <span class="badge badge-success show-when-small">
-            Threshold is <%= @badge.current_validation_threshold %>
-          </span>
         <% end %>
 
         <% if @log.validation_status == 'requested' %>

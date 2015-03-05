@@ -4,14 +4,15 @@
 
   date_format ||= :full
 
-  # Force preload of important variables
-  entry.log.reload if entry.log.badge.nil?
-  entry.log.badge.reload if !entry.log.badge.nil? && entry.log.badge.group.nil?
-  entry.log.badge.group.reload if !entry.log.badge.nil? && !entry.log.badge.group.nil?
+  # Preload all the records
+  log = entry.log
+  badge = log.badge
+  group = badge.group
+  user = log.user
 %>
 
 
-<% if !entry.log.nil? && !entry.log.badge.nil? && !entry.log.badge.group.nil? %>
+<% if !log.nil? && !badge.nil? && !group.nil? %>
 
   <div class="info-card entry-card <%= entry.category %> <%= entry.format %>" 
     data-bl-dyncol="child">
@@ -27,7 +28,7 @@
 
       <span class='header-action'>
         <%= link_to "<i class='fa fa-chevron-circle-right'></i>".html_safe, 
-          [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
+          [group, badge, log, entry] %>
       </span>
     </div>
 
@@ -39,28 +40,28 @@
       
       <div class="card-footline-row">      
         <span class="log-gravatar">
-          <%= link_to gravatar_for(entry.log.user, class: "img-circle #{entry.log_user_type}"), 
-            [entry.log.badge.group, entry.log.badge, entry.log],
-            title: "View #{entry.log.user.name}'s #{entry.log.badge.progress_log}", data: { toggle: 'tooltip' } %>
-          <abbr class="username <%= entry.log_user_type %>" data-toggle="tooltip" data-placement="bottom"
-            title="<%= entry.log.user.name %>" >
-            <%= entry.log.user.username %>
+          <%= link_to gravatar_for(user, class: "img-circle #{entry.log_user_type}"), 
+            [group, badge, log],
+            title: "View #{user.name}'s #{badge.progress_log}", data: { toggle: 'tooltip' } %>
+          <abbr class="username <%= entry.log_user_type %>" data-toggle="tooltip" 
+            data-placement="bottom" title="<%= user.name %>" >
+            <%= user.username %>
           </abbr>
         </span>
         
-        <% if entry.creator != entry.log.user %>
+        <% if entry.creator_id != log.user_id %>
           <span class="creator-gravatar">
             <img src="<%= gravatar_url_for entry.creator %>" 
               class="gravatar img-circle <%= entry.entry_creator_type %>"
               title="Posted by <%= entry.creator.name %>" data-placement="bottom"
               data-toggle="tooltip">
             
-            <% if (entry.type == 'validation') && entry.log_validated %>
+            <% if (entry.type == 'validation') && log_validated %>
               <span class="validation-result positive" title="Learning was positively validated"
                 data-toggle="tooltip">
                 &#10003;
               </span>
-            <% elsif (entry.type == 'validation') && !entry.log_validated %>
+            <% elsif (entry.type == 'validation') && !log_validated %>
               <span class="validation-result negative" title="Learning was negatively validated"
                 data-toggle="tooltip">
                 &#10007;

@@ -197,15 +197,16 @@ class Log
   # and values = true / false indicating whether that requirement is complete
   def requirements_complete
     requirement_map = {} # this is a map to keep track of the list contents while we're building it
-    
+    # BASE LINE >> 28q, 32ms
+    # BASE LINE >> 16q, 27.3
     if badge
       # First initialize the topic map with everything set to false
       badge.requirements.each { |tag| requirement_map[tag] = false }
 
       # Then run through and log any entries which've been posted to the requirements
       entries.where(type: 'post').each do |entry|
-        if entry.tag && requirement_map.has_key?(entry.tag)
-          requirement_map[entry.tag] = true
+        if entry.tag_id && requirement_map.has_key?(entry.tag_id)
+          requirement_map[entry.tag_id] = true
         end
       end
     end

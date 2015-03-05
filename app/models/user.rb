@@ -139,11 +139,11 @@ class User
   end
 
   def member_of?(group)
-    member_of.include?(group)
+    member_of_ids.include?(group.id)
   end
 
   def admin_of?(group)
-    admin_of.include?(group)
+    admin_of_ids.include?(group.id)
   end
 
   def learner_of?(badge)
