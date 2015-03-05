@@ -56,12 +56,12 @@
               title="Posted by <%= entry.creator.name %>" data-placement="bottom"
               data-toggle="tooltip">
             
-            <% if (entry.type == 'validation') && log_validated %>
+            <% if (entry.type == 'validation') && entry.log_validated %>
               <span class="validation-result positive" title="Learning was positively validated"
                 data-toggle="tooltip">
                 &#10003;
               </span>
-            <% elsif (entry.type == 'validation') && !log_validated %>
+            <% elsif (entry.type == 'validation') && !entry.log_validated %>
               <span class="validation-result negative" title="Learning was negatively validated"
                 data-toggle="tooltip">
                 &#10007;
