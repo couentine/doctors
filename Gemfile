@@ -26,6 +26,7 @@ gem 'font-awesome-rails', '~> 4.3'
 gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 # gem 'carrierwave'
 gem 'fog'
+gem 'newrelic_rpm'
 
 # Pagination
 
