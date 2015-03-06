@@ -1,0 +1,3 @@
+http://bl-staging-mango.herokuapp.com
+http://bl-staging-mango.herokuapp.com/badgelist
+http://bl-staging-mango.herokuapp.com/globaledcon/globaledcon-tweet
