@@ -1,8 +1,12 @@
 <%
-  entry_count = log.entries.count
-  badge = log.badge
-  group = badge.group
-  user = log.user 
+  # Object Variables = log, badge, group
+  # Boolan Variables = is_admin
+  
+  user = log.user
+
+  # Note: This is a workaround for now to avoid querying entries just to get the count. 
+  #       This will also count deleted entries.
+  entry_count = log.next_entry_number - log.validation_count - log.rejection_count - 1
 %>
 
 <div class="info-card log-card fixed-height" data-bl-dyncol="child">
@@ -17,8 +21,7 @@
           <span class="card-actions">
             <%=
               # Output the little "X" that allows admins to remove learners from the badge
-              if (log.validation_status != 'validated') && current_user && @current_user_is_admin  \
-                && (current_user != user)
+              if (log.validation_status != 'validated') && is_admin && (current_user != user)
                   link_to '<i class="fa fa-remove"></i>'.html_safe, 
                     group_badge_log_path(group, badge, log, log: { detached_log: true } ), 
                     method: :put, class: "log-card-delete", title: 'Remove from badge', 
@@ -30,8 +33,7 @@
             %>
           </span>
 
-          <h2><%= link_to user.name, [group, badge, log], 
-            title: "View progress log" %></h2>
+          <h2><%= link_to user.name, [group, badge, log], title: "View progress log" %></h2>
           <h3><%= user.username %></h3>
         </span>
         <span class="card-content">

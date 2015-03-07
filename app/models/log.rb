@@ -217,7 +217,7 @@ class Log
 
   # Returns all entries with type = 'validation', sorted from newest to oldest
   def validations
-    entries.all(type: 'validation').order_by(:updated_at.desc)
+    entries.where(type: 'validation').desc(:updated_at)
   end
 
 protected

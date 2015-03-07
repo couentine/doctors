@@ -134,16 +134,15 @@
           </tr>
         </thead>
         <tbody>
-          <% @badge.requesting_learner_logs.each do |log| %>
+          <% @requesting_learner_logs.each do |log| %>
             <tr>
               <td>
-                <%= link_to log.user.name, [log.badge.group, log.badge, log], 
-                  title: "View progress log"  %>
+                <%= link_to log.user.name, [@group, @badge, log], title: "View progress log"  %>
               </td>
               <td><%= (log.date_withdrawn || log.date_requested).to_s(:full_date_time) %></td>
               <td>
                 FIXME: <%= link_to '<i class="fa fa-plus"></i> Add your expertise'.html_safe, 
-                    [log.badge.group, log.badge, log] %> 
+                    [@group, @badge, log] %> 
               </td>
             </tr>
           <% end %>
@@ -174,13 +173,13 @@
           <% @badge.new_expert_logs.each do |log| %>
             <tr>
               <td>
-                <%= link_to log.user.name, [log.badge.group, log.badge, log], 
+                <%= link_to log.user.name, [@group, @badge, log], 
                   title: "View #{@badge.progress_log}"  %>
               </td>
               <td><%= log.date_issued.to_s(:full_date_time) %></td>
               <td>
-                FIXME: <%= link_to '<i class="fa fa-plus"></i> Add your expertise'.html_safe, 
-                    [log.badge.group, log.badge, log] %> 
+                <%= link_to '<i class="fa fa-plus"></i> Add your expertise'.html_safe, 
+                    [@group, @badge, log] %> 
               </td>
             </tr>
           <% end %>
@@ -544,28 +543,28 @@
               <% end %>
             <% end %>
 
-            <% unless @badge.new_expert_logs.blank? %>
+            <% unless @new_expert_logs.blank? %>
               <div class="btn-group">
                 <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 
                   data-toggle="dropdown">
-                  <%= @badge.new_expert_logs.count %> new 
-                  <%= (@badge.new_expert_logs.count == 1)? @expert : @experts %>
+                  <%= @new_expert_logs.count %> new 
+                  <%= (@new_expert_logs.count == 1)? @expert : @experts %>
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu pull-right">
-                  <% @badge.new_expert_logs.take(10).each do |log| %>
+                  <% @new_expert_logs.take(10).each do |log| %>
                     <li>
                       <%= link_to \
                         "#{log.user.name} (Validated #{log.date_issued.to_s(:short_date)})",
-                        [log.badge.group, log.badge, log], title: 'Click to add your expertise',
+                        [@group, @badge, log], title: 'Click to add your expertise',
                         tabindex: -1 %>
                     </li>
                   <% end %>
 
-                  <% if @badge.new_expert_logs.count > 10 %>
+                  <% if @new_expert_logs.count > 10 %>
                     <li>
                       <a tabindex="-1" href="#new-<%= @experts.parameterize %>" data-toggle="modal">
-                        <%= (@badge.new_expert_logs.count - 10).to_s %> more...
+                        <%= (@new_expert_logs.count - 10).to_s %> more...
                       </a>
                     </li>
                   <% end %>
@@ -579,15 +578,30 @@
         </div>
       </div>
 
-      <div class="row">
-        
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="experts" 
-             data-bl-dyncol-width="12">
+      <% unless @expert_logs.blank? %>
 
-            <%= render @badge.expert_logs %>
+        <div class="row">
+          
+          <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="experts" 
+               data-bl-dyncol-width="12">
 
+              <%= render @expert_logs, badge: @badge, group: @group, \
+                is_admin: @current_user_is_admin %>
+
+          </div>
         </div>
-      </div>
+
+        <div class="row">
+          <div class="span12">
+            <div class="pagination-footer">
+              <div class="pagination" id="paginator-experts">
+                <%= paginate @expert_logs, remote: true, param_name: 'pe' %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <% end %>
 
   </div>
 
@@ -605,29 +619,29 @@
               <%= link_to "<i class='fa fa-plus'></i> Invite #{@learners}".html_safe,
                   add_badge_learners_path(@group, @badge), class: 'btn btn-small' %>
             
-              <% unless @badge.requesting_learner_logs.blank? %>
+              <% unless @requesting_learner_logs.blank? %>
                 <div class="btn-group">
                   <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 
                     data-toggle="dropdown">
-                    <%= @badge.requesting_learner_logs.count %> validation 
-                    <%= (@badge.requesting_learner_logs.count == 1) ? "request" : "requests" %>
+                    <%= @requesting_learner_logs.count %> validation 
+                    <%= (@requesting_learner_logs.count == 1) ? "request" : "requests" %>
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">
-                    <% @badge.requesting_learner_logs.take(10).each do |log| %>
+                    <% @requesting_learner_logs.take(10).each do |log| %>
                       <li>
                         <%= link_to "#{log.user.name}" \
                           + " (#{log.date_withdrawn.nil? ? 'Requested' : 'Withdrawn'}"\
                           + " #{(log.date_withdrawn || log.date_requested).to_s(:short_date)})",
-                          [log.badge.group, log.badge, log], title: 'Click to add your expertise',
+                          [@group, @badge, log], title: 'Click to add your expertise',
                           tabindex: -1 %>
                       </li>
                     <% end %>
 
-                    <% if @badge.requesting_learner_logs.count > 10 %>
+                    <% if @requesting_learner_logs.count > 10 %>
                       <li>
                         <a tabindex="-1" href="#validation-requests" data-toggle="modal">
-                          <%= (@badge.requesting_learner_logs.count - 10).to_s %> more...
+                          <%= (@requesting_learner_logs.count - 10).to_s %> more...
                         </a>
                       </li>
                     <% end %>
@@ -641,15 +655,30 @@
         </div>
       </div>
 
-      <div class="row">
-        
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="learners" 
-             data-bl-dyncol-width="12">
+      <% unless @learner_logs.blank? %>
 
-            <%= render @badge.learner_logs if !@badge.learner_logs.empty? %>
+        <div class="row">
+          
+          <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="learners" 
+               data-bl-dyncol-width="12">
 
+              <%= render @learner_logs, badge: @badge, group: @group, \
+                is_admin: @current_user_is_admin %>
+
+          </div>
         </div>
-      </div>
+
+        <div class="row">
+          <div class="span12">
+            <div class="pagination-footer">
+              <div class="pagination" id="paginator-learners">
+                <%= paginate @learner_logs, remote: true, param_name: 'pl' %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <% end %>
 
     </div>
 

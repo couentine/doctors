@@ -459,7 +459,7 @@
     <div class="row">
       <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="validations" 
       data-bl-dyncol-width="12">
-        <%= render(@validations, show_badge: false, date_format: :ago) %>
+        <%= render(@validations, date_format: :ago) %>
       </div>
     </div>
 
@@ -583,7 +583,7 @@
 
             <div class="span12">
 
-              <%= render(topic_item['entries'], show_badge: false, date_format: :ago) %>
+              <%= render(topic_item['entries'], date_format: :ago) %>
 
             </div>
           

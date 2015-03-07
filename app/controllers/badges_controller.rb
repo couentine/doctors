@@ -23,9 +23,18 @@ class BadgesController < ApplicationController
     # Performance Note: The badge show action is executed every time a badge image is displayed.
 
     respond_to do |format|
-      format.html do # show.html.erb
+      format.any(:html, :js) do # show.html.erb
         find_all_records
         @first_view_after_issued = @log && @log.has_flag?('first_view_after_issued')
+        @new_expert_logs = @badge.new_expert_logs.includes(:user)
+        @requesting_learner_logs = @badge.requesting_learner_logs.includes(:user)
+
+        # Get paginated versions of member and expert logs
+        @page_learners = params[:pl] || 1
+        @page_experts = params[:pe] || 1
+        @page_size = params[:page_size] || APP_CONFIG['page_size_small']
+        @learner_logs = @badge.learner_logs.includes(:user).page(@page_learners).per(@page_size)
+        @expert_logs = @badge.expert_logs.includes(:user).page(@page_experts).per(@page_size)
       end
       format.png do
         @group = Group.find(params[:group_id]) || not_found
@@ -345,7 +354,8 @@ private
   def find_all_records
     find_parent_records
 
-    @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase) || not_found
+    @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase) \
+      || not_found
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @can_edit_badge = @can_edit_badge \
