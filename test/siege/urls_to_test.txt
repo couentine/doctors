@@ -1,3 +1,6 @@
 http://bl-staging-mango.herokuapp.com
 http://bl-staging-mango.herokuapp.com/badgelist
 http://bl-staging-mango.herokuapp.com/globaledcon/globaledcon-tweet
+http://bl-staging-mango.herokuapp.com/u/edutoolkit
+http://bl-staging-mango.herokuapp.com/u/hankish
+http://bl-staging-mango.herokuapp.com/globaledcon
