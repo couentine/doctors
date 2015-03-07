@@ -1,23 +1,8 @@
 <% 
   provide(:title, "Home")
   provide(:body_class, "home-page")
-  provide(:show_subheader, true)
+  provide(:show_subheader, false)
 %>
-
-<% content_for :subheader_links do %>
-  <li class="active">
-    <i class="fa fa-home"></i> This is your home screen
-  </li>
-<% end %>
-
-<% content_for :subheader_actions do %>
-
-  <li class="collapsible">
-    <%= link_to '<i class="fa fa-plus-circle"></i> New Learning Group'.html_safe, 
-      new_group_path %>
-  </li>
-  
-<% end %>
 
 <!-- === AUTO-SHOW TUTORIAL ON FIRST SIGN-ING === -->
 
@@ -39,21 +24,23 @@
 <div class="row">
   <div class="span12">
     <div class="home-page-header">
-      <% if @group_and_log_list.blank? %>
+      <% if @groups.blank? %>
         <h2>No groups or badges yet...</h2><br>
       <% else %>
-        <h2>Your learning groups &amp; badges...</h2>
+        <div class="primary-button">
+          <%= link_to '<i class="fa fa-plus"></i>'.html_safe, 
+            new_group_path, class: 'btn btn-success' %>
+        </div>
+        <h2>Your Learning Groups</h2>
       <% end %>
     </div>
   </div>
 </div>
 
-
-
-<% if @group_and_log_list.blank? %>
+<% if @groups.blank? %>
 
   <div class="row">
-    <div class="well well-lead span7 offset2">
+    <div class="well well-lead span7 offset2 inset-well">
       <i class="fa fa-info-circle header-icon"></i>
       <ul>
         <li><strong>Step 1:</strong> Create a learning group<br></li>
@@ -66,85 +53,24 @@
   </div>
 
 <% else %>
-
-  <div class="row">
-    <div class="span12">
       
-    <% @group_and_log_list.each do |row|
-         unless row[:group].name.nil?  %>
+  <% @groups.each_slice(4).each do |group_slice| %>
 
-      <div class="container-card group-container-card">
+    <div class="row home-group-row">
 
-        <div class="white-striped-background"> &nbsp; </div>
-
-        <table>
-          <tr>
-
-            <td class="header-column">
-              <%= link_to group_image_tag_for(row[:group]), row[:group],
-                title: "View the learning group", class: "image-link" %><br>
-              <h2><%= link_to row[:group].name, row[:group],title: "View the learning group" %></h2>
-              <h3>
-                <% if @this_is_current_user %>
-                  You are 
-                <% else %>
-                  <%= @user.name %> is 
-                <% end %>
-                <% if row[:type] == :admin %>
-                  an <abbr data-toggle="tooltip" data-placement="right"
-                  title="Admins can create or delete badges and add new members.">admin</abbr>.
-                <% else %>
-                  a <abbr title="Members can join badges and view activity."
-                  data-toggle="tooltip" data-placement="right">member</abbr>.
-                <% end %>
-              </h3>
-            </td>
-
-            <td class="body-column">
-
-              <% if (row[:expert_logs].count + row[:learner_logs].count) > 0 %>
-                <% [row[:expert_logs], row[:learner_logs]].flatten.each do |log| %>
-                  <div class="inner-row">
-                    <%= link_to image_tag(group_badge_path(log.badge.group, log.badge, format: :png)), 
-                      [log.badge.group, log.badge], title: "View the badge", class: "image-link" %>
-
-                    <h2><%= link_to log.badge.name, [log.badge.group, log.badge] %></h2><br>
-                    <% if log.validation_status == 'validated' %>
-                      <h3><%= log.badge.expert.capitalize %> since <%= log.date_issued.to_s(:full_date) %></h3><br>
-                    <% else %>
-                      <h3>
-                        <%= log.badge.learner.capitalize %> since 
-                        <%= (log.date_started || log.created_at).to_s(:full_date) %>
-                      </h3><br>
-                    <% end %>
-
-                    <ul>
-                      <li>
-                        <% if @this_is_current_user %>
-                          <%= link_to "<i class='fa fa-user'></i> View Your Log".html_safe,
-                            [log.badge.group, log.badge, log] %>
-                        <% else %>
-                          <%= link_to "<i class='fa fa-user'></i> View Learning Log".html_safe,
-                            [log.badge.group, log.badge, log] %>
-                        <% end %>
-                      </li>
-                    </ul>
-                  </div>
-                <% end %>
-              <% end %>
-
-            </td>
-
-          </tr>
-        </table>
-
-      </div>
-
-    <%  end
-    end %>
+      <% group_slice.each do |group| %>
+        <div class="span3 group-col">
+          <div class="well group-col-inner">
+            <%= link_to group_image_tag_for(group), group,
+              title: "View the learning group", class: "image-link" %><br>
+            <h2><%= link_to group.name, group, title: "View the learning group" %></h2>
+          </div>
+        </div>
+      <% end %> <!-- END group_slice -->
 
     </div>
-  </div>
+
+  <% end %> <!-- END @groups -->
 
 <% end %>
 

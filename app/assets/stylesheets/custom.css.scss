@@ -62,6 +62,17 @@ body {
   font-size: 16px;
   line-height: 1.8em;
 
+  &.home-page {
+    background: linear-gradient(45deg, $dark-white 25%, white 25%, white 50%,
+                             $dark-white 50%, $dark-white 75%, white 75%);
+    background-size: 16px 16px;
+
+    header.navbar .navbar-inner {
+      background-color: rgba(255, 255, 255, 0.65);
+    }
+    footer, pre.debug_dump { display: none; }
+  }
+
   @media (min-width: 980px) {
     padding-top: 60px;
     &.with-subheader { padding-top: 110px; }
@@ -335,6 +346,14 @@ ul.dropdown-menu {
     i.header-icon {
       color: $really-light-gray;
     }
+  }
+
+  &.inset-well {
+    box-shadow: inset 3px 0px 18px $light-text-color;
+    border-radius: 12px;
+    margin: 15px 15px 35px 15px;
+    padding: 25px;
+    border-left-width: 8px;
   }
 }
 
@@ -2837,12 +2856,87 @@ div.cta-card {
 /* === HOME PAGE === */
 
 .home-page-header {
-  margin: 5px 0 0 0;
+  margin: 0px 0 1px 0;
 
   h2 {
-    color: $primary-dark;
-    font-size: 26px;
-    font-weight: lighter;
+    font-size: 30px;
+    display: inline-block;
+    max-width: 275px;
+    
+    color: #eaeaea;
+    text-shadow: -2px 0px 1px #ccc
+  }
+
+  @media (min-width: 768px) { 
+    margin: 4px 0 17px 0;
+    
+    h2 { 
+      max-width: none; 
+      font-size: 45px;
+    }
+  }
+  @media (min-width: 980px) {
+    margin: 25px 0;
+  }
+}
+
+.primary-button {
+  display: inline-block;
+  top: 84px;
+  position: absolute;
+  right: 26px;
+  z-index: 10;
+
+  .btn {
+    border-radius: 500px;
+    font-size: 30px;
+    padding: 11px 14px;
+    font-weight: normal;
+    line-height: 28px;
+    box-shadow: 8px 5px 9px $medium-gray;
+  }
+
+  @media (min-width: 768px) { 
+    right: 45px; 
+  }
+}
+
+.home-group-row {
+  .group-col {
+    .group-col-inner {
+      box-shadow: inset 0px 0px 18px $light-text-color;
+      border-radius: 12px;
+      border: 1px solid $light-gray;
+      margin: 15px 15px 35px 15px;
+      padding: 25px;
+      background-color: white;
+      text-align: center !important;
+
+      h2 {
+        line-height: 1.4em;
+        color: $light-text-color;
+        margin: 0;
+        font-size: 24px;
+        text-align: center;
+        padding-top: 10px;
+        border-top: 3px solid $light-gray;
+      }
+
+      a {
+        display: block;
+        margin: 0;
+
+        &.image-link img {
+          width: 235px;
+          max-width: 100%;
+        }
+
+        &:hover, &:focus {
+          text-decoration: none;
+          color: $light-text-color;
+        }
+      }
+    }
   }
 }
 
