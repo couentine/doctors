@@ -50,8 +50,28 @@ class GroupsController < ApplicationController
   # GET /group-url
   # GET /group-url.json
   def show
+    # Get paginated versions of members
+    @page = params[:page] || 1
+    @page_size = params[:page_size] || APP_CONFIG['page_size_small']
+    @members = @group.members.asc(:name).page(@page).per(@page_size)
+
     respond_to do |format|
-      format.html # show.html.erb
+      format.js # show.js.erb
+      format.html do
+        @requirements_map = {} # maps from badge id to requirements
+        Tag.where(:badge.in => @group.badge_ids, type: 'requirement').asc(:sort_order).each do |tag|
+          if @requirements_map.has_key? tag.badge_id
+            @requirements_map[tag.badge_id] << tag
+          else
+            @requirements_map[tag.badge_id] = [tag]
+          end
+        end
+
+        @log_map = {} # maps from badge id to log of current user if present
+        current_user.group_logs_for(@group).each do |log|
+          @log_map[log.badge_id] = log
+        end if current_user
+      end
       format.json { render json: @group, filter_user: current_user }
     end
   end

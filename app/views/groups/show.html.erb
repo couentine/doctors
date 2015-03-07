@@ -321,7 +321,7 @@
 
 <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 
-  <% if @current_user_is_admin && !@group.badges.empty? \
+  <% if @current_user_is_admin && !@group.badge_ids.empty? \
     && (current_user.sign_in_count <= 3) && !current_user.has_flag?("form-user-discussion") %>
   
     <% if @group.public? %>
@@ -420,7 +420,7 @@
           <h2>Badges</h2>
         </div>
 
-        <% if @group.badges.empty? %>
+        <% if @group.badge_ids.empty? %>
           <div class="well span7 offset2">
             <h3>Got skills?</h3>
             <p>
@@ -445,7 +445,11 @@
       <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
            data-bl-dyncol-width="12">
 
-          <%= render @group.badges.asc(:url) if !@group.badges.empty? %>
+          <% unless @group.badge_ids.empty? %>
+            <%= render @group.badges.asc(:url), group: @group, requirements_map: @requirements_map,
+              log_map: @log_map, is_member: @current_user_is_member, 
+              is_admin: @current_user_is_admin %>
+          <% end %>
 
       </div>
     </div>
@@ -458,7 +462,7 @@
     <div class="row">
       <div class="span12">
           
-        <div class="tab-header <%= (@group.members.empty?) ? 'empty' : '' %>">
+        <div class="tab-header <%= (@group.member_ids.empty?) ? 'empty' : '' %>">
           <% if @current_user_is_admin || @badge_list_admin %>
             <%= link_to '<i class="fa fa-plus"></i> Invite Members'.html_safe,
                 add_group_members_path(@group), class: 'btn btn-small' %>
@@ -507,7 +511,7 @@
       </div>
     </div>
 
-    <% if @group.members.empty? %>
+    <% if @group.member_ids.empty? %>
       <div class="well span7 offset2 gray empty">
         <h3>Got members?</h3>
         <p>Next Step: Invite them.</p>
@@ -516,9 +520,15 @@
       <div class="row">
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
              data-bl-dyncol-width="12">
+            <%= render @members %>
+        </div>
+      </div>
 
-            <%= render @group.members.sort_by{|u| u.name} if !@group.members.empty? %>
-
+      <div class="row">
+        <div class="span12">
+          <div class="pagination-footer">
+            <div class="pagination" id="paginator"><%= paginate @members, remote: true %></div>
+          </div>
         </div>
       </div>
     <% end %>
@@ -586,7 +596,7 @@
       <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="admins" 
            data-bl-dyncol-width="12">
 
-        <%= render @group.admins.sort_by{|u| u.name} %>
+        <%= render @group.admins.asc(:name) %>
       
       </div>
     </div>

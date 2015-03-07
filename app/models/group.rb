@@ -111,15 +111,15 @@ class Group
   end
 
   def user_count
-    admins.count + members.count
+    admin_ids.count + member_ids.count
   end
 
   def has_member?(user)
-    members.include?(user)
+    member_ids.include?(user.id)
   end
 
   def has_admin?(user)
-    admins.include?(user)
+    admin_ids.include?(user.id)
   end
 
   def has_invited_member?(email)

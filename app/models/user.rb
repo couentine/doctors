@@ -146,27 +146,31 @@ class User
     admin_of_ids.include?(group.id)
   end
 
+  def group_logs_for(group)
+    logs.where(group_id: group.id)
+  end
+
   def learner_of?(badge)
-    log = logs.find_by(badge: badge) rescue nil
+    log = logs.find_by(badge_id: badge.id) rescue nil
     
     # Return value = 
     !log.nil? && !log.detached_log && log.validation_status != 'validated'
   end
 
   def expert_of?(badge)
-    log = logs.find_by(badge: badge) rescue nil
+    log = logs.find_by(badge_id: badge.id) rescue nil
     
     # Return value = 
     !log.nil? && !log.detached_log && log.validation_status == 'validated'
   end
 
   def find_log(badge)
-    logs.find_by(badge: badge) rescue nil
+    logs.find_by(badge_id: badge.id) rescue nil
   end
 
   # Returns the date which this user's badge was issued (or nil if they are not an expert)
   def expert_date(badge)
-    log = logs.find_by(badge: badge) rescue nil
+    log = logs.find_by(badge_id: badge.id) rescue nil
     
     if log.nil? || log.detached_log
       nil

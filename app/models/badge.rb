@@ -155,24 +155,14 @@ class Badge
     tags.where(:type.ne => 'requirement').order_by(:name.asc)
   end
 
-  # Returns all non-validated logs, sorted by user's name
+  # Returns all non-validated logs, sorted by entry counts (user name would require queries)
   def learner_logs
-    logs.find_all do |log|
-      (log.validation_status != 'validated') \
-      && !log.detached_log
-    end.sort_by do |log|
-      log.user.name
-    end
+    logs.where(:validation_status.ne => 'validated', detached_log: false).desc(:next_entry_number)
   end
 
-  # Returns all validated logs, sorted by user's name
+  # Returns all validated logs, sorted by entry counts (user name would require queries)
   def expert_logs
-    logs.find_all do |log|
-      (log.validation_status == 'validated') \
-      && !log.detached_log
-    end.sort_by do |log|
-      log.user.name
-    end
+    logs.where(validation_status: 'validated', detached_log: false).desc(:next_entry_number)
   end
 
   # Returns the email addresses of all waiting experts
@@ -184,30 +174,16 @@ class Badge
   end
 
   # Returns all learners who are currently requesting validation
-  # or who have recently withdrawn their validation requests.
   # Reverse sorts logs by request/withdrawal date
   def requesting_learner_logs
-    logs.find_all do |log|
-      !log.detached_log && ( \
-        (log.validation_status == 'requested') \
-        || ((log.validation_status == 'withdrawn') \
-            && (log.date_withdrawn > (Time.now - RECENT_DATE_THRESHOLD))) \
-      )
-    end.sort_by do |log|
-      log.date_withdrawn || log.date_requested
-    end.reverse
+    logs.where(validation_status: 'requested', detached_log: false).desc(:date_withdrawn)
   end
 
   # Returns all recently validated experts, reverse sorted by issue date
   def new_expert_logs
-    logs.find_all do |log|
-      !log.detached_log \
-      && (log.validation_status == 'validated') \
-      && !log.date_issued.nil? \
-      && (log.date_issued > (Time.now - RECENT_DATE_THRESHOLD))
-    end.sort_by do |log|
-      log.date_issued
-    end.reverse
+    recent_date = Time.now - RECENT_DATE_THRESHOLD
+    logs.where(validation_status: 'validated', :date_issued.gt => recent_date, \
+      detached_log: false).desc(:date_issued)
   end
 
   # Adds a learner to the badge by creating or reattaching a log for them
@@ -216,8 +192,7 @@ class Badge
   # Return value = the newly created/reattached log
   def add_learner(user, date_started = nil)
     the_log = logs.find_by(user: user) rescue nil
-    logger.info "The Log = #{the_log.inspect}"
-
+    
     if the_log
       if the_log.detached_log
         the_log.detached_log = false
@@ -235,21 +210,26 @@ class Badge
 
   # Returns the ACTUAL validation threshold based on the group settings AND the badge expert count
   def current_validation_threshold
-    validation_threshold = expert_logs.count
+    # NOTE: I'm removing this for now since it requires an extra query.
+    return [expert_logs.count, 1].min
+    
+    # validation_threshold = expert_logs.count
 
-    if group && group.validation_threshold
-      validation_threshold = [validation_threshold, group.validation_threshold].min
-    end
+    # if group && group.validation_threshold
+    #   validation_threshold = [validation_threshold, group.validation_threshold].min
+    # end
 
-    validation_threshold
+    # validation_threshold
   end
 
   # Refresh the topic_list_text from the requirements list
   def refresh_topic_list_text
-    if has_requirements?
-      self.topic_list_text = requirements.map{ |tag| tag.display_name }.join("\n")
-    else
+    requirement_items = requirements
+
+    if requirement_items.blank?
       self.topic_list_text = ''
+    else
+      self.topic_list_text = requirement_items.map{ |tag| tag.display_name }.join("\n")
     end
   end
 

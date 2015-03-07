@@ -226,7 +226,6 @@ function checkForLocationHash() {
       } else {
         // Then scroll to the right part of the page (the default scroll is off due to the navbar)
         $(window).scrollTop($("#"+header).offset().top - $("header.navbar").height() - 30);
-        console.log($("#"+header).offset().top - $("header.navbar").height() - 30);
       }
     }
   }
@@ -407,6 +406,16 @@ function checkDynamicColumns() {
       // });
     }
   }
+}
+
+// Replaces the contents of a group via ajax (childrenText = a string that contains dom elements)
+function updateDynamicColumnContents(key, childrenText) {
+  children = $.parseHTML(childrenText);
+  dcGroups[key].children = children;
+  if ($(window).width() > 0) availableWidth = ($(window).width()/12) * dcGroups[key].width;
+  targetColCount = getTargetColCount(availableWidth);
+  if ((targetColCount == 3) && ((dcGroups[key].width % 3) > 0)) targetColCount = 2;
+  updateDynamicColumnGroup(key, targetColCount);
 }
 
 // Rebuilds the columns for the specified group with {targetColCount} columns

@@ -1,33 +1,50 @@
-<div class="info-card badge-card <%= (current_user && current_user.expert_of?(badge)) ? 'awarded' : '' %>" 
+<%
+  # Boolean Variables = is_member, is_admin
+  # Object Variables = badge, group
+  # Map[badge_id] Variables = log_map (of current_user for this badge if present), requirements_map
+
+  log = log_map[badge.id]
+  requirements = requirements_map[badge.id]
+
+  if log
+    is_expert = (log.validation_status == 'validated')
+    is_learner = !is_learner
+  else
+    is_expert = false
+    is_learner = false
+  end
+%>
+
+<div class="info-card badge-card <%= (is_expert) ? 'awarded' : '' %>" 
   data-bl-dyncol="child">
   <table>
     <tr class="card-image-row">
       <td>
-        <% if current_user && current_user.expert_of?(badge) %>
+        <% if is_expert %>
           <div class="big-icon awarded">
             <i class="fa fa-check-circle"></i>
           </div>
-        <% elsif current_user && current_user.learner_of?(badge) %>
+        <% elsif is_learner %>
           <div class="big-icon">
             <i class="fa fa-flag"></i>
           </div>
         <% end %>
-        <%= link_to image_tag(group_badge_path(badge.group, badge, format: :png)), 
-          group_badge_path(badge.group, badge), title: badge.name %><br/>
+        <%= link_to image_tag(group_badge_path(group, badge, format: :png)), 
+          group_badge_path(group, badge), title: badge.name %><br/>
       </td>
     </tr>
     <tr class="card-body-row">
       <td class="card-body">
         <span class="card-headline">
-          <%= link_to badge.name, group_badge_path(badge.group, badge), title: badge.name %>
+          <%= link_to badge.name, group_badge_path(group, badge), title: badge.name %>
         </span>
         <span class="card-text">
           <p><%= badge.summary %></p>
           
-          <% if badge.has_requirements? %>
+          <% unless requirements.blank? %>
             <h4>Required Evidence</h4>
             <ul class="topic-list">
-              <% badge.requirements.each do |tag| %>
+              <% requirements.each do |tag| %>
                 <li>
                   <%
                     icon_text = "<span class='fa-stack single-stack'>" \
@@ -35,14 +52,12 @@
                       + "<i class='fa #{tag.format_icon} fa-stack-1x fa-inverse'></i></span>"
                   %>
                   <%= link_to "#{icon_text} #{tag.display_name}".html_safe, 
-                    group_badge_path(badge.group, badge) + "/" + tag.name_with_caps %>
+                    group_badge_path(group, badge) + "/" + tag.name_with_caps %>
                   <%= 
                     link_to "<i class='fa #{tag.format_icon}'></i> Post".html_safe, 
-                      new_group_badge_log_entry_path(badge.group, badge, \
-                      current_user.find_log(badge), tag: tag.name_with_caps), 
+                      new_group_badge_log_entry_path(group, badge, log, tag: tag.name_with_caps), 
                       class: 'btn btn-mini' \
-                    if current_user && \
-                      (current_user.learner_of?(badge) || current_user.expert_of?(badge))
+                    if is_learner || is_expert
                   %>
                 </li>
               <% end %>
@@ -54,16 +69,15 @@
     <tr class="card-footline-row">
       <td class="card-footline">
         <ul class="left-foot">
-          <% if current_user && current_user.expert_of?(badge) %>
+          <% if is_expert %>
             <li class="foot-text"><%= badge.Expert %></li>
-          <% elsif current_user && current_user.learner_of?(badge) %>
+          <% elsif is_learner %>
             <li class="foot-text"><%= badge.Learner %></li>
           <% elsif badge.tracks_progress? && current_user \
-            && (badge.group.open? || current_user.member_of?(badge.group) \
-              || current_user.admin_of?(badge.group)) %>
+              && (group.open? || is_member || is_admin) %>
             <li>
                 <%= link_to '<i class="fa fa-plus-circle"></i> Join Badge'.html_safe, 
-                    group_badge_logs_path(badge.group, badge), method: :post, class: 'btn btn-mini' %>
+                    group_badge_logs_path(group, badge), method: :post, class: 'btn btn-mini' %>
             </li>
           <% end %>
         </ul>
