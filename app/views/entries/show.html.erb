@@ -8,6 +8,12 @@
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
+
+  if @log.validation_status == 'validated'
+    log_user_type = 'expert'
+  else
+    log_user_type = 'learner'
+  end
 %>
 
 <% content_for :subheader_links do %>
@@ -65,7 +71,7 @@
 
 <div class="row add-top-margin">
   <div class="span12">
-    <div class="page-card entry-page-card <%= @entry.category %>">
+    <div class="page-card entry-page-card <%= @entry.type %>">
 
       <div class="super-header-section white-striped-background">
         <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), 
@@ -76,43 +82,19 @@
       <div class="header-section">
 
         <span class="log-user-link">
-          <%= link_to gravatar_for(@entry.log.user, \
-            class: "img-circle #{@entry.log_user_type}", size: 200), 
-            [@entry.log.badge.group, @entry.log.badge, @entry.log],
-            title: "View #{@entry.log.user.name}'s #{@badge.progress_log}",
+          <%= link_to gravatar_for(@user, \
+            class: "img-circle #{log_user_type}", size: 200), [@group, @badge, @log],
+            title: "View #{@user.name}'s #{@badge.progress_log}",
             data: { toggle: 'tooltip', placement: 'left' } %>
           <span class="username">
-            <% 
-              if @entry.log_user_type == :expert
-                word_to_use = @expert.capitalize
-              else
-                word_to_use = @learner.capitalize
-              end
-            %>
-            
-            <% if @show_progress %>
-              <abbr title="<%= "#{word_to_use} at time of #{@entry.type}" %>" 
-              class="<%= @entry.log_user_type %>" data-toggle="tooltip"
-              data-placement="bottom"><%= @entry.log.user.name %></abbr>
-            <% else %>
-              <%= @entry.log.user.name %>
-            <% end %>
+            <%= @user.name %>
           </span>
         </span>
 
-        <% if @entry.creator != @entry.log.user %>
+        <% if @entry.creator != @user %>
           <span class="creator-user-link">
-            <% 
-              if @entry.entry_creator_type == :expert
-                word_to_use = @expert.capitalize
-              else
-                word_to_use = @learner.capitalize
-              end
-            %>
-            <%= link_to gravatar_for(@entry.creator, \
-              class: "img-circle #{@entry.entry_creator_type}"), 
-              [@entry.log.badge.group, @entry.log.badge, @entry.log],
-              title: "Posted by #{@entry.creator.name} (#{word_to_use} at time of #{@entry.type})",
+            <%= link_to gravatar_for(@entry.creator, class: "img-circle expert"), 
+              [@group, @badge, @log], title: "Posted by #{@entry.creator.name}",
               data: { toggle: 'tooltip', placement: 'left' } %>
             <span class="arrow">&#9654;</span>
           </span>
@@ -149,10 +131,10 @@
             </li>
           <% end %>
           <li>
-            <% if @entry.privacy == 'secret' %>
+            <% if @parent_tag && @parent_tag.privacy == 'secret' %>
               <i class='fa fa-user-secret'></i> 
               Only visible to badge <%= @experts %> and group admins
-            <% elsif @entry.privacy == 'private' %>
+            <% elsif @parent_tag && @parent_tag.privacy == 'private' %>
               <i class='fa fa-eye-slash'></i> 
               Only visible to group members
             <% elsif @group.private? %>

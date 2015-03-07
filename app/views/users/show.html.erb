@@ -80,7 +80,7 @@
 
 <!-- === MEMBERSHIPS === -->
 
-<% if @group_and_log_list.blank? %>
+<% if @expert_group_badge_log_list.blank? %>
 
   <div class="row">
     <div class="well span7 offset2">
@@ -104,49 +104,46 @@
   <div class="row">
     <div class="span12">
       <div class="container-card evidence-card">
-        <% @group_and_log_list.each do |row| %>
-          <% unless row[:expert_logs].blank? %>
+        <% @expert_group_badge_log_list.each do |group_row| 
+          group = group_row[:group]
+          group_type = group_row[:type] %>
             
-            <table class="header-table">
-              <tr>
-                <td>
-                  <%= link_to group_image_tag_for(row[:group]), row[:group],
-                    title: "View the learning group", class: "image-link" %>
-                </td>
-                <td>
-                  <h2>
-                    <%= link_to row[:group].name, row[:group],title: "View the learning group" %>
-                  </h2>
-                  <h3>
-                    <% if row[:type] == :admin %>
-                      Admin
-                    <% else %>
-                      Member
-                    <% end %>
-                  </h3>
-                </td>
-              </tr>
-            </table>
+          <table class="header-table">
+            <tr>
+              <td>
+                <%= link_to group_image_tag_for(group), group, title: "View the learning group", class: "image-link" %>
+              </td>
+              <td>
+                <h2>
+                  <%= link_to group.name, group, title: "View the learning group" %>
+                </h2>
+                <h3><%= group_type %></h3>
+              </td>
+            </tr>
+          </table>
 
-            <div class="body-row">
-              <% row[:expert_logs].each do |log| %>
-                <div class="inner-row">
-                  <%= link_to image_tag(group_badge_path(log.badge.group, log.badge, format: :png)), 
-                    [log.badge.group, log.badge, log], 
-                    title: "View the badge", class: "image-link" %>
+          <div class="body-row">
+            <% group_row[:badges].each do |badge_row| 
+              badge = badge_row[:badge]
+              log = badge_row[:log] %>
 
-                  <h2><%= link_to log.badge.name, [log.badge.group, log.badge, log] %></h2>
-                  <h3>
-                    <%= log.badge.expert.capitalize %> 
-                    since 
-                    <%= log.date_issued.to_s(:short_date) %>
-                  </h3>
-                </div>
-              <% end %>
-            </div>
+              <div class="inner-row">
+                <%= link_to image_tag(group_badge_path(group, badge, format: :png)), 
+                  "/#{group.to_param}/#{badge.to_param}/u/#{@user.username}", 
+                  title: "View the badge", class: "image-link" %>
 
-          <% end %>
-        <% end %> <!-- === # END: @group_and_log_list.each === -->
+                <h2>
+                  <%= link_to badge.name, 
+                    "/#{group.to_param}/#{badge.to_param}/u/#{@user.username}" %>
+                </h2>
+                <h3>
+                  <%= badge.expert.capitalize %> since <%= log.date_issued.to_s(:short_date) %>
+                </h3>
+              </div>
+            <% end %>
+          </div>
+
+        <% end %> <!-- === # END: @expert_group_badge_log_list.each === -->
       </div>
     </div>
   </div>

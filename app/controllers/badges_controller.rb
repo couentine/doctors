@@ -35,6 +35,17 @@ class BadgesController < ApplicationController
         @page_size = params[:page_size] || APP_CONFIG['page_size_small']
         @learner_logs = @badge.learner_logs.includes(:user).page(@page_learners).per(@page_size)
         @expert_logs = @badge.expert_logs.includes(:user).page(@page_experts).per(@page_size)
+        @requirements = @badge.requirements
+
+        # Now we build a map for the log partials
+        @user_map, user_reverse_map, user_ids = {}, {}, []
+        [@learner_logs, @expert_logs].flatten.each do |log|
+          user_reverse_map[log.user_id] = log.id
+          user_ids << log.user_id
+        end
+        User.where(:id.in => user_ids).each do |user|
+          @user_map[user_reverse_map[user.id]] = user
+        end
       end
       format.png do
         @group = Group.find(params[:group_id]) || not_found

@@ -139,7 +139,7 @@
     
     <% if @show_sharing %>
       
-      var assertionURL = "<%= @log.assertion_url %>";
+      var assertionURL = "<%= @log.assertion_url(@group, @badge, @user) %>";
 
       $('#export-to-backpack').click(function() {
         console.log("Assertion URL = " + assertionURL);
@@ -459,7 +459,8 @@
     <div class="row">
       <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="validations" 
       data-bl-dyncol-width="12">
-        <%= render(@validations, date_format: :ago) %>
+        <%= render @validations, date_format: :ago, group: @group, badge: @badge, log: @log, 
+          user: @user %>
       </div>
     </div>
 
@@ -467,11 +468,11 @@
 
 <% end %>
 
-<% if @show_progress && (@badge.has_requirements? || @current_user_is_log_owner) %>
+<% if @show_progress && (!@requirements.blank? || @current_user_is_log_owner) %>
 
   <!-- === EVIDENCE === -->
 
-  <% if @badge.has_requirements? %>
+  <% if !@requirements.blank? %>
 
     <!-- === TABLE OF CONTENTS === -->
 
@@ -491,10 +492,10 @@
       <div class="span12">
         <div class="info-card text-card topic-list-card">
           <ul>
-            <% requirements_complete = @log.requirements_complete %>
-            <% @badge.requirements.each do |tag| %>
+            <% requirements_complete = @log.requirements_complete(@requirements) %>
+            <% @requirements.each do |tag| %>
               <%
-                if requirements_complete[tag]
+                if requirements_complete[tag.id]
                   icon_text = "<i class='fa fa-check-square-o'></i>"
                 else
                   icon_text = "<i class='fa fa-square-o'></i>"
@@ -583,7 +584,8 @@
 
             <div class="span12">
 
-              <%= render(topic_item['entries'], date_format: :ago) %>
+              <%= render topic_item['entries'], date_format: :ago, group: @group, badge: @badge,
+                log: @log, user: @user %>
 
             </div>
           

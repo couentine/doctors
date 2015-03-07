@@ -2,7 +2,12 @@
 
   <!-- === WEB LINK === -->
   <div class="panel panel-entry-content panel-entry-content-link">
-    <%= link_to entry.link_url, entry.link_url, target: '_blank' %>
+    <% if entry.body %>
+      <%= entry.body.html_safe %>
+    <% else %>
+      <%= link_to "<i class='fa fa-link'></i> #{entry.link_url}".html_safe, entry.link_url,
+        target: '_blank', class: 'linkified-url' %>
+    <% end %>
   </div>
 
 <% elsif entry.format == 'tweet' %>

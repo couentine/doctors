@@ -1981,9 +1981,10 @@ div.badge-card {
   text-align: center;
   margin-bottom: 15px;
 
-  a {
+  a.linkified-url {
     display: inline-block;
-    background-color: $secondary-light;
+    background-color: $secondary-medium;
+    border: 2px solid $secondary-dark !important;
     border-radius: 500px;
     text-align: center;
     font-size: 20px;
@@ -1996,8 +1997,8 @@ div.badge-card {
 
     &:hover, &.focus {
       color: white;
-      background-color: $secondary-medium;
-      border-color: $secondary-dark;
+      background-color: $secondary-light;
+      border-color: $secondary-medium !important;
       text-decoration: none;
     } 
   }

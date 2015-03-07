@@ -150,6 +150,17 @@ class User
     logs.where(group_id: group.id)
   end
 
+  # Doesn't use any queries, returns :admin or :member or :none
+  def member_type_of(group_id)
+    if admin_of_ids.include? group_id
+      :admin
+    elsif member_of_ids.include? group_id
+      :member
+    else
+      :none
+    end
+  end
+
   def learner_of?(badge)
     log = logs.find_by(badge_id: badge.id) rescue nil
     
@@ -190,6 +201,59 @@ class User
 
   def expert_logs
     return logs.where(validation_status: 'validated')
+  end
+
+  # Returns all expert badge logs grouped by badge, then group. Doesn't filter out anything.
+  #
+  # Return array has one entry for each group = {
+  #   :type => one_of['Admin', 'Member'],
+  #   :group => the_group,
+  #   :badges => { [:badge,
+  #                 :log]
+  #              } }
+  # >> Return array is sorted by group name
+  def expert_group_badge_log_list()
+    badge_map, log_map = {}, {} # group_id => badges[], #badge_id => logs
+    group_ids, badge_ids = [], []
+    return_rows = []
+
+    # Get all expert logs which aren't hidden or detached
+    logs.where(validation_status: 'validated', show_on_profile: true, 
+        detached_log: false).each do |log|
+      badge_ids << log.badge_id unless badge_ids.include? log.badge_id      
+      log_map[log.badge_id] = log
+    end
+
+    Badge.where(:id.in => badge_ids).asc(:name).each do |badge|
+      group_ids << badge.group_id unless group_ids.include? badge.group_id
+
+      if badge_map.has_key? badge.group_id
+        badge_map[badge.group_id] << badge
+      else
+        badge_map[badge.group_id] = [badge]
+      end
+    end
+
+    Group.where(:id.in => group_ids).asc(:name).each do |group|
+      group_row = {
+        type: member_type_of(group.id).to_s.capitalize,
+        group: group,
+        badges: []
+      }
+
+      badge_map[group.id].each do |badge|
+        badge_row = {
+          badge: badge,
+          log: log_map[badge.id]
+        }
+
+        group_row[:badges] << badge_row
+      end
+
+      return_rows << group_row
+    end
+
+    return_rows
   end
 
   # Returns all group AND badge memberships.

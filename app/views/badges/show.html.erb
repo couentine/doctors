@@ -295,22 +295,22 @@
 
     <!-- === TOPIC LIST === -->
 
-  <% if @badge.has_requirements? || (@can_edit_badge && @show_progress) %>
+  <% if !@requirements.blank? || (@can_edit_badge && @show_progress) %>
       
     <div class="tab-pane" id="requirements">
 
       <div class="row">
         <div class="span12">
-          <div class="tab-header merge-with-card <%= (@badge.has_requirements?) ? '' : 'empty' %>">
+          <div class="tab-header merge-with-card <%= (@requirements.blank?) ? 'empty' : '' %>">
             <% if @can_edit_badge %>
               <a tabindex="-1" class="btn btn-small" id="edit-topic-list" data-toggle="custom" 
                 data-hide="#edit-topic-list,#topic-list-row,#topic-footer-row" 
                 data-focus="#badge_topic_list_text" data-show="#topic-list-inline-form">
                   
-                  <% if @badge.has_requirements? %>
-                    <i class="fa fa-pencil"></i> Edit the requirement list
-                  <% else %>
+                  <% if @requirements.blank? %>
                     <i class="fa fa-plus"></i> Add a requirement list
+                  <% else %>
+                    <i class="fa fa-pencil"></i> Edit the requirement list
                   <% end %>
               </a>
             <% end %>
@@ -332,7 +332,7 @@
         </div>
       </div>
 
-      <% if @badge.has_requirements? %>
+      <% if !@requirements.blank? %>
 
         <div class="row" id="topic-list-row">
           <div class="span12">
@@ -340,10 +340,10 @@
               <ul>
                 <% if @current_user_is_learner || @current_user_is_expert %>
                   
-                  <% requirements_complete = @log.requirements_complete %>
-                  <% @badge.requirements.each do |tag| %>
+                  <% requirements_complete = @log.requirements_complete(@requirements) %>
+                  <% @requirements.each do |tag| %>
                     <%
-                      if requirements_complete[tag]
+                      if requirements_complete[tag.id]
                         icon_text = "<i class='fa fa-check-square-o'></i>"
                       else
                         icon_text = "<i class='fa fa-square-o'></i>"
@@ -361,7 +361,7 @@
                 
                 <% else %>
 
-                  <% @badge.requirements.each do |tag| %>
+                  <% @requirements.each do |tag| %>
                     <%
                       icon_text = "<span class='fa-stack single-stack'>" \
                         + "<i class='fa fa-square fa-stack-2x'></i>"      \
@@ -585,7 +585,7 @@
           <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="experts" 
                data-bl-dyncol-width="12">
 
-              <%= render @expert_logs, badge: @badge, group: @group, \
+              <%= render @expert_logs, badge: @badge, group: @group, user_map: @user_map, \
                 is_admin: @current_user_is_admin %>
 
           </div>
@@ -662,7 +662,7 @@
           <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="learners" 
                data-bl-dyncol-width="12">
 
-              <%= render @learner_logs, badge: @badge, group: @group, \
+              <%= render @learner_logs, badge: @badge, group: @group, user_map: @user_map, \
                 is_admin: @current_user_is_admin %>
 
           </div>

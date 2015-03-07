@@ -23,13 +23,14 @@ class TagsController < ApplicationController
   def show
     # Query for entries with this tag
     @page = params[:page] || 1
-    @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
+    @page_size = params[:page_size] || APP_CONFIG['page_size_small']
     @version_list = []
     if @current_user_log
-      @entries = @tag.entries.where(:log.ne => @current_user_log).page(@page).per(@page_size)
-      @current_user_entries = @current_user_log.entries.where(tag: @tag).order_by(:updated_at.desc)
+      @entries = @tag.entries.where(:log.ne => @current_user_log).desc(:updated_at)\
+        .page(@page).per(@page_size)
+      @current_user_entries = @current_user_log.entries.where(tag: @tag).desc(:updated_at)
     else
-      @entries = @tag.entries.page(@page).per(@page_size)
+      @entries = @tag.entries.desc(:updated_at).page(@page).per(@page_size)
       @current_user_entries = []
     end
     
@@ -59,6 +60,38 @@ class TagsController < ApplicationController
       @current_version_info = nil
     end
 
+    # Now we build maps for partials (it's sort of a process but saves 2 queries per entry)
+
+    @log_map, @user_map = {}, {}
+    log_reverse_map, user_reverse_map = {}, {}
+    log_ids, user_ids = [], []
+    
+    # Start by running through entries and gathering log ids while mapping back to the entries
+    @entries.each do |entry|
+      log_ids << entry.log_id
+      if log_reverse_map.has_key? entry.log_id
+        log_reverse_map[entry.log_id] << entry.id
+      else
+        log_reverse_map[entry.log_id] = [entry.id]
+      end
+    end
+
+    # Now run through and build the log map while setting up the user reverse map and id list
+    Log.where(:id.in => log_ids).each do |log|
+      log_reverse_map[log.id].each{ |entry_id| @log_map[entry_id] = log }
+
+      # there can be only 1 log per user per badge so we can just copy the log's reverse map values
+      user_reverse_map[log.user_id] = log_reverse_map[log.id] 
+      user_ids << log.user_id
+    end
+    
+    # Finally we query users and build the user map
+    User.where(:id.in => user_ids).each do |user|
+      user_reverse_map[user.id].each{ |entry_id| @user_map[entry_id] = user }
+    end
+
+    # Done!
+
     respond_to do |format|
       format.html do 
         if (@tag.name == 'topics') && !@tag_exists
@@ -67,6 +100,7 @@ class TagsController < ApplicationController
         end
         # else: show.html.erb
       end
+      format.js # show.js.erb
       format.json { render json: @tag, filter_user: current_user }
     end
   end

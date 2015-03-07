@@ -45,6 +45,17 @@ module StringTools
     end
   end
 
+  # Takes a normal link and transforms it into an image OR an item specified in LINKS_TO_TRANSLATE
+  # Otherwise it returns a linkified version of the url as a simple anchor tag
+  def transform_link(link_url)
+    matches = link_url.match(HTTP_URL_REGEX) # url should be part 0
+    if matches[0]
+      make_tag_for matches[0]
+    else
+      link_url
+    end
+  end
+
   def make_tag_for(url)
     found_one = false
     the_id = nil

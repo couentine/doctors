@@ -1,9 +1,17 @@
+<%
+  # Object Variables: entry, log, badge, group, user
+%>
+
 <% if entry.format == 'link' %>
 
   <!-- === WEB LINK === -->
   <div class="panel panel-entry-content panel-entry-content-link">
-    <%= link_to "<i class='fa fa-link'></i> #{entry.link_url}".html_safe, entry.link_url,
-      target: '_blank' %>
+    <% if entry.body %>
+      <%= entry.body.html_safe %>
+    <% else %>
+      <%= link_to "<i class='fa fa-link'></i> #{entry.link_url}".html_safe, entry.link_url,
+        target: '_blank', class: 'linkified-url' %>
+    <% end %>
   </div>
 
 <% elsif entry.format == 'tweet' %>
@@ -20,7 +28,7 @@
   <div class="panel panel-entry-content panel-entry-content-image">
     <% if entry.uploaded_image? %>
       <%= link_to image_tag(entry.uploaded_image_url(:preview)),
-        [entry.log.badge.group, entry.log.badge, entry.log, entry] %>
+        "/#{group.to_param}/#{badge.to_param}/u/#{user.username}/#{entry.to_param}" %>
     <% else %>
       <i class="fa fa-exclamation-circle"></i>
     <% end %>

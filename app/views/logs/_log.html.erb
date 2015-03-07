@@ -1,8 +1,9 @@
 <%
   # Object Variables = log, badge, group
+  # Map[log_id] Variables = user_map
   # Boolan Variables = is_admin
   
-  user = log.user
+  user = user_map[log.id]
 
   # Note: This is a workaround for now to avoid querying entries just to get the count. 
   #       This will also count deleted entries.
@@ -13,7 +14,7 @@
   <table>
     <tr class="card-body-row">
       <td class="card-image" style="background-image: url('<%= gravatar_url_for user, :size => 150 %>')">
-        <%= link_to '&nbsp;'.html_safe, [group, badge, log], 
+        <%= link_to '&nbsp;'.html_safe, "/#{group.to_param}/#{badge.to_param}/u/#{user.username}",
           title: "View progress log", class: 'image-link' %>
       </td>
       <td class="card-body">
@@ -23,17 +24,21 @@
               # Output the little "X" that allows admins to remove learners from the badge
               if (log.validation_status != 'validated') && is_admin && (current_user != user)
                   link_to '<i class="fa fa-remove"></i>'.html_safe, 
-                    group_badge_log_path(group, badge, log, log: { detached_log: true } ), 
-                    method: :put, class: "log-card-delete", title: 'Remove from badge', 
+                    "/#{group.to_param}/#{badge.to_param}/u/#{user.username}" \
+                    + "?log%5Bdetached_log%5D=true", method: :put, 
+                    class: "log-card-delete", title: 'Remove from badge', 
                     data: { toggle: "tooltip", placement: "bottom", 
-                    confirm: "Are you absolutely sure you want to revoke this user's"\
-                    + " badge membership?\n\nNote: The user's progress log will NOT be deleted, only"\
-                    + " their membership in the badge." }
+                    confirm: "Are you absolutely sure you want to revoke this user's badge " \
+                    + "membership?\n\nNote: The user's progress log will NOT be deleted, only " \
+                    + "their membership in the badge." }
               end 
             %>
           </span>
 
-          <h2><%= link_to user.name, [group, badge, log], title: "View progress log" %></h2>
+          <h2>
+            <%= link_to user.name, "/#{group.to_param}/#{badge.to_param}/u/#{user.username}", 
+              title: "View progress log" %>
+          </h2>
           <h3><%= user.username %></h3>
         </span>
         <span class="card-content">

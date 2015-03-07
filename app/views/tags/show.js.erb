@@ -1,0 +1,2 @@
+updateDynamicColumnContents('entries', '<%= escape_javascript render(@entries, date_format: :ago, group: @group, badge: @badge, user_map: @user_map, log_map: @log_map) %>');
+$('#paginator').html('<%= escape_javascript(paginate(@entries, remote: true).to_s) %>');

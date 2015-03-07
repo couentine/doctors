@@ -73,15 +73,18 @@ class Log
   def date_issued_stamp; (date_issued.nil?) ? '' : date_issued.to_i; end
   def badge_url; "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}.json"; end
   def badge_image_url; "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}.png"; end
-  def assertion_url
-    "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}/o/#{user.username}.json"
+  def assertion_url(the_group=badge.group, the_badge=badge, the_user = user)
+    "#{ENV['root_url']}/#{the_group.url}/#{the_badge.url}/o/#{the_user.username}.json"
   end
+
   def evidence_url
     "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}/u/#{user.username}"
   end
+
   def recipient
     { type: 'email', hashed: true, salt: user.identity_salt, identity: user.identity_hash }
   end
+
   def verify; { type: 'hosted', url: assertion_url }; end
 
   # === LOG METHODS === #
@@ -162,30 +165,34 @@ class Log
   end
 
   # Returns the full content of all of this log's posts, organized by topic
-  # Return value is a list of hash items, each with the following keys = {
+  # Pass the pre-queried badge as a parameter if desired to save a query
   #   'tag' => the_tag_record_itself || nil
   #   'entries' => a_list_of_all_entries }
-  def posts_by_topic
+  def posts_by_topic()
     topic_list = [] # this is the return list
-    topic_map = {} # this is a map to keep track of the list contents while we're building it
+    topic_item_map = {} # this is a map to keep track of the list contents while we're building it
     
-    if badge
-      # First build out the topic map so that it contains all of the badge topics
-      badge.requirements.each do |tag|
+    if badge_id
+      # First query and sort the tags appropriately (requirements first, then the rest)
+      # Use that to seed the topic_list since it will be the master list for the order
+      Tag.where(badge_id: badge_id).order_by(:type.asc, :sort_order.asc, :name.asc).each do |tag|
         topic_item = { 'tag' => tag, 'entries' => [] }
         topic_list << topic_item
-        topic_map[tag] = topic_item
+        topic_item_map[tag.id] = topic_item
       end
+
+      # Now add a null item (for etcetera)... it's the last one so it's easy to find
+      topic_list << { 'tag' => nil, 'entries' => [] }
 
       # Run through all of the posts and add them to the list
       entries.where(type: 'post').each do |entry|
-        if topic_map.has_key? entry.tag
-          topic_map[entry.tag]['entries'] << entry
-        else
-          topic_item = { 'tag' => entry.tag, 'entries' => [entry] }
-          topic_list << topic_item
-          topic_map[entry.tag] = topic_item
-        end
+        topic_item = topic_item_map[entry.tag_id] || topic_list.last
+        topic_item['entries'] << entry
+      end
+
+      # Finally we just need to run through the list and cleanse any wiki pages without entries
+      topic_list = topic_list.select do |item| 
+        !item['entries'].blank? || (item['tag'] && (item['tag'].type == 'requirement'))
       end
     end
 
@@ -195,19 +202,24 @@ class Log
 
   # Returns a map with keys = each of the badge requirement tag ids
   # and values = true / false indicating whether that requirement is complete
-  def requirements_complete
-    requirement_map = {} # this is a map to keep track of the list contents while we're building it
-    # BASE LINE >> 28q, 32ms
-    # BASE LINE >> 16q, 27.3
-    if badge
+  # Pass badge_requirements in if desired to save a query
+  def requirements_complete(badge_requirements = nil)
+    requirement_map = {}
+    requirement_id_list = []
+
+    if badge_id
       # First initialize the topic map with everything set to false
-      badge.requirements.each { |tag| requirement_map[tag] = false }
+      if badge_requirements.nil?
+        badge_requirements = Tag.where(badge_id: badge_id, type: 'requirement').asc(:sort_order)
+      end
+      badge_requirements.each do |tag| 
+        requirement_map[tag.id] = false
+        requirement_id_list << tag.id
+      end
 
       # Then run through and log any entries which've been posted to the requirements
-      entries.where(type: 'post').each do |entry|
-        if entry.tag_id && requirement_map.has_key?(entry.tag_id)
-          requirement_map[entry.tag_id] = true
-        end
+      entries.where(type: 'post', :tag_id.in => requirement_id_list).each do |entry|
+        requirement_map[entry.tag_id] = true
       end
     end
 

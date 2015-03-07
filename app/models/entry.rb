@@ -54,7 +54,8 @@ class Entry
   validates :summary, presence: true, length: { within: 3..MAX_SUMMARY_LENGTH }, \
     if: :summary_is_required?
   validates :body, presence: true, if: :body_is_required?
-  validates :link_url, presence: true, if: :link_is_required?
+  validates :link_url, presence: true, format: { with: HTTP_URL_REGEX, \
+    message: 'must be a valid link (remember the http)' }, if: :link_is_required?
   validates :uploaded_image, presence: true, if: :image_is_required?
   validates :link_url, format: { with: TWITTER_URL_REGEX, message: "must be a valid Twitter url" },\
     if: :tweet_is_required?
@@ -66,8 +67,7 @@ class Entry
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
-  before_save :process_parent_tag
-  before_save :process_content_changes
+  before_save :process_parent_tag_and_content_changes
   before_save :update_body_versions # DO store the first value since it comes from the user
   after_create :update_log
   after_create :send_notifications
@@ -126,48 +126,9 @@ class Entry
     ((created_at.to_date - log.date_started.to_date).to_f / 3600 / 7).ceil
   end
 
-  # Return Values = [:learner_post, :expert_post, :validation]
-  def category
-    if type == 'validation'
-      :validation
-    elsif (creator_id != log.user_id) || (log.date_issued && (self.created_at > log.date_issued))
-      :expert_post
-    else
-      :learner_post
-    end
-  end
-
-  # Return Values = [:learner, :expert]
-  def entry_creator_type
-    if log.badge.nil?
-      :learner
-    else
-      expert_date = creator.expert_date log.badge
-      if expert_date && (created_at > expert_date)
-        :expert
-      else
-        :learner
-      end
-    end
-  end
-
-  # Return Values = [:learner, :expert]
-  def log_user_type
-    if log.badge.nil?
-      :learner
-    else
-      expert_date = log.user.expert_date log.badge
-      if expert_date && (created_at > expert_date)
-        :expert
-      else
-        :learner
-      end
-    end
-  end
-
   # Returns the privacy level of the parent tag OR if the parent tag is unset, returns 'public'
   def privacy
-    if tag.nil? || tag.badge.nil? # We need to have these refs to manage any sort of privacy
+    if tag_id.nil?
       return 'public'
     else
       return tag.privacy
@@ -197,15 +158,17 @@ protected
   end
 
   # Sets tag relationship based on parent_tag string
-  def process_parent_tag
-    if !parent_tag.blank? && parent_tag_changed? && !log.badge.nil?
-      matched_tags = log.badge.tags.where(name: parent_tag.downcase)
+  # This also does format-specific processing 
+  #   (since this is the only callback that's sure of the format on a new entry)
+  def process_parent_tag_and_content_changes
+    if !parent_tag.blank? && parent_tag_changed? && !log.badge_id.nil?
+      matched_tags = Tag.where(badge: log.badge_id, name: parent_tag.downcase)
       if matched_tags.count > 0
         self.tag = matched_tags.first
         self.format = tag.format
       else
         t = Tag.new
-        t.badge = log.badge
+        t.badge = log.badge_id
         t.name_with_caps = parent_tag
         t.name = parent_tag.downcase
         t.wiki = ''
@@ -256,18 +219,13 @@ protected
         # Nothing found so rather than throw an error we'll just set the summary to an error value.
         self.summary = "No tweet found! Please check the link and try again." 
       end
-
-      # Now manually fire the process_content_changes (we can't be sure of the timing)
-      self.process_content_changes
+    elsif (format == 'link') && link_url_changed? && !link_url.blank?
+      # Transform special links into other sorts of embeds
+      self.body = transform_link link_url
     end
-  end
 
-  # Linkifies summary and body, pulls tweet bodies from twitter
-  def process_content_changes
     if body_changed? || summary_changed? || link_url_changed?
-      # First get the tweet body from the twitter api (FIXME)
-      
-      # Then linkify summary and body (and split body into sections)
+      # Linkify summary and body (and split body into sections)
       summary_result = linkify_text(summary, log.badge.group, log.badge)
       self.linkified_summary = summary_result[:text] if summary_changed?
       body_result = linkify_text(body, log.badge.group, log.badge)
@@ -296,7 +254,7 @@ protected
 
   # This method takes care of updating the log as needed.
   def update_log
-    if log
+    if log_id && log
       # First increment the entry number counter
       log.next_entry_number += 1
       
@@ -318,7 +276,7 @@ protected
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
     if created_at > (Time.now - 2.hours)
-      if (type == 'validation') && (log.user != creator)
+      if (type == 'validation') && (log.user_id != creator_id)
         UserMailer.log_validation_received(log.user, creator, \
           log.badge.group, log.badge, log, self).deliver 
       end

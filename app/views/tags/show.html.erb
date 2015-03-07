@@ -278,7 +278,8 @@
 
           <div class="span12">
 
-            <%= render(@current_user_entries, show_badge: false, date_format: :ago) %>
+            <%= render @current_user_entries, date_format: :ago, group: @group, badge: @badge, 
+              log: @current_user_log, user: current_user %>
 
           </div>
         
@@ -305,7 +306,6 @@
       </div>
 
       <div class="row">
-        
         <% if @entries.blank? %>
 
           <div class="well span7 offset2 gray empty">
@@ -321,13 +321,25 @@
           <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="entries" 
             data-bl-dyncol-width="12">
 
-            <%= render(@entries, show_badge: false, date_format: :ago) %>
+            <%= render @entries, date_format: :ago, group: @group, badge: @badge, 
+              user_map: @user_map, log_map: @log_map %>
 
           </div>
         
         <% end %>
-
       </div>
+
+      <% unless @entries.blank? %>
+
+        <div class="row">
+          <div class="span12">
+            <div class="pagination-footer">
+              <div class="pagination" id="paginator"><%= paginate @entries, remote: true %></div>
+            </div>
+          </div>
+        </div>
+
+      <% end %>
 
     <% end %>
 
