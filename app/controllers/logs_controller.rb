@@ -16,7 +16,8 @@ class LogsController < ApplicationController
     @validations = @log.validations
 
     @presentation_format = params[:f]
-    @first_view_after_issued = @current_user_is_log_owner && @log.has_flag?('first_view_after_issued')
+    @first_view_after_issued = @current_user_is_log_owner \
+      && @log.has_flag?('first_view_after_issued')
 
     if @presentation_format == 'ob1'
       if @log.issue_status == 'retracted'

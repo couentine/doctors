@@ -65,7 +65,12 @@ class BadgesController < ApplicationController
           end
         end
       end
-      format.json { render json: @badge, filter_user: current_user }
+      format.json do 
+        @group = Group.find(params[:group_id]) || not_found
+        @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase) \
+          || not_found
+        render json: @badge, filter_user: current_user
+      end
     end
   end
 

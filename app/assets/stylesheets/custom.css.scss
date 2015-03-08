@@ -63,9 +63,9 @@ body {
   line-height: 1.8em;
 
   &.home-page {
-    background: linear-gradient(45deg, $dark-white 25%, white 25%, white 50%,
-                             $dark-white 50%, $dark-white 75%, white 75%);
-    background-size: 16px 16px;
+    background: linear-gradient(45deg, #fafafa 25%, white 25%, white 50%,
+                             #fafafa 50%, #fafafa 75%, white 75%);
+    background-size: 60px 60px;
 
     header.navbar .navbar-inner {
       background-color: rgba(255, 255, 255, 0.65);
@@ -2904,7 +2904,7 @@ div.cta-card {
 .home-group-row {
   .group-col {
     .group-col-inner {
-      box-shadow: inset 0px 0px 18px $light-text-color;
+      box-shadow: inset 2px 2px 13px $light-text-color;
       border-radius: 12px;
       border: 1px solid $light-gray;
       margin: 15px 15px 35px 15px;

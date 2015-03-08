@@ -68,7 +68,7 @@ class GroupsController < ApplicationController
         end
 
         @log_map = {} # maps from badge id to log of current user if present
-        current_user.group_logs_for(@group).each do |log|
+        current_user.logs.where(:badge_id.in => @group.badge_ids).each do |log|
           @log_map[log.badge_id] = log
         end if current_user
       end

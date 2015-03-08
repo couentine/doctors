@@ -146,10 +146,6 @@ class User
     admin_of_ids.include?(group.id)
   end
 
-  def group_logs_for(group)
-    logs.where(group_id: group.id)
-  end
-
   # Doesn't use any queries, returns :admin or :member or :none
   def member_type_of(group_id)
     if admin_of_ids.include? group_id
