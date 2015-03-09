@@ -45,7 +45,7 @@
       <li  class="collapsible">
         <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <% if (@current_user_is_expert && @show_progress) || @badge_list_admin %>
+        <% if (@can_award_badge && @show_progress) || @badge_list_admin %>
           <span class="divider">|</span>
         <% end %>
       </li>
@@ -59,7 +59,7 @@
       </li>
     <% end %>
 
-    <% if @current_user_is_expert && !@current_user_is_log_owner && @validation.nil? %>
+    <% if @can_award_badge && !@current_user_is_log_owner && @validation.nil? %>
       <li class="collapsible">
         <% if @log.validation_status == 'requested' %>
           <%= link_to "<i class='icon-check icon-white'></i> Add Your Expertise".html_safe,
@@ -89,7 +89,7 @@
             <li>
               <a href="#log-visibility" tabindex="-1" data-toggle="modal">
                 <i class="icon-pencil"></i> 
-                Change log visiblity &amp; membership
+                Edit your badge membership
               </a>
             </li>
             <% if @log.validation_status == 'requested' %>
@@ -176,13 +176,13 @@
 
 <% if @current_user_is_log_owner || @badge_list_admin %>
 
-  <!-- === EDIT LOG VISIBILITY MODAL === -->
+  <!-- === EDIT BADGE MEMBERSHIP MODAL === -->
 
   <div id="log-visibility" class="modal hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Edit progress log visiblity</h3>
+      <h3 id="mimm-label">Edit your badge membership</h3>
     </div>
 
     <div class="modal-body">
@@ -196,6 +196,14 @@
               [false, "Must have link <p class='text-success'><small>(Hidden from profile, but shareable via direct link)</small></p>".html_safe]],
               label_method: :last, value_method: :first, 
               label: 'Should this badge be visible on your Badge List user profile?' %>
+
+            <% if @can_award_badge %>
+              <%= f.input :receive_validation_request_emails, as: :select, include_blank: false,
+                collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
+                value_method: :first, label: 'Receive validation request emails?',
+                hint: "Validation request emails are sent automatically whenever a #{@learner} " \
+                  + "completes all of the badge requirements." %>
+            <% end %>
 
             <% 
               if @group.private? 
@@ -392,12 +400,12 @@
       <div class="tab-header">
 
         <% if @current_user_is_log_owner %>
-          <% if @validation.nil? %>
+          <% if !@validation.nil? %>
             <%= link_to "<i class='icon-pencil'></i> Update self validation".html_safe,
               edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
               class: 'btn btn-small' %>
           <% end %>
-        <% elsif @current_user_is_expert %>
+        <% elsif @can_award_badge %>
           <% if @validation.nil? %>
             <%= link_to "<i class='icon-check'></i> Add your expertise".html_safe,
               new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
@@ -438,7 +446,7 @@
       <div class="well span7 offset2">
         <h3>No validations yet...</h3>
         <p>
-          <% if @current_user_is_expert %>
+          <% if @can_award_badge %>
             This <%= @learner %> needs validations! To add your expertise, click the button
             below and let the <%= @learner %> know whether or not your believe they have mastered
             the badge.<br><br>

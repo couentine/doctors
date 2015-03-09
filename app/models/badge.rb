@@ -12,6 +12,7 @@ class Badge
   MAX_TERM_LENGTH = 15
   RECENT_DATE_THRESHOLD = 10.days # Used to filter "recent" activity & changes
   EDITABILITY_VALUES = ['experts', 'admins']
+  AWARDABILITY_VALUES = ['experts', 'admins']
   JSON_FIELDS = [:group, :name, :summary, :word_for_expert, :word_for_learner]
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps }
@@ -25,49 +26,53 @@ class Badge
 
   # === FIELDS & VALIDATIONS === #
 
-  field :name,                        type: String
-  field :url,                         type: String
-  field :url_with_caps,               type: String
-  field :summary,                     type: String
-  field :word_for_expert,             type: String, default: 'expert'
-  field :word_for_learner,            type: String, default: 'learner'
-  field :progress_tracking_enabled,   type: Boolean, default: true
-  field :editability,                 type: String, default: 'experts'
+  field :name,                            type: String
+  field :url,                             type: String
+  field :url_with_caps,                   type: String
+  field :summary,                         type: String
+  field :word_for_expert,                 type: String, default: 'expert'
+  field :word_for_learner,                type: String, default: 'learner'
+  field :progress_tracking_enabled,       type: Boolean, default: true
+  field :editability,                     type: String, default: 'experts'
+  field :awardability,                    type: String, default: 'experts'
+  field :send_validation_request_emails,  type: Boolean, default: 'true'
   
-  field :info,                        type: String
-  field :info_sections,               type: Array
-  field :info_versions,               type: Array
-  field :info_tags,                   type: Array
-  field :info_tags_with_caps,         type: Array
+  field :info,                            type: String
+  field :info_sections,                   type: Array
+  field :info_versions,                   type: Array
+  field :info_tags,                       type: Array
+  field :info_tags_with_caps,             type: Array
 
-  field :topic_list_text,             type: String
-  field :topics,                      type: Array, default: [] # RETIRED field
+  field :topic_list_text,                 type: String
+  field :topics,                          type: Array, default: [] # RETIRED field
 
-  field :image_frame,                 type: String
-  field :image_icon,                  type: String
-  field :image_color1,                type: String
-  field :image_color2,                type: String
-  field :image_url,                   type: String # RETIRED field
-  field :image,                       type: Moped::BSON::Binary # stores the actual badge image
+  field :image_frame,                     type: String
+  field :image_icon,                      type: String
+  field :image_color1,                    type: String
+  field :image_color2,                    type: String
+  field :image_url,                       type: String # RETIRED field
+  field :image,                           type: Moped::BSON::Binary # stores the actual badge image
                                                                 # (either designed OR uploaded)
-  field :image_attributions,          type: Array
-  field :icon_search_text,            type: String # stores what the user searched for b4 picking the icon
-  field :uploaded_image,              type: String # powered by the carrierwave gem
+  field :image_attributions,              type: Array
+  field :icon_search_text,                type: String # stores what user searched for b4 picking
+  field :uploaded_image,                  type: String # powered by the carrierwave gem
   mount_uploader :uploaded_image,     ImageUploader
 
-  field :current_user,                type: String # used when logging info_versions
-  field :current_username,            type: String # used when logging info_versions
-  field :flags,                       type: Array
+  field :current_user,                    type: String # used when logging info_versions
+  field :current_username,                type: String # used when logging info_versions
+  field :flags,                           type: Array
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH },
             uniqueness: { scope: :group },
-            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
+            format: { with: /\A[\w-]+\Z/, 
+              message: "can only contain letters, numbers, dashes and underscores" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :url, presence: true, length: { within: 2..MAX_URL_LENGTH },
             uniqueness: { scope: :group },
-            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
+            format: { with: /\A[\w-]+\Z/, 
+              message: "can only contain letters, numbers, dashes and underscores" },
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
@@ -75,13 +80,16 @@ class Badge
   validates :word_for_learner, length: { maximum: MAX_TERM_LENGTH }
   validates :editability, inclusion: { in: EDITABILITY_VALUES, 
     message: "%{value} is not a valid type of editability" }
+  validates :awardability, inclusion: { in: AWARDABILITY_VALUES, 
+    message: "%{value} is not a valid type of awardability" }
   validates :group, presence: true
   validates :creator, presence: true
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
-    :editability, :image_frame, :image_icon, :image_color1, :image_color2, :icon_search_text, 
-    :topic_list_text, :uploaded_image, :remove_uploaded_image, :uploaded_image_cache
+    :editability, :awardability, :image_frame, :image_icon, :image_color1, :image_color2, 
+    :icon_search_text, :topic_list_text, :uploaded_image, :remove_uploaded_image, 
+    :uploaded_image_cache
   
   # === CALLBACKS === #
 

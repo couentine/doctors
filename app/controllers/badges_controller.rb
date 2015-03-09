@@ -86,8 +86,13 @@ class BadgesController < ApplicationController
     @allow_url_editing = true;
 
     @badge_editability_options = [
-      ["All Badge Experts", 'experts'],
+      ["Badge Experts & Group Admins", 'experts'],
       ["Only Group Admins", 'admins']
+    ]
+    @badge_awardability_options = @badge_editability_options
+    @send_email_options = [
+      ['Let each awarder opt-out (recommended)', true],
+      ['Send no emails to anyone', false]
     ]
     
     respond_to do |format|
@@ -106,8 +111,13 @@ class BadgesController < ApplicationController
       if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
     @allow_url_editing = @badge.expert_logs.length < 2;
     @badge_editability_options = [
-      ["All Badge #{@badge.Experts}", 'experts'],
+      ["Badge #{@badge.Experts} & Group Admins", 'experts'],
       ["Only Group Admins", 'admins']
+    ]
+    @badge_awardability_options = @badge_editability_options
+    @send_email_options = [
+      ['Let each awarder opt-out (recommended)', true],
+      ['Send no emails to anyone', false]
     ]
   end
 
@@ -365,6 +375,7 @@ private
     @current_user_is_member = current_user && current_user.member_of?(@group)
     @badge_list_admin = current_user && current_user.admin?
     @can_edit_badge = @current_user_is_admin || @badge_list_admin
+    @can_award_badge = @current_user_is_admin
   end
 
   def find_all_records
@@ -376,6 +387,8 @@ private
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @can_edit_badge = @can_edit_badge \
       || ((@badge.editability == 'experts') && @current_user_is_expert)
+    @can_award_badge = @can_award_badge \
+      || ((@badge.awardability == 'experts') && @current_user_is_expert)
     if @current_user_is_learner || @current_user_is_expert
       @log = @badge.logs.find_by(user: current_user)
     end

@@ -21,31 +21,32 @@ class Log
 
   # === FIELDS & VALIDATIONS === #
 
-  field :validation_status,       type: String, default: 'incomplete'
-  field :issue_status,            type: String, default: 'unissued'
-  field :show_on_profile,         type: Boolean, default: true
-  field :detached_log,            type: Boolean, default: false
+  field :validation_status,                   type: String, default: 'incomplete'
+  field :issue_status,                        type: String, default: 'unissued'
+  field :show_on_profile,                     type: Boolean, default: true
+  field :detached_log,                        type: Boolean, default: false
+  field :receive_validation_request_emails,   type: Boolean, default: true
 
-  field :wiki,                    type: String, default: APP_CONFIG['default_log_wiki']
-  field :wiki_sections,           type: Array
-  field :wiki_versions,           type: Array
-  field :tags,                    type: Array
-  field :tags_with_caps,          type: Array
+  field :wiki,                                type: String, default: APP_CONFIG['default_log_wiki']
+  field :wiki_sections,                       type: Array
+  field :wiki_versions,                       type: Array
+  field :tags,                                type: Array
+  field :tags_with_caps,                      type: Array
 
-  field :date_started,            type: Time
-  field :date_requested,          type: Time
-  field :date_withdrawn,          type: Time
-  field :date_issued,             type: Time
-  field :date_retracted,          type: Time
-  field :date_originally_issued,  type: Time
-  field :date_sent_to_backpack,   type: Time
+  field :date_started,                        type: Time
+  field :date_requested,                      type: Time
+  field :date_withdrawn,                      type: Time
+  field :date_issued,                         type: Time
+  field :date_retracted,                      type: Time
+  field :date_originally_issued,              type: Time
+  field :date_sent_to_backpack,               type: Time
 
-  field :validation_count,        type: Integer, default: 0
-  field :rejection_count,         type: Integer, default: 0
-  field :next_entry_number,       type: Integer, default: 1
-  field :current_user,            type: String # used when logging wiki_versions
-  field :current_username,        type: String # used when logging wiki_versions
-  field :flags,                   type: Array, default: []
+  field :validation_count,                    type: Integer, default: 0
+  field :rejection_count,                     type: Integer, default: 0
+  field :next_entry_number,                   type: Integer, default: 1
+  field :current_user,                        type: String # used when logging wiki_versions
+  field :current_username,                    type: String # used when logging wiki_versions
+  field :flags,                               type: Array, default: []
 
   validates :badge, presence: true
   validates :user, presence: true
@@ -56,7 +57,7 @@ class Log
   
   # Which fields are accessible?
   attr_accessible :show_on_profile, :detached_log, :date_started, :date_requested, 
-    :date_withdrawn, :date_sent_to_backpack, :wiki
+    :date_withdrawn, :date_sent_to_backpack, :wiki, :receive_validation_request_emails
 
   # === CALLBACKS === #
 
@@ -361,10 +362,24 @@ protected
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
     if validation_status_changed? && (updated_at > (Time.now - 2.hours))
-      if validation_status == 'requested'
-        badge.expert_logs.each do |expert_log|
-          UserMailer.log_validation_request(expert_log.user, self.user, \
-            badge.group, badge, self).deliver 
+      if (validation_status == 'requested') && badge.send_validation_request_emails
+        # Requests go out to all admins and (depending on awardability setting) any expert who
+        # has not opted out
+        user_ids_to_email = badge.group.admin_ids
+
+        # First get all expert logs and run through them
+        badge.logs.where(validation_status: 'validated', detached_log: false).each do |log|
+          if user_ids_to_email.include? log.user_id # then just check if they've opted out
+            user_ids_to_email.delete log.user_id unless log.receive_validation_request_emails
+          else # then just check if we're awarding to non-admin experts
+            user_ids_to_email << log.user_id if badge.awardability == 'experts'
+          end
+        end
+
+        # Now query the users and send them each an email
+        User.where(:id.in => user_ids_to_email).each do |user_to_email|
+          UserMailer.log_validation_request(user_to_email, self.user, badge.group, badge, \
+            self).deliver 
         end
       elsif validation_status == 'validated'
         UserMailer.log_badge_issued(user, badge.group, badge, self).deliver 

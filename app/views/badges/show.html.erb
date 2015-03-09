@@ -39,8 +39,8 @@
             aria-labelledby="dropdown-subheader-settings">
             <% if @current_user_is_expert || @current_user_is_learner %>
               <li>
-                <%= link_to '<i class="fa fa-pencil"></i> Change your badge membership'.html_safe, 
-                  '#edit-membership', tabindex: -1, data: { toggle: 'modal' } %>
+                <%= link_to '<i class="fa fa-pencil"></i> Edit your badge membership'.html_safe, 
+                  '#log-visibility', tabindex: -1, data: { toggle: 'modal' } %>
               </li>
             <% end %>
             <% if @can_edit_badge %>
@@ -113,7 +113,7 @@
 
 <% end %>
 
-<% if @current_user_is_expert || @badge_list_admin %>
+<% if @can_award_badge %>
 
   <!-- === VALIDATION REQUESTS MODAL === -->
 
@@ -151,54 +151,58 @@
     </div>
   </div>
 
-  <!-- === NEW EXPERTS MODAL === -->
+<% end %>
 
-  <div id="new-<%= @experts.parameterize %>" class="modal hide fade" tabindex="-1" role="dialog" 
-   aria-labelledby="mimm-label" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Recently validated <%= @experts %></h3>
-    </div>
+<!-- === NEW EXPERTS MODAL === -->
 
-    <div class="modal-body">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Validated</th>
+<div id="new-<%= @experts.parameterize %>" class="modal hide fade" tabindex="-1" role="dialog" 
+ aria-labelledby="mimm-label" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="mimm-label">Recently validated <%= @experts %></h3>
+  </div>
+
+  <div class="modal-body">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Validated</th>
+          <% if @can_award_badge %>
             <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @badge.new_expert_logs.each do |log| %>
-            <tr>
-              <td>
-                <%= link_to log.user.name, [@group, @badge, log], 
-                  title: "View #{@badge.progress_log}"  %>
-              </td>
-              <td><%= log.date_issued.to_s(:full_date_time) %></td>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% @badge.new_expert_logs.each do |log| %>
+          <tr>
+            <td>
+              <%= link_to log.user.name, [@group, @badge, log], 
+                title: "View #{@badge.progress_log}"  %>
+            </td>
+            <td><%= log.date_issued.to_s(:full_date_time) %></td>
+            <% if @can_award_badge %>
               <td>
                 <%= link_to '<i class="fa fa-plus"></i> Add your expertise'.html_safe, 
                     [@group, @badge, log] %> 
               </td>
-            </tr>
-          <% end %>
-      </tbody>
-      </table>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    </div>
+            <% end %>
+          </tr>
+        <% end %>
+    </tbody>
+    </table>
   </div>
 
-<% end %>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
 
 <% if @current_user_is_expert || @current_user_is_learner %>
 
-  <!-- === EDIT MEMBERSHIP MODAL === -->
+  <!-- === EDIT BADGE MEMBERSHIP MODAL === -->
 
-  <div id="edit-membership" class="modal hide fade" tabindex="-1" role="dialog" 
+  <div id="log-visibility" class="modal hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -208,20 +212,40 @@
     <div class="modal-body">
       <div class="bl-modal-form">
         <div class="form-body">
-          <form class="form-horizontal">      
-            <div class="control-group">
-              <label class="control-label" for="delete-log">
-                Resign badge membership
-              </label>
-              <div class="controls">
-                <%= link_to "Resign from badge but keep #{@badge.progress_log}", 
-                  group_badge_log_path(@group, @badge, @log, log: { detached_log: true }), 
-                  title: "You will no longer be a member of this badge", method: :put, 
-                  class: 'btn brn-large', data: { toggle: 'tooltip', placement: 'bottom',
-                   confirm: "Are you sure you want to leave this badge?" } %>
-                
-              </div>
-            </div>
+          <%= simple_form_for [@group, @badge, @log], method: :put,
+            html: {id: 'log-visibility-form', class: 'form-horizontal'} do |f| %>
+
+            <%= f.input :show_on_profile, as: :radio_buttons, 
+              collection: [[true, 'Visible on Badge List profile'] , \
+              [false, "Must have link <p class='text-success'><small>(Hidden from profile, but shareable via direct link)</small></p>".html_safe]],
+              label_method: :last, value_method: :first, 
+              label: 'Should this badge be visible on your Badge List user profile?' %>
+
+            <% if @can_award_badge %>
+              <%= f.input :receive_validation_request_emails, as: :select, include_blank: false,
+                collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
+                value_method: :first, label: 'Receive validation request emails?',
+                hint: "Validation request emails are sent automatically whenever a #{@learner} " \
+                  + "completes all of the badge requirements." %>
+            <% end %>
+
+            <% 
+              if @group.private? 
+                private_text = 'This will break Mozilla compatibility'
+              else
+                private_text = 'Only available for private learning grouups'
+              end 
+            %>
+            
+            <%
+              if @log.validation_status == 'validated'
+                privacy_label = "Can other people see your #{@badge.progress_log}?"
+              else
+                privacy_label = "After you earn the badge your #{@badge.progress_log} will be"
+              end
+            %>
+
+            <h4>Dangerous Stuff</h4>
 
             <div class="control-group">
               <label class="control-label" for="delete-log">
@@ -229,20 +253,26 @@
               </label>
               <div class="controls">
                 <%= link_to "Delete your #{@badge.progress_log}", [@group, @badge, @log], title: "Careful!",
-                  method: :delete, class: 'btn btn-danger brn-large', 
+                  method: :delete, id: "delete-log", class: 'btn btn-danger brn-large', 
                   data: { confirm: "Warning: This can't be undone. Are you absolutely sure you want to"\
                   + " permanently delete your #{@badge.progress_log}?", toggle: 'tooltip', 
                   placement: 'bottom' } %>
                 
               </div>
             </div>
-           </form>
+
+          <% end %>
+         
          </div>        
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-info" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn" aria-hidden="true" 
+       onclick="$('#log-visibility-form').submit();">
+        Save
+      </button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
   </div>
 
@@ -536,7 +566,7 @@
       <div class="row">
         <div class="span12">
           <div class="tab-header">
-            <% if @current_user_is_expert || @badge_list_admin %>
+            <% if @can_award_badge %>
               <% unless @badge.current_validation_threshold > 1 %>
                 <%= link_to '<i class="fa fa-shield"></i> Award the badge'.html_safe,
                     badge_issue_path(@group, @badge), class: 'btn btn-small', id: 'award-badge' %>
@@ -614,12 +644,12 @@
       <div class="row">
         <div class="span12">
           <div class="tab-header <%= (@badge.learner_logs.empty?) ? 'empty' : '' %>">
-            <% if @current_user_is_expert || @badge_list_admin %>
+            <% if @current_user_is_expert || @current_user_is_admin || @badge_list_admin %>
 
               <%= link_to "<i class='fa fa-plus'></i> Invite #{@learners}".html_safe,
                   add_badge_learners_path(@group, @badge), class: 'btn btn-small' %>
             
-              <% unless @requesting_learner_logs.blank? %>
+              <% if @can_award_badge && !@requesting_learner_logs.blank? %>
                 <div class="btn-group">
                   <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 
                     data-toggle="dropdown">

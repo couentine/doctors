@@ -788,6 +788,12 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
         input[type="text"]:focus,textarea:focus,,input[type="url"]:focus {
           background-color: $really-light-gray;
         }
+        p.help-block {
+          font-size: 0.8em;
+          font-style: italic;
+          margin-top: 15px;
+          color: $light-text-color;
+        }
         .huge-text-area {
           width: 95%;
           height: 245px;
@@ -821,6 +827,7 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
         }
       }
 
+      &.entry_log_validated b { display: inline !important; }
       &.radio_buttons .controls label.radio {
         font-size: 20px;
         margin-bottom: 20px;

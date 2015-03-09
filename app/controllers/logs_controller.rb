@@ -154,6 +154,12 @@ private
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @badge_list_admin = current_user && current_user.admin?
 
+    # Define permission variables
+    @can_edit_badge = @current_user_is_admin || @badge_list_admin \
+      || ((@badge.editability == 'experts') && @current_user_is_expert)
+    @can_award_badge = @current_user_is_admin \
+      || ((@badge.awardability == 'experts') && @current_user_is_expert)
+
     # Define badge terminology shortcuts
     @expert = @badge.expert
     @experts = @badge.experts
