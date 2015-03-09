@@ -76,7 +76,7 @@ class UserMailer < ActionMailer::Base
   
   def log_validation_request(to_user, from_user, group, badge, log)
     @to_user, @from_user, @group, @badge, @log = to_user, from_user, group, badge, log
-logger.debug "+===[ Sending validation request to #{to_user.email} ]===+"
+
     mail(
       :subject  => "Validation Request for #{badge.name}",
       :to       => to_user.email_name,

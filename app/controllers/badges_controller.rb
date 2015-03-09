@@ -305,6 +305,7 @@ class BadgesController < ApplicationController
       render 'issue_form'
     else
       user = User.find_by(email: @email) rescue nil
+
       if user.nil?
         # add them to the group invited members (but be sure not to create a dupe)
         if @group.has_invited_member? @email

@@ -23,7 +23,7 @@
                 end
 
                 if path
-                  link_to '<i class="icon-remove"></i>'.html_safe, destroy_group_member_path(@group, user),
+                  link_to '<i class="icon-remove"></i>'.html_safe, path,
                           method: :delete, class: "user-card-delete", title: link_title,
                           data: { toggle: "tooltip", placement: "bottom",
                                confirm: "Are you absolutely sure you want to revoke this user's membership?" }
