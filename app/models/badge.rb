@@ -89,7 +89,7 @@ class Badge
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
     :editability, :awardability, :image_frame, :image_icon, :image_color1, :image_color2, 
     :icon_search_text, :topic_list_text, :uploaded_image, :remove_uploaded_image, 
-    :uploaded_image_cache
+    :uploaded_image_cache, :send_validation_request_emails
   
   # === CALLBACKS === #
 
