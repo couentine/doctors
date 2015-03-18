@@ -13,10 +13,13 @@
               if current_user && @group && @current_user_is_admin  && (current_user != user)
                 if user.admin_of?(@group)
                   path = destroy_group_admin_path(@group, user) 
-                  link_title = "Remove this admin"
+                  link_title = "Downgrade this admin to a member"
+                  link_confirm = "Are you sure you want to downgrade this admin to a normal member?"
                 elsif user.member_of?(@group)
                   path = destroy_group_member_path(@group, user)
                   link_title = "Remove this member"
+                  link_confirm = \
+                    "Are you absolutely sure you want to revoke this user's membership?"
                 else
                   path = nil
                   link_title = nil
@@ -25,8 +28,7 @@
                 if path
                   link_to '<i class="icon-remove"></i>'.html_safe, path,
                           method: :delete, class: "user-card-delete", title: link_title,
-                          data: { toggle: "tooltip", placement: "bottom",
-                               confirm: "Are you absolutely sure you want to revoke this user's membership?" }
+                          data: { toggle: "tooltip", placement: "bottom", confirm: link_confirm }
                 end
               end 
             %>

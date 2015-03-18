@@ -209,14 +209,9 @@ class GroupsController < ApplicationController
 
     if params[:type] == 'admin' && @group.has_admin?(@user)
       @group.admins.delete(@user)
-      @user.logs.find_all { |log| log.badge.group == @group }.each do |log_to_detach|
-        log_to_detach.detached_log = true
-        log_to_detach.save!
-        detached_log_count += 1
-      end
-      notice = "#{@user.name} has been removed from the learning group admins"
-      notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
-      notice += "."
+      @group.members << @user
+      @group.save
+      notice = "#{@user.name} has been downgraded from an admin to a member."
     elsif params[:type] == 'member' && @group.has_member?(@user)
       @group.members.delete(@user)
       @user.logs.find_all { |log| log.badge.group == @group }.each do |log_to_detach|
