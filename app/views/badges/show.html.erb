@@ -644,7 +644,7 @@
       <div class="row">
         <div class="span12">
           <div class="tab-header <%= (@badge.learner_logs.empty?) ? 'empty' : '' %>">
-            <% if @current_user_is_expert || @current_user_is_admin || @badge_list_admin %>
+            <% if @can_edit_badge %>
 
               <%= link_to "<i class='fa fa-plus'></i> Invite #{@learners}".html_safe,
                   add_badge_learners_path(@group, @badge), class: 'btn btn-small' %>

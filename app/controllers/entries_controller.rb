@@ -7,7 +7,7 @@ class EntriesController < ApplicationController
   before_filter :visible_to_current_user, only: [:show]
   before_filter :entry_creator, only: [:edit, :update]
   before_filter :log_owner_or_entry_creator, only: [:destroy]
-  before_filter :badge_expert_or_log_owner, only: [:new, :create]
+  before_filter :can_post_to_log, only: [:new, :create]
 
   # === RESTFUL ACTIONS === #
 
@@ -262,9 +262,10 @@ private
     end
   end
 
-  def badge_expert_or_log_owner
-    unless @current_user_is_expert || @current_user_is_log_owner || @badge_list_admin
-      flash[:error] = "That action is restricted to badge experts and the log owner."
+  def can_post_to_log
+    unless @current_user_is_expert || @current_user_is_admin || @current_user_is_log_owner \
+        || @badge_list_admin
+      flash[:error] = "You do not have permission to post to this log."
       redirect_to [@group, @badge, @log]
     end
   end

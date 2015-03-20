@@ -38,7 +38,7 @@
   </li>
 <% end %>
 
-<% if @current_user_is_expert || @current_user_is_learner || @badge_list_admin %>
+<% if @current_user_is_expert || @current_user_is_learner || @can_award_badge %>
   <% content_for :subheader_actions do %>
 
     <% if !@current_user_is_log_owner && !@current_user_log.nil? %>

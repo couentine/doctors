@@ -6,8 +6,8 @@ class BadgesController < ApplicationController
     :entries_index, :add_learners, :create_learners, :issue_form, :issue_save]
   before_filter :authenticate_user!, except: [:show, :entries_index]
   before_filter :group_admin, only: [:new, :create, :destroy]
-  before_filter :badge_expert, only: [:add_learners, :create_learners, :issue_form, :issue_save]
-  before_filter :can_edit, only: [:edit, :update]
+  before_filter :can_award, only: [:issue_form, :issue_save]
+  before_filter :can_edit, only: [:edit, :update, :add_learners, :create_learners]
 
   # === CONSTANTS === #
 
@@ -413,9 +413,9 @@ private
     end 
   end
 
-  def badge_expert
-    unless @current_user_is_expert || @badge_list_admin
-      flash[:error] = "You must be a badge expert to do that!"
+  def can_award
+    unless @can_award_badge
+      flash[:error] = "You do not have permission to award this badge."
       redirect_to [@group, @badge]
     end 
   end
