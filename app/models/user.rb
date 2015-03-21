@@ -196,7 +196,9 @@ class User
     if name.blank?
       return email
     else
-      return "#{name} <#{email}>"
+      escaped_name = name.gsub(/"/, "'") # replace double quotes with single quotes
+      escaped_name = '"' + escaped_name + '"' # surround name with double quotes
+      return "#{escaped_name} <#{email}>"
     end
   end
 
