@@ -11,7 +11,7 @@ module EmailTools
     if from_user.nil? || from_user.name.blank?
       "Badge List <#{ENV['from_email']}>"
     else
-      "#{from_user.name} <#{ENV['from_email']}>"
+      "#{from_user.escaped_name} <#{ENV['from_email']}>"
     end
   end
 

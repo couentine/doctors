@@ -191,13 +191,16 @@ class User
     end
   end
 
+  # Returns name surrounded by quotes and with double quotes replaced by single quotes
+  def escaped_name
+    '"' + name.gsub(/"/, "'") + '"'
+  end
+
   # Returns "John Doe <email@example.com>" OR "email@example.com" depending on presence of name
   def email_name
     if name.blank?
       return email
     else
-      escaped_name = name.gsub(/"/, "'") # replace double quotes with single quotes
-      escaped_name = '"' + escaped_name + '"' # surround name with double quotes
       return "#{escaped_name} <#{email}>"
     end
   end
