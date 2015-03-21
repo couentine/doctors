@@ -130,6 +130,8 @@ class Entry
   def privacy
     if tag_id.nil?
       return 'public'
+    elsif tag.nil?
+      return 'public'
     else
       return tag.privacy
     end
