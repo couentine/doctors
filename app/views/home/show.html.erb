@@ -40,7 +40,7 @@
 <% if @groups.blank? %>
 
   <div class="row">
-    <div class="well well-lead span7 offset2 inset-well">
+    <div class="group-col well well-lead inset-well">
       <i class="fa fa-info-circle header-icon"></i>
       <ul>
         <li><strong>Step 1:</strong> Create a learning group<br></li>
@@ -48,7 +48,7 @@
         <li><Strong>Step 3:</Strong> Invite learners to share evidence</li>
       </ul><br>
       <%= link_to "<i class='fa fa-plus'></i> Create a new learning group".html_safe,
-        new_group_path, class: 'btn btn-large btn-success pull-right' %>
+        new_group_path, class: 'btn btn-large btn-success' %>
     </div>
   </div>
 

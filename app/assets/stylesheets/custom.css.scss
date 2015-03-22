@@ -71,6 +71,10 @@ body {
       background-color: rgba(255, 255, 255, 0.65);
     }
     footer, pre.debug_dump { display: none; }
+
+    .alert {
+      margin-right: 85px;
+    }
   }
 
   @media (min-width: 980px) {
@@ -176,10 +180,12 @@ ul.dropdown-menu {
 }
 .alert {
   background-color: $primary-really-light;
-  border-color: $primary-light;
-  border-style: dashed;
+  border: none;
   color: $medium-text-color;
-  font-size: 16px;
+  box-shadow: inset 2px 2px 13px #999;
+  border-radius: 12px;
+  padding: 15px 35px 15px 20px;
+  font-size: 1.1em;
   
   h3 {
     font-size: 26px; 
@@ -225,6 +231,10 @@ ul.dropdown-menu {
   &.alert-gray {
     background-color: $light-gray;
     border-color: $medium-gray;
+  }
+
+  @media (min-width: 980px) {
+    margin-top: 23px;
   }
 }
 .tooltip {
@@ -2913,6 +2923,16 @@ div.cta-card {
     font-weight: normal;
     line-height: 28px;
     box-shadow: 8px 5px 9px $medium-gray;
+    text-shadow: none;
+    border: 2px solid $secondary-dark;
+    height: 30px;
+    width: 24px;
+    text-align: center;
+
+    .fa {
+      position: relative;
+      top: 1px;
+    }
   }
 
   @media (min-width: 768px) { 
