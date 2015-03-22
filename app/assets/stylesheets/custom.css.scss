@@ -2922,39 +2922,49 @@ div.cta-card {
 
 .home-group-row {
   .group-col {
-    .group-col-inner {
-      box-shadow: inset 2px 2px 13px $light-text-color;
-      border-radius: 12px;
-      border: 1px solid $light-gray;
-      margin: 15px 15px 35px 15px;
-      padding: 25px;
-      background-color: white;
-      text-align: center !important;
+    box-shadow: inset 2px 2px 13px $light-text-color;
+    border-radius: 12px;
+    border: 1px solid $light-gray;
+    margin: 15px 0 35px 0;
+    padding: 25px;
+    background-color: white;
+    overflow-x: hidden;
 
-      h2 {
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
         line-height: 1.4em;
         color: $light-text-color;
-        margin: 0;
-        font-size: 24px;
-        text-align: center;
-        padding-top: 10px;
-        border-top: 3px solid $light-gray;
-      }
+        margin: 0 0 20px 0;
+        font-size: 30px;
+        
+        a {
+          display: inline-block;
+          margin: 0;
 
-      a {
-        display: block;
-        margin: 0;
+          img {
+            max-height: 1.2em;
+            max-width: 1.2em;
+            margin-right: 15px;
+            position: relative;
+            top: -0.1em;
+          }
 
-        &.image-link img {
-          width: 235px;
-          max-width: 100%;
+          &:hover, &:focus {
+            text-decoration: none;
+            color: $light-text-color;
+          }
         }
 
-        &:hover, &:focus {
-          text-decoration: none;
-          color: $light-text-color;
-        }
+        &:last-child { margin-bottom: 0; }
       }
+    }
+    
+    @media (min-width: 768px) {
+      margin: 15px 0 35px 25px;
     }
   }
 }

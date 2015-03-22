@@ -54,23 +54,20 @@
 
 <% else %>
       
-  <% @groups.each_slice(4).each do |group_slice| %>
+  <div class="row home-group-row">
+    <div class="group-col">
 
-    <div class="row home-group-row">
-
-      <% group_slice.each do |group| %>
-        <div class="span3 group-col">
-          <div class="well group-col-inner">
-            <%= link_to group_image_tag_for(group), group,
-              title: "View the learning group", class: "image-link" %><br>
-            <h2><%= link_to group.name, group, title: "View the learning group" %></h2>
-          </div>
-        </div>
-      <% end %> <!-- END group_slice -->
+      <ul>
+        <% @groups.each do |group| %>
+          <li>
+            <%= link_to group_image_tag_for(group) + group.name, group,
+              title: "View the learning group" %>
+          </li>
+        <% end %> <!-- END @groups -->
+      </ul>
 
     </div>
-
-  <% end %> <!-- END @groups -->
+  </div>
 
 <% end %>
 
