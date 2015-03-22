@@ -2031,6 +2031,18 @@ div.badge-card {
 }
 .panel-entry-content-tweet a {
   background-color: $tertiary-light;
+  display: inline-block;
+  border: 2px solid $tertiary-dark !important;
+  border-radius: 500px;
+  text-align: center;
+  font-size: 20px;
+  padding: 15px 25px;
+  color: white !important;
+  font-weight: bold;
+  word-break: break-word;
+  line-height: 1.4em; 
+  border: 2px solid transparent;
+
   &:hover, &.focus {
     color: white;
     background-color: $tertiary-medium;

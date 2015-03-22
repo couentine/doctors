@@ -32,8 +32,11 @@
 
       <!-- === TWITTER LINK === -->
 
-      <ul id="tweet-input-selection"
-          style="<%= (@entry.errors[:link_url].blank?) ? '' : 'display: none;' %>">
+      <%
+        show_existing = !@entry.errors[:link_url].blank? || !@entry.new_record?
+      %>
+
+      <ul id="tweet-input-selection" style="<%= (show_existing) ? 'display: none;' : '' %>">
         <li>
           <a href="#" class="btn btn-success btn-large" id="show-tweet-input-existing">
             <i class="fa fa-link"></i>
@@ -48,8 +51,7 @@
         </li>
       </ul>
 
-      <div id="tweet-input-existing" 
-          style="<%= (@entry.errors[:link_url].blank?) ? 'display: none;' : '' %>">
+      <div id="tweet-input-existing" style="<%= (show_existing) ? '': 'display: none;' %>">
         <%= f.input :link_url, label: 'Tweet URL', auto_focus: true,
           input_html: { class: 'input-xxlarge',
           placeholder: 'https://twitter.com/example/status/9876543210',

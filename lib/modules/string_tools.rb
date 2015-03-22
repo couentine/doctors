@@ -8,7 +8,7 @@ module StringTools
   SECTION_DIVIDER_REGEX = /-+\s*<br *\/?>\s*/i
   CODE_BLOCK_REGEX = /<code[^>]*>(.*)<\/code[^>]*>/im
   TWITTER_URL_REGEX = /\A\s*(https?:\/\/)?(www\.)?twitter\.com\/.*\z/i
-  TWEET_ID_REGEX = /\A\s*(https?:\/\/)?(www\.)?twitter\.com\/.*status\/(\d{3,})\s*\z/i
+  TWEET_ID_REGEX = /\A\s*(https?:\/\/)?(www\.)?twitter\.com\/.*status\/(\d{3,})(\?\S*)?\s*\z/i
   
   LINKS_TO_TRANSLATE = [
     [/youtube.com.*(?:\/|v=)([^&$]+)/,
