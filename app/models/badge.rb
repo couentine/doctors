@@ -43,7 +43,9 @@ class Badge
   field :info_tags,                       type: Array
   field :info_tags_with_caps,             type: Array
 
-  field :topic_list_text,                 type: String
+  field :requirement_list,                type: String, default: '[]'
+  field :original_requirement_list,       type: String, default: '[]'
+  field :topic_list_text,                 type: String # RETIRED field
   field :topics,                          type: Array, default: [] # RETIRED field
 
   field :image_frame,                     type: String
@@ -88,7 +90,7 @@ class Badge
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
     :editability, :awardability, :image_frame, :image_icon, :image_color1, :image_color2, 
-    :icon_search_text, :topic_list_text, :uploaded_image, :remove_uploaded_image, 
+    :icon_search_text, :requirement_list, :topic_list_text, :uploaded_image, :remove_uploaded_image,
     :uploaded_image_cache, :send_validation_request_emails
   
   # === CALLBACKS === #
@@ -238,6 +240,26 @@ class Badge
       self.topic_list_text = ''
     else
       self.topic_list_text = requirement_items.map{ |tag| tag.display_name }.join("\n")
+    end
+  end
+
+  # Call this method to build out requirement_list (and original_requirement_list)
+  def build_requirement_list
+    unless new_record?
+      list = []
+      requirements.each do |tag|
+        list << {
+          id: tag.id,
+          display_name: tag.display_name,
+          summary: tag.summary,
+          format: tag.format,
+          privacy: tag.privacy,
+          is_deleted: false
+        }
+      end
+
+      self.requirement_list = list.to_json
+      self.original_requirement_list = requirement_list
     end
   end
 

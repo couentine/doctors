@@ -119,6 +119,13 @@ class BadgesController < ApplicationController
       ['Let each awarder opt-out (recommended)', true],
       ['Send no emails to anyone', false]
     ]
+
+    # Initialize the badge requirement list and related info
+    @badge.build_requirement_list
+    @tag_format_options = []
+    Tag::FORMAT_VALUES.each do |format|
+      @tag_format_options << [Tag.format_icon(format), format]
+    end
   end
 
   # POST /group-url/badges

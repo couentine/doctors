@@ -69,24 +69,28 @@ class Tag
 
   # === TAG METHODS === #
 
+  def self.format_icon(format_string)
+    case format_string
+    when 'link'
+      return 'fa-link'
+    when 'tweet'
+      return 'fa-twitter'
+    when 'image'
+      return 'fa-camera'
+    when 'code'
+      return 'fa-code'
+    else
+      return 'fa-pencil'
+    end
+  end
+
   def to_param
     name_with_caps
   end
 
   # Returns the font awesome icon code for this tag's format (ex: "fa-camera")
   def format_icon
-    case format
-    when 'link'
-      icon_text = 'fa-link'
-    when 'tweet'
-      icon_text = 'fa-twitter'
-    when 'image'
-      icon_text = 'fa-camera'
-    when 'code'
-      icon_text = 'fa-code'
-    else
-      icon_text = 'fa-pencil'
-    end
+    return Tag.format_icon(format)
   end
 
 protected
