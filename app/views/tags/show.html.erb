@@ -203,16 +203,16 @@
               <% if @tag.type == 'requirement' %>
                 <li>
                   <% if @tag.privacy == 'secret' %>
-                    <i class='fa fa-user-secret'></i> 
+                    <i class='fa fa-lock'></i> 
                     Evidence only visible to badge <%= @experts %> and group admins
                   <% elsif @tag.privacy == 'private' %>
-                    <i class='fa fa-eye-slash'></i> 
+                    <i class='fa fa-users'></i> 
                     Evidence only visible to group members
                   <% elsif @group.private? %>
                     <i class='fa fa-link'></i> 
                     Evidence visible to anyone with the link
                   <% else %>
-                    <i class='fa fa-eye'></i> 
+                    <i class='fa fa-globe'></i> 
                     Evidence visible to public
                   <% end %>
                 </li>
