@@ -78,22 +78,21 @@
   </div>
 </div>
 
-<!-- === MEMBERSHIPS === -->
+<!-- === AWARDED BADGES === -->
 
 <% if @expert_group_badge_log_list.blank? %>
 
   <div class="row">
     <div class="well span7 offset2">
-      <p class="lead">No memberships yet...</p>
+      <h3>No badges yet...</h3>
       <p>
         <% if @this_is_current_user %>
-          To get started you'll either need to create a new learning group 
-          or get someone else to invite you to one of theirs.<br><br>
+          All of the badges you earn will show up here. To create some badges of your own...<br><br>
 
           <%= link_to "<i class='fa fa-plus'></i> Create a new learning group".html_safe,
             new_group_path, class: 'btn btn-success' %>
         <% else %>
-          They look lonely. Maybe you could invite them to join one of your learning groups?
+          This user hasn't earned any badges yet.
         <% end %>
       </p>
     </div>
@@ -144,6 +143,37 @@
           </div>
 
         <% end %> <!-- === # END: @expert_group_badge_log_list.each === -->
+      </div>
+    </div>
+  </div>
+
+<% end %>
+
+<!-- === GROUP MEMBERSHIPS === -->
+<% if !@user.admin_of_ids.blank? || !@user.member_of_ids.blank? %>
+
+  <div class="row">
+    <div class="span12">
+      <div class="tab-header merge-with-card">
+        <h2>Group Memberships</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="topic-list-row">
+    <div class="span12">
+      <div class="info-card text-card group-list-card">
+        <ul>
+          <% @user.groups.asc(:name).each do |group| %>
+            <li>
+              <%= link_to group_image_tag_for(group) + " " + group.name, group, 
+                title: "View the learning group" %>
+              <span class="no-link">
+                <%= "#{@user.member_type_of(group.id).capitalize}" %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
       </div>
     </div>
   </div>

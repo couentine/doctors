@@ -2160,7 +2160,7 @@ div.entry-card {
   }
 }
 
-div.topic-list-card {
+div.topic-list-card, div.group-list-card {
   ul {
     margin-left: 0;
     border-left: none;
@@ -2172,6 +2172,11 @@ div.topic-list-card {
       margin-bottom: 15px;
       margin-left: 0;
       line-height: 1.7em;
+
+      img {
+        height: 1.7em;
+        margin-right: 10px;
+      }
       
       .separator { 
         color: $light-text-color; 
@@ -2180,6 +2185,12 @@ div.topic-list-card {
       .post-count { 
         color: $light-text-color; 
         font-size: 16px;
+      }
+      .no-link {
+        color: $light-text-color;
+        font-size: 0.8em;
+        font-style: italic;
+        margin-left: 10px;
       }
 
       &:last-child { margin-bottom: 0; }
