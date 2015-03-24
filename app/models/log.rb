@@ -365,7 +365,7 @@ protected
       if (validation_status == 'requested') && badge.send_validation_request_emails
         # Requests go out to all admins and (depending on awardability setting) any expert who
         # has not opted out
-        user_ids_to_email = badge.group.admin_ids
+        user_ids_to_email = badge.group.admin_ids.clone
 
         # First get all expert logs and run through them
         badge.logs.where(validation_status: 'validated', detached_log: false).each do |log|
