@@ -155,13 +155,4 @@ protected
       end
     end
   end
-
-  # NOTE: DISABLING FOR NOW BECAUSE CAUSES INFINITE LOOP FROM badge.update_topics
-  # When the display name changes for a requirement, this callback updates the badge
-  def update_badge_topic_list_text
-    if display_name_changed? && (type == 'requirement')
-      badge.refresh_topic_list_text
-      badge.timeless.save
-    end
-  end
 end

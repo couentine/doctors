@@ -103,7 +103,7 @@ class Badge
   before_save :update_terms
   after_create :add_creator_as_expert
   after_save :update_requirement_editability
-  after_save :update_topics
+  after_save :process_requirement_list
 
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -346,46 +346,76 @@ protected
     end
   end
 
-  def update_topics
-    if topic_list_text_changed?
-      # First build a map of current tags
-      badge_tags = {}
-      tags.each { |tag| badge_tags[tag.name] = tag }
-
-      # Now run through the topic list and process name changes while building new requirement list
-      new_requirement_name_list = []
-      sort_index = 0
-      topic_list_text.split(/\r?\n|,/).each do |tag_display_name|
-        unless tag_display_name.blank?
-          sort_index += 1
-          tag_name_with_caps = tagify_string tag_display_name
-          tag_name = tag_name_with_caps.downcase
-          new_requirement_name_list << tag_name
-          
-          if badge_tags.has_key? tag_name
-            badge_tags[tag_name].type = 'requirement'
-            badge_tags[tag_name].sort_order = sort_index
-            badge_tags[tag_name].display_name = tag_display_name
-            badge_tags[tag_name].name_with_caps = tag_name_with_caps
-            badge_tags[tag_name].save if badge_tags[tag_name].changed?
-          else
-            new_tag = Tag.new()
-            new_tag.badge = self
-            new_tag.type = 'requirement'
-            new_tag.sort_order = sort_index
-            new_tag.name = tag_name
-            new_tag.display_name = tag_display_name
-            new_tag.name_with_caps = tag_name_with_caps
-            new_tag.save
+  # Processes changes to the requirement_list
+  def process_requirement_list
+    if requirement_list != original_requirement_list
+      # First parse the requirement list from JSON
+      parsed_list = JSON.parse requirement_list rescue nil
+      
+      if parsed_list.instance_of?(Array) # false if nil
+        tag_ids, tag_names, matched_tag_names = [], [], []
+        requirement_id_map, requirement_name_map = {}, {} # maps from tag name/id > requirement item
+        
+        # Run through and build a list of tag ids and tag names to query
+        parsed_list.each_with_index do |index, requirement|
+          unless requirement[:display_name].blank?
+            requirement[:sort_order] = index + 1
+            requirement[:name_with_caps] = tagify_string(requirement[:display_name])
+            requirement[:name] = requirement[:name_with_caps].downcase
+            tag_names << requirement[:name]
+            requirement_name_map[requirement[:name]] = requirement
+            
+            unless requirement[:id].blank?
+              tag_ids << requirement[:id] 
+              requirement_id_map[requirement[:id]] = requirement
+            end
           end
         end
-      end unless topic_list_text.blank?
 
-      # Finally run through and de-mote any old requirements which are no longer in the list
-      requirements.each do |tag|
-        unless new_requirement_name_list.include? tag.name
-          tag.type = 'wiki'
-          tag.save
+        # Query for all existing requirement tags as well as any other tags referenced in the list 
+        # (whether or not they are requirements)
+        relevant_tags = tags.any_of({:id.in => tag_ids}, {:name.in => tag_names}, 
+          {type: 'requirement'})
+
+        # Run through and handle updates to existing tags
+        relevant_tags.each do |tag|
+          # First try to find the requirement by id (for updating), then try by name (for promoting)
+          r = requirement_id_map[tag.id] || requirement_name_map[tag.name]
+
+          if r # then this tag is being updated
+            tag.type = (r[:is_deleted]) ? 'wiki' : 'requirement'
+            tag.sort_order = r[:sort_order]
+            tag.name = r[:name]
+            tag.display_name = r[:display_name]
+            tag.name_with_caps = r[:name_with_caps]
+            tag.summary = r[:summary]
+            tag.format = r[:format]
+            tag.privacy = r[:privacy]
+
+            tag.save if tag.changed? && tag.valid?
+            matched_tag_names << tag.name # This will have the NEW name if it changed
+          else # this tag is no longer in the requirement list, demote it
+            tag.type = 'wiki'
+            tag.save
+          end
+        end
+
+        # Last step is to go back and create any requirement tags which are new
+        requirement_name_map.each do |tag_name, r|
+          unless matched_tag_names.include? tag_name
+            new_tag = Tag.new()
+            new_tag.badge = self
+            new_tag.type = (r[:is_deleted]) ? 'wiki' : 'requirement'
+            new_tag.sort_order = r[:sort_order]
+            new_tag.name = r[:name]
+            new_tag.display_name = r[:display_name]
+            new_tag.name_with_caps = r[:name_with_caps]
+            new_tag.summary = r[:summary]
+            new_tag.format = r[:format]
+            new_tag.privacy = r[:privacy]
+
+            new_tag.save if new_tag.valid?
+          end
         end
       end
     end
