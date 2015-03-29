@@ -101,6 +101,7 @@ class Badge
   before_save :update_info_versions, on: :update # Don't store the first (default) value
   before_save :build_badge_image
   before_save :update_terms
+  before_save :update_progress_tracking
   after_create :add_creator_as_expert
   after_save :update_requirement_editability
   after_save :process_requirement_list
@@ -336,13 +337,24 @@ protected
 
     if word_for_learner_changed?
       if word_for_learner.blank?
-        self.progress_tracking_enabled = false
+        # self.progress_tracking_enabled = false
         self.word_for_learner = nil
       else 
-        self.progress_tracking_enabled = true
+        # self.progress_tracking_enabled = true
         self.word_for_learner = word_for_learner.gsub(/[^ A-Za-z]/, ' ').gsub(/ {2,}/, ' ')\
           .strip.downcase.singularize
       end
+    end
+  end
+
+  # Sets progress tracking enabled boolean based on whether there are requirements specified
+  def update_progress_tracking
+    # Requirement list is built in the badge CONTROLLER so it's possible that it won't be set in
+    # certain cases (like an ajax update). So we only want to override this if this is a new record
+    # or if this is an update and the requirement list is changing.
+    if self.new_record? || (requirement_list != original_requirement_list)
+      # Just test for the presence of a curly brace...
+      self.progress_tracking_enabled = requirement_list.include? '{'
     end
   end
 
@@ -400,7 +412,7 @@ protected
           end
         end
 
-        # Last step is to go back and create any requirement tags which are new
+        # Now go back and create any requirement tags which are new
         requirement_name_map.each do |tag_name, r|
           unless matched_tag_names.include? tag_name
             new_tag = Tag.new()
@@ -418,6 +430,9 @@ protected
           end
         end
       end
+
+      # Last step is to override original_requirement_list so this won't fire again on update
+      self.original_requirement_list = requirement_list
     end
   end
 

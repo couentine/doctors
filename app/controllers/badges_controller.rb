@@ -8,6 +8,7 @@ class BadgesController < ApplicationController
   before_filter :group_admin, only: [:new, :create, :destroy]
   before_filter :can_award, only: [:issue_form, :issue_save]
   before_filter :can_edit, only: [:edit, :update, :add_learners, :create_learners]
+  before_filter :set_editing_parameters, only: [:new, :edit]
 
   # === CONSTANTS === #
 
@@ -78,22 +79,7 @@ class BadgesController < ApplicationController
   # GET /group-url/badges/new.json
   def new
     @badge = Badge.new(group: @group)
-
-    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
-    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
-    @badge.word_for_expert = EXPERT_WORDS.first # values are singularized in page
-    @badge.word_for_learner = LEARNER_WORDS.first # values are singularized in page
     @allow_url_editing = true;
-
-    @badge_editability_options = [
-      ["Badge Experts & Group Admins", 'experts'],
-      ["Only Group Admins", 'admins']
-    ]
-    @badge_awardability_options = @badge_editability_options
-    @send_email_options = [
-      ['Let each awarder opt-out (recommended)', true],
-      ['Send no emails to anyone', false]
-    ]
     
     respond_to do |format|
       format.html # new.html.erb
@@ -103,29 +89,7 @@ class BadgesController < ApplicationController
 
   # GET /group-url/badge-url/edit
   def edit
-    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
-    @expert_words << @badge.word_for_expert.pluralize \
-      if !@expert_words.include? @badge.word_for_expert.pluralize
-    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
-    @learner_words << @badge.word_for_learner.pluralize \
-      if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
     @allow_url_editing = @badge.expert_logs.length < 2;
-    @badge_editability_options = [
-      ["Badge #{@badge.Experts} & Group Admins", 'experts'],
-      ["Only Group Admins", 'admins']
-    ]
-    @badge_awardability_options = @badge_editability_options
-    @send_email_options = [
-      ['Let each awarder opt-out (recommended)', true],
-      ['Send no emails to anyone', false]
-    ]
-
-    # Initialize the badge requirement list and related info
-    @badge.build_requirement_list
-    @tag_format_options = []
-    Tag::FORMAT_VALUES.each do |format|
-      @tag_format_options << [Tag.format_icon(format), format]
-    end
   end
 
   # POST /group-url/badges
@@ -432,6 +396,57 @@ private
       flash[:error] = "You do not have permission to edit this badge."
       redirect_to [@group, @badge]
     end 
+  end
+
+  def set_editing_parameters
+    if @badge
+      @badge_editability_options = [
+        ["Badge #{@badge.Experts} & Group Admins", 'experts'],
+        ["Only Group Admins", 'admins']
+      ]
+    else
+      @badge_editability_options = [
+        ["Badge Experts & Group Admins", 'experts'],
+        ["Only Group Admins", 'admins']
+      ]
+    end
+    @badge_awardability_options = @badge_editability_options
+
+    @send_email_options = [
+      ['Let each awarder opt-out (recommended)', true],
+      ['Send no emails to anyone', false]
+    ]
+
+    # Initialize the badge requirement list and related info
+    @badge.build_requirement_list
+    @tag_format_options = []
+    @tag_format_map = {}
+    Tag::FORMAT_VALUES.each do |format_string|
+      @tag_format_options << {
+        icon: Tag.format_icon(format_string),
+        text: format_string.capitalize,
+        value: format_string
+      }
+      @tag_format_map[format_string] = {
+        icon: Tag.format_icon(format_string),
+        text: format_string.capitalize,
+      }
+    end
+    @tag_privacy_options = []
+    @tag_privacy_map = {}
+    Tag.privacy_values(@group.type).each do |privacy_string|
+      @tag_privacy_options << {
+        icon: Tag.privacy_icon(@group.type, privacy_string),
+        name: privacy_string.capitalize,
+        text: Tag.privacy_text(@group.type, privacy_string),
+        value: privacy_string
+      }
+      @tag_privacy_map[privacy_string] = {
+        icon: Tag.privacy_icon(@group.type, privacy_string),
+        name: privacy_string.capitalize,
+        text: Tag.privacy_text(@group.type, privacy_string)
+      }
+    end
   end
 
 end

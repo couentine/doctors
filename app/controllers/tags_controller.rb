@@ -7,6 +7,7 @@ class TagsController < ApplicationController
   before_filter :can_view_tag, except: [:index]
   before_filter :can_edit_tag, only: [:edit, :update, :restore]
   before_filter :badge_expert, only: [:destroy]
+  before_filter :set_editing_parameters, only: [:edit]
 
   # === RESTFUL ACTIONS === #
 
@@ -216,31 +217,6 @@ private
     @Learner = @badge.Learner
     @Learners = @badge.Learners
     @show_progress = @badge.tracks_progress?
-
-    # Build format options
-    @tag_format_options = [
-      ['Free Text Response', 'text'],
-      ['Web Link', 'link'],
-      ['Twitter Link', 'tweet'],
-      ['Image Upload', 'image'],
-      ['Code Snippet', 'code']
-    ]
-
-    # Build editability options
-    @tag_editability_options = [
-      ["#{@Experts} and #{@Learners}", 'learners'],
-      ["Only #{@Experts}", 'experts']
-    ]
-    if @current_user_is_admin || @badge_list_admin
-      @tag_editability_options << ['Only Group Admins', 'admins'] 
-    end
-    
-    # Build privacy options
-    @tag_privacy_options = [["<strong>Public</strong> - Everyone".html_safe, 'public']];
-    if (@group.private?)
-      @tag_privacy_options << ["<strong>Private</strong> - Only Group Members".html_safe, 'private']
-    end
-    @tag_privacy_options << ["<strong>Secret</strong> - Only Badge #{@Experts}".html_safe, 'secret']
   end
   
   def find_all_records
@@ -298,6 +274,36 @@ private
     unless @current_user_is_expert || @badge_list_admin
       flash[:error] = "Only badge experts can delete requirement pages."
       redirect_to [@group, @badge, @tag]
+    end
+  end
+
+  def set_editing_parameters
+    # Build format options
+    @tag_format_options = [
+      ['Free Text Response', 'text'],
+      ['Web Link', 'link'],
+      ['Twitter Link', 'tweet'],
+      ['Image Upload', 'image'],
+      ['Code Snippet', 'code']
+    ]
+
+    # Build editability options
+    @tag_editability_options = [
+      ["#{@Experts} and #{@Learners}", 'learners'],
+      ["Only #{@Experts}", 'experts']
+    ]
+    if @current_user_is_admin || @badge_list_admin
+      @tag_editability_options << ['Only Group Admins', 'admins'] 
+    end
+    
+    # Build privacy options
+    @tag_privacy_options = []
+    Tag.privacy_values(@group.type).each do |privacy_string|
+      @tag_privacy_options << [
+        ("<strong>#{privacy_string.capitalize}</strong>" \
+        + " - #{Tag.privacy_text(@group.type, privacy_string).capitalize}").html_safe,
+        privacy_string
+      ]
     end
   end
 

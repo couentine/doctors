@@ -1,0 +1,62 @@
+<script type="text/javascript">
+  
+  var requirementList = <%= @badge.requirement_list.html_safe %>;
+  var tagFormatMap = <%= @tag_format_map.to_json.html_safe %>;
+  var tagPrivacyMap = <%= @tag_privacy_map.to_json.html_safe %>;
+
+  $(document).ready(function() {
+    buildListDOM();
+  });
+
+  // Builds requirement list DOM elements from the requirementList object
+  function buildListDOM() {
+    var listPanel = $("#rle-list-panel").empty();
+    var item;
+    
+    for (var i = 0; i < requirementList.length; i++) {
+      item = requirementList[i];
+      listPanel.append(
+        "<div class='rle-list-item' data-id='" + item.id + "'><table><tr>"
+        + "<td class='mover-col'><i class='fa fa-arrows-v'></i></td>"
+        
+        + "<td class='format-icon-col'><i class='fa " + tagFormatMap[item.format].icon 
+          + "'></i><span>" + tagFormatMap[item.format].text + "</span></td>"
+        
+        + "<td class='body-col'><div class='body-header'>"
+          + "<div class='rle-item-display-name'>" + item.display_name + "</div>"
+          + "<div class='rle-item-privacy'><i class='fa " + tagPrivacyMap[item.privacy].icon + "'>"
+            + "</i></div></div>"
+          + "<div class='rle-item-summary'>" + item.summary + "</div>"
+          + "</td>"
+        
+        + "<td class='action-col'><ul class='action-bar'>"
+          + "<li><a class='action-button action-edit' href='#'><i class='fa fa-edit'></i></a></li>"
+  + "<li><a class='action-button action-remove' href='#'><i class='fa fa-remove'></i></a></a></li>"
+          + "</ul></td>"
+        
+        + "</tr></table></div>"
+      );
+    }
+  }
+
+</script>
+
+<h2>
+  Evidence required to earn badge
+  <input class="btn" type="button" id="rle-add-requirement" value="Add Requirement"/>
+</h2>
+
+<div class="alert" id="rle-no-requirements" 
+    style="<%= (@badge.requirement_list.include? '{') ? 'display: none;' : '' %>">
+  <h3>You haven't specified any requirements yet</h3>
+  <p>Tip: Leave this section blank if you don't want <%= @badge.learners %> 
+  to submit evidence for this badge.</p>
+</div>
+
+<div id="rle-list-panel">
+  <%
+    # This is populated dynamically by javascript.
+  %>
+</div>
+
+<%= f.input :requirement_list, as: :hidden %>

@@ -30,78 +30,13 @@
         $("#url-preview").show();
         $('#badge_summary').focus();
       });
-      $("#url-cancel").click(function() {
+      $("#url-cancel").click(function() {`
         $('#badge_url_with_caps').val(parameterizeText($("#badge_name").val()));
         $('#url-preview-label').text(parameterizeText($("#badge_name").val()));
         $("#url-editor").hide();
         $("#url-preview").show();
       });
     <% end %>
-
-    // Create events to add custom badge terms
-    
-    $("#badge_word_for_expert").append("<option value disabled='disabled'>-----</option>");
-    $("#badge_word_for_expert").append("<option value='*' class='select-hr'>+ Add Word</option>");
-    $("#badge_word_for_expert").change(function() {
-      if ($(this).val() == "*") {
-        var customValue = prompt("People who have earned the badge are called 'badge _____'", 'learners');
-
-        if ((customValue != null) && (customValue.trim().length > MAX_TERM_LENGTH)) {
-          alert('Your word must be less than ' + (MAX_TERM_LENGTH+1) + ' characters. Please try again.');
-          $(this).val('expert');
-        } else if ((customValue != null) && (customValue.trim() != '')) {
-          customValue = customValue.trim();
-          $(this).append("<option value='" + customValue + "'>" + customValue + "</option>");
-          $(this).val(customValue);
-          $(this).focus();
-        } else {
-          $(this).val('expert');
-        }
-      }
-    });
-
-    $("#badge_word_for_learner").children().first().text("< None >") // Label the blank value
-    $("#badge_word_for_learner").append("<option value disabled='disabled'>-----</option>");
-    $("#badge_word_for_learner").append("<option value='*' class='select-hr'>+ Add Word</option>");
-    $("#badge_word_for_learner").change(function() {
-      if ($(this).val() == "*") {
-        var customValue = prompt("People tracking their progress towards earning the badge are "
-          + "called 'badge _____'", 'experts');
-
-        if ((customValue != null) && (customValue.trim().length > MAX_TERM_LENGTH)) {
-          alert('Your word must be less than ' + (MAX_TERM_LENGTH+1) + ' characters. Please try again.');
-          $(this).val('learner');
-        } else if ((customValue != null) && (customValue.trim() != '')) {
-          customValue = customValue.trim();
-          $(this).append("<option value='" + customValue + "'>" + customValue + "</option>");
-          $(this).val(customValue);
-          $(this).focus();
-        } else {
-          $(this).val('learner');
-        }
-      } else if (($(this).val() == "") && ($('#toggle-progress-tracking').data('status') == 'on')) {
-        toggleProgressTracking();
-      } else if (($(this).val() != "") && ($('#toggle-progress-tracking').data('status') == 'off')) {
-        toggleProgressTracking();
-      }
-    });
-
-    // Add popover
-    $("#progress-tracking-explanation").popover({
-      title: "<a class='pull-right' href='#' "
-        + "onclick=\"$('#progress-tracking-explanation').popover('hide')\" "
-        + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
-        + "What is progress tracking?",
-      content: "Badge List helps you track the progress of people working to earn the badge by "
-        + "letting them post entries to a progress log.<br><br>"
-        + "This functionality is <i>optional</i>.  "
-        + "It’s up to you to decide whether keeping track of progress is an important part of "
-        + "this badge.  You can change this setting at any time.",
-      placement: "bottom",
-      trigger: "click",
-      container: "body",
-      html: true
-    });
 
   });
 
@@ -114,28 +49,6 @@
       $('#form-extra-info').slideDown();
       $('#form-extra-info-toggle').val('Hide Settings')
       $('#group_location').focus()
-    }
-  }
-
-  function toggleProgressTracking() {
-    var buttonElement = $('#toggle-progress-tracking');
-    var selectElement = $('#badge_word_for_learner');
-
-    if (buttonElement.data('status') == 'on') {
-      selectElement.data('previous-value', selectElement.val());
-      selectElement.val("");
-      buttonElement.text('Turn on progress tracking for this badge');
-      buttonElement.data('status', 'off');
-      $('.learner-word-row').addClass('disabled');
-      // $('.learner-word-row.value-row select').prop('disabled', true);
-    } else {
-      var previousValue = selectElement.data('previous-value');
-      if ((previousValue == null) || (previousValue == "")) previousValue = 'learner';
-      if (selectElement.val() == "") selectElement.val(previousValue);
-      buttonElement.text('Turn off progress tracking for this badge');
-      buttonElement.data('status', 'on');
-      $('.learner-word-row').removeClass('disabled');
-      // $('.learner-word-row.value-row select').prop('disabled', false);
     }
   }
 
@@ -196,18 +109,14 @@
     <%= f.input :summary, as: :text, label: 'Summary', input_html: { data: {
         :'character-count' => true, :'max-length' => Badge::MAX_SUMMARY_LENGTH,
         toggle: 'tooltip', title: 'Explain clearly what badge earners have accomplished' } } %>
-
-    <%= f.input :topic_list_text, as: :text, label: 'Required Evidence', 
-      input_html: { 
-        title: ("Each line item you type gets its own page where you can write " \
-        + "a full explanation and let badge members post evidence.").html_safe,
-        placeholder: 'Enter a list of short phrases. (One per line.)',
-        data: { toggle: 'tooltip'} 
-      } %>
-      
+  
     <!-- === BADGE IMAGE MAKER === -->
 
     <%= render 'shared/badge_maker', f: f %>
+  
+    <!-- === REQUIREMENT LIST EDITOR === -->
+
+    <%= render 'shared/requirement_list_editor', f: f %>
 
     <% if @current_user_is_admin %>
 
