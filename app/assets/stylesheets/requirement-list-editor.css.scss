@@ -53,30 +53,33 @@ $dark-text-color: #3b3b3b;
     display: block;
     margin: 0 0 20px 0;
     color: $medium-text-color;
+    box-shadow: 2px 2px 2px 0 $light-gray;
+    border: 1px solid $light-gray;
+    border-radius: 5px;
 
     table {
       width: 100%;
-      box-shadow: 2px 2px 2px 0 $light-gray;
-      border-top: 1px solid $light-gray;
+      position: relative;
 
       td.mover-col {
-        background-color: $medium-gray;
+        background-color: $dark-white;
         width: 25px;
         vertical-align: middle;
         text-align: center;
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
 
         i.fa {
           color: $light-text-color;
-          font-size: 30px;
+          font-size: 16px;
         }
       }
       td.format-icon-col {
-        background-color: $tertiary-medium;
-        color: white;
+        color: $tertiary-medium;
         width: 60px;
         text-align: center;
         vertical-align: middle;
-        padding: 20px 0;
+        padding: 20px 0 20px 5px;
 
         i.fa {
           font-size: 30px;
@@ -89,12 +92,12 @@ $dark-text-color: #3b3b3b;
         }
       }
       td.body-col {
-        padding: 15px;
+        padding: 15px 15px 15px 10px;
         vertical-align: top;
 
         .body-header {
           padding-bottom: 7px;
-          border-bottom: 1px solid $light-text-color;
+          border-bottom: 1px solid $light-gray;
           margin-bottom: 10px;
           
           .rle-item-display-name, .rle-item-privacy {
@@ -103,10 +106,45 @@ $dark-text-color: #3b3b3b;
             display: inline-block;
             margin-right: 5px;
           }
+          .rle-item-privacy { color: $light-text-color; }
         }
         .rle-item-summary {
           font-size: 14px;
           display: block;
+        }
+      }
+      td.action-col {
+        width: 0;
+
+        ul {
+          list-style: none;
+          position: absolute;
+          right: -15px;
+          top: 9px;
+
+          li {
+            display: block;
+            margin: 0 0 5px 0;
+            
+            a {
+              font-size: 17px;
+              border-radius: 500px;
+              background-color: $tertiary-medium;
+              color: white;
+              display: block;
+              padding: 5px 0;
+              width: 30px;
+              text-align: center;
+              box-shadow: 2px 2px 4px 0 $medium-gray;
+
+              &.action-save, &.action-revert { background-color: $primary-medium; }
+
+              &:hover, &:focus {
+                background-color: $tertiary-dark;
+                &.action-save, &.action-revert { background-color: $primary-dark; }
+              }
+            }
+          }
         }
       }
     }

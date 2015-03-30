@@ -15,28 +15,98 @@
     
     for (var i = 0; i < requirementList.length; i++) {
       item = requirementList[i];
-      listPanel.append(
-        "<div class='rle-list-item' data-id='" + item.id + "'><table><tr>"
-        + "<td class='mover-col'><i class='fa fa-arrows-v'></i></td>"
-        
-        + "<td class='format-icon-col'><i class='fa " + tagFormatMap[item.format].icon 
-          + "'></i><span>" + tagFormatMap[item.format].text + "</span></td>"
-        
-        + "<td class='body-col'><div class='body-header'>"
-          + "<div class='rle-item-display-name'>" + item.display_name + "</div>"
-          + "<div class='rle-item-privacy'><i class='fa " + tagPrivacyMap[item.privacy].icon + "'>"
-            + "</i></div></div>"
-          + "<div class='rle-item-summary'>" + item.summary + "</div>"
-          + "</td>"
-        
-        + "<td class='action-col'><ul class='action-bar'>"
-          + "<li><a class='action-button action-edit' href='#'><i class='fa fa-edit'></i></a></li>"
-  + "<li><a class='action-button action-remove' href='#'><i class='fa fa-remove'></i></a></a></li>"
-          + "</ul></td>"
-        
-        + "</tr></table></div>"
-      );
+      listPanel.append(buildListItem(i, item));
+      activateListItem(i);
     }
+
+    listPanel.sortable();
+  }
+
+  // Returns the specified list item
+  function getListItem(listItemIndex) { 
+    return $(".rle-list-item[data-index=" + listItemIndex + "]");
+  }
+
+  // Attaches javascript events to newly built list item
+  function activateListItem(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+
+    listItem.find("a.action-edit").click(function(e) {
+      goEditMode(listItemIndex);
+      e.preventDefault();
+    });
+    listItem.find("a.action-remove").click(function(e) {
+      $(this).closest(".rle-list-item").data("deleted", "true").addClass("deleted-mode");
+      e.preventDefault();
+    });
+  }
+
+  // Sends a list item to edit mode
+  function goEditMode(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    
+    listItem.find(".display-mode").fadeOut();
+    listItem.find(".edit-mode").fadeIn();
+
+  }
+
+  // Returns the html for a new list item
+  // item must have the following properties: 
+  function buildListItem(listItemIndex, item) {
+    var i = listItemIndex; // for brevity
+
+    return "<div class='rle-list-item' data-index='" + i 
+      + "' data-id='" + item.id + "' data-deleted=false>"
+      
+      + "<table class='display-mode'><tr>"
+
+      + "<td class='mover-col'><i class='fa fa-bars'></i></td>"
+      
+      + "<td class='format-icon-col'><i class='fa " + tagFormatMap[item.format].icon 
+        + "'></i><span>" + tagFormatMap[item.format].text + "</span></td>"
+      
+      + "<td class='body-col'><div class='body-header'>"
+        + "<div class='rle-item-display-name'>" + item.display_name + "</div>"
+        + "<div class='rle-item-privacy'><i class='fa " + tagPrivacyMap[item.privacy].icon + "'>"
+          + "</i></div></div>"
+        + "<div class='rle-item-summary'>" + item.summary + "</div>"
+        + "</td>"
+      
+      + "<td class='action-col'><ul class='action-bar'>"
+        + "<li><a class='action-button action-edit' href='#'><i class='fa fa-edit'></i></a></li>"
+    + "<li><a class='action-button action-remove' href='#'><i class='fa fa-remove'></i></a></li>"
+        + "</ul></td>"
+      
+      + "</tr></table>"
+
+      + "<table class='edit-mode' style='display: none;'>"
+
+      + "<tr>"
+      + "<td class='label-col'><label for='rle-display-name-" + i + "'>Title</label></td>"
+      + "<td class='input-col'>"
+      + "<input type='text' class='rle-display-name' id='rle-display-name-" + i + "'></td>"
+      + "<td class='action-col'><ul class='action-bar'>"
+       + "<li><a class='action-button action-save' href='#'><i class='fa fa-check'></i></a></li>"
+       + "<li><a class='action-button action-revert' href='#'><i class='fa fa-undo'></i></a></li>"
+      + "</ul></td>"
+      + "</tr>"
+
+
+      + "<tr>"
+      + "<td class='label-col'><label for='rle-summary-" + i + "'>Summary</label></td>"
+      + "<td class='input-col'>"
+      + "<textarea class='rle-summary' id='rle-summary-" + i + "'></textarea></td>"
+      + "</tr>"
+
+      + "<tr>"
+      + "<td class='label-col'><label for='rle-format-" + i + "'>Evidence Format</label></td>"
+      + "<td class='input-col'>"
+      + "<input type='text' class='rle-format' id='rle-format-" + i + "'></td>"
+      + "</tr>"
+
+      + "</table>"
+
+    + "</div>";
   }
 
 </script>
