@@ -3,6 +3,9 @@
   var requirementList = <%= @badge.requirement_list.html_safe %>;
   var tagFormatMap = <%= @tag_format_map.to_json.html_safe %>;
   var tagPrivacyMap = <%= @tag_privacy_map.to_json.html_safe %>;
+  var isNewBadge = <%= @badge.new_record? %>;
+  var maxTagTitleLength = <%= Tag::MAX_NAME_LENGTH %>;
+  var maxTagSummaryLength = <%= Tag::MAX_SUMMARY_LENGTH %>;
 
   $(document).ready(function() {
     buildListDOM();
@@ -30,24 +33,68 @@
   // Attaches javascript events to newly built list item
   function activateListItem(listItemIndex) {
     var listItem = getListItem(listItemIndex);
+    var i = listItemIndex; // For brevity
 
-    listItem.find("a.action-edit").click(function(e) {
-      goEditMode(listItemIndex);
-      e.preventDefault();
-    });
-    listItem.find("a.action-remove").click(function(e) {
-      $(this).closest(".rle-list-item").data("deleted", "true").addClass("deleted-mode");
-      e.preventDefault();
-    });
+    // Build tooltips
+    listItem.find("[data-toggle=tooltip]").tooltip({container: "#rle-list-panel"});
+
+    // Attach events to the buttons
+    listItem.find("a.action-edit").click(function(e) { startEdit(i); e.preventDefault(); });
+    listItem.find("a.action-save").click(function(e) { saveEdit(i); e.preventDefault(); });
+    listItem.find("a.action-revert").click(function(e) { revertEdit(i); e.preventDefault(); });
+
+    listItem.find("a.action-remove").click(function(e) { removeItem(i); e.preventDefault(); });
+    listItem.find("a.action-restore").click(function(e) { restoreItem(i); e.preventDefault(); });
+
+    // Add character counts to the summary field
+    createCharacterCounts(listItem);
   }
 
-  // Sends a list item to edit mode
-  function goEditMode(listItemIndex) {
+  function startEdit(listItemIndex) {
     var listItem = getListItem(listItemIndex);
     
-    listItem.find(".display-mode").fadeOut();
-    listItem.find(".edit-mode").fadeIn();
+    // Build out all of the values
+    listItem.find(".rle-display-name").val(listItem.find(".rle-item-display-name").text());
+    listItem.find(".rle-summary").val(listItem.find(".rle-item-summary").text());
+    listItem.find(".rle-format").val(listItem.find(".rle-item-format").data("value"));
+    listItem.find(".rle-privacy").val(listItem.find(".rle-item-privacy").data("value"));
+    
+    // Save the current value in case it needs to be reverted to
+    listItem.find(".rle-display-name").data('revert-value', listItem.find(".rle-display-name")
+      .val());
+    listItem.find(".rle-summary").data('revert-value', listItem.find(".rle-summary").val());
+    listItem.find(".rle-format").data('revert-value', listItem.find(".rle-format").val());
+    listItem.find(".rle-privacy").data('revert-value', listItem.find(".rle-privacy").val());
+    
+    // Then update the display
+    listItem.find(".display-mode").hide();
+    listItem.find(".edit-mode").show();
+    listItem.find(".rle-display-name").focus();
+  }
 
+  function saveEdit(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    var itemFormat = listItem.find(".rle-format").val();
+    var itemPrivacy = listItem.find(".rle-privacy").val();
+    
+    // Save the values back to the primary DOM
+    listItem.find(".rle-item-display-name").text(listItem.find(".rle-display-name").val());
+    listItem.find(".rle-item-summary").text(listItem.find(".rle-summary").val());
+    
+    listItem.find(".rle-item-format").data("value", itemFormat).text(tagFormatMap[itemFormat].text);
+    listItem.find('.format-icon-col .fa').removeClass().
+      addClass('fa ' + tagFormatMap[itemFormat].icon);
+    
+    listItem.find(".rle-item-privacy").data("value", itemPrivacy);
+    // LEFT OFF HERE
+    
+    // Then update the display
+    
+    listItem.find('.format-icon-col .fa').removeClass().
+      addClass('fa ' + tagFormatMap[itemFormat].icon);
+
+    listItem.find(".edit-mode").hide();
+    listItem.find(".display-mode").show();
   }
 
   // Returns the html for a new list item
@@ -56,55 +103,78 @@
     var i = listItemIndex; // for brevity
 
     return "<div class='rle-list-item' data-index='" + i 
-      + "' data-id='" + item.id + "' data-deleted=false>"
+      + "' data-id='" + item.id + "' data-is-deleted='false'>"
       
+      + "<div class='removed-mode' style='display:none;'><span>You have removed this requirement. "
+        + "It will be downgraded to a wiki page. All evidence will be kept.</span>"
+        + "<a href='#' class='action-restore btn btn-small'>Restore this requirement</a></div>"
+
       + "<table class='display-mode'><tr>"
 
       + "<td class='mover-col'><i class='fa fa-bars'></i></td>"
       
       + "<td class='format-icon-col'><i class='fa " + tagFormatMap[item.format].icon 
-        + "'></i><span>" + tagFormatMap[item.format].text + "</span></td>"
+        + "'></i><span class='rle-item-format' data-value='" + item.format + "'>" 
+        + tagFormatMap[item.format].text + "</span></td>"
       
       + "<td class='body-col'><div class='body-header'>"
         + "<div class='rle-item-display-name'>" + item.display_name + "</div>"
-        + "<div class='rle-item-privacy'><i class='fa " + tagPrivacyMap[item.privacy].icon + "'>"
-          + "</i></div></div>"
+        + "<div class='rle-item-privacy' data-value='" + item.privacy + "'><i class='fa " 
+          + tagPrivacyMap[item.privacy].icon + "' "
+          + "title='Evidence " + tagPrivacyMap[item.privacy].text + "' data-toggle='tooltip' "
+          + "data-placement='bottom'></i></div></div>"
         + "<div class='rle-item-summary'>" + item.summary + "</div>"
-        + "</td>"
+      + "</td>"
       
       + "<td class='action-col'><ul class='action-bar'>"
-        + "<li><a class='action-button action-edit' href='#'><i class='fa fa-edit'></i></a></li>"
-    + "<li><a class='action-button action-remove' href='#'><i class='fa fa-remove'></i></a></li>"
-        + "</ul></td>"
+        + "<li data-toggle='tooltip' data-placement='left' title='Edit Requirement'>"
+          + "<a class='action-button action-edit' href='#'><i class='fa fa-edit'></i></a></li>"
+        + "<li data-toggle='tooltip' data-placement='left' title='Remove Requirement'>"
+          + "<a class='action-button action-remove' href='#'><i class='fa fa-remove'></i></a></li>"
+      + "</ul></td>"
       
       + "</tr></table>"
 
-      + "<table class='edit-mode' style='display: none;'>"
+      + "<table class='edit-mode' style='display: none;'><tr>"
+      + "<td class='mover-col'><i class='fa fa-bars'></i></td>"
+      + "<td class='body-col'><table class='inner-table'>"
 
       + "<tr>"
       + "<td class='label-col'><label for='rle-display-name-" + i + "'>Title</label></td>"
       + "<td class='input-col'>"
-      + "<input type='text' class='rle-display-name' id='rle-display-name-" + i + "'></td>"
-      + "<td class='action-col'><ul class='action-bar'>"
-       + "<li><a class='action-button action-save' href='#'><i class='fa fa-check'></i></a></li>"
-       + "<li><a class='action-button action-revert' href='#'><i class='fa fa-undo'></i></a></li>"
-      + "</ul></td>"
+      + "<input type='text' class='rle-display-name' id='rle-display-name-" + i + "' "
+        + "maxlength='" + maxTagTitleLength + "'></td>"
       + "</tr>"
-
 
       + "<tr>"
       + "<td class='label-col'><label for='rle-summary-" + i + "'>Summary</label></td>"
       + "<td class='input-col'>"
-      + "<textarea class='rle-summary' id='rle-summary-" + i + "'></textarea></td>"
+      + "<textarea class='rle-summary' id='rle-summary-" + i + "' data-character-count='true' "
+      + "data-max-length='" + maxTagSummaryLength + "'></textarea></td>"
       + "</tr>"
 
       + "<tr>"
       + "<td class='label-col'><label for='rle-format-" + i + "'>Evidence Format</label></td>"
       + "<td class='input-col'>"
-      + "<input type='text' class='rle-format' id='rle-format-" + i + "'></td>"
+      + "<select class='rle-format' id='rle-format-" + i + "'>"
+        + "<%= @tag_format_options_string.html_safe %></select></td>"
       + "</tr>"
 
-      + "</table>"
+      + "<tr>"
+      + "<td class='label-col'><label for='rle-privacy-" + i + "'>Evidence Visibility</label></td>"
+      + "<td class='input-col'>"
+      + "<select class='rle-privacy' id='rle-privacy-" + i + "'>"
+        + "<%= @tag_privacy_options_string.html_safe %></select></td>"
+      + "</tr>"
+
+      + "</table></td>" // END INNER TABLE and BODY COL
+      + "<td class='action-col'><ul class='action-bar'>"
+        + "<li data-toggle='tooltip' data-placement='left' title='Save Changes'>"
+         + "<a class='action-button action-save' href='#'><i class='fa fa-check'></i></a></li>"
+        + "<li data-toggle='tooltip' data-placement='left' title='Discard Changes'>"
+          + "<a class='action-button action-revert' href='#'><i class='fa fa-undo'></i></a></li>"
+      + "</ul></td>"
+      + "</tr></table>" // END OUTER TABLE
 
     + "</div>";
   }

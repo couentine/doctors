@@ -53,11 +53,13 @@ $dark-text-color: #3b3b3b;
     display: block;
     margin: 0 0 20px 0;
     color: $medium-text-color;
+    background-color: white;
     box-shadow: 2px 2px 2px 0 $light-gray;
     border: 1px solid $light-gray;
     border-radius: 5px;
+    cursor: grab; cursor: -webkit-grab; cursor: -moz-grab;
 
-    table {
+    table:not(.inner-table) {
       width: 100%;
       position: relative;
 
@@ -92,7 +94,7 @@ $dark-text-color: #3b3b3b;
         }
       }
       td.body-col {
-        padding: 15px 15px 15px 10px;
+        padding: 15px 25px 15px 10px;
         vertical-align: top;
 
         .body-header {
@@ -125,6 +127,7 @@ $dark-text-color: #3b3b3b;
           li {
             display: block;
             margin: 0 0 5px 0;
+            padding-left: 10px;
             
             a {
               font-size: 17px;
@@ -148,5 +151,59 @@ $dark-text-color: #3b3b3b;
         }
       }
     }
+    table.inner-table {
+      width: 100%;
+
+      td.label-col {
+        padding: 5px 10px;
+        text-align: right;
+        vertical-align: top;
+        
+        label { font-weight: bold; }
+      }
+      td.input-col {
+        padding: 5px 30px 5px 0;
+
+        input, textarea {
+          width: 100%; 
+          border-radius: 2px;
+          background-color: $really-light-gray;
+        }
+        textarea { height: 4em; }
+        select { background-color: $really-light-gray; }
+
+        .character-count-wrap { position: relative; }
+        .character-count {
+          position: absolute;
+          right: 0;
+          bottom: 9px;
+          font-size: 11px;
+          font-style: italic;
+          color: $light-text-color;
+          padding: 1px 3px;
+          border-radius: 5px;
+        }
+        .character-count.negative {
+          color: $primary-dark;
+          font-weight: bold;
+          background-color: $medium-white;
+        }
+      }
+    }
+  
+    &:active {
+      cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;
+      box-shadow: 5px 5px 6px 0 $medium-gray;
+    }
   }
+  .tooltip > .tooltip-inner { background-color: black; }
+  .tooltip.top .tooltip-arrow { border-top-color: black; }
+  .tooltip.right .tooltip-arrow { border-right-color: black; }
+  .tooltip.bottom .tooltip-arrow { border-bottom-color: black; }
+  .tooltip.left .tooltip-arrow { border-left-color: black; }
+
+  @media (max-width: 767px) { width: 92%; }
+  @media (min-width: 768px) and (max-width: 979px) { width: 94%; }
+  @media (min-width: 980px) and (max-width: 1199px) { width: 550px; margin-left: 77px; }
+  @media (min-width: 1200px) { width: 750px; margin-left: 78px; }
 }

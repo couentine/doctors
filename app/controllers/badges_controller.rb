@@ -419,33 +419,27 @@ private
 
     # Initialize the badge requirement list and related info
     @badge.build_requirement_list
-    @tag_format_options = []
     @tag_format_map = {}
+    @tag_format_options_string = ''
     Tag::FORMAT_VALUES.each do |format_string|
-      @tag_format_options << {
-        icon: Tag.format_icon(format_string),
-        text: format_string.capitalize,
-        value: format_string
-      }
       @tag_format_map[format_string] = {
         icon: Tag.format_icon(format_string),
         text: format_string.capitalize,
       }
+      @tag_format_options_string += \
+        "<option value='#{format_string}'>#{format_string.capitalize}</option>"
     end
-    @tag_privacy_options = []
     @tag_privacy_map = {}
+    @tag_privacy_options_string = ''
     Tag.privacy_values(@group.type).each do |privacy_string|
-      @tag_privacy_options << {
-        icon: Tag.privacy_icon(@group.type, privacy_string),
-        name: privacy_string.capitalize,
-        text: Tag.privacy_text(@group.type, privacy_string),
-        value: privacy_string
-      }
       @tag_privacy_map[privacy_string] = {
         icon: Tag.privacy_icon(@group.type, privacy_string),
         name: privacy_string.capitalize,
         text: Tag.privacy_text(@group.type, privacy_string)
       }
+      @tag_privacy_options_string += \
+        "<option value='#{privacy_string}'>#{privacy_string.capitalize} " \
+        + "(#{Tag.privacy_text(@group.type, privacy_string).capitalize})</option>"
     end
   end
 

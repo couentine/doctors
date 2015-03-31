@@ -44,7 +44,7 @@ $(document).ready(function() {
     checkForLocationHash();
     registerLocationHashEvents();
     registerAllRichTextAreas();
-    createCharacterCounts();
+    createCharacterCounts($("body"));
     registerToggleLinks();
     addSyntaxHighlighting();
     addVideoIcons();
@@ -107,9 +107,10 @@ function addAnchorsToPaginateLinks() {
 
 /* === CHARACTER COUNTS === */
 
-function createCharacterCounts() {
+// Adds character counts within the specified element (should be a jquery element list)
+function createCharacterCounts(withinElement) {
   var maxLengh;
-  $("textarea[data-character-count=true]").each(function() {
+  $(withinElement).find("textarea[data-character-count=true]").each(function() {
     var remainingCharacters = $(this).attr('data-max-length') - $(this).val().length;
     var classText = "character-count";
     if (remainingCharacters < 0) classText += " negative";
