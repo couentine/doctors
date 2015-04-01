@@ -40,11 +40,18 @@
 
     // Attach events to the buttons
     listItem.find("a.action-edit").click(function(e) { startEdit(i); e.preventDefault(); });
-    listItem.find("a.action-save").click(function(e) { saveEdit(i); e.preventDefault(); });
+    listItem.find("a.action-save").click(function(e) { saveEdit(i, true); e.preventDefault(); });
     listItem.find("a.action-revert").click(function(e) { revertEdit(i); e.preventDefault(); });
-
     listItem.find("a.action-remove").click(function(e) { removeItem(i); e.preventDefault(); });
     listItem.find("a.action-restore").click(function(e) { restoreItem(i); e.preventDefault(); });
+
+    // Enter keys on form elements should be captured and redirected
+    listItem.find("select,input[type=text]").keypress(function(e) {
+      if (e.which == 13) {
+        listItem.find("a.action-save").click();
+        e.preventDefault();
+      }
+    });
 
     // Add character counts to the summary field
     createCharacterCounts(listItem);
@@ -59,42 +66,69 @@
     listItem.find(".rle-format").val(listItem.find(".rle-item-format").data("value"));
     listItem.find(".rle-privacy").val(listItem.find(".rle-item-privacy").data("value"));
     
-    // Save the current value in case it needs to be reverted to
-    listItem.find(".rle-display-name").data('revert-value', listItem.find(".rle-display-name")
-      .val());
-    listItem.find(".rle-summary").data('revert-value', listItem.find(".rle-summary").val());
-    listItem.find(".rle-format").data('revert-value', listItem.find(".rle-format").val());
-    listItem.find(".rle-privacy").data('revert-value', listItem.find(".rle-privacy").val());
-    
     // Then update the display
     listItem.find(".display-mode").hide();
     listItem.find(".edit-mode").show();
     listItem.find(".rle-display-name").focus();
   }
 
-  function saveEdit(listItemIndex) {
+  function saveEdit(listItemIndex, alertOnError) {
     var listItem = getListItem(listItemIndex);
+    var itemTitle = listItem.find(".rle-display-name").val();
+    var itemSummary = listItem.find(".rle-summary").val();
     var itemFormat = listItem.find(".rle-format").val();
     var itemPrivacy = listItem.find(".rle-privacy").val();
     
-    // Save the values back to the primary DOM
-    listItem.find(".rle-item-display-name").text(listItem.find(".rle-display-name").val());
-    listItem.find(".rle-item-summary").text(listItem.find(".rle-summary").val());
-    
-    listItem.find(".rle-item-format").data("value", itemFormat).text(tagFormatMap[itemFormat].text);
-    listItem.find('.format-icon-col .fa').removeClass().
-      addClass('fa ' + tagFormatMap[itemFormat].icon);
-    
-    listItem.find(".rle-item-privacy").data("value", itemPrivacy);
-    // LEFT OFF HERE
-    
-    // Then update the display
-    
-    listItem.find('.format-icon-col .fa').removeClass().
-      addClass('fa ' + tagFormatMap[itemFormat].icon);
+    if ((itemTitle && itemTitle.trim()) || !alertOnError) {
+      // Shorten the summary if its over the length
+      if (itemSummary.length > maxTagSummaryLength) 
+        itemSummary = itemSummary.substr(0, maxTagSummaryLength);
 
+      // Save the values back to the primary DOM
+      listItem.find(".rle-item-display-name").text(itemTitle);
+      listItem.find(".rle-item-summary").text(itemSummary);
+      listItem.find(".rle-item-format").data("value", itemFormat).text(tagFormatMap[itemFormat].text)
+        .siblings('i.fa').removeClass().addClass('fa ' + tagFormatMap[itemFormat].icon);
+      listItem.find(".rle-item-privacy").data("value", itemPrivacy)
+        .find("i.fa").removeClass().addClass('fa ' + tagPrivacyMap[itemPrivacy].icon)
+          .attr("title", "Evidence " + tagPrivacyMap[itemPrivacy].text).tooltip('fixTitle');
+      
+      // Then update the display
+      listItem.find(".edit-mode").hide();
+      listItem.find(".display-mode").show();
+    } else {
+      alert("You have to enter a Title before saving.");
+      listItem.find(".rle-item-display-name").focus();
+    }
+  }
+
+  function revertEdit(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    
+    // Go back to the main display without copying the new values over
     listItem.find(".edit-mode").hide();
     listItem.find(".display-mode").show();
+  }
+
+  function removeItem(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    
+    if (listItem.data("id")) {
+      // If this is an existing item put it into a restorable state
+      listItem.find(".action-bar").fadeOut();
+      listItem.find(".removed-mode").fadeIn();
+      listItem.data("is-deleted", "true");
+    } else {
+      // If this is a new item then just get rid of it
+    }
+  }
+
+  function restoreItem(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    
+    listItem.find(".removed-mode").fadeOut();
+    listItem.find(".action-bar").fadeIn();
+    listItem.data("is-deleted", "false");
   }
 
   // Returns the html for a new list item
@@ -105,9 +139,11 @@
     return "<div class='rle-list-item' data-index='" + i 
       + "' data-id='" + item.id + "' data-is-deleted='false'>"
       
-      + "<div class='removed-mode' style='display:none;'><span>You have removed this requirement. "
-        + "It will be downgraded to a wiki page. All evidence will be kept.</span>"
-        + "<a href='#' class='action-restore btn btn-small'>Restore this requirement</a></div>"
+      + "<table class='removed-mode' style='display:none;'><tr><td>"
+        + "<span>You have removed this requirement. "
+        + "It will be downgraded to a wiki page. Any evidence will be preserved.</span>"
+        + "<a href='#' class='action-restore btn btn-small'>Restore this requirement</a>"
+      + "</td></tr></table>"
 
       + "<table class='display-mode'><tr>"
 

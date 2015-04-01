@@ -54,12 +54,13 @@ $dark-text-color: #3b3b3b;
     margin: 0 0 20px 0;
     color: $medium-text-color;
     background-color: white;
-    box-shadow: 2px 2px 2px 0 $light-gray;
+    box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.1);
     border: 1px solid $light-gray;
     border-radius: 5px;
     cursor: grab; cursor: -webkit-grab; cursor: -moz-grab;
+    position: relative;
 
-    table:not(.inner-table) {
+    table.display-mode, table.edit-mode {
       width: 100%;
       position: relative;
 
@@ -123,6 +124,7 @@ $dark-text-color: #3b3b3b;
           position: absolute;
           right: -15px;
           top: 9px;
+          z-index: 2;
 
           li {
             display: block;
@@ -190,10 +192,34 @@ $dark-text-color: #3b3b3b;
         }
       }
     }
+    table.removed-mode {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0.8);
+      z-index: 1;
+
+      td {
+        vertical-align: middle;
+        text-align: center;
+
+        span {
+          display: block;
+          padding: 35px 20px 10px 20px;
+          font-weight: bold;
+          font-size: 14px;
+          line-height: 1.3em;
+        }
+        a {
+          display: inline-block;
+        }
+      }
+    }
   
     &:active {
       cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;
-      box-shadow: 5px 5px 6px 0 $medium-gray;
+      // box-shadow: 5px 5px 6px 0 $medium-gray;
+      box-shadow: 5px 5px 6px 0 rgba(0, 0, 0, 0.4);
     }
   }
   .tooltip > .tooltip-inner { background-color: black; }
