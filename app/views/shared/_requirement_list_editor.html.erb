@@ -8,7 +8,11 @@
   var maxTagSummaryLength = <%= Tag::MAX_SUMMARY_LENGTH %>;
 
   $(document).ready(function() {
+    // Build the list
     buildListDOM();
+
+    // Associate the new button
+    $("#rle-add-requirement").click(function(e) { addNewItem(); e.preventDefault(); });
   });
 
   // Builds requirement list DOM elements from the requirementList object
@@ -18,7 +22,7 @@
     
     for (var i = 0; i < requirementList.length; i++) {
       item = requirementList[i];
-      listPanel.append(buildListItem(i, item));
+      listPanel.append(buildListItem(i, item, false));
       activateListItem(i);
     }
 
@@ -105,9 +109,14 @@
   function revertEdit(listItemIndex) {
     var listItem = getListItem(listItemIndex);
     
-    // Go back to the main display without copying the new values over
-    listItem.find(".edit-mode").hide();
-    listItem.find(".display-mode").show();
+    if (listItem.find('.rle-item-display-name').text()) {
+      // This item already existed, go back to the main display without copying the new values over
+      listItem.find(".edit-mode").hide();
+      listItem.find(".display-mode").show();
+    } else {
+      // This is a new item, so just get rid of it
+      removeItem(listItemIndex);
+    }
   }
 
   function removeItem(listItemIndex) {
@@ -120,6 +129,16 @@
       listItem.data("is-deleted", "true");
     } else {
       // If this is a new item then just get rid of it
+      listItem.slideUp(function() { 
+        $(this).remove();
+        
+        // Remove any straggling tooltips
+        $(".tooltip:visible").fadeOut(function() { $(this).remove() }); 
+
+        // Show the no requirements panel if needed
+        if ($(".rle-list-item").length == 0) 
+          $("#rle-no-requirements").slideDown();
+      });
     }
   }
 
@@ -131,21 +150,36 @@
     listItem.data("is-deleted", "false");
   }
 
+  function addNewItem() {
+    var item = { display_name: '', format: 'text', id: '', privacy: 'public', summary: '' };
+    var nextIndex = $(".rle-list-item").length; // zero-indexed
+    
+    // Hide the no requirements panel if needed
+    $("#rle-no-requirements").slideUp();
+
+    // Add and activate the list item
+    $("#rle-list-panel").append(buildListItem(nextIndex, item, true));
+    activateListItem(nextIndex);
+    getListItem(nextIndex).slideDown(function() { $(this).find(".rle-display-name").focus() });
+  }
+
   // Returns the html for a new list item
-  // item must have the following properties: 
-  function buildListItem(listItemIndex, item) {
+  // item must have the following properties: display_name, format, id, privacy, summary
+  // editMode should be true if the list item should appear in edit mode
+  //   editMode will also cause the item to initially be added with display none (for animation)
+  function buildListItem(listItemIndex, item, editMode) {
     var i = listItemIndex; // for brevity
 
-    return "<div class='rle-list-item' data-index='" + i 
-      + "' data-id='" + item.id + "' data-is-deleted='false'>"
+    return "<div class='rle-list-item' data-index='" + i + "' style='"
+      + (editMode ? 'display: none;' : '') + "' data-id='" + item.id + "' data-is-deleted='false'>"
       
-      + "<table class='removed-mode' style='display:none;'><tr><td>"
-        + "<span>You have removed this requirement. "
-        + "It will be downgraded to a wiki page. Any evidence will be preserved.</span>"
-        + "<a href='#' class='action-restore btn btn-small'>Restore this requirement</a>"
-      + "</td></tr></table>"
+      + "<div class='removed-mode' style='display:none;'>"
+        + "<span>This requirement will be downgraded to a wiki page and any evidence will be "
+        + "preserved.<br><a href='#' class='action-restore btn btn-small'>Restore this "
+        + "requirement</a></span>"
+      + "</div>"
 
-      + "<table class='display-mode'><tr>"
+      + "<table class='display-mode' style='" + (editMode ? 'display: none;' : '') + "'><tr>"
 
       + "<td class='mover-col'><i class='fa fa-bars'></i></td>"
       
@@ -171,7 +205,7 @@
       
       + "</tr></table>"
 
-      + "<table class='edit-mode' style='display: none;'><tr>"
+      + "<table class='edit-mode' style='" + (editMode ? '' : 'display: none;') + "'><tr>"
       + "<td class='mover-col'><i class='fa fa-bars'></i></td>"
       + "<td class='body-col'><table class='inner-table'>"
 
@@ -179,14 +213,15 @@
       + "<td class='label-col'><label for='rle-display-name-" + i + "'>Title</label></td>"
       + "<td class='input-col'>"
       + "<input type='text' class='rle-display-name' id='rle-display-name-" + i + "' "
-        + "maxlength='" + maxTagTitleLength + "'></td>"
-      + "</tr>"
+        + "maxlength='" + maxTagTitleLength + "' placeholder='Enter a title for this requirement'>"
+      + "</td></tr>"
 
       + "<tr>"
       + "<td class='label-col'><label for='rle-summary-" + i + "'>Summary</label></td>"
       + "<td class='input-col'>"
-      + "<textarea class='rle-summary' id='rle-summary-" + i + "' data-character-count='true' "
-      + "data-max-length='" + maxTagSummaryLength + "'></textarea></td>"
+        + "<textarea class='rle-summary' id='rle-summary-" + i + "' data-character-count='true' "
+        + "data-max-length='" + maxTagSummaryLength + "' placeholder='Use the summary to "
+        + "provide additional detail or instruction'></textarea></td>"
       + "</tr>"
 
       + "<tr>"
@@ -219,15 +254,13 @@
 
 <h2>
   Evidence required to earn badge
-  <input class="btn" type="button" id="rle-add-requirement" value="Add Requirement"/>
 </h2>
 
-<div class="alert" id="rle-no-requirements" 
+<span id="rle-no-requirements" 
     style="<%= (@badge.requirement_list.include? '{') ? 'display: none;' : '' %>">
-  <h3>You haven't specified any requirements yet</h3>
-  <p>Tip: Leave this section blank if you don't want <%= @badge.learners %> 
-  to submit evidence for this badge.</p>
-</div>
+  You haven't added any requirements. (Leave this section blank if you don't want 
+  <%= @badge.learners %> to submit evidence for this badge.)
+</span>
 
 <div id="rle-list-panel">
   <%
@@ -235,4 +268,11 @@
   %>
 </div>
 
+<div id="rle-add-requirement-bar">
+  <a class="btn btn-success" id="rle-add-requirement" href="#">
+    <i class="fa fa-plus"></i> Add Requirement
+  </a>
+</div>
+
 <%= f.input :requirement_list, as: :hidden %>
+<%= f.input :original_requirement_list, as: :hidden %>

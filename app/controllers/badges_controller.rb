@@ -418,7 +418,7 @@ private
     ]
 
     # Initialize the badge requirement list and related info
-    @badge.build_requirement_list
+    @badge.build_requirement_list if @badge
     @tag_format_map = {}
     @tag_format_options_string = ''
     Tag::FORMAT_VALUES.each do |format_string|

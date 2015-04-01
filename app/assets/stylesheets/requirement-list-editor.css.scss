@@ -47,7 +47,7 @@ $dark-text-color: #3b3b3b;
 #rle-list-panel {
   display: block;
   float: left;
-  padding: 25px;
+  padding: 25px 25px 0px 25px;
 
   .rle-list-item {
     display: block;
@@ -192,27 +192,23 @@ $dark-text-color: #3b3b3b;
         }
       }
     }
-    table.removed-mode {
+    div.removed-mode {
       position: absolute;
       top: 0; right: 0; bottom: 0; left: 0;
       border-radius: 5px;
       background-color: rgba(255, 255, 255, 0.8);
       z-index: 1;
+      text-align: center;
+      padding-top: 15px;
 
-      td {
-        vertical-align: middle;
-        text-align: center;
+      span {
+        display: block;
+        padding: 0 20px;
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 1.3em;
 
-        span {
-          display: block;
-          padding: 35px 20px 10px 20px;
-          font-weight: bold;
-          font-size: 14px;
-          line-height: 1.3em;
-        }
-        a {
-          display: inline-block;
-        }
+        a { display: inline-block; margin-top: 8px; }
       }
     }
   
@@ -228,8 +224,38 @@ $dark-text-color: #3b3b3b;
   .tooltip.bottom .tooltip-arrow { border-bottom-color: black; }
   .tooltip.left .tooltip-arrow { border-left-color: black; }
 
+  @media (max-width: 767px) { 
+    width: 92%;
+
+    table.edit-mode {
+      td.mover-col, td.label-col { display: none; }
+    }
+  }
+  @media (min-width: 768px) and (max-width: 979px) { width: 94%; }
+  @media (min-width: 980px) and (max-width: 1199px) { width: 550px; margin-left: 77px; }
+  @media (min-width: 1200px) { width: 750px; margin-left: 78px; }
+}
+
+#rle-add-requirement-bar {
+  float: left;
+  text-align: center;
+  margin: 0 0 10px 25px;
+
+  .btn {
+    border-radius: 500px;
+  }
+
   @media (max-width: 767px) { width: 92%; }
   @media (min-width: 768px) and (max-width: 979px) { width: 94%; }
   @media (min-width: 980px) and (max-width: 1199px) { width: 550px; margin-left: 77px; }
   @media (min-width: 1200px) { width: 750px; margin-left: 78px; }
+}
+
+#rle-no-requirements {
+  display: block;
+  float: left;
+  font-weight: normal;
+  color: $light-text-color;
+  font-size: 16px;
+  margin: 5px 25px 0 25px;
 }
