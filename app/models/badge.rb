@@ -370,16 +370,16 @@ protected
         
         # Run through and build a list of tag ids and tag names to query
         parsed_list.each_with_index do |requirement, index|
-          unless requirement[:display_name].blank?
-            requirement[:sort_order] = index + 1
-            requirement[:name_with_caps] = tagify_string(requirement[:display_name])
-            requirement[:name] = requirement[:name_with_caps].downcase
-            tag_names << requirement[:name]
-            requirement_name_map[requirement[:name]] = requirement
+          unless requirement['display_name'].blank?
+            requirement['sort_order'] = index + 1
+            requirement['name_with_caps'] = tagify_string(requirement['display_name'])
+            requirement['name'] = requirement['name_with_caps'].downcase
+            tag_names << requirement['name']
+            requirement_name_map[requirement['name']] = requirement
             
-            unless requirement[:id].blank?
-              tag_ids << requirement[:id] 
-              requirement_id_map[requirement[:id]] = requirement
+            unless requirement['id'].blank?
+              tag_ids << requirement['id'] 
+              requirement_id_map[requirement['id']] = requirement
             end
           end
         end
@@ -395,14 +395,14 @@ protected
           r = requirement_id_map[tag.id] || requirement_name_map[tag.name]
 
           if r # then this tag is being updated
-            tag.type = (r[:is_deleted]) ? 'wiki' : 'requirement'
-            tag.sort_order = r[:sort_order]
-            tag.name = r[:name]
-            tag.display_name = r[:display_name]
-            tag.name_with_caps = r[:name_with_caps]
-            tag.summary = r[:summary]
-            tag.format = r[:format]
-            tag.privacy = r[:privacy]
+            tag.type = (r['is_deleted']) ? 'wiki' : 'requirement'
+            tag.sort_order = r['sort_order']
+            tag.name = r['name']
+            tag.display_name = r['display_name']
+            tag.name_with_caps = r['name_with_caps']
+            tag.summary = r['summary']
+            tag.format = r['format']
+            tag.privacy = r['privacy']
 
             tag.save if tag.changed? && tag.valid?
             matched_tag_names << tag.name # This will have the NEW name if it changed
@@ -411,7 +411,7 @@ protected
             tag.save
           end
         end
-
+        
         # Now go back and create any requirement tags which are new
         requirement_name_map.each do |tag_name, r|
           unless matched_tag_names.include? tag_name
