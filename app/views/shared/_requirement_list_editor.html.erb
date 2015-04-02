@@ -6,6 +6,7 @@
   var isNewBadge = <%= @badge.new_record? %>;
   var maxTagTitleLength = <%= Tag::MAX_NAME_LENGTH %>;
   var maxTagSummaryLength = <%= Tag::MAX_SUMMARY_LENGTH %>;
+  var saveJSON = <%= @badge.new_record? %>; // always save if new otherwise only save if changed
 
   $(document).ready(function() {
     // Build the list
@@ -13,6 +14,9 @@
 
     // Associate the new button
     $("#rle-add-requirement").click(function(e) { addNewItem(); e.preventDefault(); });
+
+    // Save to JSON on form save event
+    $("form").submit(function() { if (saveJSON) saveListToJSON(); });
   });
 
   // Builds requirement list DOM elements from the requirementList object
@@ -27,6 +31,10 @@
     }
 
     listPanel.sortable();
+    listPanel.disableSelection();
+
+    // Resorting should cause the JSON to be saved
+    listPanel.on("sortchange", function(event, ui) { saveJSON = true; });
   }
 
   // Returns the specified list item
@@ -100,6 +108,9 @@
       // Then update the display
       listItem.find(".edit-mode").hide();
       listItem.find(".display-mode").show();
+
+      // Finally we mark that the JSON now needs to be saved
+      saveJSON = true;
     } else {
       alert("You have to enter a Title before saving.");
       listItem.find(".rle-item-display-name").focus();
@@ -161,6 +172,32 @@
     $("#rle-list-panel").append(buildListItem(nextIndex, item, true));
     activateListItem(nextIndex);
     getListItem(nextIndex).slideDown(function() { $(this).find(".rle-display-name").focus() });
+  }
+
+  function saveListToJSON() {
+    var itemList = [];
+    var listItem;
+
+    // First save any items which are in edit mode
+    $("table.edit-mode:visible").each(function() {
+      saveEdit($(this).closest(".rle-list-item").data("index"), false); // no alert on error
+    });
+    
+    // Now run through and pull all of the current values into the itemList
+    $("#rle-list-panel").find(".rle-list-item").each(function() {
+      listItem = $(this);
+      itemList.push({
+        id: listItem.data("id"),
+        display_name: listItem.find(".rle-item-display-name").text(),
+        summary: listItem.find(".rle-item-summary").text(),
+        format: listItem.find(".rle-item-format").data("value"),
+        privacy: listItem.find(".rle-item-privacy").data("value"),
+        is_deleted: listItem.data("is-deleted")
+      });
+    });
+
+    // Save the item list to the hidden field
+    $("#badge_requirement_list").val(JSON.stringify(itemList));
   }
 
   // Returns the html for a new list item

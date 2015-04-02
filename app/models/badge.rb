@@ -361,7 +361,6 @@ protected
   # Processes changes to the requirement_list
   def process_requirement_list
     if requirement_list != original_requirement_list
-      throw "stop"
       # First parse the requirement list from JSON
       parsed_list = JSON.parse requirement_list rescue nil
       
@@ -370,7 +369,7 @@ protected
         requirement_id_map, requirement_name_map = {}, {} # maps from tag name/id > requirement item
         
         # Run through and build a list of tag ids and tag names to query
-        parsed_list.each_with_index do |index, requirement|
+        parsed_list.each_with_index do |requirement, index|
           unless requirement[:display_name].blank?
             requirement[:sort_order] = index + 1
             requirement[:name_with_caps] = tagify_string(requirement[:display_name])
