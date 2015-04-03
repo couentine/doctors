@@ -82,6 +82,9 @@
     listItem.find(".display-mode").hide();
     listItem.find(".edit-mode").show();
     listItem.find(".rle-display-name").focus();
+
+    // Mark that the JSON now needs to be saved
+    saveJSON = true;
   }
 
   function saveEdit(listItemIndex, alertOnError) {
@@ -90,7 +93,7 @@
     var itemSummary = listItem.find(".rle-summary").val();
     var itemFormat = listItem.find(".rle-format").val();
     var itemPrivacy = listItem.find(".rle-privacy").val();
-    
+
     if ((itemTitle && itemTitle.trim()) || !alertOnError) {
       // Shorten the summary if its over the length
       if (itemSummary.length > maxTagSummaryLength) 
@@ -108,9 +111,6 @@
       // Then update the display
       listItem.find(".edit-mode").hide();
       listItem.find(".display-mode").show();
-
-      // Finally we mark that the JSON now needs to be saved
-      saveJSON = true;
     } else {
       alert("You have to enter a Title before saving.");
       listItem.find(".rle-item-display-name").focus();
@@ -138,6 +138,9 @@
       listItem.find(".action-bar").fadeOut();
       listItem.find(".removed-mode").fadeIn();
       listItem.data("is-deleted", "true");
+
+      // Mark that the JSON now needs to be saved
+      saveJSON = true;
     } else {
       // If this is a new item then just get rid of it
       listItem.slideUp(function() { 
@@ -172,6 +175,9 @@
     $("#rle-list-panel").append(buildListItem(nextIndex, item, true));
     activateListItem(nextIndex);
     getListItem(nextIndex).slideDown(function() { $(this).find(".rle-display-name").focus() });
+
+    // Mark that the JSON now needs to be saved
+    saveJSON = true;
   }
 
   function saveListToJSON() {

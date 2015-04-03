@@ -392,7 +392,7 @@ protected
         # Run through and handle updates to existing tags
         relevant_tags.each do |tag|
           # First try to find the requirement by id (for updating), then try by name (for promoting)
-          r = requirement_id_map[tag.id] || requirement_name_map[tag.name]
+          r = requirement_id_map[tag.id.to_s] || requirement_name_map[tag.name]
 
           if r # then this tag is being updated
             tag.type = (r['is_deleted']) ? 'wiki' : 'requirement'
@@ -400,10 +400,10 @@ protected
             tag.name = r['name']
             tag.display_name = r['display_name']
             tag.name_with_caps = r['name_with_caps']
-            tag.summary = r['summary']
             tag.format = r['format']
             tag.privacy = r['privacy']
-
+            tag.summary = r['summary'] unless r['summary'].blank? # don't override if blank
+            
             tag.save if tag.changed? && tag.valid?
             matched_tag_names << tag.name # This will have the NEW name if it changed
           else # this tag is no longer in the requirement list, demote it
@@ -417,14 +417,14 @@ protected
           unless matched_tag_names.include? tag_name
             new_tag = Tag.new()
             new_tag.badge = self
-            new_tag.type = (r[:is_deleted]) ? 'wiki' : 'requirement'
-            new_tag.sort_order = r[:sort_order]
-            new_tag.name = r[:name]
-            new_tag.display_name = r[:display_name]
-            new_tag.name_with_caps = r[:name_with_caps]
-            new_tag.summary = r[:summary]
-            new_tag.format = r[:format]
-            new_tag.privacy = r[:privacy]
+            new_tag.type = (r['is_deleted']) ? 'wiki' : 'requirement'
+            new_tag.sort_order = r['sort_order']
+            new_tag.name = r['name']
+            new_tag.display_name = r['display_name']
+            new_tag.name_with_caps = r['name_with_caps']
+            new_tag.summary = r['summary']
+            new_tag.format = r['format']
+            new_tag.privacy = r['privacy']
 
             new_tag.save if new_tag.valid?
           end
