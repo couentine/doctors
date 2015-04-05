@@ -140,11 +140,14 @@ class Entry
   # Uses the group and tag visibility to determine if this user can see the log entry
   # The entry is always visible to its creator and the owner of the log
   # NOTE: It's ok if user is nil
-  def visible_to?(user)
+  #       Provide badge in order to save a query. (Only used if privacy = secret)
+  def visible_to?(user, badge = nil)
     if !user.nil? && ((user.id == log.user_id) || (user.id == creator_id))
       return true
     elsif privacy == 'secret'
-      return !user.nil? && (user.expert_of?(tag.badge) || user.admin_of?(tag.badge.group))
+      badge = tag.badge unless badge
+      return !user.nil? && (user.admin_of?(tag.badge.group) \
+        || ((badge.awardability == 'experts') && user.expert_of?(tag.badge)))
     elsif privacy == 'private'
       return !user.nil? && (user.member_of?(tag.badge.group) || user.admin_of?(tag.badge.group))
     else
