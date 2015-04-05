@@ -22,6 +22,11 @@
     $("button.set-color").click(function() {
       manuallySetColor($(this));
     });
+    $("#manual-foreground-color,#manual-background-color").keyup(function() {
+      if (/(^#?[0-9A-F]{6}$)|(^#?[0-9A-F]{3}$)/i
+        .test($(this).val())) $(this).removeClass('invalid');
+      else $(this).addClass('invalid')
+    })
     $("#badge-frames,#badge-icons").scroll(function() {
       var e = $(this);
       var l = e.find(".scroll-left");
@@ -213,7 +218,8 @@
       }
     }
     newList.append("<span class='manual-color'><label for='manual-foreground-color'>Hex code</label> "
-      + "<input type='text' id='manual-foreground-color' value='" + curBadgeColor2 + "'>"
+      + "<input type='text' id='manual-foreground-color' value='" + curBadgeColor2 
+        + "' maxlength='7'>"
       + "<button type='button' class='btn btn-mini set-color' "
       + "data-target='#badge_image_color2' data-source='#manual-foreground-color'>"
       + "Update</button></span>");
@@ -246,7 +252,8 @@
       }
     }
     newList.append("<span class='manual-color'><label for='manual-background-color'>Hex code</label> "
-      + "<input type='text' id='manual-background-color' value='" + curBadgeColor1 + "'>"
+      + "<input type='text' id='manual-background-color' value='" + curBadgeColor1 
+        + "' maxlength='7'>"
       + "<button type='button' class='btn btn-mini set-color' "
       + "data-target='#badge_image_color1' data-source='#manual-background-color'>"
       + "Update</button></span>");

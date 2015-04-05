@@ -3292,6 +3292,8 @@ div.topic-list-card, div.group-list-card {
             display: inline-block;
             padding: 2px;
             margin-right: 10px;
+
+            &.invalid { background-color: $red-really-light; }
           }
         }
         table {

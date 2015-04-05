@@ -22,6 +22,7 @@ class BadgeMaker
   LIB_PATH = "#{Rails.root}/lib/modules"
   IMAGES_ROOT_PATH = "#{Rails.root}/lib/assets/badge_maker"
   THUMBNAILS_ROOT_PATH = "#{Rails.root}/app/assets/images/badge_maker"
+  VALID_HEX_COLOR = /\A(\h{3}|\h{6})\z/
   
   NEW_ICONS_INBOX = "#{IMAGES_ROOT_PATH}/inbox"
   NEW_ICONS_OUTBOX = "#{IMAGES_ROOT_PATH}/outbox"
@@ -129,10 +130,14 @@ class BadgeMaker
     if color1.blank?
       random_key = config[:colors]['background'].keys.sample
       color1 = config[:colors]['background'][random_key]['hex']
+    elsif !color1[VALID_HEX_COLOR]
+      color1 = 'FFFFFF'
     end
     if color2.blank?
       random_key = config[:colors]['foreground'].keys.sample
       color2 = config[:colors]['foreground'][random_key]['hex']
+    elsif !color2[VALID_HEX_COLOR]
+      color2 = '000000'
     end
 
     # Grab the other variables from the index
