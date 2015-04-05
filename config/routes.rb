@@ -8,10 +8,11 @@ BadgeList::Application.routes.draw do
 
   devise_for :users
 
-  root :to => 'home#show'
+  root :to => 'home#root'
   resources :users, :only => [:show], path: "u"
   match 'i' => 'badge_maker#show', via: :get, as: :badge_image
   match 'c' => 'static_pages#colors', via: :get
+  match 'w' => 'home#root_external', via: :get
 
   # === ADMIN PATHS === #
   scope '/a' do
