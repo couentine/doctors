@@ -166,8 +166,8 @@ protected
     end
 
     # Editability for requirements must always match the badge editability
-    if (type == 'requirement') && badge
-      self.editability = badge.editability
+    if (type == 'requirement') && badge_id
+      self.editability = badge.editability.to_s
     end
   end
 

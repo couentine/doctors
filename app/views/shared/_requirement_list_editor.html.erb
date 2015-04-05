@@ -1,6 +1,6 @@
 <script type="text/javascript">
   
-  var requirementList = <%= @badge.requirement_list.html_safe %>;
+  var requirementList = <%= @requirement_list.html_safe %>;
   var tagFormatMap = <%= @tag_format_map.to_json.html_safe %>;
   var tagPrivacyMap = <%= @tag_privacy_map.to_json.html_safe %>;
   var isNewBadge = <%= @badge.new_record? %>;
@@ -31,7 +31,7 @@
     }
 
     listPanel.sortable();
-    listPanel.disableSelection();
+    // listPanel.disableSelection();
 
     // Resorting should cause the JSON to be saved
     listPanel.on("sortchange", function(event, ui) { saveJSON = true; });
@@ -300,7 +300,7 @@
 </h2>
 
 <span id="rle-no-requirements" 
-    style="<%= (@badge.requirement_list.include? '{') ? 'display: none;' : '' %>">
+    style="<%= (@requirement_list.include? '{') ? 'display: none;' : '' %>">
   You haven't added any requirements. (Leave this section blank if you don't want 
   <%= @badge.learners %> to submit evidence for this badge.)
 </span>
@@ -317,5 +317,12 @@
   </a>
 </div>
 
-<%= f.input :requirement_list, as: :hidden %>
-<%= f.input :original_requirement_list, as: :hidden %>
+<div class="control-group hidden badge_requirement_list">
+  <div class="controls">
+    <input class="hidden" id="badge_requirement_list" name="rl" type="hidden" value="">
+    <%
+      # The badge_requirement_list value is ONLY set if saveJSON is true, otherwise it is left 
+      # blank and the controller will not end up touching the requirements.
+    %>
+  </div>
+</div>

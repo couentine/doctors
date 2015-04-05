@@ -7,7 +7,7 @@ class TagsController < ApplicationController
   before_filter :can_view_tag, except: [:index]
   before_filter :can_edit_tag, only: [:edit, :update, :restore]
   before_filter :badge_expert, only: [:destroy]
-  before_filter :set_editing_parameters, only: [:edit]
+  before_filter :set_editing_parameters, only: [:edit, :update]
 
   # === RESTFUL ACTIONS === #
 
