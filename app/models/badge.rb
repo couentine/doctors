@@ -43,7 +43,7 @@ class Badge
   field :info_tags,                       type: Array
   field :info_tags_with_caps,             type: Array
 
-  field :topic_list_text,                 type: String
+  field :topic_list_text,                 type: String # RETIRED field
   field :topics,                          type: Array, default: [] # RETIRED field
 
   field :image_frame,                     type: String
@@ -88,7 +88,7 @@ class Badge
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
     :editability, :awardability, :image_frame, :image_icon, :image_color1, :image_color2, 
-    :icon_search_text, :topic_list_text, :uploaded_image, :remove_uploaded_image, 
+    :icon_search_text, :topic_list_text, :uploaded_image, :remove_uploaded_image,
     :uploaded_image_cache, :send_validation_request_emails
   
   # === CALLBACKS === #
@@ -101,7 +101,6 @@ class Badge
   before_save :update_terms
   after_create :add_creator_as_expert
   after_save :update_requirement_editability
-  after_save :update_topics
 
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -125,6 +124,9 @@ class Badge
 
   def log; (tracks_progress?) ? 'log' : 'profile'; end
   def progress_log; (tracks_progress?) ? 'progress log' : 'badge profile'; end
+
+  def awarders;  (awardability == 'experts') ? experts : 'admins'; end
+  def badge_awarders;  (awardability == 'experts') ? "badge #{experts}" : 'group admins'; end
 
   # === BADGE METHODS === #
 
@@ -241,6 +243,108 @@ class Badge
     end
   end
 
+  # Call this method to return requirement_list JSON-formatted string
+  def build_requirement_list
+    if new_record?
+      return '[]'
+    else
+      list = []
+      requirements.each do |tag|
+        list << {
+          id: tag.id,
+          display_name: tag.display_name,
+          summary: (tag.summary.blank? || (tag.summary == 'null')) ? '' : tag.summary,
+          format: tag.format,
+          privacy: tag.privacy,
+          is_deleted: false
+        }
+      end
+      
+      return list.to_json
+    end
+  end
+
+  # Call this method to processes changes to the requirement_list 
+  # Also updates progress_tracking_enabled (and saves the badge record if needed)
+  # NOTE: If requirement_list is blank then this method does nothing
+  def update_requirement_list(requirement_list)
+    unless requirement_list.blank?
+      # First parse the requirement list from JSON
+      parsed_list = JSON.parse requirement_list rescue nil
+      
+      if parsed_list.instance_of?(Array) # false if nil
+        tag_ids, tag_names, matched_tag_names = [], [], []
+        requirement_id_map, requirement_name_map = {}, {} # maps from tag name/id > requirement item
+        
+        # Run through and build a list of tag ids and tag names to query
+        parsed_list.each_with_index do |requirement, index|
+          unless requirement['display_name'].blank?
+            requirement['sort_order'] = index + 1
+            requirement['name_with_caps'] = tagify_string(requirement['display_name'])
+            requirement['name'] = requirement['name_with_caps'].downcase
+            tag_names << requirement['name']
+            requirement_name_map[requirement['name']] = requirement
+            
+            unless requirement['id'].blank?
+              tag_ids << requirement['id'] 
+              requirement_id_map[requirement['id']] = requirement
+            end
+          end
+        end
+
+        # Query for all existing requirement tags as well as any other tags referenced in the list 
+        # (whether or not they are requirements)
+        relevant_tags = tags.any_of({:id.in => tag_ids}, {:name.in => tag_names}, 
+          {type: 'requirement'})
+
+        # Run through and handle updates to existing tags
+        relevant_tags.each do |tag|
+          # First try to find the requirement by id (for updating), then try by name (for promoting)
+          r = requirement_id_map[tag.id.to_s] || requirement_name_map[tag.name]
+
+          if r # then this tag is being updated
+            tag.type = (r['is_deleted']) ? 'wiki' : 'requirement'
+            tag.sort_order = r['sort_order']
+            tag.name = r['name']
+            tag.display_name = r['display_name']
+            tag.name_with_caps = r['name_with_caps']
+            tag.format = r['format']
+            tag.privacy = r['privacy']
+            tag.summary = r['summary']
+
+            tag.save if tag.changed? && tag.valid?
+            matched_tag_names << tag.name # This will have the NEW name if it changed
+          else # this tag is no longer in the requirement list, demote it
+            tag.type = 'wiki'
+            tag.save
+          end
+        end
+        
+        # Now go back and create any requirement tags which are new
+        requirement_name_map.each do |tag_name, r|
+          unless matched_tag_names.include? tag_name
+            new_tag = Tag.new()
+            new_tag.badge = self
+            new_tag.type = (r['is_deleted']) ? 'wiki' : 'requirement'
+            new_tag.sort_order = r['sort_order']
+            new_tag.name = r['name']
+            new_tag.display_name = r['display_name']
+            new_tag.name_with_caps = r['name_with_caps']
+            new_tag.summary = r['summary']
+            new_tag.format = r['format']
+            new_tag.privacy = r['privacy']
+
+            new_tag.save if new_tag.valid?
+          end
+        end
+      end
+
+      # The last step is to update progress tracking boolean if needed
+      self.progress_tracking_enabled = requirement_list.include? '{'
+      self.save if self.changed?
+    end
+  end
+
 protected
   
   def set_default_values
@@ -314,57 +418,10 @@ protected
 
     if word_for_learner_changed?
       if word_for_learner.blank?
-        self.progress_tracking_enabled = false
         self.word_for_learner = nil
       else 
-        self.progress_tracking_enabled = true
         self.word_for_learner = word_for_learner.gsub(/[^ A-Za-z]/, ' ').gsub(/ {2,}/, ' ')\
           .strip.downcase.singularize
-      end
-    end
-  end
-
-  def update_topics
-    if topic_list_text_changed?
-      # First build a map of current tags
-      badge_tags = {}
-      tags.each { |tag| badge_tags[tag.name] = tag }
-
-      # Now run through the topic list and process name changes while building new requirement list
-      new_requirement_name_list = []
-      sort_index = 0
-      topic_list_text.split(/\r?\n|,/).each do |tag_display_name|
-        unless tag_display_name.blank?
-          sort_index += 1
-          tag_name_with_caps = tagify_string tag_display_name
-          tag_name = tag_name_with_caps.downcase
-          new_requirement_name_list << tag_name
-          
-          if badge_tags.has_key? tag_name
-            badge_tags[tag_name].type = 'requirement'
-            badge_tags[tag_name].sort_order = sort_index
-            badge_tags[tag_name].display_name = tag_display_name
-            badge_tags[tag_name].name_with_caps = tag_name_with_caps
-            badge_tags[tag_name].save if badge_tags[tag_name].changed?
-          else
-            new_tag = Tag.new()
-            new_tag.badge = self
-            new_tag.type = 'requirement'
-            new_tag.sort_order = sort_index
-            new_tag.name = tag_name
-            new_tag.display_name = tag_display_name
-            new_tag.name_with_caps = tag_name_with_caps
-            new_tag.save
-          end
-        end
-      end unless topic_list_text.blank?
-
-      # Finally run through and de-mote any old requirements which are no longer in the list
-      requirements.each do |tag|
-        unless new_requirement_name_list.include? tag.name
-          tag.type = 'wiki'
-          tag.save
-        end
       end
     end
   end

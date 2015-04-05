@@ -8,6 +8,8 @@ class BadgesController < ApplicationController
   before_filter :group_admin, only: [:new, :create, :destroy]
   before_filter :can_award, only: [:issue_form, :issue_save]
   before_filter :can_edit, only: [:edit, :update, :add_learners, :create_learners]
+  before_filter :set_editing_parameters, only: [:new, :edit]
+  before_filter :build_requirement_list, only: [:new, :edit]
 
   # === CONSTANTS === #
 
@@ -78,22 +80,7 @@ class BadgesController < ApplicationController
   # GET /group-url/badges/new.json
   def new
     @badge = Badge.new(group: @group)
-
-    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
-    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
-    @badge.word_for_expert = EXPERT_WORDS.first # values are singularized in page
-    @badge.word_for_learner = LEARNER_WORDS.first # values are singularized in page
     @allow_url_editing = true;
-
-    @badge_editability_options = [
-      ["Badge Experts & Group Admins", 'experts'],
-      ["Only Group Admins", 'admins']
-    ]
-    @badge_awardability_options = @badge_editability_options
-    @send_email_options = [
-      ['Let each awarder opt-out (recommended)', true],
-      ['Send no emails to anyone', false]
-    ]
     
     respond_to do |format|
       format.html # new.html.erb
@@ -103,22 +90,7 @@ class BadgesController < ApplicationController
 
   # GET /group-url/badge-url/edit
   def edit
-    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
-    @expert_words << @badge.word_for_expert.pluralize \
-      if !@expert_words.include? @badge.word_for_expert.pluralize
-    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
-    @learner_words << @badge.word_for_learner.pluralize \
-      if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
     @allow_url_editing = @badge.expert_logs.length < 2;
-    @badge_editability_options = [
-      ["Badge #{@badge.Experts} & Group Admins", 'experts'],
-      ["Only Group Admins", 'admins']
-    ]
-    @badge_awardability_options = @badge_editability_options
-    @send_email_options = [
-      ['Let each awarder opt-out (recommended)', true],
-      ['Send no emails to anyone', false]
-    ]
   end
 
   # POST /group-url/badges
@@ -129,21 +101,21 @@ class BadgesController < ApplicationController
     @badge.creator = current_user
     @badge.current_user = current_user
     @badge.current_username = current_user.username
-    @allow_url_editing = true;
-
-    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
-    @expert_words << @badge.word_for_expert.pluralize \
-      if !@expert_words.include? @badge.word_for_expert.pluralize
-    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
-    @learner_words << @badge.word_for_learner.pluralize \
-      if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
+    @requirement_list = params[:rl]
 
     respond_to do |format|
       if @badge.save
+        # First update the requirements (won't do anything if requirement list is blank)
+        @badge.update_requirement_list(@requirement_list)
+        
+        # Then redirect
         format.html { redirect_to @group, 
           notice: "The '#{@badge.name}' badge was successfully created." }
         format.json { render json: @badge, status: :created, location: @badge, filter_user: current_user }
       else
+        set_editing_parameters
+        @allow_url_editing = true;
+
         flash[:error] = "There was an error creating the badge."
         format.html { render action: "new" }
         format.json { render json: @badge.errors, status: :unprocessable_entity }
@@ -157,20 +129,21 @@ class BadgesController < ApplicationController
   def update
     @badge.current_user = current_user
     @badge.current_username = current_user.username
-
-    @expert_words = EXPERT_WORDS.map{ |word| word.pluralize }
-    @expert_words << @badge.word_for_expert.pluralize \
-      if !@expert_words.include? @badge.word_for_expert.pluralize
-    @learner_words = LEARNER_WORDS.map{ |word| word.pluralize }
-    @learner_words << @badge.word_for_learner.pluralize \
-      if !@badge.word_for_learner.blank? && !@learner_words.include?(@badge.word_for_learner.pluralize)
-    @allow_url_editing = @badge.expert_logs.length < 2;
+    @requirement_list = params[:rl]
     
     respond_to do |format|
       if @badge.update_attributes(params[:badge])
+        # First update the requirements (won't do anything if requirement list is blank)
+        @badge.update_requirement_list(@requirement_list)
+        
+        # Then redirect
         format.html { redirect_to [@group, @badge], notice: 'Badge was successfully updated.' }
         format.json { head :no_content }
       else
+        set_editing_parameters
+        build_requirement_list if @requirement_list.blank? # rebuild from scratch if neede
+        @allow_url_editing = @badge.expert_logs.length < 2;
+
         format.html do 
           if params[:modal]
             flash[:error] = "There was a problem updating the badge, try again later.\nError Text: #{@badge.errors}"
@@ -425,6 +398,55 @@ private
       flash[:error] = "You do not have permission to edit this badge."
       redirect_to [@group, @badge]
     end 
+  end
+
+  def set_editing_parameters
+    if @badge
+      @badge_editability_options = [
+        ["Badge #{@badge.Experts} & Group Admins", 'experts'],
+        ["Only Group Admins", 'admins']
+      ]
+    else
+      @badge_editability_options = [
+        ["Badge Experts & Group Admins", 'experts'],
+        ["Only Group Admins", 'admins']
+      ]
+    end
+    @badge_awardability_options = @badge_editability_options
+
+    @send_email_options = [
+      ['Let each awarder opt-out (recommended)', true],
+      ['Send no emails to anyone', false]
+    ]
+
+    # Initialize the badge requirement list and related info
+    @tag_format_map = {}
+    @tag_format_options_string = ''
+    Tag::FORMAT_VALUES.each do |format_string|
+      @tag_format_map[format_string] = {
+        icon: Tag.format_icon(format_string),
+        text: format_string.capitalize,
+      }
+      @tag_format_options_string += \
+        "<option value='#{format_string}'>#{format_string.capitalize}</option>"
+    end
+    @tag_privacy_map = {}
+    @tag_privacy_options_string = ''
+    Tag.privacy_values(@group.type).each do |privacy_string|
+      @tag_privacy_map[privacy_string] = {
+        icon: Tag.privacy_icon(@group.type, privacy_string),
+        name: privacy_string.capitalize,
+        text: Tag.privacy_text(@group.type, privacy_string)
+      }
+      @tag_privacy_options_string += \
+        "<option value='#{privacy_string}'>#{privacy_string.capitalize} " \
+        + "(#{Tag.privacy_text(@group.type, privacy_string).capitalize})</option>"
+    end
+  end
+
+  # Build from badge
+  def build_requirement_list
+    @requirement_list = (@badge) ? @badge.build_requirement_list : '[]'
   end
 
 end

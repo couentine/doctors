@@ -69,24 +69,84 @@ class Tag
 
   # === TAG METHODS === #
 
+  # Returns the font awesome icon which represents the specified format
+  def self.format_icon(format_string)
+    case format_string
+    when 'link'
+      return 'fa-link'
+    when 'tweet'
+      return 'fa-twitter'
+    when 'image'
+      return 'fa-camera'
+    when 'code'
+      return 'fa-code'
+    else
+      return 'fa-pencil'
+    end
+  end
+
+  # Returns list of valid privacy values for a group of the specified type
+  def self.privacy_values(group_type)
+    if group_type == 'private'
+      return ['public', 'private', 'secret']
+    else
+      return ['public', 'secret']
+    end
+  end
+
+  # Returns the font awesome icon which represents the specified privacy state
+  # group_type should equal the type field from the group record
+  def self.privacy_icon(group_type, privacy_string)
+    case privacy_string
+    when 'secret'
+      return 'fa-lock'
+    when 'private'
+      return 'fa-users'
+    else
+      if group_type == 'private'
+        return 'fa-link'
+      else
+        return 'fa-globe'
+      end
+    end
+  end
+
+  # Returns text describing who can see entries for the specified privacy state
+  # group_type should equal the type field from the group record
+  def self.privacy_text(group_type, privacy_string)
+    case privacy_string
+    when 'secret'
+      return 'only visible to badge awarders'
+    when 'private'
+      return 'only visible to group members'
+    else
+      if group_type == 'private'
+        return 'visible to group members and anyone with the link'
+      else
+        return 'visible to public'
+      end
+    end
+  end
+
   def to_param
     name_with_caps
   end
 
   # Returns the font awesome icon code for this tag's format (ex: "fa-camera")
   def format_icon
-    case format
-    when 'link'
-      icon_text = 'fa-link'
-    when 'tweet'
-      icon_text = 'fa-twitter'
-    when 'image'
-      icon_text = 'fa-camera'
-    when 'code'
-      icon_text = 'fa-code'
-    else
-      icon_text = 'fa-pencil'
-    end
+    return Tag.format_icon(format)
+  end
+
+  # Returns the font awesome icon which represents this tag's privacy state
+  # group_type should equal the type field from the group record
+  def privacy_icon(group_type)
+    return Tag.privacy_icon(group_type, privacy)
+  end
+
+  # Returns text describing who can see entries for this tag
+  # group_type should equal the type field from the group record
+  def privacy_text(group_type)
+    return Tag.privacy_text(group_type, privacy)
   end
 
 protected
@@ -106,8 +166,8 @@ protected
     end
 
     # Editability for requirements must always match the badge editability
-    if (type == 'requirement') && badge
-      self.editability = badge.editability
+    if (type == 'requirement') && badge_id
+      self.editability = badge.editability.to_s
     end
   end
 
@@ -149,15 +209,6 @@ protected
         entry.parent_tag = name_with_caps
         entry.timeless.save
       end
-    end
-  end
-
-  # NOTE: DISABLING FOR NOW BECAUSE CAUSES INFINITE LOOP FROM badge.update_topics
-  # When the display name changes for a requirement, this callback updates the badge
-  def update_badge_topic_list_text
-    if display_name_changed? && (type == 'requirement')
-      badge.refresh_topic_list_text
-      badge.timeless.save
     end
   end
 end

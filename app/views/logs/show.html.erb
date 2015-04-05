@@ -535,7 +535,8 @@
         || ((topic_item['tag'].privacy == 'private')             \
           && (@current_user_is_member || @current_user_is_admin)) \
         || ((topic_item['tag'].privacy == 'secret')                \
-          && (@current_user_is_expert || @current_user_is_admin))
+          && (@current_user_is_admin                                \
+            || ((@badge.awardability == 'experts') && @current_user_is_expert)))
       %>
 
         <div class="row add-top-margin" 

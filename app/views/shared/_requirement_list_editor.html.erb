@@ -1,0 +1,328 @@
+<script type="text/javascript">
+  
+  var requirementList = <%= @requirement_list.html_safe %>;
+  var tagFormatMap = <%= @tag_format_map.to_json.html_safe %>;
+  var tagPrivacyMap = <%= @tag_privacy_map.to_json.html_safe %>;
+  var isNewBadge = <%= @badge.new_record? %>;
+  var maxTagTitleLength = <%= Tag::MAX_NAME_LENGTH %>;
+  var maxTagSummaryLength = <%= Tag::MAX_SUMMARY_LENGTH %>;
+  var saveJSON = <%= @badge.new_record? %>; // always save if new otherwise only save if changed
+
+  $(document).ready(function() {
+    // Build the list
+    buildListDOM();
+
+    // Associate the new button
+    $("#rle-add-requirement").click(function(e) { addNewItem(); e.preventDefault(); });
+
+    // Save to JSON on form save event
+    $("form").submit(function() { if (saveJSON) saveListToJSON(); });
+  });
+
+  // Builds requirement list DOM elements from the requirementList object
+  function buildListDOM() {
+    var listPanel = $("#rle-list-panel").empty();
+    var item;
+    
+    for (var i = 0; i < requirementList.length; i++) {
+      item = requirementList[i];
+      listPanel.append(buildListItem(i, item, false));
+      activateListItem(i);
+    }
+
+    listPanel.sortable();
+    // listPanel.disableSelection();
+
+    // Resorting should cause the JSON to be saved
+    listPanel.on("sortchange", function(event, ui) { saveJSON = true; });
+  }
+
+  // Returns the specified list item
+  function getListItem(listItemIndex) { 
+    return $(".rle-list-item[data-index=" + listItemIndex + "]");
+  }
+
+  // Attaches javascript events to newly built list item
+  function activateListItem(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    var i = listItemIndex; // For brevity
+
+    // Build tooltips
+    listItem.find("[data-toggle=tooltip]").tooltip({container: "#rle-list-panel"});
+
+    // Attach events to the buttons
+    listItem.find("a.action-edit").click(function(e) { startEdit(i); e.preventDefault(); });
+    listItem.find("a.action-save").click(function(e) { saveEdit(i, true); e.preventDefault(); });
+    listItem.find("a.action-revert").click(function(e) { revertEdit(i); e.preventDefault(); });
+    listItem.find("a.action-remove").click(function(e) { removeItem(i); e.preventDefault(); });
+    listItem.find("a.action-restore").click(function(e) { restoreItem(i); e.preventDefault(); });
+
+    // Enter keys on form elements should be captured and redirected
+    listItem.find("select,input[type=text]").keypress(function(e) {
+      if (e.which == 13) {
+        listItem.find("a.action-save").click();
+        e.preventDefault();
+      }
+    });
+
+    // Add character counts to the summary field
+    createCharacterCounts(listItem);
+  }
+
+  function startEdit(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    
+    // Build out all of the values
+    listItem.find(".rle-display-name").val(listItem.find(".rle-item-display-name").text());
+    listItem.find(".rle-summary").val(listItem.find(".rle-item-summary").text());
+    listItem.find(".rle-format").val(listItem.find(".rle-item-format").data("value"));
+    listItem.find(".rle-privacy").val(listItem.find(".rle-item-privacy").data("value"));
+    
+    // Then update the display
+    listItem.find(".display-mode").hide();
+    listItem.find(".edit-mode").show();
+    listItem.find(".rle-display-name").focus();
+
+    // Mark that the JSON now needs to be saved
+    saveJSON = true;
+  }
+
+  function saveEdit(listItemIndex, alertOnError) {
+    var listItem = getListItem(listItemIndex);
+    var itemTitle = listItem.find(".rle-display-name").val();
+    var itemSummary = listItem.find(".rle-summary").val();
+    var itemFormat = listItem.find(".rle-format").val();
+    var itemPrivacy = listItem.find(".rle-privacy").val();
+
+    if ((itemTitle && itemTitle.trim()) || !alertOnError) {
+      // Shorten the summary if its over the length
+      if (itemSummary.length > maxTagSummaryLength) 
+        itemSummary = itemSummary.substr(0, maxTagSummaryLength);
+
+      // Save the values back to the primary DOM
+      listItem.find(".rle-item-display-name").text(itemTitle);
+      listItem.find(".rle-item-summary").text(itemSummary);
+      listItem.find(".rle-item-format").data("value", itemFormat).text(tagFormatMap[itemFormat].text)
+        .siblings('i.fa').removeClass().addClass('fa ' + tagFormatMap[itemFormat].icon);
+      listItem.find(".rle-item-privacy").data("value", itemPrivacy)
+        .find("i.fa").removeClass().addClass('fa ' + tagPrivacyMap[itemPrivacy].icon)
+          .attr("title", "Evidence " + tagPrivacyMap[itemPrivacy].text).tooltip('fixTitle');
+      
+      // Then update the display
+      listItem.find(".edit-mode").hide();
+      listItem.find(".display-mode").show();
+    } else {
+      alert("You have to enter a Title before saving.");
+      listItem.find(".rle-item-display-name").focus();
+    }
+  }
+
+  function revertEdit(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    
+    if (listItem.find('.rle-item-display-name').text()) {
+      // This item already existed, go back to the main display without copying the new values over
+      listItem.find(".edit-mode").hide();
+      listItem.find(".display-mode").show();
+    } else {
+      // This is a new item, so just get rid of it
+      removeItem(listItemIndex);
+    }
+  }
+
+  function removeItem(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    
+    if (listItem.data("id")) {
+      // If this is an existing item put it into a restorable state
+      listItem.find(".action-bar").fadeOut();
+      listItem.find(".removed-mode").fadeIn();
+      listItem.data("is-deleted", "true");
+
+      // Mark that the JSON now needs to be saved
+      saveJSON = true;
+    } else {
+      // If this is a new item then just get rid of it
+      listItem.slideUp(function() { 
+        $(this).remove();
+        
+        // Remove any straggling tooltips
+        $(".tooltip:visible").fadeOut(function() { $(this).remove() }); 
+
+        // Show the no requirements panel if needed
+        if ($(".rle-list-item").length == 0) 
+          $("#rle-no-requirements").slideDown();
+      });
+    }
+  }
+
+  function restoreItem(listItemIndex) {
+    var listItem = getListItem(listItemIndex);
+    
+    listItem.find(".removed-mode").fadeOut();
+    listItem.find(".action-bar").fadeIn();
+    listItem.data("is-deleted", "false");
+  }
+
+  function addNewItem() {
+    var item = { display_name: '', format: 'text', id: '', privacy: 'public', summary: '' };
+    var nextIndex = $(".rle-list-item").length; // zero-indexed
+    
+    // Hide the no requirements panel if needed
+    $("#rle-no-requirements").slideUp();
+
+    // Add and activate the list item
+    $("#rle-list-panel").append(buildListItem(nextIndex, item, true));
+    activateListItem(nextIndex);
+    getListItem(nextIndex).slideDown(function() { $(this).find(".rle-display-name").focus() });
+
+    // Mark that the JSON now needs to be saved
+    saveJSON = true;
+  }
+
+  function saveListToJSON() {
+    var itemList = [];
+    var listItem;
+
+    // First save any items which are in edit mode
+    $("table.edit-mode:visible").each(function() {
+      saveEdit($(this).closest(".rle-list-item").data("index"), false); // no alert on error
+    });
+    
+    // Now run through and pull all of the current values into the itemList
+    $("#rle-list-panel").find(".rle-list-item").each(function() {
+      listItem = $(this);
+      itemList.push({
+        id: listItem.data("id"),
+        display_name: listItem.find(".rle-item-display-name").text(),
+        summary: listItem.find(".rle-item-summary").text(),
+        format: listItem.find(".rle-item-format").data("value"),
+        privacy: listItem.find(".rle-item-privacy").data("value"),
+        is_deleted: listItem.data("is-deleted")
+      });
+    });
+
+    // Save the item list to the hidden field
+    $("#badge_requirement_list").val(JSON.stringify(itemList));
+  }
+
+  // Returns the html for a new list item
+  // item must have the following properties: display_name, format, id, privacy, summary
+  // editMode should be true if the list item should appear in edit mode
+  //   editMode will also cause the item to initially be added with display none (for animation)
+  function buildListItem(listItemIndex, item, editMode) {
+    var i = listItemIndex; // for brevity
+
+    return "<div class='rle-list-item' data-index='" + i + "' style='"
+      + (editMode ? 'display: none;' : '') + "' data-id='" + item.id + "' data-is-deleted='false'>"
+      
+      + "<div class='removed-mode' style='display:none;'>"
+        + "<span>This requirement will be downgraded to a wiki page and any evidence will be "
+        + "preserved.<br><a href='#' class='action-restore btn btn-small'>Restore this "
+        + "requirement</a></span>"
+      + "</div>"
+
+      + "<table class='display-mode' style='" + (editMode ? 'display: none;' : '') + "'><tr>"
+
+      + "<td class='mover-col'><i class='fa fa-bars'></i></td>"
+      
+      + "<td class='format-icon-col'><i class='fa " + tagFormatMap[item.format].icon 
+        + "'></i><span class='rle-item-format' data-value='" + item.format + "'>" 
+        + tagFormatMap[item.format].text + "</span></td>"
+      
+      + "<td class='body-col'><div class='body-header'>"
+        + "<div class='rle-item-display-name'>" + item.display_name + "</div>"
+        + "<div class='rle-item-privacy' data-value='" + item.privacy + "'><i class='fa " 
+          + tagPrivacyMap[item.privacy].icon + "' "
+          + "title='Evidence " + tagPrivacyMap[item.privacy].text + "' data-toggle='tooltip' "
+          + "data-placement='bottom'></i></div></div>"
+        + "<div class='rle-item-summary'>" + item.summary + "</div>"
+      + "</td>"
+      
+      + "<td class='action-col'><ul class='action-bar'>"
+        + "<li data-toggle='tooltip' data-placement='left' title='Edit Requirement'>"
+          + "<a class='action-button action-edit' href='#'><i class='fa fa-edit'></i></a></li>"
+        + "<li data-toggle='tooltip' data-placement='left' title='Remove Requirement'>"
+          + "<a class='action-button action-remove' href='#'><i class='fa fa-remove'></i></a></li>"
+      + "</ul></td>"
+      
+      + "</tr></table>"
+
+      + "<table class='edit-mode' style='" + (editMode ? '' : 'display: none;') + "'><tr>"
+      + "<td class='mover-col'><i class='fa fa-bars'></i></td>"
+      + "<td class='body-col'><table class='inner-table'>"
+
+      + "<tr>"
+      + "<td class='label-col'><label for='rle-display-name-" + i + "'>Title</label></td>"
+      + "<td class='input-col'>"
+      + "<input type='text' class='rle-display-name' id='rle-display-name-" + i + "' "
+        + "maxlength='" + maxTagTitleLength + "' placeholder='Enter a title for this requirement'>"
+      + "</td></tr>"
+
+      + "<tr>"
+      + "<td class='label-col'><label for='rle-summary-" + i + "'>Summary</label></td>"
+      + "<td class='input-col'>"
+        + "<textarea class='rle-summary' id='rle-summary-" + i + "' data-character-count='true' "
+        + "data-max-length='" + maxTagSummaryLength + "' placeholder='Use the summary to "
+        + "provide additional detail or instruction'></textarea></td>"
+      + "</tr>"
+
+      + "<tr>"
+      + "<td class='label-col'><label for='rle-format-" + i + "'>Evidence Format</label></td>"
+      + "<td class='input-col'>"
+      + "<select class='rle-format' id='rle-format-" + i + "'>"
+        + "<%= @tag_format_options_string.html_safe %></select></td>"
+      + "</tr>"
+
+      + "<tr>"
+      + "<td class='label-col'><label for='rle-privacy-" + i + "'>Evidence Visibility</label></td>"
+      + "<td class='input-col'>"
+      + "<select class='rle-privacy' id='rle-privacy-" + i + "'>"
+        + "<%= @tag_privacy_options_string.html_safe %></select></td>"
+      + "</tr>"
+
+      + "</table></td>" // END INNER TABLE and BODY COL
+      + "<td class='action-col'><ul class='action-bar'>"
+        + "<li data-toggle='tooltip' data-placement='left' title='Save Changes'>"
+         + "<a class='action-button action-save' href='#'><i class='fa fa-check'></i></a></li>"
+        + "<li data-toggle='tooltip' data-placement='left' title='Discard Changes'>"
+          + "<a class='action-button action-revert' href='#'><i class='fa fa-undo'></i></a></li>"
+      + "</ul></td>"
+      + "</tr></table>" // END OUTER TABLE
+
+    + "</div>";
+  }
+
+</script>
+
+<h2>
+  Evidence required to earn badge
+</h2>
+
+<span id="rle-no-requirements" 
+    style="<%= (@requirement_list.include? '{') ? 'display: none;' : '' %>">
+  You haven't added any requirements. (Leave this section blank if you don't want 
+  <%= @badge.learners %> to submit evidence for this badge.)
+</span>
+
+<div id="rle-list-panel">
+  <%
+    # This is populated dynamically by javascript.
+  %>
+</div>
+
+<div id="rle-add-requirement-bar">
+  <a class="btn btn-success" id="rle-add-requirement" href="#">
+    <i class="fa fa-plus"></i> Add Requirement
+  </a>
+</div>
+
+<div class="control-group hidden badge_requirement_list">
+  <div class="controls">
+    <input class="hidden" id="badge_requirement_list" name="rl" type="hidden" value="">
+    <%
+      # The badge_requirement_list value is ONLY set if saveJSON is true, otherwise it is left 
+      # blank and the controller will not end up touching the requirements.
+    %>
+  </div>
+</div>

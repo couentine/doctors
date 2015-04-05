@@ -166,7 +166,6 @@ class Log
   end
 
   # Returns the full content of all of this log's posts, organized by topic
-  # Pass the pre-queried badge as a parameter if desired to save a query
   #   'tag' => the_tag_record_itself || nil
   #   'entries' => a_list_of_all_entries }
   def posts_by_topic()

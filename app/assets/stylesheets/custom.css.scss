@@ -1355,7 +1355,7 @@ form#group-add-users-form {
   }
   a.label-link:hover { text-decoration: none; border-bottom: none; }
   a,a:visited { color: $medium-text-color; }
-  a:focus,a:hover { 
+  a:not(.btn):focus,a:not(.btn):hover { 
     color: $dark-text-color;
     text-decoration: none;
     border-bottom: 1px dashed $dark-text-color;
@@ -1400,6 +1400,56 @@ form#group-add-users-form {
 
       ul { color: $light-text-color; }
       a,a:visited { color: $light-text-color; }
+    }
+
+    tr.footer-row {
+      background-color: $medium-gray;
+
+      td {
+        span.label-text {
+          display: inline-block;
+          margin: 13px 5px 13px 13px;
+          line-height: 1.3em;
+          font-size: 14px;
+          color: white;
+        }
+        ul.action-list {
+          display: inline-block;
+          margin: 5px;
+          float: right;
+          text-align: right;
+
+          li {
+            display: inline-block;
+            margin-right: 5px;
+
+            .btn {
+              border-color: transparent;
+              background-color: $medium-white;
+              color: $light-text-color;
+              text-shadow: none;
+
+              &:hover, &:focus {
+                background-color: $light-gray;
+              }
+            }
+          }
+        }
+      }
+    
+      &.highlight {
+        background-color: $secondary-medium;
+
+        td ul.action-list li .btn {
+          background-color: $secondary-really-light;
+          color: $secondary-dark;
+          text-shadow: none;
+
+          &:hover, &:focus {
+            background-color: $medium-white;
+          }
+        }
+      }
     }
   }
 
@@ -2160,7 +2210,7 @@ div.entry-card {
   }
 }
 
-div.topic-list-card {
+div.topic-list-card, div.group-list-card {
   ul {
     margin-left: 0;
     border-left: none;
@@ -2172,6 +2222,11 @@ div.topic-list-card {
       margin-bottom: 15px;
       margin-left: 0;
       line-height: 1.7em;
+
+      img {
+        height: 1.7em;
+        margin-right: 10px;
+      }
       
       .separator { 
         color: $light-text-color; 
@@ -2180,6 +2235,12 @@ div.topic-list-card {
       .post-count { 
         color: $light-text-color; 
         font-size: 16px;
+      }
+      .no-link {
+        color: $light-text-color;
+        font-size: 0.8em;
+        font-style: italic;
+        margin-left: 10px;
       }
 
       &:last-child { margin-bottom: 0; }
@@ -2202,28 +2263,6 @@ div.topic-list-card {
       position: relative;
       top: -4px;
     }
-  }
-}
-
-div.cta-card {
-  text-align: center;
-  border-color: $really-light-gray;
-  box-shadow: none;
-  margin: -42px 15px 30px 15px;
-  border-radius: 0 0 5px 5px;
-
-  a, a:visited {
-    display: block;
-    padding: 7px 10px;
-    background-color: $secondary-medium;
-    color: white;
-    border-radius: 0 0 5px 5px;
-    box-shadow: inset 0px 2px 7px $light-text-color;
-  }
-  a:hover, a:focus {
-    text-decoration: none;
-    background-color: $secondary-dark;
-    color: white;
   }
 }
 

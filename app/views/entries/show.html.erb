@@ -131,17 +131,11 @@
             </li>
           <% end %>
           <li>
-            <% if @parent_tag && @parent_tag.privacy == 'secret' %>
-              <i class='fa fa-user-secret'></i> 
-              Only visible to badge <%= @experts %> and group admins
-            <% elsif @parent_tag && @parent_tag.privacy == 'private' %>
-              <i class='fa fa-eye-slash'></i> 
-              Only visible to group members
-            <% elsif @group.private? %>
-              <i class='fa fa-link'></i> 
-              Visible to group members and anyone with the link
+            <% if @parent_tag %>
+              <i class="fa <%= @parent_tag.privacy_icon(@group.type) %>"></i>
+              <%= @parent_tag.privacy_text(@group.type).capitalize %>
             <% else %>
-              <i class='fa fa-eye'></i> 
+              <i class='fa fa-globe'></i> 
               Visible to public
             <% end %>
           </li>
