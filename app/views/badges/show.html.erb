@@ -293,8 +293,6 @@
                   You're a badge <%= @learner %>.
                 <% elsif @current_user_is_admin %>
                   You're a group admin.
-                <% elsif @badge_list_admin %>
-                  You're a Badge List admin.
                 <% elsif can_join_badge %>
                   To get this badge, join it and submit the required evidence.
                 <% elsif is_group_member || can_join_group  %>

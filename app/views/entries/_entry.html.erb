@@ -59,8 +59,8 @@
           <span class="creator-gravatar">
             <img src="<%= gravatar_url_for entry.creator %>" 
               class="gravatar img-circle <%= log_user_type %>"
-              title="Posted by <%= entry.creator.name %>" data-placement="bottom"
-              data-toggle="tooltip">
+              title="Posted by <%= entry.current_username %>"
+              data-placement="bottom" data-toggle="tooltip">
             
             <% if (entry.type == 'validation') && entry.log_validated %>
               <span class="validation-result positive" title="Learning was positively validated"

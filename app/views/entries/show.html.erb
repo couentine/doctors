@@ -93,8 +93,9 @@
 
         <% if @entry.creator != @user %>
           <span class="creator-user-link">
-            <%= link_to gravatar_for(@entry.creator, class: "img-circle expert"), 
-              [@group, @badge, @log], title: "Posted by #{@entry.creator.name}",
+            <%= link_to gravatar_for(@entry.creator, class: "img-circle expert", 
+              username: @entry.current_username), [@group, @badge, @log], 
+              title: "Posted by #{@entry.current_username}",
               data: { toggle: 'tooltip', placement: 'left' } %>
             <span class="arrow">&#9654;</span>
           </span>
