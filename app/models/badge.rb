@@ -253,13 +253,13 @@ class Badge
         list << {
           id: tag.id,
           display_name: tag.display_name,
-          summary: tag.summary,
+          summary: (tag.summary.blank? || (tag.summary == 'null')) ? '' : tag.summary,
           format: tag.format,
           privacy: tag.privacy,
           is_deleted: false
         }
       end
-
+      
       return list.to_json
     end
   end
@@ -310,7 +310,7 @@ class Badge
             tag.name_with_caps = r['name_with_caps']
             tag.format = r['format']
             tag.privacy = r['privacy']
-            tag.summary = r['summary'] unless r['summary'].blank? # don't override if blank
+            tag.summary = r['summary']
 
             tag.save if tag.changed? && tag.valid?
             matched_tag_names << tag.name # This will have the NEW name if it changed
