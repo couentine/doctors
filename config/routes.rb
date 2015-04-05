@@ -12,7 +12,7 @@ BadgeList::Application.routes.draw do
   resources :users, :only => [:show], path: "u"
   match 'i' => 'badge_maker#show', via: :get, as: :badge_image
   match 'c' => 'static_pages#colors', via: :get
-  match 'w' => 'home#root_external', via: :get
+  match 'w' => 'home#root_external', via: :get, as: :root_external
 
   # === ADMIN PATHS === #
   scope '/a' do

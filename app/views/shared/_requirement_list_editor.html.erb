@@ -1,3 +1,7 @@
+<% content_for :header do %>
+  <%= stylesheet_link_tag 'requirement-list-editor' %>
+<% end %>
+
 <script type="text/javascript">
   
   var requirementList = <%= @requirement_list.html_safe %>;
