@@ -1,12 +1,27 @@
 
-<footer class="footer">
-  <% if content_for? :extra_footer_text %>
-    <%= yield :extra_footer_text %>
-    <hr>
-    Also... Badge List is made by a small team in San Francisco called 
-    <a href="http://kstreem.com" target="_blank">Knowledgestreem</a>.
-  <% else %>
+<footer class="bl-footer">
+  <div class="left-foot">
     Badge List is made by a small team in San Francisco called 
     <a href="http://kstreem.com" target="_blank">Knowledgestreem</a>.
-  <% end %>
-</footer><br/><br/>
+  </div>
+  <div class="right-foot">
+    <ul>
+      <li>
+        <a href="https://twitter.com/badgelist" title="Badge List Twitter" target="_blank">
+          <i class="fa fa-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a href="https://facebook.com/knowledgestreem" title="Knowledgestreem Facebook" 
+            target="_blank">
+          <i class="fa fa-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a href="http://badgelist.com/badgelist/help" title="Badge List Help" target="_blank">
+          <i class="fa fa-question"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+</footer>

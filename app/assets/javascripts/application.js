@@ -12,12 +12,10 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require_tree .
 // Loads all Bootstrap javascripts
 //= require bootstrap
 //= require wysihtml5-0.3.0.min.js
 //= require jquery.autosize.min.js
-//= require jquery.wordrotator.min
 //= require browser_details
 //= require jquery-ui-1.11.4.custom/jquery-ui.min.js
 //= require badge_list
