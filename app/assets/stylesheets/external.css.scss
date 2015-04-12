@@ -198,17 +198,63 @@ section {
 
 /* === HOME PAGE ROWS === */
 
+.vertical-line {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  margin-left: -3px;
+  border-left: 3px solid $secondary-medium;
+  opacity: 0.5;
+}
+
 .row-fluid {
   padding-top: 30px; padding-bottom: 30px; 
+  overflow-x: hidden;
+  position: relative;
 
   ul.details {
-    margin-top: 20px;
-    margin-bottom: 0;
+    margin: 20px 40px;
+    list-style: none;
+    text-align: center;
+    background-color: white;
+    padding: 25px;
+    box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.12);
+    border-radius: 2px;
+    font-weight: normal;
 
     li {
       font-size: 20px;
       margin-bottom: 12px;
       line-height: 1.5em;
+
+      i.fa {
+        color: $secondary-medium;
+        font-size: 30px;
+        display: block;
+        margin: 0 auto 10px auto;
+        padding-top: 10px;
+        width: 50px;
+        height: 40px;
+        background-color: $secondary-really-light;
+        border-radius: 500px;
+      }
+      strong {
+        font-weight: bolder;
+        color: $secondary-medium;
+      }
+
+      &.separator {
+        padding: 0; margin: 0;
+
+        span {
+          width: 140px;
+          border-bottom: 1px solid $light-gray;
+          display: inline-block;
+          margin: 0 0 30px 0;
+          font-size: 1px;
+          line-height: 1px;
+        }
+      }
     }
   }
   ul.examples {
@@ -219,28 +265,51 @@ section {
     li {
       display: inline-block;
       margin-right: 25px;
+
+      &:last-child { margin-right: 0; }
     }
+  }
+  span.details {
+    display: block;
+  }
+  span.list-header {
+    color: $tertiary-dark;
+    display: block;
+    border-bottom: 1px solid $tertiary-dark;
+    text-align: center;
+    padding-bottom: 10px;
+    margin: 15px auto 0 auto;
+    width: 200px;
   }
 }
 
 .header-row {
-  color:white;
-  background-color:#2B3A48;
-  text-align:center;
-}
-.header-row:after {
-  content: " ";
-      display:block;
-      position: relative;
-  top:0px;left:0px;
-      width:100%;
-      height:36px;
-      background: linear-gradient(#2B3A48 0%, transparent 0%), linear-gradient(135deg, #272220 33.33%, transparent 33.33%) 0 0%, #272220 linear-gradient(45deg, #272220 33.33%, #2B3A48 33.33%) 0 0%;
-      background: -webkit-linear-gradient(#2B3A48 0%, transparent 0%), -webkit-linear-gradient(135deg, #272220 33.33%, transparent 33.33%) 0 0%, #272220 -webkit-linear-gradient(45deg, #272220 33.33%, #2B3A48 33.33%) 0 0%;
-      background: -o-linear-gradient(#2B3A48 0%, transparent 0%), -o-linear-gradient(135deg, #272220 33.33%, transparent 33.33%) 0 0%, #272220 -o-linear-gradient(45deg, #272220 33.33%, #2B3A48 33.33%) 0 0%;
-      background: -moz-linear-gradient(#2B3A48 0%, transparent 0%), -moz-linear-gradient(135deg, #272220 33.33%, transparent 33.33%) 0 0%, #272220 -moz-linear-gradient(45deg, #272220 33.33%, #2B3A48 33.33%) 0 0%;
-      background-repeat: repeat-x;
-      background-size: 0px 100%, 9px 27px, 9px 27px;
+  color: white;
+  background-color: $secondary-dark;
+  text-align: center;
+  padding-bottom: 0;
+  margin-bottom: 20px;
+  
+  &:after {
+    content: " ";
+    display: block;
+    position: relative; top: 0px; left: 0px; width: 100%; height: 36px;
+    background: linear-gradient($secondary-dark 0%, transparent 0%), 
+      linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
+      white linear-gradient(45deg, 
+      white 33.33%, $secondary-dark 33.33%) 0 0%;
+    background: -webkit-linear-gradient($secondary-dark 0%, transparent 0%), 
+      -webkit-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
+      white -webkit-linear-gradient(45deg, white 33.33%, $secondary-dark 33.33%) 0 0%;
+    background: -o-linear-gradient($secondary-dark 0%, transparent 0%), 
+      -o-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
+      white -o-linear-gradient(45deg, white 33.33%, $secondary-dark 33.33%) 0 0%;
+    background: -moz-linear-gradient($secondary-dark 0%, transparent 0%), 
+      -moz-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
+      white -moz-linear-gradient(45deg, white 33.33%, $secondary-dark 33.33%) 0 0%;
+    background-repeat: repeat-x;
+    background-size: 0px 100%, 17px 51px, 17px 51px;
+  }
 }
 
 .banner-row {
@@ -284,19 +353,13 @@ section {
     border-radius: 2px;
     box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
   }
+  .vertical-line { bottom: 0; height: 29px; }
 }
 
 .sub-banner-row {
-  background: linear-gradient(45deg, 
-    #fafafa 25%, 
-    white 25%, 
-    white 50%, 
-    #fafafa 50%, 
-    #fafafa 75%, 
-    white 75%
-  );
-  background-size: 60px 60px;
-  border-bottom: 2px solid $light-gray;
+  background-color: $dark-white;
+  z-index: 2;
+  overflow-y: hidden;
 
   h2 { 
     color: $medium-text-color; 
@@ -304,27 +367,49 @@ section {
     border-bottom: 2px solid $medium-gray;
     line-height: 1.2em;
   }
+
+  .vertical-line { 
+    &.top { top: 0; height: 51px; }
+    &.bottom { bottom: 0; height: 50px; }
+  }
 }
 
 .number-row {
   position: relative;
 
+  .row-inner {
+    padding: 0 40px !important;
+  }
   .number {
     font-size: 250px;
     position: absolute;
-    left: -30px;
+    left: -10px;
     top: 110px;
     font-weight: bold;
     z-index: 0;
     opacity: 0.3;
+    color: $tertiary-light;
   }
 
   &.dark {
-    background-color: $light-gray;
+    background-color: $tertiary-really-light;
 
     .number {
       left: auto;
-      right: -30px;
+      right: -10px;
     }
   }
+}
+
+.get-started-row {
+  background-color: $secondary-light;
+  background: linear-gradient(45deg, 
+    $secondary-light 25%, 
+    transparentize($tertiary-light, 0.05) 25%, 
+    transparentize($tertiary-light, 0.05) 50%, 
+    $secondary-light 50%, 
+    $secondary-light 75%, 
+    transparentize($tertiary-light, 0.05) 75%
+  );
+  background-size: 60px 60px;   
 }
