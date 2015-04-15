@@ -216,10 +216,9 @@ section {
     margin: 20px 40px;
     list-style: none;
     text-align: center;
-    background-color: white;
+    background-color: $medium-white;
     padding: 25px;
-    box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.12);
-    border-radius: 2px;
+    border-radius: 15px;
     font-weight: normal;
 
     li {
@@ -285,7 +284,7 @@ section {
 
 .header-row {
   color: white;
-  background-color: $secondary-dark;
+  background-color: $tertiary-medium;
   text-align: center;
   padding-bottom: 0;
   margin-bottom: 20px;
@@ -294,19 +293,19 @@ section {
     content: " ";
     display: block;
     position: relative; top: 0px; left: 0px; width: 100%; height: 36px;
-    background: linear-gradient($secondary-dark 0%, transparent 0%), 
+    background: linear-gradient($tertiary-medium 0%, transparent 0%), 
       linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
       white linear-gradient(45deg, 
-      white 33.33%, $secondary-dark 33.33%) 0 0%;
-    background: -webkit-linear-gradient($secondary-dark 0%, transparent 0%), 
+      white 33.33%, $tertiary-medium 33.33%) 0 0%;
+    background: -webkit-linear-gradient($tertiary-medium 0%, transparent 0%), 
       -webkit-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
-      white -webkit-linear-gradient(45deg, white 33.33%, $secondary-dark 33.33%) 0 0%;
-    background: -o-linear-gradient($secondary-dark 0%, transparent 0%), 
+      white -webkit-linear-gradient(45deg, white 33.33%, $tertiary-medium 33.33%) 0 0%;
+    background: -o-linear-gradient($tertiary-medium 0%, transparent 0%), 
       -o-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
-      white -o-linear-gradient(45deg, white 33.33%, $secondary-dark 33.33%) 0 0%;
-    background: -moz-linear-gradient($secondary-dark 0%, transparent 0%), 
+      white -o-linear-gradient(45deg, white 33.33%, $tertiary-medium 33.33%) 0 0%;
+    background: -moz-linear-gradient($tertiary-medium 0%, transparent 0%), 
       -moz-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
-      white -moz-linear-gradient(45deg, white 33.33%, $secondary-dark 33.33%) 0 0%;
+      white -moz-linear-gradient(45deg, white 33.33%, $tertiary-medium 33.33%) 0 0%;
     background-repeat: repeat-x;
     background-size: 0px 100%, 17px 51px, 17px 51px;
   }
@@ -357,7 +356,7 @@ section {
 }
 
 .sub-banner-row {
-  background-color: $dark-white;
+  background-color: white;
   z-index: 2;
   overflow-y: hidden;
 
@@ -411,5 +410,36 @@ section {
     $secondary-light 75%, 
     transparentize($tertiary-light, 0.05) 75%
   );
-  background-size: 60px 60px;   
+  background-size: 60px 60px;
+  padding-top: 60px;
+  padding-bottom: 60px;
+  box-shadow: inset 0 0 3px 3px rgba(0, 0, 0, 0.2);
+  border-top: 20px solid $light-white;
+  border-bottom: 20px solid $light-white;
+
+  .row-inner {
+    border-radius: 15px;
+    background-color: $light-white;
+    margin: 0 15px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+
+    h2 { margin-bottom: 20px; }
+
+    .btn {
+      text-shadow: none;
+      background-image: none;
+      border-radius: 15px;
+      background-color: $primary-medium;
+      border: none;
+      border-right: 5px solid $primary-dark;
+      border-bottom: 5px solid $primary-dark;
+      color: white;
+
+      &:hover, &:focus {
+        background-color: $primary-dark;
+      }
+    }
+  }
 }
