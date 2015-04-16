@@ -272,42 +272,21 @@ section {
     display: block;
   }
   span.list-header {
-    color: $tertiary-dark;
+    color: white;
     display: block;
-    border-bottom: 1px solid $tertiary-dark;
+    border-bottom: 1px solid white;
     text-align: center;
     padding-bottom: 10px;
     margin: 15px auto 0 auto;
     width: 200px;
   }
-}
 
-.header-row {
-  color: white;
-  background-color: $tertiary-medium;
-  text-align: center;
-  padding-bottom: 0;
-  margin-bottom: 20px;
-  
-  &:after {
-    content: " ";
-    display: block;
-    position: relative; top: 0px; left: 0px; width: 100%; height: 36px;
-    background: linear-gradient($tertiary-medium 0%, transparent 0%), 
-      linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
-      white linear-gradient(45deg, 
-      white 33.33%, $tertiary-medium 33.33%) 0 0%;
-    background: -webkit-linear-gradient($tertiary-medium 0%, transparent 0%), 
-      -webkit-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
-      white -webkit-linear-gradient(45deg, white 33.33%, $tertiary-medium 33.33%) 0 0%;
-    background: -o-linear-gradient($tertiary-medium 0%, transparent 0%), 
-      -o-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
-      white -o-linear-gradient(45deg, white 33.33%, $tertiary-medium 33.33%) 0 0%;
-    background: -moz-linear-gradient($tertiary-medium 0%, transparent 0%), 
-      -moz-linear-gradient(135deg, white 33.33%, transparent 33.33%) 0 0%, 
-      white -moz-linear-gradient(45deg, white 33.33%, $tertiary-medium 33.33%) 0 0%;
-    background-repeat: repeat-x;
-    background-size: 0px 100%, 17px 51px, 17px 51px;
+  @media (min-width: 980px) {
+    ul.details {
+      li {
+        font-size: 26px;
+      }
+    }
   }
 }
 
@@ -373,11 +352,22 @@ section {
   }
 }
 
+.number-header-row {
+  color: white;
+  background-color: $medium-text-color;
+  text-align: center;
+  padding-bottom: 0;
+
+  h2 { font-size: 40px; }
+}
+
 .number-row {
-  position: relative;
+  background-color: $medium-text-color;
+  color: white;
 
   .row-inner {
     padding: 0 40px !important;
+    position: relative;
   }
   .number {
     font-size: 250px;
@@ -386,17 +376,8 @@ section {
     top: 110px;
     font-weight: bold;
     z-index: 0;
-    opacity: 0.3;
-    color: $tertiary-light;
-  }
-
-  &.dark {
-    background-color: $tertiary-really-light;
-
-    .number {
-      left: auto;
-      right: -10px;
-    }
+    opacity: 0.23;
+    color: white;
   }
 }
 
@@ -414,8 +395,8 @@ section {
   padding-top: 60px;
   padding-bottom: 60px;
   box-shadow: inset 0 0 3px 3px rgba(0, 0, 0, 0.2);
-  border-top: 20px solid $light-white;
-  border-bottom: 20px solid $light-white;
+  border-top: 20px solid $tertiary-dark;
+  border-bottom: 20px solid $tertiary-dark;
 
   .row-inner {
     border-radius: 15px;
