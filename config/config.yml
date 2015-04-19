@@ -40,11 +40,14 @@ defaults: &defaults
    - members
    - new
    - perm_assets
+   - pricing
+   - privacy-policy
    - show
    - support
    - update
    - user
    - users
+   - terms-of-service
    - validation
    - validations
 

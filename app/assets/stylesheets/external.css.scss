@@ -690,20 +690,27 @@ footer.bl-footer {
 /* === NON HOME PAGE STYLES === */
 
 .page-banner-row {
+  background-color: white;
   text-align: center;
   padding-bottom: 0;
-
+  
   h1 {
     text-align: center;
     display: inline-block;
     padding: 0 10px;
+    text-shadow: 2px 2px $dark-white;
   }
   .tag-line {
     display: block;
     padding: 15px;
     border-radius: 2px;
     margin: 15px;
+    background-color: $dark-white;
   }
+}
+
+.text-row {
+  background-color: white;
 }
 
 .table-row {
@@ -803,7 +810,7 @@ footer.bl-footer {
   &.page-banner-row {
     h1 {
       color: white;
-      text-shadow: 2px 2px $secondary-dark
+      text-shadow: 2px 2px $secondary-dark;
     }
     .tag-line {
       background-color: $secondary-dark;

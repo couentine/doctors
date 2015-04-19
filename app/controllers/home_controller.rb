@@ -23,4 +23,14 @@ class HomeController < ApplicationController
     render layout: 'website'
   end
 
+  # GET /privacy-policy
+  def privacy_policy
+    render layout: 'website'
+  end
+
+  # GET /terms-of-service
+  def terms_of_service
+    render layout: 'website'
+  end
+
 end

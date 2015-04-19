@@ -14,6 +14,8 @@ BadgeList::Application.routes.draw do
   match 'c' => 'static_pages#colors', via: :get
   match 'w' => 'home#root_external', via: :get, as: :root_external
   match 'pricing' => 'home#pricing', via: :get, as: :pricing
+  match 'privacy-policy' => 'home#privacy_policy', via: :get, as: :privacy_policy
+  match 'terms-of-service' => 'home#terms_of_service', via: :get, as: :terms_of_service
 
   # === ADMIN PATHS === #
   scope '/a' do
