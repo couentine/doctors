@@ -2832,7 +2832,7 @@ div.topic-list-card, div.group-list-card {
   box-shadow: -1px 1px 7px 0 $card-shadow-color;
   position: relative;
   background-color: $light-white;
-  margin: 30px 0 0 0;
+  margin: 50px 0 0 0;
 
   .signin-header {
     border-bottom: 2px solid $primary-medium;
@@ -2859,7 +2859,7 @@ div.topic-list-card, div.group-list-card {
       box-shadow: none !important;
       font-size: 20px;
       padding: 14px 10px 10px 10px;
-      width: 70%;
+      width: 90%;
     }
     input[type="email"].signin:focus,input[type="password"].signin:focus,input[type="text"].signin:focus {
       background-color: $really-light-gray !important;
