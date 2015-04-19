@@ -18,4 +18,9 @@ class HomeController < ApplicationController
     render layout: 'website'
   end
 
+  # GET /pricing
+  def pricing
+    render layout: 'website'
+  end
+
 end

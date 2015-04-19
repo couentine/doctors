@@ -13,6 +13,7 @@ BadgeList::Application.routes.draw do
   match 'i' => 'badge_maker#show', via: :get, as: :badge_image
   match 'c' => 'static_pages#colors', via: :get
   match 'w' => 'home#root_external', via: :get, as: :root_external
+  match 'pricing' => 'home#pricing', via: :get, as: :pricing
 
   # === ADMIN PATHS === #
   scope '/a' do

@@ -1,6 +1,7 @@
-<header id="bl-navbar">
+<header id="bl-navbar" class="<%= (content_for?(:hide_header)) ? '' : 'with-background' %>">
   
   <% if user_signed_in? %>
+
     <ul class="nav left-nav">
       <li>
         <a href="/" title="Back to App Home" data-toggle="tooltip" data-placement="bottom">
@@ -28,12 +29,21 @@
         </ul>
       </li>
     </ul>
+
   <% else %>
+
+    <ul class="nav left-nav">
+      <li>
+        <%= link_to image_tag('badge-list-icon-50.png') + ' Badge List', '/', class: "brand" %>
+
+      </li>
+    </ul>
     <ul class="nav right-nav">
       <li>
         <%= link_to "<i class='fa fa-sign-in'></i> Sign in".html_safe, new_user_session_path %>
       </li>
     </ul>
+
   <% end %>
 </div>
   

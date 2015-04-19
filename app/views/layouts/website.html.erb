@@ -36,7 +36,7 @@
     <% end %>
   </head>
 
-  <body>
+  <body class="<%= (content_for?(:hide_header)) ? '' : 'with-space' %>">
     <%= render 'layouts/website_header' %>
     <div class="container-fluid">
       <% flash.each do |key, value| %>
