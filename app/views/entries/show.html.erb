@@ -44,7 +44,7 @@
       <li  class="collapsible">
         <%= link_to "<i class='fa fa-user'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <% if @current_user_is_entry_creator %>
+        <% if @current_user_is_entry_creator || @badge_list_admin %>
           <span class="divider">|</span>
         <% end %>
       </li>

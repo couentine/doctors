@@ -269,9 +269,8 @@
                      && (@group.type=='private') && @group.user_limit %>
                   <br>
                   
-                  <a href="/badgelist/about/pricing" class="label-link" 
-                  title="Click for Badge List pricing" 
-                  data-toggle="tooltip" data-placement="bottom">
+                  <a href="/pricing" class="label-link" title="Click for Badge List pricing" 
+                      data-toggle="tooltip" data-placement="bottom">
 
                     <% if @group.active_user_count > @group.user_limit %>
                       <span class="label label-important"><%= @group.user_limit%> Users (OVER LIMIT)</span>

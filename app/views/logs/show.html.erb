@@ -45,7 +45,7 @@
       <li  class="collapsible">
         <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <% if (@can_award_badge && @show_progress) || @badge_list_admin %>
+        <% if @show_sharing || @can_award_badge || @badge_list_admin %>
           <span class="divider">|</span>
         <% end %>
       </li>
