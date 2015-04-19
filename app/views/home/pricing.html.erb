@@ -50,7 +50,12 @@
 
 <div class="row-fluid pricing-page-row button-row">
   <div class="span6 offset3 row-inner">
-    <%= link_to 'Start your free 14 day trial', new_user_registration_path, 
-      class: 'btn btn-large' %>
+    <% if user_signed_in? %>
+      <%= link_to 'Start your free 14 day trial', new_group_path, 
+        class: 'btn btn-large' %>
+    <% else %>
+      <%= link_to 'Start your free 14 day trial', new_user_registration_path, 
+        class: 'btn btn-large' %>
+    <% end %>
   </div>
 </div>
