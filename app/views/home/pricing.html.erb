@@ -2,21 +2,55 @@
   provide(:title, "Pricing")
 %>
 
-<div class="row-fluid pricing-row">
+<div class="row-fluid pricing-page-row page-banner-row">
+  <div class="span6 offset3">
+    <h1>Badge List Pricing</h1>
+    <span class="tag-line">
+      All private groups include free lifetime hosting for all awarded badges.
+    </span>
+  </div>
+</div>
+
+<div class="row-fluid pricing-page-row table-row">
   <div class="span8 offset2">
-    <ul class="details">
-      <li>
-        <h2>Pricing</h2>
-      </li>
-      <li class="separator"><span>&nbsp;</span></li>
-      <li>
-        <i class="fa fa-globe"></i>
-        <strong>Public</strong> groups are free forever.</li>
-      <li>
-        <i class="fa fa-building"></i>
-        <strong>Private</strong> groups cost money based the number of users.<br>
-        <em>All awarded badges include free <strong>lifetime hosting</strong>.</em>
-      </li>
-    </ul>
+    <div class="row-inner">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Starter</th>
+            <th>Basic</th>
+            <th>Standard</th>
+            <th>Premium</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>100 users</td>
+            <td>500 users</td>
+            <td>1,000 users</td>
+            <td>5,000 users</td>
+          </tr>
+          <tr>
+            <td>$50 / month</td>
+            <td>$120 / month</td>
+            <td>$200 / month</td>
+            <td>$450 / month</td>
+          </tr>
+          <tr class="table-footer">
+            <td colspan="4">
+              For questions or enterprise account inquiries contact
+              <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="row-fluid pricing-page-row button-row">
+  <div class="span6 offset3 row-inner">
+    <%= link_to 'Start your free 14 day trial', new_user_registration_path, 
+      class: 'btn btn-large' %>
   </div>
 </div>

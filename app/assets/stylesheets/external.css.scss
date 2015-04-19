@@ -18,7 +18,9 @@ body {
   padding: 0;
 
   &.with-space {
-    padding-top: 50px;
+    .row-fluid:first-child {
+      padding-top: 70px;
+    }
   }
 
   @media (min-width: 980px) {}
@@ -683,4 +685,148 @@ footer.bl-footer {
 
 .pricing-row {
   background-color: $light-gray;
+}
+
+/* === NON HOME PAGE STYLES === */
+
+.page-banner-row {
+  text-align: center;
+  padding-bottom: 0;
+
+  h1 {
+    text-align: center;
+    display: inline-block;
+    padding: 0 10px;
+  }
+  .tag-line {
+    display: block;
+    padding: 15px;
+    border-radius: 2px;
+    margin: 15px;
+  }
+}
+
+.table-row {
+  .row-inner {
+    border-radius: 15px;
+    background-color: $light-gray;
+    border: 5px solid $light-gray;
+    max-width: 800px;
+    margin: 0 auto;
+    
+    table {
+      color: $medium-text-color;
+      margin-bottom: 0;
+      border-radius: 15px;
+
+      tr {
+        th {
+          color: $dark-text-color;
+          text-align: center;
+          padding: 15px;
+          font-weight: bold;
+          border-bottom: 1px solid $medium-gray;
+        }
+        td { 
+          border: none; 
+          text-align: center;
+          padding: 15px;
+          font-size: 1em;
+        }
+
+        &.table-footer {
+         td {
+          font-size: 0.9em;
+          font-style: italic;
+          padding: 15px;
+          border-top: 1px solid $medium-gray;
+          color: $light-text-color;
+
+          a {
+            color: $light-text-color;
+
+            &:hover, &:focus {
+              text-decoration: underline;
+              color: $dark-text-color;
+            }
+          }
+         } 
+        }
+      }
+    }
+  }
+
+  @media (min-width: 980px) {
+    table {
+      font-size: 20px;
+      tr {
+        th, td {
+          padding: 20px !important;
+        }
+      }
+    }
+  }
+}
+
+.button-row {
+  text-align: center;
+
+  .row-inner {
+    padding: 10px 0 50px 0;
+
+    a.btn {
+      text-shadow: none;
+      background-image: none;
+      border-radius: 15px;
+      background-color: $primary-medium;
+      border: none;
+      border-right: 5px solid $primary-dark;
+      border-bottom: 5px solid $primary-dark;
+      color: white;
+      padding: 20px 30px;
+
+      &:hover, &:focus {
+        background-color: $primary-dark;
+      }
+    }
+  }
+
+  @media (min-width: 980px) {
+    a.btn { font-size: 20px; }
+  }
+}
+
+.pricing-page-row {
+  background-color: $secondary-medium;
+  color: white;
+
+  &.page-banner-row {
+    h1 {
+      color: white;
+      text-shadow: 2px 2px $secondary-dark
+    }
+    .tag-line {
+      background-color: $secondary-dark;
+    }
+  }
+  &.table-row {
+    .row-inner {
+      background-color: $secondary-light;
+      border: 5px solid $secondary-light;
+      
+      table {
+        tr {
+          th { border-bottom: 1px solid $secondary-medium; }
+
+          &.table-footer {
+            td { 
+              border-top: 1px solid $secondary-medium; 
+              color: $secondary-dark;
+              a { color: $secondary-dark; }
+            } 
+          }
+        }
+      }
+    }
+  }
 }
