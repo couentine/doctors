@@ -156,6 +156,29 @@ section {
   }
 }
 
+/* === ALERTS === */
+
+.alert-bar {
+  text-align: center;
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin-top: 70px;
+
+  .alert {
+    display: inline-block;
+    max-width: 50%;
+  }
+}
+
+body.with-flash {
+  .row-fluid:first-child {
+    padding-top: 130px;
+  }
+}
+
 /* === HEADER === */
 
 #bl-navbar {
@@ -189,9 +212,11 @@ section {
           position: relative;
           top: -0.1em;
         }
+        
+        &:hover, &:focus { background-color: $primary-light; }
       }
-      a:hover, a:focus { background-color: $primary-light; }
       .caret { color: $dark-text-color; }
+      ul.dropdown-menu { background-color: transparentize($light-text-color, 0.5); }
 
       &.inner {
         a { text-shadow: none; }

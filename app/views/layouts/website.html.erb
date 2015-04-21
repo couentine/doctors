@@ -36,13 +36,21 @@
     <% end %>
   </head>
 
-  <body class="<%= (content_for?(:hide_header)) ? '' : 'with-space' %>">
+  <%
+    body_classes = (content_for?(:hide_header)) ? '' : 'with-space'
+    body_classes += (flash.blank?) ? '' : ' with-flash'
+  %>
+  <body class="<%= body_classes %> ">
     <%= render 'layouts/website_header' %>
     <div class="container-fluid">
-      <% flash.each do |key, value| %>
-        <%= content_tag(:div, value, class: "alert alert-#{key}") %>
-      <% end %>
       <%= yield %>
+      <% unless content_for? :hide_flash %>
+        <div class="alert-bar">
+          <% flash.each do |key, value| %>
+            <%= content_tag(:div, value, class: "alert alert-#{key}") %>
+          <% end %>
+        </div>
+      <% end %>
       <%= render 'layouts/website_footer' unless content_for?(:hide_footer) %>
     </div>
   </body>
