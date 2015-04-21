@@ -3,7 +3,8 @@ class LogsController < ApplicationController
   
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy]
   prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy]
-  before_filter :authenticate_user!, only: [:edit, :create, :update, :destroy]
+  before_filter :authenticate_user!, only: [:edit, :update, :destroy]
+  before_filter :authenticate_or_signup, only: [:create]
   before_filter :log_owner, only: [:edit, :destroy]
   before_filter :group_admin_or_log_owner, only: [:update]
 
@@ -198,6 +199,15 @@ private
     unless @current_user_is_admin || @current_user_is_log_owner || @badge_list_admin
       flash[:error] = "That action is restricted to group admins or the log owner."
       redirect_to [@group, @badge, @log]
+    end
+  end
+
+  def authenticate_or_signup
+    if current_user
+      true
+    else
+      flash[:notice] = "First you'll need to create a Badge List account."
+      redirect_to new_user_registration_path
     end
   end
 

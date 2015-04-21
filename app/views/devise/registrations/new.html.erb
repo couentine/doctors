@@ -27,6 +27,7 @@
 
             <div class="controls">
               <%= f.button :submit, "Create an account", :class => 'btn-large btn-success' %>
+              <%= link_to "Already have an account?", new_user_session_path, class: 'btn btn-link' %>
               <p class="button-info-block">
                 By clicking "Create an account", you agree to our 
                 <a href="/terms-of-service" target="_blank">terms of service</a> and 

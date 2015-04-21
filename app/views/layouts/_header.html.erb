@@ -9,13 +9,15 @@
           title: "Badge List Home" %>
           <span class="divider"><i class="fa fa-caret-right"></i></span>
       </li>
-      <li>
-        <a href="/w" class="smaller">
-          <i class="fa fa-globe" title="Badge List Website" data-toggle="tooltip" 
-            data-placement="bottom"></i>
-          <span class="divider"><i class="fa fa-caret-right"></i></span>
-        </a>
-      </li>
+      <% if user_signed_in? %>
+        <li>
+          <a href="/w" class="smaller">
+            <i class="fa fa-globe" title="Badge List Website" data-toggle="tooltip" 
+              data-placement="bottom"></i>
+            <span class="divider"><i class="fa fa-caret-right"></i></span>
+          </a>
+        </li>
+      <% end %>
       <li>
         <a href="http://badgelist.com/help/docs" class="smaller">
           <i class="fa fa-question" title="Badge List Help Docs" data-toggle="tooltip" 
