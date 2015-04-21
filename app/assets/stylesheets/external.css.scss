@@ -250,6 +250,7 @@ footer.bl-footer {
     padding: 0 15px;
     margin-bottom: 15px;
     text-align: center;
+    line-height: 1.4em;
 
     a {
       color: white;
@@ -301,13 +302,15 @@ footer.bl-footer {
       text-align: left; 
       margin-top: 15px;
       padding-left: 30px;
-      line-height: 2.4em;
     }
     .right-foot { 
       text-align: right; 
       padding-right: 30px;
       margin-top: 15px;
     }
+  }
+  @media (min-width: 980px) {
+    .left-foot { padding-top: 0.4em; }
   }
 }
 
