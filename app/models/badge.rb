@@ -271,6 +271,7 @@ class Badge
     unless requirement_list.blank?
       # First parse the requirement list from JSON
       parsed_list = JSON.parse requirement_list rescue nil
+      new_requirement_count = 0 # used later to set progress tracking boolean
       
       if parsed_list.instance_of?(Array) # false if nil
         tag_ids, tag_names, matched_tag_names = [], [], []
@@ -284,6 +285,7 @@ class Badge
             requirement['name'] = requirement['name_with_caps'].downcase
             tag_names << requirement['name']
             requirement_name_map[requirement['name']] = requirement
+            new_requirement_count += 1 unless requirement['is_deleted']
             
             unless requirement['id'].blank?
               tag_ids << requirement['id'] 
@@ -338,9 +340,9 @@ class Badge
           end
         end
       end
-
+      
       # The last step is to update progress tracking boolean if needed
-      self.progress_tracking_enabled = requirement_list.include? '{'
+      self.progress_tracking_enabled = (new_requirement_count > 0)
       self.save if self.changed?
     end
   end
