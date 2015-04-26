@@ -47,14 +47,16 @@
 
       <div class="form-body" style="float: none">
 
-        <% if @current_user_is_expert %>
+        <% if @current_user_is_expert || @current_user_is_admin || @badge_list_admin %>
           <%= f.input :display_name, autofocus: true, 
             label: (@tag.type == 'requirement') ? 'Requirement Name' : 'Page Title', 
             placeholder: 'Orbital Trajectories', input_html: { maxlength: Tag::MAX_NAME_LENGTH } %>
         <% else %>
           <%= f.input :display_name, as: :hidden %>
           <div class="control-group">
-            <label class="control-label">Requirement Name</label>
+            <label class="control-label">
+              <%= (@tag.type == 'requirement') ? 'Requirement Name' : 'Page Title' %>
+            </label>
             <div class="controls">
               <span class="input-mock"><%= @tag.display_name %></span> 
             </div>
@@ -72,16 +74,12 @@
         <%= f.input :wiki, as: :text, label: 'Page Body', 
           input_html: { class: "huge-text-area rich-text-area" } %>
 
-        <% if (@tag.type == 'requirement') \
-            && (@current_user_is_expert || @current_user_is_admin || @badge_list_admin) %>
+        <% if (@tag.type == 'requirement') %>
           <%= f.input :privacy, label: 'Who can view evidence posted for this requirement?', 
             as: :radio_buttons, collection: @tag_privacy_options %>
-        <% end %>
-
-        <% if @show_progress && (@tag.type != 'requirement') \
-            && (@current_user_is_expert || @current_user_is_admin || @badge_list_admin) %>
-          <%= f.input :editability, label: 'Who can edit this page?', as: :radio_buttons,
-            collection: @tag_editability_options %>
+        <% elsif @current_user_is_admin || @badge_list_admin %>
+          <%= f.input :editability, label: "Who can edit this page?", 
+            as: :radio_buttons, collection: @tag_editability_options %>
         <% end %>
 
       </div>
