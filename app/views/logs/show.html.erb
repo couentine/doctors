@@ -266,17 +266,37 @@
     </div>
 
     <div class="modal-body">
-      <p>
-        <a href="#" id="export-to-backpack" class="btn btn-large btn-success">
-          Export this badge to your Mozilla Backpack
-        </a>
-      </p>
-      <p>&nbsp;</p>
-      <p>
-        <strong>NOTE:</strong> You'll only be able to export this badge to a backpack linked to 
-        the same email address
-        (<strong><%= current_user.email%></strong>).
-      </p>
+      <ul class="button-list">
+        <li>
+          <a href="#" id="export-to-linkedin" class="btn btn-primary">
+            <i class="fa fa-linkedin-square"></i>
+            Add to LinkedIn Profile
+          </a>
+        </li>
+        <li>
+          <a href="#" id="export-to-facebook" class="btn btn-primary">
+            <i class="fa fa-facebook-square"></i>
+            Post to Facebook
+          </a>
+        </li>
+        <li>
+          <a href="#" id="export-to-twitter" class="btn btn-primary">
+            <i class="fa fa-twitter-square"></i>
+            Share on Twitter
+          </a>
+        </li>
+        <li>
+          <a href="#" id="export-to-embed" class="btn btn-success">
+            <i class="fa fa-share-square"></i>
+            Get embed code for blogs and other web pages
+          </a>
+        </li>
+        <li>
+          <a href="#" id="export-to-backpack" class="btn btn-warning">
+            Export to Mozilla Backpack
+          </a>
+        </li>
+      </ul>
     </div>
 
     <div class="modal-footer">

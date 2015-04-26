@@ -1173,6 +1173,20 @@ form#group-add-users-form {
     border-bottom: none;
     padding: 15px;
   }
+  .modal-body {
+    ul.button-list {
+      display: block;
+      margin: 15px 0 5px 0;
+      font-size: 15px;
+      color: $dark-text-color;
+      list-style: none;
+
+      li {
+        display: block;
+        margin-top: 10px;
+      }
+    }
+  }
   .modal-footer {
     background-color: $dark-white;
   }
