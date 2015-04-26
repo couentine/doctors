@@ -13,6 +13,7 @@ class LogsController < ApplicationController
   # Accepts page parameters: page, page_size
   # GET /group-url/badge-url/u/username
   # GET /group-url/badge-url/u/username.json?f=ob1
+  # GET /group-url/badge-url/u/username.embed => Shows iframe-friendly version
   def show
     @validations = @log.validations
 
@@ -44,6 +45,7 @@ class LogsController < ApplicationController
         format.html do
           @requirements = @badge.requirements
         end
+        # format.embed { render template: 'logs/show_embed', layout: 'embed'}
         format.json { render json: @log, filter_user: current_user }
       end
     end

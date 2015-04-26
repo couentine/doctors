@@ -45,17 +45,9 @@
       <li  class="collapsible">
         <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
             [@group, @badge, @current_user_log] %>
-        <% if @show_sharing || @can_award_badge || @badge_list_admin %>
+        <% if @can_award_badge || @badge_list_admin %>
           <span class="divider">|</span>
         <% end %>
-      </li>
-    <% end %>
-
-    <% if @show_sharing %>
-      <li class="collapsible">
-        <%= link_to '<i class="fa fa-share"></i> Share Badge'.html_safe, '#badge-sharing', 
-          id: 'share-badge', data: { toggle: 'modal' } %>
-        <span class="divider">|</span>
       </li>
     <% end %>
 
@@ -142,7 +134,6 @@
       var assertionURL = "<%= @log.assertion_url(@group, @badge, @user) %>";
 
       $('#export-to-backpack').click(function() {
-        console.log("Assertion URL = " + assertionURL);
         $('#badge-sharing').modal('hide');
         OpenBadges.issue([assertionURL], function(errors, successes) {
           if ((errors != null) && (errors.length > 0) && (errors[0].reason != 'DENIED')) {
@@ -153,20 +144,10 @@
         });
       });
 
-    <% end %>
-
-    <% if @show_sharing && @first_view_after_issued %>
-
-      $("#share-badge").popover({
-        content: "<a class='pull-right' href='#' onclick=\"$('#share-badge').popover('hide')\" "
-          + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
-          + "You've been awarded the badge, congratulations!<br><br>"
-          + "When you're ready, click here to share your achievement.",
-        placement: "bottom",
-        trigger: "manual",
-        container: "header",
-        html: true
-      }).popover("show");
+      $('#export-to-embed').click(function() {
+        $('#badge-sharing').modal('hide');
+        $('#badge-embed').modal('show');
+      });
 
     <% end %>
 
@@ -258,45 +239,25 @@
 
   <!-- === BADGE SHARING MODAL === -->
 
-  <div id="badge-sharing" class="modal hide fade" tabindex="-1" role="dialog" 
+  <%= render 'shared/badge_sharing_modal' %>
+
+  <!-- === BADGE EMBED MODAL === -->
+
+  <div id="badge-embed" class="modal hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Share your badge achievement</h3>
+      <h3 id="mimm-label">Badge embed code</h3>
     </div>
 
     <div class="modal-body">
-      <ul class="button-list">
-        <li>
-          <a href="#" id="export-to-linkedin" class="btn btn-primary">
-            <i class="fa fa-linkedin-square"></i>
-            Add to LinkedIn Profile
-          </a>
-        </li>
-        <li>
-          <a href="#" id="export-to-facebook" class="btn btn-primary">
-            <i class="fa fa-facebook-square"></i>
-            Post to Facebook
-          </a>
-        </li>
-        <li>
-          <a href="#" id="export-to-twitter" class="btn btn-primary">
-            <i class="fa fa-twitter-square"></i>
-            Share on Twitter
-          </a>
-        </li>
-        <li>
-          <a href="#" id="export-to-embed" class="btn btn-success">
-            <i class="fa fa-share-square"></i>
-            Get embed code for blogs and other web pages
-          </a>
-        </li>
-        <li>
-          <a href="#" id="export-to-backpack" class="btn btn-warning">
-            Export to Mozilla Backpack
-          </a>
-        </li>
-      </ul>
+      <p>
+        You can display your badge achievement on your blog or on any other website which supports 
+        iframes. Just copy and paste the code below.
+      </p>
+      <pre>
+FIXME
+      </pre>
     </div>
 
     <div class="modal-footer">
@@ -366,7 +327,9 @@
               </h3>
             </td>
             
-            <td class="separator hidden-phone"><span>&nbsp;</span></td>
+            <td class="separator hidden-phone <%= (@show_sharing) ? 'with-footer' : '' %>">
+              <span>&nbsp;</span>
+            </td>
             
             <td class="right-panel with-right-image ">
               <h1><%= link_to @user.name, @user, title: 'View Badge List user profile' %></h1>
@@ -405,6 +368,24 @@
               </span>
             </td>
           </tr>
+
+          <% if @show_sharing %>
+            <tr class="footer-row highlight-primary">
+              <td colspan="5">
+                <span class="label-text">
+                  You've been awarded this badge.
+                </span>
+                <ul class="action-list">
+                  <li>
+                    <%= link_to '<i class="fa fa-share-alt"></i> Share the badge'.html_safe, 
+                      '#badge-sharing', id: 'share-badge', class: 'btn btn-small', 
+                      data: { toggle: 'modal' } %>
+                  </li>
+                </ul>
+              </td>
+            </tr>
+          <% end %>
+
         </tbody>
       </table>
     </div>

@@ -304,6 +304,13 @@
               <ul class="action-list">
                 <% if @current_user_is_expert || @current_user_is_learner %>
                   <li>
+                    <%= link_to '<i class="fa fa-share-alt"></i> Share the badge'.html_safe, 
+                      group_badge_log_path(@group, @badge, @log) + '#badge-sharing', 
+                      class: 'btn btn-small' %>
+                  </li>
+                <% end %>
+                <% if @current_user_is_expert || @current_user_is_learner %>
+                  <li>
                     <%= link_to \
                       '<i class="fa fa-shield"></i> Edit your membership'.html_safe,
                       '#log-visibility', class: 'btn btn-small', data: { toggle: 'modal' } %>

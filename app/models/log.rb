@@ -74,12 +74,12 @@ class Log
   def date_issued_stamp; (date_issued.nil?) ? '' : date_issued.to_i; end
   def badge_url; "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}.json"; end
   def badge_image_url; "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}.png"; end
-  def assertion_url(the_group=badge.group, the_badge=badge, the_user = user)
+  def assertion_url(the_group=badge.group, the_badge=badge, the_user=user)
     "#{ENV['root_url']}/#{the_group.url}/#{the_badge.url}/o/#{the_user.username}.json"
   end
 
-  def evidence_url
-    "#{ENV['root_url']}/#{badge.group.url}/#{badge.url}/u/#{user.username}"
+  def evidence_url(the_group=badge.group, the_badge=badge, the_user=user)
+    "#{ENV['root_url']}/#{the_group.url}/#{the_badge.url}/u/#{the_user.username}"
   end
 
   def recipient

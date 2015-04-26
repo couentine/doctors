@@ -1176,14 +1176,22 @@ form#group-add-users-form {
   .modal-body {
     ul.button-list {
       display: block;
-      margin: 15px 0 5px 0;
-      font-size: 15px;
+      margin: 0 0 5px 0;
+      font-size: 16px;
       color: $dark-text-color;
       list-style: none;
 
       li {
         display: block;
         margin-top: 10px;
+        text-align: center;
+
+        a.btn {
+          border-radius: 500px;
+          min-width: 250px;
+          text-shadow: none;
+          border: none;
+        }
       }
     }
   }
@@ -1362,6 +1370,8 @@ form#group-add-users-form {
         width: 6px;
         background-color: $light-text-color;
       }
+
+      &.with-footer span { bottom: 60px; }
     }
     td.right-panel {
       vertical-align: top;
@@ -1412,6 +1422,19 @@ form#group-add-users-form {
         td ul.action-list li .btn {
           background-color: $secondary-really-light;
           color: $secondary-dark;
+          text-shadow: none;
+
+          &:hover, &:focus {
+            background-color: $medium-white;
+          }
+        }
+      }
+      &.highlight-primary {
+        background-color: $primary-medium;
+
+        td ul.action-list li .btn {
+          background-color: $primary-really-light;
+          color: $primary-dark;
           text-shadow: none;
 
           &:hover, &:focus {
