@@ -1,0 +1,159 @@
+/* === IMPORT SITE COLORS AND BOOTSTRAP === */
+
+@import "colors";
+
+/* === DEFINE STYLES === */
+
+/* === UNIVERSAL === */
+
+body {
+  overflow: auto;
+  background-color: transparent;
+  color: $dark-text-color;
+  font-family: 'Open Sans', Verdana, Arial !important;
+  font-size: 16px;
+  line-height: 1.8em;
+  padding: 0;
+
+  &.with-space {
+    .row-fluid:first-child {
+      padding-top: 70px;
+    }
+  }
+
+  @media (min-width: 980px) {}
+  @media (max-width: 979px) {}
+  @media (max-width: 767px) {
+    line-height: 1.5em;
+  }
+}
+p,ol,ul,td {
+  font-family: 'Open Sans', Verdana, Arial !important;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+section {
+  overflow: auto;
+}
+
+.add-top-margin { margin-top: 30px; }
+
+@media (min-width: 768px) {
+  .show-when-small {
+    display: none !important;
+  }
+}
+@media (max-width: 767px) {
+  .collapse-when-small  {
+    display: none !important;
+  }
+}
+
+/* === SHARED CARD STYLES === */
+
+.info-card {
+  position: relative;
+  margin: 0 auto 20px auto;
+  border-radius: 2px;
+  background-color: white;
+  color: $dark-text-color;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.23);
+  border: 1px solid $light-gray;
+  max-width: 300px;
+  text-align: center;
+
+  .card-title-row {
+    padding: 10px;
+    font-size: 20px;
+    line-height: 1.3em;
+    background-color: $dark-white;
+    border-bottom: 1px solid $light-gray;
+
+    a, a:visited {
+      text-decoration: none;
+      color: $medium-text-color;
+      padding: 5px 10px;
+      background-color: $light-gray;
+      position: relative;
+      top: -22px;
+      z-index: 1;
+      border-radius: 2px;
+      border: 1px solid $medium-gray;
+      line-height: 1.4em;
+      display: inline-block;
+    }
+  }
+  .card-body-row {
+    padding: 30px;
+
+    .body-image {
+      img { 
+        border-radius: 500px; 
+        height: 110px;
+        width: 110px;
+        border: 1px solid $medium-gray;
+      }
+    }
+    .body-title {
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 1.4em;
+      margin-bottom: 10px;
+    }
+    .body-content {
+      font-size: 16px;
+      line-height: 1.4em;
+      margin-bottom: 22px;
+    }
+    .body-action {
+      a.btn, a.btn:visited {
+        display: inline-block;
+        padding: 7px 15px;
+        line-height: 1.5em;
+        text-decoration: none;
+        background-color: $primary-medium;
+        color: white;
+        border-radius: 2px;
+        box-shadow: 2px 2px 0 $primary-dark;
+      }
+      a.btn:hover, a.btn:focus {
+        color: $dark-white;
+        box-shadow: 3px 3px 0 $medium-text-color;
+      }
+    }
+  }
+}
+
+/* === LOG CARD === */
+
+.log-card {
+  border-top: 8px solid $green-medium;
+  margin-top: 50px;
+
+  .card-image-row {
+    background-color: $dark-white;
+
+    a { 
+      display: inline-block;
+      margin-top: -55px;
+      position: relative;
+      z-index: 2;
+      
+      img {
+        height: 110px;
+      }
+    }
+
+    .big-icon {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+
+      i.fa {
+        font-size: 30px;
+        color: $green-medium;
+      }
+    }
+  }
+}

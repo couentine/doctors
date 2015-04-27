@@ -45,7 +45,7 @@ class LogsController < ApplicationController
         format.html do
           @requirements = @badge.requirements
         end
-        # format.embed { render template: 'logs/show_embed', layout: 'embed'}
+        format.embed { render layout: 'embed' }
         format.json { render json: @log, filter_user: current_user }
       end
     end

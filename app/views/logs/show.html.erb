@@ -370,7 +370,7 @@ FIXME
           </tr>
 
           <% if @show_sharing %>
-            <tr class="footer-row highlight-primary">
+            <tr class="footer-row highlight-tertiary">
               <td colspan="5">
                 <span class="label-text">
                   You've been awarded this badge.
@@ -424,13 +424,6 @@ FIXME
           </span>
           <span class="badge badge-warning show-when-small">
             Requested <%= @log.date_requested.to_s(:short_date) %>
-          </span>
-        <% elsif @log.validation_status == 'validated' %>
-          <span class="badge badge-info collapse-when-small">
-            Badge awarded <%= @log.date_issued.to_s(:full_date) %>
-          </span>
-          <span class="badge badge-info show-when-small">
-            Awarded <%= @log.date_issued.to_s(:short_date) %>
           </span>
         <% end %>
 

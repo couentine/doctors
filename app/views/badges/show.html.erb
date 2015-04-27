@@ -284,7 +284,7 @@
               (@current_user_is_admin || @current_user_is_member || @group.open?)
             can_join_group = !@current_user_is_member && !@current_user_is_admin && @group.open?
           %>
-          <tr class="footer-row <%= (can_join_badge) ? 'highlight' : '' %>">
+          <tr class="footer-row <%= (can_join_badge) ? 'highlight-secondary' : '' %>">
             <td colspan="2">
               <span class="label-text">
                 <% if @current_user_is_expert %>

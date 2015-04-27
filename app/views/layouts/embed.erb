@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <% if content_for? :full_title %>
+      <title><%= yield(:full_title) %></title>
+    <% else %>
+      <title><%= full_title(yield(:title)).html_safe %></title>
+    <% end %>
+
+    <%= render 'layouts/analytics.html.erb' if Rails.env.production? %>
+    <%= render 'layouts/fonts.html.erb' %>
+    <%= stylesheet_link_tag "embed", media: "all" %>
+    <%= javascript_include_tag "embed" %>
+    <%= csrf_meta_tags %>
+    <%= render 'layouts/shim.html.erb' %>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/assets/badge-list-icon-32-square.png" />
+  </head>
+
+  <body class="<%= yield(:body_class) if content_for?(:body_class) %>" >
+    <div class="container">
+      <%= yield %>
+    </div>
+  </body>
+
+</html>

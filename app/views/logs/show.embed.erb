@@ -1,0 +1,52 @@
+<% 
+  provide(:title, "#{@user.name} - #{@badge.name}")
+  is_awarded = (@log.issue_status == 'issued')
+%>
+
+<% if is_awarded %>
+  <div class="info-card log-card">
+    
+    <div class="card-image-row">
+      <div class="big-icon awarded">
+        <i class="fa fa-check-circle"></i>
+      </div>
+      <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), 
+        group_badge_path(@group, @badge), title: @badge.name,  target: '_blank' %>
+    </div>
+
+    <div class="card-title-row">
+      <%= link_to @badge.name, group_badge_path(@group, @badge), title: @badge.name %>
+    </div>
+
+    <div class="card-body-row">
+      <div class="body-image"><%= gravatar_for @user, size: 110 %></div>
+      <div class="body-title"><%= @user.name %></div>
+      <div class="body-content">
+        received this badge on <br><%= @log.date_issued.to_s(:full_date) %>
+      </div>
+      <div class="body-action">
+        <%= link_to "<i class='fa fa-list-alt'></i> View Evidence Log".html_safe,  
+          group_badge_log_path(@group, @badge, @log), class: 'btn', target: '_blank'  %>
+      </div>
+    </div>
+
+  </div>
+
+<% else %>
+
+  <div class="info-card">
+
+    <div class="card-body-row">
+      <div class="body-title">This user has not yet earned this badge</div>
+      <div class="body-content">
+        A badge may only be embedded publicly after it has been awarded.
+      </div>
+      <div class="body-action">
+        <%= link_to "<i class='fa fa-list-alt'></i> View Evidence Log".html_safe,  
+          group_badge_log_path(@group, @badge, @log), class: 'btn', target: '_blank'  %>
+      </div>
+    </div>
+
+  </div>  
+
+<% end %>

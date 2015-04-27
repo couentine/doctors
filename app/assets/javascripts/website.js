@@ -1,5 +1,4 @@
-// This is a manifest file that'll be compiled into application.js, which will include all the files
-// listed below.
+// This is the manifest file used the external website
 //
 //= require jquery
 //= require jquery_ujs

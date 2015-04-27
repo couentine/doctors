@@ -1416,7 +1416,7 @@ form#group-add-users-form {
         }
       }
     
-      &.highlight {
+      &.highlight-secondary {
         background-color: $secondary-medium;
 
         td ul.action-list li .btn {
@@ -1435,6 +1435,19 @@ form#group-add-users-form {
         td ul.action-list li .btn {
           background-color: $primary-really-light;
           color: $primary-dark;
+          text-shadow: none;
+
+          &:hover, &:focus {
+            background-color: $medium-white;
+          }
+        }
+      }
+      &.highlight-tertiary {
+        background-color: $tertiary-medium;
+
+        td ul.action-list li .btn {
+          background-color: $tertiary-really-light;
+          color: $tertiary-dark;
           text-shadow: none;
 
           &:hover, &:focus {

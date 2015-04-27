@@ -1,0 +1,7 @@
+/*
+ * This is the manifest file for the iframe embeds.
+ *= require_self
+ *= require embedded
+ *= require animate.min
+ *= require font-awesome
+ */
