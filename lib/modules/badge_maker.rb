@@ -207,6 +207,16 @@ class BadgeMaker
     composite_with_mask(badge_image, color2_overlay, foreground_mask)
   end
 
+  # Returns a widened version of the image
+  def self.build_wide_image(badge_image)
+    badge_image.combine_options do |c|
+      c.gravity "center"
+      c.background "transparent"
+      c.extent "1000x500"
+    end
+    badge_image
+  end
+
   # Returns the attribution hash for the specified type (:frames or :icons) and name
   def self.get_attribution(type, name)
     if !BADGE_MAKER_CONFIG.nil? && BADGE_MAKER_CONFIG[type].include?(name.to_s.downcase)

@@ -20,6 +20,7 @@ class BadgesController < ApplicationController
 
   # GET /group-url/badge-url
   # GET /group-url/badge-url.png => Serves the badge image as a PNG file
+  # GET /group-url/badge-url.png?f=wide => Serves the WIDE badge image as a PNG file
   # GET /group-url/badge-url.json
   def show
     # Performance Note: The badge show action is executed every time a badge image is displayed.
@@ -50,20 +51,38 @@ class BadgesController < ApplicationController
         end
       end
       format.png do
+        @wide_format = (params[:f] == 'wide')
         @group = Group.find(params[:group_id]) || not_found
         @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase) \
           || not_found
 
         if @badge.image_mode == 'upload' && @badge.uploaded_image && @badge.uploaded_image.file \
             && @badge.uploaded_image.file.content_type
-          content = @badge.uploaded_image.read
-          if stale?(etag: content, last_modified: @badge.updated_at.utc, public: true)
-            send_data content, type: @badge.uploaded_image.file.content_type, disposition: "inline"
-            expires_in 0, public: true
+          if @wide_format && @badge.uploaded_image.version_exists?('wide')
+            content = @badge.uploaded_image.wide.read
+            if stale?(etag: content, last_modified: @badge.updated_at.utc, public: true)
+              send_data content, type: @badge.uploaded_image.wide.file.content_type, 
+                disposition: "inline"
+              expires_in 0, public: true
+            end
+          else
+            content = @badge.uploaded_image.read
+            if stale?(etag: content, last_modified: @badge.updated_at.utc, public: true)
+              send_data content, type: @badge.uploaded_image.file.content_type, 
+                disposition: "inline"
+              expires_in 0, public: true
+            end
           end
         elsif !@badge.image.nil?
-          if stale?(etag: @badge.image, last_modified: @badge.updated_at.utc, public: true)
-            send_data @badge.image.encode('ISO-8859-1'), type: "image/png", disposition: "inline"
+          if @wide_format && !@badge.image_wide.nil?
+            if stale?(etag: @badge.image_wide, last_modified: @badge.updated_at.utc, public: true)
+              send_data @badge.image_wide.encode('ISO-8859-1'), type: "image/png", 
+                disposition: "inline"
+            end
+          else
+            if stale?(etag: @badge.image, last_modified: @badge.updated_at.utc, public: true)
+              send_data @badge.image.encode('ISO-8859-1'), type: "image/png", disposition: "inline"
+            end
           end
         end
       end

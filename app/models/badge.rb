@@ -51,8 +51,9 @@ class Badge
   field :image_color1,                    type: String
   field :image_color2,                    type: String
   field :image_url,                       type: String # RETIRED field
-  field :image,                           type: Moped::BSON::Binary # stores the actual badge image
-                                                                # (either designed OR uploaded)
+  field :image,                           type: Moped::BSON::Binary # stores the designed image
+  field :image_wide,                      type: Moped::BSON::Binary
+
   field :image_attributions,              type: Array
   field :icon_search_text,                type: String # stores what user searched for b4 picking
   field :uploaded_image,                  type: String # powered by the carrierwave gem
@@ -385,7 +386,11 @@ protected
       || image_color2_changed?
       # First build the image
       badge_image = BadgeMaker.build_image image_frame, image_icon, image_color1, image_color2
-      self.image = badge_image.to_blob.force_encoding("ISO-8859-1").encode("UTF-8") unless badge_image.nil?
+      unless badge_image.nil?
+        self.image = badge_image.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
+        badge_image_wide = BadgeMaker.build_wide_image(badge_image)
+        self.image_wide = badge_image_wide.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
+      end
 
       # Then store the attribution information 
       # Note: The parameters will only be missing for test data, randomization for users will happen
