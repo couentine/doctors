@@ -77,9 +77,11 @@ class Log
   def assertion_url(the_group=badge.group, the_badge=badge, the_user=user)
     "#{ENV['root_url']}/#{the_group.url}/#{the_badge.url}/o/#{the_user.username}.json"
   end
-
   def evidence_url(the_group=badge.group, the_badge=badge, the_user=user)
     "#{ENV['root_url']}/#{the_group.url}/#{the_badge.url}/u/#{the_user.username}"
+  end
+  def embed_url(the_group=badge.group, the_badge=badge, the_user=user)
+    evidence_url(the_group, the_badge, the_user) + '.embed'
   end
 
   def recipient

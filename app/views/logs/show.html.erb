@@ -130,28 +130,6 @@
         });
         return false;
     });
-    
-    <% if @show_sharing %>
-      
-      var assertionURL = "<%= @log.assertion_url(@group, @badge, @user) %>";
-
-      $('#export-to-backpack').click(function() {
-        $('#badge-sharing').modal('hide');
-        OpenBadges.issue([assertionURL], function(errors, successes) {
-          if ((errors != null) && (errors.length > 0) && (errors[0].reason != 'DENIED')) {
-            $('#badge-sharing-error').modal('show');
-            $('#badge-sharing-error-text').html("Assertion URL = " + errors[0].url 
-              + ", Reason = " + errors[0].reason);
-          }
-        });
-      });
-
-      $('#export-to-embed').click(function() {
-        $('#badge-sharing').modal('hide');
-        $('#badge-embed').modal('show');
-      });
-
-    <% end %>
 
   });
 
@@ -239,63 +217,9 @@
 
 <% if @show_sharing %>
 
-  <!-- === BADGE SHARING MODAL === -->
+  <!-- === BADGE SHARING MODALS === -->
 
-  <%= render 'shared/badge_sharing_modal' %>
-
-  <!-- === BADGE EMBED MODAL === -->
-
-  <div id="badge-embed" class="modal hide fade" tabindex="-1" role="dialog" 
-   aria-labelledby="mimm-label" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Badge embed code</h3>
-    </div>
-
-    <div class="modal-body">
-      <p>
-        You can display your badge achievement on your blog or on any other website which supports 
-        iframes. Just copy and paste the code below.
-      </p>
-      <pre>
-FIXME
-      </pre>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    </div>
-  </div>
-
-  <!-- === BADGE SHARING ERROR MODAL === -->
-
-  <div id="badge-sharing-error" class="modal hide fade" tabindex="-1" role="dialog" 
-   aria-labelledby="mimm-label" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Oh no!</h3>
-    </div>
-
-    <div class="modal-body">
-      <p>
-        It looks like there was an error sharing your badge. This could be due to a problem with
-        Mozilla's system or it could be due to a bug in Badge List. We humbly apologize for the 
-        inconvenience and ask you to try again later.
-      </p>
-      <p>
-        In the meantime please feel free to send an email to <b>help@badgelist.com</b> if you'd 
-        like our help resolving this issue. (Be sure to include the error text below.) Thanks!
-      </p>
-      <p>
-        <b>Error Text:</b> 
-        <span id="badge-sharing-error-text"></span>
-      </p>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    </div>
-  </div>
+  <%= render 'shared/badge_sharing_modals' %>
 
 <% end %>
 

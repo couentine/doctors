@@ -11,11 +11,12 @@
         <i class="fa fa-check-circle"></i>
       </div>
       <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), 
-        group_badge_path(@group, @badge), title: @badge.name,  target: '_blank' %>
+        group_badge_path(@group, @badge), title: 'View the badge',  target: '_blank' %>
     </div>
 
     <div class="card-title-row">
-      <%= link_to @badge.name, group_badge_path(@group, @badge), title: @badge.name %>
+      <%= link_to @badge.name, group_badge_path(@group, @badge), title: 'View the badge',
+        target: '_blank' %>
     </div>
 
     <div class="card-body-row">

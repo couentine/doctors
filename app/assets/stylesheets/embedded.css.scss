@@ -83,6 +83,11 @@ section {
       line-height: 1.4em;
       display: inline-block;
     }
+    a:hover, a:focus {
+      background-color: $secondary-light;
+      border-color: $secondary-medium;
+      color: white;
+    }
   }
   .card-body-row {
     padding: 30px;

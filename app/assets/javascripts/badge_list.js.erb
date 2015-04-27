@@ -48,6 +48,7 @@ $(document).ready(function() {
     registerToggleLinks();
     addSyntaxHighlighting();
     addVideoIcons();
+    registerEmbedCodeBoxes();
     $('form:not(.allow-double-submission)').preventDoubleSubmission();
 
     $(window).on('resize', function() {
@@ -539,4 +540,11 @@ function addSyntaxHighlighting() {
 
 function addVideoIcons() {
   // $('a.linkified-video').append("<i class='fa fa-play-circle-o overlay-icon'></i>");
+}
+
+// Makes it so that when you click on the embed code text box everything is selected
+function registerEmbedCodeBoxes() {
+  $("input.embed-code").click(function() {
+    $(this).select();
+  });
 }
