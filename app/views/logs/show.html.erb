@@ -9,8 +9,8 @@
   if @log.validation_status == 'validated'
     provide(:metadata_title, "#{@badge.name} awarded to #{@user.name}")
     provide(:metadata_description, @badge.summary)
-    provide(:metadata_image, group_badge_url(@group, @badge, format: :png))
-    provide(:metadata_image_width, '500')
+    provide(:metadata_image, group_badge_url(@group, @badge, format: :png) + '?f=wide')
+    provide(:metadata_image_width, '1000')
     provide(:metadata_image_height, '500')
     provide(:metadata_site_name, @group.name)
     provide(:metadata_url, group_badge_log_url(@group, @badge, @log))
