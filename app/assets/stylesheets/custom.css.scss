@@ -1176,6 +1176,14 @@ form#group-add-users-form {
     padding: 15px;
   }
   .modal-body {
+    p.small {
+      font-size: 14px;
+      color: $light-text-color;
+
+      a {
+        text-decoration: underline;
+      }
+    }
     ul.button-list {
       display: block;
       margin: 0 0 5px 0;
@@ -1193,6 +1201,20 @@ form#group-add-users-form {
           min-width: 250px;
           text-shadow: none;
           border: none;
+        }
+      }
+    }
+    ol.number-list {
+      display: block;
+      margin: 0 0 5px 30px;
+      font-size: 16px;
+      color: $dark-text-color;
+
+      li {
+        margin-top: 10px;
+
+        a.btn {
+          text-shadow: none;
         }
       }
     }
