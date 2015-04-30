@@ -33,14 +33,28 @@ class ApplicationController < ActionController::Base
   end
 
   def store_location
-    # store last url as long as it isn't a /users path
-    if request.format == "text/html" || request.content_type == "text/html"
+    # Store the last url as long as it isn't a /users path
+    if (request.format == "text/html") || (request.content_type == "text/html")
       session[:previous_url] = request.fullpath unless request.fullpath =~ /\/users/
+    end
+
+    # If the 'join' parameter is set then store the badge id
+    if ((request.format == "text/html") || (request.content_type == "text/html")) \
+        && !params[:join].blank?
+      session[:join_badge_id] = params[:join]
     end
   end
 
   def after_sign_in_path_for(resource)
-    session[:previous_url] || root_path
+    if !session[:join_badge_id].blank?
+      badge = Badge.find(session[:join_badge_id]) rescue nil
+    end
+      
+    if badge
+      "/#{badge.group.url}/#{badge.url}/join"
+    else
+      session[:previous_url] || root_path
+    end
   end
 
 private

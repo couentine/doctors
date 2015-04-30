@@ -85,6 +85,7 @@ BadgeList::Application.routes.draw do
   resources :groups, path: "", except: [:index, :new, :create] do
     resources :badges, only: [:new, :create]
     resources :badges, path: "", except: [:index, :new, :create] do
+      match 'join' => 'logs#create', via: :get
       resources :logs, only: [:create]
       resources :logs, path: "u", except: [:index, :new, :create] do
         resources :entries, only: [:new, :create]

@@ -3,8 +3,7 @@ class LogsController < ApplicationController
   
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy]
   prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy]
-  before_filter :authenticate_user!, only: [:edit, :update, :destroy]
-  before_filter :authenticate_or_signup, only: [:create]
+  before_filter :authenticate_user!, only: [:create, :edit, :update, :destroy]
   before_filter :log_owner, only: [:edit, :destroy]
   before_filter :group_admin_or_log_owner, only: [:update]
 
@@ -72,15 +71,16 @@ class LogsController < ApplicationController
       if needs_to_join_group # group is open so we'll add the user to the members now
         @group.members << current_user
         if @group.save
-          message = 'You have joined both the learning group and the badge. Welcome!'
+          message = 'You have joined both the learning group and the badge. ' \
+            + 'The next step is to begin submitting evidence below.'
         else
           message = 'An error occured while trying to add you to the learning group and badge.'
           is_error = true
         end
       elsif log_already_exists
-        message = 'You are already a member of this badge.'
+        message = 'Unfortunately, you can only join a badge once.'
       else
-        message = 'Welcome to the badge!'
+        message = 'Welcome to the badge! The next step is to begin submitting evidence below.'
       end
       
       if !is_error
@@ -201,15 +201,6 @@ private
     unless @current_user_is_admin || @current_user_is_log_owner || @badge_list_admin
       flash[:error] = "That action is restricted to group admins or the log owner."
       redirect_to [@group, @badge, @log]
-    end
-  end
-
-  def authenticate_or_signup
-    if current_user
-      true
-    else
-      flash[:notice] = "First you'll need to create a Badge List account."
-      redirect_to new_user_registration_path
     end
   end
 

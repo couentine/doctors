@@ -3,6 +3,12 @@
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
+
+  is_group_member = @current_user_is_member || @current_user_is_admin
+  is_badge_member = @current_user_is_learner || @current_user_is_expert
+  can_join_badge = !is_badge_member && @show_progress && \
+    (@current_user_is_admin || @current_user_is_member || @group.open?)
+  can_join_group = !@current_user_is_member && !@current_user_is_admin && @group.open?
 %>
 
 <% content_for :subheader_links do %>
@@ -53,6 +59,34 @@
   <% end %>
 <% end unless @badge.image_attributions.blank? %>
 
+<% if can_join_badge && !current_user  %>
+  
+  <!-- === SIGN IN (TO JOIN BADGE) MODAL === -->
+
+  <div id="sign-in-to-join" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Sign in to continue<h3>
+    </div>
+
+    <div class="modal-body">
+      <p>To join this badge, first you need to sign in or create a new account.<br><br></p>
+      <ul class="button-list">
+        <li>
+          <%= link_to 'Sign in', new_user_session_path(join: @badge.id), 
+            class: 'btn btn-large btn-warning' %>
+        </li>
+        <li>
+          <%= link_to 'Create a new account', new_user_registration_path(join: @badge.id), 
+            class: 'btn btn-large btn-success' %>
+        </li>
+      </ul>
+      <p>&nbsp;</p>
+    </div>
+  </div>
+
+<% end %>
 
 <% if @can_edit_badge %>
 
@@ -67,6 +101,7 @@
             end %>;
 
       $(document).ready(function() {
+        
         if (badgeInfoVersions.length > 1) {
           var userName;
           for (var i in badgeInfoVersions) {
@@ -82,6 +117,7 @@
           });
         } else
           $('#badge-versions-section').hide();
+
       });
     </script>
 
@@ -277,13 +313,6 @@
             </td>
           </tr>
 
-          <% 
-            is_group_member = @current_user_is_member || @current_user_is_admin
-            is_badge_member = @current_user_is_learner || @current_user_is_expert
-            can_join_badge = !is_badge_member && @show_progress && \
-              (@current_user_is_admin || @current_user_is_member || @group.open?)
-            can_join_group = !@current_user_is_member && !@current_user_is_admin && @group.open?
-          %>
           <tr class="footer-row <%= (can_join_badge) ? 'highlight-secondary' : '' %>">
             <td colspan="2">
               <span class="label-text">
@@ -317,9 +346,14 @@
                   </li>
                 <% elsif can_join_badge %>
                   <li>
-                    <%= link_to '<i class="fa fa-plus-circle"></i> Join this badge'.html_safe, 
-                      group_badge_logs_path(@group, @badge), method: :post, 
-                      class: 'btn btn-small' %>
+                    <% if current_user %>
+                      <%= link_to '<i class="fa fa-plus-circle"></i> Join this badge'.html_safe, 
+                        "#{group_badge_path(@group, @badge)}/join", class: 'btn btn-small' %>
+                    <% else %>
+                        <a href="#sign-in-to-join" class="btn btn-small" data-toggle="modal">
+                          <i class="fa fa-plus-circle"></i> Join this badge
+                        </a>
+                    <% end %>
                   </li>
                 <% end %>
                 <% if @can_edit_badge %>
