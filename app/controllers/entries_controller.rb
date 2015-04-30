@@ -107,10 +107,20 @@ class EntriesController < ApplicationController
         render :edit
       end
     else
-      if (@type == 'validation') && @validation_already_exists
-        notice = "Your validation was updated."
+      if (@type == 'validation') 
+        if @validation_already_exists
+          notice = "Your validation was updated."
+        else
+          notice = "Your validation was submitted."
+        end
       else
-        notice = "Your #{@type} was created."
+        if @entry.log.validation_status == 'requested'
+          notice = "You have submitted all of the required evidence. A validation request has " \
+            + "automatically been sent to the badge awarders and you will be notified by email " \
+            + "when a validation is received."
+        else
+          notice = "Your evidence has been posted."
+        end
       end
 
       redirect_to [@group, @badge, @log], notice: notice

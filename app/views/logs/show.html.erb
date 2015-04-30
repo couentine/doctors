@@ -135,6 +135,26 @@
 
 </script>
 
+<% if @current_user_is_log_owner %>
+
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+
+      if ($(".topic-list-card li a.btn.complete").length == 0) {
+        $(".topic-list-card li a.btn.incomplete").first().tooltip({
+          title: "Click here to get started",
+          placement: "bottom",
+          trigger: "manual"
+        }).tooltip('show');
+      }
+
+    });
+
+  </script>
+
+<% end %>
+
 <% if @current_user_is_log_owner || @badge_list_admin %>
 
   <!-- === EDIT BADGE MEMBERSHIP MODAL === -->
@@ -425,8 +445,10 @@
               <%
                 if requirements_complete[tag.id]
                   icon_text = "<i class='fa fa-check-square-o'></i>"
+                  button_class = "complete"
                 else
                   icon_text = "<i class='fa fa-square-o'></i>"
+                  button_class = "incomplete"
                 end
               %>
               <li>
@@ -437,7 +459,7 @@
                   <%= link_to "<i class='fa #{tag.format_icon}'></i> ".html_safe \
                     + "Post #{tag.format.to_s.capitalize}", \
                     new_group_badge_log_entry_path(@group, @badge, @log, \
-                    tag: tag.name_with_caps), class: 'btn btn-mini' %>
+                    tag: tag.name_with_caps), class: "btn btn-mini #{button_class}" %>
                 <% end %>
               </li>
             <% end %>

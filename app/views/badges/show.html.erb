@@ -88,6 +88,26 @@
 
 <% end %>
 
+<% if @current_user_is_learner || @current_user_is_expert %>
+
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+
+      if ($(".topic-list-card li a.btn.complete").length == 0) {
+        $(".topic-list-card li a.btn.incomplete").first().tooltip({
+          title: "Click here to get started",
+          placement: "bottom",
+          trigger: "manual"
+        }).tooltip('show');
+      }
+
+    });
+
+  </script>
+
+<% end %>
+
 <% if @can_edit_badge %>
 
   <!-- === BADGE INFO VERSIONS === -->
@@ -331,7 +351,7 @@
                 <% end %>
               </span>
               <ul class="action-list">
-                <% if @current_user_is_expert || @current_user_is_learner %>
+                <% if @current_user_is_expert %>
                   <li>
                     <%= link_to '<i class="fa fa-share-alt"></i> Share the badge'.html_safe, 
                       group_badge_log_path(@group, @badge, @log) + '#badge-sharing', 
@@ -416,8 +436,10 @@
                   <%
                     if requirements_complete[tag.id]
                       icon_text = "<i class='fa fa-check-square-o'></i>"
+                      button_class = "complete"
                     else
                       icon_text = "<i class='fa fa-square-o'></i>"
+                      button_class = "incomplete"
                     end
                   %>
                   <li>
@@ -426,7 +448,7 @@
                     <%= link_to "<i class='fa #{tag.format_icon}'></i> ".html_safe \
                       + "Post #{tag.format.to_s.capitalize}", \
                       new_group_badge_log_entry_path(@group, @badge, @log, \
-                      tag: tag.name_with_caps), class: 'btn btn-mini' %>
+                      tag: tag.name_with_caps), class: "btn btn-mini #{button_class}" %>
                   </li>
                 <% end %>
               
