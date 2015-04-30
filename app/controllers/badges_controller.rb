@@ -58,7 +58,8 @@ class BadgesController < ApplicationController
 
         if @badge.image_mode == 'upload' && @badge.uploaded_image && @badge.uploaded_image.file \
             && @badge.uploaded_image.file.content_type
-          if @wide_format && @badge.uploaded_image.version_exists?('wide')
+          if @wide_format && @badge.uploaded_image.version_exists?('wide') \
+              && @badge.uploaded_image.wide.file && @badge.uploaded_image.wide.file.content_type
             content = @badge.uploaded_image.wide.read
             if stale?(etag: content, last_modified: @badge.updated_at.utc, public: true)
               send_data content, type: @badge.uploaded_image.wide.file.content_type, 

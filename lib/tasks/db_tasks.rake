@@ -337,4 +337,29 @@ namespace :db do
     puts " >> Done."
   end
 
+  # Populates wide badge images for badges missing them
+  task backpopulate_wide_badge_images: :environment do
+    print "Updating #{Badge.count} badges"
+
+    Badge.each do |badge|
+      if (badge.image_mode == 'upload') && badge.uploaded_image && badge.uploaded_image.file \
+          && badge.uploaded_image.file.content_type \
+          && !badge.uploaded_image.version_exists?('wide')
+        # FIXME
+        # badge_image = MiniMagick::Image.read(badge.uploaded_image.wide.read)
+        # badge_image_wide = BadgeMaker.build_wide_image(badge_image)
+        # badge.image_wide = badge_image_wide.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
+      elsif !badge.image.nil? && badge.image_wide.nil?
+        badge_image = MiniMagick::Image.read(badge.image.encode('ISO-8859-1'))
+        badge_image_wide = BadgeMaker.build_wide_image(badge_image)
+        badge.image_wide = badge_image_wide.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
+      end
+
+      badge.timeless.save if badge.changed?
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end
