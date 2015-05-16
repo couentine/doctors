@@ -1,2 +1,5 @@
 updateDynamicColumnContents('members', '<%= escape_javascript render(@members) %>');
-$('#paginator').html('<%= escape_javascript(paginate(@members, :remote => true).to_s) %>');
+$('#paginator-members').html('<%= escape_javascript(paginate(@members, remote: true, param_name: "pm").to_s) %>');
+
+updateDynamicColumnContents('badges', '<%= escape_javascript render(@badges, group: @group, requirements_map: @requirements_map, log_map: @log_map, is_member: @current_user_is_member, is_admin: @current_user_is_admin) %>');
+$('#paginator-badges').html('<%= escape_javascript(paginate(@badges, remote: true, param_name: "pb").to_s) %>');

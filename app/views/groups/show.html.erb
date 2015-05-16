@@ -439,19 +439,31 @@
       </div>
     </div>
 
-    <div class="row">
-      
-      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
-           data-bl-dyncol-width="12">
+    <% unless @badge_ids.empty? %>
 
-          <% unless @group.badge_ids.empty? %>
-            <%= render @group.badges.asc(:url), group: @group, requirements_map: @requirements_map,
-              log_map: @log_map, is_member: @current_user_is_member, 
-              is_admin: @current_user_is_admin %>
-          <% end %>
+      <div class="row">
+        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
+            data-bl-dyncol-width="12">
 
+          <%= render @badges, group: @group, requirements_map: @requirements_map,
+            log_map: @log_map, is_member: @current_user_is_member, 
+            is_admin: @current_user_is_admin %>
+
+        </div>
       </div>
-    </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="pagination-footer">
+            <div class="pagination" id="paginator-badges">
+              <%= paginate @badges, remote: true, param_name: 'pb' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+    <% end %>
+
   </div>
 
   <!-- === MEMBERS TAB === -->
@@ -526,7 +538,9 @@
       <div class="row">
         <div class="span12">
           <div class="pagination-footer">
-            <div class="pagination" id="paginator"><%= paginate @members, remote: true %></div>
+            <div class="pagination" id="paginator-members">
+              <%= paginate @members, remote: true, param_name: 'pm' %>
+            </div>
           </div>
         </div>
       </div>

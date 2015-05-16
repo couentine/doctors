@@ -53,15 +53,20 @@ class GroupsController < ApplicationController
   # GET /group-url.json
   def show
     # Get paginated versions of members
-    @page = params[:page] || 1
-    @page_size = params[:page_size] || APP_CONFIG['page_size_small']
-    @members = @group.members.asc(:name).page(@page).per(@page_size)
+    @member_page = params[:pm] || 1
+    @member_page_size = params[:psm] || APP_CONFIG['page_size_small']
+    @members = @group.members.asc(:name).page(@member_page).per(@member_page_size)
+
+    # Get paginated versions of badges
+    @badge_page = params[:pb] || 1
+    @badge_page_size = params[:psb] || APP_CONFIG['page_size_small']
+    @badges = @group.badges.asc(:url).page(@badge_page).per(@badge_page_size)
+    @badge_ids = @badges.map{ |b| b.id }
 
     respond_to do |format|
-      format.js # show.js.erb
-      format.html do
+      format.any(:html, :js) do # show.html.erb
         @requirements_map = {} # maps from badge id to requirements
-        Tag.where(:badge.in => @group.badge_ids, type: 'requirement').asc(:sort_order).each do |tag|
+        Tag.where(:badge.in => @badge_ids, type: 'requirement').asc(:sort_order).each do |tag|
           if @requirements_map.has_key? tag.badge_id
             @requirements_map[tag.badge_id] << tag
           else
@@ -70,7 +75,7 @@ class GroupsController < ApplicationController
         end
 
         @log_map = {} # maps from badge id to log of current user if present
-        current_user.logs.where(:badge_id.in => @group.badge_ids).each do |log|
+        current_user.logs.where(:badge_id.in => @badge_ids).each do |log|
           @log_map[log.badge_id] = log
         end if current_user
       end
