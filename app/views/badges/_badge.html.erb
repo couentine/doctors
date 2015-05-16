@@ -1,10 +1,13 @@
 <%
   # Boolean Variables = is_member, is_admin
   # Object Variables = badge, group
-  # Map[badge_id] Variables = log_map (of current_user for this badge if present), requirements_map
+  # Map[badge_id] Variables = log_map (of current_user for this badge if present), requirements_map,
+  #                           expert_count_map, learner_count_map
 
   log = log_map[badge.id]
   requirements = requirements_map[badge.id]
+  expert_count = expert_count_map[badge.id]
+  learner_count = learner_count_map[badge.id]
 
   if log
     is_expert = (log.validation_status == 'validated')
@@ -85,12 +88,12 @@
           <% if badge.tracks_progress? %>
             <li data-toggle="tooltip" data-placement="bottom" title="<%= badge.Learners %>">
               <i class="fa fa-users"></i> 
-              <%= badge.learner_logs.count %>
+              <%= learner_count %>
             </li>
           <% end %>
           <li data-toggle="tooltip" data-placement="bottom" title="<%= badge.Experts %>">
             <i class="fa fa-trophy"></i>
-            <%= badge.expert_logs.count %>
+            <%= expert_count %>
           </li>
         </ul>
       </td>

@@ -61,7 +61,13 @@ class GroupsController < ApplicationController
     @badge_page = params[:pb] || 1
     @badge_page_size = params[:psb] || APP_CONFIG['page_size_small']
     @badges = @group.badges.asc(:url).page(@badge_page).per(@badge_page_size)
-    @badge_ids = @badges.map{ |b| b.id }
+    @expert_count_map = {} # maps from badge id to expert count
+    @learner_count_map = {} # maps from badge id to learner count
+    @badge_ids = []
+    @badges.each do |badge|
+      @badge_ids << badge.id
+      @expert_count_map[badge.id], @learner_count_map[badge.id] = 0, 0
+    end
 
     respond_to do |format|
       format.any(:html, :js) do # show.html.erb
@@ -78,6 +84,14 @@ class GroupsController < ApplicationController
         current_user.logs.where(:badge_id.in => @badge_ids).each do |log|
           @log_map[log.badge_id] = log
         end if current_user
+
+        Log.where(:badge.in => @badge_ids).each do |log|
+          if log.validation_status == 'validated'
+            @expert_count_map[log.badge_id] += 1
+          else
+            @learner_count_map[log.badge_id] += 1
+          end
+        end
       end
       format.json { render json: @group, filter_user: current_user }
     end

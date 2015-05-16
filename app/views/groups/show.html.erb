@@ -445,9 +445,9 @@
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
             data-bl-dyncol-width="12">
 
-          <%= render @badges, group: @group, requirements_map: @requirements_map,
-            log_map: @log_map, is_member: @current_user_is_member, 
-            is_admin: @current_user_is_admin %>
+          <%= render @badges, group: @group, requirements_map: @requirements_map, log_map: @log_map,
+            is_member: @current_user_is_member, is_admin: @current_user_is_admin,
+            expert_count_map: @expert_count_map, learner_count_map: @learner_count_map %>
 
         </div>
       </div>
