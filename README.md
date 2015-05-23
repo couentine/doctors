@@ -1,7 +1,7 @@
 # Badge List #
 
-This repository stores the code that powers Badge List. It uses Mongoid for persistence and 
-the Postmark gem for email.
+This repository stores the code that powers Badge List. It uses Mongoid (hosted now on MongoLab) for persistence and 
+the Postmark gem for email. It also uses Redis (hosted now on on RedisCloud) for queueing along with Sidekiq for asynch operations.
 
 ## Required Environment Variables ##
 
@@ -11,6 +11,7 @@ when deploying.
 - ENV['root_domain'] = badgelist.com or localhost, etc
 - ENV['root_url'] = http://badgelist.com, etc
 - ENV['from_email'] = app@badgelist.com or knowledgestreem@gmail.com, etc
+- ENV['REDIS_PROVIDER'] = REDISCLOUD_URL
 
 **Example ".env" file for dev environment:**
 ```

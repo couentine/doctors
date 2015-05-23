@@ -1,4 +1,5 @@
 BadgeList::Application.routes.draw do
+  require 'sidekiq/web'
 
   resources :tags
 
@@ -23,6 +24,9 @@ BadgeList::Application.routes.draw do
   end
   match 'a' => 'admin_pages#index', via: :get
   match 'a/groups' => 'groups#index', via: :get
+  authenticate :user, lambda { |u| u.admin? } do
+    mount Sidekiq::Web => '/a/sidekiq'
+  end
   
   # === MANUAL FORM PATHS === #
   match 'f/talk-with-us' => 'forms#user_discussion', via: :post

@@ -265,10 +265,10 @@ class GroupsController < ApplicationController
       end
 
       if params[:type] == 'admin'
-        NewUserMailer.group_admin_add(found_user["email"], found_user["name"], 
+        NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
                                       current_user, @group, @badges).deliver
       else
-        NewUserMailer.group_member_add(found_user["email"], found_user["name"], 
+        NewUserMailer.delay.group_member_add(found_user["email"], found_user["name"], 
                                       current_user, @group, @badges).deliver
       end
       found_user[:invite_date] = Time.now
@@ -384,7 +384,7 @@ class GroupsController < ApplicationController
             else
               @group.admins << user
               @badges.each { |badge| badge.add_learner user }
-              UserMailer.group_admin_add(user, current_user, @group, @badges).deliver if @notify_by_email
+              UserMailer.delay.group_admin_add(user, current_user, @group, @badges).deliver if @notify_by_email
               if @group.has_member?(user)
                 @group.members.delete(user)
                 @upgraded_member_emails << user.email
@@ -404,7 +404,7 @@ class GroupsController < ApplicationController
             else
               @group.members << user
               @badges.each { |badge| badge.add_learner user }
-              UserMailer.group_member_add(user, current_user, @group, @badges).deliver if @notify_by_email
+              UserMailer.delay.group_member_add(user, current_user, @group, @badges).deliver if @notify_by_email
               @new_member_emails << user.email
             end
           end
@@ -436,7 +436,7 @@ class GroupsController < ApplicationController
             @new_admin_emails << email
           end
           @group.invited_admins << invited_user
-          NewUserMailer.group_admin_add(email, name_from_email[email],
+          NewUserMailer.delay.group_admin_add(email, name_from_email[email],
                                         current_user, @group, @badges).deliver if @notify_by_email
         else
           if @group.has_invited_member?(email)
@@ -444,7 +444,7 @@ class GroupsController < ApplicationController
           else
             @group.invited_members << invited_user
             @new_member_emails << email
-            NewUserMailer.group_member_add(email, name_from_email[email],
+            NewUserMailer.delay.group_member_add(email, name_from_email[email],
                                            current_user, @group, @badges).deliver if @notify_by_email
           end
         end

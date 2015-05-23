@@ -282,7 +282,7 @@ protected
     # Note: The created_at condition is to filter out sample_data & migrations
     if created_at > (Time.now - 2.hours)
       if (type == 'validation') && (log.user_id != creator_id)
-        UserMailer.log_validation_received(log.user, creator, \
+        UserMailer.delay.log_validation_received(log.user, creator, \
           log.badge.group, log.badge, log, self).deliver 
       end
     end

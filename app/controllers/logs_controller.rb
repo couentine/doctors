@@ -89,7 +89,7 @@ class LogsController < ApplicationController
         if is_error
           message = 'An error occured while trying to create a progress log for you.' 
         else
-          UserMailer.log_new(current_user, current_user, @group, @badge, @log).deliver
+          UserMailer.delay.log_new(current_user, current_user, @group, @badge, @log).deliver
         end
       end
     else
