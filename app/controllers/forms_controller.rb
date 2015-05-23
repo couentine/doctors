@@ -28,7 +28,7 @@ class FormsController < ApplicationController
     current_user.save
 
     # Finally send the email and return only javascript
-    SystemMailer.delay.form_user_discussion(TARGET_EMAIL, current_user, goals, availability).deliver
+    SystemMailer.delay.form_user_discussion(TARGET_EMAIL, current_user.id, goals, availability)
     respond_to do |format|
       format.js {} # render user_discussion.js.erb
     end

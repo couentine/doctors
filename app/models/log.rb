@@ -379,17 +379,17 @@ protected
 
         # Now query the users and send them each an email
         User.where(:id.in => user_ids_to_email).each do |user_to_email|
-          UserMailer.delay.log_validation_request(user_to_email, self.user, badge.group, badge, \
-            self).deliver 
+          UserMailer.delay.log_validation_request(user_to_email.id, self.user.id, badge.group_id, \
+            badge.id, self.id) 
         end
       elsif validation_status == 'validated'
-        UserMailer.delay.log_badge_issued(user, badge.group, badge, self).deliver 
+        UserMailer.delay.log_badge_issued(user.id, badge.group_id, badge.id, self.id) 
       end
     end
 
     if issue_status_changed? && (updated_at > (Time.now - 1.hour))
       if issue_status == 'retracted'
-        UserMailer.delay.log_badge_retracted(user, badge.group, badge, self).deliver 
+        UserMailer.delay.log_badge_retracted(user.id, badge.group_id, badge.id, self.id) 
       end
     end
   end

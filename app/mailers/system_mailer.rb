@@ -2,7 +2,8 @@ class SystemMailer < ActionMailer::Base
   include EmailTools
 
   def form_user_discussion(to_email, from_user, goals, availability)
-    @to_email, @from_user, @goals, @availability = to_email, from_user, goals, availability
+    @to_email, @from_user, @goals, @availability \
+      = to_email, User.find(from_user), goals, availability
 
     mail(
       :subject  => "Badge List Discussion Request - #{from_user.name}",

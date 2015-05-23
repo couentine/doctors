@@ -244,7 +244,8 @@ class BadgesController < ApplicationController
         
         if @notify_by_email
           begin
-            UserMailer.delay.log_new(user, current_user, @group, @badge, new_learner_log).deliver 
+            UserMailer.delay.log_new(user.id, current_user.id, @group.id, @badge.id, \
+              new_learner_log.id) 
           rescue Exception => e
             logger.error "+++badges_controller.create_learners: " \
             + "There was an error sending an email to #{user}. " \
@@ -316,7 +317,7 @@ class BadgesController < ApplicationController
 
         # send the email and then save the group (if there's no error sending the email)
         begin
-          NewUserMailer.delay.badge_issued(@email, nil, current_user, @group, @badge).deliver
+          NewUserMailer.delay.badge_issued(@email, nil, current_user.id, @group.id, @badge.id)
           @group.save!
           redirect_to [@group, @badge], 
             notice: "A notice of badge achievement was sent to #{@email}. " \

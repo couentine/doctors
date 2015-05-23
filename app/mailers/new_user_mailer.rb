@@ -1,8 +1,10 @@
 class NewUserMailer < ActionMailer::Base
   include EmailTools
 
-  def group_member_add(to_email, to_name, from_user, group, badges)
-    @to_email, @to_name, @from_user, @group, @badges = to_email, to_name, from_user, group, badges
+  def group_member_add(to_email, to_name, from_user_id, group_id, badge_ids)
+    @to_email, @to_name = to_email, to_name
+    @from_user, @group, @badges = User.find(from_user_id), Group.find(group_id), \
+        Badge.where(:id.in => badge_ids)
 
     if @to_name.blank?
       to_email_name = @to_email
@@ -11,16 +13,18 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "Welcome to #{group.name}!",
+      :subject  => "Welcome to #{@group.name}!",
       :to       => to_email_name,
-      :from     => build_from_string(from_user),
-      :reply_to => from_user.email_name,
+      :from     => build_from_string(@from_user),
+      :reply_to => @from_user.email_name,
       :tag      => 'group_member_add,new_user_mailer'
     )
   end
 
-  def group_admin_add(to_email, to_name, from_user, group, badges)
-    @to_email, @to_name, @from_user, @group, @badges = to_email, to_name, from_user, group, badges
+  def group_admin_add(to_email, to_name, from_user_id, group_id, badge_ids)
+    @to_email, @to_name = to_email, to_name
+    @from_user, @group, @badges = User.find(from_user_id), Group.find(group_id), \
+        Badge.where(:id.in => badge_ids)
 
     if @to_name.blank?
       to_email_name = @to_email
@@ -29,16 +33,18 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "You're now an admin of #{group.name}",
+      :subject  => "You're now an admin of #{@group.name}",
       :to       => to_email_name,
-      :from     => build_from_string(from_user),
-      :reply_to => from_user.email_name,
+      :from     => build_from_string(@from_user),
+      :reply_to => @from_user.email_name,
       :tag      => 'group_admin_add,new_user_mailer'
     )
   end
 
-  def badge_issued(to_email, to_name, from_user, group, badge)
-    @to_email, @to_name, @from_user, @group, @badge = to_email, to_name, from_user, group, badge
+  def badge_issued(to_email, to_name, from_user_id, group_id, badge_id)
+    @to_email, @to_name = to_email, to_name
+    @from_user, @group, @badge = User.find(from_user_id), Group.find(group_id), \
+      Badge.find(badge_id)
 
     if @to_name.blank?
       to_email_name = @to_email
@@ -47,10 +53,10 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "You've been awarded the #{badge.name} badge!",
+      :subject  => "You've been awarded the #{@badge.name} badge!",
       :to       => to_email_name,
-      :from     => build_from_string(from_user),
-      :reply_to => from_user.email_name,
+      :from     => build_from_string(@from_user),
+      :reply_to => @from_user.email_name,
       :tag      => 'badge_issued,new_user_mailer'
     )
   end

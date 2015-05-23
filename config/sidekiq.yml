@@ -2,4 +2,5 @@
 :queues:
   - [high, 5]
   - [default, 3]
+  - [mailer, 2]
   - [low, 1]

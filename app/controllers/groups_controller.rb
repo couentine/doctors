@@ -259,17 +259,18 @@ class GroupsController < ApplicationController
     if found_user
       # Query for the badges if param is included
       if found_user["badges"].blank?
-        @badges = []
+        @badges, badge_ids = [], []
       else
         @badges = @group.badges.where(:url.in => found_user["badges"])
+        badge_ids = @badges.map{ |b| b.id }
       end
 
       if params[:type] == 'admin'
         NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
-                                      current_user, @group, @badges).deliver
+                                      current_user.id, @group.id, badge_ids)
       else
         NewUserMailer.delay.group_member_add(found_user["email"], found_user["name"], 
-                                      current_user, @group, @badges).deliver
+                                      current_user.id, @group.id, badge_ids)
       end
       found_user[:invite_date] = Time.now
 
@@ -352,9 +353,10 @@ class GroupsController < ApplicationController
 
     # Query for the badges if param is included
     if params["badges"].blank?
-      @badges = []
+      @badges, badge_ids = [], []
     else
       @badges = @group.badges.where(:url.in => params["badges"])
+      badge_ids = @badges.map{ |b| b.id }
     end
 
     # Parse the emails using the UsersHelper function
@@ -376,6 +378,7 @@ class GroupsController < ApplicationController
 
       # For existing users: We can add them right away
       unless users_to_add.empty?
+        badge_ids = []
         if @type == :admin
           users_to_add.each do |user|
             if @group.has_admin?(user)
@@ -384,7 +387,9 @@ class GroupsController < ApplicationController
             else
               @group.admins << user
               @badges.each { |badge| badge.add_learner user }
-              UserMailer.delay.group_admin_add(user, current_user, @group, @badges).deliver if @notify_by_email
+              if @notify_by_email
+                UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, badge_ids)
+              end
               if @group.has_member?(user)
                 @group.members.delete(user)
                 @upgraded_member_emails << user.email
@@ -404,7 +409,9 @@ class GroupsController < ApplicationController
             else
               @group.members << user
               @badges.each { |badge| badge.add_learner user }
-              UserMailer.delay.group_member_add(user, current_user, @group, @badges).deliver if @notify_by_email
+              if @notify_by_email
+                UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, badge_ids)
+              end
               @new_member_emails << user.email
             end
           end
@@ -437,7 +444,7 @@ class GroupsController < ApplicationController
           end
           @group.invited_admins << invited_user
           NewUserMailer.delay.group_admin_add(email, name_from_email[email],
-                                        current_user, @group, @badges).deliver if @notify_by_email
+            current_user.id, @group.id, badge_ids) if @notify_by_email
         else
           if @group.has_invited_member?(email)
             @skipped_member_emails << email
@@ -445,7 +452,7 @@ class GroupsController < ApplicationController
             @group.invited_members << invited_user
             @new_member_emails << email
             NewUserMailer.delay.group_member_add(email, name_from_email[email],
-                                           current_user, @group, @badges).deliver if @notify_by_email
+              current_user.id, @group.id, badge_ids) if @notify_by_email
           end
         end
       end
