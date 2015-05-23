@@ -44,6 +44,7 @@ gem 'postmark-rails', '~> 0.5.2'
 
 # Users
 gem 'devise', '~> 3.3.0'
+gem 'devise-async'
 
 # Twitter
 gem 'twitter'
