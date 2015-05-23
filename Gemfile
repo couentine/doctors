@@ -8,6 +8,7 @@ gem 'thin'
 
 gem 'mongoid', '3.1.5'
 gem 'bson_ext', '1.9.2'
+gem 'redis'
 
 gem 'bootstrap-sass', '2.3.2.2'
 gem 'faker'
