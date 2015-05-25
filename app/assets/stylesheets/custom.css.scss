@@ -741,7 +741,7 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           color: $medium-text-color;
           font-style: italic;
         }
-        input[type="text"],textarea,input[type="url"] {
+        input[type="text"],textarea,input[type="url"],input[type="email"],input[type="password"] {
           border-radius: 0;
           border-top: none;
           border-right: none;
@@ -752,7 +752,8 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
         textarea {
           border-left: 1px solid $light-gray;
         }
-        input[type="text"]:focus,textarea:focus,,input[type="url"]:focus {
+        input[type="text"]:focus,textarea:focus,input[type="url"]:focus,input[type="email"]:focus,
+            input[type="password"]:focus {
           background-color: $really-light-gray;
         }
         p.help-block {
@@ -1440,6 +1441,9 @@ form#group-add-users-form {
 
               &:hover, &:focus {
                 background-color: $light-gray;
+              }
+              &.btn-danger {
+                background-color: #C3211D;
               }
             }
           }

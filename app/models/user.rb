@@ -13,6 +13,7 @@ class User
   # === RELATIONSHIP === #
 
   has_many :created_groups, inverse_of: :creator, class_name: "Group"
+  has_many :owned_groups, inverse_of: :owner, class_name: "Group"
   has_many :created_badges, inverse_of: :creator, class_name: "Badge"
   has_many :logs, dependent: :destroy
   has_many :created_entries, inverse_of: :creator, class_name: "Entry"

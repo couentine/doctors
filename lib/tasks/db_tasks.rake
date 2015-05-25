@@ -359,4 +359,16 @@ namespace :db do
     puts " >> Done."
   end
 
+  task backpopulate_group_owners: :environment do
+    print "Updating #{Group.count} groups"
+    Group.each do |group|
+      if group.owner.nil?
+        group.owner = group.creator
+        group.timeless.save
+      end
+      print "."
+    end
+    puts " >> Done."
+  end
+
 end
