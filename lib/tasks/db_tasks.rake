@@ -364,6 +364,7 @@ namespace :db do
     Group.each do |group|
       if group.owner.nil?
         group.owner = group.creator
+        group.admins << group.owner unless group.admin_ids.include? group.owner_id
         group.timeless.save
       end
       print "."

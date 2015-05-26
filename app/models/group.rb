@@ -45,7 +45,9 @@ class Group
   
   field :subscription_plan,           type: String # values are defined in config.yml
   field :stripe_subscription_id,      type: String
-  field :stripe_subscription_status,  type: String
+  field :stripe_subscription_details, type: String
+  field :stripe_subscription_status,  type: String # Possible Status Values = ['trialing', 'active',
+                                                   #  'past_due', 'canceled', 'unpaid']
 
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
@@ -78,6 +80,7 @@ class Group
   before_validation :update_caps_field
   before_create :add_creator_to_admins
   before_update :change_owner
+  after_create :queue_create_stripe_subscription
 
   # === GROUP MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -186,15 +189,16 @@ class Group
     end
   end
 
-  # Calls out to stripe to create a new customer record and then saves the strip cust id locally
+  # Calls out to stripe to create a new subscription for this group on the owner's customer record
   def create_stripe_subscription
     if !subscription_plan.blank? && stripe_subscription_id.blank? && owner_has_stripe_card?
       Stripe.api_key = ENV['stripe_secret_key']
 
-      customer = Strip::Customer.retrieve(owner.stripe_customer_id)
+      customer = Stripe::Customer.retrieve(owner.stripe_customer_id)
       subscription = customer.subscriptions.create(
         plan: subscription_plan,
         metadata: {
+          description: "#{name} (#{url})",
           group_id: id,
           group_url: url,
           group_name: name,
@@ -205,10 +209,41 @@ class Group
       if customer && subscription
         self.stripe_subscription_id = subscription.id
         self.stripe_subscription_status = subscription.status
+        self.stripe_subscription_details = subscription.to_hash
         self.save
       end
     end
   end
+
+  # Call this from after_create callback
+  def queue_create_stripe_subscription
+    if !subscription_plan.blank? && stripe_subscription_id.blank? && owner_has_stripe_card?
+      self.delay(queue: 'high').create_stripe_subscription
+    end
+  end
+
+  # Calls out to stripe to refresh the subscription status
+  def refresh_stripe_subscription
+    if !stripe_subscription_id.blank? && !owner.stripe_customer_id.blank?
+      Stripe.api_key = ENV['stripe_secret_key']
+
+      customer = Stripe::Customer.retrieve(owner.stripe_customer_id)
+      subscription = customer.subscriptions.retrieve(stripe_subscription_id) if customer
+      
+      if customer && subscription
+        self.stripe_subscription_status = subscription.status
+        self.stripe_subscription_details = subscription.to_hash
+        self.save
+      end
+    end
+  end
+
+  # LEFT OFF HERE: Next step... add "queue_refresh_stripe_subscription"
+  #   It should take a param that lets me schedule it for later so I can basically have it check
+  #   in with the server after each billing event.
+  # Then: Work on some functions to propogate changes in the name and url back to the server
+  #       Along with a function to cancel the subscription when the owner changes 
+  #       ... think it through since i might have to poke holes in the validations
 
 protected
 
