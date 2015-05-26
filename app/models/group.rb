@@ -200,7 +200,7 @@ class Group
           group_name: name,
           group_website: website
         }
-      )
+      ) if customer
       
       if customer && subscription
         self.stripe_subscription_id = subscription.id
