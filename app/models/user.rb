@@ -38,7 +38,6 @@ class User
 
   field :stripe_customer_id,            type: String
   field :stripe_cards,                  type: Array, default: []
-  field :stripe_cards_last_updated,     type: Time
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
@@ -119,10 +118,6 @@ class User
 
   def to_param
     username
-  end
-
-  def has_stripe_card?
-    !stripe_customer_id.blank? && !stripe_cards.blank?
   end
 
   def set_flag(flag)
@@ -273,6 +268,12 @@ class User
   def manually_update_identity_hash
     self.identity_salt = SecureRandom.hex
     self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+  end
+
+  # === STRIPE RELATED METHODS === #
+
+  def has_stripe_card?
+    !stripe_customer_id.blank? && !stripe_cards.blank?
   end
 
   # Calls out to stripe to create a new customer record and then saves the strip cust id locally

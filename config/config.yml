@@ -6,6 +6,21 @@ defaults: &defaults
   page_size_normal: 30
   page_size_large: 60
 
+  # Subscription Plans
+  subscription_plans:
+    Standard-100:
+      name: Starter
+      monthly_price: 50.0
+    Standard-500:
+      name: Basic
+      monthly_price: 120.0
+    Standard-1000:
+      name: Standard
+      monthly_price: 200.0
+    Standard-5000:
+      name: Premium
+      monthly_price: 450.0
+
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:
    - add

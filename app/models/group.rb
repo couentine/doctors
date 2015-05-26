@@ -26,23 +26,27 @@ class Group
 
   # === FIELDS & VALIDATIONS === #
 
-  field :name,                    type: String
-  field :url,                     type: String
-  field :url_with_caps,           type: String
-  field :location,                type: String
-  field :website,                 type: String
-  field :image_url,               type: String
-  field :type,                    type: String, default: 'private'
-  field :customer_code,           type: String
-  field :validation_threshold,    type: Integer, default: 1
-  field :invited_admins,          type: Array, default: []
-  field :invited_members,         type: Array, default: []
-  field :flags,                   type: Array, default: []
-  field :monthly_active_users,    type: Hash, default: {}, pre_processed: true
-  field :active_user_count,       type: Integer
-  field :user_limit,              type: Integer, default: 5 # only for private groups
+  field :name,                        type: String
+  field :url,                         type: String
+  field :url_with_caps,               type: String
+  field :location,                    type: String
+  field :website,                     type: String
+  field :image_url,                   type: String
+  field :type,                        type: String, default: 'private'
+  field :customer_code,               type: String
+  field :validation_threshold,        type: Integer, default: 1
+  field :invited_admins,              type: Array, default: []
+  field :invited_members,             type: Array, default: []
+  field :flags,                       type: Array, default: []
+  field :monthly_active_users,        type: Hash, default: {}, pre_processed: true
+  field :active_user_count,           type: Integer
+  field :user_limit,                  type: Integer, default: 5 # only for private groups
+  field :new_owner_username,          type: String
+  
+  field :subscription_plan,           type: String # values are defined in config.yml
+  field :stripe_subscription_id,      type: String
+  field :stripe_subscription_status,  type: String
 
-  field :new_owner_username,      type: String
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
@@ -59,12 +63,14 @@ class Group
   validates :type, inclusion: { in: TYPE_VALUES, 
                                 message: "%{value} is not a valid Group Type" }
   validates :creator, presence: true
+  validates :subscription_plan, presence: true, if: :private?
 
   validate :new_owner_username_exists
+  validate :owner_has_stripe_card?, if: :private?
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
-    :validation_threshold, :user_limit, :new_owner_username
+    :validation_threshold, :user_limit, :new_owner_username, :subscription_plan
 
   # === CALLBACKS === #
 
@@ -169,8 +175,42 @@ class Group
     end
   end
 
-protected
+  # === STRIPE RELATED METHODS === #
 
+  # Validation method to confirm that the group owner has added credit cards
+  def owner_has_stripe_card?
+    if owner_id.blank?
+      false
+    else
+      owner.has_stripe_card?
+    end
+  end
+
+  # Calls out to stripe to create a new customer record and then saves the strip cust id locally
+  def create_stripe_subscription
+    if !subscription_plan.blank? && stripe_subscription_id.blank? && owner_has_stripe_card?
+      Stripe.api_key = ENV['stripe_secret_key']
+
+      customer = Strip::Customer.retrieve(owner.stripe_customer_id)
+      subscription = customer.subscriptions.create(
+        plan: subscription_plan,
+        metadata: {
+          group_id: id,
+          group_url: url,
+          group_name: name,
+          group_website: website
+        }
+      )
+      
+      if customer && subscription
+        self.stripe_subscription_id = subscription.id
+        self.stripe_subscription_status = subscription.status
+        self.save
+      end
+    end
+  end
+
+protected
 
   def add_creator_to_admins
     self.admins << self.creator unless self.creator.blank?
