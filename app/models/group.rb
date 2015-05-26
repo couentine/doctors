@@ -42,6 +42,8 @@ class Group
   field :active_user_count,       type: Integer
   field :user_limit,              type: Integer, default: 5 # only for private groups
 
+  field :new_owner_username,      type: String
+
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
             format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
@@ -58,15 +60,18 @@ class Group
                                 message: "%{value} is not a valid Group Type" }
   validates :creator, presence: true
 
+  validate :new_owner_username_exists
+
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
-    :validation_threshold, :user_limit
+    :validation_threshold, :user_limit, :new_owner_username
 
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
   before_validation :update_caps_field
   before_create :add_creator_to_admins
+  before_update :change_owner
 
   # === GROUP MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -182,11 +187,36 @@ protected
     end
   end
 
-   def update_caps_field
+  def update_caps_field
     if url_with_caps.nil?
       self.url = nil
     else
       self.url = url_with_caps.downcase
+    end
+  end
+
+  def new_owner_username_exists
+    if new_owner_username.blank?
+      true
+    else
+      new_owner = User.find(new_owner_username) rescue nil
+      if new_owner.nil?
+        errors.add(:new_owner_username, " is not a valid Badge List username")
+        false
+      else
+        true
+      end
+    end
+  end
+
+  def change_owner
+    if new_owner_username && new_owner_username_changed?
+      new_owner = User.find(new_owner_username) rescue nil
+      if new_owner && (owner_id != new_owner.id)
+        self.owner = new_owner
+        self.admins << new_owner unless self.admin_ids.include? new_owner.id
+      end
+      self.new_owner_username = nil
     end
   end
 

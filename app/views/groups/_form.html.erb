@@ -49,29 +49,38 @@
                 collection: @group_type_options %>
 
     <% unless @group.new_record? %>
-      <h2>
-        Extra information (optional)
-        <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
-          value="Show Extra Info" onclick="toggleExtraInfo()" />
-      </h2>
 
-      <div id="form-extra-info" style="display:none">
-        <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
-                    input_html: { class: 'input-xlarge' } %>
+      <!-- === EXTRA INFO === -->
+      
+      <h2>Extra information</h2>
 
-        <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
-                    input_html: { class: 'input-xlarge' } %>
+      <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
+                  input_html: { class: 'input-xlarge' } %>
 
-        <%= f.input :image_url, label: 'Group Image URL', 
-                    placeholder: 'http://nasa.gov/logo.png',
-                    input_html: { class: 'input-xlarge' } %>
+      <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
+                  input_html: { class: 'input-xlarge' } %>
 
-        <% if @badge_list_admin %>
-          <%= f.input :user_limit, label: '(ADMIN) User Limit', 
-              placeholder: 'Private group allowed size',
-              input_html: { class: 'input-mini' } %>
-        <% end %>
-      </div>
+      <%= f.input :image_url, label: 'Group Image URL', 
+                  placeholder: 'http://nasa.gov/logo.png',
+                  input_html: { class: 'input-xlarge' } %>
+
+      <% if @badge_list_admin %>
+        <%= f.input :user_limit, label: '(ADMIN) User Limit', 
+            placeholder: 'Private group allowed size',
+            input_html: { class: 'input-mini' } %>
+      <% end %>
+
+      <!-- === GROUP OWNERSHIP === -->
+
+      <h2>Transfer group ownership</h2>
+      
+      <%= f.input :new_owner_username, label: 'New owner', 
+        placeholder: 'Enter Badge List username',
+        hint: 'This will instantly and irreversably transfer ownership of this group to the ' \
+        + 'user you specify (enter their Badge List username not their email). ' \
+        + 'Badge List will not send them a notification so please be sure to ' \
+        + 'notify the recipient and get their agreement beforehand.' %>
+
     <% end %>
   </div>  
   

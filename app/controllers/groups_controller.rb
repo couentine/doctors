@@ -7,12 +7,13 @@ class GroupsController < ApplicationController
   # Non-RESTful Actions >> :leave, :destroy_user, :destroy_invited_user, 
   #                        :add_users, :create_users
 
-  before_filter :find_group, only: [:show, :edit, :update, :destroy, :join, :leave,
+  prepend_before_filter :find_group, only: [:show, :edit, :update, :destroy, :join, :leave,
     :destroy_user, :send_invitation, :destroy_invited_user, :add_users, :create_users]
   before_filter :authenticate_user!, except: [:show]
   before_filter :group_member_or_admin, only: [:leave]
-  before_filter :group_admin, only: [:edit, :update, :destroy, :destroy_user, 
-    :destroy_invited_user, :add_users, :create_users]
+  before_filter :group_admin, only: [:destroy_user, :destroy_invited_user, :add_users, 
+    :create_users]
+  before_filter :group_owner, only: [:edit, :update, :destroy]
   before_filter :badge_list_admin, only: [:index]
 
 
@@ -474,22 +475,29 @@ private
     @group.log_active_user current_user # log monthly active user if applicable
     @current_user_is_admin = current_user && @group.has_admin?(current_user)
     @current_user_is_member = current_user && @group.has_member?(current_user)
+    @current_user_is_owner = current_user && (@group.owner_id == current_user.id)
     @badge_list_admin = current_user && current_user.admin?
   end
 
   def group_admin
-    if !@group.has_admin?(current_user) && !(current_user && current_user.admin?)
+    unless @current_user_is_admin || @badge_list_admin
       flash[:error] = "You must be an admin of #{@group.name} to do that!"
       redirect_to @group
     end 
   end
 
+  def group_owner
+    unless @current_user_is_owner || @badge_list_admin
+      flash[:error] = "Only the group owner can access this functionality."
+      redirect_to @group
+    end 
+  end
+
   def group_member_or_admin
-    if !@group.has_member?(current_user) && !@group.has_admin?(current_user) \
-      && !(current_user && current_user.admin?)
+    unless @current_user_is_member || @current_user_is_admin || @badge_list_admin
       flash[:error] = "You must be a member or admin of #{@group.name} to do that!"
       redirect_to @group
-    end
+    end 
   end
 
   def badge_list_admin
