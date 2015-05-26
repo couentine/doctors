@@ -392,6 +392,10 @@ ul.dropdown-menu {
     animation: spin 1s linear infinite;
     -webkit-animation: spin 1s linear infinite;
     -moz-animation: spin 1s linear infinite;
+
+    &.large { border: solid 60px; margin-top: 40px; }
+    &.secondary { border-color: $secondary-medium transparent $secondary-medium transparent; }
+    &.tertiary { border-color: $tertiary-medium transparent $tertiary-medium transparent; }
   }
 }
 @-webkit-keyframes spin {
@@ -761,6 +765,10 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           font-style: italic;
           margin-top: 15px;
           color: $light-text-color;
+
+          &.error-block {
+            color: $red-medium;
+          }
         }
         .huge-text-area {
           width: 95%;
@@ -835,6 +843,7 @@ div.bl-inline-form {
   margin-bottom: 30px;
   border-radius: 5px;
   box-shadow: inset -1px 1px 7px 0 $card-shadow-color;
+  position: relative;
 
   .control-group {
     float: none;
@@ -843,6 +852,13 @@ div.bl-inline-form {
       color: $tertiary-dark;
       margin-bottom: 10px;
       font-size: 16px
+    }
+  }
+  p.help-block {
+    margin-top: 15px;
+
+    &.error-block {
+      color: $red-medium;
     }
   }
 

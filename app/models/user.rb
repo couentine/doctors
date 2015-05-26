@@ -22,19 +22,23 @@ class User
 
   # === CUSTOM FIELDS & VALIDTIONS === #
   
-  field :name,                type: String
-  field :username,            type: String
-  field :username_with_caps,  type: String
-  field :flags,               type: Array, default: [], pre_processed: true
-  field :flags,               type: Array, default: [], pre_processed: true
-  field :admin,               type: Boolean, default: false
-  field :page_views,          type: Hash, default: {}, pre_processed: true
-  field :form_submissions,    type: Array
-  field :last_active_at,      type: Time
-  field :active_months,       type: Array
+  field :name,                          type: String
+  field :username,                      type: String
+  field :username_with_caps,            type: String
+  field :flags,                         type: Array, default: [], pre_processed: true
+  field :flags,                         type: Array, default: [], pre_processed: true
+  field :admin,                         type: Boolean, default: false
+  field :page_views,                    type: Hash, default: {}, pre_processed: true
+  field :form_submissions,              type: Array
+  field :last_active_at,                type: Time
+  field :active_months,                 type: Array
 
-  field :identity_hash,       type: String
-  field :identity_salt,       type: String
+  field :identity_hash,                 type: String
+  field :identity_salt,                 type: String
+
+  field :stripe_customer_id,            type: String
+  field :stripe_cards,                  type: Array, default: []
+  field :stripe_cards_last_updated,     type: Time
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
@@ -115,6 +119,10 @@ class User
 
   def to_param
     username
+  end
+
+  def has_stripe_card?
+    !stripe_customer_id.blank? && !stripe_cards.blank?
   end
 
   def set_flag(flag)
@@ -265,6 +273,72 @@ class User
   def manually_update_identity_hash
     self.identity_salt = SecureRandom.hex
     self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+  end
+
+  # Calls out to stripe to create a new customer record and then saves the strip cust id locally
+  def create_stripe_customer
+    if stripe_customer_id.blank?
+      Stripe.api_key = ENV['stripe_secret_key']
+
+      response = Stripe::Customer.create(
+        email: email,
+        description: "#{name} (#{username_with_caps})",
+        metadata: {
+          user_id: id,
+          username: username,
+          name: name
+        }
+      )
+      
+      if response
+        self.stripe_customer_id = response.id
+        self.save
+      end
+    end
+  end
+
+  # Calls out to stripe to add a card (the token comes from Stripe.js on the front end)
+  def add_stripe_card(card_token)
+    create_stripe_customer if stripe_customer_id.blank?
+    
+    unless stripe_customer_id.blank?
+      Stripe.api_key = ENV['stripe_secret_key']
+
+      customer = Stripe::Customer.retrieve(stripe_customer_id)
+      card = customer.sources.create(source: card_token)
+
+      if card
+        self.stripe_cards << card.to_hash
+        self.save
+      end
+    end
+  end
+
+  # Calls out to stripe to refresh list of stripe cards
+  def refresh_stripe_cards
+    if stripe_customer_id.blank?
+      self.stripe_cards = []
+    else
+      Stripe.api_key = ENV['stripe_secret_key']
+
+      customer = Stripe::Customer.retrieve(stripe_customer_id)
+      cards = customer.sources.all if customer
+      self.stripe_cards = cards.map{ |c| c.to_hash } if customer && cards
+    end
+    self.save
+  end
+
+  # Calls out to stripe to delete a card
+  def delete_stripe_card(card_id)
+    unless stripe_customer_id.blank?
+      Stripe.api_key = ENV['stripe_secret_key']
+
+      customer = Stripe::Customer.retrieve(stripe_customer_id)
+      card = customer.sources.retrieve(card_id)
+      card.delete if customer && card
+
+      refresh_stripe_cards
+    end
   end
 
 protected
