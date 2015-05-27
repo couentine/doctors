@@ -16,6 +16,9 @@ class Group
   CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem', 'london-21', 'tokyo-15',
     'paris-99', 'budapest-54', 'chicago-67', 'santiago-12'] # add new customers here
 
+  PENDING_TRANSFER_FLAG = 'pending_transfer'
+  PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
+
   # === RELATIONSHIPS === #
 
   belongs_to :creator, inverse_of: :created_groups, class_name: "User"
@@ -44,11 +47,12 @@ class Group
   field :new_owner_username,          type: String
   
   field :subscription_plan,           type: String # values are defined in config.yml
+  field :subscription_end_date,       type: Time
+  field :stripe_subscription_card,    type: String
   field :stripe_subscription_id,      type: String
   field :stripe_subscription_details, type: String
   field :stripe_subscription_status,  type: String # Possible Status Values = ['trialing', 'active',
                                                    #  'past_due', 'canceled', 'unpaid']
-
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
@@ -66,9 +70,9 @@ class Group
                                 message: "%{value} is not a valid Group Type" }
   validates :creator, presence: true
   validates :subscription_plan, presence: true, if: :private?
+  validates :stripe_subscription_card, presence: true, if: :private?
 
   validate :new_owner_username_exists
-  validate :owner_has_stripe_card?, if: :private?
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
@@ -80,6 +84,7 @@ class Group
   before_validation :update_caps_field
   before_create :add_creator_to_admins
   before_update :change_owner
+  before_save :process_subscription_updates
   after_create :queue_create_stripe_subscription
 
   # === GROUP MOCK FIELD METHODS === #
@@ -109,6 +114,18 @@ class Group
 
   def to_param
     url
+  end
+
+  def set_flag(flag)
+    self.flags << flag unless flags.include? flag
+  end
+
+  def clear_flag(flag)
+    self.flags.delete flag if flags.include? flag
+  end
+
+  def has_flag?(flag)
+    flags.include? flag
   end
 
   # Is this group visible to the public?
@@ -180,75 +197,151 @@ class Group
 
   # === STRIPE RELATED METHODS === #
 
-  # Validation method to confirm that the group owner has added credit cards
-  def owner_has_stripe_card?
-    if owner_id.blank?
-      false
-    else
-      owner.has_stripe_card?
-    end
+  # Calls out to stripe to create a new subscription for the provided group 
+  # (subscription is created on the owner's customer record)
+  
+  def create_stripe_subscription
+    Group.create_stripe_subscription(nil, self)
   end
 
-  # Calls out to stripe to create a new subscription for this group on the owner's customer record
-  def create_stripe_subscription
-    if !subscription_plan.blank? && stripe_subscription_id.blank? && owner_has_stripe_card?
+  def self.create_stripe_subscription(group_id, group = nil) # provide group to skip query
+    group = Group.find(group_id) if group.nil?
+
+    if group && !group.subscription_plan.blank? && group.stripe_subscription_id.blank? \
+        && group.owner_has_stripe_card?
       Stripe.api_key = ENV['stripe_secret_key']
 
-      customer = Stripe::Customer.retrieve(owner.stripe_customer_id)
+      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
       subscription = customer.subscriptions.create(
-        plan: subscription_plan,
+        plan: group.subscription_plan,
+        source: group.stripe_subscription_card,
         metadata: {
-          description: "#{name} (#{url})",
-          group_id: id,
-          group_url: url,
-          group_name: name,
-          group_website: website
+          description: "#{group.name} (#{group.url})",
+          group_id: group.id,
+          group_url: group.url,
+          group_name: group.name,
+          group_website: group.website
         }
       ) if customer
       
       if customer && subscription
-        self.stripe_subscription_id = subscription.id
-        self.stripe_subscription_status = subscription.status
-        self.stripe_subscription_details = subscription.to_hash
-        self.save
+        group.stripe_subscription_id = subscription.id
+        group.stripe_subscription_status = subscription.status
+        group.stripe_subscription_details = subscription.to_hash
+        group.subscription_end_date = subscription.current_period_end
+        group.save
       end
     end
   end
 
   # Call this from after_create callback
-  def queue_create_stripe_subscription
+  def queue_create_stripe_subscription(queue = 'high')
     if !subscription_plan.blank? && stripe_subscription_id.blank? && owner_has_stripe_card?
-      self.delay(queue: 'high').create_stripe_subscription
+      Group.delay(queue: queue).create_stripe_subscription(id)
     end
   end
 
   # Calls out to stripe to refresh the subscription status
+  
   def refresh_stripe_subscription
-    if !stripe_subscription_id.blank? && !owner.stripe_customer_id.blank?
+    Group.refresh_stripe_subscription(nil, self)
+  end
+  
+  def self.refresh_stripe_subscription(stripe_sub_id, group = nil) # provide group to skip query
+    group = Group.find_by(stripe_subscription_id: stripe_sub_id) if group.nil?
+
+    if group && !group.stripe_subscription_id.blank? && !group.owner.stripe_customer_id.blank?
       Stripe.api_key = ENV['stripe_secret_key']
 
-      customer = Stripe::Customer.retrieve(owner.stripe_customer_id)
-      subscription = customer.subscriptions.retrieve(stripe_subscription_id) if customer
+      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+      subscription = customer.subscriptions.retrieve(group.stripe_subscription_id) if customer
       
       if customer && subscription
-        self.stripe_subscription_status = subscription.status
-        self.stripe_subscription_details = subscription.to_hash
-        self.save
+        group.subscription_plan = subscription.plan.id
+        group.stripe_subscription_status = subscription.status
+        group.stripe_subscription_details = subscription.to_hash
+        group.subscription_end_date = subscription.current_period_end
+        group.save
       end
     end
   end
 
-  # LEFT OFF HERE: Next step... add "queue_refresh_stripe_subscription"
-  #   It should take a param that lets me schedule it for later so I can basically have it check
-  #   in with the server after each billing event.
-  # Then: Work on some functions to propogate changes in the name and url back to the server
-  #       Along with a function to cancel the subscription when the owner changes 
-  #       ... think it through since i might have to poke holes in the validations
+  # Calls out to stripe to update stripe about local changes to the subscription
+  
+  def update_stripe_subscription
+    Group.update_stripe_subscription(nil, self)
+  end
+  
+  def self.update_stripe_subscription(group_id, group = nil) # provide group to skip query
+    group = Group.find(group_id) if group.nil?
+
+    if group && !group.stripe_subscription_id.blank?
+      Stripe.api_key = ENV['stripe_secret_key']
+
+      # LEFT OFF HERE: 
+      # Finish updating this function to do what it says.
+      # Then change update_stripe_if_needed callback (and add it to the callback list)
+      # >> Remember to figure out how to keep it from running on stripe updates
+      # Then work on cancelling subscriptions
+      # Then figure out how to "fix" a subscription if it breaks
+      # Then either work on the webhook controller OR begin on the UI
+
+      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+      subscription = customer.subscriptions.retrieve(group.stripe_subscription_id) if customer
+      
+      if customer && subscription
+        group.subscription_plan = subscription.plan.id
+        group.stripe_subscription_status = subscription.status
+        group.stripe_subscription_details = subscription.to_hash
+        group.subscription_end_date = subscription.current_period_end
+        group.save
+      end
+    end
+  end
+
+  
 
 protected
 
   def add_creator_to_admins
     self.admins << self.creator unless self.creator.blank?
+  end
+
+  def process_subscription_updates
+    if new_record?
+      if !subscription_plan.blank? && stripe_subscription_id.blank?
+        # Default to a 2 week trial (until we hear back from strip via webhook)
+        self.stripe_subscription_status = 'trialing'
+        self.subscription_end_date = 2.weeks.from_now
+      end
+    else
+      if stripe_subscription_status_changed?
+        case stripe_subscription_status
+        when 'trialing', 'active'
+          clear_flag PENDING_SUBSCRIPTION_FLAG
+        when 'past_due', 'canceled', 'unpaid'
+          add_flag PENDING_SUBSCRIPTION_FLAG
+        else
+          add_flag PENDING_SUBSCRIPTION_FLAG
+        end
+      end
+    end
+  end
+
+  # Updates core fields in stripe if they change locally
+  def update_stripe_if_needed
+    if !new_record?
+      # if name_changed?
+      #   plan: group.subscription_plan,
+      #   source: group.stripe_subscription_card,
+      #   metadata: {
+      #     description: "#{group.name} (#{group.url})",
+      #     group_id: group.id,
+      #     group_url: group.url,
+      #     group_name: group.name,
+      #     group_website: group.website
+      #   }
+    end
   end
 
   def set_default_values
