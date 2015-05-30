@@ -279,8 +279,6 @@ class User
   # Calls out to stripe to create a new customer record and then saves the strip cust id locally
   def create_stripe_customer
     if stripe_customer_id.blank?
-      Stripe.api_key = ENV['stripe_secret_key']
-
       response = Stripe::Customer.create(
         email: email,
         description: "#{name} (#{username_with_caps})",
@@ -303,8 +301,6 @@ class User
     create_stripe_customer if stripe_customer_id.blank?
     
     unless stripe_customer_id.blank?
-      Stripe.api_key = ENV['stripe_secret_key']
-
       customer = Stripe::Customer.retrieve(stripe_customer_id)
       card = customer.sources.create(source: card_token)
 
@@ -320,8 +316,6 @@ class User
     if stripe_customer_id.blank?
       self.stripe_cards = []
     else
-      Stripe.api_key = ENV['stripe_secret_key']
-
       customer = Stripe::Customer.retrieve(stripe_customer_id)
       cards = customer.sources.all if customer
       self.stripe_cards = cards.map{ |c| c.to_hash } if customer && cards
@@ -332,8 +326,6 @@ class User
   # Calls out to stripe to delete a card
   def delete_stripe_card(card_id)
     unless stripe_customer_id.blank?
-      Stripe.api_key = ENV['stripe_secret_key']
-
       customer = Stripe::Customer.retrieve(stripe_customer_id)
       card = customer.sources.retrieve(card_id)
       card.delete if customer && card

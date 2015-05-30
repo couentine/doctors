@@ -86,6 +86,7 @@ class Group
   before_update :change_owner
   before_save :process_subscription_updates
   after_create :queue_create_stripe_subscription
+  after_update :update_stripe_if_needed
 
   # === GROUP MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -209,8 +210,6 @@ class Group
 
     if group && !group.subscription_plan.blank? && group.stripe_subscription_id.blank? \
         && group.owner_has_stripe_card?
-      Stripe.api_key = ENV['stripe_secret_key']
-
       customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
       subscription = customer.subscriptions.create(
         plan: group.subscription_plan,
@@ -251,8 +250,6 @@ class Group
     group = Group.find_by(stripe_subscription_id: stripe_sub_id) if group.nil?
 
     if group && !group.stripe_subscription_id.blank? && !group.owner.stripe_customer_id.blank?
-      Stripe.api_key = ENV['stripe_secret_key']
-
       customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
       subscription = customer.subscriptions.retrieve(group.stripe_subscription_id) if customer
       
@@ -276,31 +273,31 @@ class Group
     group = Group.find(group_id) if group.nil?
 
     if group && !group.stripe_subscription_id.blank?
-      Stripe.api_key = ENV['stripe_secret_key']
-
-      # LEFT OFF HERE: 
-      # Finish updating this function to do what it says.
-      # Then change update_stripe_if_needed callback (and add it to the callback list)
-      # >> Remember to figure out how to keep it from running on stripe updates
-      # Then work on cancelling subscriptions
-      # Then figure out how to "fix" a subscription if it breaks
-      # Then either work on the webhook controller OR begin on the UI
-
       customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
       subscription = customer.subscriptions.retrieve(group.stripe_subscription_id) if customer
       
       if customer && subscription
-        group.subscription_plan = subscription.plan.id
-        group.stripe_subscription_status = subscription.status
-        group.stripe_subscription_details = subscription.to_hash
-        group.subscription_end_date = subscription.current_period_end
-        group.save
+        subscription.plan = group.subscription_plan,
+        subscription.source = group.stripe_subscription_card,
+        subscription.metadata = {
+          description: "#{group.name} (#{group.url})",
+          group_id: group.id,
+          group_url: group.url,
+          group_name: group.name,
+          group_website: group.website
+        }
+        subscription.save
       end
     end
   end
 
+  # LEFT OFF HERE: FIXME
+  # Then change update_stripe_if_needed callback (and add it to the callback list)
+  # >> Remember to figure out how to keep it from running on stripe updates
+  # Then work on cancelling subscriptions
+  # Then figure out how to "fix" a subscription if it breaks
+  # Then either work on the webhook controller OR begin on the UI
   
-
 protected
 
   def add_creator_to_admins
@@ -330,17 +327,9 @@ protected
 
   # Updates core fields in stripe if they change locally
   def update_stripe_if_needed
-    if !new_record?
-      # if name_changed?
-      #   plan: group.subscription_plan,
-      #   source: group.stripe_subscription_card,
-      #   metadata: {
-      #     description: "#{group.name} (#{group.url})",
-      #     group_id: group.id,
-      #     group_url: group.url,
-      #     group_name: group.name,
-      #     group_website: group.website
-      #   }
+    if !new_record? && (subscription_plan_changed? || stripe_subscription_card_changed? \
+        || name_changed? || url_changed? || website_changed?)
+      Group.delay(queue: 'low').update_stripe_subscription(id)
     end
   end
 
