@@ -20,7 +20,7 @@ class User
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
 
-  # === CUSTOM FIELDS & VALIDTIONS === #
+  # === CUSTOM FIELDS & VALIDATIONS === #
   
   field :name,                          type: String
   field :username,                      type: String
@@ -54,7 +54,8 @@ class User
     :validatable, :confirmable, :lockable, :async
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :name, :username_with_caps, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :name, :username_with_caps, :password, :password_confirmation, 
+    :remember_me
 
   # === STANDARD DEVISE FIELDS === #
 

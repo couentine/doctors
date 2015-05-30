@@ -17,7 +17,7 @@ defaults: &defaults
         trial_period_days: 14
         statement_descriptor: Badge List Starter
         users: 100
-        admins: 0
+        admins: -1
         sub_groups: 0
       standard-500m-1:
         name: Basic
@@ -27,7 +27,7 @@ defaults: &defaults
         trial_period_days: 14
         statement_descriptor: Badge List Basic
         users: 500
-        admins: 0
+        admins: -1
         sub_groups: 1
       standard-1000m-1:
         name: Standard
@@ -37,7 +37,7 @@ defaults: &defaults
         trial_period_days: 14
         statement_descriptor: Badge List Standard
         users: 1000
-        admins: 0
+        admins: -1
         sub_groups: 5
       standard-5000m-1:
         name: Premium
@@ -47,8 +47,8 @@ defaults: &defaults
         trial_period_days: 14
         statement_descriptor: Badge List Premium
         users: 5000
-        admins: 0
-        sub_groups: 0
+        admins: -1
+        sub_groups: -1
     k12:
       k12-1y-1:
         name: Single Teacher
@@ -57,9 +57,20 @@ defaults: &defaults
         interval: year
         trial_period_days: 14
         statement_descriptor: Badge List K12 Teacher
-        users: 0
+        users: -1
         admins: 1
-        sub_groups: 1
+        sub_groups: 0
+    free:
+      free-unlimited-1:
+        name: Free Unlimited
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Free
+        users: -1
+        admins: -1
+        sub_groups: -1
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:

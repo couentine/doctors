@@ -19,6 +19,10 @@ class Group
   PENDING_TRANSFER_FLAG = 'pending_transfer'
   PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
 
+  # === INSTANCE VARIABLES === #
+
+  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
+
   # === RELATIONSHIPS === #
 
   belongs_to :creator, inverse_of: :created_groups, class_name: "User"
@@ -41,11 +45,19 @@ class Group
   field :invited_admins,              type: Array, default: []
   field :invited_members,             type: Array, default: []
   field :flags,                       type: Array, default: []
-  field :monthly_active_users,        type: Hash, default: {}, pre_processed: true
-  field :active_user_count,           type: Integer
-  field :user_limit,                  type: Integer, default: 5 # only for private groups
   field :new_owner_username,          type: String
   
+  field :user_limit,                  type: Integer, default: 5
+  field :admin_limit,                 type: Integer, default: 1
+  field :sub_group_limit,             type: Integer, default: 0
+  field :total_user_count,            type: Integer, default: 0
+  field :admin_count,                 type: Integer, default: 0
+  field :member_count,                type: Integer, default: 0
+  field :sub_group_count,             type: Integer, default: 0
+  field :active_user_count,           type: Integer, default: 0
+  field :monthly_active_users,        type: Hash, default: {}, pre_processed: true
+  
+  field :pricing_group,               type: String, default: 'standard'
   field :subscription_plan,           type: String # values are defined in config.yml
   field :subscription_end_date,       type: Time
   field :stripe_subscription_card,    type: String
@@ -76,7 +88,8 @@ class Group
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
-    :validation_threshold, :user_limit, :new_owner_username, :subscription_plan
+    :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit,
+    :pricing_group, :subscription_plan, :stripe_subscription_card
 
   # === CALLBACKS === #
 
@@ -84,6 +97,7 @@ class Group
   before_validation :update_caps_field
   before_create :add_creator_to_admins
   before_update :change_owner
+  before_save :update_counts
   before_save :process_subscription_updates
   after_create :queue_create_stripe_subscription
   after_update :update_stripe_if_needed
@@ -246,8 +260,11 @@ class Group
     Group.refresh_stripe_subscription(nil, self)
   end
   
-  def self.refresh_stripe_subscription(stripe_sub_id, group = nil) # provide group to skip query
+  # This is called from the stripe webhook
+  # Provide group to skip query
+  def self.refresh_stripe_subscription(stripe_sub_id, group = nil, context = 'default')
     group = Group.find_by(stripe_subscription_id: stripe_sub_id) if group.nil?
+    group.context = context
 
     if group && !group.stripe_subscription_id.blank? && !group.owner.stripe_customer_id.blank?
       customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
@@ -292,16 +309,25 @@ class Group
   end
 
   # LEFT OFF HERE: FIXME
-  # Then change update_stripe_if_needed callback (and add it to the callback list)
-  # >> Remember to figure out how to keep it from running on stripe updates
   # Then work on cancelling subscriptions
   # Then figure out how to "fix" a subscription if it breaks
-  # Then either work on the webhook controller OR begin on the UI
+  # Then add model properties for UI limit display (think about how to communicate being over limit)
+  # Then work on the webhook controller
+  # Then UI? (check back in with list)
   
 protected
 
   def add_creator_to_admins
     self.admins << self.creator unless self.creator.blank?
+  end
+
+  def update_counts
+    if member_ids_changed? || admin_ids_changed?
+      self.total_user_count = member_ids.count + admin_ids.count
+    end
+
+    self.member_count = member_ids.count if member_ids_changed?
+    self.admin_count = admin_ids.count if admin_ids_changed?
   end
 
   def process_subscription_updates
@@ -323,12 +349,25 @@ protected
         end
       end
     end
+
+    if subscription_plan_changed?
+      if ALL_SUBSCRIPTION_PLANS[subscription_plan]
+        self.user_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['users']
+        self.admin_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['admins']
+        self.sub_group_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['sub_groups']
+      else
+        self.user_limit = 5
+        self.admin_limit = 1
+        self.sub_group_limit = 0
+      end
+    end
   end
 
-  # Updates core fields in stripe if they change locally
+  # Updates core fields in stripe if they change locally 
+  # (it won't run if this callback is being fired by stripe itself)
   def update_stripe_if_needed
-    if !new_record? && (subscription_plan_changed? || stripe_subscription_card_changed? \
-        || name_changed? || url_changed? || website_changed?)
+    if !new_record? && (context != 'stripe') && (subscription_plan_changed? \
+        || stripe_subscription_card_changed? || name_changed? || url_changed? || website_changed?)
       Group.delay(queue: 'low').update_stripe_subscription(id)
     end
   end

@@ -372,4 +372,17 @@ namespace :db do
     puts " >> Done."
   end
 
+  task update_group_counts: :environment do
+    print "Updating #{Group.count} groups"
+    Group.each do |group|
+      group.total_user_count = group.member_ids.count + group.admin_ids.count
+      group.admin_count = group.admin_ids.count
+      group.member_count = group.member_ids.count
+      group.timeless.save
+
+      print "."
+    end
+    puts " >> Done."
+  end
+
 end
