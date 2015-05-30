@@ -81,10 +81,9 @@ class Group
   validates :type, inclusion: { in: TYPE_VALUES, 
                                 message: "%{value} is not a valid Group Type" }
   validates :creator, presence: true
-  validates :subscription_plan, presence: true, if: :private?
-  validates :stripe_subscription_card, presence: true, if: :private?
-
+  
   validate :new_owner_username_exists
+  validate :subscription_fields_valid
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
@@ -99,7 +98,7 @@ class Group
   before_update :change_owner
   before_save :update_counts
   before_save :process_subscription_updates
-  after_create :queue_create_stripe_subscription
+  after_save :queue_create_stripe_subscription_if_needed
   after_update :update_stripe_if_needed
 
   # === GROUP MOCK FIELD METHODS === #
@@ -222,8 +221,9 @@ class Group
   def self.create_stripe_subscription(group_id, group = nil) # provide group to skip query
     group = Group.find(group_id) if group.nil?
 
-    if group && !group.subscription_plan.blank? && group.stripe_subscription_id.blank? \
-        && group.owner_has_stripe_card?
+    if group && group.private? && group.stripe_subscription_id.blank? \
+        && !group.subscription_plan.blank? && !group.stripe_subscription_card.blank? \
+        && (subscription_status != 'canceled')
       customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
       subscription = customer.subscriptions.create(
         plan: group.subscription_plan,
@@ -247,9 +247,10 @@ class Group
     end
   end
 
-  # Call this from after_create callback
-  def queue_create_stripe_subscription(queue = 'high')
-    if !subscription_plan.blank? && stripe_subscription_id.blank? && owner_has_stripe_card?
+  # Call this from after_save callback
+  def queue_create_stripe_subscription_if_needed(queue = 'high')
+    if private? && stripe_subscription_id.blank? && !subscription_plan.blank? \
+        && !stripe_subscription_card.blank? && (subscription_status != 'canceled')
       Group.delay(queue: queue).create_stripe_subscription(id)
     end
   end
@@ -308,6 +309,28 @@ class Group
     end
   end
 
+  # Calls out to stripe to cancel subscription
+  
+  def cancel_stripe_subscription
+    Group.cancel_stripe_subscription(nil, self)
+  end
+  
+  def self.cancel_stripe_subscription(group_id, group = nil) # provide group to skip query
+    group = Group.find(group_id) if group.nil?
+
+    if group && !group.stripe_subscription_id.blank?
+      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+      subscription = customer.subscriptions.retrieve(group.stripe_subscription_id) if customer
+      
+      if customer && subscription
+        subscription = subscription.delete
+        group.subscription_status = 'canceled'
+        group.stripe_subscription_details = subscription.to_hash
+        group.save
+      end
+    end
+  end
+
   # LEFT OFF HERE: FIXME
   # Then work on cancelling subscriptions
   # Then figure out how to "fix" a subscription if it breaks
@@ -342,8 +365,13 @@ protected
         case stripe_subscription_status
         when 'trialing', 'active'
           clear_flag PENDING_SUBSCRIPTION_FLAG
-        when 'past_due', 'canceled', 'unpaid'
+        when 'past_due', 'unpaid'
           add_flag PENDING_SUBSCRIPTION_FLAG
+        when 'canceled'
+          add_flag PENDING_SUBSCRIPTION_FLAG
+          self.stripe_subscription_id = nil
+          self.stripe_subscription_card = nil
+          self.subscription_end_date = 2.weeks.from_now
         else
           add_flag PENDING_SUBSCRIPTION_FLAG
         end
@@ -403,6 +431,13 @@ protected
         true
       end
     end
+  end
+
+  # The only way you can save a private group is if you select a subscription and a card 
+  # OR if the subscription has been canceled.
+  def subscription_fields_valid
+    public? || (subscription_status == 'canceled') \
+      || (subscription_plan && stripe_subscription_card)
   end
 
   def change_owner
