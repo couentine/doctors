@@ -129,31 +129,31 @@ class Group
   # === LIMIT-FOCUSED INSTANCE METHODS === #
 
   def can_add_members?
-    public? || (
-      ((user_limit < 0) || (total_user_count < user_limit))
-        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+    public? || ( \
+      ((user_limit < 0) || (total_user_count < user_limit)) \
+        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
           || (stripe_subscription_status == 'unpaid'))
     )
   end
 
   def can_add_admins?
-    public? || (
-      ((admin_limit < 0) || (admin_count < admin_limit))
-        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+    public? || ( \
+      ((admin_limit < 0) || (admin_count < admin_limit)) \
+        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
           || (stripe_subscription_status == 'unpaid'))
     )
   end
 
   def can_create_sub_groups?
-    public? || (
-      ((sub_group_limit < 0) || (sub_group_count < sub_group_limit))
-        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+    public? || ( \
+      ((sub_group_limit < 0) || (sub_group_count < sub_group_limit)) \
+        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
           || (stripe_subscription_status == 'unpaid'))
     )
   end
 
   def can_create_badges?
-    public? || !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+    public? || !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
       || (stripe_subscription_status == 'unpaid'))
   end
 
@@ -191,8 +191,8 @@ class Group
           alert_title: "Your group is inactive due to failed payments",
           alert_body: "There was a problem renewing your subscription after several attempts. " \
             + "The final payment attempt was made at #{payment_fail_date.to_s(:short_date_time)}. "\
-            + "Your group will remain inactive until you update your billing details or change "
-            + "the group type to public. You can also choose to cancel your subscription which "
+            + "Your group will remain inactive until you update your billing details or change " \
+            + "the group type to public. You can also choose to cancel your subscription which " \
             + "will leave your group's contents online but prevent new content from being posted." }
       when 'canceled'
         if (Time.now < subscription_end_date)
@@ -202,13 +202,13 @@ class Group
             alert_body: "Your group's subscription is currently inactive but within the two week " \
               + "grace period. The grace period expires at " \
               + "#{subscription_end_date.to_s(:short_date)}, after that all group content will " \
-              + "remain online, but no new content will be able to be posted. To reactivate the "
+              + "remain online, but no new content will be able to be posted. To reactivate the " \
               + "group, select a plan and confirm your billing details." }
         else
           { color: 'blue', icon: 'fa-close', show_alert: true,
             summary: "Inactive private group", alert_title: "Your group is currently inactive",
             alert_body: "Your group's subscription is currently inactive. All group content will " \
-              + "remain online, but no new content can be posted. You an reactivate the group "
+              + "remain online, but no new content can be posted. You an reactivate the group " \
               + "at any time by selecting a plan and confirming your billing details." }
         end
       else
@@ -238,12 +238,12 @@ class Group
   # }
   def status_details_for_members
     if private? && \
-        ((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+        ((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
           || (stripe_subscription_status == 'unpaid'))
       { color: 'blue', icon: 'fa-close', show_alert: true,
         alert_title: "This group is currently inactive",
         alert_body: "While the group is inactive all existing content will " \
-          + "remain online, but no new content can be posted. "
+          + "remain online, but no new content can be posted. " \
           + "Please contact the group admins with any questions." }
     else
       { show_alert: false }
