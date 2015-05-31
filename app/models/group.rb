@@ -60,6 +60,8 @@ class Group
   field :pricing_group,               type: String, default: 'standard'
   field :subscription_plan,           type: String # values are defined in config.yml
   field :subscription_end_date,       type: Time
+  field :stripe_payment_fail_date,    type: Time
+  field :stripe_payment_retry_date,   type: Time
   field :stripe_subscription_card,    type: String
   field :stripe_subscription_id,      type: String
   field :stripe_subscription_details, type: String
@@ -107,7 +109,7 @@ class Group
   def primary_email; (!creator.nil?) ? creator.email : nil; end
   def issuer_website; (website.blank?) ? "#{ENV['root_url']}/#{url}" : website; end
 
-  # === BADGE METHODS === #
+  # === GROUP METHODS === #
 
   # This will find by ObjectId OR by URL
   def self.find(input)
@@ -122,6 +124,130 @@ class Group
     end
 
     group
+  end
+
+  # === LIMIT-FOCUSED INSTANCE METHODS === #
+
+  def can_add_members?
+    public? || (
+      ((user_limit < 0) || (total_user_count < user_limit))
+        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+          || (stripe_subscription_status == 'unpaid'))
+    )
+  end
+
+  def can_add_admins?
+    public? || (
+      ((admin_limit < 0) || (admin_count < admin_limit))
+        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+          || (stripe_subscription_status == 'unpaid'))
+    )
+  end
+
+  def can_create_sub_groups?
+    public? || (
+      ((sub_group_limit < 0) || (sub_group_count < sub_group_limit))
+        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+          || (stripe_subscription_status == 'unpaid'))
+    )
+  end
+
+  def can_create_badges?
+    public? || !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+      || (stripe_subscription_status == 'unpaid'))
+  end
+
+  def can_post_new_evidence?
+    can_create_badges?
+  end
+
+  # Returns hash = {
+  #   color: 'red', 'orange', 'blue' or 'green',
+  #   summary: summary_of_current_status,
+  #   icon: 'fa-check' (or the like),
+  #   show_alert: true or false,
+  #   alert_title: title_of_alert_if_shown,
+  #   alert_body: body_of_alert_if_shown,
+  # }
+  def status_details_for_admins
+    if public?
+      { color: 'green', summary: 'Free public group', icon: 'fa-check-circle', show_alert: false }
+    else
+      case stripe_subscription_status
+      when 'trialing'
+        { color: 'orange', summary: "Trial ends on #{subscription_end_date.to_s(:short_date)}", 
+          icon: 'fa-clock-o', show_alert: false }
+      when 'past_due'
+        { color: 'red', icon: 'fa-exclamation-circle', show_alert: true,
+          summary: "Payment failed on #{payment_fail_date.to_s(:short_date)}",
+          alert_title: "There is a billing problem with your group",
+          alert_body: "There was a problem renewing your subscription at " \
+            + "#{payment_fail_date.to_s(:short_date_time)}. Payment will be attempted again at " \
+            + "#{payment_retry_date.to_s(:short_date_time)}, please update your billing " \
+            + "details before the next attempt to ensure your group's continued service." }
+      when 'unpaid'
+        { color: 'red', icon: 'fa-exclamation-triangle', show_alert: true,
+          summary: "Subscription expired on #{subscription_end_date.to_s(:short_date)}",
+          alert_title: "Your group is inactive due to failed payments",
+          alert_body: "There was a problem renewing your subscription after several attempts. " \
+            + "The final payment attempt was made at #{payment_fail_date.to_s(:short_date_time)}. "\
+            + "Your group will remain inactive until you update your billing details or change "
+            + "the group type to public. You can also choose to cancel your subscription which "
+            + "will leave your group's contents online but prevent new content from being posted." }
+      when 'canceled'
+        if (Time.now < subscription_end_date)
+          { color: 'orange', icon: 'fa-clock-o', show_alert: true,
+            summary: "Grace period expires #{subscription_end_date.to_s(:short_date)}",
+            alert_title: "Your group is currently inactive",
+            alert_body: "Your group's subscription is currently inactive but within the two week " \
+              + "grace period. The grace period expires at " \
+              + "#{subscription_end_date.to_s(:short_date)}, after that all group content will " \
+              + "remain online, but no new content will be able to be posted. To reactivate the "
+              + "group, select a plan and confirm your billing details." }
+        else
+          { color: 'blue', icon: 'fa-close', show_alert: true,
+            summary: "Inactive private group", alert_title: "Your group is currently inactive",
+            alert_body: "Your group's subscription is currently inactive. All group content will " \
+              + "remain online, but no new content can be posted. You an reactivate the group "
+              + "at any time by selecting a plan and confirming your billing details." }
+        end
+      else
+        if (user_limit >= 0) && (total_user_count > (user_limit * 0.95))
+          { color: 'orange', icon: 'fa-check-circle', show_alert: true,
+            summary: "Active subscription renews #{subscription_end_date.to_s(:short_date)}",
+            alert_title: "Your group is near its user limit",
+            alert_body: "You are currently using #{total_user_count} of the #{user_limit} " \
+              + "total users allowed with your current subscription. When you reach your limit " \
+              + "your group will continue to work, but no new users will be able to be added. " \
+              + "To ensure uninterrupted functionality we recommend either upgrading to a " \
+              + "larger plan or removing users from your group." }
+        else 
+          { color: 'green', icon: 'fa-check-circle', show_alert: false,
+            summary: "Active subscription renews #{subscription_end_date.to_s(:short_date)}" }
+        end
+      end
+    end
+  end
+
+  # Returns hash = {
+  #   show_alert: true or false,
+  #   color: 'red', 'orange', 'blue' or 'green',
+  #   icon: 'fa-check' (or the like),
+  #   alert_title: title_of_alert_if_shown,
+  #   alert_body: body_of_alert_if_shown,
+  # }
+  def status_details_for_members
+    if private? && \
+        ((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)
+          || (stripe_subscription_status == 'unpaid'))
+      { color: 'blue', icon: 'fa-close', show_alert: true,
+        alert_title: "This group is currently inactive",
+        alert_body: "While the group is inactive all existing content will " \
+          + "remain online, but no new content can be posted. "
+          + "Please contact the group admins with any questions." }
+    else
+      { show_alert: false }
+    end
   end
 
   # === INSTANCE METHODS === #
@@ -223,7 +349,7 @@ class Group
 
     if group && group.private? && group.stripe_subscription_id.blank? \
         && !group.subscription_plan.blank? && !group.stripe_subscription_card.blank? \
-        && (subscription_status != 'canceled')
+        && (stripe_subscription_status != 'canceled')
       customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
       subscription = customer.subscriptions.create(
         plan: group.subscription_plan,
@@ -250,7 +376,7 @@ class Group
   # Call this from after_save callback
   def queue_create_stripe_subscription_if_needed(queue = 'high')
     if private? && stripe_subscription_id.blank? && !subscription_plan.blank? \
-        && !stripe_subscription_card.blank? && (subscription_status != 'canceled')
+        && !stripe_subscription_card.blank? && (stripe_subscription_status != 'canceled')
       Group.delay(queue: queue).create_stripe_subscription(id)
     end
   end
@@ -263,7 +389,8 @@ class Group
   
   # This is called from the stripe webhook
   # Provide group to skip query
-  def self.refresh_stripe_subscription(stripe_sub_id, group = nil, context = 'default')
+  def self.refresh_stripe_subscription(stripe_sub_id, group = nil, context = 'default',
+      payment_fail_date = nil, payment_retry_date = nil)
     group = Group.find_by(stripe_subscription_id: stripe_sub_id) if group.nil?
     group.context = context
 
@@ -276,6 +403,8 @@ class Group
         group.stripe_subscription_status = subscription.status
         group.stripe_subscription_details = subscription.to_hash
         group.subscription_end_date = subscription.current_period_end
+        group.stripe_payment_fail_date = payment_fail_date
+        group.stripe_payment_retry_date = payment_retry_date
         group.save
       end
     end
@@ -324,19 +453,12 @@ class Group
       
       if customer && subscription
         subscription = subscription.delete
-        group.subscription_status = 'canceled'
+        group.stripe_subscription_status = 'canceled'
         group.stripe_subscription_details = subscription.to_hash
         group.save
       end
     end
   end
-
-  # LEFT OFF HERE: FIXME
-  # Then work on cancelling subscriptions
-  # Then figure out how to "fix" a subscription if it breaks
-  # Then add model properties for UI limit display (think about how to communicate being over limit)
-  # Then work on the webhook controller
-  # Then UI? (check back in with list)
   
 protected
 
@@ -363,9 +485,9 @@ protected
     else
       if stripe_subscription_status_changed?
         case stripe_subscription_status
-        when 'trialing', 'active'
+        when 'trialing', 'active', 'past_due'
           clear_flag PENDING_SUBSCRIPTION_FLAG
-        when 'past_due', 'unpaid'
+        when 'unpaid'
           add_flag PENDING_SUBSCRIPTION_FLAG
         when 'canceled'
           add_flag PENDING_SUBSCRIPTION_FLAG
@@ -436,7 +558,7 @@ protected
   # The only way you can save a private group is if you select a subscription and a card 
   # OR if the subscription has been canceled.
   def subscription_fields_valid
-    public? || (subscription_status == 'canceled') \
+    public? || (stripe_subscription_status == 'canceled') \
       || (subscription_plan && stripe_subscription_card)
   end
 
