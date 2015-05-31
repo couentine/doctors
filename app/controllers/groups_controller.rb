@@ -20,13 +20,13 @@ class GroupsController < ApplicationController
   # === CONSTANTS === #
 
   GROUP_TYPE_OPTIONS = [
+    ['<b>Public</b> <span>Anyone can join.<br>'.html_safe \
+      + 'Free for unlimited users.</span>'.html_safe, 'open'],
     ['<b>Private</b> <span>You choose who can join the group.<br>'.html_safe \
       + 'Plans start at $50 per month '.html_safe \
       + '(<a href="/pricing" target="_blank">view pricing info</a>).<br>'.html_safe \
       + '<small>Creating this group will start your 14 day free trial.</small></span>'.html_safe, 
-      'private'],
-    ['<b>Public</b> <span>Anyone can join.<br>'.html_safe \
-      + 'Free for unlimited users.</span>'.html_safe, 'open']
+      'private']
   ]
 
   # === RESTFUL ACTIONS === #

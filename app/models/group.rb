@@ -39,7 +39,7 @@ class Group
   field :location,                    type: String
   field :website,                     type: String
   field :image_url,                   type: String
-  field :type,                        type: String, default: 'private'
+  field :type,                        type: String, default: 'open'
   field :customer_code,               type: String
   field :validation_threshold,        type: Integer, default: 1
   field :invited_admins,              type: Array, default: []
@@ -542,15 +542,11 @@ protected
   end
 
   def new_owner_username_exists
-    if new_owner_username.blank?
-      true
-    else
+    unless new_owner_username.blank?
       new_owner = User.find(new_owner_username) rescue nil
+      
       if new_owner.nil?
         errors.add(:new_owner_username, " is not a valid Badge List username")
-        false
-      else
-        true
       end
     end
   end
@@ -558,8 +554,10 @@ protected
   # The only way you can save a private group is if you select a subscription and a card 
   # OR if the subscription has been canceled.
   def subscription_fields_valid
-    public? || (stripe_subscription_status == 'canceled') \
-      || (subscription_plan && stripe_subscription_card)
+    if !public? && (stripe_subscription_status != 'canceled')
+      errors.add(:stripe_subscription_status, 'is required') unless subscription_plan
+      errors.add(:stripe_subscription_card, 'is required') unless stripe_subscription_card
+    end
   end
 
   def change_owner
