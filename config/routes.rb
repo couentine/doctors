@@ -28,6 +28,9 @@ BadgeList::Application.routes.draw do
     mount Sidekiq::Web => '/a/sidekiq'
   end
   
+  # === WEBHOOK PATHS === #
+  match 'h/stripe_event' => 'webhooks#stripe_event', via: :post
+  
   # === MANUAL FORM PATHS === #
   match 'f/talk-with-us' => 'forms#user_discussion', via: :post
   # match 'f/contact-us' => 'forms#contact_us', via: :post
