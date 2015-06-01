@@ -56,6 +56,7 @@ group :development, :test do
   gem "better_errors", '1.1.0'
   gem "binding_of_caller"
   gem 'rack-mini-profiler'
+  gem 'ultrahook'
 end
 
 group :test do

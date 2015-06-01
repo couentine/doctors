@@ -29,4 +29,13 @@ twitter_consumer_key=abc123
 twitter_consumer_secret=abc123
 twitter_access_token=abc123
 twitter_access_secret=abc123
+ULTRAHOOK_API_KEY=abc123
+```
+
+## Running foreman ##
+
+Note that there is a seprate foreman procfile for development which will also forward webhooks
+using the ultrahook client.
+```
+$ foreman start -f Procfile.dev
 ```
