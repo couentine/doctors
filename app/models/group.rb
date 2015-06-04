@@ -396,7 +396,12 @@ class Group
     group.context = context
 
     if group
-      group.info_items.new(type: info_item_data['type'], data: info_item_data) if info_item_data
+      if info_item_data
+        item = group.info_items.new
+        item.type = 'stripe-event'
+        item.data = info_item_data)
+        item.save
+      end
 
       if group.stripe_subscription_id.blank? && !group.owner.stripe_customer_id.blank?
         customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
