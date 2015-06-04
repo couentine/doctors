@@ -391,22 +391,26 @@ class Group
   # This is called from the stripe webhook
   # Provide group to skip query
   def self.refresh_stripe_subscription(stripe_sub_id, group = nil, context = 'default',
-      payment_fail_date = nil, payment_retry_date = nil)
+      payment_fail_date = nil, payment_retry_date = nil, info_item_data = nil)
     group = Group.find_by(stripe_subscription_id: stripe_sub_id) if group.nil?
     group.context = context
 
-    if group && !group.stripe_subscription_id.blank? && !group.owner.stripe_customer_id.blank?
-      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
-      subscription = customer.subscriptions.retrieve(group.stripe_subscription_id) if customer
-      
-      if customer && subscription
-        group.subscription_plan = subscription.plan.id
-        group.stripe_subscription_status = subscription.status
-        group.stripe_subscription_details = subscription.to_hash
-        group.subscription_end_date = subscription.current_period_end
-        group.stripe_payment_fail_date = payment_fail_date
-        group.stripe_payment_retry_date = payment_retry_date
-        group.save
+    if group
+      group.info_items.new(type: info_item_data['type'], data: info_item_data) if info_item_data
+
+      if group.stripe_subscription_id.blank? && !group.owner.stripe_customer_id.blank?
+        customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+        subscription = customer.subscriptions.retrieve(group.stripe_subscription_id) if customer
+        
+        if customer && subscription
+          group.subscription_plan = subscription.plan.id
+          group.stripe_subscription_status = subscription.status
+          group.stripe_subscription_details = subscription.to_hash
+          group.subscription_end_date = subscription.current_period_end
+          group.stripe_payment_fail_date = payment_fail_date
+          group.stripe_payment_retry_date = payment_retry_date
+          group.save
+        end
       end
     end
   end
