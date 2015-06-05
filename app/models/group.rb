@@ -385,22 +385,24 @@ class Group
   # Calls out to stripe to refresh the subscription status
   
   def refresh_stripe_subscription
-    Group.refresh_stripe_subscription(nil, self)
+    Group.refresh_stripe_subscription(nil, group: self)
   end
   
-  # This is called from the stripe webhook
-  # Provide group to skip query
-  def self.refresh_stripe_subscription(stripe_sub_id, group = nil, context = 'default',
-      payment_fail_date = nil, payment_retry_date = nil, info_item_data = nil)
-    group = Group.find_by(stripe_subscription_id: stripe_sub_id) if group.nil?
-    group.context = context
+  # This is called from the stripe webhook. Accepts the following options hash members:
+  # - group: This will cause the group query to be skipped
+  # - context: This will override the default group context value
+  # - payment_fail_date: This will optionally cause the payment_fail_date to be updated
+  # - payment_retry_date: This will optionally cause the payment_retry_date to be updated
+  # - info_item_data: This will optionally result in the insertion of an info item 
+  #     with type = "stripe-event" and name = "Invoice Payment"
+  def self.refresh_stripe_subscription(stripe_sub_id, options = {})
+    group = options[:group] || Group.find_by(stripe_subscription_id: stripe_sub_id)
+    group.context = options[:context]
 
     if group
-      if info_item_data
-        item = group.info_items.new
-        item.type = 'stripe-event'
-        item.data = info_item_data)
-        item.save
+      if options[:info_item_data]
+        group.info_items.new(type: 'stripe-event', name: 'Invoice Payment', \
+          data: options[:info_item_data]).save
       end
 
       if group.stripe_subscription_id.blank? && !group.owner.stripe_customer_id.blank?
@@ -412,8 +414,8 @@ class Group
           group.stripe_subscription_status = subscription.status
           group.stripe_subscription_details = subscription.to_hash
           group.subscription_end_date = subscription.current_period_end
-          group.stripe_payment_fail_date = payment_fail_date
-          group.stripe_payment_retry_date = payment_retry_date
+          group.stripe_payment_fail_date = options[:payment_fail_date]
+          group.stripe_payment_retry_date = options[:payment_retry_date]
           group.save
         end
       end

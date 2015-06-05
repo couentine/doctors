@@ -12,12 +12,12 @@ class WebhooksController < ApplicationController
       case event['type']
       when 'invoice.payment_succeeded'
         Group.delay(queue: 'high').refresh_stripe_subscription(
-          event['data']['object']['subscription'], nil, 'stripe')
+          event['data']['object']['subscription'], context: 'stripe', info_item_data: event)
       when 'invoice.payment_failed'
         Group.delay(queue: 'high').refresh_stripe_subscription(
-          event['data']['object']['subscription'], nil, 'stripe', 
-          Time.at(event['data']['object']['date']), 
-          Time.at(event['data']['object']['next_payment_attempt']))
+          event['data']['object']['subscription'], context: 'stripe', info_item_data: event,
+          payment_fail_date: Time.at(event['data']['object']['date']), 
+          payment_retry_date: Time.at(event['data']['object']['next_payment_attempt']))
       end
 
       render nothing: true, status: :ok
