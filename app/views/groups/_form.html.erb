@@ -48,6 +48,22 @@
     <%= f.input :type, label: 'Group Type', as: :radio_buttons, label_html: { class: 'hidden' },
                 collection: @group_type_options %>
 
+    <!-- === SUBSCRIPTION DETAILS === -->
+
+    <div id="subscription-details-panel" style="<%= (@group.private?) ? '' : 'display:none;' %>">
+    
+      <h2>Subscription Details</h2>
+
+      <p class="help-block">
+        All plans come with a 14 day free trial.
+        <a class="btn btn-link" href="/pricing" target="_blank">View Complete Pricing Details</a>
+      </p>
+
+      <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, 
+        collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
+
+    </div>
+
     <% unless @group.new_record? %>
 
       <!-- === EXTRA INFO === -->
