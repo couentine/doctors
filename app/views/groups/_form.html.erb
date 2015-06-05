@@ -1,12 +1,21 @@
 <script>
 
   $(document).ready(function() {
+
     <% if @group.new_record? %>
       // If this is a new record then auto set the URL as they type
       $('#group_name').keyup(function() {
         $('#group_url_with_caps').val(parameterizeText($(this).val()));
       });
     <% end %>
+
+    $("#group_type_private").click(function() {
+      $("#subscription-details-panel").fadeIn();
+    });
+    $("#group_type_open").click(function() {
+      $("#subscription-details-panel").fadeOut();
+    });
+
   });
 
   function toggleExtraInfo() {
@@ -54,13 +63,18 @@
     
       <h2>Subscription Details</h2>
 
-      <p class="help-block">
-        All plans come with a 14 day free trial.
-        <a class="btn btn-link" href="/pricing" target="_blank">View Complete Pricing Details</a>
-      </p>
+      <div class="control-group">
+        <div class="sub-header">
+          All plans come with a 14 day free trial.
+          (<a href="/pricing" target="_blank">View pricing details</a>.)
+        </div>
+      </div>
 
-      <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, 
+      <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, include_blank: false,
         collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
+
+      <%= f.input :stripe_subscription_card, label: 'Credit Card', as: :select, 
+        include_blank: false, collection: @group.owner.stripe_card_options %>
 
     </div>
 

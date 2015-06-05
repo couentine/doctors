@@ -714,6 +714,13 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
       margin-bottom: 10px;
     }
     .control-group {
+      .sub-header {
+        margin: 0 0 0 25px;
+
+        a:not(.btn) {
+          text-decoration: underline;
+        }
+      }
       .controls {
         p { 
           margin: 5px 0 0 0; 
@@ -818,6 +825,8 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           line-height: 1.6em;
         }
         small { color: $light-text-color; }
+
+        &:last-child { margin-bottom: 0; }
       }
     }
   }

@@ -122,6 +122,14 @@ class User
     username
   end
 
+  def stripe_card_options
+    if stripe_cards.blank?
+      [["You haven't added a card yet", '']]
+    else
+      [["Select a card:", '']]
+    end
+  end
+
   def set_flag(flag)
     self.flags << flag unless flags.include? flag
   end

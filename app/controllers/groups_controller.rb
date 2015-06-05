@@ -99,6 +99,7 @@ class GroupsController < ApplicationController
   # GET /groups/new.json
   def new
     @group = Group.new
+    @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
 
     respond_to do |format|
@@ -116,7 +117,7 @@ class GroupsController < ApplicationController
   # POST /groups.json
   def create
     @group = Group.new(params[:group])
-    @group.creator = current_user
+    @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
 
     respond_to do |format|
