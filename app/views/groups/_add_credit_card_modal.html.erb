@@ -1,0 +1,38 @@
+<%
+  provide(:include_stripe, true) 
+%>
+
+<!-- === ADD CREDIT CARD MODAL === -->
+
+<div id="add-credit-card" class="modal hide fade" tabindex="-1" role="dialog" 
+ aria-labelledby="mimm-label" aria-hidden="true">
+  <div class="spinner-wrapper" id="stripe-spinner" style="display: none;">
+    <div class="spinner large tertiary">&nbsp;</div>
+  </div>
+
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="mimm-label">Add credit card to your account<h3>
+  </div>
+
+  <div class="modal-body">
+    <div class="bl-modal-form">
+      <div class="form-body">
+        <%= simple_form_for @group.owner, url: add_card_path, method: :post, html: { 
+            class: 'form-horizontal', id: 'stripe-form' } do |f| %>
+
+          <%= render 'shared/stripe_card_form_fields' %>
+
+        <% end %>
+       
+       </div>        
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-info" aria-hidden="true" onclick="addCardToStripe($('#stripe-form'));">
+      Save new card
+    </button>
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>

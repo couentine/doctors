@@ -971,6 +971,13 @@ div.bl-form {
     width: 98%;
     text-align: right;
     padding: 1.8%;
+
+    .label {
+      display: inline-block;
+      margin: 0 5px 10px 5px;
+      position: relative;
+      top: 2px;
+    }
   } 
 }
 .bl-form-entry {

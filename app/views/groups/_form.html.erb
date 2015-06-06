@@ -11,9 +11,15 @@
 
     $("#group_type_private").click(function() {
       $("#subscription-details-panel").fadeIn();
+      if ($("#group_stripe_subscription_card").val() == "") {
+        $("#submit-group-form").prop("disabled", true);
+        $("#card-required-label").show();
+      }
     });
     $("#group_type_open").click(function() {
       $("#subscription-details-panel").fadeOut();
+      $("#submit-group-form").prop("disabled", false);
+      $("#card-required-label").hide();
     });
 
   });
@@ -73,8 +79,34 @@
       <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, include_blank: false,
         collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
 
+      <% card_input_style = (@group.owner.has_stripe_card?) ? '' : 'display: none;' %>
       <%= f.input :stripe_subscription_card, label: 'Credit Card', as: :select, 
-        include_blank: false, collection: @group.owner.stripe_card_options %>
+        include_blank: false, collection: @group.owner.stripe_card_options, 
+        wrapper_html: { style: card_input_style, id: 'has-credit-card-panel' } %>
+
+      <% unless @group.owner.has_stripe_card? %>
+        <div class="control-group" id="no-credit-card-panel">
+          <label class="optional control-label">Credit Card</label>
+          <div class="controls">
+            <a class="btn btn-success" href="#add-credit-card" data-toggle="modal">
+              <i class="fa fa-credit-card"></i>
+              Add a credit card
+            </a>
+          </div>
+        </div>
+      <% end %>
+
+
+      <div class="control-group">
+        <div class="sub-header">
+          <em>
+            Have any questions about pricing or billing?
+            Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
+              target="_blank">Paid Subscription FAQ</a> or 
+            email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+          </em>
+        </div>
+      </div>
 
     </div>
 
@@ -115,7 +147,12 @@
   </div>  
   
   <div class="form-footer add-top-margin">
-    <%= f.button :submit, class: 'btn btn-primary' %>
+    <span class="label label-primary" id="card-required-label" style="display: none;">
+      <i class="fa fa-credit-card"></i>
+      Credit card required to continue
+    </span>
+
+    <%= f.button :submit, class: 'btn btn-primary', id: 'submit-group-form' %>
     <%= 
       if @group.new_record?
         link_to "Cancel", root_path, class: "btn"

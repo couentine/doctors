@@ -1,0 +1,42 @@
+<div class="control-group">
+  <p class="help-block">
+    <em>
+      <strong>Note:</strong>
+      You credit card information is transmitted securely to our payment processor via https.
+    </em>
+  </p>
+
+  <p class="help-block error-block" style="display: none;">
+    <i class="fa fa-exclamation-circle"></i>
+    <span class="inner"></span>
+  </p>
+</div>
+
+<div class="control-group hidden">
+  <div class="controls">
+    <input class="hidden" id="stripe_token" name="stripe_token" type="hidden">
+  </div>
+</div>
+
+<div class="control-group">
+  <label class="control-label">Card Number</label>
+  <div class="controls">
+    <input type="text" size="20" data-stripe="number"/>
+  </div>
+</div>
+
+<div class="control-group">
+  <label class="control-label">Card Verification Code</label>
+  <div class="controls">
+    <input type="text" size="4" data-stripe="cvc" style="width: 50px;"/>
+  </div>
+</div>
+
+<div class="control-group">
+  <label class="control-label">Expiration (MM/YYYY)</label>
+  <div class="controls">
+    <input type="text" size="2" maxlength="2" data-stripe="exp-month" style="width: 20px;"/>
+    <span> / </span>
+    <input type="text" size="4" maxlength="4" data-stripe="exp-year" style="width: 40px;"/>
+  </div>
+</div>
