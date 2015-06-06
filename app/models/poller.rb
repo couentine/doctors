@@ -1,0 +1,31 @@
+class Poller
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  
+  # === CONSTANTS === #
+
+  STATUS_VALUES = ['pending', 'successful', 'failed']
+
+  POLLING_INTERVAL = 150 # in milliseconds
+  DELETE_AFTER = 5.minutes # old pollers are automatically deleted after they close
+
+  # === FIELDS & VALIDATIONS === #
+
+  field :status,        type: String, default: 'pending'
+  field :message,       type: String
+  
+  validates :status, inclusion: { in: STATUS_VALUES, message: "%{value} is not a valid status" }
+  
+  # === CALLBACK === #
+
+  after_save :queue_delete_if_closed
+
+protected
+  
+  def queue_delete_if_closed
+    if (status == 'successful') || (status == 'failed')
+      self.delay_for(DELETE_AFTER).delete
+    end
+  end
+
+end

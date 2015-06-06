@@ -30,6 +30,9 @@ BadgeList::Application.routes.draw do
   
   # === WEBHOOK PATHS === #
   match 'h/stripe_event' => 'webhooks#stripe_event', via: :post
+
+  # === POLLER PATHS === #
+  match 'p/:id' => 'pollers#show', via: :get, as: :poller
   
   # === MANUAL FORM PATHS === #
   match 'f/talk-with-us' => 'forms#user_discussion', via: :post
