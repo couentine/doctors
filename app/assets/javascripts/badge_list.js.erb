@@ -548,3 +548,28 @@ function registerEmbedCodeBoxes() {
     $(this).select();
   });
 }
+
+var POLLING_INTERVAL = <%= Poller::POLLING_INTERVAL %>;
+var POLLING_URL = "/p/";
+
+// This function starts a poller which queries "/p/pollerId.json"
+// The function onCompleted will be run when the poller completes with the poller object as a param
+// The function onError will be run with no params if the polling URL returns null
+function startPoller(pollerId, onCompleted, onError) {
+  setTimeout(function() { executePoller(pollerId, onCompleted, onError); }, POLLING_INTERVAL);
+}
+
+function executePoller(pollerId, onCompleted, onError) {
+  var poller;
+
+  try { poller = $.getJSON(POLLING_URL + pollerId + ".json"); }
+  catch (e) { poller = null; }
+
+  if (poller == null) {
+    onError();
+  } else if (poller.completed) {
+    onCompleted(poller);
+  } else {
+    setTimeout(function() { executePoller(pollerId, onCompleted, onError); }, POLLING_INTERVAL); 
+  }
+}
