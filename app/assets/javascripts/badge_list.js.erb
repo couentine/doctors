@@ -549,27 +549,36 @@ function registerEmbedCodeBoxes() {
   });
 }
 
-var POLLING_INTERVAL = <%= Poller::POLLING_INTERVAL %>;
+var INITIAL_POLLING_INTERVAL = <%= Poller::INITIAL_POLLING_INTERVAL %>;
+var POLLING_INTERVAL_DOUBLE_RATE = <%= Poller::POLLING_INTERVAL_DOUBLE_RATE %>;
+var POLLING_MAX_TRIES = <%= Poller::POLLING_MAX_TRIES %>;
 var POLLING_URL = "/p/";
 
 // This function starts a poller which queries "/p/pollerId.json"
 // The function onCompleted will be run when the poller completes with the poller object as a param
 // The function onError will be run with no params if the polling URL returns null
 function startPoller(pollerId, onCompleted, onError) {
-  setTimeout(function() { executePoller(pollerId, onCompleted, onError); }, POLLING_INTERVAL);
+  setTimeout(function() { executePoller(pollerId, onCompleted, onError, 1); }, 
+    INITIAL_POLLING_INTERVAL);
 }
-
-function executePoller(pollerId, onCompleted, onError) {
+var tempPoller;
+function executePoller(pollerId, onCompleted, onError, numTries) {
   var poller;
+  var nextInterval = INITIAL_POLLING_INTERVAL 
+    * Math.pow(2, Math.floor(numTries/POLLING_INTERVAL_DOUBLE_RATE));
 
-  try { poller = $.getJSON(POLLING_URL + pollerId + ".json"); }
-  catch (e) { poller = null; }
-
-  if (poller == null) {
-    onError();
-  } else if (poller.completed) {
-    onCompleted(poller);
-  } else {
-    setTimeout(function() { executePoller(pollerId, onCompleted, onError); }, POLLING_INTERVAL); 
-  }
+  try { 
+    $.getJSON(POLLING_URL + pollerId + ".json", function(poller) {
+      if (poller == null) {
+        onError();
+      } else if (poller.completed) {
+        onCompleted(poller);
+      } else if (numTries < POLLING_MAX_TRIES) {
+        setTimeout(function() { executePoller(pollerId, onCompleted, onError, numTries + 1); }, 
+          nextInterval); 
+      } else {
+        onError();
+      }
+    });
+  } catch (e) { onError(); }
 }

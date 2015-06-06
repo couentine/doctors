@@ -42,8 +42,15 @@
     } else {
       // Insert the token into the form and submit
       var token = response.id;
-      $form.find('#stripe_token').val(token);
-      $form.get(0).submit();
+      $.ajax({
+          url: "/users/cards",
+          type: "POST",
+          data: { stripe_token: token },
+          success: function(response) {
+            startPoller(response.poller_id, addCardCompleted, addCardError);
+          },
+          error: addCardError
+      });
     }
   };
 

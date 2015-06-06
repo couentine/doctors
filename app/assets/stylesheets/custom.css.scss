@@ -321,6 +321,11 @@ ul.dropdown-menu {
     border-left-width: 8px;
   }
 }
+table.table {
+  tr.highlight-primary { background-color: $primary-really-light; }
+  tr.highlight-secondary { background-color: $secondary-really-light; }
+  tr.highlight-tertiary { background-color: $tertiary-really-light; }
+}
 
 .badge { text-shadow: none; }
 .badge-success { background-color: $secondary-light; }

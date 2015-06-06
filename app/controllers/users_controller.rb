@@ -38,22 +38,13 @@ class UsersController < ApplicationController
 
   # === STRIPE-RELATED STUFF === #
 
-  # POST /users/cards
-  # Accepts page parameters: stripe_token
+  # POST /users/cards?stripe_token=abc123
   # Adds a new card to the current user's stripe account
   def add_card
-    @stripe_token = params[:stripe_token]
-
     respond_to do |format|
-      format.html do     
-        begin
-          current_user.add_stripe_card(@stripe_token)
-          notice = 'You have successfully added a credit card to your account.'
-        rescue => e
-          notice = 'An error occurred while trying to add the credit card, please try again.'
-        end
-        
-        redirect_to edit_user_registration_path, notice: notice
+      format.json do     
+        @poller_id = current_user.add_stripe_card(params[:stripe_token], true)
+        render json: { poller_id: @poller_id }
       end
     end
   end

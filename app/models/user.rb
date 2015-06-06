@@ -41,10 +41,12 @@ class User
   field :stripe_cards,                  type: Array, default: []
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
-  validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
-            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores." }
+  validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
+    uniqueness:true, format: { with: /\A[\w-]+\Z/, 
+      message: "can only contain letters, numbers, dashes and underscores." }
   validates :username, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
-            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores." }
+    format: { with: /\A[\w-]+\Z/, 
+      message: "can only contain letters, numbers, dashes and underscores." }
 
   
   # === DEVISE SETTINGS === #
@@ -307,16 +309,54 @@ class User
   end
 
   # Calls out to stripe to add a card (the token comes from Stripe.js on the front end)
-  def add_stripe_card(card_token)
-    create_stripe_customer if stripe_customer_id.blank?
-    
-    unless stripe_customer_id.blank?
-      customer = Stripe::Customer.retrieve(stripe_customer_id)
+  # If async is set to true then the method will return the id of a poller
+  def add_stripe_card(card_token, async = false)
+    if async
+      poller = Poller.new
+      poller.save
+      User.delay(queue: 'high', retry: false).add_stripe_card(card_token, user_id: id, \
+        poller_id: poller.id)
+      poller.id
+    else
+      User.add_stripe_card(card_token, user: self)
+    end
+  end
+
+  # Calls out to stripe to add a card (the token comes from Stripe.js on the front end)
+  # Accepts the following options
+  # - user_id: Provide this to have the method query for the user
+  # - user: Provide a pre-queried user object to save a query
+  # - poller_id: If provided this poller record will be updated with success or failure details
+  def self.add_stripe_card(card_token, options = {})
+    begin
+      poller = Poller.find(options[:poller_id]) rescue nil
+      user = options[:user] || User.find(options[:user_id])
+
+      create_stripe_customer if user.stripe_customer_id.blank?  
+      customer = Stripe::Customer.retrieve(user.stripe_customer_id)
       card = customer.sources.create(source: card_token)
 
       if card
-        self.stripe_cards << card.to_hash
-        self.save
+        user.stripe_cards << card.to_hash
+        user.save
+
+        if poller
+          poller.status = 'successful'
+          poller.message = 'You have successfully added a credit card to your account.'
+          poller.data = card.to_hash
+          poller.save
+        end
+      else
+        throw "Card was rejected."
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to add the credit card, ' \
+          + "please try again. (Error message: #{e})"
+        poller.save
+      else
+        throw e
       end
     end
   end

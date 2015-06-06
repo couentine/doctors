@@ -3,6 +3,44 @@
   provide(:include_stripe, true) 
 %>
 
+<script>
+
+  /* === Stripe polling functionality === */
+
+  function addCardCompleted(poller) {
+    var stripe_form = $('#stripe-form');
+
+    if (poller.status == 'successful') {
+      $("#add-card-form").slideUp();
+      $("#billing-info-row").slideDown();
+      $("#billing-info-buttons").slideDown();
+      
+      var card = poller.data;
+      $("#billing-info-row table tbody").append(
+        "<tr class='highlight-secondary'>"
+          + "<td>" + card.brand + "</td><td>" + card.last4 + "</td>"
+          + "<td>" + card.exp_month + " / " + card.exp_year + "</td>"
+          + "<td><span class='label label-success'>New card added!</span></td>"
+        + "</tr>"
+      );
+    } else {
+      // Show the errors on the form
+      stripe_form.find('.error-block').show().find('.inner').text(poller.message);
+      stripe_form.find('button').prop('disabled', false);
+      $('#stripe-spinner').hide();
+    }
+  }
+
+  function addCardError() {
+    var stripe_form = $('#stripe-form');
+    stripe_form.find('.error-block').show().find('.inner')
+      .text("There was a problem adding your card, please try again later.");
+    stripe_form.find('button').prop('disabled', false);
+    $('#stripe-spinner').hide();
+  }
+
+</script>
+
 <% 
   if @user.errors.blank?
     form_error = nil
@@ -164,8 +202,7 @@
 <!-- === BILLING INFO === -->
 
 <div class="bl-inline-form" id="add-card-form" style="display: none;">
-  <%= simple_form_for @user, url: add_card_path, method: :post, html: { 
-      class: 'form-horizontal', id: 'stripe-form' } do |f| %>
+  <%= simple_form_for @user, html: { class: 'form-horizontal', id: 'stripe-form' } do |f| %>
     
     <div class="spinner-wrapper" id="stripe-spinner" style="display: none;">
       <div class="spinner large tertiary">&nbsp;</div>
