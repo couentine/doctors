@@ -53,36 +53,10 @@ class UsersController < ApplicationController
   # Accepts page parameters: id
   # Deletes a card from the user's stripe account
   def delete_card
-    @id = params[:id]
-
     respond_to do |format|
-      format.html do     
-        begin
-          current_user.delete_stripe_card(@id)
-          notice = 'The credit card has been removed from your account.'
-        rescue => e
-          notice = 'An error occurred while trying to remove the credit card, please try again.'
-        end
-        
-        redirect_to edit_user_registration_path, notice: notice
-      end
-    end
-  end
-
-  # GET /users/cards
-  # Refreshes cards and redirects to the user's profile
-  def refresh_cards
-    respond_to do |format|
-      format.html do     
-        begin
-          current_user.refresh_stripe_cards
-          notice = 'Your billing information has been refreshed.'
-        rescue => e
-          notice = 'An error occurred while trying to refresh your billing information, ' \
-            + 'please try again.'
-        end
-        
-        redirect_to edit_user_registration_path, notice: notice
+      format.json do     
+        @poller_id = current_user.delete_stripe_card(params[:id], true)
+        render json: { poller_id: @poller_id }
       end
     end
   end

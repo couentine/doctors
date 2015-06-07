@@ -5,6 +5,27 @@
 
 <script>
 
+  var deletedCardId;
+
+  $(document).ready(function() {
+
+    $("a[data-type=delete-card]").click(function(e) {
+      deletedCardId = $(this).data("id");
+      $("#delete-card-spinner").fadeIn();
+      $.ajax({
+          url: "/users/card/" + deletedCardId,
+          type: "DELETE",
+          success: function(response) {
+            startPoller(response.poller_id, deleteCardCompleted, deleteCardError);
+          },
+          error: deleteCardError
+      });
+
+      e.preventDefault();
+    });
+
+  });
+
   /* === Stripe polling functionality === */
 
   function addCardCompleted(poller) {
@@ -13,7 +34,8 @@
     if (poller.status == 'successful') {
       $("#add-card-form").slideUp();
       $("#billing-info-row").slideDown();
-      $("#billing-info-buttons").slideDown();
+      $("#credit-card-buttons").slideDown();
+      $('#stripe-spinner').hide();
       
       var card = poller.data;
       $("#billing-info-row table tbody").append(
@@ -23,6 +45,11 @@
           + "<td><span class='label label-success'>New card added!</span></td>"
         + "</tr>"
       );
+
+      if ($("#yes-card-panel table tbody tr").length == 1) {
+        $("#no-card-panel").slideUp();
+        $("#yes-card-panel").slideDown();
+      }
     } else {
       // Show the errors on the form
       stripe_form.find('.error-block').show().find('.inner').text(poller.message);
@@ -37,6 +64,29 @@
       .text("There was a problem adding your card, please try again later.");
     stripe_form.find('button').prop('disabled', false);
     $('#stripe-spinner').hide();
+  }
+
+  function deleteCardCompleted(poller) {
+    if (poller.status == 'successful') {
+      $("tr[data-id=" + deletedCardId + "]").remove();
+      if ($("#yes-card-panel table tbody tr").length == 0) {
+        $("#yes-card-panel").slideUp();
+        $("#no-card-panel").slideDown();
+      }
+      $("#delete-card-spinner").fadeOut();
+    } else {
+      $("tr[data-id=" + deletedCardId + "] td:last-child")
+        .html("<span class='label label-warning'>"
+          + "<i class='fa fa-exclamation-triangle'></i> " + poller.message + "</span>");
+      $("#delete-card-spinner").fadeOut();
+    }
+  }
+
+  function deleteCardError() {
+    $("tr[data-id=" + deletedCardId + "] td:last-child")
+      .html("<span class='label label-warning'>"
+        + "<i class='fa fa-exclamation-triangle'></i> Error removing card</span>");
+    $("#delete-card-spinner").fadeOut();
   }
 
 </script>
@@ -148,16 +198,6 @@
 <div class="row">
   <div class="span12">
     <div class="tab-header merge-with-card">
-      <div id="billing-info-buttons">
-        <a tabindex="-1" class="btn btn-small" id="add-card" data-toggle="custom" 
-            data-hide="#billing-info-buttons,#billing-info-row" data-show="#add-card-form"
-            data-focus="input[data-stripe=number]">
-          <i class='fa fa-credit-card'></i> Add a credit card
-        </a>
-        <%= link_to "<i class='fa fa-refresh'></i> Refresh billing info".html_safe, 
-          refresh_cards_path, class: 'btn btn-small' %>
-      </div>
-
       <h2>Billing info</h2>
       <h3><i class="fa fa-lock"></i> Stored securely in Stripe</h3>
     </div>
@@ -167,8 +207,25 @@
 <div class="row" id="billing-info-row">
   <div class="span12">
     <div class="info-card text-card">
-      <% if @user.has_stripe_card? %>
-        <table class="table">
+
+      <div class="spinner-wrapper" id="delete-card-spinner" style="display: none;">
+        <div class="spinner large tertiary">&nbsp;</div>
+      </div>
+
+      <div class="header-block">
+        <div id="credit-card-buttons">
+          <a tabindex="-1" class="btn btn-small btn-primary" id="add-card" data-toggle="custom" 
+              data-hide="#credit-card-buttons,#billing-info-row" data-show="#add-card-form"
+              data-focus="input[data-stripe=number]">
+            <i class='fa fa-credit-card'></i> Add a credit card
+          </a>
+        </div>
+
+        <h3>Credit Cards</h3>
+      </div>
+      
+      <div id="yes-card-panel" style="<%= (@user.has_stripe_card?) ? '' : 'display: none;' %>">
+        <table class="table with-border">
           <thead>
             <tr>
               <th>Card Type</th>
@@ -179,22 +236,33 @@
           </thead>
           <tbody>
             <% @user.stripe_cards.each do |card| %>
-              <tr>
+              <tr data-id="<%= card['id'] %>">
                 <td><%= card['brand'] %></td>
                 <td><%= card['last4'] %></td>
                 <td><%= card['exp_month'] %> / <%= card['exp_year'] %></td>
                 <td>
                   <%= link_to "<i class='fa fa-remove'></i> Remove Card".html_safe, 
-                    delete_card_path(card['id']), method: :delete, class: 'btn btn-small',
-                    data: { confirm: 'Are you sure you want to remove this card?' } %>
+                    '#', class: 'btn btn-small', data: { type: 'delete-card', 
+                      id: card['id'] } %>
                 </td>
               </tr>
             <% end %>
           </tbody>
         </table>
-      <% else %>
-        You haven't added any credit cards to your account yet.
-      <% end %>
+      </div>
+      
+      <div id="no-card-panel" style="<%= (@user.has_stripe_card?) ? 'display: none;' : '' %>">
+        <table class="table with-border">
+          <tbody>
+            <tr>
+              <td>
+                You haven't added any credit cards to your account yet.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>
@@ -215,7 +283,7 @@
     <div class="form-footer">
       <%= f.button :submit, "Save new card", :class => "btn btn-info" %>
       <a class="btn" data-toggle="custom"  data-hide="#add-card-form" 
-        data-show="#billing-info-buttons,#billing-info-row">Cancel</a>
+        data-show="#credit-card-buttons,#billing-info-row">Cancel</a>
     </div>
 
   <% end %>

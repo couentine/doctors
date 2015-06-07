@@ -374,13 +374,54 @@ class User
   end
 
   # Calls out to stripe to delete a card
-  def delete_stripe_card(card_id)
-    unless stripe_customer_id.blank?
-      customer = Stripe::Customer.retrieve(stripe_customer_id)
-      card = customer.sources.retrieve(card_id)
-      card.delete if customer && card
+  # If async is set to true then the method will return the id of a poller
+  def delete_stripe_card(card_id, async = false)
+    if async
+      poller = Poller.new
+      poller.save
+      User.delay(queue: 'high', retry: false).delete_stripe_card(card_id, user_id: id, \
+        poller_id: poller.id)
+      poller.id
+    else
+      User.delete_stripe_card(card_id, user: self)
+    end  
+  end
 
-      refresh_stripe_cards
+  # Calls out to stripe to delete a card
+  # Accepts the following options
+  # - user_id: Provide this to have the method query for the user
+  # - user: Provide a pre-queried user object to save a query
+  # - poller_id: If provided this poller record will be updated with success or failure details
+  def self.delete_stripe_card(card_id, options = {})
+    begin
+      poller = Poller.find(options[:poller_id]) rescue nil
+      user = options[:user] || User.find(options[:user_id])
+
+      customer = Stripe::Customer.retrieve(user.stripe_customer_id)
+      card = customer.sources.retrieve(card_id)
+
+      if card
+        card.delete
+        user.refresh_stripe_cards
+
+        if poller
+          poller.status = 'successful'
+          poller.message = 'The credit card has been removed from your account.'
+          poller.data = card.to_hash
+          poller.save
+        end
+      else
+        throw "There was a problem removing the card, please try again."
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to remove the credit card, ' \
+          + "please try again. (Error message: #{e})"
+        poller.save
+      else
+        throw e
+      end
     end
   end
 
