@@ -438,13 +438,13 @@ class Group
       if customer && subscription
         subscription.plan = group.subscription_plan,
         subscription.source = group.stripe_subscription_card,
-        subscription.metadata = {
-          description: "#{group.name} (#{group.url})",
-          group_id: group.id,
-          group_url: group.url,
-          group_name: group.name,
-          group_website: group.website
-        }
+        # subscription.metadata = {
+        #   description: "#{group.name} (#{group.url})",
+        #   group_id: group.id,
+        #   group_url: group.url,
+        #   group_name: group.name,
+        #   group_website: group.website
+        # }
         subscription.save
       end
     end
