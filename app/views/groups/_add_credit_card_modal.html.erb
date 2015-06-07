@@ -2,6 +2,52 @@
   provide(:include_stripe, true) 
 %>
 
+<script type="text/javascript">
+  
+  $(document).ready(function() {
+
+    $("#add-credit-card").on('shown', function() {
+      $("input[data-stripe=number]").focus();
+    });
+
+  });
+
+  /* === Stripe polling functionality === */
+
+  function addCardCompleted(poller) {
+    var stripe_form = $('#stripe-form');
+
+    if (poller.status == 'successful') {
+      $("#has-credit-card-panel").show();
+      $("#no-credit-card-panel").hide();
+      $("#add-credit-card").modal("hide");
+      $('#stripe-spinner').hide();
+      $("#stripe-form input[type=text]").val("")
+      
+      var card = poller.data;
+      $("#group_stripe_subscription_card").append(
+        "<option value='" + card.id + "'>"
+          + card.brand + ": xxx-" + card.last4
+        + "</option>"
+      ).val(card.id);
+    } else {
+      // Show the errors on the form
+      stripe_form.find('.error-block').show().find('.inner').text(poller.message);
+      stripe_form.find('button').prop('disabled', false);
+      $('#stripe-spinner').hide();
+    }
+  }
+
+  function addCardError() {
+    var stripe_form = $('#stripe-form');
+    stripe_form.find('.error-block').show().find('.inner')
+      .text("There was a problem adding your card, please try again later.");
+    stripe_form.find('button').prop('disabled', false);
+    $('#stripe-spinner').hide();
+  }
+
+</script>
+
 <!-- === ADD CREDIT CARD MODAL === -->
 
 <div id="add-credit-card" class="modal hide fade" tabindex="-1" role="dialog" 
@@ -12,7 +58,7 @@
 
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="mimm-label">Add credit card to your account<h3>
+    <h3 id="mimm-label">Add a credit card to your account<h3>
   </div>
 
   <div class="modal-body">

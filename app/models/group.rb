@@ -350,7 +350,7 @@ class Group
 
     if group && group.private? && group.stripe_subscription_id.blank? \
         && !group.subscription_plan.blank? && !group.stripe_subscription_card.blank? \
-        && (stripe_subscription_status != 'canceled')
+        && (group.stripe_subscription_status != 'canceled')
       customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
       subscription = customer.subscriptions.create(
         plan: group.subscription_plan,

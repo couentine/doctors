@@ -772,16 +772,6 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
             input[type="password"]:focus {
           background-color: $really-light-gray;
         }
-        p.help-block {
-          font-size: 0.8em;
-          font-style: italic;
-          margin-top: 15px;
-          color: $light-text-color;
-
-          &.error-block {
-            color: $red-medium;
-          }
-        }
         .huge-text-area {
           width: 95%;
           height: 245px;
@@ -806,6 +796,16 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           color: $primary-dark;
           font-weight: bold;
           background-color: $medium-white;
+        }
+      }
+      p.help-block {
+        font-size: 0.8em;
+        font-style: italic;
+        margin-top: 15px;
+        color: $light-text-color;
+
+        &.error-block {
+          color: $red-medium;
         }
       }
 
@@ -879,6 +879,14 @@ div.bl-inline-form {
   @media (max-width: 767px) {
     .control-label { margin-left: 0; }
     .controls { margin-left: 0; }
+  }
+}
+
+.bl-modal-form {
+  form {
+    margin: 0;
+
+    p.help-block:first-child { margin-top: 0; }
   }
 }
 
@@ -1265,6 +1273,12 @@ form#group-add-users-form {
   }
   .modal-footer {
     background-color: $dark-white;
+  }
+
+  .spinner-wrapper {
+    z-index: 50;
+
+    .spinner { margin-top: 110px; }
   }
 }
 

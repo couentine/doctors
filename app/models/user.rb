@@ -126,9 +126,11 @@ class User
 
   def stripe_card_options
     if stripe_cards.blank?
-      [["You haven't added a card yet", '']]
+      []
     else
-      [["Select a card:", '']]
+      stripe_cards.map do |card|
+        ["#{card['brand']}: xxx-#{card['last4']}", card['id']]
+      end
     end
   end
 

@@ -36,6 +36,7 @@
       $("#billing-info-row").slideDown();
       $("#credit-card-buttons").slideDown();
       $('#stripe-spinner').hide();
+      $("#stripe-form input[type=text]").val("")
       
       var card = poller.data;
       $("#billing-info-row table tbody").append(

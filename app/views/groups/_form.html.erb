@@ -72,17 +72,27 @@
       <div class="control-group">
         <div class="sub-header">
           All plans come with a 14 day free trial.
-          (<a href="/pricing" target="_blank">View pricing details</a>.)
+          (<a href="/pricing" target="_blank">View plan details</a>.)
         </div>
       </div>
 
       <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, include_blank: false,
         collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
 
-      <% card_input_style = (@group.owner.has_stripe_card?) ? '' : 'display: none;' %>
-      <%= f.input :stripe_subscription_card, label: 'Credit Card', as: :select, 
-        include_blank: false, collection: @group.owner.stripe_card_options, 
-        wrapper_html: { style: card_input_style, id: 'has-credit-card-panel' } %>
+      <div id="has-credit-card-panel" 
+          style="<%= (@group.owner.has_stripe_card?) ? '' : 'display: none;' %>">
+        <%= f.input :stripe_subscription_card, label: 'Credit Card', as: :select, 
+          include_blank: false, collection: @group.owner.stripe_card_options %>
+
+        <div class="control-group">
+          <div class="controls">
+            <a class="btn" href="#add-credit-card" data-toggle="modal">
+              <i class="fa fa-plus"></i>
+              Add a credit card
+            </a>
+          </div>
+        </div>
+      </div>
 
       <% unless @group.owner.has_stripe_card? %>
         <div class="control-group" id="no-credit-card-panel">
