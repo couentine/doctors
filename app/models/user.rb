@@ -38,6 +38,7 @@ class User
   field :identity_salt,                 type: String
 
   field :stripe_customer_id,            type: String
+  field :stripe_default_source,         type: String
   field :stripe_cards,                  type: Array, default: []
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
@@ -339,6 +340,7 @@ class User
       card = customer.sources.create(source: card_token)
 
       if card
+        user.stripe_default_source = customer.default_source
         user.stripe_cards << card.to_hash
         user.save
 
@@ -369,8 +371,9 @@ class User
       self.stripe_cards = []
     else
       customer = Stripe::Customer.retrieve(stripe_customer_id)
-      cards = customer.sources.all if customer
+      cards = customer.sources.all
       self.stripe_cards = cards.map{ |c| c.to_hash } if customer && cards
+      self.stripe_default_source = customer.default_source
     end
     self.save
   end

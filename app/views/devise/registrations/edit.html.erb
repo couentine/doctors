@@ -238,7 +238,14 @@
           <tbody>
             <% @user.stripe_cards.each do |card| %>
               <tr data-id="<%= card['id'] %>">
-                <td><%= card['brand'] %></td>
+                <td>
+                  <%= card['brand'] %>
+                  <% if card['id'] == @user.stripe_default_source %>
+                    <span class='label'>
+                      <i class="fa fa-check-circle"></i> Default
+                    </span>
+                  <% end %>
+                </td>
                 <td><%= card['last4'] %></td>
                 <td><%= card['exp_month'] %> / <%= card['exp_year'] %></td>
                 <td>

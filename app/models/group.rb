@@ -362,9 +362,16 @@ class Group
     group = options[:group] || Group.find(options[:group_id])
 
     customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+    if (customer.default_source != group.stripe_subscription_card)
+      customer.default_source = group.stripe_subscription_card
+      customer.save
+      
+      group.owner.stripe_default_source = group.stripe_subscription_card
+      group.owner.save
+    end
+
     subscription = customer.subscriptions.create(
       plan: group.subscription_plan,
-      source: group.stripe_subscription_card,
       metadata: {
         description: "#{group.name} (#{group.url})",
         group_id: group.id,
@@ -429,12 +436,14 @@ class Group
     group = options[:group] || Group.find(options[:group_id])
 
     customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+    if customer.default_source != group.stripe_subscription_card
+      customer.default_source = group.stripe_subscription_card
+      customer.save
+    end
+    
     subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
-  
-    if (group.subscription_plan != subscription.plan) \
-        || (group.stripe_subscription_card != subscription.source)
+    if group.subscription_plan != subscription.plan
       subscription.plan = group.subscription_plan
-      subscription.source = group.stripe_subscription_card
       subscription.save
     end
   end

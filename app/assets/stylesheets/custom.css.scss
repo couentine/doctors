@@ -325,6 +325,7 @@ table.table {
   tr.highlight-primary { background-color: $primary-really-light; }
   tr.highlight-secondary { background-color: $secondary-really-light; }
   tr.highlight-tertiary { background-color: $tertiary-really-light; }
+  tr.highlight { font-weight: bold !important; background-color: $really-light-gray; }
 }
 
 .badge { text-shadow: none; }

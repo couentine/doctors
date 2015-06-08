@@ -7,6 +7,22 @@
       $('#group_name').keyup(function() {
         $('#group_url_with_caps').val(parameterizeText($(this).val()));
       });
+    <% else %>
+      $("#cancel-subscription").click(function(e) {
+        if (confirm("Are you sure you want to cancel your subscription? All of your group's "
+            + "content will still be available and you can create a new subscription at any time.")) {
+          $('#cancel-subscription-spinner').fadeIn();
+          $.ajax({
+            url: "<%= cancel_subscription_path(@group) %>",
+            type: "POST",
+            success: function(response) {
+              startPoller(response.poller_id, cancelSubscriptionCompleted, cancelSubscriptionError);
+            },
+            error: cancelSubscriptionError
+          });
+        }
+        e.preventDefault();
+      });
     <% end %>
 
     $("#group_type_private").click(function() {
@@ -26,22 +42,6 @@
       $("#view-subscription-panel").fadeOut(function() {
         $("#edit-subscription-panel").fadeIn();
       });
-      e.preventDefault();
-    });
-
-    $("#cancel-subscription").click(function(e) {
-      if (confirm("Are you sure you want to cancel your subscription? All of your group's "
-          + "content will still be available and you can create a new subscription at any time.")) {
-        $('#cancel-subscription-spinner').fadeIn();
-        $.ajax({
-          url: "<%= cancel_subscription_path(@group) %>",
-          type: "POST",
-          success: function(response) {
-            startPoller(response.poller_id, cancelSubscriptionCompleted, cancelSubscriptionError);
-          },
-          error: cancelSubscriptionError
-        });
-      }
       e.preventDefault();
     });
 
