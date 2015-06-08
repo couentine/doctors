@@ -384,6 +384,7 @@ table.table {
   background: linear-gradient(45deg, $dark-white 25%, $light-white 25%, $light-white 50%,
                            $dark-white 50%, $dark-white 75%, $light-white 75%);
   background-size: 16px 16px;
+  z-index: 50;
   
   .spinner {
     content: "";
@@ -663,6 +664,8 @@ footer {
 
 /* General Form Elements */
 div.bl-form,div.bl-modal-form,div.bl-inline-form {
+  position: relative;
+
   .control-group { 
     float: left; 
     min-width: 55%;

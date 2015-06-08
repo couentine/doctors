@@ -7,13 +7,14 @@ class GroupsController < ApplicationController
   # Non-RESTful Actions >> :leave, :destroy_user, :destroy_invited_user, 
   #                        :add_users, :create_users
 
-  prepend_before_filter :find_group, only: [:show, :edit, :update, :destroy, :join, :leave,
-    :destroy_user, :send_invitation, :destroy_invited_user, :add_users, :create_users]
+  prepend_before_filter :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
+    :join, :leave, :destroy_user, :send_invitation, :destroy_invited_user, :add_users, 
+    :create_users]
   before_filter :authenticate_user!, except: [:show]
   before_filter :group_member_or_admin, only: [:leave]
   before_filter :group_admin, only: [:destroy_user, :destroy_invited_user, :add_users, 
     :create_users]
-  before_filter :group_owner, only: [:edit, :update, :destroy]
+  before_filter :group_owner, only: [:edit, :update, :destroy, :cancel_subscription]
   before_filter :badge_list_admin, only: [:index]
 
 
@@ -169,6 +170,17 @@ class GroupsController < ApplicationController
   end
 
   # === NON-RESTFUL ACTIONS === #
+
+  # POST /group-url/cancel
+  # Cancels the group's subscription (asynchronous with a poller)
+  def cancel_subscription
+    respond_to do |format|
+      format.json do     
+        @poller_id = @group.cancel_stripe_subscription(true, true)
+        render json: { poller_id: @poller_id }
+      end
+    end
+  end
 
   # POST /group-url/join
   def join

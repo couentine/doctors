@@ -43,13 +43,13 @@
       // Insert the token into the form and submit
       var token = response.id;
       $.ajax({
-          url: "/users/cards",
-          type: "POST",
-          data: { stripe_token: token },
-          success: function(response) {
-            startPoller(response.poller_id, addCardCompleted, addCardError);
-          },
-          error: addCardError
+        url: "/users/cards",
+        type: "POST",
+        data: { stripe_token: token },
+        success: function(response) {
+          startPoller(response.poller_id, addCardCompleted, addCardError);
+        },
+        error: addCardError
       });
     }
   };

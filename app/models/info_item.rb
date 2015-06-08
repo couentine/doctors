@@ -4,7 +4,7 @@ class InfoItem
   
   # === CONSTANTS === #
 
-  TYPE_VALUES = ['stripe-event']
+  TYPE_VALUES = ['stripe-event', 'dev-log']
 
   # === RELATIONSHIPS === #
 

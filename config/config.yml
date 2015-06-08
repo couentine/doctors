@@ -61,6 +61,16 @@ defaults: &defaults
         admins: 1
         sub_groups: 0
     free:
+      free-5m-1:
+        name: Free Mini
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Free
+        users: 5
+        admins: -1
+        sub_groups: -1
       free-unlimited-1:
         name: Free Unlimited
         amount: 0
@@ -71,6 +81,28 @@ defaults: &defaults
         users: -1
         admins: -1
         sub_groups: -1
+    trial:
+      trial-100m-1:
+        name: Trial Starter
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Trial
+        users: 100
+        admins: -1
+        sub_groups: 0
+    test:
+      test-100d-1:
+        name: Daily 100
+        amount: 200
+        currency: usd
+        interval: day
+        trial_period_days: 0
+        statement_descriptor: Badge List Daily 100
+        users: 100
+        admins: -1
+        sub_groups: 0
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:
@@ -80,6 +112,7 @@ defaults: &defaults
    - assets
    - badge
    - badges
+   - cancel
    - create
    - delete
    - destroy

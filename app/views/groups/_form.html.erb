@@ -22,6 +22,29 @@
       $("#card-required-label").hide();
     });
 
+    $("#show-edit-subscription-panel").click(function(e) {
+      $("#view-subscription-panel").fadeOut(function() {
+        $("#edit-subscription-panel").fadeIn();
+      });
+      e.preventDefault();
+    });
+
+    $("#cancel-subscription").click(function(e) {
+      if (confirm("Are you sure you want to cancel your subscription? All of your group's "
+          + "content will still be available and you can create a new subscription at any time.")) {
+        $('#cancel-subscription-spinner').fadeIn();
+        $.ajax({
+          url: "<%= cancel_subscription_path(@group) %>",
+          type: "POST",
+          success: function(response) {
+            startPoller(response.poller_id, cancelSubscriptionCompleted, cancelSubscriptionError);
+          },
+          error: cancelSubscriptionError
+        });
+      }
+      e.preventDefault();
+    });
+
   });
 
   function toggleExtraInfo() {
@@ -44,7 +67,27 @@
       .replace(/ /g, '-').trunc(MAX_URL_LENGTH);
   }
 
+  /* === Stripe polling functionality === */
+
+  function cancelSubscriptionCompleted(poller) {
+    if (poller.status == 'successful') {
+      window.location.reload();
+    } else {
+      $('#cancel-subscription-spinner').fadeOut();
+      alert(poller.message);
+    }
+  }
+
+  function cancelSubscriptionError() {
+    $('#cancel-subscription-spinner').fadeOut();
+    alert("There was an error cancelling your subscription, please try again.");
+  }
+
 </script>
+
+<div class="spinner-wrapper" id="cancel-subscription-spinner" style="display: none;">
+  <div class="spinner large tertiary">&nbsp;</div>
+</div>
 
 <%= simple_form_for(@group, html: { class: 'form-horizontal' }) do |f| %>
   <%= f.error_notification %>
@@ -69,54 +112,107 @@
     
       <h2>Subscription Details</h2>
 
-      <div class="control-group">
-        <div class="sub-header">
-          All plans come with a 14 day free trial.
-          (<a href="/pricing" target="_blank">View plan details</a>.)
-        </div>
-      </div>
+      <% if @group.private? && !@group.new_record? %>
+        <div id="view-subscription-panel">
 
-      <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, include_blank: false,
-        collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
-
-      <div id="has-credit-card-panel" 
-          style="<%= (@group.owner.has_stripe_card?) ? '' : 'display: none;' %>">
-        <%= f.input :stripe_subscription_card, label: 'Credit Card', as: :select, 
-          include_blank: false, collection: @group.owner.stripe_card_options %>
-
-        <div class="control-group">
-          <div class="controls">
-            <a class="btn" href="#add-credit-card" data-toggle="modal">
-              <i class="fa fa-plus"></i>
-              Add a credit card
-            </a>
+          <div class="control-group">
+            <label class="control-label">Current Plan</label>
+            <div class="controls">
+              <%= APP_CONFIG['subscription_plans'][@group.pricing_group]\
+                [@group.subscription_plan]['name'] %>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <% unless @group.owner.has_stripe_card? %>
-        <div class="control-group" id="no-credit-card-panel">
-          <label class="optional control-label">Credit Card</label>
-          <div class="controls">
-            <a class="btn btn-success" href="#add-credit-card" data-toggle="modal">
-              <i class="fa fa-credit-card"></i>
-              Add a credit card
-            </a>
+          <% subscription_status = @group.status_details_for_admins %>
+          <div class="control-group">
+            <label class="control-label">Subscription Status</label>
+            <div class="controls <%= subscription_status[:color] %>">
+              <i class="fa <%= subscription_status[:icon] %>"></i>
+              <%= subscription_status[:summary] %>
+            </div>
           </div>
-        </div>
+
+          <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+              <a href="#" id="show-edit-subscription-panel" class="btn">
+                <i class="fa fa-pencil"></i>
+                Edit Subscription
+              </a>
+              <a href="#" id="cancel-subscription" class="btn btn-danger">
+                <i class="fa fa-remove"></i>
+                Cancel Subscription
+              </a>
+            </div>
+          </div>  
+
+          <div class="control-group">
+            <div class="sub-header">
+              <em>
+                Have questions about your subscription?
+                Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
+                  target="_blank">Paid Subscription FAQ</a> or 
+                email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+              </em>
+            </div>
+          </div>        
+
+        </div> <!-- /view-subscription-panel -->
       <% end %>
 
+      <div id="edit-subscription-panel" 
+          style="<%= (@group.new_record? || @group.public?) ? '' : 'display:none;' %>">
 
-      <div class="control-group">
-        <div class="sub-header">
-          <em>
-            Have any questions about pricing or billing?
-            Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
-              target="_blank">Paid Subscription FAQ</a> or 
-            email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
-          </em>
+        <div class="control-group">
+          <div class="sub-header">
+            All plans come with a 14 day free trial.
+            (<a href="/pricing" target="_blank">View plan details</a>.)
+          </div>
         </div>
-      </div>
+
+        <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, include_blank: false,
+          collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
+
+        <div id="has-credit-card-panel" 
+            style="<%= (@group.owner.has_stripe_card?) ? '' : 'display: none;' %>">
+          <%= f.input :stripe_subscription_card, label: 'Credit Card', as: :select, 
+            include_blank: false, collection: @group.owner.stripe_card_options %>
+
+          <div class="control-group">
+            <div class="controls">
+              <a class="btn" href="#add-credit-card" data-toggle="modal">
+                <i class="fa fa-plus"></i>
+                Add a credit card
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <% unless @group.owner.has_stripe_card? %>
+          <div class="control-group" id="no-credit-card-panel">
+            <label class="optional control-label">Credit Card</label>
+            <div class="controls">
+              <a class="btn btn-success" href="#add-credit-card" data-toggle="modal">
+                <i class="fa fa-credit-card"></i>
+                Add a credit card
+              </a>
+            </div>
+          </div>
+        <% end %>
+
+
+        <div class="control-group">
+          <div class="sub-header">
+            <em>
+              Have any questions about pricing or billing?
+              Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
+                target="_blank">Paid Subscription FAQ</a> or 
+              email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+            </em>
+          </div>
+        </div>
+
+      </div> <!-- /edit-subscription-panel -->
 
     </div>
 

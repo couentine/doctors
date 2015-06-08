@@ -39,3 +39,11 @@ using the ultrahook client.
 ```
 $ foreman start -f Procfile.dev
 ```
+
+## Stripe Webhooks ##
+
+WebhooksController is designed to accept the following events at the '/h/stripe_event' endpoint:
+- customer.subscription.created
+- customer.subscription.deleted
+- invoice.payment_succeeded
+- invoice.payment_failed
