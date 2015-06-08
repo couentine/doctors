@@ -402,7 +402,7 @@ class Group
 
     if options[:info_item_data]
       group.info_items.new(type: 'stripe-event', name: 'Invoice Payment', \
-        data: options[:info_item_data]).save
+        data: options[:info_item_data], user: owner).save
     end
 
     customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
