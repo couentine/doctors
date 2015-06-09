@@ -108,6 +108,7 @@ class Group
   before_create :create_first_subscription
   before_update :create_another_subscription
   after_update :update_stripe_if_needed
+  before_destroy :cancel_subscription_on_destroy
 
   # === GROUP MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -402,19 +403,30 @@ class Group
 
     if options[:info_item_data]
       group.info_items.new(type: 'stripe-event', name: 'Invoice Payment', \
-        data: options[:info_item_data], user: owner).save
+        data: options[:info_item_data], user: group.owner).save
     end
 
     customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
-    subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
-    
-    group.subscription_plan = subscription.plan.id
-    group.stripe_subscription_status = subscription.status
-    group.stripe_subscription_details = subscription.to_hash
-    group.subscription_end_date = subscription.current_period_end
-    group.stripe_payment_fail_date = options[:payment_fail_date]
-    group.stripe_payment_retry_date = options[:payment_retry_date]
-    group.save
+    begin
+      subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
+      
+      group.subscription_plan = subscription.plan.id
+      group.stripe_subscription_status = subscription.status
+      group.stripe_subscription_details = subscription.to_hash
+      group.subscription_end_date = subscription.current_period_end
+      group.stripe_payment_fail_date = options[:payment_fail_date]
+      group.stripe_payment_retry_date = options[:payment_retry_date]
+      group.save
+    rescue Exception => e
+      if subscription
+        # There was an unanticipated error, throw it
+        throw e
+      else
+        # There is no more subscription (it must've been cancelled remotely), cancel it locally
+        group.stripe_subscription_status = 'canceled'
+        group.save
+      end
+    end
   end
 
   # Calls out to stripe to update stripe about local changes to the subscription
@@ -557,7 +569,7 @@ protected
         # Cancel the subscription if needed 
         # NOTE: This callback runs AFTER process_subscription_field_updates
         if private?
-          add_flag PENDING_SUBSCRIPTION_FLAG
+          set_flag PENDING_SUBSCRIPTION_FLAG
           self.stripe_subscription_status = 'canceled'
           self.stripe_subscription_id = nil
           self.stripe_subscription_card = nil
@@ -590,14 +602,14 @@ protected
         when 'new', 'trialing', 'active', 'past_due'
           clear_flag PENDING_SUBSCRIPTION_FLAG
         when 'unpaid'
-          add_flag PENDING_SUBSCRIPTION_FLAG
+          set_flag PENDING_SUBSCRIPTION_FLAG
         when 'canceled'
-          add_flag PENDING_SUBSCRIPTION_FLAG
+          set_flag PENDING_SUBSCRIPTION_FLAG
           self.stripe_subscription_id = nil
           self.stripe_subscription_card = nil
           self.subscription_end_date = 2.weeks.from_now
         else
-          add_flag PENDING_SUBSCRIPTION_FLAG
+          set_flag PENDING_SUBSCRIPTION_FLAG
         end
       end
 
@@ -648,6 +660,13 @@ protected
     if private? && (subscription_plan_changed? || stripe_subscription_card_changed?) \
         && (context != 'stripe')
       update_stripe_subscription(true) # asynchronous
+    end
+  end
+
+  # Cancels the stripe subscription when destroying a private group
+  def cancel_subscription_on_destroy
+    if !stripe_subscription_id.blank?
+      cancel_stripe_subscription(false, true); # asynchronous
     end
   end
 

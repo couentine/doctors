@@ -103,6 +103,16 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
+      test-100d-1t:
+        name: Daily 100 with Trial
+        amount: 200
+        currency: usd
+        interval: day
+        trial_period_days: 1
+        statement_descriptor: Badge List Daily 100
+        users: 100
+        admins: -1
+        sub_groups: 0
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:

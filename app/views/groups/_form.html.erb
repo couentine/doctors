@@ -7,6 +7,11 @@
       $('#group_name').keyup(function() {
         $('#group_url_with_caps').val(parameterizeText($(this).val()));
       });
+
+      <% if @group.owner.stripe_default_source %>
+        // Set the credit card dropdown to be their default stripe card
+        $("#group_stripe_subscription_card").val("<%= @group.owner.stripe_default_source %>");
+      <% end %>
     <% else %>
       $("#cancel-subscription").click(function(e) {
         if (confirm("Are you sure you want to cancel your subscription? All of your group's "
