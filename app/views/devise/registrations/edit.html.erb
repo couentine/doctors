@@ -170,29 +170,56 @@
   </div>
 </div>
 
-<% unless @user.owned_group_ids.blank? %>
-  <div class="row" id="topic-list-row">
-    <div class="span12">
-      <div class="info-card text-card group-list-card">
-        <ul>
-          <% @user.owned_groups.asc(:name).each do |group| %>
-            <li>
-              <%= link_to group_image_tag_for(group) + " " + group.name, group, 
-                title: "View the learning group" %>
-              <span class="no-link">
-                <% if group.private? %>
-                  <i class="fa fa-lock"></i> Private
-                <% else %>
-                  <i class="fa fa-globe"></i> Public
-                <% end %>
-              </span>
-            </li>
+<div class="row" id="group-list-row">
+  <div class="span12">
+    <div class="info-card text-card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th>Type</th>
+            <th>Paid Subscription</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @user.owned_groups.blank? %>
+            <tr>
+              <td>
+                You haven't created any groups yet.
+              </td>
+            </tr>
+          <% else %>
+            <% @user.owned_groups.asc(:name).each do |group| %>
+              <tr>
+                <td>
+                  <%= link_to group.name, group, title: "View the learning group" %>
+                </td>
+                <td>
+                  <% if group.private? %>
+                    <i class="fa fa-lock"></i> Private
+                  <% else %>
+                    <i class="fa fa-globe"></i> Public
+                  <% end %>
+                </td>
+                <td>
+                  <% if group.private? && group.subscription_plan %>
+                    <%= ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['name'] %> - 
+                    <% subscription_status = group.status_details_for_admins %>
+                    <span class="label <%= subscription_status[:color] %>">
+                      <i class="fa <%= subscription_status[:icon] %>"></i>
+                      <%= group.subscription_status_string %> - 
+                      <%= subscription_status[:summary] %>
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
           <% end %>
-        </ul>
-      </div>
+        </tbody>
+      </table>
     </div>
   </div>
-<% end %>
+</div>
 
 <!-- === BILLING INFO === -->
 
