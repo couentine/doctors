@@ -102,6 +102,7 @@ class GroupsController < ApplicationController
     @group = Group.new
     @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
+    @badge_list_admin = current_user && current_user.admin?
 
     respond_to do |format|
       format.html # new.html.erb
@@ -120,6 +121,7 @@ class GroupsController < ApplicationController
     @group = Group.new(params[:group])
     @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
+    @badge_list_admin = current_user && current_user.admin?
 
     respond_to do |format|
       if @group.save

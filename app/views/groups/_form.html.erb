@@ -132,8 +132,7 @@
           <div class="control-group">
             <label class="control-label">Current Plan &amp; Status</label>
             <div class="controls">
-              <%= APP_CONFIG['subscription_plans'][@group.pricing_group]\
-                [@group.subscription_plan]['name'] %><br>
+              <%= ALL_SUBSCRIPTION_PLANS[@group.subscription_plan]['name'] %><br>
               <span class="label <%= subscription_status[:color] %>">
                 <i class="fa <%= subscription_status[:icon] %>"></i>
                 <%= @group.subscription_status_string %> - 
@@ -191,7 +190,10 @@
           </div>
         </div>
 
-        <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, include_blank: false, collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
+        <% subscription_options = (@badge_list_admin) ? SUBSCRIPTION_OPTIONS['admin'] \
+          : SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
+        <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, 
+          include_blank: false, collection: subscription_options %>
 
 
         <div id="has-credit-card-panel" 

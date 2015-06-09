@@ -231,7 +231,7 @@ class Group
               + "group, select a plan and confirm your billing details." }
         else
           { color: 'blue', icon: 'fa-close', show_alert: true,
-            summary: "Inactive private group", alert_title: "Your group is currently inactive",
+            summary: "Group is inactive", alert_title: "Your group is currently inactive",
             alert_body: "Your group's subscription is currently inactive. All group content will " \
               + "remain online, but no new content can be posted. You an reactivate the group " \
               + "at any time by selecting a plan and confirming your billing details." }
@@ -239,7 +239,7 @@ class Group
       else
         if (user_limit >= 0) && (total_user_count > (user_limit * 0.95))
           { color: 'orange', icon: 'fa-check-circle', show_alert: true,
-            summary: "Active subscription renews #{subscription_end_date.to_s(:short_date)}",
+            summary: "Subscription renews #{subscription_end_date.to_s(:short_date)}",
             alert_title: "Your group is near its user limit",
             alert_body: "You are currently using #{total_user_count} of the #{user_limit} " \
               + "total users allowed with your current subscription. When you reach your limit " \
@@ -248,7 +248,7 @@ class Group
               + "larger plan or removing users from your group." }
         else 
           { color: 'green', icon: 'fa-check-circle', show_alert: false,
-            summary: "Active subscription renews #{subscription_end_date.to_s(:short_date)}" }
+            summary: "Subscription renews #{subscription_end_date.to_s(:short_date)}" }
         end
       end
     end
