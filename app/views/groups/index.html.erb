@@ -1,5 +1,7 @@
 <% 
   provide(:title, "All Groups")
+
+  creator_index = {}
 %>
 
 <!-- === PAGE HEADER === -->
@@ -57,7 +59,7 @@
             <tr>
               <th>Group</th>
               <th>Created</th>
-              <th>Admins + Members</th>
+              <th>Admins, Members</th>
               <th>Active Users / Limit</th>
               <th>User Activity History</th>
               <th>Badges</th>
@@ -73,18 +75,24 @@
                   (<%= group.type.capitalize %>)
                 </td>
                 <td>
+                  <% 
+                    creator = creator_index[group.creator_id] \
+                      || (User.find(group.creator_id) rescue nil)
+
+                    if creator && !creator_index.has_key?(creator.id)
+                      creator_index[creator.id] = creator
+                    end
+                  %>
+
                   <%= group.created_at.to_s :short_date %> by
-                  <% if group.creator.nil? %>
-                    [ Deleted User ]
+                  <% if creator %>
+                    <%= link_to creator.name, user_path(creator) %>
                   <% else %>
-                    <a href="<%= user_path(group.creator) %>">
-                    <%= group.creator.name %>
+                    [ Deleted User ]
                   <% end %>
                 </td>
                 <td>
-                  <%= group.admins.count %>
-                  + <%= group.members.count %>
-                  = <%= group.admins.count + group.members.count %>
+                  <%= group.admin_ids.count %>, <%= group.member_ids.count %>
                 </td>
                 <td>
                   <%= group.active_user_count || 0 %> / 
@@ -101,7 +109,7 @@
                     <%= flattened_map.join(', ') %>
                   <% end %>
                 </td>
-                <td><%= group.badges.count unless group.badges.nil? %></td>
+                <td><%= (group.badge_ids || []).count %></td>
               </tr>
             <% end %>
           </tbody>

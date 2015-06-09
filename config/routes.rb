@@ -21,6 +21,7 @@ BadgeList::Application.routes.draw do
   # === ADMIN PATHS === #
   scope '/a' do
     resources :users, :only => [:index]
+    resources :info_items, :only => [:index, :show]
   end
   match 'a' => 'admin_pages#index', via: :get
   match 'a/groups' => 'groups#index', via: :get
