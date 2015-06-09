@@ -333,7 +333,14 @@ table.table {
 .badge-warning { background-color: $primary-light; }
 .badge-info { background-color: $tertiary-light; }
 
-.label { text-shadow: none; }
+.label { 
+  text-shadow: none; 
+
+  &.orange { background-color: $primary-medium; }
+  &.green { background-color: $secondary-medium; }
+  &.blue { background-color: $tertiary-medium; }
+  &.red { background-color: $red-medium; }
+}
 .label-success { background-color: $secondary-medium; }
 .label-warning { background-color: $primary-medium; }
 .label-important { background-color: $red-medium; }

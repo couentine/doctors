@@ -50,6 +50,14 @@
       e.preventDefault();
     });
 
+    $("#revive-subscription").click(function(e) {
+      $("#view-subscription-panel").fadeOut(function() {
+        $("#edit-subscription-panel").fadeIn();
+      });
+      $("#group_new_subscription").val("true");
+      e.preventDefault();
+    });
+
   });
 
   function toggleExtraInfo() {
@@ -120,34 +128,38 @@
       <% if @group.private? && !@group.new_record? %>
         <div id="view-subscription-panel">
 
-          <div class="control-group">
-            <label class="control-label">Current Plan</label>
-            <div class="controls">
-              <%= APP_CONFIG['subscription_plans'][@group.pricing_group]\
-                [@group.subscription_plan]['name'] %>
-            </div>
-          </div>
-
           <% subscription_status = @group.status_details_for_admins %>
           <div class="control-group">
-            <label class="control-label">Subscription Status</label>
-            <div class="controls <%= subscription_status[:color] %>">
-              <i class="fa <%= subscription_status[:icon] %>"></i>
-              <%= subscription_status[:summary] %>
+            <label class="control-label">Current Plan &amp; Status</label>
+            <div class="controls">
+              <%= APP_CONFIG['subscription_plans'][@group.pricing_group]\
+                [@group.subscription_plan]['name'] %><br>
+              <span class="label <%= subscription_status[:color] %>">
+                <i class="fa <%= subscription_status[:icon] %>"></i>
+                <%= @group.subscription_status_string %> - 
+                <%= subscription_status[:summary] %>
+              </span> 
             </div>
           </div>
 
           <div class="control-group">
             <label class="control-label"></label>
             <div class="controls">
-              <a href="#" id="show-edit-subscription-panel" class="btn">
-                <i class="fa fa-pencil"></i>
-                Edit Subscription
-              </a>
-              <a href="#" id="cancel-subscription" class="btn btn-danger">
-                <i class="fa fa-remove"></i>
-                Cancel Subscription
-              </a>
+              <% if @group.stripe_subscription_status == 'canceled' %>
+                <a href="#" id="revive-subscription" class="btn">
+                  <i class="fa fa-credit-card"></i>
+                  Revive Subscription
+                </a>
+              <% else %>
+                <a href="#" id="show-edit-subscription-panel" class="btn">
+                  <i class="fa fa-pencil"></i>
+                  Edit Subscription
+                </a>
+                <a href="#" id="cancel-subscription" class="btn btn-danger">
+                  <i class="fa fa-remove"></i>
+                  Cancel Subscription
+                </a>
+              <% end %>
             </div>
           </div>  
 
@@ -168,6 +180,10 @@
       <div id="edit-subscription-panel" 
           style="<%= (@group.new_record? || @group.public?) ? '' : 'display:none;' %>">
 
+        <% unless @group.new_record? %>
+          <%= f.input :new_subscription, label: 'Revive Subscription', as: :hidden %>
+        <% end %>
+
         <div class="control-group">
           <div class="sub-header">
             All plans come with a 14 day free trial.
@@ -175,8 +191,8 @@
           </div>
         </div>
 
-        <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, include_blank: false,
-          collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
+        <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, include_blank: false, collection: SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
+
 
         <div id="has-credit-card-panel" 
             style="<%= (@group.owner.has_stripe_card?) ? '' : 'display: none;' %>">

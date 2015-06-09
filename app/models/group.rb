@@ -168,6 +168,24 @@ class Group
     can_create_badges?
   end
 
+  # Returns stripe_subscription_status as a readable string
+  def subscription_status_string
+    case stripe_subscription_status
+    when 'trialing', 'new'
+      'Trial'
+    when 'active'
+      'Active'
+    when 'past_due'
+      'Past Due'
+    when 'canceled'
+      'Canceled'
+    when 'unpaid'
+      'Unpaid'
+    else
+      'None'
+    end
+  end
+
   # Returns hash = {
   #   color: 'red', 'orange', 'blue' or 'green',
   #   summary: summary_of_current_status,
@@ -398,34 +416,45 @@ class Group
   # - info_item_data: This will optionally result in the insertion of an info item 
   #     with type = "stripe-event" and name = "Invoice Payment"
   def self.refresh_stripe_subscription(stripe_subscription_id, options = {})
-    group = options[:group] || Group.find_by(stripe_subscription_id: stripe_subscription_id)
-    group.context = options[:context]
+    group = options[:group] \
+      || (Group.find_by(stripe_subscription_id: stripe_subscription_id) rescue nil)
+    
+    if group
+      group.context = options[:context]
 
-    if options[:info_item_data]
-      group.info_items.new(type: 'stripe-event', name: 'Invoice Payment', \
-        data: options[:info_item_data], user: group.owner).save
-    end
-
-    customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
-    begin
-      subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
-      
-      group.subscription_plan = subscription.plan.id
-      group.stripe_subscription_status = subscription.status
-      group.stripe_subscription_details = subscription.to_hash
-      group.subscription_end_date = subscription.current_period_end
-      group.stripe_payment_fail_date = options[:payment_fail_date]
-      group.stripe_payment_retry_date = options[:payment_retry_date]
-      group.save
-    rescue Exception => e
-      if subscription
-        # There was an unanticipated error, throw it
-        throw e
-      else
-        # There is no more subscription (it must've been cancelled remotely), cancel it locally
-        group.stripe_subscription_status = 'canceled'
-        group.save
+      if options[:info_item_data]
+        group.info_items.new(type: 'stripe-event', name: 'Invoice Payment', \
+          data: options[:info_item_data], user: group.owner).save
       end
+
+      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+      begin
+        subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
+        
+        group.subscription_plan = subscription.plan.id
+        group.stripe_subscription_status = subscription.status
+        group.stripe_subscription_details = subscription.to_hash
+        group.subscription_end_date = subscription.current_period_end
+        group.stripe_payment_fail_date = options[:payment_fail_date]
+        group.stripe_payment_retry_date = options[:payment_retry_date]
+        group.save
+      rescue Exception => e
+        if subscription
+          # There was an unanticipated error, throw it
+          throw e
+        else
+          # There is no more subscription (it must've been cancelled remotely), cancel it locally
+          group.stripe_subscription_status = 'canceled'
+          group.save
+        end
+      end
+    else
+      # Save a copy of the problemtic body if we're in development
+      item = InfoItem.new
+      item.type = 'webhook-error'
+      item.name = 'Stripe Webhook Error (Group.refresh_stripe_subscription)'
+      item.data = { stripe_subscription_id: stripe_subscription_id, options: options }
+      item.save
     end
   end
 
