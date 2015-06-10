@@ -200,8 +200,16 @@ class Group
     else
       case stripe_subscription_status
       when 'new', 'trialing'
-        { color: 'orange', summary: "Trial ends on #{subscription_end_date.to_s(:short_date)}", 
-          icon: 'fa-clock-o', show_alert: false }
+        { color: 'orange', summary: "Trial ends on " \
+            + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}", 
+          icon: 'fa-clock-o', show_alert: true,
+          summary: "Trial ends on " \
+            + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}",
+          alert_title: "Group is in trial period",
+          alert_body: ("Your private group trail ends on " \
+                      + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}. " \
+                      + "If you have any questions, send us an email at " \
+                  + "<a href='mailto:solutions@badgelist.com'>solutions@badgelist.com.").html_safe }
       when 'past_due'
         { color: 'red', icon: 'fa-exclamation-circle', show_alert: true,
           summary: "Payment failed on #{payment_fail_date.to_s(:short_date)}",
@@ -225,10 +233,10 @@ class Group
             summary: "Grace period expires #{subscription_end_date.to_s(:short_date)}",
             alert_title: "Your group is currently inactive",
             alert_body: "Your group's subscription is currently inactive but within the two week " \
-              + "grace period. The grace period expires at " \
+              + "grace period. The grace period expires on " \
               + "#{subscription_end_date.to_s(:short_date)}, after that all group content will " \
               + "remain online, but no new content will be able to be posted. To reactivate the " \
-              + "group, select a plan and confirm your billing details." }
+              + "group at any time just select a plan and confirm your billing details." }
         else
           { color: 'blue', icon: 'fa-close', show_alert: true,
             summary: "Group is inactive", alert_title: "Your group is currently inactive",

@@ -1,6 +1,8 @@
 <% 
   provide(:title, @group.name)
   can_join_group = @group.open? && !@current_user_is_admin && !@current_user_is_member
+
+  status_details = @group.status_details_for_admins
 %>
 
 <% if @current_user_is_admin || @current_user_is_member || @badge_list_admin || @group.open? %>
@@ -242,22 +244,20 @@
                   end
                 %>
 
-                <% if (@current_user_is_admin || @badge_list_admin) \
-                     && (@group.type=='private') && @group.user_limit %>
+                <% if (@current_user_is_admin || @badge_list_admin) %>
+                  (<%= (@group.subscription_plan) ? \
+                    ALL_SUBSCRIPTION_PLANS[@group.subscription_plan]['name']:'No plan selected' %>)
                   <br>
-                  
-                  <a href="/pricing" class="label-link" title="Click for Badge List pricing" 
-                      data-toggle="tooltip" data-placement="bottom">
+                  <span class="label <%= status_details[:color] %>">
+                    <i class="fa <%= status_details[:icon] %>"></i>
+                    <%= @group.subscription_status_string %> - 
+                    <%= status_details[:summary] %>
+                  </span> 
 
-                    <% if @group.active_user_count > @group.user_limit %>
-                      <span class="label label-important"><%= @group.user_limit%> Users (OVER LIMIT)</span>
-                    <% elsif @group.active_user_count > (@group.user_limit - 2) %>
-                      <span class="label label-warning"><%= @group.user_limit%> Users (Close to Limit)</span>
-                    <% else %>
-                      <span class="label label-success"><%= @group.user_limit%> Users</span>
-                    <% end %>
-
-                  </a>
+                  <%= link_to "<span class='label'>#{@group.user_limit} Users</span>".html_safe, 
+                    edit_group_path(@group), class: "label-link",
+                    title: "View your subscription plan details",
+                    data: { toggle: "tooltip", placement: "bottom" } %>
                 <% end %>
               </h3>
             </td>
@@ -339,6 +339,25 @@
     </div>
   </div>
 </div>
+
+<% 
+  if @current_user_is_admin || @badge_list_admin
+    
+    if status_details[:show_alert]
+%>
+
+  <div class="well span9 offset1 <%= status_details[:color] %>">
+    <h3><%= status_details[:alert_title] %></h3>
+    <p>
+      <%= status_details[:alert_body] %>
+    </p>
+  </div>
+
+<% 
+    end
+
+  end 
+%>
 
 <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 

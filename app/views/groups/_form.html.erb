@@ -132,7 +132,8 @@
           <div class="control-group">
             <label class="control-label">Current Plan &amp; Status</label>
             <div class="controls">
-              <%= ALL_SUBSCRIPTION_PLANS[@group.subscription_plan]['name'] %><br>
+              <%= (@group.subscription_plan) ? \
+                ALL_SUBSCRIPTION_PLANS[@group.subscription_plan]['name']:'No plan selected' %><br>
               <span class="label <%= subscription_status[:color] %>">
                 <i class="fa <%= subscription_status[:icon] %>"></i>
                 <%= @group.subscription_status_string %> - 
@@ -154,10 +155,13 @@
                   <i class="fa fa-pencil"></i>
                   Edit Subscription
                 </a>
-                <a href="#" id="cancel-subscription" class="btn btn-danger">
-                  <i class="fa fa-remove"></i>
-                  Cancel Subscription
-                </a>
+                
+                <% unless @group.stripe_subscription_id.blank? %>
+                  <a href="#" id="cancel-subscription" class="btn btn-danger">
+                    <i class="fa fa-remove"></i>
+                    Cancel Subscription
+                  </a>
+                <% end %>
               <% end %>
             </div>
           </div>  

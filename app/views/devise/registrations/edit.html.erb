@@ -83,7 +83,7 @@ var xxx;
               $("#payments-panel table tbody").append("<tr>"
                 + "<td>" + groupName + "</td>"
                 + "<td>" + unixTimeToString(payment.data.data.object.date) + "</td>"
-                + "<td>$" + payment.data.data.object.total.toFixed(2) + "</td>"
+                + "<td>$" + (payment.data.data.object.total/100).toFixed(2) + "</td>"
                 + "<td>" + paymentStatus + "</td>"
                 + "</tr>");
             }

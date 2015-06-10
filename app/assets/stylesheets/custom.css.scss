@@ -284,7 +284,21 @@ ul.dropdown-menu {
     ul { font-size: 21px; }
     i.header-icon { font-size: 70px; }
   }
-  &.tertiary {
+  &.primary, &.orange {
+    background-color: $primary-white;
+    border-left: 3px solid $primary-dark;
+
+    h3,h4 { color: $primary-dark; }
+    ul {
+      li { 
+        a:focus,a:hover { color: $primary-dark; }
+      }
+    }
+    i.header-icon {
+      color: $primary-really-light;
+    }
+  }
+  &.tertiary, &.blue {
     background-color: $tertiary-white;
     border-left: 3px solid $tertiary-dark;
 
