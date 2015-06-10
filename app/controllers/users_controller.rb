@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   
-  before_filter :authenticate_user!, only: [:index, :add_card, :delete_card, :refresh_cards]
+  before_filter :authenticate_user!, only: [:index, :add_card, :delete_card, :payment_history]
   before_filter :badge_list_admin, only: [:index]
 
   # GET /a/users
@@ -60,6 +60,25 @@ class UsersController < ApplicationController
       end
     end
   end
+
+  # GET /users/payments
+  # Accepts page parameters: page, page_size
+  # Gets the current user's payment history and returns it in json hash
+  def payment_history
+    respond_to do |format|
+      format.json do     
+        @page = (params[:page] || 1).to_i
+        @page_size = (params[:page_size] || APP_CONFIG['page_size_normal']).to_i
+        @payments = current_user.info_items.where(type: 'stripe-event')\
+          .order_by("created_at desc").page(@page).per(@page_size) rescue []
+        @has_more_pages = @payments.total_count > (@page * @page_size)
+
+        render json: { page: @page, count: @payments.count, total_count: @payments.total_count,
+          has_more_pages: @has_more_pages, payments: @payments }
+      end
+    end
+  end
+
 
 private
 

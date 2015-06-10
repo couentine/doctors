@@ -582,3 +582,16 @@ function executePoller(pollerId, onCompleted, onError, numTries) {
     });
   } catch (e) { onError(); }
 }
+
+function unixTimeToString(unix_timestamp){
+  var a = new Date(unix_timestamp*1000);
+  var year = a.getFullYear();
+  var month = a.getMonth() + 1;
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes() < 10 ? '0' + a.getMinutes() : a.getMinutes(); 
+  var sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds();
+  // var time = month + '/' + date + '/' + year + ' ' + hour + ':' + min + ':' + sec ;
+  var time = month + '/' + date + '/' + year;
+  return time;
+}

@@ -1438,10 +1438,26 @@ form#group-add-users-form {
     td.left-image, td.right-image {
       padding: 15px;
       width: 120px;
+      position: relative;
 
       img { 
         display: block; 
         width: 120px;
+      }
+      
+      .btn-overlay {
+        display: block;
+        text-align: center;
+        position: absolute;
+        bottom: 8px;
+        left: 0;
+        right: -2px;
+
+        a.btn {
+          opacity: 0.85;
+
+          &:hover, &:focus { opacity: 1; }
+        }
       }
     }
     td.left-image { background-color: $really-light-gray; }

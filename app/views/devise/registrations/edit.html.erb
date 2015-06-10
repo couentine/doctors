@@ -3,9 +3,18 @@
   provide(:include_stripe, true) 
 %>
 
+<style type="text/css">
+  
+  #change-password-form, #edit-user-info-form {
+    margin: 0 10px 10px 10px;
+  }
+
+</style>
+
 <script>
 
   var deletedCardId;
+  var paymentHistoryPage = 1;
 
   $(document).ready(function() {
 
@@ -24,7 +33,77 @@
       e.preventDefault();
     });
 
+    // Load the first page of payment history
+    loadPaymentHistoryPage();
+
+    $("#payment-history-prev-page").click(function(e) {
+      if (paymentHistoryPage > 1) {
+        paymentHistoryPage -= 1;
+        loadPaymentHistoryPage();
+      }
+    });
+    $("#payment-history-next-page").click(function(e) {
+      paymentHistoryPage += 1;
+      loadPaymentHistoryPage();
+    });
+
   });
+var xxx;
+  // Loads current page of payments
+  function loadPaymentHistoryPage() {
+    // First disable the display and buttons
+    $("#payment-history-prev-page").fadeOut();
+    $("#payment-history-next-page").fadeOut();
+    $("#payments-panel").fadeOut();
+    $("#no-payments-panel").fadeOut();
+    $("#payments-panel table tbody").empty();
+
+    // Then query the payment history via ajax
+    $.getJSON("/users/payments?page_size=10&page=" + paymentHistoryPage + ".json", 
+      function(response) {
+        try { 
+          var payment; var groupName; var paymentStatus;
+          var payments = response.payments;
+          paymentHistoryPage = response.page;
+
+          if (response.count > 0) {
+            for (var i = 0; i < payments.length; i++) {
+              payment = payments[i];
+              groupName = ""; xxx=payment;
+              if ((payment.data.data.object.lines.data.length > 0)
+                  && (payment.data.data.object.lines.data[0].metadata != null)) {
+                groupName = payment.data.data.object.lines.data[0].metadata.group_name;
+              }
+              if (payment.data.data.object.paid) {
+                paymentStatus =  "<i class='fa fa-check-circle'></i> Successful";
+              } else {
+                paymentStatus = "<i class='fa fa-exclamation-circle'></i> Payment Problem";
+              }
+
+              $("#payments-panel table tbody").append("<tr>"
+                + "<td>" + groupName + "</td>"
+                + "<td>" + unixTimeToString(payment.data.data.object.date) + "</td>"
+                + "<td>$" + payment.data.data.object.total.toFixed(2) + "</td>"
+                + "<td>" + paymentStatus + "</td>"
+                + "</tr>");
+            }
+            
+            // Show the panel and enable buttons as appropriate
+            $("#payments-panel").fadeIn();
+            if (paymentHistoryPage > 1) $("#payment-history-prev-page").fadeIn();
+            if (response.has_more_pages) $("#payment-history-next-page").fadeIn();
+          } else {
+            $("#no-payments-message").text("You haven't made any payments yet.");
+            $("#no-payments-panel").fadeIn();
+          }
+        } catch (e) {
+          $("#no-payments-message").text("There was an error loading your payment history. (Error: "
+            + e.message + ")");
+          $("#no-payments-panel").fadeIn();
+        }
+      }
+    );
+  }
 
   /* === Stripe polling functionality === */
 
@@ -116,43 +195,119 @@
 <div class="row add-top-margin">
   <div class="span12">
     <div class="header-bar user-header-bar">
+
       <table class="info-table">
         <tbody>
           <tr class="body-row">
             <td class="left-image">
               <%= gravatar_for(@user, :size => 100, :class => 'img-circle') %>
+              <div class="btn-overlay">
+                <a href="https://en.gravatar.com/connect/?source=_signup" target="_blank" 
+                    data-toggle="tooltip" data-placement="bottom" class="btn btn-small"
+                    title="Badge List uses Gravatar to display your profile picture.">
+                  <i class="fa fa-pencil"></i> Edit photo
+                </a>
+              </div>
             </td>
             <td class="single-panel">
               <h1><%= @user.name %></h1>
-              <h2><%= @user.username_with_caps %></h2>
-              <h3><i class="fa fa-envelope"></i> <%= @user.email %></h3>
+              <h2>
+                <%= link_to "<i class='fa fa-shield'></i> #{@user.username_with_caps}".html_safe, 
+                  user_path(@user), title: 'View your badge profile', 
+                  data: { toggle: 'tooltip', placement: 'right' } %>
+              </h2>
+              <h3>
+                <%= @user.email %>
+              </h3>
             </td>
           </tr>
 
           <tr class="footer-row">
             <td colspan="2">
+
               <span class="label-text">
                 You've been a Badge List member since 
                 <%= @user.created_at.to_s(:full_date) %>
               </span>
-              <ul class="action-list">
+              <ul class="action-list" id="account-edit-buttons" 
+                  style="<%= (form_error) ? 'display: none;' : '' %>">
                 <li>
-                  <%= link_to \
-                    "<i class='fa fa-exclamation-circle'></i> Delete your account".html_safe, 
-                    registration_path(resource_name), 
-                    :data => { :confirm => "Are you absoluetly sure? This can't be undone." }, 
-                    :method => :delete, :class => "btn btn-small" %>
+                  <a tabindex="-1" class="btn btn-small" id="edit-user-info" data-toggle="custom" 
+                      data-hide="#account-edit-buttons,#account-details-row" 
+                      data-show="#edit-user-info-form" data-focus="#user_email">
+                    <i class="fa fa-pencil"></i> Edit user info
+                  </a>
                 </li>
                 <li>
-                  <%= link_to "<i class='fa fa-shield'></i> View your badge profile".html_safe, 
-                    user_path(@user), class: 'btn btn-small' %>
+                  <a tabindex="-1" class="btn btn-small" id="change-password" data-toggle="custom" 
+                      data-hide="#account-edit-buttons,#account-details-row" 
+                      data-focus="#user_current_password" data-show="#change-password-form">
+                    <i class="fa fa-key"></i> Change password
+                  </a>
                 </li>
               </ul>
+
+              <!-- === CHANGE PASSWORD FORM === -->
+
+              <div class="bl-inline-form" id="change-password-form" 
+                  style="<%= (form_error == 'change-password') ? '' : 'display: none;' %>">
+                <%= simple_form_for(resource, as: resource_name, 
+                    url: registration_path(resource_name), 
+                    html: { :method => :put, :class => 'form-horizontal' }) do |f| %>
+                  
+                  <div class="form-body">
+                    <%= f.error_notification %>
+                    
+                    <%= f.input :email, :as => :hidden, :required => true %>
+                    <%= f.input :current_password, :required => true %>
+                    <%= f.input :password, :label => 'New password', :autocomplete => "off", 
+                      :required => true %>
+                    <%= f.input :password_confirmation, :label => 'Confirm new password', 
+                      :autocomplete => "off", :required => true %>
+                  </div>
+
+                  <div class="form-footer">
+                    <%= f.button :submit, "Change password", :class => "btn btn-info" %>
+                    <a class="btn" data-toggle="custom"  data-hide="#change-password-form" 
+                      data-show="#account-edit-buttons,#account-details-row">Cancel</a>
+                  </div>
+
+                <% end %>
+              </div>
+
+              <!-- === EDIT USER INFO FORM === -->
+
+              <div class="bl-inline-form" id="edit-user-info-form" 
+                  style="<%= (form_error == 'edit-user-info') ? '' : 'display: none;' %>">
+                <%= simple_form_for(resource, as: resource_name, 
+                    url: registration_path(resource_name), 
+                    html: { :method => :put, :class => 'form-horizontal' }) do |f| %>
+                  
+                  <div class="form-body">
+                    <%= f.error_notification %>
+                    
+                    <%= f.input :email, label: "Your email" %>
+                    <%= f.input :name, label: "Your full name" %>
+                    <%= f.input :username_with_caps, label: "Your username" %>
+                    <%= f.input :current_password, label: "Confirm your password", required: true %>
+                  </div>
+
+                  <div class="form-footer">
+                    <%= f.button :submit, "Update info", :class => "btn btn-info" %>
+                    <a class="btn" data-toggle="custom"  data-hide="#edit-user-info-form" 
+                      data-show="#account-edit-buttons,#account-details-row">Cancel</a>
+                  </div>
+
+                <% end %>
+              </div>
+            
             </td>
           </tr>
 
         </tbody>
       </table>
+
+
     </div>
   </div>
 </div>
@@ -240,6 +395,8 @@
         <div class="spinner large tertiary">&nbsp;</div>
       </div>
 
+      <!-- === CREDIT CARDS === -->
+
       <div class="header-block">
         <div id="credit-card-buttons">
           <a tabindex="-1" class="btn btn-small btn-primary" id="add-card" data-toggle="custom" 
@@ -298,6 +455,48 @@
         </table>
       </div>
 
+      <!-- === PAYMENT HISTORY === -->
+
+      <div class="header-block">
+        <div id="payment-history-buttons">
+          <button id="payment-history-next-page" class="btn btn-small">
+            <i class="fa fa-arrow-right"></i>
+          </button>
+          <button id="payment-history-prev-page" class="btn btn-small">
+            <i class="fa fa-arrow-left"></i>
+          </button>
+        </div>
+
+        <h3>Payment History</h3>
+      </div>
+      
+      <div id="payments-panel" style="display: none;">
+        <table class="table with-border">
+          <thead>
+            <tr>
+              <th>Group Name</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="no-payments-panel">
+        <table class="table with-border">
+          <tbody>
+            <tr>
+              <td id="no-payments-message">
+                Loading your payment information...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>
@@ -324,86 +523,29 @@
   <% end %>
 </div>
 
-<!-- === ACCOUNT DETAILS === -->
+<!-- === ACCOUNT DELETION === -->
 
-<div class="row">
+<div class="row add-top-margin">
   <div class="span12">
     <div class="tab-header merge-with-card">
-      <div id="account-edit-buttons" style="<%= (form_error) ? 'display: none;' : '' %>">
-        <a tabindex="-1" class="btn btn-small" id="edit-user-info" data-toggle="custom" 
-          data-hide="#account-edit-buttons,#account-details-row" data-show="#edit-user-info-form"
-          data-focus="#user_email">
-
-          <i class="fa fa-pencil"></i> Edit user info
-        </a>
-        <a tabindex="-1" class="btn btn-small" id="change-password" data-toggle="custom" 
-          data-hide="#account-edit-buttons,#account-details-row" 
-          data-focus="#user_current_password" data-show="#change-password-form">
-
-          <i class="fa fa-key"></i> Change password
-        </a>
-      </div>
-
-      <h2>Update account details</h2>
+      <h2>Delete your account</h2>
     </div>
   </div>
 </div>
 
-<div class="row" id="account-details-row" style="<%= (form_error) ? 'display: none;' : '' %>">
+<div class="row" id="delete-account">
   <div class="span12">
     <div class="info-card text-card">
-      Click one of the buttons in the header above to edit your account details.
+      <p>
+        Click the button below to permanently delete your Badge List account.
+      </p>
+      <p>
+        <%= link_to \
+          "<i class='fa fa-exclamation-circle'></i> Delete your account".html_safe, 
+          registration_path(resource_name), 
+          :data => { :confirm => "Are you absoluetly sure? This can't be undone." }, 
+          :method => :delete, :class => "btn btn-danger" %>
+      </p>
     </div>
   </div>
-</div>
-
-<!-- === CHANGE PASSWORD FORM === -->
-
-<div class="bl-inline-form" id="change-password-form" 
-    style="<%= (form_error == 'change-password') ? '' : 'display: none;' %>">
-  <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), 
-      :html => { :method => :put, :class => 'form-horizontal' }) do |f| %>
-    
-    <div class="form-body">
-      <%= f.error_notification %>
-      
-      <%= f.input :email, :as => :hidden, :required => true %>
-      <%= f.input :current_password, :required => true %>
-      <%= f.input :password, :label => 'New password', :autocomplete => "off", :required => true %>
-      <%= f.input :password_confirmation, :label => 'Confirm new password', :autocomplete => "off", 
-        :required => true %>
-    </div>
-
-    <div class="form-footer">
-      <%= f.button :submit, "Change password", :class => "btn btn-info" %>
-      <a class="btn" data-toggle="custom"  data-hide="#change-password-form" 
-        data-show="#account-edit-buttons,#account-details-row">Cancel</a>
-    </div>
-
-  <% end %>
-</div>
-
-<!-- === EDIT USER INFO FORM === -->
-
-<div class="bl-inline-form" id="edit-user-info-form" 
-    style="<%= (form_error == 'edit-user-info') ? '' : 'display: none;' %>">
-  <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), 
-      :html => { :method => :put, :class => 'form-horizontal' }) do |f| %>
-    
-    <div class="form-body">
-      <%= f.error_notification %>
-      
-      <%= f.input :email, :label => "Your email" %>
-      <%= f.input :name, :label => "Your full name" %>
-      <%= f.input :username_with_caps, :label => "Your username" %>
-      <%= f.input :current_password, :label => "Confirm your password", :required => true %>
-    </div>
-
-    <div class="form-footer">
-      <%= f.button :submit, "Update info", :class => "btn btn-info" %>
-      <a class="btn" data-toggle="custom"  data-hide="#edit-user-info-form" 
-        data-show="#account-edit-buttons,#account-details-row">Cancel</a>
-    </div>
-
-  <% end %>
 </div>

@@ -43,6 +43,7 @@ BadgeList::Application.routes.draw do
   match 'users/cards' => 'users#add_card', via: :post, as: :add_card
   match 'users/cards' => 'users#refresh_cards', via: :get, as: :refresh_cards
   match 'users/card/:id' => 'users#delete_card', via: :delete, as: :delete_card
+  match 'users/payments' => 'users#payment_history', via: :get, as: :payment_history
 
   # === MANUAL GROUP PATHS === #
   match ':group_id/cancel' => 'groups#cancel_subscription', via: :post, as: :cancel_subscription
