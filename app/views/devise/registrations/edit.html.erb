@@ -1,5 +1,5 @@
 <% 
-  provide(:title, 'Change account info') 
+  provide(:title, 'Your account') 
   provide(:include_stripe, true) 
 %>
 
@@ -316,7 +316,7 @@ var xxx;
 
 <div class="row">
   <div class="span12">
-    <div class="tab-header merge-with-card <%= (@user.owned_group_ids.blank?) ? 'empty' : '' %>">
+    <div class="tab-header merge-with-card">
       <%= link_to "<i class='fa fa-plus'></i> Create new group".html_safe, new_group_path, 
         class: "btn btn-small" %>
 
@@ -328,22 +328,18 @@ var xxx;
 <div class="row" id="group-list-row">
   <div class="span12">
     <div class="info-card text-card">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Group</th>
-            <th>Type</th>
-            <th>Paid Subscription</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if @user.owned_groups.blank? %>
+      <% if @user.owned_groups.blank? %>
+        You haven't created any groups yet.
+      <% else %>
+        <table class="table">
+          <thead>
             <tr>
-              <td>
-                You haven't created any groups yet.
-              </td>
+              <th>Group</th>
+              <th>Type</th>
+              <th>Paid Subscription</th>
             </tr>
-          <% else %>
+          </thead>
+          <tbody>
             <% @user.owned_groups.asc(:name).each do |group| %>
               <tr>
                 <td>
@@ -369,9 +365,9 @@ var xxx;
                 </td>
               </tr>
             <% end %>
-          <% end %>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      <% end %>
     </div>
   </div>
 </div>

@@ -254,7 +254,11 @@
                     <%= status_details[:summary] %>
                   </span> 
 
-                  <%= link_to "<span class='label'>#{@group.user_limit} Users</span>".html_safe, 
+                  <%
+                    limit_text = (@group.user_limit < 0) ? "#{@group.admin_limit} Teacher"\
+                      : "#{@group.user_limit} Users"
+                  %>
+                  <%= link_to "<span class='label'>#{limit_text}</span>".html_safe, 
                     edit_group_path(@group), class: "label-link",
                     title: "View your subscription plan details",
                     data: { toggle: "tooltip", placement: "bottom" } %>
@@ -282,9 +286,6 @@
                 </li>
                 <li>
                   <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> 
-                  <% unless @group.active_user_count.nil? %>
-                    (<%= @group.active_user_count %> active this month)
-                  <% end %>
                 </li>
                 <li>
                   <i class="fa fa-at"></i> 

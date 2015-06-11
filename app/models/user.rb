@@ -335,7 +335,7 @@ class User
       poller = Poller.find(options[:poller_id]) rescue nil
       user = options[:user] || User.find(options[:user_id])
 
-      create_stripe_customer if user.stripe_customer_id.blank?  
+      user.create_stripe_customer if user.stripe_customer_id.blank?  
       customer = Stripe::Customer.retrieve(user.stripe_customer_id)
       card = customer.sources.create(source: card_token)
 

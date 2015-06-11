@@ -423,11 +423,11 @@ class Group
   # - payment_retry_date: This will optionally cause the payment_retry_date to be updated
   # - info_item_data: This will optionally result in the insertion of an info item 
   #     with type = "stripe-event" and name = "Invoice Payment"
+  # - throw_errors: Set this to true to throw errors instead of logging them
   def self.refresh_stripe_subscription(stripe_subscription_id, options = {})
-    group = options[:group] \
-      || (Group.find_by(stripe_subscription_id: stripe_subscription_id) rescue nil)
-    
-    if group
+    begin
+      group = options[:group] \
+        || (Group.find_by(stripe_subscription_id: stripe_subscription_id) rescue nil)
       group.context = options[:context]
 
       if options[:info_item_data]
@@ -456,13 +456,17 @@ class Group
           group.save
         end
       end
-    else
-      # Save a copy of the problemtic body if we're in development
-      item = InfoItem.new
-      item.type = 'webhook-error'
-      item.name = 'Stripe Webhook Error (Group.refresh_stripe_subscription)'
-      item.data = { stripe_subscription_id: stripe_subscription_id, options: options }
-      item.save
+    rescue Exception => e
+      if options[:throw_errors]
+        throw e
+      else
+        # Log this error
+        item = InfoItem.new
+        item.type = 'webhook-error'
+        item.name = 'Stripe Webhook Error (Group.refresh_stripe_subscription)'
+        item.data = { stripe_subscription_id: stripe_subscription_id, options: options, e: e.to_s }
+        item.save
+      end
     end
   end
 
@@ -481,19 +485,33 @@ class Group
   # Accepts the following options:
   # - group_id: Include this to have the group be queried
   # - group: Include this to skip the query
+  # - throw_errors: Set this to true to throw errors instead of logging them
   def self.update_stripe_subscription(options = {})
-    group = options[:group] || Group.find(options[:group_id])
+    begin
+      group = options[:group] || Group.find(options[:group_id])
 
-    customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
-    if customer.default_source != group.stripe_subscription_card
-      customer.default_source = group.stripe_subscription_card
-      customer.save
-    end
-    
-    subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
-    if group.subscription_plan != subscription.plan
-      subscription.plan = group.subscription_plan
-      subscription.save
+      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+      if customer.default_source != group.stripe_subscription_card
+        customer.default_source = group.stripe_subscription_card
+        customer.save
+      end
+      
+      subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
+      if group.subscription_plan != subscription.plan
+        subscription.plan = group.subscription_plan
+        subscription.save
+      end
+    rescue Exception => e
+      if options[:throw_errors]
+        throw e
+      else
+        # Log this error
+        item = InfoItem.new
+        item.type = 'callback-error'
+        item.name = 'Problem Updating Subscription (Group.update_stripe_subscription)'
+        item.data = { group: group, owner: group.owner, options: options, error: e.to_s }
+        item.save
+      end
     end
   end
 
@@ -520,6 +538,7 @@ class Group
   # - group_id: Include this to have the group be queried and updated by id
   # - group: Include this to have the group be updated without requerying
   # - poller_id: If provided this poller record will be updated with success or failure details
+  # - throw_errors: Set this to true to throw errors instead of logging them
   def self.cancel_stripe_subscription(stripe_customer_id, stripe_subscription_id, options = {})
     begin
       poller = Poller.find(options[:poller_id]) rescue nil
@@ -546,8 +565,16 @@ class Group
         poller.message = 'An error occurred while trying to cancel your subscription, ' \
           + "please try again. (Error message: #{e})"
         poller.save
-      else
+      elsif options[:throw_errors]
         throw e
+      else
+        # Log this error
+        item = InfoItem.new
+        item.type = 'callback-error'
+        item.name = 'Problem Cancelling Subscription (Group.cancel_stripe_subscription)'
+        item.data = { stripe_customer_id: stripe_customer_id, group: group,
+          stripe_subscription_id: stripe_subscription_id, options: options, error: e.to_s }
+        item.save
       end
     end
   end

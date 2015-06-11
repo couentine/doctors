@@ -747,6 +747,12 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
       .sub-header {
         margin: 0 0 0 25px;
 
+        h3 {
+          float: none;
+          display: block;
+          margin: 10px 0;
+        }
+
         a:not(.btn) {
           text-decoration: underline;
         }

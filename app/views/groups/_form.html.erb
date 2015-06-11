@@ -32,7 +32,8 @@
 
     $("#group_type_private").click(function() {
       $("#subscription-details-panel").fadeIn();
-      if ($("#group_stripe_subscription_card").val() == "") {
+      if (($("#group_stripe_subscription_card").val() == null)
+          || ($("#group_stripe_subscription_card").val() == "")) {
         $("#submit-group-form").prop("disabled", true);
         $("#card-required-label").show();
       }
@@ -57,6 +58,11 @@
       $("#group_new_subscription").val("true");
       e.preventDefault();
     });
+
+    // Default to private if k12 pricing group
+    <% if @is_k12 %>
+      $("#group_type_private").click();
+    <% end %>
 
   });
 
@@ -183,7 +189,9 @@
       <div id="edit-subscription-panel" 
           style="<%= (@group.new_record? || @group.public?) ? '' : 'display:none;' %>">
 
-        <% unless @group.new_record? %>
+        <% if @group.new_record? %>
+          <%= f.input :pricing_group, label: 'Pricing Group', as: :hidden %>
+        <% else %>
           <%= f.input :new_subscription, label: 'Revive Subscription', as: :hidden %>
         <% end %>
 
@@ -227,17 +235,32 @@
           </div>
         <% end %>
 
-
-        <div class="control-group">
-          <div class="sub-header">
-            <em>
-              Have any questions about pricing or billing?
-              Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
-                target="_blank">Paid Subscription FAQ</a> or 
-              email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
-            </em>
+        <% if @is_k12 %>
+          <div class="control-group">
+            <div class="sub-header">
+              <h3>
+                <i class="fa fa-gift"></i> K12 Teachers
+              </h3>
+              We <i class="fa fa-heart"></i> teachers so what you see above is our special 
+              pricing just for K12 educators. It includes unlimited students for a super low annual 
+              price. This deal is intended only for individual teachers so you'll only be able to 
+              have one admin in your group.  <br><br>
+              By creating a group with this plan you are promising that you're really a K12 teacher
+              and that you won't use the group for multiple teachers. Thank you so much!
+            </div>
           </div>
-        </div>
+
+          <div class="control-group">
+            <div class="sub-header">
+              <em>
+                Have any questions about pricing or billing?
+                Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
+                  target="_blank">Paid Subscription FAQ</a> or 
+                email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+              </em>
+            </div>
+          </div>
+        <% end %>
 
       </div> <!-- /edit-subscription-panel -->
 
@@ -259,22 +282,25 @@
                   placeholder: 'http://nasa.gov/logo.png',
                   input_html: { class: 'input-xlarge' } %>
 
-      <% if @badge_list_admin %>
-        <%= f.input :user_limit, label: '(ADMIN) User Limit', 
-            placeholder: 'Private group allowed size',
-            input_html: { class: 'input-mini' } %>
-      <% end %>
-
       <!-- === GROUP OWNERSHIP === -->
 
       <h2>Transfer group ownership</h2>
-      
       <%= f.input :new_owner_username, label: 'New owner', 
         placeholder: 'Enter Badge List username',
         hint: 'This will instantly and irreversably transfer ownership of this group to the ' \
         + 'user you specify (enter their Badge List username not their email). ' \
         + 'Badge List will not send them a notification so please be sure to ' \
         + 'notify the recipient and get their agreement beforehand.' %>
+
+      <% if @badge_list_admin %>
+        <!-- === BADGE LIST ADMIN STUFF === -->
+
+        <h2>Badge List Admin Panel</h2>
+      
+        <%= f.input :user_limit, label: 'User Limit', input_html: { class: 'input-mini' } %>
+        <%= f.input :admin_limit, label: 'Admin Limit', input_html: { class: 'input-mini' } %>
+        <%= f.input :sub_group_limit, label: 'User Limit', input_html: { class: 'input-mini' } %>
+      <% end %>
 
     <% end %>
   </div>  

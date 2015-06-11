@@ -98,11 +98,15 @@ class GroupsController < ApplicationController
 
   # GET /groups/new
   # GET /groups/new.json
+  # Accepts 'pg' parameter to set pricing group (only accepts 'k12' for now)
   def new
     @group = Group.new
     @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
     @badge_list_admin = current_user && current_user.admin?
+
+    @is_k12 = (params[:pg] == 'k12')
+    @group.pricing_group = 'k12' if @is_k12
 
     respond_to do |format|
       format.html # new.html.erb

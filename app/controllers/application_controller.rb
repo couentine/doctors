@@ -33,15 +33,17 @@ class ApplicationController < ActionController::Base
   end
 
   def store_location
-    # Store the last url as long as it isn't a /users path
-    if (request.format == "text/html") || (request.content_type == "text/html")
+    if ((request.format == "text/html") || (request.content_type == "text/html"))
+      # Store the last url as long as it isn't a /users path
       session[:previous_url] = request.fullpath unless request.fullpath =~ /\/users/
-    end
 
-    # If the 'join' parameter is set then store the badge id
-    if ((request.format == "text/html") || (request.content_type == "text/html")) \
-        && !params[:join].blank?
-      session[:join_badge_id] = params[:join]
+      if !params[:join].blank?
+        # If the 'join' parameter is set then store the badge id
+        session[:join_badge_id] = params[:join]
+      elsif !params[:create_k12].blank?
+        # If they hit the registration page with the create_k12 param set then store it for later
+        session[:create_k12] = true
+      end
     end
   end
 
@@ -52,6 +54,8 @@ class ApplicationController < ActionController::Base
       
     if badge
       "/#{badge.group.url}/#{badge.url}/join"
+    elsif session[:create_k12]
+      "/groups/new?pg=k12"
     else
       session[:previous_url] || root_path
     end

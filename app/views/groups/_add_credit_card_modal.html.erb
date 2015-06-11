@@ -20,6 +20,8 @@
     if (poller.status == 'successful') {
       $("#has-credit-card-panel").show();
       $("#no-credit-card-panel").hide();
+      $("#submit-group-form").prop("disabled", false);
+      $("#card-required-label").hide();
       $("#add-credit-card").modal("hide");
       $('#stripe-spinner').hide();
       $("#stripe-form input[type=text]").val("")

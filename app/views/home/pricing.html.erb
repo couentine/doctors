@@ -6,7 +6,8 @@
   <div class="span6 offset3">
     <h1>Badge List Pricing</h1>
     <span class="tag-line">
-      All private groups include free lifetime hosting for all awarded badges.
+      All private groups include free lifetime hosting for all awarded badges. 
+      Try it free for 2 weeks.
     </span>
   </div>
 </div>
@@ -31,6 +32,12 @@
             <td>5,000 users</td>
           </tr>
           <tr>
+            <td></td>
+            <td>1 sub-group</td>
+            <td>5 sub-groups</td>
+            <td>Unlimited sub-groups</td>
+          </tr>
+          <tr>
             <td>$50 / month</td>
             <td>$120 / month</td>
             <td>$200 / month</td>
@@ -51,11 +58,14 @@
 <div class="row-fluid pricing-page-row button-row">
   <div class="span6 offset3 row-inner">
     <% if user_signed_in? %>
-      <%= link_to 'Start your free 14 day trial', new_group_path, 
+      <%= link_to 'Create your group', new_group_path, 
         class: 'btn btn-large' %>
     <% else %>
-      <%= link_to 'Start your free 14 day trial', new_user_registration_path, 
+      <%= link_to 'Create your group', new_user_registration_path, 
         class: 'btn btn-large' %>
     <% end %>
+    <br><br>
+    <i class="fa fa-gift"></i> Are you a K12 teacher?<br>
+    <%= link_to "Click here for special pricing", pricing_k12_path, class: 'btn btn-link' %>
   </div>
 </div>
