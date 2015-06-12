@@ -3,11 +3,6 @@
   $(document).ready(function() {
 
     <% if @group.new_record? %>
-      // If this is a new record then auto set the URL as they type
-      $('#group_name').keyup(function() {
-        $('#group_url_with_caps').val(parameterizeText($(this).val()));
-      });
-
       <% if @group.owner.stripe_default_source %>
         // Set the credit card dropdown to be their default stripe card
         $("#group_stripe_subscription_card").val("<%= @group.owner.stripe_default_source %>");
@@ -64,6 +59,47 @@
       $("#group_type_private").click();
     <% end %>
 
+
+    <% if @allow_url_editing %>
+      // URL Editing Logic
+
+      // Auto set the URL as they type the name
+      $('#group_name').keyup(function() {
+        $('#group_url_with_caps').val(parameterizeText($(this).val()));
+        $('#url-preview-label').text(parameterizeText($(this).val()));
+        if (($('#group_url_with_caps').val().length > 0) && !$("#url-panel").is(":visible"))
+          $("#url-panel").fadeIn();
+        else if (($('#group_url_with_caps').val().length == 0) && $("#url-panel").is(":visible"))
+          $("#url-panel").fadeOut();
+      });
+
+      // Only allow url characters in the manual url box and update the label as they type
+      $('#group_url_with_caps').keyup(function() {
+        $(this).val(parameterizeText($(this).val()));
+        $('#url-preview-label').text($(this).val());
+      });
+
+      $("#url-edit").click(function() {
+        $("#url-preview").fadeOut(function() {
+          $("#url-editor").show();
+        });
+        $('#group_url_with_caps').focus();
+      });
+      $("#url-save").click(function() {
+        $("#url-editor").fadeOut(function() {
+          $("#url-preview").show();
+        });
+        $('#group_name').focus();
+      });
+      $("#url-cancel").click(function() {
+        $('#badge_url_with_caps').val(parameterizeText($("#group_name").val()));
+        $('#url-preview-label').text(parameterizeText($("#group_name").val()));
+        $("#url-editor").hide();
+        $("#url-preview").show();
+      });
+
+    <% end %>
+
   });
 
   function toggleExtraInfo() {
@@ -82,7 +118,7 @@
   var MAX_URL_LENGTH = <%= Group::MAX_URL_LENGTH %>;
   function parameterizeText(s) {
     if (s == null) return '';
-    else return s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').replace(/ +/g, ' ')
+    else return s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').replace(/ +/g, ' ').trim()
       .replace(/ /g, '-').trunc(MAX_URL_LENGTH);
   }
 
@@ -112,15 +148,39 @@
   <%= f.error_notification %>
   <div class="form-body">
     <%= f.input :name, label: 'Group Name', placeholder: 'NASA Astronaut Training',
-      autofocus: true, input_html: { class: 'input-xlarge', data: { toggle: 'tooltip',
-        title: 'What is your organization, team or group called?' } } %>
+      autofocus: true, input_html: { class: 'input-xlarge' } %>
+
+    <div id="url-panel">
+      <% if @allow_url_editing  %>
+        <i class="fa fa-question-circle" data-toggle="tooltip" title=
+          "You will not be able to edit the Group's URL after you've added members and badges."></i>
+      <% end %>
+      <label for="group_url_with_caps">URL: </label>
+        
+      <span id="url-preview">
+        "<span id="url-preview-label"><%= @group.url_with_caps %></span>"
+        <% if @allow_url_editing  %>
+          <a href="#" id="url-edit" class="btn btn-small btn-link">Edit</a>
+        <% else %>
+          <i class="fa fa-lock" data-toggle="tooltip" title=
+          "You can no longer to edit the Group's URL because it would break badge links."></i>
+        <% end %>
+      </span>
     
-    <%= f.input :url_with_caps, wrapper: :prepend, label: 'Group URL' do %>
-      <%= content_tag :span, "badgelist.com/", class: "add-on" %>
-      <%= f.input_field :url_with_caps, placeholder: 'nasa-crew', class: 'input-medium', 
-        data: { toggle: 'tooltip',
-        title: 'Pick a unique URL for your learning group' } %>
-    <% end %>
+      <% if @allow_url_editing  %>
+        <span id="url-editor" style="display: none;">
+          <%= f.text_field :url_with_caps %>
+          <ul class="unstyled">
+            <li><a href="#" id="url-save" class="btn btn-small btn-link">
+              <i class="fa fa-check"></i>
+            </a></li>
+            <li><a href="#" id="url-cancel" class="btn btn-small btn-link">
+              <i class="fa fa-remove"></i>
+            </a></li>
+          </ul>
+        </span>
+      <% end %>
+    </div>
 
     <%= f.input :type, label: 'Group Type', as: :radio_buttons, label_html: { class: 'hidden' },
                 collection: @group_type_options %>

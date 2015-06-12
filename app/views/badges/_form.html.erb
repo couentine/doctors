@@ -57,7 +57,7 @@
     var returnValue = '';
 
     if (s != null) 
-      returnValue = s.trim().replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ')
+      returnValue = s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').trim()
         .replace(/ +/g, ' ').replace(/ /g, '-');
     if (returnValue.substr(0, 1) == "-") returnValue = returnValue.substr(1)
     if (returnValue.substr(returnValue.length - 1) == "-") 
@@ -73,10 +73,12 @@
 
   <div class="form-body">
     
-    <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics Expert', autofocus: true,
+    <%= f.input :name, label: 'Badge Name', placeholder: 'Extraterrestrial Physics Expert',
+      autofocus: true,
       input_html: { class: 'input-xlarge', maxlength: Badge::MAX_NAME_LENGTH, 
         data: { toggle: 'tooltip',
-      title: 'Examples: Excel Spreadsheet Ninja, 2014 Hackathon Attendee, Acme Community Leader' } } %>
+      title: 'Examples: Excel Spreadsheet Ninja, 2014 Hackathon Attendee, ' \
+      + 'Acme Community Leader' } } %>
     
     <div id="url-panel" style="<%= (@badge.new_record?) ? 'display: none;' : '' %>">
       <label for="badge_url_with_caps">URL: </label>

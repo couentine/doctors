@@ -104,6 +104,7 @@ class GroupsController < ApplicationController
     @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
     @badge_list_admin = current_user && current_user.admin?
+    @allow_url_editing = true;
 
     @is_k12 = (params[:pg] == 'k12')
     @group.pricing_group = 'k12' if @is_k12
@@ -117,6 +118,7 @@ class GroupsController < ApplicationController
   # GET /group-url/edit
   def edit
     @group_type_options = GROUP_TYPE_OPTIONS
+    @allow_url_editing = (@group.member_ids.count == 0) || (@group.badge_ids.count == 0);
   end
 
   # POST /groups
