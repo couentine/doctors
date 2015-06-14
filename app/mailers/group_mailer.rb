@@ -1,0 +1,66 @@
+class GroupMailer < ActionMailer::Base
+  include EmailTools
+
+  def trial_ending(group_id)
+    @group = Group.find(group_id)
+    @trial_end_date = @group.subscription_end_date
+    @days_until_end = ((@trial_end_date - Time.now) / 86400).round
+    @payment_info_needed = !@group.owner.has_stripe_card?
+
+    if @payment_info_needed
+      subject = "We need your billing info"
+    else
+      subject = "Your trial ends in #{pluralize @days_until_end, 'day'}"
+    end
+
+    mail(
+      :subject  => subject,
+      :to       => @group.owner.email_name,
+      :from     => build_from_string,
+      :reply_to => build_from_string,
+      :tag      => 'group_mailer,trial_ending'
+    )
+  end
+
+  def payment_failure(group_id)
+    @group = Group.find(group_id)
+    @payment_fail_date = @group.stripe_payment_fail_date
+    @retry_date = @group.stripe_payment_retry_date
+    @days_until_retry = ((@retry_date - Time.now) / 86400).round
+    
+    subject = "Billing charge declined"
+
+    mail(
+      :subject  => subject,
+      :to       => @group.owner.email_name,
+      :from     => build_from_string,
+      :reply_to => build_from_string,
+      :tag      => 'group_mailer,payment_failure'
+    )
+  end
+
+  def subscription_canceled(group_id)
+    @group = Group.find(group_id)
+
+    mail(
+      :subject  => "Your subscription has been canceled",
+      :to       => @group.owner.email_name,
+      :from     => build_from_string,
+      :reply_to => build_from_string,
+      :tag      => 'group_mailer,subscription_canceled'
+    )
+  end
+
+  def group_transfer(group_id)
+    @group = Group.find(group_id)
+
+    mail(
+      :subject  => "You're the new owner of #{@group.name}",
+      :to       => @group.owner.email_name,
+      :from     => build_from_string,
+      :reply_to => build_from_string,
+      :tag      => 'group_mailer,group_transfer'
+    )
+  end
+
+end
