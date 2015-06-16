@@ -17,10 +17,6 @@ class GroupsController < ApplicationController
   before_filter :group_owner, only: [:edit, :update, :destroy, :cancel_subscription]
   before_filter :badge_list_admin, only: [:index]
 
-  # === LIMIT-FOCUSED FILTERS === #
-
-  before_filter :can_add_members_or_admins, only: [:add_users, :create_users]
-
   # === CONSTANTS === #
 
   GROUP_TYPE_OPTIONS = [
@@ -344,14 +340,20 @@ class GroupsController < ApplicationController
       @form_path = create_group_members_path(@group)
     end
 
-    # Query for the badges if param is included
-    badge_urls = params["badges"] || []
-    @badge_list = []
-    @group.badges.asc(:name).each do |badge|
-      @badge_list << {
-        badge: badge,
-        selected: badge_urls.include?(badge.url)
-      }
+    if (@type == :admin) && !@group.can_add_admins?
+      redirect_to @group, notice: 'You cannot add new admins to this group.'
+    elsif (@type == :member) && !@group.can_add_members?
+      redirect_to @group, notice: 'You cannot add new members to this group.'
+    else
+      # Query for the badges if param is included
+      badge_urls = params["badges"] || []
+      @badge_list = []
+      @group.badges.asc(:name).each do |badge|
+        @badge_list << {
+          badge: badge,
+          selected: badge_urls.include?(badge.url)
+        }
+      end
     end
   end
 
@@ -374,118 +376,124 @@ class GroupsController < ApplicationController
                                # type=admin >> They are already admins
                                # type=member >> Admins cannot be down-graded
 
-    # Query for the badges if param is included
-    if params["badges"].blank?
-      @badges, badge_ids = [], []
+    if (@type == :admin) && !@group.can_add_admins?
+      redirect_to @group, notice: 'You cannot add new admins to this group.'
+    elsif (@type == :member) && !@group.can_add_members?
+      redirect_to @group, notice: 'You cannot add new members to this group.'
     else
-      @badges = @group.badges.where(:url.in => params["badges"])
-      badge_ids = @badges.map{ |b| b.id }
-    end
-
-    # Parse the emails using the UsersHelper function
-    parsed_emails = parse_emails(params[:emails])
-    @invalid_emails = parsed_emails[:invalid]
-    valid_email_names = parsed_emails[:valid]
-    valid_emails = []
-    name_from_email = {} # key = email, value = name
-    valid_email_names.each do |item|
-      valid_emails << item[:email]
-      name_from_email[item[:email]] = item[:name]
-    end
-    
-    unless valid_emails.empty?
-      # query for users and build list of users that don't exist yet
-      match_results = match_emails_to_users(valid_emails)
-      users_to_add = match_results[:matched_users]
-      emails_to_invite = match_results[:unmatched_emails]
-
-      # For existing users: We can add them right away
-      unless users_to_add.empty?
-        badge_ids = []
-        if @type == :admin
-          users_to_add.each do |user|
-            if @group.has_admin?(user)
-              @skipped_admin_emails << user.email
-              @badges.each { |badge| badge.add_learner user }
-            else
-              @group.admins << user
-              @badges.each { |badge| badge.add_learner user }
-              if @notify_by_email
-                UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, badge_ids)
-              end
-              if @group.has_member?(user)
-                @group.members.delete(user)
-                @upgraded_member_emails << user.email
-              else
-                @new_admin_emails << user.email
-              end
-            end
-          end
-        else
-          users_to_add.each do |user|
-            if @group.has_member?(user)
-              @skipped_member_emails << user.email
-              @badges.each { |badge| badge.add_learner user }
-            elsif @group.has_admin?(user)
-              @skipped_admin_emails << user.email
-              @badges.each { |badge| badge.add_learner user }
-            else
-              @group.members << user
-              @badges.each { |badge| badge.add_learner user }
-              if @notify_by_email
-                UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, badge_ids)
-              end
-              @new_member_emails << user.email
-            end
-          end
-        end
-      end
-
-      # Check if the group variables need initialization
-      @group.invited_admins = [] if @group.invited_admins.nil?
-      @group.invited_members = [] if @group.invited_members.nil?
-
-      # For new users: We will park them in an array of hashes on the group
-      if params[:notify_by_email]
-        invite_date = Time.now
+      # Query for the badges if param is included
+      if params["badges"].blank?
+        @badges, badge_ids = [], []
       else
-        invite_date = nil
+        @badges = @group.badges.where(:url.in => params["badges"])
+        badge_ids = @badges.map{ |b| b.id }
       end
-      emails_to_invite.each do |email|
-        invited_user = {:email => email, 
-          :name => name_from_email[email], :invite_date => invite_date }
-        invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
 
-        if @group.has_invited_admin?(email)
-          @skipped_admin_emails << email
-        elsif @type == :admin
-          if @group.has_invited_member?(email)
-            @upgraded_member_emails << email
-            found_user = @group.invited_members.detect { |u| u["email"] == email}
-            @group.invited_members.delete(found_user) unless found_user.nil?
+      # Parse the emails using the UsersHelper function
+      parsed_emails = parse_emails(params[:emails])
+      @invalid_emails = parsed_emails[:invalid]
+      valid_email_names = parsed_emails[:valid]
+      valid_emails = []
+      name_from_email = {} # key = email, value = name
+      valid_email_names.each do |item|
+        valid_emails << item[:email]
+        name_from_email[item[:email]] = item[:name]
+      end
+      
+      unless valid_emails.empty?
+        # query for users and build list of users that don't exist yet
+        match_results = match_emails_to_users(valid_emails)
+        users_to_add = match_results[:matched_users]
+        emails_to_invite = match_results[:unmatched_emails]
+
+        # For existing users: We can add them right away
+        unless users_to_add.empty?
+          badge_ids = []
+          if @type == :admin
+            users_to_add.each do |user|
+              if @group.has_admin?(user)
+                @skipped_admin_emails << user.email
+                @badges.each { |badge| badge.add_learner user }
+              else
+                @group.admins << user
+                @badges.each { |badge| badge.add_learner user }
+                if @notify_by_email
+                  UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, badge_ids)
+                end
+                if @group.has_member?(user)
+                  @group.members.delete(user)
+                  @upgraded_member_emails << user.email
+                else
+                  @new_admin_emails << user.email
+                end
+              end
+            end
           else
-            @new_admin_emails << email
+            users_to_add.each do |user|
+              if @group.has_member?(user)
+                @skipped_member_emails << user.email
+                @badges.each { |badge| badge.add_learner user }
+              elsif @group.has_admin?(user)
+                @skipped_admin_emails << user.email
+                @badges.each { |badge| badge.add_learner user }
+              else
+                @group.members << user
+                @badges.each { |badge| badge.add_learner user }
+                if @notify_by_email
+                  UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, badge_ids)
+                end
+                @new_member_emails << user.email
+              end
+            end
           end
-          @group.invited_admins << invited_user
-          NewUserMailer.delay.group_admin_add(email, name_from_email[email],
-            current_user.id, @group.id, badge_ids) if @notify_by_email
+        end
+
+        # Check if the group variables need initialization
+        @group.invited_admins = [] if @group.invited_admins.nil?
+        @group.invited_members = [] if @group.invited_members.nil?
+
+        # For new users: We will park them in an array of hashes on the group
+        if params[:notify_by_email]
+          invite_date = Time.now
         else
-          if @group.has_invited_member?(email)
-            @skipped_member_emails << email
-          else
-            @group.invited_members << invited_user
-            @new_member_emails << email
-            NewUserMailer.delay.group_member_add(email, name_from_email[email],
+          invite_date = nil
+        end
+        emails_to_invite.each do |email|
+          invited_user = {:email => email, 
+            :name => name_from_email[email], :invite_date => invite_date }
+          invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
+
+          if @group.has_invited_admin?(email)
+            @skipped_admin_emails << email
+          elsif @type == :admin
+            if @group.has_invited_member?(email)
+              @upgraded_member_emails << email
+              found_user = @group.invited_members.detect { |u| u["email"] == email}
+              @group.invited_members.delete(found_user) unless found_user.nil?
+            else
+              @new_admin_emails << email
+            end
+            @group.invited_admins << invited_user
+            NewUserMailer.delay.group_admin_add(email, name_from_email[email],
               current_user.id, @group.id, badge_ids) if @notify_by_email
+          else
+            if @group.has_invited_member?(email)
+              @skipped_member_emails << email
+            else
+              @group.invited_members << invited_user
+              @new_member_emails << email
+              NewUserMailer.delay.group_member_add(email, name_from_email[email],
+                current_user.id, @group.id, badge_ids) if @notify_by_email
+            end
           end
         end
       end
-    end
 
-    if @group.changed?
-      if !@group.save
-        flash[:error] = "There was a problem updating the group, please try again later."
-        render 'add_users'
+      if @group.changed?
+        if !@group.save
+          flash[:error] = "There was a problem updating the group, please try again later."
+          render 'add_users'
+        end
       end
     end
   end
@@ -526,13 +534,6 @@ private
   def badge_list_admin
     unless current_user && current_user.admin?
       redirect_to '/'
-    end  
-  end
-
-  def can_add_members_or_admins
-    unless @group.can_add_members? || @group.can_add_admins?
-      flash[:error] = "You cannot add users to this group right now."
-      redirect_to @group
     end  
   end
 

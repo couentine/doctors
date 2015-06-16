@@ -164,7 +164,7 @@ class Group
       || (stripe_subscription_status == 'unpaid'))
   end
 
-  def can_post_new_evidence?
+  def can_create_entries?
     can_create_badges?
   end
 
@@ -241,7 +241,7 @@ class Group
           { color: 'blue', icon: 'fa-close', show_alert: true,
             summary: "Group is inactive", alert_title: "Your group is currently inactive",
             alert_body: "Your group's subscription is currently inactive. All group content will " \
-              + "remain online, but no new content can be posted. You an reactivate the group " \
+              + "remain online, but no new content can be posted. You can reactivate the group " \
               + "at any time by selecting a plan and confirming your billing details." }
         end
       else
