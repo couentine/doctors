@@ -47,6 +47,7 @@ class Group
   field :invited_members,             type: Array, default: []
   field :flags,                       type: Array, default: []
   field :new_owner_username,          type: String
+  field :previous_owner_id,           type: String
   
   field :user_limit,                  type: Integer, default: 5
   field :admin_limit,                 type: Integer, default: 1
@@ -198,6 +199,9 @@ class Group
     if public?
       { color: 'green', summary: 'Free public group', icon: 'fa-check-circle', show_alert: false }
     else
+      date_failed = stripe_payment_fail_date || Time.now
+      date_retry = stripe_payment_retry_date || (Time.now + 3.days)
+
       case stripe_subscription_status
       when 'new', 'trialing'
         { color: 'orange', summary: "Trial ends on " \
@@ -212,18 +216,18 @@ class Group
                   + "<a href='mailto:solutions@badgelist.com'>solutions@badgelist.com.").html_safe }
       when 'past_due'
         { color: 'red', icon: 'fa-exclamation-circle', show_alert: true,
-          summary: "Payment failed on #{payment_fail_date.to_s(:short_date)}",
+          summary: "Payment failed on #{date_failed.to_s(:short_date)}",
           alert_title: "There is a billing problem with your group",
-          alert_body: "There was a problem renewing your subscription at " \
-            + "#{payment_fail_date.to_s(:short_date_time)}. Payment will be attempted again at " \
-            + "#{payment_retry_date.to_s(:short_date_time)}, please update your billing " \
+          alert_body: "There was a problem renewing your subscription on " \
+            + "#{date_failed.to_s(:short_date_time)}. Payment will be attempted again on " \
+            + "#{date_retry.to_s(:short_date_time)}, please update your billing " \
             + "details before the next attempt to ensure your group's continued service." }
       when 'unpaid'
         { color: 'red', icon: 'fa-exclamation-triangle', show_alert: true,
           summary: "Subscription expired on #{subscription_end_date.to_s(:short_date)}",
           alert_title: "Your group is inactive due to failed payments",
           alert_body: "There was a problem renewing your subscription after several attempts. " \
-            + "The final payment attempt was made at #{payment_fail_date.to_s(:short_date_time)}. "\
+            + "The final payment attempt was made on #{date_failed.to_s(:short_date_time)}. "\
             + "Your group will remain inactive until you update your billing details or change " \
             + "the group type to public. You can also choose to cancel your subscription which " \
             + "will leave your group's contents online but prevent new content from being posted." }
@@ -627,6 +631,7 @@ protected
     if new_owner_username && new_owner_username_changed?
       new_owner = User.find(new_owner_username) rescue nil
       if new_owner && (owner_id != new_owner.id)
+        self.previous_owner_id = self.owner_id
         self.owner = new_owner
         self.admins << new_owner unless self.admin_ids.include? new_owner.id
 

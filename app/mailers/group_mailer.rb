@@ -1,5 +1,6 @@
 class GroupMailer < ActionMailer::Base
   include EmailTools
+  include ActionView::Helpers::TextHelper
 
   def trial_ending(group_id)
     @group = Group.find(group_id)
@@ -53,12 +54,21 @@ class GroupMailer < ActionMailer::Base
 
   def group_transfer(group_id)
     @group = Group.find(group_id)
+    @previous_owner = User.find(@group.previous_owner_id) rescue nil
+
+    if @previous_owner
+      from_string = build_from_string @previous_owner
+      reply_to_string = @previous_owner.email_name
+    else
+      from_string = build_from_string
+      reply_to_string = build_from_string
+    end
 
     mail(
       :subject  => "You're the new owner of #{@group.name}",
       :to       => @group.owner.email_name,
-      :from     => build_from_string,
-      :reply_to => build_from_string,
+      :from     => from_string,
+      :reply_to => reply_to_string,
       :tag      => 'group_mailer,group_transfer'
     )
   end
