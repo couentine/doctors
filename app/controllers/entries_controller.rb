@@ -9,6 +9,10 @@ class EntriesController < ApplicationController
   before_filter :log_owner_or_entry_creator, only: [:destroy]
   before_filter :can_post_to_log, only: [:new, :create]
 
+  # === LIMIT-FOCUSED FILTERS === #
+
+  before_filter :can_post_new_evidence, only: [:new, :create]
+
   # === RESTFUL ACTIONS === #
 
   # GET /group-url/badge-url/u/username/1

@@ -11,6 +11,11 @@ class BadgesController < ApplicationController
   before_filter :set_editing_parameters, only: [:new, :edit]
   before_filter :build_requirement_list, only: [:new, :edit]
 
+  # === LIMIT-FOCUSED FILTERS === #
+
+  before_filter :can_create_badges, only: [:new, :create]
+  before_filter :can_post_new_evidence, only: [:issue_form, :issue_save]
+
   # === CONSTANTS === #
 
   EXPERT_WORDS = %w(expert master guide guru jedi)

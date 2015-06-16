@@ -17,6 +17,9 @@ class GroupsController < ApplicationController
   before_filter :group_owner, only: [:edit, :update, :destroy, :cancel_subscription]
   before_filter :badge_list_admin, only: [:index]
 
+  # === LIMIT-FOCUSED FILTERS === #
+
+  before_filter :can_add_members_or_admins, only: [:add_users, :create_users]
 
   # === CONSTANTS === #
 
@@ -133,7 +136,8 @@ class GroupsController < ApplicationController
       if @group.save
         format.html { redirect_to @group, 
                       notice: 'Learning Group was successfully created.' }
-        format.json { render json: @group, status: :created, location: @group, filter_user: current_user }
+        format.json { render json: @group, status: :created, location: @group, 
+          filter_user: current_user }
       else
         format.html { render action: "new" }
         format.json { render json: @group.errors, status: :unprocessable_entity }
@@ -448,7 +452,8 @@ class GroupsController < ApplicationController
         invite_date = nil
       end
       emails_to_invite.each do |email|
-        invited_user = {:email => email, :name => name_from_email[email], :invite_date => invite_date }
+        invited_user = {:email => email, 
+          :name => name_from_email[email], :invite_date => invite_date }
         invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
 
         if @group.has_invited_admin?(email)
@@ -521,6 +526,13 @@ private
   def badge_list_admin
     unless current_user && current_user.admin?
       redirect_to '/'
+    end  
+  end
+
+  def can_add_members_or_admins
+    unless @group.can_add_members? || @group.can_add_admins?
+      flash[:error] = "You cannot add users to this group right now."
+      redirect_to @group
     end  
   end
 
