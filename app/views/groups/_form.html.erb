@@ -1,3 +1,7 @@
+<%
+  half_off = @group.owner.has_flag? User::HALF_OFF_FLAG
+%>
+
 <script>
 
   $(document).ready(function() {
@@ -265,7 +269,9 @@
         <% subscription_options = (@badge_list_admin) ? SUBSCRIPTION_OPTIONS['admin'] \
           : SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
         <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, 
-          include_blank: false, collection: subscription_options %>
+          include_blank: false, collection: subscription_options, 
+          hint: (half_off) ? "<i class='fa fa-gift'></i> ".html_safe \
+            + "You'll pay 50% of the price listed above".html_safe : '' %>
 
 
         <div id="has-credit-card-panel" 
@@ -309,18 +315,29 @@
               and that you won't use the group for multiple teachers. Thank you so much!
             </div>
           </div>
-
+        <% elsif @group.owner.has_flag? User::HALF_OFF_FLAG %>
           <div class="control-group">
             <div class="sub-header">
-              <em>
-                Have any questions about pricing or billing?
-                Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
-                  target="_blank">Paid Subscription FAQ</a> or 
-                email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
-              </em>
+              <h3>
+                <i class="fa fa-gift"></i> 50% Off!
+              </h3>
+              <strong>Thank you for being an early Badge List user.</strong>
+              You've got the OG half off deal which means that any private groups that you own
+              will permanently be 50% off for as long as you keep your Badge List account.
             </div>
           </div>
         <% end %>
+        
+        <div class="control-group">
+          <div class="sub-header">
+            <em>
+              Have any questions about pricing or billing?
+              Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
+                target="_blank">Paid Subscription FAQ</a> or 
+              email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+            </em>
+          </div>
+        </div>
 
       </div> <!-- /edit-subscription-panel -->
 

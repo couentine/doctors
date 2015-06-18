@@ -10,6 +10,8 @@ class User
   MAX_USERNAME_LENGTH = 15
   JSON_FIELDS = [:name, :username, :username_with_caps]
 
+  HALF_OFF_FLAG = '50_percent_off'
+
   # === RELATIONSHIP === #
 
   has_many :created_groups, inverse_of: :creator, class_name: "Group"
