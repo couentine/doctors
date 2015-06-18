@@ -385,4 +385,21 @@ namespace :db do
     puts " >> Done."
   end
 
+  # Re-assigns all private group owners
+  task staging_only_break_all_private_groups: :environment do
+    new_owners = User.where(:email.in => ['ryan.hank@gmail.com', 'ryan.hank+2@gmail.com', 
+      'benroome@gmail.com', 'benroome+test@gmail.com', 'quemalex@gmail.com'])
+
+    print "Updating #{Group.where(type: 'private').count} groups"
+    Group.where(type: 'private').each do |group|
+      group.owner = new_owners.sample
+      group.timeless.save
+#LEFT OFF HERE: This won't work how I want... what i really want is to change the emails
+# for all users so that they point to us.... otherwise i won't get the full experience
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end
