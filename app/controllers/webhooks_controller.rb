@@ -10,7 +10,10 @@ class WebhooksController < ApplicationController
       event = JSON.parse(request.body.read)
 
       case event['type']
-      when 'customer.subscription.created', 'customer.subscription.deleted'
+      when 'customer.subscription.created'
+        Group.delay(queue: 'high').refresh_stripe_subscription(\
+          event['data']['object']['id'], context: 'stripe', queue_send_trial_ending_email: true)
+      when 'customer.subscription.deleted'
         Group.delay(queue: 'high').refresh_stripe_subscription(\
           event['data']['object']['id'], context: 'stripe')
       when 'invoice.payment_succeeded'
@@ -21,6 +24,7 @@ class WebhooksController < ApplicationController
           event['data']['object']['subscription'], context: 'stripe', info_item_data: event,\
           payment_fail_date: Time.at(event['data']['object']['date']), \
           payment_retry_date: Time.at(event['data']['object']['next_payment_attempt']))
+        GroupMailer.delay(retry: 10, queue: 'low').payment_failure(id)
       end
 
       # Save a copy of the request body if we're in development

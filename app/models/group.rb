@@ -428,6 +428,7 @@ class Group
   # - info_item_data: This will optionally result in the insertion of an info item 
   #     with type = "stripe-event" and name = "Invoice Payment"
   # - throw_errors: Set this to true to throw errors instead of logging them
+  # - queue_send_trial_ending_email: Set to true to send the trial_ending email 3 days before end
   def self.refresh_stripe_subscription(stripe_subscription_id, options = {})
     begin
       group = options[:group] \
@@ -450,6 +451,12 @@ class Group
         group.stripe_payment_fail_date = options[:payment_fail_date]
         group.stripe_payment_retry_date = options[:payment_retry_date]
         group.save
+
+        if options[:queue_send_trial_ending_email]
+          # Schedule a reminder email to go out 3 days before the trial expires
+          GroupMailer.delay_until(group.subscription_end_date - 3.days, retry: 5, queue: 'low')\
+            .trial_ending(group.id)
+        end
       rescue Exception => e
         if subscription
           # There was an unanticipated error, throw it
@@ -513,7 +520,7 @@ class Group
         item = InfoItem.new
         item.type = 'callback-error'
         item.name = 'Problem Updating Subscription (Group.update_stripe_subscription)'
-        item.data = { group: group, owner: group.owner, options: options, error: e.to_s }
+        item.data = { options: options, error: e.to_s }
         item.save
       end
     end
@@ -562,7 +569,7 @@ class Group
         poller.message = 'You have successfully cancelled your subscription.'
         poller.data = subscription.to_hash
         poller.save
-      end      
+      end
     rescue Exception => e
       if poller
         poller.status = 'failed'
@@ -576,8 +583,8 @@ class Group
         item = InfoItem.new
         item.type = 'callback-error'
         item.name = 'Problem Cancelling Subscription (Group.cancel_stripe_subscription)'
-        item.data = { stripe_customer_id: stripe_customer_id, group: group,
-          stripe_subscription_id: stripe_subscription_id, options: options, error: e.to_s }
+        item.data = { stripe_customer_id: stripe_customer_id, options: options, error: e.to_s,
+          stripe_subscription_id: stripe_subscription_id }
         item.save
       end
     end
@@ -644,6 +651,9 @@ protected
           self.stripe_subscription_card = nil
           self.subscription_end_date = 2.weeks.from_now
         end
+
+        # Notify the new owner
+        GroupMailer.delay(queue: 'low').group_transfer(id)
       end
       self.new_owner_username = nil
     end
@@ -677,6 +687,9 @@ protected
           self.stripe_subscription_id = nil
           self.stripe_subscription_card = nil
           self.subscription_end_date = 2.weeks.from_now
+
+          # Notify the user that their group is canceled
+          GroupMailer.delay(retry: 10, queue: 'low').subscription_canceled(id)
         else
           set_flag PENDING_SUBSCRIPTION_FLAG
         end
