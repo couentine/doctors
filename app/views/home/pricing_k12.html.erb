@@ -23,7 +23,7 @@
         </thead>
         <tbody>
           <tr>
-            <td>Unlimited users</td>
+            <td>Unlimited students</td>
           </tr>
           <tr>
             <td>1 teacher</td>
@@ -33,7 +33,7 @@
           </tr>
           <tr class="table-footer">
             <td colspan="4">
-              Interested in a multi-teacher plan or have general questions? Email us at
+              Interested in a multi-teacher plan or have other questions? Email us at
               <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
             </td>
           </tr>
@@ -52,5 +52,8 @@
       <%= link_to 'Try it free for 2 weeks', new_user_registration_path(create_k12: true), 
         class: 'btn btn-large' %>
     <% end %>
+    <br><br>
+    Not a teacher?<br>
+    <%= link_to "Click here for our standard pricing", pricing_path, class: 'btn btn-link' %>
   </div>
 </div>
