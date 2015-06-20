@@ -145,7 +145,8 @@
                 </td>
                 <td>
                   <%= group.active_user_count || 0 %> / 
-                  <%= (group.public?) ? '&infin;'.html_safe : group.user_limit %>
+                  <%= (group.public? || (group.user_limit < 0)) ? '&infin;'.html_safe \
+                    : group.user_limit %>
                 </td>
                 <td>
                   <% unless group.monthly_active_users.nil? %>
