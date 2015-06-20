@@ -389,6 +389,7 @@ class Group
   # Accepts the following options:
   # - group_id: Include this to have the group be queried
   # - group: Include this to skip the query
+  # - trial_end: Manually sets the trial end date (should be unix timestamp)
   def self.create_stripe_subscription(options = {})
     group = options[:group] || Group.find(options[:group_id])
 
@@ -403,6 +404,7 @@ class Group
 
     subscription = customer.subscriptions.create(
       plan: group.subscription_plan,
+      trial_end: options[:trial_end],
       metadata: {
         description: "#{group.name} (#{group.url})",
         group_id: group.id,
