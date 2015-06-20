@@ -71,6 +71,26 @@ defaults: &defaults
         users: 5
         admins: -1
         sub_groups: -1
+      free-100m-1:
+        name: Free Starter
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Free
+        users: 100
+        admins: -1
+        sub_groups: 0
+      free-500m-1:
+        name: Free Basic
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Free
+        users: 500
+        admins: -1
+        sub_groups: 1
       free-unlimited-1:
         name: Free Unlimited
         amount: 0

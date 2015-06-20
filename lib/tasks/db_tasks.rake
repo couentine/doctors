@@ -385,18 +385,84 @@ namespace :db do
     puts " >> Done."
   end
 
-  # Re-assigns all private group owners
-  task staging_only_break_all_private_groups: :environment do
-    new_owners = User.where(:email.in => ['ryan.hank@gmail.com', 'ryan.hank+2@gmail.com', 
-      'benroome@gmail.com', 'benroome+test@gmail.com', 'quemalex@gmail.com'])
+  # Randomly reassigns everyone's user accounts to various test emails
+  task staging_only_change_all_user_emails: :environment do
+    test_gmails = ['ryan.hank', 'benroome', 'quemalex']
+    change_log = []
 
-    print "Updating #{Group.where(type: 'private').count} groups"
-    Group.where(type: 'private').each do |group|
-      group.owner = new_owners.sample
-      group.timeless.save
-#LEFT OFF HERE: This won't work how I want... what i really want is to change the emails
-# for all users so that they point to us.... otherwise i won't get the full experience
-      print "."
+    print "Updating #{User.count} users"
+    User.each do |user|
+      unless user.admin?
+        begin
+          change_log_item = { id: user.id, name: user.name, original_email: user.email }
+          user.email = "#{test_gmails.sample}+#{user.username}@gmail.com"
+          user.skip_reconfirmation!
+          user.timeless.save
+          print "."
+
+          change_log_item[:new_email] = user.email
+          change_log << change_log_item
+        rescue
+          print "!"
+        end
+      end
+    end
+
+    item = InfoItem.new
+    item.type = 'db-task-result'
+    item.name = 'Summary of Changes (staging_only_change_all_user_emails)'
+    item.data = { change_log: change_log }
+    item.save
+
+    puts " >> Done."
+  end
+
+  # One-time migration of users & groups to stripe-based subscriptions & pricing
+  task migrate_users_and_groups_to_stripe: :environment do
+    # User flags to set
+    IGNORE_FLAG = 'sm_ignore'
+    MANUAL_FLAG = 'sm_manual'
+    STANDARD_FLAG = 'sm_standard'
+    OG_FLAG = 'sm_og'
+
+    # List of users who will be dealt with manually
+    manual_users = ['hood', 'kucrl', 'hankish', 'benroome', 'miltology', 'kimberly']
+
+    print "Migrating #{User.count} users"
+    
+    User.each do |user|
+      if manual_users.include? user.username
+        begin
+          user.create_stripe_customer if user.stripe_customer_id.blank?  
+          customer = Stripe::Customer.retrieve(user.stripe_customer_id)
+          customer.coupon = 'og-perma-50'
+          customer.save
+          user.set_flag User::HALF_OFF_FLAG
+          print "."
+        rescue Exception => e
+          item = InfoItem.new
+          item.type = 'db-task-error'
+          item.name = 'Error Migrating Manual User (migrate_users_and_groups_to_stripe)'
+          item.data = { user_id: user.id, username: user.username, email: user.email, 
+            error: e.to_s }
+          item.save
+          print "!"
+        end
+        
+        user.set_flag MANUAL_FLAG
+        user.timeless.save
+      elsif user.owned_groups.count == 0
+        user.set_flag IGNORE_FLAG
+      else
+        # LEFT OFF HERE: Next step >> Bring customer creation into this top section then finish 
+        # building out the logic below.
+        first_group_create_date = \
+          user.owned_groups.asc(:created_at).first.created_at
+        pricing_published_date = '2015-04-22'.to_time
+
+        if first_group_create_date < pricing_published_date
+        end
+      end
     end
 
     puts " >> Done."

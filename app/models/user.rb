@@ -29,7 +29,6 @@ class User
   field :username,                      type: String
   field :username_with_caps,            type: String
   field :flags,                         type: Array, default: [], pre_processed: true
-  field :flags,                         type: Array, default: [], pre_processed: true
   field :admin,                         type: Boolean, default: false
   field :page_views,                    type: Hash, default: {}, pre_processed: true
   field :form_submissions,              type: Array

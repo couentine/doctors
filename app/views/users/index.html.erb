@@ -2,6 +2,17 @@
   provide(:title, "All Users")
 %>
 
+<style type="text/css">
+  
+  a.label {
+    color: white !important;
+  }
+  a.label:hover, a.label:focus {
+    background-color: #333;
+  }
+
+</style>
+
 <!-- === PAGE HEADER === -->
 
 <div class="row add-top-margin">
@@ -26,10 +37,11 @@
             - <%= [(@page.to_i * @page_size.to_i), @users.count].min %>
             of <%= @users.count %>
           </h2>
-          <% unless @exclude_flags.blank? %>
+          <% if @only_flag %>
             <h3>
-              Excluding Flags: 
-              <%= @exclude_flags.join ", " %>
+              Only Showing Flag: 
+              <%= @only_flag %>
+              <%= link_to 'Clear search', users_path, class: 'btn btn-small' %>
             </h3>
           <% end %>
         </span>            
@@ -38,7 +50,7 @@
   </div>
 </div>
 
-<!-- === ENTRIES LIST === -->
+<!-- === USERS LIST === -->
 
 <% if !@users.blank? %>
   
@@ -63,6 +75,7 @@
               <th>Groups Owned</th>
               <th>Memberships</th>
               <th>Entries</th>
+              <th>Flags</th>
             </tr>
           </thead>
           <tbody>
@@ -94,6 +107,12 @@
                 </td>
                 <td>
                   <%= (user.created_entry_ids || []).count %>
+                </td>
+                <td>
+                  <% user.flags.each do |flag| %>
+                    <%= link_to flag, users_path(page_size: @page_size, flag: flag), 
+                      class: 'label' %>
+                  <% end unless user.flags.blank? %>
                 </td>
               </tr>
             <% end %>
