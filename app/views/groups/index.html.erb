@@ -1,8 +1,19 @@
 <% 
   provide(:title, "All Groups")
 
-  creator_index = {}
+  owner_index = {}
 %>
+
+<style type="text/css">
+  
+  a.label {
+    color: white !important;
+  }
+  a.label:hover, a.label:focus {
+    background-color: #333;
+  }
+
+</style>
 
 <!-- === PAGE HEADER === -->
 
@@ -28,12 +39,30 @@
             - <%= [(@page.to_i * @page_size.to_i), @groups.count].min %>
             of <%= @groups.count %>
           </h2>
-          <% unless @exclude_flags.blank? %>
-            <h3>
-              Excluding Flags: 
-              <%= @exclude_flags.join ", " %>
-            </h3>
-          <% end %>
+          <h2>
+            <% if params[:type] || params[:plan] || params[:status] %>
+              Filters:
+              <%= link_to 'Clear search', groups_path, class: 'btn btn-small' %>
+            <% else %>
+              Default Filters:
+            <% end %>
+          </h2>
+          <h3>
+            <ul>
+              <li>
+                <strong>Type =</strong> 
+                <%= (params[:type]) ? "#{@types.first}" : "Any" %>
+              </li>
+              <li>
+                <strong>Plan = </strong> 
+                <%= (params[:plan]) ? "#{@plans.first}" : "Any" %>
+              </li>
+              <li>
+                <strong>Status = </strong> 
+                <%= (params[:status]) ? "#{@stati.first}" : "Any" %>
+              </li>
+            </ul>
+          </h3>
         </span>            
       </div>
     </div>
@@ -58,6 +87,8 @@
           <thead>
             <tr>
               <th>Group</th>
+              <th>Type, Plan, Status</th>
+              <th>Owner</th>
               <th>Created</th>
               <th>Admins, Members</th>
               <th>Active Users / Limit</th>
@@ -72,24 +103,42 @@
                   <a href="<%= group_path(group) %>">
                     <%= group.name %>
                   </a>
-                  (<%= group.type.capitalize %>)
+                </td>
+                <td>
+                  <%= link_to group.type.capitalize, groups_path(page_size: @page_size, 
+                    type: group.type, plan: params[:plan], status: params[:status]) %>
+                  <% if group.subscription_plan %>
+                    - 
+                    <%= link_to group.subscription_plan, groups_path(page_size: @page_size, 
+                      type: params[:type], plan: group.subscription_plan, status: params[:status]), 
+                      class: 'label' %>
+                    
+                    <% subscription_status = group.status_details_for_admins %>
+                    <%= link_to group.subscription_status_string, groups_path(page_size: @page_size,
+                      type: params[:type], plan: params[:plan], 
+                      status: group.stripe_subscription_status), 
+                      class: "label #{subscription_status[:color]}" %>
+                  <% end %>
                 </td>
                 <td>
                   <% 
-                    creator = creator_index[group.creator_id] \
-                      || (User.find(group.creator_id) rescue nil)
+                    owner = owner_index[group.owner_id] \
+                      || (User.find(group.owner_id) rescue nil)
 
-                    if creator && !creator_index.has_key?(creator.id)
-                      creator_index[creator.id] = creator
+                    if owner && !owner_index.has_key?(owner.id)
+                      owner_index[owner.id] = owner
                     end
                   %>
 
-                  <%= group.created_at.to_s :short_date %> by
-                  <% if creator %>
-                    <%= link_to creator.name, user_path(creator) %>
+                  <% if owner %>
+                    <%= link_to owner.name, user_path(owner), target: '_blank' %>
+                    (<%= owner.email %>)
                   <% else %>
                     [ Deleted User ]
                   <% end %>
+                </td>
+                <td>
+                  <%= group.created_at.to_s :short_date %>
                 </td>
                 <td>
                   <%= group.admin_ids.count %>, <%= group.member_ids.count %>

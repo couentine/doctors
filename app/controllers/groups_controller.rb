@@ -30,16 +30,21 @@ class GroupsController < ApplicationController
 
   # GET /a/groups
   # GET /a/groups.json
-  # Accepts page parameters: page, page_size, sort_by, sort_order, exclude_flags[]
+  # Accepts page parameters: page, page_size, sort_by, sort_order, type, plan, status
   def index
     # Grab the current page of groups
     @page = params[:page] || 1
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
-    @exclude_flags = params[:exclude_flags] || %w(sample_data internal-data)
+    @types = (params[:type]) ? [params[:type]] : (Group::TYPE_VALUES + ['', nil])
+    @plans = (params[:plan]) ? [params[:plan]] : (ALL_SUBSCRIPTION_PLANS.keys + ['', nil])
+    @stati = (params[:status]) ? [params[:status]] \
+      : ['trialing', 'active', 'past_due', 'canceled', 'unpaid', 'new', '', nil]
     @sort_by = params[:sort_by] || "created_at"
     @sort_order = params[:sort_order] || "desc"
-    @groups = Group.where(:flags.nin => @exclude_flags).order_by("#{@sort_by} #{@sort_order}")\
-      .page(@page).per(@page_size)
+    
+    @groups = Group.where(:type.in => @types, :subscription_plan.in => @plans, \
+      :stripe_subscription_status.in => @stati)\
+      .order_by("#{@sort_by} #{@sort_order}").page(@page).per(@page_size)
 
     respond_to do |format|
       format.html # index.html.erb
