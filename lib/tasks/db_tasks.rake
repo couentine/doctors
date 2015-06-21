@@ -426,7 +426,6 @@ namespace :db do
   # One-time migration of users & groups to stripe-based subscriptions & pricing
   task migrate_users_and_groups_to_stripe: :environment do
     user_change_log, group_change_log = [], []
-    group_owner_map = {} # user_id => user
 
     # User flags / group subscription mappings
     IGNORE_FLAG = 'sm_ignore'
@@ -447,6 +446,7 @@ namespace :db do
     User.each do |user|
       error_item = InfoItem.new
       error_item.type = 'db-task-error'
+      error_item.user = user
       error_item.data = { user_id: user.id, username: user.username, email: user.email, 
         name: user.name }
 
@@ -454,8 +454,6 @@ namespace :db do
         current_group = :ignore
         user.set_flag IGNORE_FLAG
       else
-        group_owner_map[user.id] = user # Save a link back so we don't have to requery later
-
         begin
           # Create a stripe customer if missing, then retrieve the customer object
           user.create_stripe_customer if user.stripe_customer_id.blank?  
@@ -523,39 +521,35 @@ namespace :db do
     Group.where(type: 'private').each do |group|
       error_item = InfoItem.new
       error_item.type = 'db-task-error'
-      error_item.data = { group_id: group.id, name: group.name, url: group.url, 
-        owner_id: group.owner_id }
+      error_item.group = group
+      error_item.data = { name: group.name, url: group.url, owner_id: group.owner_id }
 
       begin
-        owner = group_owner_map[group.owner_id]
+        owner = group.owner
 
-        if owner
-          error_item[:owner_email] = owner.email
-          error_item[:owner_name] = owner.name
-          error_item[:owner_username] = owner.username
+        error_item[:owner_email] = owner.email
+        error_item[:owner_name] = owner.name
+        error_item[:owner_username] = owner.username
 
-          if group.subscription_plan
-            print "-"
-          else
-            if owner.has_flag? MANUAL_FLAG
-              group.subscription_plan = MANUAL_PLAN
-              trial_end = nil
-            elsif owner.has_flag? OG_FLAG
-              group.subscription_plan = OG_PLAN
-              trial_end = nil
-            elsif owner.has_flag? STANDARD_FLAG
-              group.subscription_plan = STANDARD_PLAN
-              trial_end = [(group.created_at + 2.weeks).to_i, 4.days.from_now.to_i].max
-            else
-              throw 'The group owner didn\'t have a migration flag!'
-            end
-
-            # Create the subscription (syncronously)
-            group.stripe_subscription_status = 'trialing'
-            Group.create_stripe_subscription(group: group, trial_end: trial_end)
-          end
+        if group.subscription_plan
+          print "-"
         else
-          throw 'The group owner was not in the list and might not have a stripe customer id.'
+          if owner.has_flag? MANUAL_FLAG
+            group.subscription_plan = MANUAL_PLAN
+            trial_end = nil
+          elsif owner.has_flag? OG_FLAG
+            group.subscription_plan = OG_PLAN
+            trial_end = nil
+          elsif owner.has_flag? STANDARD_FLAG
+            group.subscription_plan = STANDARD_PLAN
+            trial_end = [(group.created_at + 2.weeks).to_i, 4.days.from_now.to_i].max
+          else
+            throw 'The group owner didn\'t have a migration flag!'
+          end
+
+          # Create the subscription (syncronously)
+          group.stripe_subscription_status = 'trialing'
+          Group.create_stripe_subscription(group: group, trial_end: trial_end)
         end
       rescue Exception => e
         error_item.name = 'Error Migrating Group (migrate_users_and_groups_to_stripe)'
