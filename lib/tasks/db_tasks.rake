@@ -433,11 +433,12 @@ namespace :db do
           user.password_confirmation = 'Password123'
           user.timeless.save
           print "."
-
-          change_log << change_log_item
-        rescue
+        rescue Exception => e
           print "!"
+          change_log[:error] = e.to_s
         end
+        
+        change_log << change_log_item
       end
     end
 
