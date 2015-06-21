@@ -389,8 +389,8 @@ namespace :db do
     puts " >> Done."
   end
 
-  # Randomly reassigns everyone's user accounts to various test emails
-  task staging_only_change_all_user_emails: :environment do
+  # Randomly reassigns everyone's user accounts to various test emails (and overwrites passwords)
+  task staging_only_change_all_user_accounts: :environment do
     test_gmails = ['ryan.hank', 'benroome', 'quemalex']
     change_log = []
 
@@ -400,6 +400,7 @@ namespace :db do
         begin
           change_log_item = { id: user.id, name: user.name, original_email: user.email }
           user.email = "#{test_gmails.sample}+#{user.username}@gmail.com"
+          user.password = 'Password123'
           user.skip_reconfirmation!
           user.timeless.save
           print "."
@@ -416,36 +417,6 @@ namespace :db do
     item = InfoItem.new
     item.type = 'db-task-result'
     item.name = 'Summary of Changes (staging_only_change_all_user_emails)'
-    item.data = { change_log: change_log }
-    item.save
-
-    puts " >> Done."
-  end
-
-  # Resets everyone's passwords to password
-  task staging_only_change_all_user_passwords: :environment do
-    print "Changing password of #{User.count} users"
-    User.each do |user|
-      unless user.admin?
-        begin
-          change_log_item = { id: user.id, name: user.name, email: user.email }
-          user.password = 'Password123'
-          user.password_confirmation = 'Password123'
-          user.timeless.save
-          print "."
-        rescue Exception => e
-          print "!"
-          change_log[:error] = e.to_s
-        end
-        
-        change_log << change_log_item
-      end
-    end
-
-    # Save results to info item
-    item = InfoItem.new
-    item.type = 'db-task-result'
-    item.name = 'Summary of Changes (staging_only_change_all_user_passwords)'
     item.data = { change_log: change_log }
     item.save
 
