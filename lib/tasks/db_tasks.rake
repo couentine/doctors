@@ -369,7 +369,7 @@ namespace :db do
       if group.owner.nil?
         group.owner = group.creator
         group.admins << group.owner unless group.admin_ids.include? group.owner_id
-        group.timeless.save
+        group.timeless.save(validate: false)
       end
       print "."
     end
@@ -382,7 +382,7 @@ namespace :db do
       group.total_user_count = group.member_ids.count + group.admin_ids.count
       group.admin_count = group.admin_ids.count
       group.member_count = group.member_ids.count
-      group.timeless.save
+      group.timeless.save(validate: false)
 
       print "."
     end
