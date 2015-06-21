@@ -22,9 +22,9 @@ BadgeList::Application.routes.draw do
   # === ADMIN PATHS === #
   scope '/a' do
     resources :users, :only => [:index]
-    resources :groups, :only => [:index]
     resources :info_items, :only => [:index, :show]
   end
+  match 'a/groups' => 'groups#index', via: :get, as: :group_index
   match 'a' => 'admin_pages#index', via: :get
   authenticate :user, lambda { |u| u.admin? } do
     mount Sidekiq::Web => '/a/sidekiq'
@@ -101,7 +101,7 @@ BadgeList::Application.routes.draw do
   match ':id/edit' => 'groups#edit', via: :get
   match ':group_id/:id/edit' => 'badges#edit', via: :get
   resources :groups, only: [:new, :create]
-  resources :groups, path: "", except: [:index, :new, :create] do
+  resources :groups, path: "", except: [:index] do
     resources :badges, only: [:new, :create]
     resources :badges, path: "", except: [:index, :new, :create] do
       match 'join' => 'logs#create', via: :get

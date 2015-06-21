@@ -42,7 +42,7 @@
           <h2>
             <% if params[:type] || params[:plan] || params[:status] %>
               Filters:
-              <%= link_to 'Clear search', groups_path, class: 'btn btn-small' %>
+              <%= link_to 'Clear search', group_index_path, class: 'btn btn-small' %>
             <% else %>
               Default Filters:
             <% end %>
@@ -105,16 +105,16 @@
                   </a>
                 </td>
                 <td>
-                  <%= link_to group.type.capitalize, groups_path(page_size: @page_size, 
+                  <%= link_to group.type.capitalize, group_index_path(page_size: @page_size, 
                     type: group.type, plan: params[:plan], status: params[:status]) %>
                   <% if group.subscription_plan %>
                     - 
-                    <%= link_to group.subscription_plan, groups_path(page_size: @page_size, 
+                    <%= link_to group.subscription_plan, group_index_path(page_size: @page_size, 
                       type: params[:type], plan: group.subscription_plan, status: params[:status]), 
                       class: 'label' %>
                     
                     <% subscription_status = group.status_details_for_admins %>
-                    <%= link_to group.subscription_status_string, groups_path(page_size: @page_size,
+                    <%= link_to group.subscription_status_string, group_index_path(page_size: @page_size,
                       type: params[:type], plan: params[:plan], 
                       status: group.stripe_subscription_status), 
                       class: "label #{subscription_status[:color]}" %>
