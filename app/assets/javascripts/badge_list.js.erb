@@ -475,9 +475,9 @@ function registerEmbedCodeBoxes() {
   });
 }
 
-var INITIAL_POLLING_INTERVAL = <%= Poller::INITIAL_POLLING_INTERVAL %>;
-var POLLING_INTERVAL_DOUBLE_RATE = <%= Poller::POLLING_INTERVAL_DOUBLE_RATE %>;
-var POLLING_MAX_TRIES = <%= Poller::POLLING_MAX_TRIES %>;
+var INITIAL_POLLING_INTERVAL = 150;
+var POLLING_INTERVAL_DOUBLE_RATE = 2;
+var POLLING_MAX_TRIES = 13;
 var POLLING_URL = "/p/";
 
 // This function starts a poller which queries "/p/pollerId.json"
