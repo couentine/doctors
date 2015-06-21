@@ -60,7 +60,9 @@ namespace :db do
   task update_tag_fields: :environment do
     print "Updating #{Tag.count} tags"
     Tag.each do |tag|
-      tag.display_name = tag.name_with_caps.gsub(/[^A-Za-z0-9]/, ' ').gsub(/ {2,}/, ' ') if tag.display_name.blank?
+      if tag.display_name.blank?
+        tag.display_name = tag.name_with_caps.gsub(/[^A-Za-z0-9]/, ' ').gsub(/ {2,}/, ' ')
+      end
       tag.editability = 'learners' if tag.editability.blank?
       tag.timeless.save if tag.changed?
       print "."
@@ -128,7 +130,8 @@ namespace :db do
           end
           
           logs.each do |log|
-            print "#{badge.group.url}/#{badge.url}/#{user.username}/#{log.id} = #{log.entries.count}, #{(log.date_issued.nil?) ? 'learner' : 'expert'} >> "
+            print "#{badge.group.url}/#{badge.url}/#{user.username}/#{log.id} = " \
+              + "#{log.entries.count}, #{(log.date_issued.nil?) ? 'learner' : 'expert'} >> "
             if log_to_keep == log
               puts "KEEP"
             else
@@ -180,7 +183,8 @@ namespace :db do
           end
           
           logs.each do |log|
-            print "#{badge.group.url}/#{badge.url}/#{user.username}/#{log.id} = #{log.entries.count}, #{(log.date_issued.nil?) ? 'learner' : 'expert'} >> "
+            print "#{badge.group.url}/#{badge.url}/#{user.username}/#{log.id} = " \
+              + "#{log.entries.count}, #{(log.date_issued.nil?) ? 'learner' : 'expert'} >> "
             if log_to_keep == log
               puts "KEEPING"
             else
@@ -412,6 +416,35 @@ namespace :db do
     item = InfoItem.new
     item.type = 'db-task-result'
     item.name = 'Summary of Changes (staging_only_change_all_user_emails)'
+    item.data = { change_log: change_log }
+    item.save
+
+    puts " >> Done."
+  end
+
+  # Resets everyone's passwords to password
+  task staging_only_change_all_user_passwords: :environment do
+    print "Changing password of #{User.count} users"
+    User.each do |user|
+      unless user.admin?
+        begin
+          change_log_item = { id: user.id, name: user.name, email: user.email }
+          user.password = 'Password123'
+          user.password_confirmation = 'Password123'
+          user.timeless.save
+          print "."
+
+          change_log << change_log_item
+        rescue
+          print "!"
+        end
+      end
+    end
+
+    # Save results to info item
+    item = InfoItem.new
+    item.type = 'db-task-result'
+    item.name = 'Summary of Changes (staging_only_change_all_user_passwords)'
     item.data = { change_log: change_log }
     item.save
 
