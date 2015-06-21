@@ -1,0 +1,57 @@
+<%
+  # This will collect card info from a form with id = 'stripe-form'.
+  # Afterwards the code will either populate an input w/ id = 'stripe_token' 
+  #   or it will put errror text into an element with class = 'payment-errors'
+%>
+
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+
+<script type="text/javascript">
+  
+  Stripe.setPublishableKey("<%= ENV['stripe_public_key'] %>");
+
+  $(document).ready(function() {
+    
+    $('#stripe-form').submit(function(e) {
+      addCardToStripe($(this));
+
+      // Prevent the form from submitting with the default action
+      e.preventDefault();
+    });
+
+  });
+
+  // You can reference this function directly to trigger the event manually
+  // stripeFormElement should be the jquery selected version of the element
+  function addCardToStripe(stripeFormElement) {
+    $('#stripe-spinner').show();
+    stripeFormElement.find('button').prop('disabled', true);
+    stripeFormElement.find('.error-block').hide().find('.inner').text('');
+
+    Stripe.card.createToken(stripeFormElement, stripeResponseHandler);
+  }
+
+  function stripeResponseHandler(status, response) {
+    var $form = $('#stripe-form');
+
+    if (response.error) {
+      // Show the errors on the form
+      $form.find('.error-block').show().find('.inner').text(response.error.message);
+      $form.find('button').prop('disabled', false);
+      $('#stripe-spinner').hide();
+    } else {
+      // Insert the token into the form and submit
+      var token = response.id;
+      $.ajax({
+        url: "/users/cards",
+        type: "POST",
+        data: { stripe_token: token },
+        success: function(response) {
+          startPoller(response.poller_id, addCardCompleted, addCardError);
+        },
+        error: addCardError
+      });
+    }
+  };
+
+</script>

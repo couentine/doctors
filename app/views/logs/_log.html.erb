@@ -10,79 +10,83 @@
   entry_count = log.next_entry_number - log.validation_count - log.rejection_count - 1
 %>
 
-<div class="info-card log-card fixed-height" data-bl-dyncol="child">
-  <table>
-    <tr class="card-body-row">
-      <td class="card-image" style="background-image: url('<%= gravatar_url_for user, :size => 150 %>')">
-        <%= link_to '&nbsp;'.html_safe, "/#{group.to_param}/#{badge.to_param}/u/#{user.username}",
-          title: "View progress log", class: 'image-link' %>
-      </td>
-      <td class="card-body">
-        <span class="card-headline">
-          <span class="card-actions">
-            <%=
-              # Output the little "X" that allows admins to remove learners from the badge
-              if (log.validation_status != 'validated') && is_admin && (current_user != user)
-                  link_to '<i class="fa fa-remove"></i>'.html_safe, 
-                    "/#{group.to_param}/#{badge.to_param}/u/#{user.username}" \
-                    + "?log%5Bdetached_log%5D=true", method: :put, 
-                    class: "log-card-delete", title: 'Remove from badge', 
-                    data: { toggle: "tooltip", placement: "bottom", 
-                    confirm: "Are you absolutely sure you want to revoke this user's badge " \
-                    + "membership?\n\nNote: The user's progress log will NOT be deleted, only " \
-                    + "their membership in the badge." }
-              end 
-            %>
+<% if user %>
+
+  <div class="info-card log-card fixed-height" data-bl-dyncol="child">
+    <table>
+      <tr class="card-body-row">
+        <td class="card-image" style="background-image: url('<%= gravatar_url_for user, :size => 150 %>')">
+          <%= link_to '&nbsp;'.html_safe, "/#{group.to_param}/#{badge.to_param}/u/#{user.username}",
+            title: "View progress log", class: 'image-link' %>
+        </td>
+        <td class="card-body">
+          <span class="card-headline">
+            <span class="card-actions">
+              <%=
+                # Output the little "X" that allows admins to remove learners from the badge
+                if (log.validation_status != 'validated') && is_admin && (current_user != user)
+                    link_to '<i class="fa fa-remove"></i>'.html_safe, 
+                      "/#{group.to_param}/#{badge.to_param}/u/#{user.username}" \
+                      + "?log%5Bdetached_log%5D=true", method: :put, 
+                      class: "log-card-delete", title: 'Remove from badge', 
+                      data: { toggle: "tooltip", placement: "bottom", 
+                      confirm: "Are you absolutely sure you want to revoke this user's badge " \
+                      + "membership?\n\nNote: The user's progress log will NOT be deleted, only " \
+                      + "their membership in the badge." }
+                end 
+              %>
+            </span>
+
+            <h2>
+              <%= link_to user.name, "/#{group.to_param}/#{badge.to_param}/u/#{user.username}", 
+                title: "View progress log" %>
+            </h2>
+            <h3><%= user.username %></h3>
           </span>
+          <span class="card-content">
+            <ul class="metric-list">
+              <% if (log.validation_count + entry_count) > 0 %>
+                
+                <% is_creator = (user.id == badge.creator_id) %>
+                <% if is_creator %>
+                  <i data-toggle="tooltip" data-placement="bottom" title="Badge creator" 
+                    class="fa fa-shield fa-solid-gold"></i>
+                <% end %>
 
-          <h2>
-            <%= link_to user.name, "/#{group.to_param}/#{badge.to_param}/u/#{user.username}", 
-              title: "View progress log" %>
-          </h2>
-          <h3><%= user.username %></h3>
-        </span>
-        <span class="card-content">
-          <ul class="metric-list">
-            <% if (log.validation_count + entry_count) > 0 %>
-              
-              <% is_creator = (user.id == badge.creator_id) %>
-              <% if is_creator %>
-                <i data-toggle="tooltip" data-placement="bottom" title="Badge creator" 
-                  class="fa fa-shield fa-solid-gold"></i>
+                <% if badge.tracks_progress? %>
+
+                  <% entry_count.times do |i| %>
+                    <i class="fa fa-star"></i>
+                  <% end if entry_count > 0 %>
+
+                  <% (log.validation_count - (is_creator ? 1:0)).times do |i| %>
+                    <i data-toggle="tooltip" data-placement="bottom" title="1 Expert Validation" 
+                      class="fa fa-star fa-gold"></i>
+                  <% end if log.validation_count > 0 %>
+
+                <% end %> 
+                
+              <% else %>
+                <li> &nbsp; </li> <!-- Ensures that the card is the right height when empty. -->
               <% end %>
-
-              <% if badge.tracks_progress? %>
-
-                <% entry_count.times do |i| %>
-                  <i class="fa fa-star"></i>
-                <% end if entry_count > 0 %>
-
-                <% (log.validation_count - (is_creator ? 1:0)).times do |i| %>
-                  <i data-toggle="tooltip" data-placement="bottom" title="1 Expert Validation" 
-                    class="fa fa-star fa-gold"></i>
-                <% end if log.validation_count > 0 %>
-
-              <% end %> 
-              
+            </ul>
+          </span>
+          <span class="card-footline">
+            <% if log.validation_status == 'validated' %>
+              <% if user == badge.creator_id %>
+                Created badge on <%= log.created_at.to_s(:short_date) %>
+              <% elsif log.date_issued.to_date == Date.today.to_date %>
+                Awarded the badge today
+              <% else %>
+                Badge awarded on <%= log.date_issued.to_s(:short_date) %>
+              <% end %>
             <% else %>
-              <li> &nbsp; </li> <!-- This ensures that the card is the right height when empty. -->
+              Joined badge on <%= log.created_at.to_s(:short_date) %>
             <% end %>
-          </ul>
-        </span>
-        <span class="card-footline">
-          <% if log.validation_status == 'validated' %>
-            <% if user == badge.creator_id %>
-              Created badge on <%= log.created_at.to_s(:short_date) %>
-            <% elsif log.date_issued.to_date == Date.today.to_date %>
-              Awarded the badge today
-            <% else %>
-              Badge awarded on <%= log.date_issued.to_s(:short_date) %>
-            <% end %>
-          <% else %>
-            Joined badge on <%= log.created_at.to_s(:short_date) %>
-          <% end %>
-        </span>
-      </td>
-    </tr>
-  </table>
-</div>
+          </span>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+<% end %>

@@ -2,57 +2,17 @@
   provide(:title, @user.name)
 %>
 
-<% if @this_is_current_user %>
-  <% 
-    provide(:show_subheader, true)
-    provide(:subheader_image, gravatar_url_for(@user, :size => 30))
-    provide(:subheader_image_class, 'img-circle')
-  %>
-  
-  <% content_for :subheader_links do %>
-  <li class="active">
-    u
-    <span class="divider">/</span>
-    <%= @user.username_with_caps %>
-  </li>
-<% end %>
-
-  <% content_for :subheader_actions do %>
-      <li class="collapsible">
-        <div class="dropdown">
-          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
-            role="button" data-toggle="dropdown" data-target="#">
-            Account Settings
-            <i class="fa fa-cog"></i>
-            <b class="caret"></b>
-          </a>
-          <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdown-subheader-settings">
-            <li>
-              <a href="<%= edit_user_registration_path %>">
-                <i class="fa fa-edit"></i> Change account details
-              </a>
-            </li>
-            <li>
-              <a href="https://en.gravatar.com/connect/?source=_signup" target="_blank" data-toggle="tooltip" 
-                data-placement="bottom" 
-                title="Badge List uses Gravatar to display your profile picture.">
-                <i class="fa fa-picture-o"></i> Change your profile picture
-              </a>
-            </li>            
-          </ul>
-        </div>
-      </li>
-  <% end %>
-
-<% end %>
-
 <!-- === ACCOUNT STATUS WARNING === -->
 
 <% if @this_is_current_user && (!@user.confirmed? || @user.pending_reconfirmation?) %>
-  <p class="lead text-warning">
-    <b>Account Status:</b>
-    Currently waiting on email confirmation for "<%= @user.unconfirmed_email || @user.email %>"
-  </p>
+  <div class="well well-tertiary add-top-margin">
+    <i class="fa fa-exclamation-triangle header-icon"></i>
+    <h2>Email verification needed</h2>
+    <p>
+      You need to click the verification link to confirm your Badge List account.
+      (<%= link_to 'Click here to get a new link', new_confirmation_path(resource_name) %>)
+    </p>
+  </div>
 <% end %>
 
 <div class="row add-top-margin">

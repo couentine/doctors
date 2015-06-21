@@ -2,6 +2,17 @@
   provide(:title, "All Users")
 %>
 
+<style type="text/css">
+  
+  a.label {
+    color: white !important;
+  }
+  a.label:hover, a.label:focus {
+    background-color: #333;
+  }
+
+</style>
+
 <!-- === PAGE HEADER === -->
 
 <div class="row add-top-margin">
@@ -26,10 +37,11 @@
             - <%= [(@page.to_i * @page_size.to_i), @users.count].min %>
             of <%= @users.count %>
           </h2>
-          <% unless @exclude_flags.blank? %>
+          <% if @only_flag %>
             <h3>
-              Excluding Flags: 
-              <%= @exclude_flags.join ", " %>
+              Only Showing Flag: 
+              <%= @only_flag %>
+              <%= link_to 'Clear search', users_path, class: 'btn btn-small' %>
             </h3>
           <% end %>
         </span>            
@@ -38,7 +50,7 @@
   </div>
 </div>
 
-<!-- === ENTRIES LIST === -->
+<!-- === USERS LIST === -->
 
 <% if !@users.blank? %>
   
@@ -57,13 +69,13 @@
             <tr>
               <th>User</th>
               <th>Email</th>
-              <th>Signup Date</th>
-              <th>Signin Count</th>
+              <th>Join, Logins</th>
               <th>Last Active</th>
               <th>Active Months</th>
-              <th>Groups Made</th>
-              <th>Badges Made</th>
+              <th>Groups Owned</th>
+              <th>Memberships</th>
               <th>Entries</th>
+              <th>Flags</th>
             </tr>
           </thead>
           <tbody>
@@ -75,16 +87,33 @@
                     <%= user.name %>
                   </a>
                 </td>
-                <td><%= user.email %></td>
-                <td><%= user.created_at.to_s :short_date %></td>
-                <td><%= user.sign_in_count %></td>
+                <td>
+                  <%= user.email %>
+                </td>
+                <td>
+                  <%= user.created_at.to_s :short_date %>, <%= user.sign_in_count %>
+                </td>
                 <td>
                   <%= user.last_active_at.to_s :short_date_time unless user.last_active_at.nil? %>
                 </td>
-                <td><%= user.active_months.join(', ') unless user.active_months.nil? %></td>
-                <td><%= user.created_groups.count unless user.created_groups.nil? %></td>
-                <td><%= user.created_badges.count unless user.created_badges.nil? %></td>
-                <td><%= user.created_entries.count unless user.created_entries.nil? %></td>
+                <td>
+                  <%= user.active_months.join(', ') unless user.active_months.nil? %>
+                </td>
+                <td>
+                  <%= (user.owned_group_ids || []).count %>
+                </td>
+                <td>
+                  <%= (user.admin_of_ids || []).count + (user.member_of_ids || []).count  %>
+                </td>
+                <td>
+                  <%= (user.created_entry_ids || []).count %>
+                </td>
+                <td>
+                  <% user.flags.each do |flag| %>
+                    <%= link_to flag, users_path(page_size: @page_size, flag: flag), 
+                      class: 'label' %>
+                  <% end unless user.flags.blank? %>
+                </td>
               </tr>
             <% end %>
           </tbody>

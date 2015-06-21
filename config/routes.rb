@@ -15,24 +15,39 @@ BadgeList::Application.routes.draw do
   match 'c' => 'static_pages#colors', via: :get
   match 'w' => 'home#root_external', via: :get, as: :root_external
   match 'pricing' => 'home#pricing', via: :get, as: :pricing
+  match 'pricing-k12' => 'home#pricing_k12', via: :get, as: :pricing_k12
   match 'privacy-policy' => 'home#privacy_policy', via: :get, as: :privacy_policy
   match 'terms-of-service' => 'home#terms_of_service', via: :get, as: :terms_of_service
 
   # === ADMIN PATHS === #
   scope '/a' do
     resources :users, :only => [:index]
+    resources :groups, :only => [:index]
+    resources :info_items, :only => [:index, :show]
   end
   match 'a' => 'admin_pages#index', via: :get
-  match 'a/groups' => 'groups#index', via: :get
   authenticate :user, lambda { |u| u.admin? } do
     mount Sidekiq::Web => '/a/sidekiq'
   end
+  
+  # === WEBHOOK PATHS === #
+  match 'h/stripe_event' => 'webhooks#stripe_event', via: :post
+
+  # === POLLER PATHS === #
+  match 'p/:id' => 'pollers#show', via: :get, as: :poller
   
   # === MANUAL FORM PATHS === #
   match 'f/talk-with-us' => 'forms#user_discussion', via: :post
   # match 'f/contact-us' => 'forms#contact_us', via: :post
 
+  # === MANUAL USER PATHS === #
+  match 'users/cards' => 'users#add_card', via: :post, as: :add_card
+  match 'users/cards' => 'users#refresh_cards', via: :get, as: :refresh_cards
+  match 'users/card/:id' => 'users#delete_card', via: :delete, as: :delete_card
+  match 'users/payments' => 'users#payment_history', via: :get, as: :payment_history
+
   # === MANUAL GROUP PATHS === #
+  match ':group_id/cancel' => 'groups#cancel_subscription', via: :post, as: :cancel_subscription
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group
   match ':group_id/leave' => 'groups#leave', via: :delete, as: :leave_group
   match ':group_id/members/:user_id' => 'groups#destroy_user', 

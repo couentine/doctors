@@ -23,6 +23,11 @@ class HomeController < ApplicationController
     render layout: 'website'
   end
 
+  # GET /pricing_k12
+  def pricing_k12
+    render layout: 'website'
+  end
+
   # GET /privacy-policy
   def privacy_policy
     render layout: 'website'

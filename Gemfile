@@ -17,6 +17,8 @@ gem 'bootstrap-sass', '2.3.2.2'
 gem 'faker'
 gem 'simple_form', '~> 2.1.1'
 
+gem 'stripe'
+
 gem 'browser_details'
 gem 'exception_notification'
 
@@ -54,6 +56,7 @@ group :development, :test do
   gem "better_errors", '1.1.0'
   gem "binding_of_caller"
   gem 'rack-mini-profiler'
+  gem 'ultrahook'
 end
 
 group :test do

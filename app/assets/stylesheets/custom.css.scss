@@ -284,7 +284,21 @@ ul.dropdown-menu {
     ul { font-size: 21px; }
     i.header-icon { font-size: 70px; }
   }
-  &.tertiary {
+  &.primary, &.orange {
+    background-color: $primary-white;
+    border-left: 3px solid $primary-dark;
+
+    h3,h4 { color: $primary-dark; }
+    ul {
+      li { 
+        a:focus,a:hover { color: $primary-dark; }
+      }
+    }
+    i.header-icon {
+      color: $primary-really-light;
+    }
+  }
+  &.tertiary, &.blue {
     background-color: $tertiary-white;
     border-left: 3px solid $tertiary-dark;
 
@@ -321,13 +335,26 @@ ul.dropdown-menu {
     border-left-width: 8px;
   }
 }
+table.table {
+  tr.highlight-primary { background-color: $primary-really-light; }
+  tr.highlight-secondary { background-color: $secondary-really-light; }
+  tr.highlight-tertiary { background-color: $tertiary-really-light; }
+  tr.highlight { font-weight: bold !important; background-color: $really-light-gray; }
+}
 
 .badge { text-shadow: none; }
 .badge-success { background-color: $secondary-light; }
 .badge-warning { background-color: $primary-light; }
 .badge-info { background-color: $tertiary-light; }
 
-.label { text-shadow: none; }
+.label { 
+  text-shadow: none; 
+
+  &.orange { background-color: $primary-medium; }
+  &.green { background-color: $secondary-medium; }
+  &.blue { background-color: $tertiary-medium; }
+  &.red { background-color: $red-medium; }
+}
 .label-success { background-color: $secondary-medium; }
 .label-warning { background-color: $primary-medium; }
 .label-important { background-color: $red-medium; }
@@ -379,6 +406,7 @@ ul.dropdown-menu {
   background: linear-gradient(45deg, $dark-white 25%, $light-white 25%, $light-white 50%,
                            $dark-white 50%, $dark-white 75%, $light-white 75%);
   background-size: 16px 16px;
+  z-index: 50;
   
   .spinner {
     content: "";
@@ -392,6 +420,10 @@ ul.dropdown-menu {
     animation: spin 1s linear infinite;
     -webkit-animation: spin 1s linear infinite;
     -moz-animation: spin 1s linear infinite;
+
+    &.large { border: solid 60px; margin-top: 40px; }
+    &.secondary { border-color: $secondary-medium transparent $secondary-medium transparent; }
+    &.tertiary { border-color: $tertiary-medium transparent $tertiary-medium transparent; }
   }
 }
 @-webkit-keyframes spin {
@@ -654,6 +686,8 @@ footer {
 
 /* General Form Elements */
 div.bl-form,div.bl-modal-form,div.bl-inline-form {
+  position: relative;
+
   .control-group { 
     float: left; 
     min-width: 55%;
@@ -710,6 +744,19 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
       margin-bottom: 10px;
     }
     .control-group {
+      .sub-header {
+        margin: 0 0 0 25px;
+
+        h3 {
+          float: none;
+          display: block;
+          margin: 10px 0;
+        }
+
+        a:not(.btn) {
+          text-decoration: underline;
+        }
+      }
       .controls {
         p { 
           margin: 5px 0 0 0; 
@@ -741,7 +788,7 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           color: $medium-text-color;
           font-style: italic;
         }
-        input[type="text"],textarea,input[type="url"] {
+        input[type="text"],textarea,input[type="url"],input[type="email"],input[type="password"] {
           border-radius: 0;
           border-top: none;
           border-right: none;
@@ -752,14 +799,9 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
         textarea {
           border-left: 1px solid $light-gray;
         }
-        input[type="text"]:focus,textarea:focus,,input[type="url"]:focus {
+        input[type="text"]:focus,textarea:focus,input[type="url"]:focus,input[type="email"]:focus,
+            input[type="password"]:focus {
           background-color: $really-light-gray;
-        }
-        p.help-block {
-          font-size: 0.8em;
-          font-style: italic;
-          margin-top: 15px;
-          color: $light-text-color;
         }
         .huge-text-area {
           width: 95%;
@@ -787,6 +829,16 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           background-color: $medium-white;
         }
       }
+      p.help-block {
+        font-size: 0.8em;
+        font-style: italic;
+        margin-top: 15px;
+        color: $light-text-color;
+
+        &.error-block {
+          color: $red-medium;
+        }
+      }
 
       &.error {
         .controls {
@@ -809,6 +861,8 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           line-height: 1.6em;
         }
         small { color: $light-text-color; }
+
+        &:last-child { margin-bottom: 0; }
       }
     }
   }
@@ -834,6 +888,7 @@ div.bl-inline-form {
   margin-bottom: 30px;
   border-radius: 5px;
   box-shadow: inset -1px 1px 7px 0 $card-shadow-color;
+  position: relative;
 
   .control-group {
     float: none;
@@ -844,10 +899,25 @@ div.bl-inline-form {
       font-size: 16px
     }
   }
+  p.help-block {
+    margin-top: 15px;
+
+    &.error-block {
+      color: $red-medium;
+    }
+  }
 
   @media (max-width: 767px) {
     .control-label { margin-left: 0; }
     .controls { margin-left: 0; }
+  }
+}
+
+.bl-modal-form {
+  form {
+    margin: 0;
+
+    p.help-block:first-child { margin-top: 0; }
   }
 }
 
@@ -945,6 +1015,13 @@ div.bl-form {
     width: 98%;
     text-align: right;
     padding: 1.8%;
+
+    .label {
+      display: inline-block;
+      margin: 0 5px 10px 5px;
+      position: relative;
+      top: 2px;
+    }
   } 
 }
 .bl-form-entry {
@@ -1228,6 +1305,12 @@ form#group-add-users-form {
   .modal-footer {
     background-color: $dark-white;
   }
+
+  .spinner-wrapper {
+    z-index: 50;
+
+    .spinner { margin-top: 110px; }
+  }
 }
 
 .modal.tutorial {
@@ -1375,10 +1458,26 @@ form#group-add-users-form {
     td.left-image, td.right-image {
       padding: 15px;
       width: 120px;
+      position: relative;
 
       img { 
         display: block; 
         width: 120px;
+      }
+      
+      .btn-overlay {
+        display: block;
+        text-align: center;
+        position: absolute;
+        bottom: 8px;
+        left: 0;
+        right: -2px;
+
+        a.btn {
+          opacity: 0.85;
+
+          &:hover, &:focus { opacity: 1; }
+        }
       }
     }
     td.left-image { background-color: $really-light-gray; }
@@ -1440,6 +1539,9 @@ form#group-add-users-form {
 
               &:hover, &:focus {
                 background-color: $light-gray;
+              }
+              &.btn-danger {
+                background-color: #C3211D;
               }
             }
           }
@@ -3446,6 +3548,13 @@ div.topic-list-card, div.group-list-card {
     line-height: 1.4em;
   }
   pre.ace-tomorrow { font-size: 16px; }
+  table {
+    &.with-border {
+      border: 1px solid $really-light-gray;
+      border-radius: 5px;
+      border-collapse: initial;
+    }
+  }
 
   .section-container {
     display: block;
@@ -3459,6 +3568,23 @@ div.topic-list-card, div.group-list-card {
   }
   .section-container:last-child { 
     margin-bottom: 0;
+  }
+
+  .header-block {
+    margin-bottom: 20px;
+
+    h3 {
+      display: inline;
+      font-size: 18px;
+      line-height: 1.3em;
+      margin: 0;
+      color: $tertiary-medium;
+    }
+
+    .btn { 
+      float: right; 
+      margin: 0px 6px;
+    }
   }
 
   .validation-result {

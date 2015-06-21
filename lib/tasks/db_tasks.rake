@@ -359,4 +359,226 @@ namespace :db do
     puts " >> Done."
   end
 
+  task backpopulate_group_owners: :environment do
+    print "Updating #{Group.count} groups"
+    Group.each do |group|
+      if group.owner.nil?
+        group.owner = group.creator
+        group.admins << group.owner unless group.admin_ids.include? group.owner_id
+        group.timeless.save
+      end
+      print "."
+    end
+    puts " >> Done."
+  end
+
+  task update_group_counts: :environment do
+    print "Updating #{Group.count} groups"
+    Group.each do |group|
+      group.total_user_count = group.member_ids.count + group.admin_ids.count
+      group.admin_count = group.admin_ids.count
+      group.member_count = group.member_ids.count
+      group.timeless.save
+
+      print "."
+    end
+    puts " >> Done."
+  end
+
+  # Randomly reassigns everyone's user accounts to various test emails
+  task staging_only_change_all_user_emails: :environment do
+    test_gmails = ['ryan.hank', 'benroome', 'quemalex']
+    change_log = []
+
+    print "Updating #{User.count} users"
+    User.each do |user|
+      unless user.admin?
+        begin
+          change_log_item = { id: user.id, name: user.name, original_email: user.email }
+          user.email = "#{test_gmails.sample}+#{user.username}@gmail.com"
+          user.skip_reconfirmation!
+          user.timeless.save
+          print "."
+
+          change_log_item[:new_email] = user.email
+          change_log << change_log_item
+        rescue
+          print "!"
+        end
+      end
+    end
+
+    # Save results to info item
+    item = InfoItem.new
+    item.type = 'db-task-result'
+    item.name = 'Summary of Changes (staging_only_change_all_user_emails)'
+    item.data = { change_log: change_log }
+    item.save
+
+    puts " >> Done."
+  end
+
+  # One-time migration of users & groups to stripe-based subscriptions & pricing
+  task migrate_users_and_groups_to_stripe: :environment do
+    user_change_log, group_change_log = [], []
+    group_owner_map = {} # user_id => user
+
+    # User flags / group subscription mappings
+    IGNORE_FLAG = 'sm_ignore'
+    MANUAL_FLAG = 'sm_manual'
+    MANUAL_PLAN = 'free-100m-1'
+    STANDARD_FLAG = 'sm_standard'
+    STANDARD_PLAN = 'standard-100m-1'
+    OG_FLAG = 'sm_og'
+    OG_PLAN = 'free-5m-1'
+
+    # List of users who will be dealt with manually
+    manual_users = ['hood', 'kucrl', 'hankish', 'benroome', 'miltology', 'kimberly']
+
+    # === STEP 1: MIGRATE USERS === #
+
+    print "Migrating #{User.count} users"
+    
+    User.each do |user|
+      error_item = InfoItem.new
+      error_item.type = 'db-task-error'
+      error_item.data = { user_id: user.id, username: user.username, email: user.email, 
+        name: user.name }
+
+      if user.owned_groups.count == 0
+        current_group = :ignore
+        user.set_flag IGNORE_FLAG
+      else
+        group_owner_map[user.id] = user # Save a link back so we don't have to requery later
+
+        begin
+          # Create a stripe customer if missing, then retrieve the customer object
+          user.create_stripe_customer if user.stripe_customer_id.blank?  
+          customer = Stripe::Customer.retrieve(user.stripe_customer_id)
+
+          # Next determine when they created their first group
+          first_group_create_date = user.owned_groups.asc(:created_at).first.created_at
+          pricing_published_date = '2015-04-22'.to_time
+
+          # Now determine this user's group and set flags
+          if manual_users.include? user.username
+            current_group = :manual
+            user.set_flag MANUAL_FLAG
+          elsif first_group_create_date < pricing_published_date
+            current_group = :og
+            user.set_flag OG_FLAG
+          else
+            current_group = :standard
+            user.set_flag STANDARD_FLAG
+          end
+
+          # Add the og coupon to manual and og groups
+          if [:manual, :og].include? current_group
+            begin
+              customer.coupon = 'og-perma-50'
+              customer.save
+              user.set_flag User::HALF_OFF_FLAG
+            rescue Exception => e
+              error_item.name = 'Error Adding Coupon (migrate_users_and_groups_to_stripe)'
+              error_item.data[:error] = e.to_s
+            end
+          end
+        rescue Exception => e
+          error_item.name = 'Error Creating Stripe Customer (migrate_users_and_groups_to_stripe)'
+          error_item.data[:error] = e.to_s
+        end
+      end
+
+      error_item.data[:flags] = user.flags
+      user_change_log << error_item.data
+      
+      if error_item.name
+        print '!'
+        error_item.save
+      else
+        print "."
+      end
+
+      user.save if user.changed?
+    end
+
+    # Save results to info item
+    item = InfoItem.new
+    item.type = 'db-task-result'
+    item.name = 'Summary of User Changes (migrate_users_and_groups_to_stripe)'
+    item.data = { user_change_log: user_change_log }
+    item.save
+
+    puts " >> Done."
+
+    # === STEP 2: MIGRATE GROUPS === #
+
+    print "Migrating #{Group.where(type: 'private').count} private groups"
+    
+    Group.where(type: 'private').each do |group|
+      error_item = InfoItem.new
+      error_item.type = 'db-task-error'
+      error_item.data = { group_id: group.id, name: group.name, url: group.url, 
+        owner_id: group.owner_id }
+
+      begin
+        owner = group_owner_map[group.owner_id]
+
+        if owner
+          error_item[:owner_email] = owner.email
+          error_item[:owner_name] = owner.name
+          error_item[:owner_username] = owner.username
+
+          if group.subscription_plan
+            print "-"
+          else
+            if owner.has_flag? MANUAL_FLAG
+              group.subscription_plan = MANUAL_PLAN
+              trial_end = nil
+            elsif owner.has_flag? OG_FLAG
+              group.subscription_plan = OG_PLAN
+              trial_end = nil
+            elsif owner.has_flag? STANDARD_FLAG
+              group.subscription_plan = STANDARD_PLAN
+              trial_end = [(group.created_at + 2.weeks).to_i, 4.days.from_now.to_i].max
+            else
+              throw 'The group owner didn\'t have a migration flag!'
+            end
+
+            # Create the subscription (syncronously)
+            group.stripe_subscription_status = 'trialing'
+            Group.create_stripe_subscription(group: group, trial_end: trial_end)
+          end
+        else
+          throw 'The group owner was not in the list and might not have a stripe customer id.'
+        end
+      rescue Exception => e
+        error_item.name = 'Error Migrating Group (migrate_users_and_groups_to_stripe)'
+        error_item.data[:error] = e.to_s
+      end
+
+      error_item.data[:subscription_plan] = group.subscription_plan
+      error_item.data[:stripe_subscription_id] = group.stripe_subscription_id
+      error_item.data[:stripe_subscription_status] = group.stripe_subscription_status
+      error_item.data[:subscription_end_date] = group.subscription_end_date
+      group_change_log << error_item.data
+
+      if error_item.name
+        print '!'
+        error_item.save
+      else
+        print "."
+      end
+    end
+
+    # Save results to info item
+    item = InfoItem.new
+    item.type = 'db-task-result'
+    item.name = 'Summary of Group Changes (migrate_users_and_groups_to_stripe)'
+    item.data = { group_change_log: group_change_log }
+    item.save
+
+    puts " >> Done."
+  end
+
 end

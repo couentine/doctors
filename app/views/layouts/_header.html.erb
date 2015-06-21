@@ -30,21 +30,47 @@
     <% if user_signed_in? %>
       <ul class="nav pull-right">
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" id="dropdown-header-currentuser" role="button" data-toggle="dropdown" data-target="#">
+          <a href="#" class="dropdown-toggle" id="dropdown-header-currentuser" role="button" 
+              data-toggle="dropdown" data-target="#">
             <%= gravatar_for current_user, :size => 23, :class => 'img-circle' %>
             <span id="header-currentuser-name"><%= current_user.name %></span>
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-header-currentuser">
             <li>
-              <a href="<%= url_for(current_user) %>"><i class="fa fa-user"></i> 
-              Your profile</a>
+              <a href="<%= url_for(current_user) %>">
+                <i class="fa fa-shield"></i> Badge profile
+              </a>
             </li>
-            <% if current_user.admin? %>
-              <li><a href="/a"><i class="fa fa-cogs"></i> Admin tools</a></li>
-            <% end %>
+            
             <li class="divider"></li>
-            <li><%= link_to "<i class='fa fa-remove'></i> Sign out".html_safe, destroy_user_session_path, :method => :delete %></li>
+            
+            <li>
+              <a href="<%= edit_user_registration_path %>">
+                <i class="fa fa-user"></i> Badge List account
+              </a>
+            </li>
+            <li>
+              <a href="https://en.gravatar.com/connect/?source=_signup" target="_blank" data-toggle=
+                  "tooltip" data-placement="bottom" 
+                  title="Badge List uses Gravatar to display your profile picture.">
+                <i class="fa fa-picture-o"></i> Change photo
+              </a>
+            </li> 
+            <% if current_user.admin? %>
+              <li>
+                <a href="/a">
+                  <i class="fa fa-cogs"></i> Admin tools
+                </a>
+              </li>
+            <% end %>
+            
+            <li class="divider"></li>
+            
+            <li>
+              <%= link_to "<i class='fa fa-remove'></i> Sign out".html_safe, 
+                destroy_user_session_path, :method => :delete %>
+            </li>
           </ul>
         </li>
       </ul>
@@ -97,94 +123,3 @@
   <% end %>
   
 </header>
-
-<!-- === ADMIN TUTORIAL === -->
-
-<div id="admin-tutorial" class="modal hide fade tutorial" tabindex="-1" role="dialog" 
- aria-labelledby="mimm-label" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="mimm-label">How Badge List works...</h3>
-  </div>
-
-  <div class="modal-body">
-    <div class="tutorial-section">
-      <h4>1. Create your learning group</h4>
-      <%= image_tag 'admin-tutorial-1-learning-group.png' %>
-      <ul class="image-caption">
-        <li>
-          <i class="fa fa-star"></i> 
-          A learning group is a community that creates and earns badges.
-        </li>
-        <li>
-          <i class="fa fa-star"></i> 
-          The group also gives your badges context and credibility.
-        </li>
-      </ul>
-    </div>
-
-    <div class="tutorial-section">
-      <h4>2. Build badges</h4>
-      <%= image_tag 'admin-tutorial-2-badges.png' %>
-      <ul class="image-caption">
-        <li>
-          <i class="fa fa-star"></i> 
-          Badges can represent simple achievements or complex sets of skills.
-        </li>
-        <li>
-          <i class="fa fa-star"></i> 
-          Good badges explain clearly how to earn them and what earners have achieved.
-        </li>
-      </ul>
-    </div>
-
-    <div class="tutorial-section">
-      <h4>3. Recognize your experts, guide your learners</h4>
-      <%= image_tag 'admin-tutorial-3-experts-and-learners.png' %>
-      <ul class="image-caption">
-        <li>
-          <i class="fa fa-star"></i> 
-          Experts help lead the badge community
-        </li>
-        <li>
-          <i class="fa fa-star"></i> 
-          Learners log progress and receive guidance
-        </li>
-      </ul>
-    </div>
-
-    <div class="tutorial-section">
-      <h4>That's it!</h4>
-      <h5>Ready to go?</h5>
-      <p>Click the Close button below to close the tutorial and get started.</p>
-      
-      <h5>Want more resources?</h5>
-      <ul>
-        <li>
-          <a href="http://badgelist.com/help/docs" target="_blank">
-            <i class="fa fa-book"></i> Browse the Badge List help documentation
-          </a>
-        </li>
-        <li>
-          <a href="http://openbadges.org" target="_blank">
-            <i class="fa fa-shield"></i> Check out Mozilla's Open Badges site
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="modal-footer">
-    <button class="btn pull-left close-tutorial" data-dismiss="modal" aria-hidden="true"
-      title="Click here to get started" toggle="tooltip" data-placement="bottom">
-      Close the tutorial
-    </button>
-    
-    <a class="navigation-link disabled back-button" href="#" title="Previous Step">
-      <i class="fa fa-arrow-circle-o-left"></i>
-    </a>
-    <a class="navigation-link next-button" href="#" title="Next Step">
-      <i class="fa fa-arrow-circle-o-right"></i>
-    </a>
-  </div>
-</div>

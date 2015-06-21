@@ -18,14 +18,39 @@
         </a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-header-currentuser">
           <li class="inner">
-            <a href="<%= url_for(current_user) %>"><i class="fa fa-user"></i> 
-            Your profile</a>
+            <a href="<%= url_for(current_user) %>">
+              <i class="fa fa-shield"></i> Badge profile
+            </a>
           </li>
+          
+          <li class="divider inner"></li>
+          
+          <li class="inner">
+            <a href="<%= edit_user_registration_path %>">
+              <i class="fa fa-user"></i> Badge List account
+            </a>
+          </li>
+          <li class="inner">
+            <a href="https://en.gravatar.com/connect/?source=_signup" target="_blank" data-toggle=
+                "tooltip" data-placement="bottom" 
+                title="Badge List uses Gravatar to display your profile picture.">
+              <i class="fa fa-picture-o"></i> Change photo
+            </a>
+          </li> 
           <% if current_user.admin? %>
-            <li class="inner"><a href="/a"><i class="fa fa-cogs"></i> Admin tools</a></li>
+            <li class="inner">
+              <a href="/a">
+                <i class="fa fa-cogs"></i> Admin tools
+              </a>
+            </li>
           <% end %>
-          <li class="divider"></li>
-          <li class="inner"><%= link_to "<i class='fa fa-remove'></i> Sign out".html_safe, destroy_user_session_path, :method => :delete %></li>
+          
+          <li class="divider inner"></li>
+          
+          <li class="inner">
+            <%= link_to "<i class='fa fa-remove'></i> Sign out".html_safe, 
+              destroy_user_session_path, :method => :delete %>
+          </li>
         </ul>
       </li>
     </ul>

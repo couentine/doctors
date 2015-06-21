@@ -10,36 +10,45 @@ class User
   MAX_USERNAME_LENGTH = 15
   JSON_FIELDS = [:name, :username, :username_with_caps]
 
+  HALF_OFF_FLAG = '50_percent_off'
+
   # === RELATIONSHIP === #
 
   has_many :created_groups, inverse_of: :creator, class_name: "Group"
+  has_many :owned_groups, inverse_of: :owner, class_name: "Group"
   has_many :created_badges, inverse_of: :creator, class_name: "Badge"
   has_many :logs, dependent: :destroy
   has_many :created_entries, inverse_of: :creator, class_name: "Entry"
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
+  has_many :info_items, dependent: :destroy
 
-  # === CUSTOM FIELDS & VALIDTIONS === #
+  # === CUSTOM FIELDS & VALIDATIONS === #
   
-  field :name,                type: String
-  field :username,            type: String
-  field :username_with_caps,  type: String
-  field :flags,               type: Array, default: [], pre_processed: true
-  field :flags,               type: Array, default: [], pre_processed: true
-  field :admin,               type: Boolean, default: false
-  field :page_views,          type: Hash, default: {}, pre_processed: true
-  field :form_submissions,    type: Array
-  field :last_active_at,      type: Time
-  field :active_months,       type: Array
+  field :name,                          type: String
+  field :username,                      type: String
+  field :username_with_caps,            type: String
+  field :flags,                         type: Array, default: [], pre_processed: true
+  field :admin,                         type: Boolean, default: false
+  field :page_views,                    type: Hash, default: {}, pre_processed: true
+  field :form_submissions,              type: Array
+  field :last_active_at,                type: Time
+  field :active_months,                 type: Array
 
-  field :identity_hash,       type: String
-  field :identity_salt,       type: String
+  field :identity_hash,                 type: String
+  field :identity_salt,                 type: String
+
+  field :stripe_customer_id,            type: String
+  field :stripe_default_source,         type: String
+  field :stripe_cards,                  type: Array, default: []
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
-  validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
-            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores." }
+  validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
+    uniqueness:true, format: { with: /\A[\w-]+\Z/, 
+      message: "can only contain letters, numbers, dashes and underscores." }
   validates :username, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
-            format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores." }
+    format: { with: /\A[\w-]+\Z/, 
+      message: "can only contain letters, numbers, dashes and underscores." }
 
   
   # === DEVISE SETTINGS === #
@@ -50,7 +59,8 @@ class User
     :validatable, :confirmable, :lockable, :async
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :name, :username_with_caps, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :name, :username_with_caps, :password, :password_confirmation, 
+    :remember_me
 
   # === STANDARD DEVISE FIELDS === #
 
@@ -114,6 +124,16 @@ class User
 
   def to_param
     username
+  end
+
+  def stripe_card_options
+    if stripe_cards.blank?
+      []
+    else
+      stripe_cards.map do |card|
+        ["#{card['brand']}: xxx-#{card['last4']}", card['id']]
+      end
+    end
   end
 
   def set_flag(flag)
@@ -264,6 +284,151 @@ class User
   def manually_update_identity_hash
     self.identity_salt = SecureRandom.hex
     self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+  end
+
+  # === STRIPE RELATED METHODS === #
+
+  def has_stripe_card?
+    !stripe_customer_id.blank? && !stripe_cards.blank?
+  end
+
+  # Calls out to stripe to create a new customer record and then saves the strip cust id locally
+  def create_stripe_customer
+    if stripe_customer_id.blank?
+      response = Stripe::Customer.create(
+        email: email,
+        description: "#{name} (#{username_with_caps})",
+        metadata: {
+          user_id: id,
+          username: username,
+          name: name
+        }
+      )
+      
+      if response
+        self.stripe_customer_id = response.id
+        self.save
+      end
+    end
+  end
+
+  # Calls out to stripe to add a card (the token comes from Stripe.js on the front end)
+  # If async is set to true then the method will return the id of a poller
+  def add_stripe_card(card_token, async = false)
+    if async
+      poller = Poller.new
+      poller.save
+      User.delay(queue: 'high', retry: false).add_stripe_card(card_token, user_id: id, \
+        poller_id: poller.id)
+      poller.id
+    else
+      User.add_stripe_card(card_token, user: self)
+    end
+  end
+
+  # Calls out to stripe to add a card (the token comes from Stripe.js on the front end)
+  # Accepts the following options
+  # - user_id: Provide this to have the method query for the user
+  # - user: Provide a pre-queried user object to save a query
+  # - poller_id: If provided this poller record will be updated with success or failure details
+  def self.add_stripe_card(card_token, options = {})
+    begin
+      poller = Poller.find(options[:poller_id]) rescue nil
+      user = options[:user] || User.find(options[:user_id])
+
+      user.create_stripe_customer if user.stripe_customer_id.blank?  
+      customer = Stripe::Customer.retrieve(user.stripe_customer_id)
+      card = customer.sources.create(source: card_token)
+
+      if card
+        user.stripe_default_source = customer.default_source
+        user.stripe_cards << card.to_hash
+        user.save
+
+        if poller
+          poller.status = 'successful'
+          poller.message = 'You have successfully added a credit card to your account.'
+          poller.data = card.to_hash
+          poller.save
+        end
+      else
+        throw "Card was rejected."
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to add the credit card, ' \
+          + "please try again. (Error message: #{e})"
+        poller.save
+      else
+        throw e
+      end
+    end
+  end
+
+  # Calls out to stripe to refresh list of stripe cards
+  def refresh_stripe_cards
+    if stripe_customer_id.blank?
+      self.stripe_cards = []
+    else
+      customer = Stripe::Customer.retrieve(stripe_customer_id)
+      cards = customer.sources.all
+      self.stripe_cards = cards.map{ |c| c.to_hash } if customer && cards
+      self.stripe_default_source = customer.default_source
+    end
+    self.save
+  end
+
+  # Calls out to stripe to delete a card
+  # If async is set to true then the method will return the id of a poller
+  def delete_stripe_card(card_id, async = false)
+    if async
+      poller = Poller.new
+      poller.save
+      User.delay(queue: 'high', retry: false).delete_stripe_card(card_id, user_id: id, \
+        poller_id: poller.id)
+      poller.id
+    else
+      User.delete_stripe_card(card_id, user: self)
+    end  
+  end
+
+  # Calls out to stripe to delete a card
+  # Accepts the following options
+  # - user_id: Provide this to have the method query for the user
+  # - user: Provide a pre-queried user object to save a query
+  # - poller_id: If provided this poller record will be updated with success or failure details
+  def self.delete_stripe_card(card_id, options = {})
+    begin
+      poller = Poller.find(options[:poller_id]) rescue nil
+      user = options[:user] || User.find(options[:user_id])
+
+      customer = Stripe::Customer.retrieve(user.stripe_customer_id)
+      card = customer.sources.retrieve(card_id)
+
+      if card
+        card.delete
+        user.refresh_stripe_cards
+
+        if poller
+          poller.status = 'successful'
+          poller.message = 'The credit card has been removed from your account.'
+          poller.data = card.to_hash
+          poller.save
+        end
+      else
+        throw "There was a problem removing the card, please try again."
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to remove the credit card, ' \
+          + "please try again. (Error message: #{e})"
+        poller.save
+      else
+        throw e
+      end
+    end
   end
 
 protected

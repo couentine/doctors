@@ -33,7 +33,6 @@ String.prototype.trunc = String.prototype.trunc ||
 var richTextEditors = [];
 
 $(document).ready(function() {
-    setupAdminTutorial();
     checkForTooltips();
     disableLinks();
     addAnchorsToPaginateLinks();
@@ -54,7 +53,6 @@ $(document).ready(function() {
     $(window).on('resize', function() {
       if (hasDynamicColumns) checkDynamicColumns();
       checkResponsiveFormatting();
-      resizeAdminTutorial();
     });
 });
 
@@ -450,78 +448,6 @@ function updateDynamicColumnGroup(key, targetColCount) {
     $(dcGroup.columns[i % targetColCount]).append(dcGroup.children[i]);
 }
 
-var tutorialStep;
-
-function setupAdminTutorial() {
-  // First resize all of the tutorial sections and the body itself
-  resizeAdminTutorial();
-
-  // Then build an event to show a tooltip when the tutorial is closed
-  $('#admin-tutorial').on('hidden', function() {
-    $('#show-admin-tutorial').tooltip({
-      title: "<a class='pull-right' href='#' onclick=\"$('#show-admin-tutorial').tooltip('hide')\" "
-        + "title='Dismiss this message'><i class='fa fa-times'></i></a> "
-        + "Click here for help &nbsp; ",
-      placement: "bottom",
-      trigger: "manual",
-      container: "header",
-      html: true
-    }).tooltip("show");
-    setTimeout(function() {
-      $('#show-admin-tutorial').tooltip('hide');
-    }, 3000);
-  });
-
-  // Reset the tutorial when it's launched
-  $('#admin-tutorial').on('shown', function() {
-    tutorialStep = 1;
-    $('#admin-tutorial modal-body').css('left', '0');
-  });
-
-  // Build events for the back & next buttons
-  $('#admin-tutorial .back-button').click(function (e) {
-    e.preventDefault();
-    var totalSteps = $('#admin-tutorial .tutorial-section').length;
-    tutorialStep = Math.max(1, tutorialStep - 1);
-    var newLeft = -1 * ((tutorialStep - 1) * $('#admin-tutorial').width());
-    $('#admin-tutorial .modal-body').animate({left: newLeft}, 700);
-
-    if (tutorialStep == 1) $('#admin-tutorial .back-button').addClass('disabled');
-    if (tutorialStep < totalSteps) {
-      $('#admin-tutorial .next-button').removeClass('disabled');
-      $('#admin-tutorial .close-tutorial').removeClass('btn-primary');
-      // $('#admin-tutorial .close-tutorial').popover('hide');
-    }
-  });
-  $('#admin-tutorial .next-button').click(function (e) {
-    e.preventDefault();
-    var totalSteps = $('#admin-tutorial .tutorial-section').length;
-    tutorialStep = Math.min(totalSteps, tutorialStep + 1);
-    var newLeft = -1 * ((tutorialStep - 1) * $('#admin-tutorial').width());
-    $('#admin-tutorial .modal-body').animate({left: newLeft}, 700);
-
-    if (tutorialStep == totalSteps) {
-      $('#admin-tutorial .next-button').addClass('disabled');
-      $('#admin-tutorial .close-tutorial').addClass('btn-primary');
-      // $('#admin-tutorial .close-tutorial').popover({
-      //     content: "Click here to get started.",
-      //     placement: "bottom",
-      //     trigger: "manual",
-      //     container: "body"
-      //   }).popover('show');
-    }
-    if (tutorialStep > 1) $('#admin-tutorial .back-button').removeClass('disabled');
-  });
-}
-
-function resizeAdminTutorial() {
-  var totalSteps = $('#admin-tutorial .tutorial-section').length;
-  var modalWidth = $('#admin-tutorial').width();
-
-  $('#admin-tutorial .modal-body').width(totalSteps * modalWidth);
-  $('#admin-tutorial .tutorial-section').width(modalWidth);
-}
-
 function registerToggleLinks() {
   $('a[data-toggle=custom]').click(function() {
     var showSelector = $(this).data('show');
@@ -547,4 +473,51 @@ function registerEmbedCodeBoxes() {
   $("input.embed-code").click(function() {
     $(this).select();
   });
+}
+
+var INITIAL_POLLING_INTERVAL = <%= Poller::INITIAL_POLLING_INTERVAL %>;
+var POLLING_INTERVAL_DOUBLE_RATE = <%= Poller::POLLING_INTERVAL_DOUBLE_RATE %>;
+var POLLING_MAX_TRIES = <%= Poller::POLLING_MAX_TRIES %>;
+var POLLING_URL = "/p/";
+
+// This function starts a poller which queries "/p/pollerId.json"
+// The function onCompleted will be run when the poller completes with the poller object as a param
+// The function onError will be run with no params if the polling URL returns null
+function startPoller(pollerId, onCompleted, onError) {
+  setTimeout(function() { executePoller(pollerId, onCompleted, onError, 1); }, 
+    INITIAL_POLLING_INTERVAL);
+}
+var tempPoller;
+function executePoller(pollerId, onCompleted, onError, numTries) {
+  var poller;
+  var nextInterval = INITIAL_POLLING_INTERVAL 
+    * Math.pow(2, Math.floor(numTries/POLLING_INTERVAL_DOUBLE_RATE));
+
+  try { 
+    $.getJSON(POLLING_URL + pollerId + ".json", function(poller) {
+      if (poller == null) {
+        onError();
+      } else if (poller.completed) {
+        onCompleted(poller);
+      } else if (numTries < POLLING_MAX_TRIES) {
+        setTimeout(function() { executePoller(pollerId, onCompleted, onError, numTries + 1); }, 
+          nextInterval); 
+      } else {
+        onError();
+      }
+    });
+  } catch (e) { onError(); }
+}
+
+function unixTimeToString(unix_timestamp){
+  var a = new Date(unix_timestamp*1000);
+  var year = a.getFullYear();
+  var month = a.getMonth() + 1;
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes() < 10 ? '0' + a.getMinutes() : a.getMinutes(); 
+  var sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds();
+  // var time = month + '/' + date + '/' + year + ' ' + hour + ':' + min + ':' + sec ;
+  var time = month + '/' + date + '/' + year;
+  return time;
 }

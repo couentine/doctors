@@ -9,6 +9,10 @@ class EntriesController < ApplicationController
   before_filter :log_owner_or_entry_creator, only: [:destroy]
   before_filter :can_post_to_log, only: [:new, :create]
 
+  # === LIMIT-FOCUSED FILTERS === #
+
+  before_filter :can_create_entries, only: [:new, :create]
+
   # === RESTFUL ACTIONS === #
 
   # GET /group-url/badge-url/u/username/1
@@ -277,6 +281,13 @@ private
         || @badge_list_admin
       flash[:error] = "You do not have permission to post to this log."
       redirect_to [@group, @badge, @log]
+    end
+  end
+
+  def can_create_entries
+    unless @group.can_create_entries?
+      flash[:error] = "You cannot post evidence since this group is currently inactive."
+      redirect_to @group
     end
   end
 

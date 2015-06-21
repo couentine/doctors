@@ -1,12 +1,109 @@
+<%
+  half_off = @group.owner.has_flag? User::HALF_OFF_FLAG
+%>
+
 <script>
 
   $(document).ready(function() {
+
     <% if @group.new_record? %>
-      // If this is a new record then auto set the URL as they type
-      $('#group_name').keyup(function() {
-        $('#group_url_with_caps').val(parameterizeText($(this).val()));
+      <% if @group.owner.stripe_default_source %>
+        // Set the credit card dropdown to be their default stripe card
+        $("#group_stripe_subscription_card").val("<%= @group.owner.stripe_default_source %>");
+      <% end %>
+    <% else %>
+      $("#cancel-subscription").click(function(e) {
+        if (confirm("Are you sure you want to cancel your subscription? All of your group's "
+            + "content will still be available and you can create a new subscription at any time.")) {
+          $('#cancel-subscription-spinner').fadeIn();
+          $.ajax({
+            url: "<%= cancel_subscription_path(@group) %>",
+            type: "POST",
+            success: function(response) {
+              startPoller(response.poller_id, cancelSubscriptionCompleted, cancelSubscriptionError);
+            },
+            error: cancelSubscriptionError
+          });
+        }
+        e.preventDefault();
       });
     <% end %>
+
+    $("#group_type_private").click(function() {
+      $("#subscription-details-panel").fadeIn();
+      if (($("#group_stripe_subscription_card").val() == null)
+          || ($("#group_stripe_subscription_card").val() == "")) {
+        $("#submit-group-form").prop("disabled", true);
+        $("#card-required-label").show();
+      }
+    });
+    $("#group_type_open").click(function() {
+      $("#subscription-details-panel").fadeOut();
+      $("#submit-group-form").prop("disabled", false);
+      $("#card-required-label").hide();
+    });
+
+    $("#show-edit-subscription-panel").click(function(e) {
+      $("#view-subscription-panel").fadeOut(function() {
+        $("#edit-subscription-panel").fadeIn();
+      });
+      e.preventDefault();
+    });
+
+    $("#revive-subscription").click(function(e) {
+      $("#view-subscription-panel").fadeOut(function() {
+        $("#edit-subscription-panel").fadeIn();
+      });
+      $("#group_new_subscription").val("true");
+      e.preventDefault();
+    });
+
+    // Default to private if k12 pricing group
+    <% if @is_k12 %>
+      $("#group_type_private").click();
+    <% end %>
+
+
+    <% if @allow_url_editing %>
+      // URL Editing Logic
+
+      // Auto set the URL as they type the name
+      $('#group_name').keyup(function() {
+        $('#group_url_with_caps').val(parameterizeText($(this).val()));
+        $('#url-preview-label').text(parameterizeText($(this).val()));
+        if (($('#group_url_with_caps').val().length > 0) && !$("#url-panel").is(":visible"))
+          $("#url-panel").fadeIn();
+        else if (($('#group_url_with_caps').val().length == 0) && $("#url-panel").is(":visible"))
+          $("#url-panel").fadeOut();
+      });
+
+      // Only allow url characters in the manual url box and update the label as they type
+      $('#group_url_with_caps').keyup(function() {
+        $(this).val(parameterizeText($(this).val()));
+        $('#url-preview-label').text($(this).val());
+      });
+
+      $("#url-edit").click(function() {
+        $("#url-preview").fadeOut(function() {
+          $("#url-editor").show();
+        });
+        $('#group_url_with_caps').focus();
+      });
+      $("#url-save").click(function() {
+        $("#url-editor").fadeOut(function() {
+          $("#url-preview").show();
+        });
+        $('#group_name').focus();
+      });
+      $("#url-cancel").click(function() {
+        $('#badge_url_with_caps').val(parameterizeText($("#group_name").val()));
+        $('#url-preview-label').text(parameterizeText($("#group_name").val()));
+        $("#url-editor").hide();
+        $("#url-preview").show();
+      });
+
+    <% end %>
+
   });
 
   function toggleExtraInfo() {
@@ -25,58 +122,273 @@
   var MAX_URL_LENGTH = <%= Group::MAX_URL_LENGTH %>;
   function parameterizeText(s) {
     if (s == null) return '';
-    else return s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').replace(/ +/g, ' ')
+    else return s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').replace(/ +/g, ' ').trim()
       .replace(/ /g, '-').trunc(MAX_URL_LENGTH);
   }
 
+  /* === Stripe polling functionality === */
+
+  function cancelSubscriptionCompleted(poller) {
+    if (poller.status == 'successful') {
+      window.location.reload();
+    } else {
+      $('#cancel-subscription-spinner').fadeOut();
+      alert(poller.message);
+    }
+  }
+
+  function cancelSubscriptionError() {
+    $('#cancel-subscription-spinner').fadeOut();
+    alert("There was an error cancelling your subscription, please try again.");
+  }
+
 </script>
+
+<div class="spinner-wrapper" id="cancel-subscription-spinner" style="display: none;">
+  <div class="spinner large tertiary">&nbsp;</div>
+</div>
 
 <%= simple_form_for(@group, html: { class: 'form-horizontal' }) do |f| %>
   <%= f.error_notification %>
   <div class="form-body">
     <%= f.input :name, label: 'Group Name', placeholder: 'NASA Astronaut Training',
-      autofocus: true, input_html: { class: 'input-xlarge', data: { toggle: 'tooltip',
-        title: 'What is your organization, team or group called?' } } %>
+      autofocus: true, input_html: { class: 'input-xlarge' } %>
+
+    <div id="url-panel">
+      <% if @allow_url_editing  %>
+        <i class="fa fa-question-circle" data-toggle="tooltip" title=
+          "You will not be able to edit the Group's URL after you've added members and badges."></i>
+      <% end %>
+      <label for="group_url_with_caps">URL: </label>
+        
+      <span id="url-preview">
+        "<span id="url-preview-label"><%= @group.url_with_caps %></span>"
+        <% if @allow_url_editing  %>
+          <a href="#" id="url-edit" class="btn btn-small btn-link">Edit</a>
+        <% else %>
+          <i class="fa fa-lock" data-toggle="tooltip" title=
+          "You can no longer to edit the Group's URL because it would break badge links."></i>
+        <% end %>
+      </span>
     
-    <%= f.input :url_with_caps, wrapper: :prepend, label: 'Group URL' do %>
-      <%= content_tag :span, "badgelist.com/", class: "add-on" %>
-      <%= f.input_field :url_with_caps, placeholder: 'nasa-crew', class: 'input-medium', 
-        data: { toggle: 'tooltip',
-        title: 'Pick a unique URL for your learning group' } %>
-    <% end %>
+      <% if @allow_url_editing  %>
+        <span id="url-editor" style="display: none;">
+          <%= f.text_field :url_with_caps %>
+          <ul class="unstyled">
+            <li><a href="#" id="url-save" class="btn btn-small btn-link">
+              <i class="fa fa-check"></i>
+            </a></li>
+            <li><a href="#" id="url-cancel" class="btn btn-small btn-link">
+              <i class="fa fa-remove"></i>
+            </a></li>
+          </ul>
+        </span>
+      <% end %>
+    </div>
 
     <%= f.input :type, label: 'Group Type', as: :radio_buttons, label_html: { class: 'hidden' },
                 collection: @group_type_options %>
 
-    <% unless @group.new_record? %>
-      <h2>
-        Extra information (optional)
-        <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
-          value="Show Extra Info" onclick="toggleExtraInfo()" />
-      </h2>
+    <!-- === SUBSCRIPTION DETAILS === -->
 
-      <div id="form-extra-info" style="display:none">
-        <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
-                    input_html: { class: 'input-xlarge' } %>
+    <div id="subscription-details-panel" style="<%= (@group.private?) ? '' : 'display:none;' %>">
+    
+      <h2>Subscription Details</h2>
 
-        <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
-                    input_html: { class: 'input-xlarge' } %>
+      <% if @group.private? && !@group.new_record? %>
+        <div id="view-subscription-panel">
 
-        <%= f.input :image_url, label: 'Group Image URL', 
-                    placeholder: 'http://nasa.gov/logo.png',
-                    input_html: { class: 'input-xlarge' } %>
+          <% subscription_status = @group.status_details_for_admins %>
+          <div class="control-group">
+            <label class="control-label">Current Plan &amp; Status</label>
+            <div class="controls">
+              <%= (@group.subscription_plan) ? \
+                ALL_SUBSCRIPTION_PLANS[@group.subscription_plan]['name']:'No plan selected' %><br>
+              <span class="label <%= subscription_status[:color] %>">
+                <i class="fa <%= subscription_status[:icon] %>"></i>
+                <%= @group.subscription_status_string %> - 
+                <%= subscription_status[:summary] %>
+              </span> 
+            </div>
+          </div>
 
-        <% if @badge_list_admin %>
-          <%= f.input :user_limit, label: '(ADMIN) User Limit', 
-              placeholder: 'Private group allowed size',
-              input_html: { class: 'input-mini' } %>
+          <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+              <% if @group.stripe_subscription_status == 'canceled' %>
+                <a href="#" id="revive-subscription" class="btn">
+                  <i class="fa fa-credit-card"></i>
+                  Revive Subscription
+                </a>
+              <% else %>
+                <a href="#" id="show-edit-subscription-panel" class="btn">
+                  <i class="fa fa-pencil"></i>
+                  Edit Subscription
+                </a>
+                
+                <% unless @group.stripe_subscription_id.blank? %>
+                  <a href="#" id="cancel-subscription" class="btn btn-danger">
+                    <i class="fa fa-remove"></i>
+                    Cancel Subscription
+                  </a>
+                <% end %>
+              <% end %>
+            </div>
+          </div>  
+
+          <div class="control-group">
+            <div class="sub-header">
+              <em>
+                Have questions about your subscription?
+                Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
+                  target="_blank">Paid Subscription FAQ</a> or 
+                email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+              </em>
+            </div>
+          </div>        
+
+        </div> <!-- /view-subscription-panel -->
+      <% end %>
+
+      <div id="edit-subscription-panel" 
+          style="<%= (@group.new_record? || @group.public?) ? '' : 'display:none;' %>">
+
+        <% if @group.new_record? %>
+          <%= f.input :pricing_group, label: 'Pricing Group', as: :hidden %>
+        <% else %>
+          <%= f.input :new_subscription, label: 'Revive Subscription', as: :hidden %>
         <% end %>
-      </div>
+
+        <div class="control-group">
+          <div class="sub-header">
+            All plans come with a 14 day free trial.
+            (<a href="/pricing" target="_blank">View plan details</a>.)
+          </div>
+        </div>
+
+        <% subscription_options = (@badge_list_admin) ? SUBSCRIPTION_OPTIONS['admin'] \
+          : SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
+        <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, 
+          include_blank: false, collection: subscription_options, 
+          hint: (half_off) ? "<i class='fa fa-gift'></i> ".html_safe \
+            + "You'll pay 50% of the price listed above".html_safe : '' %>
+
+
+        <div id="has-credit-card-panel" 
+            style="<%= (@group.owner.has_stripe_card?) ? '' : 'display: none;' %>">
+          <%= f.input :stripe_subscription_card, label: 'Credit Card', as: :select, 
+            include_blank: false, collection: @group.owner.stripe_card_options %>
+
+          <div class="control-group">
+            <div class="controls">
+              <a class="btn" href="#add-credit-card" data-toggle="modal">
+                <i class="fa fa-plus"></i>
+                Add a credit card
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <% unless @group.owner.has_stripe_card? %>
+          <div class="control-group" id="no-credit-card-panel">
+            <label class="optional control-label">Credit Card</label>
+            <div class="controls">
+              <a class="btn btn-success" href="#add-credit-card" data-toggle="modal">
+                <i class="fa fa-credit-card"></i>
+                Add a credit card
+              </a>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @is_k12 %>
+          <div class="control-group">
+            <div class="sub-header">
+              <h3>
+                <i class="fa fa-gift"></i> K12 Teachers
+              </h3>
+              We <i class="fa fa-heart"></i> teachers so what you see above is our special 
+              pricing just for K12 educators. It includes unlimited students for a super low annual 
+              price. This deal is intended only for individual teachers so you'll only be able to 
+              have one admin in your group.  <br><br>
+              By creating a group with this plan you are promising that you're really a K12 teacher
+              and that you won't use the group for multiple teachers. Thank you so much!
+            </div>
+          </div>
+        <% elsif @group.owner.has_flag? User::HALF_OFF_FLAG %>
+          <div class="control-group">
+            <div class="sub-header">
+              <h3>
+                <i class="fa fa-gift"></i> 50% Off!
+              </h3>
+              <strong>Thank you for being an early Badge List user.</strong>
+              You've got the OG half off deal which means that any private groups that you own
+              will permanently be 50% off for as long as you keep your Badge List account.
+            </div>
+          </div>
+        <% end %>
+        
+        <div class="control-group">
+          <div class="sub-header">
+            <em>
+              Have any questions about pricing or billing?
+              Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
+                target="_blank">Paid Subscription FAQ</a> or 
+              email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+            </em>
+          </div>
+        </div>
+
+      </div> <!-- /edit-subscription-panel -->
+
+    </div>
+
+    <% unless @group.new_record? %>
+
+      <!-- === EXTRA INFO === -->
+      
+      <h2>Extra information</h2>
+
+      <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
+                  input_html: { class: 'input-xlarge' } %>
+
+      <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
+                  input_html: { class: 'input-xlarge' } %>
+
+      <%= f.input :image_url, label: 'Group Image URL', 
+                  placeholder: 'http://nasa.gov/logo.png',
+                  input_html: { class: 'input-xlarge' } %>
+
+      <!-- === GROUP OWNERSHIP === -->
+
+      <h2>Transfer group ownership</h2>
+      <%= f.input :new_owner_username, label: 'New owner', 
+        placeholder: 'Enter Badge List username',
+        hint: 'This will instantly and irreversably transfer ownership of this group to the ' \
+        + 'user you specify (enter their Badge List username not their email). ' \
+        + 'Badge List will notify the new owner by email, but please be sure to ' \
+        + 'get their agreement beforehand.' %>
+
+      <% if @badge_list_admin %>
+        <!-- === BADGE LIST ADMIN STUFF === -->
+
+        <h2>Badge List Admin Panel</h2>
+      
+        <%= f.input :user_limit, label: 'User Limit', input_html: { class: 'input-mini' } %>
+        <%= f.input :admin_limit, label: 'Admin Limit', input_html: { class: 'input-mini' } %>
+        <%= f.input :sub_group_limit, label: 'User Limit', input_html: { class: 'input-mini' } %>
+      <% end %>
+
     <% end %>
   </div>  
   
   <div class="form-footer add-top-margin">
-    <%= f.button :submit, class: 'btn btn-primary' %>
+    <span class="label label-primary" id="card-required-label" style="display: none;">
+      <i class="fa fa-credit-card"></i>
+      Credit card required to continue
+    </span>
+
+    <%= f.button :submit, class: 'btn btn-primary', id: 'submit-group-form' %>
     <%= 
       if @group.new_record?
         link_to "Cancel", root_path, class: "btn"

@@ -10,7 +10,8 @@
           <span class="card-actions">
             <%=
               # Output the little "X" that allows admins to remove users from groups
-              if current_user && @group && @current_user_is_admin  && (current_user != user)
+              if current_user && @group && @current_user_is_admin && (current_user != user) \
+                  && (user.id != @group.owner_id)
                 if user.admin_of?(@group)
                   path = destroy_group_admin_path(@group, user) 
                   link_title = "Downgrade this admin to a member"

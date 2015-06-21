@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <% if @previous_owner %>
+      <p>
+        <%= link_to @previous_owner.name, user_url(@previous_owner) %> 
+        has transferred ownership of the 
+        <%= link_to @group.name, group_url(@group) %> group to you in Badge List.  
+        That makes you the new owner,
+        with all of the awesome powers and responsibilities which that entails.
+      </p>
+      <p>
+        <strong>Have questions?</strong> Reply to this email to ask the previous owner.
+      </p>
+      <p>
+        <strong>Don't want the group?</strong> You can transfer it back by
+        <%= link_to 'editing the group', edit_group_url(@group) %>.
+      </p>
+    <% else %>
+      <p>
+        Someone has transferred ownership of the 
+        <%= link_to @group.name, group_url(@group) %> group to you.  That makes you the new owner,
+        with all of the awesome powers and responsibilities which that entails.
+      </p>
+      <p>
+        <strong>Have questions?</strong> Unfortunately the previous group owner deleted his or
+        her Badge List account after transferring the group to you, so we can't give you their info.
+        You can always email us at 
+        <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>. 
+      </p>
+    <% end %>
+
+    <p>
+      Thanks for using Badge List!
+    </p>
+
+    <hr/>
+    <p>
+      <i>
+        This email was sent automatically by the Badge List app on behalf of the previous group
+        owner.
+      </i>
+    </p>
+  </body>
+</html>

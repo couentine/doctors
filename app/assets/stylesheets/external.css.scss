@@ -812,7 +812,7 @@ footer.bl-footer {
   .row-inner {
     padding: 10px 0 50px 0;
 
-    a.btn {
+    a.btn-large {
       text-shadow: none;
       background-image: none;
       border-radius: 15px;
@@ -826,6 +826,14 @@ footer.bl-footer {
       &:hover, &:focus {
         background-color: $primary-dark;
       }
+    }
+    a.btn-link {
+      font-size: 1em;
+      color: white;
+      text-decoration: underline;
+      text-shadow: none;
+
+      &:visited { color: white; }
     }
   }
 

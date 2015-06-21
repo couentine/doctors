@@ -1,5 +1,8 @@
 <% 
   provide(:title, @group.name)
+  can_join_group = @group.open? && !@current_user_is_admin && !@current_user_is_member
+
+  status_details = @group.status_details_for_admins
 %>
 
 <% if @current_user_is_admin || @current_user_is_member || @badge_list_admin || @group.open? %>
@@ -15,16 +18,7 @@
   <% end %>
 
   <% content_for :subheader_actions do %>
-    <% if @group.open? && !@current_user_is_admin && !@current_user_is_member %>
-      <li class="collapsible highlight">
-        <%= link_to '<i class="fa fa-plus-circle"></i> Join Group'.html_safe, 
-            join_group_path(@group), method: :post %>
-        <% if @badge_list_admin %>
-          <span class="divider">|</span>
-        <% end %>
-      </li>
-    <% end %>
-    <% if @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
+    <% if @current_user_is_admin || @badge_list_admin %>
       <li class="collapsible">
         <div class="dropdown">
           <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
@@ -34,28 +28,13 @@
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdown-subheader-settings">
-            <% if @current_user_is_admin || @badge_list_admin %>
-              <li>
-                <%= link_to '<i class="fa fa-pencil"></i> Edit Group'.html_safe, edit_group_path %>
-              </li>
-            <% end %>
-            <% if @current_user_is_admin || @current_user_is_member %>
-              <li>
-                <%= link_to('<i class="fa fa-ban"></i> Leave Group'.html_safe, 
-                  leave_group_path(@group), method: :delete, 
-                  data: { confirm: 'Are you absolutely sure you want to leave this learning group?' }) %>
-              </li>
-            <% end %>
-            <% if @current_user_is_admin || @badge_list_admin %>
-              <li class="divider"></li>
-              <li>
-                  <%= link_to '<i class="fa fa-remove"></i> Delete Group'.html_safe, 
-                    @group, method: :delete,
-                    data: { confirm: 'WARNING: THIS WILL PERMANENTLY DESTROY DATA. Are you absolutely'\
-                    + ' sure you want to permanently delete this learning group and all the badges' \
-                    + ' inside of it?' } %>
-                </li>
-            <% end %>
+            <li>
+              <%= link_to '<i class="fa fa-remove"></i> Delete Group'.html_safe, 
+                @group, method: :delete, data: \
+                  { confirm: 'WARNING: THIS WILL PERMANENTLY DESTROY DATA. Are you absolutely'\
+                + ' sure you want to permanently delete this learning group and all the badges' \
+                + ' inside of it?' } %>
+            </li>
           </ul>
         </div>
       </li>
@@ -257,35 +236,37 @@
                 <%=
                   case @group.type
                     when "open"
-                      "<i class='fa fa-globe'></i> Open Learning Group".html_safe
+                      "<i class='fa fa-globe'></i> Public Group".html_safe
                     when "closed"
-                      "<i class='fa fa-eye'></i> Public Learning Group (Closed Membership)".html_safe
+                      "<i class='fa fa-eye'></i> Public Group (Closed Membership)".html_safe
                     when "private"
-                      "<i class='fa fa-lock'></i> Private Learning Group".html_safe
+                      "<i class='fa fa-lock'></i> Private Group".html_safe
                   end
                 %>
 
-                <% if (@current_user_is_admin || @badge_list_admin) \
-                     && (@group.type=='private') && @group.user_limit %>
+                <% if @group.private? && (@current_user_is_admin || @badge_list_admin) %>
+                  (<%= (@group.subscription_plan) ? \
+                    ALL_SUBSCRIPTION_PLANS[@group.subscription_plan]['name']:'No plan selected' %>)
                   <br>
-                  
-                  <a href="/pricing" class="label-link" title="Click for Badge List pricing" 
-                      data-toggle="tooltip" data-placement="bottom">
+                  <span class="label <%= status_details[:color] %>">
+                    <i class="fa <%= status_details[:icon] %>"></i>
+                    <%= @group.subscription_status_string %> - 
+                    <%= status_details[:summary] %>
+                  </span> 
 
-                    <% if @group.active_user_count > @group.user_limit %>
-                      <span class="label label-important"><%= @group.user_limit%> Users (OVER LIMIT)</span>
-                    <% elsif @group.active_user_count > (@group.user_limit - 2) %>
-                      <span class="label label-warning"><%= @group.user_limit%> Users (Close to Limit)</span>
-                    <% else %>
-                      <span class="label label-success"><%= @group.user_limit%> Users</span>
-                    <% end %>
-
-                  </a>
+                  <%
+                    limit_text = (@group.user_limit < 0) ? "#{@group.admin_limit} Teacher"\
+                      : "#{@group.user_limit} Users"
+                  %>
+                  <%= link_to "<span class='label'>#{limit_text}</span>".html_safe, 
+                    edit_group_path(@group), class: "label-link",
+                    title: "View your subscription plan details",
+                    data: { toggle: "tooltip", placement: "bottom" } %>
                 <% end %>
               </h3>
             </td>
             
-            <td class="separator hidden-phone"><span>&nbsp;</span></td>
+            <td class="separator hidden-phone with-footer"><span>&nbsp;</span></td>
             
             <td class="right-panel hidden-phone">
               <ul>
@@ -305,10 +286,52 @@
                 </li>
                 <li>
                   <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> 
-                  <% unless @group.active_user_count.nil? %>
-                    (<%= @group.active_user_count %> active this month)
-                  <% end %>
                 </li>
+                <li>
+                  <i class="fa fa-at"></i> 
+                  <%= link_to @group.owner.username_with_caps, @group.owner %>
+                  is the group owner
+                </li>
+              </ul>
+            </td>
+          </tr>
+
+          <tr class="footer-row <%= (can_join_group) ? 'highlight-secondary' : '' %>">
+            <td colspan="4">
+              <span class="label-text">
+                <% if @current_user_is_owner %>
+                  You're the group owner.
+                <% elsif @current_user_is_admin %>
+                  You're a group admin.
+                <% elsif @current_user_is_member %>
+                  You're a group member.
+                <% elsif can_join_group %>
+                  This is an open group.
+                <% else %>
+                  This is a closed group.
+                <% end %>
+              </span>
+              <ul class="action-list">
+                <% if @current_user_is_member || @current_user_is_admin \
+                    && !@current_user_is_owner %>
+                  <li>
+                    <%= link_to '<i class="fa fa-ban"></i> Leave the group'.html_safe, \
+                      leave_group_path(@group), method: :delete, class: 'btn btn-small', data: \
+                        { confirm: \
+                          'Are you absolutely sure you want to leave this learning group?' } %>
+                  </li>
+                <% elsif can_join_group %>
+                  <li>
+                    <%= link_to '<i class="fa fa-plus-circle"></i> Join the group'.html_safe, 
+                        join_group_path(@group), method: :post, class: 'btn btn-small' %>
+                  </li>
+                <% end %>
+                <% if @current_user_is_owner || @badge_list_admin %>
+                  <li>
+                    <%= link_to '<i class="fa fa-pencil"></i> Edit the group'.html_safe, 
+                      edit_group_path, class: 'btn btn-small' %>
+                  </li>
+                <% end %>
               </ul>
             </td>
           </tr>
@@ -317,6 +340,25 @@
     </div>
   </div>
 </div>
+
+<% 
+  if @current_user_is_admin || @badge_list_admin
+    
+    if status_details[:show_alert]
+%>
+
+  <div class="well span9 offset1 <%= status_details[:color] %>">
+    <h3><%= status_details[:alert_title] %></h3>
+    <p>
+      <%= status_details[:alert_body] %>
+    </p>
+  </div>
+
+<% 
+    end
+
+  end 
+%>
 
 <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 

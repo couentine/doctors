@@ -26,6 +26,8 @@
     <link rel="icon" type="image/png" href="/assets/badge-list-icon-32-square.png" />
     <%= yield(:header) if content_for? :header %>
 
+    <%= render 'shared/stripe' if content_for? :include_stripe %>
+
     <% if content_for? :include_metadata %>
       <!-- === OPEN GRAPH METADATA === -->
       <meta property="og:type" content="Article" />

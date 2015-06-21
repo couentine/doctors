@@ -1,64 +1,547 @@
-<% provide(:title, 'Change account info') %>
+<% 
+  provide(:title, 'Your account') 
+  provide(:include_stripe, true) 
+%>
 
-<div class="page-header">
-  <h1>Change your account info</h1>
-</div>
+<style type="text/css">
+  
+  #change-password-form, #edit-user-info-form {
+    margin: 0 10px 10px 10px;
+  }
 
-<% if !resource.confirmed? || resource.pending_reconfirmation? %>
-  <p class="lead text-warning">
-    <b>Account Status:</b>
-    Currently waiting on email confirmation for "<%= @user.unconfirmed_email || @user.email %>"
-  </p>
+</style>
+
+<script>
+
+  var deletedCardId;
+  var paymentHistoryPage = 1;
+
+  $(document).ready(function() {
+
+    $("a[data-type=delete-card]").click(function(e) {
+      deletedCardId = $(this).data("id");
+      $("#delete-card-spinner").fadeIn();
+      $.ajax({
+          url: "/users/card/" + deletedCardId,
+          type: "DELETE",
+          success: function(response) {
+            startPoller(response.poller_id, deleteCardCompleted, deleteCardError);
+          },
+          error: deleteCardError
+      });
+
+      e.preventDefault();
+    });
+
+    // Load the first page of payment history
+    loadPaymentHistoryPage();
+
+    $("#payment-history-prev-page").click(function(e) {
+      if (paymentHistoryPage > 1) {
+        paymentHistoryPage -= 1;
+        loadPaymentHistoryPage();
+      }
+    });
+    $("#payment-history-next-page").click(function(e) {
+      paymentHistoryPage += 1;
+      loadPaymentHistoryPage();
+    });
+
+  });
+var xxx;
+  // Loads current page of payments
+  function loadPaymentHistoryPage() {
+    // First disable the display and buttons
+    $("#payment-history-prev-page").fadeOut();
+    $("#payment-history-next-page").fadeOut();
+    $("#payments-panel").fadeOut();
+    $("#no-payments-panel").fadeOut();
+    $("#payments-panel table tbody").empty();
+
+    // Then query the payment history via ajax
+    $.getJSON("/users/payments?page_size=10&page=" + paymentHistoryPage + ".json", 
+      function(response) {
+        try { 
+          var payment; var groupName; var paymentStatus;
+          var payments = response.payments;
+          paymentHistoryPage = response.page;
+
+          if (response.count > 0) {
+            for (var i = 0; i < payments.length; i++) {
+              payment = payments[i];
+              groupName = ""; xxx=payment;
+              if ((payment.data.data.object.lines.data.length > 0)
+                  && (payment.data.data.object.lines.data[0].metadata != null)) {
+                groupName = payment.data.data.object.lines.data[0].metadata.group_name;
+              }
+              if (payment.data.data.object.paid) {
+                paymentStatus =  "<i class='fa fa-check-circle'></i> Successful";
+              } else {
+                paymentStatus = "<i class='fa fa-exclamation-circle'></i> Payment Problem";
+              }
+
+              $("#payments-panel table tbody").append("<tr>"
+                + "<td>" + groupName + "</td>"
+                + "<td>" + unixTimeToString(payment.data.data.object.date) + "</td>"
+                + "<td>$" + (payment.data.data.object.total/100).toFixed(2) + "</td>"
+                + "<td>" + paymentStatus + "</td>"
+                + "</tr>");
+            }
+            
+            // Show the panel and enable buttons as appropriate
+            $("#payments-panel").fadeIn();
+            if (paymentHistoryPage > 1) $("#payment-history-prev-page").fadeIn();
+            if (response.has_more_pages) $("#payment-history-next-page").fadeIn();
+          } else {
+            $("#no-payments-message").text("You haven't made any payments yet.");
+            $("#no-payments-panel").fadeIn();
+          }
+        } catch (e) {
+          $("#no-payments-message").text("There was an error loading your payment history. (Error: "
+            + e.message + ")");
+          $("#no-payments-panel").fadeIn();
+        }
+      }
+    );
+  }
+
+  /* === Stripe polling functionality === */
+
+  function addCardCompleted(poller) {
+    var stripe_form = $('#stripe-form');
+
+    if (poller.status == 'successful') {
+      $("#add-card-form").slideUp();
+      $("#billing-info-row").slideDown();
+      $("#credit-card-buttons").slideDown();
+      $('#stripe-spinner').hide();
+      $("#stripe-form input[type=text]").val("")
+      
+      var card = poller.data;
+      $("#billing-info-row table tbody").append(
+        "<tr class='highlight-secondary'>"
+          + "<td>" + card.brand + "</td><td>" + card.last4 + "</td>"
+          + "<td>" + card.exp_month + " / " + card.exp_year + "</td>"
+          + "<td><span class='label label-success'>New card added!</span></td>"
+        + "</tr>"
+      );
+
+      if ($("#yes-card-panel table tbody tr").length == 1) {
+        $("#no-card-panel").slideUp();
+        $("#yes-card-panel").slideDown();
+      }
+    } else {
+      // Show the errors on the form
+      stripe_form.find('.error-block').show().find('.inner').text(poller.message);
+      stripe_form.find('button').prop('disabled', false);
+      $('#stripe-spinner').hide();
+    }
+  }
+
+  function addCardError() {
+    var stripe_form = $('#stripe-form');
+    stripe_form.find('.error-block').show().find('.inner')
+      .text("There was a problem adding your card, please try again later.");
+    stripe_form.find('button').prop('disabled', false);
+    $('#stripe-spinner').hide();
+  }
+
+  function deleteCardCompleted(poller) {
+    if (poller.status == 'successful') {
+      $("tr[data-id=" + deletedCardId + "]").remove();
+      if ($("#yes-card-panel table tbody tr").length == 0) {
+        $("#yes-card-panel").slideUp();
+        $("#no-card-panel").slideDown();
+      }
+      $("#delete-card-spinner").fadeOut();
+    } else {
+      $("tr[data-id=" + deletedCardId + "] td:last-child")
+        .html("<span class='label label-warning'>"
+          + "<i class='fa fa-exclamation-triangle'></i> " + poller.message + "</span>");
+      $("#delete-card-spinner").fadeOut();
+    }
+  }
+
+  function deleteCardError() {
+    $("tr[data-id=" + deletedCardId + "] td:last-child")
+      .html("<span class='label label-warning'>"
+        + "<i class='fa fa-exclamation-triangle'></i> Error removing card</span>");
+    $("#delete-card-spinner").fadeOut();
+  }
+
+</script>
+
+<% 
+  if @user.errors.blank?
+    form_error = nil
+  elsif !@user.errors[:password].blank? || !@user.errors[:password_confirmation].blank?
+    form_error = 'change-password'
+  else
+    form_error = 'edit-user-info'
+  end 
+%>
+
+<% if !@user.confirmed? || @user.pending_reconfirmation? %>
+  <div class="well well-tertiary add-top-margin">
+    <i class="fa fa-exclamation-triangle header-icon"></i>
+    <h2>Email verification needed</h2>
+    <p>
+      You need to click the verification link to confirm your Badge List account.
+      (<%= link_to 'Click here to get a new link', new_confirmation_path(resource_name) %>)
+    </p>
+  </div>
 <% end %>
 
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="header-bar user-header-bar">
+
+      <table class="info-table">
+        <tbody>
+          <tr class="body-row">
+            <td class="left-image">
+              <%= gravatar_for(@user, :size => 100, :class => 'img-circle') %>
+              <div class="btn-overlay">
+                <a href="https://en.gravatar.com/connect/?source=_signup" target="_blank" 
+                    data-toggle="tooltip" data-placement="bottom" class="btn btn-small"
+                    title="Badge List uses Gravatar to display your profile picture.">
+                  <i class="fa fa-pencil"></i> Edit photo
+                </a>
+              </div>
+            </td>
+            <td class="single-panel">
+              <h1><%= @user.name %></h1>
+              <h2>
+                <%= link_to "<i class='fa fa-shield'></i> #{@user.username_with_caps}".html_safe, 
+                  user_path(@user), title: 'View your badge profile', 
+                  data: { toggle: 'tooltip', placement: 'right' } %>
+              </h2>
+              <h3>
+                <%= @user.email %>
+              </h3>
+            </td>
+          </tr>
+
+          <tr class="footer-row">
+            <td colspan="2">
+
+              <span class="label-text">
+                You've been a Badge List member since 
+                <%= @user.created_at.to_s(:full_date) %>
+              </span>
+              <ul class="action-list" id="account-edit-buttons" 
+                  style="<%= (form_error) ? 'display: none;' : '' %>">
+                <li>
+                  <a tabindex="-1" class="btn btn-small" id="edit-user-info" data-toggle="custom" 
+                      data-hide="#account-edit-buttons,#account-details-row" 
+                      data-show="#edit-user-info-form" data-focus="#user_email">
+                    <i class="fa fa-pencil"></i> Edit user info
+                  </a>
+                </li>
+                <li>
+                  <a tabindex="-1" class="btn btn-small" id="change-password" data-toggle="custom" 
+                      data-hide="#account-edit-buttons,#account-details-row" 
+                      data-focus="#user_current_password" data-show="#change-password-form">
+                    <i class="fa fa-key"></i> Change password
+                  </a>
+                </li>
+              </ul>
+
+              <!-- === CHANGE PASSWORD FORM === -->
+
+              <div class="bl-inline-form" id="change-password-form" 
+                  style="<%= (form_error == 'change-password') ? '' : 'display: none;' %>">
+                <%= simple_form_for(resource, as: resource_name, 
+                    url: registration_path(resource_name), 
+                    html: { :method => :put, :class => 'form-horizontal' }) do |f| %>
+                  
+                  <div class="form-body">
+                    <%= f.error_notification %>
+                    
+                    <%= f.input :email, :as => :hidden, :required => true %>
+                    <%= f.input :current_password, :required => true %>
+                    <%= f.input :password, :label => 'New password', :autocomplete => "off", 
+                      :required => true %>
+                    <%= f.input :password_confirmation, :label => 'Confirm new password', 
+                      :autocomplete => "off", :required => true %>
+                  </div>
+
+                  <div class="form-footer">
+                    <%= f.button :submit, "Change password", :class => "btn btn-info" %>
+                    <a class="btn" data-toggle="custom"  data-hide="#change-password-form" 
+                      data-show="#account-edit-buttons,#account-details-row">Cancel</a>
+                  </div>
+
+                <% end %>
+              </div>
+
+              <!-- === EDIT USER INFO FORM === -->
+
+              <div class="bl-inline-form" id="edit-user-info-form" 
+                  style="<%= (form_error == 'edit-user-info') ? '' : 'display: none;' %>">
+                <%= simple_form_for(resource, as: resource_name, 
+                    url: registration_path(resource_name), 
+                    html: { :method => :put, :class => 'form-horizontal' }) do |f| %>
+                  
+                  <div class="form-body">
+                    <%= f.error_notification %>
+                    
+                    <%= f.input :email, label: "Your email" %>
+                    <%= f.input :name, label: "Your full name" %>
+                    <%= f.input :username_with_caps, label: "Your username" %>
+                    <%= f.input :current_password, label: "Confirm your password", required: true %>
+                  </div>
+
+                  <div class="form-footer">
+                    <%= f.button :submit, "Update info", :class => "btn btn-info" %>
+                    <a class="btn" data-toggle="custom"  data-hide="#edit-user-info-form" 
+                      data-show="#account-edit-buttons,#account-details-row">Cancel</a>
+                  </div>
+
+                <% end %>
+              </div>
+            
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+
+    </div>
+  </div>
+</div>
+
+<!-- === GROUP LIST === -->
+
 <div class="row">
-  <div class="span6">
-    
-    <h3>Change your email / username</h3>
-    
-    <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put, :class => 'form-horizontal' }) do |f| %>
-      <%= f.error_notification %>
+  <div class="span12">
+    <div class="tab-header merge-with-card">
+      <%= link_to "<i class='fa fa-plus'></i> Create new group".html_safe, new_group_path, 
+        class: "btn btn-small" %>
 
-      <div class="form-inputs">
-        <%= f.input :email, :label => "New email" %>
-        <%= f.input :username_with_caps, :label => "New username" %>
-        <%= f.input :current_password, :hint => "we need your current password to confirm your changes", :required => true %>
-      </div>
-
-      <div class="controls">
-        <%= f.button :submit, "Save your changes", :class => "btn-large btn-info" %>
-      </div>
-    <% end %>
-  </div>
-
-  <div class="span6">
-    <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put, :class => 'form-horizontal' }) do |f| %>
-      <%= f.error_notification %>
-
-      <div class="form-inputs">
-        
-        <h3>Change your password</h3>
-
-        <%= f.input :email, :as => :hidden, :required => true, :autofocus => true %>
-        <%= f.input :current_password, :hint => "we need your current password to confirm your changes", :required => true %>
-
-        <%= f.input :password, :autocomplete => "off", :required => true %>
-        <%= f.input :password_confirmation, :autocomplete => "off", :required => true %>
-      </div>
-
-      <div class="controls">
-        <%= f.button :submit, "Change my password", :class => "btn-large btn-info" %>
-      </div>
-    <% end %>
+      <h2>Groups you own</h2>
+    </div>
   </div>
 </div>
 
-<div class="row" style="margin-top: 100px">
-  <div class="span4 offset4 well">
-    <h3>Close your account</h3>
-    <p class="text-error">Careful! This can't be undone.</p>
-    <p> <%= link_to "Close my account", registration_path(resource_name), :data => { :confirm => "Are you sure?" }, :method => :delete, :class => "btn btn-danger" %></p>
+<div class="row" id="group-list-row">
+  <div class="span12">
+    <div class="info-card text-card">
+      <% if @user.owned_groups.blank? %>
+        You haven't created any groups yet.
+      <% else %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Type</th>
+              <th>Paid Subscription</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @user.owned_groups.asc(:name).each do |group| %>
+              <tr>
+                <td>
+                  <%= link_to group.name, group, title: "View the learning group" %>
+                </td>
+                <td>
+                  <% if group.private? %>
+                    <i class="fa fa-lock"></i> Private
+                  <% else %>
+                    <i class="fa fa-globe"></i> Public
+                  <% end %>
+                </td>
+                <td>
+                  <% if group.private? && group.subscription_plan %>
+                    <%= ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['name'] %> - 
+                    <% subscription_status = group.status_details_for_admins %>
+                    <span class="label <%= subscription_status[:color] %>">
+                      <i class="fa <%= subscription_status[:icon] %>"></i>
+                      <%= group.subscription_status_string %> - 
+                      <%= subscription_status[:summary] %>
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
   </div>
 </div>
 
+<!-- === BILLING INFO === -->
 
+<div class="row">
+  <div class="span12">
+    <div class="tab-header merge-with-card">
+      <h2>Billing info</h2>
+      <h3><i class="fa fa-lock"></i> Stored securely in Stripe</h3>
+    </div>
+  </div>
+</div>
+
+<div class="row" id="billing-info-row">
+  <div class="span12">
+    <div class="info-card text-card">
+
+      <div class="spinner-wrapper" id="delete-card-spinner" style="display: none;">
+        <div class="spinner large tertiary">&nbsp;</div>
+      </div>
+
+      <!-- === CREDIT CARDS === -->
+
+      <div class="header-block">
+        <div id="credit-card-buttons">
+          <a tabindex="-1" class="btn btn-small btn-primary" id="add-card" data-toggle="custom" 
+              data-hide="#credit-card-buttons,#billing-info-row" data-show="#add-card-form"
+              data-focus="input[data-stripe=number]">
+            <i class='fa fa-credit-card'></i> Add a credit card
+          </a>
+        </div>
+
+        <h3>Credit Cards</h3>
+      </div>
+      
+      <div id="yes-card-panel" style="<%= (@user.has_stripe_card?) ? '' : 'display: none;' %>">
+        <table class="table with-border">
+          <thead>
+            <tr>
+              <th>Card Type</th>
+              <th>Last 4</th>
+              <th>Expiration</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @user.stripe_cards.each do |card| %>
+              <tr data-id="<%= card['id'] %>">
+                <td>
+                  <%= card['brand'] %>
+                  <% if card['id'] == @user.stripe_default_source %>
+                    <span class='label'>
+                      <i class="fa fa-check-circle"></i> Default
+                    </span>
+                  <% end %>
+                </td>
+                <td><%= card['last4'] %></td>
+                <td><%= card['exp_month'] %> / <%= card['exp_year'] %></td>
+                <td>
+                  <%= link_to "<i class='fa fa-remove'></i> Remove Card".html_safe, 
+                    '#', class: 'btn btn-small', data: { type: 'delete-card', 
+                      id: card['id'] } %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="no-card-panel" style="<%= (@user.has_stripe_card?) ? 'display: none;' : '' %>">
+        <table class="table with-border">
+          <tbody>
+            <tr>
+              <td>
+                You haven't added any credit cards to your account yet.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- === PAYMENT HISTORY === -->
+
+      <div class="header-block">
+        <div id="payment-history-buttons">
+          <button id="payment-history-next-page" class="btn btn-small">
+            <i class="fa fa-arrow-right"></i>
+          </button>
+          <button id="payment-history-prev-page" class="btn btn-small">
+            <i class="fa fa-arrow-left"></i>
+          </button>
+        </div>
+
+        <h3>Payment History</h3>
+      </div>
+      
+      <div id="payments-panel" style="display: none;">
+        <table class="table with-border">
+          <thead>
+            <tr>
+              <th>Group Name</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="no-payments-panel">
+        <table class="table with-border">
+          <tbody>
+            <tr>
+              <td id="no-payments-message">
+                Loading your payment information...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- === BILLING INFO === -->
+
+<div class="bl-inline-form" id="add-card-form" style="display: none;">
+  <%= simple_form_for @user, html: { class: 'form-horizontal', id: 'stripe-form' } do |f| %>
+    
+    <div class="spinner-wrapper" id="stripe-spinner" style="display: none;">
+      <div class="spinner large tertiary">&nbsp;</div>
+    </div>
+
+    <div class="form-body">
+      <%= render 'shared/stripe_card_form_fields' %>
+    </div>
+
+    <div class="form-footer">
+      <%= f.button :submit, "Save new card", :class => "btn btn-info" %>
+      <a class="btn" data-toggle="custom"  data-hide="#add-card-form" 
+        data-show="#credit-card-buttons,#billing-info-row">Cancel</a>
+    </div>
+
+  <% end %>
+</div>
+
+<!-- === ACCOUNT DELETION === -->
+
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="tab-header merge-with-card">
+      <h2>Delete your account</h2>
+    </div>
+  </div>
+</div>
+
+<div class="row" id="delete-account">
+  <div class="span12">
+    <div class="info-card text-card">
+      <p>
+        Click the button below to permanently delete your Badge List account.
+      </p>
+      <p>
+        <%= link_to \
+          "<i class='fa fa-exclamation-circle'></i> Delete your account".html_safe, 
+          registration_path(resource_name), 
+          :data => { :confirm => "Are you absoluetly sure? This can't be undone." }, 
+          :method => :delete, :class => "btn btn-danger" %>
+      </p>
+    </div>
+  </div>
+</div>

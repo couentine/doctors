@@ -11,6 +11,11 @@ class BadgesController < ApplicationController
   before_filter :set_editing_parameters, only: [:new, :edit]
   before_filter :build_requirement_list, only: [:new, :edit]
 
+  # === LIMIT-FOCUSED FILTERS === #
+
+  before_filter :can_create_badges, only: [:new, :create]
+  before_filter :can_create_entries, only: [:issue_form, :issue_save]
+
   # === CONSTANTS === #
 
   EXPERT_WORDS = %w(expert master guide guru jedi)
@@ -310,6 +315,9 @@ class BadgesController < ApplicationController
           found_user = @group.invited_admins.detect { |u| u["email"] == @email}
           found_user[:validations] = [] unless found_user.include? :validations
           found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, user: current_user._id }
+        elsif !@group.can_add_members?
+          flash[:error] = "This group is full and cannot accept new members."
+          render 'issue_form'
         else
           @group.invited_members << { email: @email, invite_date: Time.now, 
             validations: [{ badge: @badge.url, summary: @summary, body: @body, user: current_user._id }] }
@@ -349,6 +357,9 @@ class BadgesController < ApplicationController
         log.add_validation current_user, @summary, @body, true
         redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
           + "is now a badge expert."
+      elsif !@group.can_add_members?
+        flash[:error] = "This group is full and cannot accept new members."
+        render 'issue_form'
       else
         # create membership, log and validation
         @group.members << user
@@ -419,6 +430,20 @@ private
       flash[:error] = "You do not have permission to edit this badge."
       redirect_to [@group, @badge]
     end 
+  end
+
+  def can_create_badges
+    unless @group.can_create_badges?
+      flash[:error] = "New badges cannot be created in an inactive group."
+      redirect_to @group
+    end
+  end
+
+  def can_create_entries
+    unless @group.can_create_entries?
+      flash[:error] = "This badge cannot be awarded to new people while the group is inactive."
+      redirect_to @group
+    end
   end
 
   def set_editing_parameters
