@@ -288,9 +288,14 @@
                   <i class="fa fa-users"></i> <%= pluralize @group.user_count, "user" %> 
                 </li>
                 <li>
-                  <i class="fa fa-at"></i> 
-                  <%= link_to @group.owner.username_with_caps, @group.owner %>
-                  is the group owner
+                  <% if @group.owner %>
+                    <i class="fa fa-at"></i> 
+                    <%= link_to @group.owner.username_with_caps, @group.owner %>
+                    is the group owner
+                  <% else %>
+                    <i class="fa fa-exclamation-circle"></i> 
+                    This group has no owner
+                  <% end %>
                 </li>
               </ul>
             </td>

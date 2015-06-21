@@ -366,7 +366,7 @@ namespace :db do
   task backpopulate_group_owners: :environment do
     print "Updating #{Group.count} groups"
     Group.each do |group|
-      if group.owner.nil?
+      if group.owner.nil? && group.creator
         group.owner = group.creator
         group.admins << group.owner unless group.admin_ids.include? group.owner_id
         group.timeless.save(validate: false)
