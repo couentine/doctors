@@ -47,8 +47,13 @@
       loadPaymentHistoryPage();
     });
 
+    // Check for add card hash
+    if (window.location.hash == "#add-card") {
+      $("#add-card").click();
+    }
+
   });
-var xxx;
+
   // Loads current page of payments
   function loadPaymentHistoryPage() {
     // First disable the display and buttons
@@ -69,7 +74,7 @@ var xxx;
           if (response.count > 0) {
             for (var i = 0; i < payments.length; i++) {
               payment = payments[i];
-              groupName = ""; xxx=payment;
+              groupName = "";
               if ((payment.data.data.object.lines.data.length > 0)
                   && (payment.data.data.object.lines.data[0].metadata != null)) {
                 groupName = payment.data.data.object.lines.data[0].metadata.group_name;

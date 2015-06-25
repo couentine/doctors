@@ -6,17 +6,18 @@
   <body>
     <% if @payment_info_needed %>
       <p>
-        This is a friendly heads up that the trail period for your Badge List group 
+        This is a friendly heads up that the trial period for your Badge List group 
         (<%= link_to @group.name, group_url(@group) %>)
         ends in <%= pluralize @days_until_end, 'day' %>.  To continue using the group
         you'll need to add a credit card to your account by clicking the link below.
       </p>
       <p>
-        <%= link_to 'Add a card to your account', edit_group_url(@group) + '#add-credit-card' %>
+        <%= link_to 'Add a card to your account', 
+          edit_user_registration_url + '?d=ac#add-card' %>
       </p>
     <% else %>
       <p>
-        This is a friendly heads up that the trail period for your Badge List group 
+        This is a friendly heads up that the trial period for your Badge List group 
         (<%= link_to @group.name, group_url(@group) %>)
         ends in <%= pluralize @days_until_end, 'day' %>.  At the end of trial period your card
         will be billed for your first month's service.

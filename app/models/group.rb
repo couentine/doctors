@@ -210,7 +210,7 @@ class Group
           summary: "Trial ends on " \
             + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}",
           alert_title: "Group is in trial period",
-          alert_body: ("Your private group trail ends on " \
+          alert_body: ("Your private group trial ends on " \
                       + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}. " \
                       + "If you have any questions, send us an email at " \
                   + "<a href='mailto:solutions@badgelist.com'>solutions@badgelist.com.").html_safe }

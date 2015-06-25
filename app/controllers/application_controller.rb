@@ -51,11 +51,13 @@ class ApplicationController < ActionController::Base
     if !session[:join_badge_id].blank?
       badge = Badge.find(session[:join_badge_id]) rescue nil
     end
-      
+
     if badge
       "/#{badge.group.url}/#{badge.url}/join"
     elsif session[:create_k12]
       "/groups/new?pg=k12"
+    elsif session[:user_return_to] == "/users/edit?d=ac"
+      "/users/edit#add-card"
     else
       session[:previous_url] || root_path
     end

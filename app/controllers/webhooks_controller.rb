@@ -27,14 +27,13 @@ class WebhooksController < ApplicationController
         GroupMailer.delay(retry: 10, queue: 'low').payment_failure(id)
       end
 
-      # Save a copy of the request body if we're in development
-      if Rails.env.development?
-        item = InfoItem.new
-        item.type = 'dev-log'
-        item.name = 'Stripe Webhook Request Body'
-        item.data = event.to_hash
-        item.save
-      end
+      # Save a copy of the request body as an info item
+      item = InfoItem.new
+      item.type = 'dev-log'
+      item.name = 'Stripe Webhook Request Body'
+      item.data = event.to_hash
+      item.delete_at = 1.day.from_now if Rails.env.production?
+      item.save
 
       render nothing: true, status: :ok
     rescue Exception => e
