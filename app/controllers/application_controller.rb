@@ -58,6 +58,8 @@ class ApplicationController < ActionController::Base
       "/groups/new?pg=k12"
     elsif session[:user_return_to] == "/users/edit?d=ac"
       "/users/edit#add-card"
+    elsif session[:user_return_to] == "/users/edit"
+      "/users/edit"
     else
       session[:previous_url] || root_path
     end

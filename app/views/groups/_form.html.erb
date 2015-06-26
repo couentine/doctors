@@ -191,11 +191,22 @@
 
     <!-- === SUBSCRIPTION DETAILS === -->
 
-    <div id="subscription-details-panel" style="<%= (@group.private?) ? '' : 'display:none;' %>">
+    <% 
+      if @group.public?
+        subscription_panel_mode = 'none'
+      elsif @group.new_record? || !@group.owner.has_stripe_card?
+        subscription_panel_mode = 'edit'
+      else
+        subscription_panel_mode = 'view'
+      end
+    %>
+
+    <div id="subscription-details-panel" 
+      style="<%= (subscription_panel_mode == 'none') ? 'display:none;' : '' %>">
     
       <h2>Subscription Details</h2>
 
-      <% if @group.private? && !@group.new_record? %>
+      <% if subscription_panel_mode == 'view' %>
         <div id="view-subscription-panel">
 
           <% subscription_status = @group.status_details_for_admins %>
@@ -251,7 +262,7 @@
       <% end %>
 
       <div id="edit-subscription-panel" 
-          style="<%= (@group.new_record? || @group.public?) ? '' : 'display:none;' %>">
+          style="<%= (subscription_panel_mode != 'view') ? '' : 'display:none;' %>">
 
         <% if @group.new_record? %>
           <%= f.input :pricing_group, label: 'Pricing Group', as: :hidden %>
