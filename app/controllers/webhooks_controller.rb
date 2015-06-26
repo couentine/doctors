@@ -24,15 +24,20 @@ class WebhooksController < ApplicationController
           event['data']['object']['subscription'], context: 'stripe', info_item_data: event,\
           payment_fail_date: Time.at(event['data']['object']['date']), \
           payment_retry_date: Time.at(event['data']['object']['next_payment_attempt']))
-        GroupMailer.delay(retry: 10, queue: 'low').payment_failure(id)
+        group = Group.find_by(stripe_subscription_id: event['data']['object']['subscription']) \
+          rescue nil
+        if group
+          GroupMailer.delay(retry: 10, queue: 'low').payment_failure(group.id)
+        end
       end
 
       # Save a copy of the request body as an info item
       item = InfoItem.new
-      item.type = 'dev-log'
+      item.type = 'webhook-log'
       item.name = 'Stripe Webhook Request Body'
       item.data = event.to_hash
-      item.delete_at = 1.day.from_now if Rails.env.production?
+      # For now let's keep all of these...
+      # item.delete_at = 1.day.from_now if Rails.env.production?
       item.save
 
       render nothing: true, status: :ok
