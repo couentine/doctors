@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
-  before_filter :track_page_views
+  before_filter :log_activity
   after_filter :store_location
 
   # unless Rails.application.config.consider_all_requests_local
@@ -67,50 +67,8 @@ class ApplicationController < ActionController::Base
 
 private
 
-  # This updates the page_views and last_active_at fields on the current_user (if logged in)
-  # and also sets the @page_view_count & @current_path variables
-  def track_page_views
-    @current_path = request.fullpath.split('?').first
-    
-    unless @current_path.include?(".") # this discludes .json, .png AND anything with a dot in it
-      if current_user
-        # First update the page views
-        current_user.page_views = [] if current_user.page_views.nil?
-        current_item = current_user.page_views[@current_path]
-
-        if current_item.nil?
-          @page_view_count = 0
-          current_item = { 'count' => 1, 'dates' => [Time.now] }
-          current_user.page_views[@current_path] = current_item
-        else
-          @page_view_count = current_item['count'] || 0
-          current_item['count'] = @page_view_count + 1
-          if current_item['dates'].nil?
-            current_item['dates'] = [Time.now]
-          else
-            current_item['dates'] << Time.now
-          end
-          current_user.page_views[@current_path] = current_item
-        end
-
-        # Then update the last active fields
-        current_user.last_active_at = Time.now
-        current_user.active_months = [] if current_user.active_months.nil?
-        if current_user.active_months.empty?
-          current_user.active_months = [Time.now.to_s(:year_month)]
-        elsif current_user.active_months.last != Time.now.to_s(:year_month)
-          current_user.active_months << Time.now.to_s(:year_month)
-        end
-
-
-        # Now update the user record
-        current_user.timeless.save if current_user.changed?
-      else
-        @page_view_count = 0
-      end
-    else
-      @page_view_count = 0
-    end
+  def log_activity
+    current_user.log_activity if current_user
   end
 
 end

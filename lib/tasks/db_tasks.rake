@@ -580,4 +580,19 @@ namespace :db do
     puts " >> Done."
   end
 
+  task migrate_user_activity_metrics: :environment do
+    print "Updating #{User.count} users"
+    
+    User.each do |user|
+      user.last_active = user.last_active_at.to_date if user.last_active_at
+      user.page_views = {}
+      user.active_months = []
+      user.timeless.save
+      
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end

@@ -71,7 +71,6 @@
               <th>Email</th>
               <th>Join, Logins</th>
               <th>Last Active</th>
-              <th>Active Months</th>
               <th>Groups Owned</th>
               <th>Memberships</th>
               <th>Entries</th>
@@ -94,10 +93,7 @@
                   <%= user.created_at.to_s :short_date %>, <%= user.sign_in_count %>
                 </td>
                 <td>
-                  <%= user.last_active_at.to_s :short_date_time unless user.last_active_at.nil? %>
-                </td>
-                <td>
-                  <%= user.active_months.join(', ') unless user.active_months.nil? %>
+                  <%= user.last_active.to_s unless user.last_active.nil? %>
                 </td>
                 <td>
                   <%= (user.owned_group_ids || []).count %>

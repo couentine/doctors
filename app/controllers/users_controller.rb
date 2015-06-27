@@ -12,7 +12,7 @@ class UsersController < ApplicationController
     @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
     @only_flag = params[:flag]
     # @exclude_flags = params[:exclude_flags] || %w(sample_data internal-data)
-    @sort_by = params[:sort_by] || "last_active_at"
+    @sort_by = params[:sort_by] || "last_active"
     @sort_order = params[:sort_order] || "desc"
     
     if @only_flag

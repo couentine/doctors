@@ -30,10 +30,11 @@ class User
   field :username_with_caps,            type: String
   field :flags,                         type: Array, default: [], pre_processed: true
   field :admin,                         type: Boolean, default: false
-  field :page_views,                    type: Hash, default: {}, pre_processed: true
   field :form_submissions,              type: Array
-  field :last_active_at,                type: Time
-  field :active_months,                 type: Array
+  field :last_active,                   type: Date
+  field :last_active_at,                type: Time # RETIRED
+  field :active_months,                 type: Array # RETIRED
+  field :page_views,                    type: Hash # RETIRED
 
   field :identity_hash,                 type: String
   field :identity_salt,                 type: String
@@ -124,6 +125,14 @@ class User
 
   def to_param
     username
+  end
+
+  # Updates last_active
+  def log_activity(active_at = Time.now)
+    if active_at.to_date > (last_active || Date.new)
+      self.last_active = active_at.to_date
+      self.timeless.save
+    end
   end
 
   def stripe_card_options
