@@ -860,6 +860,12 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
           font-size: 16px;
           line-height: 1.6em;
         }
+        em {
+          display: block;
+          font-size: 14px;
+          color: $light-text-color;
+          line-height: 1.6em;
+        }
         small { color: $light-text-color; }
 
         &:last-child { margin-bottom: 0; }

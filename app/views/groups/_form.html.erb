@@ -27,6 +27,12 @@
         }
         e.preventDefault();
       });
+
+      <% if @group.private? && (@group.stripe_subscription_status != 'canceled') %>
+        $("#group_type_open").attr("disabled", true);
+        $("#group_type_open").siblings("span")
+          .after("<em>(To make your group public, cancel the subscription first.)</em>")
+      <% end %>
     <% end %>
 
     $("#group_type_private").click(function() {
