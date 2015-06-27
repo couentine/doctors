@@ -198,7 +198,6 @@ private
 
   def find_parent_records
     @group = Group.find(params[:group_id].to_s.downcase) || not_found
-    @group.log_active_user current_user # log monthly active user if applicable
     @badge = @group.badges.find_by(url: params[:badge_id].to_s.downcase) || not_found
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)

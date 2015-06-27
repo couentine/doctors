@@ -91,8 +91,6 @@
               <th>Owner</th>
               <th>Created</th>
               <th>Admins, Members</th>
-              <th>Active Users / Limit</th>
-              <th>User Activity History</th>
               <th>Badges</th>
             </tr>
           </thead>
@@ -142,22 +140,6 @@
                 </td>
                 <td>
                   <%= group.admin_ids.count %>, <%= group.member_ids.count %>
-                </td>
-                <td>
-                  <%= group.active_user_count || 0 %> / 
-                  <%= (group.public? || (group.user_limit < 0)) ? '&infin;'.html_safe \
-                    : group.user_limit %>
-                </td>
-                <td>
-                  <% unless group.monthly_active_users.nil? %>
-                    <%
-                      flattened_map = []
-                      group.monthly_active_users.each_pair do |key, value|
-                        flattened_map << key + " = " + value.count.to_s
-                      end
-                    %>
-                    <%= flattened_map.join(', ') %>
-                  <% end %>
                 </td>
                 <td><%= (group.badge_ids || []).count %></td>
               </tr>

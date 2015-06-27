@@ -56,8 +56,8 @@ class Group
   field :admin_count,                 type: Integer, default: 0
   field :member_count,                type: Integer, default: 0
   field :sub_group_count,             type: Integer, default: 0
-  field :active_user_count,           type: Integer, default: 0
-  field :monthly_active_users,        type: Hash, default: {}, pre_processed: true
+  field :active_user_count,           type: Integer # RETIRED
+  field :monthly_active_users,        type: Hash # RETIRED
   
   field :pricing_group,               type: String, default: 'standard'
   field :subscription_plan,           type: String # values are defined in config.yml
@@ -343,28 +343,6 @@ class Group
   def has_invited_admin?(email)
     found_user = invited_admins.detect { |u| u["email"] == email}
     found_user != nil
-  end
-
-  # This function logs activity in the group by a user
-  # If the user is a member or admin of the group they will be counted as a monthly active user
-  def log_active_user(current_user)
-    if current_user && (has_member?(current_user) || has_admin?(current_user))
-      self.monthly_active_users = {} if monthly_active_users.nil?
-      
-      current_month_key = Time.now.to_s(:year_month)
-      if !monthly_active_users.has_key? current_month_key
-        self.monthly_active_users[current_month_key] = [current_user.username]
-      elsif !monthly_active_users[current_month_key].include? current_user.username
-        self.monthly_active_users[current_month_key] << current_user.username
-      end
-      
-      if self.changed?
-        if monthly_active_users.has_key?(current_month_key)
-          self.active_user_count = monthly_active_users[current_month_key].count
-        end
-        self.timeless.save
-      end
-    end
   end
 
   # Returns URL of the group's logo (either from the image_url property or the Badge List default)

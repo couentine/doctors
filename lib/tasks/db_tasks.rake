@@ -585,9 +585,24 @@ namespace :db do
     
     User.each do |user|
       user.last_active = user.last_active_at.to_date if user.last_active_at
+      user.last_active_at = nil
       user.page_views = {}
       user.active_months = []
       user.timeless.save
+      
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  task clear_group_activity_metrics: :environment do
+    print "Updating #{Group.count} groups"
+    
+    Group.each do |group|
+      group.active_user_count = nil
+      group.monthly_active_users = {}
+      group.timeless.save
       
       print "."
     end
