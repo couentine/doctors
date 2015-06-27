@@ -107,7 +107,7 @@
                 <td>
                   <%= link_to group.type.capitalize, group_index_path(page_size: @page_size, 
                     type: group.type, plan: params[:plan], status: params[:status]) %>
-                  <% if group.subscription_plan %>
+                  <% if group.private? %>
                     - 
                     <%= link_to group.subscription_plan, group_index_path(page_size: @page_size, 
                       type: params[:type], plan: group.subscription_plan, status: params[:status]), 

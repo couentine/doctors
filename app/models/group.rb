@@ -171,17 +171,21 @@ class Group
 
   # Returns stripe_subscription_status as a readable string
   def subscription_status_string
-    case stripe_subscription_status
-    when 'trialing', 'new'
-      'Trial'
-    when 'active'
-      'Active'
-    when 'past_due'
-      'Past Due'
-    when 'canceled'
-      'Canceled'
-    when 'unpaid'
-      'Unpaid'
+    if private?
+      case stripe_subscription_status
+      when 'trialing', 'new'
+        'Trial'
+      when 'active'
+        'Active'
+      when 'past_due'
+        'Past Due'
+      when 'canceled'
+        'Canceled'
+      when 'unpaid'
+        'Unpaid'
+      else
+        'None'
+      end
     else
       'None'
     end
@@ -708,6 +712,8 @@ protected
           self.sub_group_limit = 0
         end
       end
+    else
+      self.subscription_plan = nil unless stripe_subscription_id
     end
   end
 
