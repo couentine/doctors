@@ -53,6 +53,7 @@
       e.animate({ scrollLeft: newScrollLeft }, 700);
       return false;
     });
+    
     $("#badge-image").load(function() {
       $("#badge-image-spinner").fadeOut();
     });
@@ -345,10 +346,32 @@
     var color1 = $("#badge_image_color1").val();
     var color2 = $("#badge_image_color2").val();
 
-    // Load the image with javascript so we can show the spinner while it's loading
-    $("#badge-image-spinner").show();
+    $("#badge-image-spinner").fadeIn();
+
+    // Start an ajax poller
     var imagePath = "/i?frame=" + frame + "&icon=" + icon + "&c1=" + color1 + "&c2=" + color2;
-    $("#badge-image").attr("src", imagePath);
+    $.ajax({
+      url: imagePath,
+      type: "GET",
+      success: function(response) {
+        startPoller(response.poller_id, imageGeneratorCompleted, imageGeneratorError);
+      },
+      error: imageGeneratorError
+    });
+  }
+
+  function imageGeneratorError() {
+    // nothing to do here
+  }
+
+  var currentImageCreated; // helps only display latest image in case there are network delays
+  var lastPoller;
+  function imageGeneratorCompleted(poller) {
+    if ((currentImageCreated == null) || (poller.created_at > currentImageCreated)) {
+      currentImageCreated = poller.created_at;
+      lastPoller = poller;
+      $("#badge-image").attr('src', '/p/' + poller._id + '.png');
+    }
   }
 
   function randomize() {

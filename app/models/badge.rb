@@ -385,7 +385,8 @@ protected
     if image.nil? || image_frame_changed? || image_icon_changed? || image_color1_changed? \
       || image_color2_changed?
       # First build the image
-      badge_image = BadgeMaker.build_image image_frame, image_icon, image_color1, image_color2
+      badge_image = BadgeMaker.build_image(frame: image_frame, icon: image_icon, 
+        color1: image_color1, color2: image_color2)
       unless badge_image.nil?
         self.image = badge_image.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
         badge_image_wide = BadgeMaker.build_wide_image(badge_image)

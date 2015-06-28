@@ -117,94 +117,136 @@ class BadgeMaker
     { frames: frame_index, icons: icon_index, colors: bm_config['colors'] }
   end
 
-  def self.build_image(frame = nil, icon = nil, color1 = nil, color2 = nil, config = nil)
-    config = BADGE_MAKER_CONFIG if config.nil?
-    raise "Badge Maker config is missing." if config.nil?
-    frame_index = config[:frames]
-    icon_index = config[:icons]
-
-    # First randomly set any parameters that are missing
-    frame = frame.downcase unless frame.nil?
-    frame = frame_index.keys.sample if frame.nil? or !frame_index.include?(frame)
-    icon = icon_index.keys.sample if icon.nil? # NOTE: If this is missing we'll build a text icon
-    if color1.blank?
-      random_key = config[:colors]['background'].keys.sample
-      color1 = config[:colors]['background'][random_key]['hex']
-    elsif !color1[VALID_HEX_COLOR]
-      color1 = 'FFFFFF'
-    end
-    if color2.blank?
-      random_key = config[:colors]['foreground'].keys.sample
-      color2 = config[:colors]['foreground'][random_key]['hex']
-    elsif !color2[VALID_HEX_COLOR]
-      color2 = '000000'
-    end
-
-    # Grab the other variables from the index
-    inner_width = frame_index[frame]['inner_width']
-    offset_x = frame_index[frame]['offset_x']
-    offset_y = frame_index[frame]['offset_y']
-    center = "#{250+offset_x},#{250+offset_y}"
-    if (offset_x == 0) && (offset_y == 0)
-      geometry = nil
+  # Accepts options for frame, icon, color1, color2, config and async
+  def self.build_image(options = {})
+    if options[:async]
+      poller = Poller.new
+      poller.save
+      options[:async] = nil
+      options[:poller_id] = poller.id
+      BadgeMaker.delay(queue: 'high', retry: false).build_image_now(options)
+      poller.id
     else
-      x_text = (offset_x < 0) ? "#{offset_x}" : "+#{offset_x}"
-      y_text = (offset_y < 0) ? "#{offset_y}" : "+#{offset_y}"
-      geometry = "#{x_text}#{y_text}"
+      BadgeMaker.build_image_now(options)
     end
+  end
 
-    # Then build the badge image
-    
-    # Start the badge off by cloning the frame and filling in the background color
-    badge_image = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/frames/#{frame}.png")
-    badge_image.combine_options do |c|
-      c.resize "500x500"
-      c.fill "##{color1}"
-      c.fuzz "60%"
-      c.opaque "white"
-    end
-
-    # Then build a foreground mask by adding the icon to the frame
-    frame_image = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/frames/#{frame}.png")
-    frame_image.resize "500x500"
-    if icon_index.include?(icon.downcase) # then this will have an IMAGE ICON
-      icon_image = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/icons/#{icon}.png")
-      icon_image.combine_options do |c|
-        c.trim
-        c.resize "#{inner_width}x#{inner_width}"
+  # Accepts options for frame, icon, color1, color2, config and poller_id
+  def self.build_image_now(options = {})
+    begin
+      frame = options[:frame]
+      icon = options[:icon]
+      color1 = options[:color1]
+      color2 = options[:color2]
+      config = options[:config]
+      if options[:poller_id]
+        poller = Poller.find(options[:poller_id]) rescue nil
       end
-    else # this will have a TEXT ICON
-      icon_image = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/blank.png")
-      icon_image.combine_options do |c|
-        c.font "#{Rails.root}/app/assets/images/fonts/arialbd.ttf"
+
+      config = BADGE_MAKER_CONFIG if config.nil?
+      raise "Badge Maker config is missing." if config.nil?
+      frame_index = config[:frames]
+      icon_index = config[:icons]
+
+      # First randomly set any parameters that are missing
+      frame = frame.downcase unless frame.nil?
+      frame = frame_index.keys.sample if frame.nil? or !frame_index.include?(frame)
+      icon = icon_index.keys.sample if icon.nil? # NOTE: If this is missing we'll build a text icon
+      if color1.blank?
+        random_key = config[:colors]['background'].keys.sample
+        color1 = config[:colors]['background'][random_key]['hex']
+      elsif !color1[VALID_HEX_COLOR]
+        color1 = 'FFFFFF'
+      end
+      if color2.blank?
+        random_key = config[:colors]['foreground'].keys.sample
+        color2 = config[:colors]['foreground'][random_key]['hex']
+      elsif !color2[VALID_HEX_COLOR]
+        color2 = '000000'
+      end
+
+      # Grab the other variables from the index
+      inner_width = frame_index[frame]['inner_width']
+      offset_x = frame_index[frame]['offset_x']
+      offset_y = frame_index[frame]['offset_y']
+      center = "#{250+offset_x},#{250+offset_y}"
+      if (offset_x == 0) && (offset_y == 0)
+        geometry = nil
+      else
+        x_text = (offset_x < 0) ? "#{offset_x}" : "+#{offset_x}"
+        y_text = (offset_y < 0) ? "#{offset_y}" : "+#{offset_y}"
+        geometry = "#{x_text}#{y_text}"
+      end
+
+      # Then build the badge image
+      
+      # Start the badge off by cloning the frame and filling in the background color
+      badge_image = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/frames/#{frame}.png")
+      badge_image.combine_options do |c|
+        c.resize "500x500"
+        c.fill "##{color1}"
+        c.fuzz "60%"
+        c.opaque "white"
+      end
+
+      # Then build a foreground mask by adding the icon to the frame
+      frame_image = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/frames/#{frame}.png")
+      frame_image.resize "500x500"
+      if icon_index.include?(icon.downcase) # then this will have an IMAGE ICON
+        icon_image = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/icons/#{icon}.png")
+        icon_image.combine_options do |c|
+          c.trim
+          c.resize "#{inner_width}x#{inner_width}"
+        end
+      else # this will have a TEXT ICON
+        icon_image = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/blank.png")
+        icon_image.combine_options do |c|
+          c.font "#{Rails.root}/app/assets/images/fonts/arialbd.ttf"
+          c.gravity "center"
+          c.pointsize '240'
+          c.draw "text 0,0 '#{icon[0..1]}'"
+          c.fill("black")
+          c.trim
+          c.resize "#{inner_width}x#{inner_width}"
+        end
+      end
+      foreground_mask = frame_image.composite(icon_image) do |c|
         c.gravity "center"
-        c.pointsize '240'
-        c.draw "text 0,0 '#{icon[0..1]}'"
-        c.fill("black")
-        c.trim
-        c.resize "#{inner_width}x#{inner_width}"
+        c.geometry geometry unless geometry.nil?
+      end
+
+      # Build out color overlay (By basing it on the frame we ensure that the transparency is kept)
+      color2_overlay = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/frames/#{frame}.png")
+      color2_overlay.combine_options do |c|
+        c.fill "##{color2}"
+        c.fuzz "100%" # basically this will fill all non-transparent pixels
+        c.opaque "white"
+      end
+      color2_overlay.combine_options do |c| # do it again with black to get the straggling pixels
+        c.fill "##{color2}"
+        c.fuzz "100%"
+        c.opaque "black"
+      end
+
+      # Finally use the foreground_mask to apply the color overlay to the existing badge_image
+      return_value = composite_with_mask(badge_image, color2_overlay, foreground_mask)
+      if poller
+        poller.data = { image: return_value.to_blob.force_encoding("ISO-8859-1").encode("UTF-8") }
+        poller.status = 'successful'
+        poller.save
+      else
+        return_value
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to build the badge image. ' \
+          + "(Error message: #{e})"
+        poller.save
+      else
+        throw e
       end
     end
-    foreground_mask = frame_image.composite(icon_image) do |c|
-      c.gravity "center"
-      c.geometry geometry unless geometry.nil?
-    end
-
-    # Build out color overlay (By basing it on the frame we ensure that the transparency is kept)
-    color2_overlay = MiniMagick::Image.open("#{IMAGES_ROOT_PATH}/frames/#{frame}.png")
-    color2_overlay.combine_options do |c|
-      c.fill "##{color2}"
-      c.fuzz "100%" # basically this will fill all non-transparent pixels
-      c.opaque "white"
-    end
-    color2_overlay.combine_options do |c| # do it again with black to get the straggling pixels
-      c.fill "##{color2}"
-      c.fuzz "100%"
-      c.opaque "black"
-    end
-
-    # Finally use the foreground_mask to apply the color overlay to the existing badge_image
-    composite_with_mask(badge_image, color2_overlay, foreground_mask)
   end
 
   # Returns a widened version of the image
