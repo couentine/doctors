@@ -113,15 +113,15 @@ class EntriesController < ApplicationController
     else
       if (@type == 'validation') 
         if @validation_already_exists
-          notice = "Your validation was updated."
+          notice = "Your feedback was updated."
         else
-          notice = "Your validation was submitted."
+          notice = "Your feedback was submitted."
         end
       else
         if @entry.log.validation_status == 'requested'
-          notice = "You have submitted all of the required evidence. A validation request has " \
+          notice = "You have submitted all of the required evidence. A feedback request has " \
             + "automatically been sent to the badge awarders and you will be notified by email " \
-            + "when a validation is received."
+            + "when feedback is posted."
         else
           notice = "Your evidence has been posted."
         end
@@ -143,7 +143,7 @@ class EntriesController < ApplicationController
           (params[:entry][:log_validated] == "true")
 
         format.html do
-          redirect_to [@group, @badge, @log, @entry], notice: 'Validation was successfully updated.'
+          redirect_to [@group, @badge, @log, @entry], notice: 'Feedback was successfully updated.'
         end
         format.json { head :no_content }
       elsif @entry.update_attributes(params[:entry])

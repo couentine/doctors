@@ -2559,6 +2559,10 @@ div.topic-list-card, div.group-list-card {
       display: block;
       color: $dark-text-color;
       margin-top: -10px;
+
+      &.endorsement {
+        color: $green-medium;
+      }
     }
 
     .creator-user-link { 

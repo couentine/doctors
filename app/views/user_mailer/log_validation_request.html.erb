@@ -5,15 +5,15 @@
   </head>
   <body>
     <p>
-      <%= @from_user.name %> has requested validation of their <%= @badge.progress_log %> for the 
+      <%= @from_user.name %> has requested feedback on their <%= @badge.progress_log %> for the 
       <%= @badge.name %> badge in Badge List.
-      To add your expertise, log into Badge List or click one of the links below. 
+      To add your feedback log into Badge List or click one of the links below. 
     </p>
     <p>
-      <strong>Is it your first time? Adding your expertise is easy.</strong>
+      <strong>Is it your first time? Adding your feedback is easy.</strong>
       <ol>
         <li>Review their <%= @badge.progress_log %></li>
-        <li>Click "Add my expertise"</li>
+        <li>Click "Add feedback"</li>
         <li>Decide whether or not they have earned the badge</li>
         <li>Write specific feedback and notes</li>
       </ol>
@@ -29,9 +29,15 @@
     </p>
     <p>
       <i><b>
-        To stop receiving validation request emails for this badge 
-        <%= link_to "edit your badge membership", 
-          group_badge_url(@group, @badge) + '#log-visibility' %>.
+        <% if @is_badge_member %>
+          To stop receiving feedback request emails for this badge 
+          <%= link_to "edit your badge membership", 
+            group_badge_url(@group, @badge) + '#log-visibility' %>.
+        <% else %>
+          You are receiving feedback request emails because you are a group admin. If you'd like to
+          stop receiving feedback request emails you will need to join the badge and edit your
+          badge membership to set your preferences.
+        <% end %>
       </b></i>
     </p>
     <p>

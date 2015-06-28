@@ -5,13 +5,18 @@
   </head>
   <body>
     <p>
-      You've received a 
-      <strong><em><%= (@entry.log_validated) ? 'positive' : 'negative' %></em></strong> 
-      validation from <%= @from_user.name %> for the <%= @badge.name %> badge in Badge List.
+      <% if @entry.log_validated %>
+        Congratulations! 
+        You've received an endorsement from <%= @from_user.name %> for the <%= @badge.name %> 
+        badge in Badge List.
+      <% else %>
+        You've gotten feedback from <%= @from_user.name %> for the <%= @badge.name %> 
+        badge in Badge List.
+      <% end %>
     </p>
 
     <p>
-      <strong>Read the validation in a browser:</strong> 
+      <strong>View the <%= @noun %>:</strong> 
       <%= link_to group_badge_log_entry_url(@group, @badge, @log, @entry), 
         group_badge_log_entry_url(@group, @badge, @log, @entry) %> <br>
       <strong>View your progress log:</strong> 
@@ -21,7 +26,7 @@
     <hr>
 
     <p>
-      <strong><u>Content of the Validation</u></strong>
+      <strong><u>Content of the <%= @Noun %></u></strong>
     </p>
 
     <p><b>Summary:</b> <%= @entry.summary %></p>

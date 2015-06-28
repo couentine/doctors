@@ -145,13 +145,13 @@
 
 <% if @can_award_badge %>
 
-  <!-- === VALIDATION REQUESTS MODAL === -->
+  <!-- === FEEDBACK REQUESTS MODAL === -->
 
-  <div id="validation-requests" class="modal hide fade" tabindex="-1" role="dialog" 
+  <div id="feedback-requests" class="modal hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label"><%= @Learners %> requesting <%= @expert %> validation</h3>
+      <h3 id="mimm-label"><%= @Learners %> requesting <%= @expert %> feedback</h3>
     </div>
 
     <div class="modal-body">
@@ -254,8 +254,8 @@
             <% if @can_award_badge %>
               <%= f.input :receive_validation_request_emails, as: :select, include_blank: false,
                 collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
-                value_method: :first, label: 'Receive validation request emails?',
-                hint: "Validation request emails are sent automatically whenever a #{@learner} " \
+                value_method: :first, label: 'Receive feedback request emails?',
+                hint: "Feedback request emails are sent automatically whenever a #{@learner} " \
                   + "completes all of the badge requirements." %>
             <% end %>
 
@@ -684,7 +684,7 @@
                 <div class="btn-group">
                   <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 
                     data-toggle="dropdown">
-                    <%= @requesting_learner_logs.count %> validation 
+                    <%= @requesting_learner_logs.count %> feedback 
                     <%= (@requesting_learner_logs.count == 1) ? "request" : "requests" %>
                     <span class="caret"></span>
                   </a>
@@ -701,7 +701,7 @@
 
                     <% if @requesting_learner_logs.count > 10 %>
                       <li>
-                        <a tabindex="-1" href="#validation-requests" data-toggle="modal">
+                        <a tabindex="-1" href="#feedback-requests" data-toggle="modal">
                           <%= (@requesting_learner_logs.count - 10).to_s %> more...
                         </a>
                       </li>

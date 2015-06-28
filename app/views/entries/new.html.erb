@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "New #{@entry.type.capitalize} - #{@badge.name}")
+  provide(:title, "New Post - #{@badge.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group))
   provide(:include_rich_text, true)
@@ -20,7 +20,7 @@
     <%= link_to @user.username, [@group, @badge] %>
     <span class="divider">/</span>
   </li>
-  <li class="active">New <%= @entry.type.capitalize %></li>
+  <li class="active">New Post</li>
 <% end %>
 
 <% if !@parent_tag_name.blank? %>
@@ -53,9 +53,9 @@
 
       <% if @entry.type == 'validation' %>
         <% if @current_user_is_log_owner %>
-          <h1>Add self validation to your <%= @badge.progress_log %></h1>
+          <h1>Add a self endorsement to your <%= @badge.progress_log %></h1>
         <% else %>
-          <h1>Add validation to <%= @user.name %>'s <%= @badge.progress_log %></h1>
+          <h1>Provide feedback on <%= @user.name %>'s <%= @badge.progress_log %></h1>
         <% end %>
       <% else %>
         <% if @current_user_is_log_owner %>

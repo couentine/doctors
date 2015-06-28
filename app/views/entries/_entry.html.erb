@@ -63,14 +63,13 @@
               data-placement="bottom" data-toggle="tooltip">
             
             <% if (entry.type == 'validation') && entry.log_validated %>
-              <span class="validation-result positive" title="Learning was positively validated"
+              <span class="validation-result positive" title="Feedback includes endorsement"
                 data-toggle="tooltip">
-                &#10003;
+                <i class="fa fa-check-circle"></i>
               </span>
             <% elsif (entry.type == 'validation') && !entry.log_validated %>
-              <span class="validation-result negative" title="Learning was negatively validated"
-                data-toggle="tooltip">
-                &#10007;
+              <span class="validation-result" data-toggle="tooltip">
+                <i class="fa fa-arrow-right"></i>
               </span>
             <% else %>
               <span class="arrow">&#9654;</span>

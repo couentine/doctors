@@ -3,7 +3,7 @@
   <div class="form-body">
     <% if @entry.type == 'validation' %>
       <%= f.input :log_validated, as: :radio_buttons, 
-        label: "In your expertise, has #{@user.name} achieved this badge?",
+        label: "Do you endorse #{@user.name}'s achievement of this badge?",
         collection: [
           ['<b>Yes</b>, issue the badge'.html_safe, true],
           ['<b>Not yet</b>, greater mastery is needed'.html_safe, false]
@@ -227,7 +227,7 @@
   <div class="form-footer">
     <%
       if (@entry.type == 'validation')
-        save_button_text = (@entry.new_record?) ? 'Submit my validation' : 'Update my validation'
+        save_button_text = (@entry.new_record?) ? 'Submit feedback' : 'Update feedback'
       else
         save_button_text = (@entry.new_record?) ? 'Post evidence' : 'Update my evidence'
       end

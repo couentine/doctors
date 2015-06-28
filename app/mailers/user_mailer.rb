@@ -83,8 +83,10 @@ class UserMailer < ActionMailer::Base
     @to_user, @from_user, @group, @badge, @log = User.find(to_user_id), User.find(from_user_id), \
       Group.find(group_id), Badge.find(badge_id), Log.find(log_id)
 
+    @is_badge_member = @to_user.learner_of?(@badge) || @to_user.expert_of?(@badge)
+    
     mail(
-      :subject  => "Validation Request for #{@badge.name}",
+      :subject  => "Feedback Request for #{@badge.name}",
       :to       => @to_user.email_name,
       :from     => build_from_string(@from_user),
       :reply_to => @from_user.email_name,
@@ -97,8 +99,11 @@ class UserMailer < ActionMailer::Base
       User.find(from_user_id), Group.find(group_id), Badge.find(badge_id), Log.find(log_id), \
       Entry.find(entry_id)
 
+    @noun = (@entry.log_validated) ? "endorsement" : "feedback"
+    @Noun = @noun.capitalize
+
     mail(
-      :subject  => "Expert Validation - #{@entry.summary}",
+      :subject  => "#{@Noun} - #{@entry.summary}",
       :to       => @to_user.email_name,
       :from     => build_from_string(@from_user),
       :reply_to => @from_user.email_name,

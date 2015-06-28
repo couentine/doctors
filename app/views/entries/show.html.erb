@@ -101,7 +101,11 @@
           </span>
         <% end %>
 
-        <% if @parent_tag && @parent_tag.display_name %>
+        <% if (@entry.type == 'validation') && @show_progress && @entry.log_validated %>
+          <h2 class="endorsement">
+            <i class="fa fa-check-circle"></i> Endorsed
+          </h2>
+        <% elsif @parent_tag && @parent_tag.display_name %>
           <h2>
             <i class="fa fa-check-square-o" title="Requirement"></i> 
             <%= link_to @parent_tag.display_name, [@group, @badge, @parent_tag] %>
@@ -145,13 +149,6 @@
       </div>
       
       <div class="body-section">
-        <% if (@entry.type == 'validation') && @show_progress %>
-          <span class="validation-result <%= @entry.log_validated ? 'yes' : 'no' %>">
-            <strong>Validation:</strong> 
-            <%= @entry.log_validated ? "Positive &#10003;".html_safe : "Negative &#10007;".html_safe %>
-          </span>
-        <% end %>
-
         <!-- === ENTRY CONTENT PARTIAL === -->
         <%= render "shared/entry_content_full", entry: @entry %>
       </div>

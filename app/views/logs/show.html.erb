@@ -56,10 +56,10 @@
     <% if @can_award_badge && !@current_user_is_log_owner && @validation.nil? %>
       <li class="collapsible">
         <% if @log.validation_status == 'requested' %>
-          <%= link_to "<i class='icon-check icon-white'></i> Add Your Expertise".html_safe,
+          <%= link_to "<i class='icon-check icon-white'></i> Add feedback".html_safe,
             new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
         <% else %>
-          <%= link_to "<i class='fa fa-shield'></i> Award Badge".html_safe,
+          <%= link_to "<i class='fa fa-shield'></i> Award badge".html_safe,
             new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
         <% end %>
 
@@ -88,16 +88,16 @@
             </li>
             <% if @log.validation_status == 'requested' %>
               <li>
-                <%= link_to "<i class='icon-flag'></i>Withdraw validation request".html_safe,
+                <%= link_to "<i class='icon-flag'></i>Withdraw feedback request".html_safe,
                   group_badge_log_path(@group, @badge, @log, log: { date_withdrawn: Time.now }), 
                   method: :put, data: { confirm: "Are you sure you want to withdraw your request "\
-                  + "for validation of your progress log? \n\n"\
+                  + "for feedback on your progress log? \n\n"\
                   + "TIP: After withdrawing your request, #{@experts} will still be able to add "\
-                  + "validation but you will no longer be highlighted as a requester." } %>
+                  + "feedback but you will no longer be highlighted as a requester." } %>
               </li>
             <% elsif @log.validation_status != 'validated' %>
               <li>
-                <%= link_to "<i class='fa fa-flag-checkered'></i> Request validation".html_safe,
+                <%= link_to "<i class='fa fa-flag-checkered'></i> Request feedback".html_safe,
                   group_badge_log_path(@group, @badge, @log, log: { date_requested: Time.now }), 
                   method: :put, data: { confirm: "Are you sure you want to send a request to all "\
                   + "of the #{@experts} asking for them to validate your progress log?" } %>
@@ -181,8 +181,8 @@
             <% if @can_award_badge %>
               <%= f.input :receive_validation_request_emails, as: :select, include_blank: false,
                 collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
-                value_method: :first, label: 'Receive validation request emails?',
-                hint: "Validation request emails are sent automatically whenever a #{@learner} " \
+                value_method: :first, label: 'Receive feedback request emails?',
+                hint: "Feedback request emails are sent automatically whenever a #{@learner} " \
                   + "completes all of the badge requirements." %>
             <% end %>
 
@@ -301,7 +301,7 @@
               <% if @log.validation_status == 'requested' %>
                 <h3><span class="text-color primary-medium">
                   <i class="fa fa-flag-checkered"></i>
-                  Requested validation on <%= @log.date_requested.to_s(:full_date) %>
+                  Requested feedback on <%= @log.date_requested.to_s(:full_date) %>
                 </span></h3>
               <% end %>
             </td>
@@ -338,7 +338,7 @@
   </div>
 </div>
 
-<!-- === VALIDATIONS === -->
+<!-- === FEEDBACK === -->
 
 <% if show_validations %>
   
@@ -348,17 +348,17 @@
 
         <% if @current_user_is_log_owner %>
           <% if !@validation.nil? %>
-            <%= link_to "<i class='icon-pencil'></i> Update self validation".html_safe,
+            <%= link_to "<i class='icon-pencil'></i> Update self endorsement".html_safe,
               edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
               class: 'btn btn-small' %>
           <% end %>
         <% elsif @can_award_badge %>
           <% if @validation.nil? %>
-            <%= link_to "<i class='icon-check'></i> Add your expertise".html_safe,
+            <%= link_to "<i class='icon-check'></i> Add feedback".html_safe,
               new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
               class: 'btn btn-small' %>
           <% else %>
-            <%= link_to "<i class='icon-pencil'></i> Update your validation".html_safe,
+            <%= link_to "<i class='icon-pencil'></i> Update your feedback".html_safe,
               edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
               class: 'btn btn-small' %>
           <% end %>
@@ -366,15 +366,15 @@
 
         <% if @log.validation_status == 'requested' %>
           <span class="badge badge-warning collapse-when-small">
-            Validation requested <%= @log.date_requested.to_s(:full_date) %>
+            Feedback requested <%= @log.date_requested.to_s(:full_date) %>
           </span>
           <span class="badge badge-warning show-when-small">
             Requested <%= @log.date_requested.to_s(:short_date) %>
           </span>
         <% end %>
 
-        <h2 class="collapse-when-small">Validation from Badge <%= @Experts %></h2>
-        <h2 class="show-when-small">Validations</h2>
+        <h2 class="collapse-when-small">Endorsements &amp; Feedback</h2>
+        <h2 class="show-when-small">Feedback</h2>
       
       </div>
     </div>
@@ -384,17 +384,17 @@
 
     <div class="row">
       <div class="well span7 offset2">
-        <h3>No validations yet...</h3>
+        <h3>No feedback yet...</h3>
         <p>
           <% if @can_award_badge %>
-            This <%= @learner %> needs validations! To add your expertise, click the button
+            This <%= @learner %> needs feedback! To add your feedback, click the button
             below and let the <%= @learner %> know whether or not your believe they have mastered
             the badge.<br><br>
-            <%= link_to "<i class='icon-check icon-white'></i> Add your expertise".html_safe,
+            <%= link_to "<i class='icon-check icon-white'></i> Add feedback".html_safe,
               new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
               class: 'btn btn-success' %>
           <% elsif @current_user_is_log_owner %>
-            Once <%= @experts %> weigh in on your progress log, their validations will appear here!
+            Once <%= @experts %> weigh in on your progress log, their feedback will appear here!
           <% else %>
             This progress log hasn't yet been validated by any <%= @experts %>.
           <% end %>

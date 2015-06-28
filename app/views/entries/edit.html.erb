@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "Edit #{@entry.type.capitalize} ##{@entry.entry_number}")
+  provide(:title, "Edit Post ##{@entry.entry_number}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group))
   provide(:include_rich_text, true) 
@@ -24,7 +24,7 @@
     <%= link_to @entry.entry_number, [@group, @badge, @log, @entry] %>
     <span class="divider">/</span>
   </li>
-  <li class="active">Edit <%= @entry.type.capitalize %></li>
+  <li class="active">Edit Post</li>
 <% end %>
 
 <% if @parent_tag %>
@@ -47,9 +47,9 @@
     <div class="form-header">
       <% if @entry.type == 'validation' %>
         <% if @current_user_is_log_owner %>
-          <h1>Update your self validation</h1>
+          <h1>Update your self endorsement</h1>
         <% else %>
-          <h1>Update your validation of <%= @user.name %>'s <%= @badge.progress_log %></h1>
+          <h1>Update your feedback on <%= @user.name %>'s <%= @badge.progress_log %></h1>
         <% end %>
       <% else %>
         <% if @current_user_is_log_owner %>
