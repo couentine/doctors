@@ -63,7 +63,7 @@ class GroupsController < ApplicationController
     # Get paginated versions of badges
     @badge_page = params[:pb] || 1
     @badge_page_size = params[:psb] || APP_CONFIG['page_size_small']
-    @badges = @group.badges.asc(:url).page(@badge_page).per(@badge_page_size)
+    @badges = @group.badges.asc(:name).page(@badge_page).per(@badge_page_size)
     @expert_count_map = {} # maps from badge id to expert count
     @learner_count_map = {} # maps from badge id to learner count
     @badge_ids = []
