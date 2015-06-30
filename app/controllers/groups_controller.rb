@@ -227,7 +227,7 @@ class GroupsController < ApplicationController
       notice = "You have left this group."
     elsif @group.has_admin?(current_user)
       if @group.admins.count > 1
-        @group.admin.delete(current_user)
+        @group.admins.delete(current_user)
         notice = "You have left this group."
       else
         notice = "You are currently the only admin and cannot leave the group."
