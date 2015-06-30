@@ -129,7 +129,67 @@ class Badge
   def awarders;  (awardability == 'experts') ? experts : 'admins'; end
   def badge_awarders;  (awardability == 'experts') ? "badge #{experts}" : 'group admins'; end
 
-  # === BADGE METHODS === #
+  # === ASYNC CLASS METHODS === #
+
+  # Creates a new badge asynchronously and returns the id of a poller
+  # The params and requirement list args should be same as those passed to badges_controller#create
+  def self.create_async(group_id, creator_id, badge_params, requirement_list)
+    poller = Poller.new
+    poller.save
+    Badge.delay(queue: 'high', retry: false).do_create_async(group_id, creator_id, badge_params, 
+      requirement_list, poller.id)
+    poller.id
+  end
+  
+  # Powers the create_async method above. Not intended to be run directly but could be.
+  def self.do_create_async(group_id, creator_id, badge_params, requirement_list, poller_id = nil)
+    begin
+      # First query for the core records
+      poller = Poller.find(poller_id) rescue nil
+      group = Group.find(group_id)
+      creator = User.find(creator_id)
+      
+      # We need to Base64 decode the uploaded file if present (and build a new UploadedFile)
+      if badge_params['uploaded_image']
+        file = badge_params['uploaded_image']
+        tempfile = Tempfile.new('file')
+        tempfile.binmode
+        tempfile.write(Base64.decode64(file.tempfile))
+        badge_params['uploaded_image'] = \
+          ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
+            filename: file.original_filename, type: file.content_type, head: file.headers)
+      end
+
+      badge = Badge.new(badge_params)
+      badge.group = group
+      badge.creator = creator
+      badge.current_user = creator
+      badge.current_username = creator.username
+
+      # Save the badge and then update the requirements if successful
+      badge.save!
+      badge.update_requirement_list(requirement_list)
+        
+      # Then save the results
+      if poller
+        poller.status = 'successful'
+        poller.message = "The '#{badge.name}' badge has been successfully created!"
+        poller.data = { badge_id: badge.id }
+        poller.save
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to create the badge, ' \
+          + "please try again. (Error message: #{e})"
+        poller.save
+      else
+        throw e
+      end
+    end
+  end
+
+  # === INSTANCE METHODS === #
 
   def to_param
     url

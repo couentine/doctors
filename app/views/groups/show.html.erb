@@ -52,6 +52,43 @@
       e.preventDefault();
     });
   });
+  
+  <% if @badge_poller_id %>
+
+    // Start the badge poller
+    badge_poller_id = "<%= @badge_poller_id %>";
+    startPoller(badge_poller_id, badgePollerCompleted, badgePollerError);
+    $(document).ready(function() {
+      $("#badges .tab-header h2")
+        .after("<h3 class='header-spinner'><i class='fa fa-refresh fa-spin'></i></h3>");
+    });
+
+    function badgePollerCompleted(poller) {
+      $(".alert").first().text(poller.message);
+      $("#badges .tab-header h3.header-spinner").fadeOut();
+      
+      if (poller.status == 'successful') {
+        document.location.href = document.location.href.split("?")[0] + "?badge_poller_completed=1";
+      } else {
+        $(".alert").first().removeClass('alert-notice').addClass('alert-error');
+      }
+    }
+
+    function badgePollerError() {
+      $(".alert").first().removeClass('alert-notice').addClass('alert-error');
+      $(".alert").first().text("An error occurred while trying to create the badge, "
+        + "please try again");
+      $("#badges .tab-header h3.header-spinner").fadeOut();
+    }
+
+  <% elsif params[:badge_poller_completed] %>
+
+    $(document).ready(function() {
+      $(".header-bar").before("<div class='alert alert-notice'>"
+        + "The badge has been successfully created!</div>");
+    });
+
+  <% end %>
 
 </script>
 

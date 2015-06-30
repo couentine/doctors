@@ -55,6 +55,8 @@ class GroupsController < ApplicationController
   # GET /group-url
   # GET /group-url.json
   def show
+    @badge_poller_id = params[:badge_poller]
+
     # Get paginated versions of members
     @member_page = params[:pm] || 1
     @member_page_size = params[:psm] || APP_CONFIG['page_size_small']

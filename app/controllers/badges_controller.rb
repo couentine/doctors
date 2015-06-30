@@ -121,6 +121,7 @@ class BadgesController < ApplicationController
   # POST /group-url/badges
   # POST /group-url/badges.json
   def create
+    # First build the badge as normal to make sure that it's valid
     @badge = Badge.new(params[:badge])
     @badge.group = @group
     @badge.creator = current_user
@@ -128,23 +129,27 @@ class BadgesController < ApplicationController
     @badge.current_username = current_user.username
     @requirement_list = params[:rl]
 
-    respond_to do |format|
-      if @badge.save
-        # First update the requirements (won't do anything if requirement list is blank)
-        @badge.update_requirement_list(@requirement_list)
-        
-        # Then redirect
-        format.html { redirect_to @group, 
-          notice: "The '#{@badge.name}' badge was successfully created." }
-        format.json { render json: @badge, status: :created, location: @badge, filter_user: current_user }
-      else
-        set_editing_parameters
-        @allow_url_editing = true;
-
-        flash[:error] = "There was an error creating the badge."
-        format.html { render action: "new" }
-        format.json { render json: @badge.errors, status: :unprocessable_entity }
+    if @badge.valid?
+      # We need to Base64 encode the uploaded file if present
+      if params[:badge][:uploaded_image]
+        file = params[:badge][:uploaded_image]
+        file.tempfile.binmode
+        file.tempfile = Base64.encode64(file.tempfile.read)
       end
+      
+      poller_id = Badge.create_async(@group.id, current_user.id, params[:badge], 
+        @requirement_list)
+      
+      # Then redirect to the group with the poller passed
+      redirect_to group_path(@group, badge_poller: poller_id), 
+        notice: "<i class='fa fa-refresh fa-spin'></i> ".html_safe + \
+          "The '#{@badge.name}' badge is being created..."
+    else
+      set_editing_parameters
+      @allow_url_editing = true;
+
+      flash[:error] = "There was an error creating the badge."
+      render action: "new"
     end
   end
 
