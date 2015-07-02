@@ -167,6 +167,7 @@ defaults: &defaults
    - logs
    - member
    - members
+   - move
    - new
    - perm_assets
    - pricing

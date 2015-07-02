@@ -135,6 +135,7 @@ class User
     end
   end
 
+  # Gets UI-ready list of cards that this user has added to stripe
   def stripe_card_options
     if stripe_cards.blank?
       []
@@ -143,6 +144,19 @@ class User
         ["#{card['brand']}: xxx-#{card['last4']}", card['id']]
       end
     end
+  end
+
+  # Gets UI-ready list of groups owned by this user
+  # Accepts "except" option to exclude a particular list of ids
+  def owned_group_options(options = {})
+    return_list = []
+    excluded_group_ids = options[:except] || []
+    
+    owned_groups.each do |group|
+      return_list << [group.name, group.id] unless excluded_group_ids.include? group.id
+    end
+
+    return_list
   end
 
   def set_flag(flag)

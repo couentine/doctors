@@ -88,7 +88,7 @@ BadgeList::Application.routes.draw do
   # match ':group_id/:badge_id/topics' => 'tags#index', via: :get, as: :badge_topics
   match ':group_id/:badge_id/issue' => 'badges#issue_form', via: :get, as: :badge_issue
   match ':group_id/:badge_id/issue' => 'badges#issue_save', via: :post
-  
+  match ':group_id/:badge_id/move' => 'badges#move', via: :put
 
   # === MANUAL LOG PATHS === #
   match ':group_id/:badge_id/o/:id' => 'logs#show', via: :get, as: :open_badge_assertion,

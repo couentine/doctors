@@ -16,30 +16,6 @@
       <%= @group.url_with_caps %>
     </li>
   <% end %>
-
-  <% content_for :subheader_actions do %>
-    <% if @current_user_is_admin || @badge_list_admin %>
-      <li class="collapsible">
-        <div class="dropdown">
-          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
-            role="button" data-toggle="dropdown" data-target="#">
-            Learning Group Settings
-            <i class="fa fa-cog"></i>
-            <b class="caret"></b>
-          </a>
-          <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdown-subheader-settings">
-            <li>
-              <%= link_to '<i class="fa fa-remove"></i> Delete Group'.html_safe, 
-                @group, method: :delete, data: \
-                  { confirm: 'WARNING: THIS WILL PERMANENTLY DESTROY DATA. Are you absolutely'\
-                + ' sure you want to permanently delete this learning group and all the badges' \
-                + ' inside of it?' } %>
-            </li>
-          </ul>
-        </div>
-      </li>
-    <% end %>
-  <% end %>
 <% end %>
 
 <script type="text/javascript">
@@ -372,6 +348,26 @@
                   <li>
                     <%= link_to '<i class="fa fa-pencil"></i> Edit the group'.html_safe, 
                       edit_group_path, class: 'btn btn-small' %>
+                  </li>
+                  
+                  <li class="collapsible">
+                    <div class="dropdown">
+                      <a href="#" class="dropdown-toggle" id="dropdown-settings" 
+                        role="button" data-toggle="dropdown" data-target="#" title="Admin Options">
+                        <i class="fa fa-cog"></i>
+                        <b class="caret"></b>
+                      </a>
+                      <ul class="dropdown-menu pull-right" role="menu" 
+                          aria-labelledby="dropdown-settings">
+                        <li>
+                          <%= link_to '<i class="fa fa-remove"></i> Delete Group'.html_safe, 
+                            @group, method: :delete, data: \
+                              { confirm: 'WARNING: THIS WILL PERMANENTLY DESTROY DATA. Are ' \
+                                + 'you absolutely sure you want to permanently delete this group?' 
+                              } %>
+                        </li>
+                      </ul>
+                    </div>
                   </li>
                 <% end %>
               </ul>

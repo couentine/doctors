@@ -1550,6 +1550,13 @@ form#group-add-users-form {
                 background-color: #C3211D;
               }
             }
+
+            &.collapsible > .dropdown a {
+              color: $medium-text-color;
+              margin-left: 5px;
+
+              &:hover, &:focus { color: $dark-text-color; border-bottom: none; }
+            }
           }
         }
       }

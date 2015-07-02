@@ -1,10 +1,11 @@
 class BadgesController < ApplicationController
   
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy, 
-    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save]
+    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save, :move]
   prepend_before_filter :find_all_records, only: [:edit, :update, :destroy, 
-    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save]
+    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save, :move]
   before_filter :authenticate_user!, except: [:show, :entries_index]
+  before_filter :group_owner, only: [:move]
   before_filter :group_admin, only: [:new, :create, :destroy]
   before_filter :can_award, only: [:issue_form, :issue_save]
   before_filter :can_edit, only: [:edit, :update, :add_learners, :create_learners]
@@ -377,10 +378,28 @@ class BadgesController < ApplicationController
     end
   end
 
+  # PUT /group/badge/move?badge[move_to_group_id]=abc123
+  # Basically this is the same as the update function but focused on setting the move to group field
+  def move
+    @badge.move_to_group_id = params[:badge][:move_to_group_id]
+    
+    if @badge.save
+      @group = @badge.group
+      redirect_to [@group, @badge], 
+        notice: "The badge was successfully moved to the '#{@group.name}' group. " \
+        + "It may take another few minutes for all of the group memberships to be moved over."
+        
+    else
+      flash[:error] = @badge.errors.messages[:move_to_group_id].first
+      render action: "show"
+    end
+  end
+
 private
 
   def find_parent_records
     @group = Group.find(params[:group_id]) || not_found
+    @current_user_is_owner = current_user && (current_user.id == @group.owner_id)
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)
     @badge_list_admin = current_user && current_user.admin?
@@ -418,6 +437,13 @@ private
   def group_admin
     unless @current_user_is_admin || @badge_list_admin
       flash[:error] = "You must be a group admin to do that!"
+      redirect_to @group
+    end 
+  end
+
+  def group_owner
+    unless @current_user_is_owner || @badge_list_admin
+      flash[:error] = "You must be the group owner to do that!"
       redirect_to @group
     end 
   end
