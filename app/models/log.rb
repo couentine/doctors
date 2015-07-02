@@ -289,14 +289,15 @@ protected
     end
   end
 
-  # Checks for validation threshold problems 
-  # >> (due to the threshold increasing with the addition of experts)
-  # This method checks to see if the addition of SELF as an expert has increased the validation threshold.
-  # If so, this method will "back-validate" all of the existing experts who are in danger of being "de-validated".
+  # Checks for validation threshold problems (due to threshold increasing w/ new experts)
+  # This method checks to see if the addition of SELF as an expert has increased the validation 
+  # threshold. If so, this method will "back-validate" all of the existing experts who are in 
+  # danger of being "de-validated".
   def back_validate_if_needed
     if (validation_status == 'validated') && validation_status_changed?
       validation_threshold = badge.current_validation_threshold
-      logger.debug "+++back_validate_if_needed: log user = #{user.name}, validation count = #{validation_count}, validation_threshold = #{validation_threshold}+++"
+      logger.debug "+++back_validate_if_needed: log user = #{user.name}, validation count = " \
+        + "#{validation_count}, validation_threshold = #{validation_threshold}+++"
       time_string = Time.now.to_s(:full_date_time)
       
       if badge.expert_logs.count <= 1
