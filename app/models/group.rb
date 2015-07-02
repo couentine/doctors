@@ -354,6 +354,31 @@ class Group
     end
   end
 
+  # === ASYNC CLASS METHODS === #
+
+  # Adds all of the user to the group unless they already exist as members or admins
+  def bulk_add_members(user_ids, async = false)
+    if async
+      Group.delay(queue: 'high').bulk_add_members(self.id, user_ids)
+    else
+      Group.bulk_add_members(nil, user_ids, self)
+    end
+  end
+  
+  # Adds all of the user to the group unless they already exist as members or admins
+  # Provide group to skip the query
+  def self.bulk_add_members(group_id, user_ids, group = nil)
+    group = Group.find(group_id) unless group
+
+    User.where(:id.in => user_ids).each do |user|
+      if !group.has_member?(user) && !group.has_admin?(user)
+        group.members << user
+      end
+    end
+
+    group.save if group.changed?
+  end
+
   # === STRIPE RELATED METHODS === #
   
   # Calls out to stripe to create new subscription for the group

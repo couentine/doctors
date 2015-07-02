@@ -63,6 +63,8 @@ class Badge
   field :current_username,                type: String # used when logging info_versions
   field :flags,                           type: Array
 
+  field :move_to_group_id,                type: String
+
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH },
             uniqueness: { scope: :group },
@@ -86,11 +88,13 @@ class Badge
   validates :group, presence: true
   validates :creator, presence: true
 
+  validate :move_to_group_id_is_valid
+
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
     :editability, :awardability, :image_frame, :image_icon, :image_color1, :image_color2, 
     :icon_search_text, :topic_list_text, :uploaded_image, :remove_uploaded_image,
-    :uploaded_image_cache, :send_validation_request_emails
+    :uploaded_image_cache, :send_validation_request_emails, :move_to_group_id
   
   # === CALLBACKS === #
 
@@ -102,6 +106,7 @@ class Badge
   before_save :update_terms
   after_create :add_creator_as_expert
   after_save :update_requirement_editability
+  before_update :move_badge_if_needed
 
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -408,6 +413,17 @@ class Badge
     end
   end
 
+  # Moves the badge to a new group and then asynchronously moves over group memberships
+  def move_badge_to(new_group)
+    if group_id != new_group.id
+      self.group = new_group
+      
+      # Now run the bulk addition of members asynchronously (no poller for now)
+      all_user_ids = logs.map{ |log| log.user_id }
+      new_group.bulk_add_members(all_user_ids, true)
+    end
+  end
+
 protected
   
   def set_default_values
@@ -501,6 +517,31 @@ protected
         tag.editability = self.editability
         tag.timeless.save
       end
+    end
+  end
+
+  # Validates that the destination group id points to a real group that is owned by the same user
+  # as the current group
+  def move_to_group_id_is_valid
+    unless move_to_group_id.blank?
+      new_group = Group.find(move_to_group_id) rescue nil
+      
+      if new_group.nil?
+        errors.add(:move_to_group_id, " is not a valid Badge List group.")
+      elsif (new_group.owner_id != group.owner_id)
+        errors.add(:move_to_group_id, " is not a valid destination group. " \
+          + "You can ony move this badge to a group you own.")
+      elsif !new_group.can_create_badges?
+        errors.add(:move_to_group_id, " is currently inactive and cannot host new badges.")
+      end
+    end
+  end
+
+  def move_badge_if_needed
+    if !move_to_group_id.blank?
+      new_group = Group.find(move_to_group_id)
+      self.move_badge_to new_group
+      self.move_to_group_id = nil
     end
   end
 
