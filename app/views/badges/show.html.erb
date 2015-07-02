@@ -298,8 +298,17 @@
           <%= simple_form_for [@group, @badge], url: group_badge_path(@group, @badge) + '/move', 
               method: :put, html: {id: 'move-badge-form', class: 'form-horizontal'} do |f| %>
 
-            <%= f.input :move_to_group_id, label: 'Destination Group', as: :select, 
-              include_blank: false, collection: [['Select another group that you own...', '']] \
+            <div class="control-group">
+              <div class="sub-header">
+                <strong>Note:</strong> Moving a badge changes the URL of the badge and of all
+                progress logs within the badge. That means any links or Mozilla Backpacks that point
+                to the old URL will have to be updated. It is best practive to communicate this 
+                change to your users beforehand.
+              </div>
+            </div>
+
+            <%= f.input :move_to_group_id, label: 'Select Destination Group', as: :select, 
+              include_blank: false, collection: [['Groups that you own...', '']] \
                 + @group.owner.owned_group_options(except: [@group.id]) %>
 
           <% end %>
