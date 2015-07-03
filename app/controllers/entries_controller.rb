@@ -247,7 +247,7 @@ private
     @entry = @log.entries.find_by(entry_number: (params[:entry_id] || params[:id])) || not_found
     @parent_tag = @entry.tag
     @current_user_is_entry_creator = current_user && (current_user.id == @entry.creator_id)
-    @visible_to_current_user = @entry.visible_to?(current_user, @badge)
+    @visible_to_current_user = @badge_list_admin || @entry.visible_to?(current_user, @badge)
 
     if current_user
       @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil 

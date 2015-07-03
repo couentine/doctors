@@ -248,7 +248,8 @@ private
     # NOTE: If this group is private then the controller takes care of bouncing non-members
     #       So we really only need to worry about the "secret" level of privacy. 
     #       (But it's not that hard to be super accurate so we will be.)
-    @current_user_can_see_entries = (@tag.type == 'requirement') && ((@tag.privacy == 'public') \
+    @current_user_can_see_entries = (@tag.type == 'requirement') && (@badge_list_admin \
+        || (@tag.privacy == 'public') \
         || ((@tag.privacy == 'private') && (@current_user_is_member || @current_user_is_admin)) \
         || ((@tag.privacy == 'secret') && (@current_user_is_admin \
           || ((@badge.awardability == 'experts') && @current_user_is_expert))))

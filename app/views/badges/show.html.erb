@@ -1,7 +1,5 @@
 <% 
   provide(:title, "#{@badge.name} - #{@group.name}")
-  provide(:show_subheader, true)
-  provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
 
   is_group_member = @current_user_is_member || @current_user_is_admin
@@ -10,14 +8,6 @@
     (@current_user_is_admin || @current_user_is_member || @group.open?)
   can_join_group = !@current_user_is_member && !@current_user_is_admin && @group.open?
 %>
-
-<% content_for :subheader_links do %>
-  <li>
-    <%= link_to @group.url_with_caps, group_path(@group) %>
-    <span class="divider">/</span>
-  </li>
-  <li class="active"><%= @badge.url_with_caps %></li>
-<% end %>
 
 <% content_for :extra_footer_text do %>
   This badge's image includes the following elements from

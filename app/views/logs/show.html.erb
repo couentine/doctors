@@ -1,7 +1,5 @@
 <% 
   provide(:title, "#{@user.name} - #{@badge.name}")
-  provide(:show_subheader, true)
-  provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
   provide(:include_ob_issuer, true)
 
@@ -23,93 +21,6 @@
     provide(:metadata_url, group_badge_log_url(@group, @badge, @log))
   end
 %>
-
-<% content_for :subheader_links do %>
-  <li>
-    <%= link_to @group.url_with_caps, @group %>
-    <span class="divider">/</span>
-  </li>
-  <li>
-    <%= link_to @badge.url_with_caps, [@group, @badge] %>
-    <span class="divider">/</span>
-  </li>
-  <li class="active">
-    u
-    <span class="divider">/</span>
-    <%= @user.username_with_caps %>
-  </li>
-<% end %>
-
-<% if @current_user_is_expert || @current_user_is_learner || @can_award_badge %>
-  <% content_for :subheader_actions do %>
-
-    <% if !@current_user_is_log_owner && !@current_user_log.nil? %>
-      <li  class="collapsible">
-        <%= link_to "<i class='icon-user icon-white'></i> View Your #{@badge.log.capitalize}".html_safe, 
-            [@group, @badge, @current_user_log] %>
-        <% if @can_award_badge || @badge_list_admin %>
-          <span class="divider">|</span>
-        <% end %>
-      </li>
-    <% end %>
-
-    <% if @can_award_badge && !@current_user_is_log_owner && @validation.nil? %>
-      <li class="collapsible">
-        <% if @log.validation_status == 'requested' %>
-          <%= link_to "<i class='icon-check icon-white'></i> Add feedback".html_safe,
-            new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
-        <% else %>
-          <%= link_to "<i class='fa fa-shield'></i> Award badge".html_safe,
-            new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation') %>
-        <% end %>
-
-        <% if @badge_list_admin %>
-          <span class="divider">|</span>
-        <% end %>
-      </li>
-    <% end %>
-
-    <% if @current_user_is_log_owner || @badge_list_admin %>
-      <li class="collapsible">
-        <div class="dropdown">
-          <a href="#" class="dropdown-toggle" id="dropdown-subheader-settings" 
-            role="button" data-toggle="dropdown" data-target="#">
-            Log Settings
-            <i class="icon-cog icon-white"></i>
-            <b class="caret"></b>
-          </a>
-          <ul class="dropdown-menu pull-right" role="menu" 
-            aria-labelledby="dropdown-subheader-settings">
-            <li>
-              <a href="#log-visibility" tabindex="-1" data-toggle="modal">
-                <i class="icon-pencil"></i> 
-                Edit your badge membership
-              </a>
-            </li>
-            <% if @log.validation_status == 'requested' %>
-              <li>
-                <%= link_to "<i class='icon-flag'></i>Withdraw feedback request".html_safe,
-                  group_badge_log_path(@group, @badge, @log, log: { date_withdrawn: Time.now }), 
-                  method: :put, data: { confirm: "Are you sure you want to withdraw your request "\
-                  + "for feedback on your progress log? \n\n"\
-                  + "TIP: After withdrawing your request, #{@experts} will still be able to add "\
-                  + "feedback but you will no longer be highlighted as a requester." } %>
-              </li>
-            <% elsif @log.validation_status != 'validated' %>
-              <li>
-                <%= link_to "<i class='fa fa-flag-checkered'></i> Request feedback".html_safe,
-                  group_badge_log_path(@group, @badge, @log, log: { date_requested: Time.now }), 
-                  method: :put, data: { confirm: "Are you sure you want to send a request to all "\
-                  + "of the #{@experts} asking for them to validate your progress log?" } %>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-      </li>
-    <% end %>
-
-  <% end %>
-<% end %>
 
 <!-- === LOG SPECIFIC SCRIPTS === -->
 
@@ -273,7 +184,8 @@
               </h3>
             </td>
             
-            <td class="separator hidden-phone <%= (@show_sharing) ? 'with-footer' : '' %>">
+            <% has_footer = @current_user_is_log_owner || @can_award_badge || @badge_list_admin %>
+            <td class="separator hidden-phone <%= (has_footer) ? 'with-footer' : '' %>">
               <span>&nbsp;</span>
             </td>
             
@@ -315,18 +227,74 @@
             </td>
           </tr>
 
-          <% if @show_sharing %>
-            <tr class="footer-row highlight-tertiary">
+          <% if has_footer %>
+            <tr class="footer-row <%= (@show_sharing) ? 'highlight-tertiary' : '' %>">
               <td colspan="5">
                 <span class="label-text">
-                  You've been awarded this badge.
+                  <% if @show_sharing %>
+                    You've been awarded this badge.
+                  <% elsif @current_user_is_log_owner %>
+                    This is your <%= @badge.progress_log %>.
+                  <% elsif @can_award_badge %>
+                    You're a badge awarder.
+                  <% end %>
                 </span>
+                
                 <ul class="action-list">
-                  <li>
-                    <%= link_to '<i class="fa fa-share-alt"></i> Share the badge'.html_safe, 
-                      '#badge-sharing', id: 'share-badge', class: 'btn btn-small', 
-                      data: { toggle: 'modal' } %>
-                  </li>
+                  <% if @show_sharing %>
+                    <li>
+                      <%= link_to '<i class="fa fa-share-alt"></i> Share the badge'.html_safe, 
+                        '#badge-sharing', id: 'share-badge', class: 'btn btn-small', 
+                        data: { toggle: 'modal' } %>
+                    </li>
+                  <% end %>
+
+                  <% if @can_award_badge && !@current_user_is_log_owner && @validation.nil? %>
+                    <li>
+                      <% if @log.validation_status == 'requested' %>
+                        <%= link_to "<i class='fa fa-check-square-o'></i> Add feedback".html_safe,
+                        new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'),
+                        class: 'btn btn-small' %>
+                      <% else %>
+                        <%= link_to "<i class='fa fa-shield'></i> Award badge".html_safe,
+                        new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'),
+                        class: 'btn btn-small' %>
+                      <% end %>
+                    </li>
+                  <% end %>
+
+                  <% if @current_user_is_log_owner || @badge_list_admin %>
+                    <li>
+                      <a href="#log-visibility" tabindex="-1" data-toggle="modal" 
+                          class="btn btn-small">
+                        <i class="fa fa-pencil"></i> 
+                        Edit badge membership
+                      </a>
+                    </li>
+                    <% if @log.validation_status == 'requested' %>
+                      <li>
+                        <%= link_to "<i class='fa fa-flag'></i> ".html_safe \
+                          + "Withdraw feedback request".html_safe,
+                          group_badge_log_path(@group, @badge, @log, 
+                          log: { date_withdrawn: Time.now }), method: :put, class: 'btn btn-small',
+                          data: { confirm: "Are you sure you want to withdraw your request "\
+                          + "for feedback on your progress log? \n\nTIP: After withdrawing your "\
+                          + "request, #{@experts} will still be able to add "\
+                          + "feedback but you will no longer be highlighted as a requester." } %>
+                      </li>
+                    <% elsif @log.validation_status != 'validated' %>
+                      <li>
+                        <%= link_to "<i class='fa fa-flag-checkered'></i> ".html_safe \
+                          + "Request feedback".html_safe, group_badge_log_path(@group, @badge, 
+                          @log, log: { date_requested: Time.now }), method: :put, 
+                          class: 'btn btn-small', data: 
+                          { confirm: "Are you sure you want to send a request to all "\
+                          + "of the #{@experts} asking for them to validate your progress log?" } %>
+                      </li>
+                    <% end %>
+                  <% end %>
+
+
                 </ul>
               </td>
             </tr>
@@ -348,17 +316,17 @@
 
         <% if @current_user_is_log_owner %>
           <% if !@validation.nil? %>
-            <%= link_to "<i class='icon-pencil'></i> Update self endorsement".html_safe,
+            <%= link_to "<i class='fa fa-pencil'></i> Update self endorsement".html_safe,
               edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
               class: 'btn btn-small' %>
           <% end %>
         <% elsif @can_award_badge %>
           <% if @validation.nil? %>
-            <%= link_to "<i class='icon-check'></i> Add feedback".html_safe,
+            <%= link_to "<i class='fa fa-check-square-o'></i> Add feedback".html_safe,
               new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
               class: 'btn btn-small' %>
           <% else %>
-            <%= link_to "<i class='icon-pencil'></i> Update your feedback".html_safe,
+            <%= link_to "<i class='fa fa-pencil'></i> Update your feedback".html_safe,
               edit_group_badge_log_entry_path(@group, @badge, @log, @validation), 
               class: 'btn btn-small' %>
           <% end %>
@@ -390,7 +358,7 @@
             This <%= @learner %> needs feedback! To add your feedback, click the button
             below and let the <%= @learner %> know whether or not your believe they have mastered
             the badge.<br><br>
-            <%= link_to "<i class='icon-check icon-white'></i> Add feedback".html_safe,
+            <%= link_to "<i class='fa fa-check-square-o'></i> Add feedback".html_safe,
               new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
               class: 'btn btn-success' %>
           <% elsif @current_user_is_log_owner %>
