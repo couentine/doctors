@@ -34,6 +34,7 @@ gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 # gem 'carrierwave'
 gem 'fog'
 gem 'newrelic_rpm'
+gem 'intercom-rails'
 
 # Pagination
 

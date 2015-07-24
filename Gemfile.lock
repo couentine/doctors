@@ -200,6 +200,8 @@ GEM
     http_parser.rb (0.6.0)
     i18n (0.7.0)
     inflecto (0.0.2)
+    intercom-rails (0.2.28)
+      activesupport (> 3.0)
     ipaddress (0.8.0)
     journey (1.0.4)
     jquery-rails (3.1.2)
@@ -398,6 +400,7 @@ DEPENDENCIES
   faker
   fog
   font-awesome-rails (~> 4.3)
+  intercom-rails
   jquery-rails (~> 3.1.2)
   kaminari (~> 0.16.1)
   kaminari-bootstrap (~> 0.1.3)
