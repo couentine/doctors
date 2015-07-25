@@ -124,7 +124,12 @@ class User
   # === INSTANCE METHODS === #
 
   def to_param
-    username
+    username_with_caps
+  end
+
+  # Returns full URL to this user's profile based on current root URL
+  def profile_url
+    "#{ENV['root_url'] || 'http://badgelist.com'}/u/#{username_with_caps}"
   end
 
   # Updates last_active

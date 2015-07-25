@@ -117,6 +117,10 @@ class Group
   def primary_email; (!creator.nil?) ? creator.email : nil; end
   def issuer_website; (website.blank?) ? "#{ENV['root_url']}/#{url}" : website; end
 
+  def group_url
+    "#{ENV['root_url'] || 'http://badgelist.com'}/#{url_with_caps}"
+  end
+
   # === GROUP METHODS === #
 
   # This will find by ObjectId OR by URL
@@ -294,7 +298,7 @@ class Group
   # === INSTANCE METHODS === #
 
   def to_param
-    url
+    url_with_caps
   end
 
   def set_flag(flag)

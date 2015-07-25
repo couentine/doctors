@@ -48,11 +48,12 @@ IntercomRails.config do |config|
   # A hash of additional data you wish to send about your users.
   # You can provide either a method name which will be sent to the current
   # user object, or a Proc which will be passed the current user.
-  #
-  # config.user.custom_data = {
-  #   :plan => Proc.new { |current_user| current_user.plan.name },
-  #   :favorite_color => :favorite_color
-  # }
+  config.user.custom_data = {
+    :username => :username_with_caps,
+    :profile_url => :profile_url,
+    :flags => :flags,
+    :admin => :admin
+  }
 
   # == User -> Company association
   # A Proc that given a user returns an array of companies
@@ -66,29 +67,64 @@ IntercomRails.config do |config|
   # in your controllers. 'Companies' are generic groupings of users, so this
   # could be a company, app or group.
   #
-  # config.company.current = Proc.new { current_company }
+  config.company.current = Proc.new { current_user_group }
 
   # == Company Custom Data
   # A hash of additional data you wish to send about a company.
   # This works the same as User custom data above.
-  #
-  # config.company.custom_data = {
-  #   :number_of_messages => Proc.new { |app| app.messages.count },
-  #   :is_interesting => :is_interesting?
-  # }
+  config.company.custom_data = {
+    :group_url => :group_url,
+    :location => :location,
+    :website => :website,
+    :type => :type,
+    :flags => :flags,
+    :user_limit => :user_limit,
+    :admin_limit => :admin_limit,
+    :sub_group_limit => :sub_group_limit,
+    :total_user_count => :total_user_count,
+    :admin_count => :admin_count,
+    :member_count => :member_count,
+    :sub_group_count => :sub_group_count,
+    :pricing_group => :pricing_group,
+    :subscription_plan => :subscription_plan,
+    :subscription_end_date => :subscription_end_date,
+    :stripe_payment_fail_date => :stripe_payment_fail_date,
+    :stripe_payment_retry_date => :stripe_payment_retry_date,
+    :stripe_subscription_card => :stripe_subscription_card,
+    :stripe_subscription_id => :stripe_subscription_id,
+    :stripe_subscription_details => :stripe_subscription_details,
+    :stripe_subscription_status => :stripe_subscription_status
+  }
 
   # == Company Plan name
   # This is the name of the plan a company is currently paying (or not paying) for.
   # e.g. Messaging, Free, Pro, etc.
   #
-  # config.company.plan = Proc.new { |current_company| current_company.plan.name }
+  config.company.plan = Proc.new do |current_company| 
+    if current_company.subscription_plan
+      ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['name']
+    else
+      nil
+    end
+  end
 
   # == Company Monthly Spend
   # This is the amount the company spends each month on your app. If your company
   # has a plan, it will set the 'total value' of that plan appropriately.
   #
-  # config.company.monthly_spend = Proc.new { |current_company| current_company.plan.price }
-  # config.company.monthly_spend = Proc.new { |current_company| (current_company.plan.price - current_company.subscription.discount) }
+  config.company.plan = Proc.new do |current_company| 
+    if current_company.subscription_plan
+      if ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['interval'] == 'month'
+        ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['amount']
+      elsif ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['interval'] == 'year'
+        ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['amount'] / 12
+      else
+        0
+      end
+    else
+      nil
+    end
+  end
 
   # == Custom Style
   # By default, Intercom will add a button that opens the messenger to
