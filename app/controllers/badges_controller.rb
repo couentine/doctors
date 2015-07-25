@@ -405,6 +405,9 @@ private
     @badge_list_admin = current_user && current_user.admin?
     @can_edit_badge = @current_user_is_admin || @badge_list_admin
     @can_award_badge = @current_user_is_admin
+
+    # Set current group (for analytics) only if user is logged in and a member
+    current_user_group = @group if @current_user_is_member || @current_user_is_admin
   end
 
   def find_all_records

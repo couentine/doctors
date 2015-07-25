@@ -73,6 +73,7 @@ IntercomRails.config do |config|
   # A hash of additional data you wish to send about a company.
   # This works the same as User custom data above.
   config.company.custom_data = {
+    :last_activity_at => Proc.new { Time.now },
     :group_url => :group_url,
     :location => :location,
     :website => :website,
@@ -100,9 +101,9 @@ IntercomRails.config do |config|
   # This is the name of the plan a company is currently paying (or not paying) for.
   # e.g. Messaging, Free, Pro, etc.
   #
-  config.company.plan = Proc.new do |current_company| 
-    if current_company.subscription_plan
-      ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['name']
+  config.company.plan = Proc.new do |group| 
+    if group.subscription_plan
+      ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['name']
     else
       nil
     end
@@ -112,12 +113,12 @@ IntercomRails.config do |config|
   # This is the amount the company spends each month on your app. If your company
   # has a plan, it will set the 'total value' of that plan appropriately.
   #
-  config.company.plan = Proc.new do |current_company| 
-    if current_company.subscription_plan
-      if ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['interval'] == 'month'
-        ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['amount']
-      elsif ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['interval'] == 'year'
-        ALL_SUBSCRIPTION_PLANS[current_company.subscription_plan]['amount'] / 12
+  config.company.plan = Proc.new do |group| 
+    if group.subscription_plan
+      if ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['interval'] == 'month'
+        ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['amount']
+      elsif ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['interval'] == 'year'
+        ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['amount'] / 12
       else
         0
       end
