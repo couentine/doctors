@@ -30,6 +30,7 @@ twitter_consumer_secret=abc123
 twitter_access_token=abc123
 twitter_access_secret=abc123
 ULTRAHOOK_API_KEY=abc123
+INTERCOM_APP_ID=abc123
 ```
 
 ## Running foreman ##
