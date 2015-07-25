@@ -53,10 +53,6 @@ IntercomRails.config do |config|
     :profile_url => :profile_url,
     :flags => :flags,
     :admin => :admin,
-    :admin_of_ids => Proc.new{ |user| user.admin_of_ids.to_json },
-    :member_of_ids => Proc.new{ |user| user.member_of_ids.to_json },
-    :created_group_ids => Proc.new{ |user| user.created_group_ids.to_json },
-    :owned_group_ids => Proc.new{ |user| user.owned_group_ids.to_json },
     :created_group_count => Proc.new{ |user| (user.created_group_ids || []).count },
     :owned_group_count => Proc.new{ |user| (user.owned_group_ids || []).count },
     :created_badge_count => Proc.new{ |user| (user.created_badge_ids || []).count },
@@ -75,7 +71,7 @@ IntercomRails.config do |config|
   # in your controllers. 'Companies' are generic groupings of users, so this
   # could be a company, app or group.
   #
-  config.company.current = Proc.new { current_user_group }
+  config.company.current = Proc.new { @current_user_group }
 
   # == Company Custom Data
   # A hash of additional data you wish to send about a company.
@@ -101,7 +97,6 @@ IntercomRails.config do |config|
     :stripe_payment_retry_date => :stripe_payment_retry_date,
     :stripe_subscription_card => :stripe_subscription_card,
     :stripe_subscription_id => :stripe_subscription_id,
-    :stripe_subscription_details => :stripe_subscription_details,
     :stripe_subscription_status => :stripe_subscription_status,
     :creator => :creator_id,
     :owner => :owner_id
@@ -110,7 +105,6 @@ IntercomRails.config do |config|
   # == Company Plan name
   # This is the name of the plan a company is currently paying (or not paying) for.
   # e.g. Messaging, Free, Pro, etc.
-  #
   config.company.plan = Proc.new do |group| 
     if group.subscription_plan
       ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['name']
@@ -122,13 +116,12 @@ IntercomRails.config do |config|
   # == Company Monthly Spend
   # This is the amount the company spends each month on your app. If your company
   # has a plan, it will set the 'total value' of that plan appropriately.
-  #
-  config.company.plan = Proc.new do |group| 
+  config.company.monthly_spend = Proc.new do |group| 
     if group.subscription_plan
       if ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['interval'] == 'month'
-        ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['amount']
+        ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['amount'] / 100
       elsif ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['interval'] == 'year'
-        ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['amount'] / 12
+        ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['amount'] / 12 / 100
       else
         0
       end

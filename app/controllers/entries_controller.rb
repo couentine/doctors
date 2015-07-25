@@ -190,7 +190,7 @@ private
     @badge_list_admin = current_user && current_user.admin?
 
     # Set current group (for analytics) only if user is logged in and an admin
-    current_user_group = @group if @current_user_is_admin
+    @current_user_group = @group if @current_user_is_admin
 
     # Define badge terminology shortcuts
     @expert = @badge.expert

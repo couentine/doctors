@@ -407,7 +407,7 @@ private
     @can_award_badge = @current_user_is_admin
 
     # Set current group (for analytics) only if user is logged in and an admin
-    current_user_group = @group if @current_user_is_admin
+    @current_user_group = @group if @current_user_is_admin
   end
 
   def find_all_records
