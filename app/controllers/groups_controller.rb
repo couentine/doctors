@@ -515,8 +515,8 @@ private
     @current_user_is_owner = current_user && (@group.owner_id == current_user.id)
     @badge_list_admin = current_user && current_user.admin?
 
-    # Set current group (for analytics) only if user is logged in and a member
-    current_user_group = @group if @current_user_is_member || @current_user_is_admin
+    # Set current group (for analytics) only if user is logged in and an admin
+    current_user_group = @group if @current_user_is_admin
   end
 
   def group_admin

@@ -156,8 +156,8 @@ private
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
     @badge_list_admin = current_user && current_user.admin?
 
-    # Set current group (for analytics) only if user is logged in and a member
-    current_user_group = @group if @current_user_is_member || @current_user_is_admin
+    # Set current group (for analytics) only if user is logged in and an admin
+    current_user_group = @group if @current_user_is_admin
 
     # Define permission variables
     @can_edit_badge = @current_user_is_admin || @badge_list_admin \

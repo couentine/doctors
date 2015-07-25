@@ -206,8 +206,8 @@ private
     @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil if current_user
     @badge_list_admin = current_user && current_user.admin?
 
-    # Set current group (for analytics) only if user is logged in and a member
-    current_user_group = @group if @current_user_is_member || @current_user_is_admin
+    # Set current group (for analytics) only if user is logged in and an admin
+    current_user_group = @group if @current_user_is_admin
 
     # Define badge terminology shortcuts
     @expert = @badge.expert

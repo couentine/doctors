@@ -52,7 +52,15 @@ IntercomRails.config do |config|
     :username => :username_with_caps,
     :profile_url => :profile_url,
     :flags => :flags,
-    :admin => :admin
+    :admin => :admin,
+    :admin_of_ids => Proc.new{ |user| user.admin_of_ids.to_json },
+    :member_of_ids => Proc.new{ |user| user.member_of_ids.to_json },
+    :created_group_ids => Proc.new{ |user| user.created_group_ids.to_json },
+    :owned_group_ids => Proc.new{ |user| user.owned_group_ids.to_json },
+    :created_group_count => Proc.new{ |user| (user.created_group_ids || []).count },
+    :owned_group_count => Proc.new{ |user| (user.owned_group_ids || []).count },
+    :created_badge_count => Proc.new{ |user| (user.created_badge_ids || []).count },
+    :entry_count => Proc.new{ |user| (user.created_entry_ids || []).count }
   }
 
   # == User -> Company association
@@ -94,7 +102,9 @@ IntercomRails.config do |config|
     :stripe_subscription_card => :stripe_subscription_card,
     :stripe_subscription_id => :stripe_subscription_id,
     :stripe_subscription_details => :stripe_subscription_details,
-    :stripe_subscription_status => :stripe_subscription_status
+    :stripe_subscription_status => :stripe_subscription_status,
+    :creator => :creator_id,
+    :owner => :owner_id
   }
 
   # == Company Plan name
