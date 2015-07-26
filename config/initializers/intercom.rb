@@ -1,7 +1,9 @@
 IntercomRails.config do |config|
-  # == Intercom app_id
-  #
-  config.app_id = ENV["INTERCOM_APP_ID"]
+  # Init the RAILS gem
+  config.app_id = ENV['INTERCOM_APP_ID']
+  
+  # Init the normal RUBY gem
+# intercom = Intercom::Client.new(app_id: ENV['INTERCOM_APP_ID'], api_key: ENV['INTERCOM_API_KEY'])
 
   # == Intercom secret key
   # This is required to enable secure mode, you can find it on your Setup
@@ -99,7 +101,8 @@ IntercomRails.config do |config|
     :stripe_subscription_id => :stripe_subscription_id,
     :stripe_subscription_status => :stripe_subscription_status,
     :creator => :creator_id,
-    :owner => :owner_id
+    :owner => :owner_id,
+    :badge_count => Proc.new { |group| (group.badge_ids || []).count }
   }
 
   # == Company Plan name

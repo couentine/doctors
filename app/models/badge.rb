@@ -108,12 +108,18 @@ class Badge
   after_save :update_requirement_editability
   before_update :move_badge_if_needed
 
+  before_save :update_analytics
+
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
 
   def image_as_url; "#{ENV['root_url']}/#{group.url}/#{url}.png"; end
   def criteria_url; "#{ENV['root_url']}/#{group.url}/#{url}"; end
   def issuer_url; "#{ENV['root_url']}/#{group.url}.json"; end
+
+  def badge_url
+    "#{ENV['root_url'] || 'http://badgelist.com'}/#{group.url_with_caps}/#{url_with_caps}"
+  end
 
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields
@@ -197,7 +203,7 @@ class Badge
   # === INSTANCE METHODS === #
 
   def to_param
-    url
+    url_with_caps
   end
 
   # Returns 'design' or 'upload' based on whether there is an uploaded badge image
@@ -542,6 +548,25 @@ protected
       new_group = Group.find(move_to_group_id)
       self.move_badge_to new_group
       self.move_to_group_id = nil
+    end
+  end
+
+  #=== ANALYTICS ===#
+
+  def update_analytics
+    if new_record?
+      IntercomEventWorker.perform_async({
+        'event_name' => 'badge-create',
+        'email' => creator.email,
+        'created_at' => Time.now.to_i,
+        'metadata' => {
+          'group_id' => group.id.to_s,
+          'group_name' => group.name,
+          'badge_id' => id.to_s,
+          'badge_name' => name,
+          'badge_url' => badge_url
+        }
+      })
     end
   end
 

@@ -413,6 +413,19 @@ class GroupsController < ApplicationController
         users_to_add = match_results[:matched_users]
         emails_to_invite = match_results[:unmatched_emails]
 
+        # First update analytics
+        IntercomEventWorker.perform_async({
+          'event_name' => (@type == :admin) ? 'group-admins-invite' : 'group-members-invite',
+          'email' => current_user.email,
+          'created_at' => Time.now.to_i,
+          'metadata' => {
+            'group_id' => @group.id.to_s,
+            'group_name' => @group.name,
+            'group_url' => @group.group_url,
+            'invitee_count' => valid_emails.count  
+          }
+        })
+
         # For existing users: We can add them right away
         unless users_to_add.empty?
           badge_ids = []

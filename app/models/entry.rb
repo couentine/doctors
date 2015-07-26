@@ -72,6 +72,8 @@ class Entry
   after_create :update_log
   after_create :send_notifications
   after_destroy :check_log_validation_counts
+
+  before_save :update_analytics
   
   # === ENTRY METHODS === #
 
@@ -297,6 +299,18 @@ protected
         log.rejection_count -= 1
       end
       log.save
+    end
+  end
+
+  #=== ANALYTICS ===#
+
+  def update_analytics
+    if new_record?
+      IntercomEventWorker.perform_async({
+        'event_name' => (type == 'validation') ? 'validation-create' : 'post-create',
+        'email' => creator.email,
+        'created_at' => Time.now.to_i
+      })
     end
   end
 

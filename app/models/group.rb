@@ -110,6 +110,8 @@ class Group
   before_update :create_another_subscription
   after_update :update_stripe_if_needed
   before_destroy :cancel_subscription_on_destroy
+  
+  before_save :update_analytics
 
   # === GROUP MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -764,6 +766,24 @@ protected
   def cancel_subscription_on_destroy
     if !stripe_subscription_id.blank?
       cancel_stripe_subscription(false, true); # asynchronous
+    end
+  end
+
+  #=== ANALYTICS ===#
+
+  def update_analytics
+    if new_record?
+      IntercomEventWorker.perform_async({
+        'event_name' => 'group-create',
+        'email' => creator.email,
+        'created_at' => Time.now.to_i,
+        'metadata' => {
+          'group_id' => id.to_s,
+          'group_name' => name,
+          'group_url' => group_url,
+          'group_type' => type
+        },
+      })
     end
   end
 

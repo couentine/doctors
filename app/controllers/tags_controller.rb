@@ -121,7 +121,7 @@ class TagsController < ApplicationController
       if @tag_exists
         if @tag.update_attributes(params[:tag])
           format.html do
-            flash[:notice] = 'Requirement page was successfully updated.'
+            flash[:notice] = "#{@tag.type.capitalize} page was successfully updated."
             redirect_to [@group, @badge, @tag]
           end
           format.json { head :no_content }
@@ -132,8 +132,27 @@ class TagsController < ApplicationController
       else
         @tag.badge = @badge
         if @tag.save
+          # First update analytics if this is a wiki page
+          if @tag.type == 'wiki'
+            IntercomEventWorker.perform_async({
+              'event_name' => 'wiki-create',
+              'email' => current_user.email,
+              'created_at' => Time.now.to_i,
+              'metadata' => {
+                'group_id' => @group.id.to_s,
+                'group_name' => @group.name,
+                'badge_id' => @badge.id.to_s,
+                'badge_name' => @badge.name,
+                'badge_url' => @badge.badge_url,
+                'tag_name' => @tag.name_with_caps,
+                'tag_url' => "#{@badge.badge_url}/#{@tag.name_with_caps}".first(255)
+              }
+            })
+          end
+
+          # Then respond to user
           format.html do
-            flash[:notice] = 'Requirement page was successfully created.'
+            flash[:notice] = "#{@tag.type.capitalize} page was successfully created."
             redirect_to [@group, @badge, @tag]
           end
           format.json { head :no_content }
