@@ -33,8 +33,8 @@ class UsersController < ApplicationController
   # Accepts page parameters: page, page_size
   def show
     @user = User.find(params[:id]) || not_found
-    @expert_group_badge_log_list = @user.expert_group_badge_log_list
     @this_is_current_user = current_user && (@user == current_user)
+    @group_badge_log_list = @user.group_badge_log_list(!@this_is_current_user)
 
     respond_to do |format|
       format.html # show.html.erb

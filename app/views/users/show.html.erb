@@ -40,7 +40,7 @@
 
 <!-- === AWARDED BADGES === -->
 
-<% if @expert_group_badge_log_list.blank? %>
+<% if @group_badge_log_list.blank? %>
 
   <div class="row">
     <div class="well span7 offset2">
@@ -63,7 +63,7 @@
   <div class="row">
     <div class="span12">
       <div class="container-card evidence-card">
-        <% @expert_group_badge_log_list.each do |group_row| 
+        <% @group_badge_log_list.each do |group_row| 
           group = group_row[:group]
           group_type = group_row[:type] %>
             
@@ -86,7 +86,7 @@
               badge = badge_row[:badge]
               log = badge_row[:log] %>
 
-              <div class="inner-row">
+              <div class="inner-row <%= (log.validation_status=='validated') ? '' : 'learner' %>">
                 <%= link_to image_tag(group_badge_path(group, badge, format: :png)), 
                   "/#{group.to_param}/#{badge.to_param}/u/#{@user.username}", 
                   title: "View the badge", class: "image-link" %>
@@ -96,13 +96,20 @@
                     "/#{group.to_param}/#{badge.to_param}/u/#{@user.username}" %>
                 </h2>
                 <h3>
-                  <%= badge.expert.capitalize %> since <%= log.date_issued.to_s(:short_date) %>
+                  <% if log.validation_status == 'validated' %>
+                    <%= badge.expert.capitalize %> since <%= log.date_issued.to_s(:short_date) %>
+                    <% if !log.show_on_profile %>
+                      (Hidden from public)
+                    <% end %>
+                  <% else %>
+                    <%= badge.learner.capitalize %> since <%= log.date_started.to_s(:short_date) %>
+                  <% end %>
                 </h3>
               </div>
             <% end %>
           </div>
 
-        <% end %> <!-- === # END: @expert_group_badge_log_list.each === -->
+        <% end %> <!-- === # END: @group_badge_log_list.each === -->
       </div>
     </div>
   </div>

@@ -190,7 +190,7 @@
             </td>
             
             <td class="right-panel with-right-image ">
-              <h1><%= link_to @user.name, @user, title: 'View Badge List user profile' %></h1>
+              <h1><%= link_to @user.name, @user, title: 'View badge profile' %></h1>
               <h2>
                 <%= 
                   if @log.validation_status == 'validated'
@@ -232,7 +232,14 @@
               <td colspan="5">
                 <span class="label-text">
                   <% if @show_sharing %>
-                    You've been awarded this badge.
+                    You've been awarded this badge and 
+                    <% if @log.show_on_profile %>
+                      it's visible on your 
+                      <%= link_to 'badge profile', @user, title: 'View your badge profile' %>.
+                    <% else %>
+                      it's hidden from your 
+                      <%= link_to 'badge profile', @user, title: 'View your badge profile' %>.
+                    <% end %>
                   <% elsif @current_user_is_log_owner %>
                     This is your <%= @badge.progress_log %>.
                   <% elsif @can_award_badge %>

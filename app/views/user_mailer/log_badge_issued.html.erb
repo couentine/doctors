@@ -28,8 +28,11 @@
             <% else %>
             
               <p>
-                You have been awarded the <%= link_to @badge.name, group_badge_url(@group, @badge) %> badge in 
-                Badge List. You are now one of the badge <%= @badge.experts %>, congratulations!
+                You have been awarded the 
+                <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
+                badge in Badge List. It has been added to your 
+                <%= link_to 'badge profile', "#{ENV['root_url']}/u/#{@to_user.username_with_caps}"%>
+                and you are now one of the <%= @badge.experts %>, congratulations!
               </p>
               <p>
                 Click the link below to view your newly awarded badge.

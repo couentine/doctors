@@ -1526,6 +1526,13 @@ form#group-add-users-form {
           line-height: 1.3em;
           font-size: 14px;
           color: white;
+
+          a {
+            color: inherit;
+            text-decoration: underline;
+
+            &:hover, &:focus { border-bottom: none; color: light-text-color; }
+          }
         }
         ul.action-list {
           display: inline-block;
@@ -2828,6 +2835,8 @@ div.topic-list-card, div.group-list-card {
         display: inline-block;
         padding: 20px;
         text-align: center;
+        border: 4px solid transparent;
+        border-radius: 12px;
 
         .image-link img {
           width: 150px;
@@ -2858,6 +2867,13 @@ div.topic-list-card, div.group-list-card {
         h3 { 
           font-size: 0.8em; 
           color: $light-text-color;
+        }
+        
+        &.learner {
+          border: 4px dashed $medium-gray;
+          opacity: 0.6;
+
+          h3 { background-color: $primary-light; color: white; }
         }
       }
     }

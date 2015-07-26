@@ -256,7 +256,8 @@ class User
     return logs.where(validation_status: 'validated')
   end
 
-  # Returns all expert badge logs grouped by badge, then group. Doesn't filter out anything.
+  # Returns all badge logs by group. Doesn't filter out anything.
+  # If public_only then only gets expert logs, otherwise returns everything except detached logs.
   #
   # Return array has one entry for each group = {
   #   :type => one_of['Admin', 'Member'],
@@ -265,14 +266,23 @@ class User
   #                 :log]
   #              } }
   # >> Return array is sorted by group name
-  def expert_group_badge_log_list()
+  def group_badge_log_list(public_only = true)
     badge_map, log_map = {}, {} # group_id => badges[], #badge_id => logs
     group_ids, badge_ids = [], []
     return_rows = []
 
+    # First build the query
+
     # Get all expert logs which aren't hidden or detached
-    logs.where(validation_status: 'validated', show_on_profile: true, 
-        detached_log: false).each do |log|
+    if public_only 
+      log_query = logs.where(validation_status: 'validated', show_on_profile: true, 
+        detached_log: false)
+    else
+      log_query = logs.where(detached_log: false)
+    end
+
+    # Run through the log query and build the map
+    log_query.each do |log|
       badge_ids << log.badge_id unless badge_ids.include? log.badge_id      
       log_map[log.badge_id] = log
     end
