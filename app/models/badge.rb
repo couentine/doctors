@@ -50,14 +50,16 @@ class Badge
   field :image_icon,                      type: String
   field :image_color1,                    type: String
   field :image_color2,                    type: String
-  field :image_url,                       type: String # RETIRED field
-  field :image,                           type: Moped::BSON::Binary # stores the designed image
-  field :image_wide,                      type: Moped::BSON::Binary
-
+  field :designed_image,                  type: String
+  mount_uploader :designed_image,         S3BadgeUploader
+  field :custom_image,                    type: String
+  mount_uploader :custom_image,           S3BadgeUploader
   field :image_attributions,              type: Array
-  field :icon_search_text,                type: String # stores what user searched for b4 picking
-  field :uploaded_image,                  type: String # powered by the carrierwave gem
-  mount_uploader :uploaded_image,     ImageUploader
+  
+  field :uploaded_image,                  type: String # RETIRED
+  mount_uploader :uploaded_image,         ImageUploader # RETIRED
+  field :image,                           type: Moped::BSON::Binary # RETIRED
+  field :image_wide,                      type: Moped::BSON::Binary # RETIRED
 
   field :current_user,                    type: String # used when logging info_versions
   field :current_username,                type: String # used when logging info_versions
@@ -469,11 +471,23 @@ protected
       # First build the image
       badge_image = BadgeMaker.build_image(frame: image_frame, icon: image_icon, 
         color1: image_color1, color2: image_color2)
-      unless badge_image.nil?
-        self.image = badge_image.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
-        badge_image_wide = BadgeMaker.build_wide_image(badge_image)
-        self.image_wide = badge_image_wide.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
-      end
+      
+      # unless badge_image.nil?
+      #   self.image = badge_image.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
+      #   badge_image_wide = BadgeMaker.build_wide_image(badge_image)
+      #   self.image_wide = badge_image_wide.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
+      # end
+
+      # Then prepare the image for uploading to s3
+      tempfile = Tempfile.new('badge_image')
+      tempfile.binmode
+      tempfile.write(Base64.decode64(badge_image.tempfile))
+      self.designed_image = \
+        ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
+          filename: 'badge_image.png', type: badge_image.content_type, head: badge_image.headers)
+
+        # LEFT OFF HERE... next step is to think through the above (make sure i'm not misencoding) 
+        #                   then work through the rest of the callback process and fix everything
 
       # Then store the attribution information 
       # Note: The parameters will only be missing for test data, randomization for users will happen
