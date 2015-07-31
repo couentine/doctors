@@ -73,7 +73,7 @@
     });
 
     // Check image file size after selection 
-    $('#badge_uploaded_image').bind('change', function() {
+    $('#badge_custom_image').bind('change', function() {
       if ($(this).val().trim() != "") {
         if (this.files[0].size > MAX_IMAGE_UPLOAD_SIZE) {
           alert("The image you have selected is too big. The maximum supported file size is "
@@ -87,7 +87,7 @@
       <% if @badge.errors.blank? %>
         // Then select a random badge
         randomize();
-      <% elsif @badge.uploaded_image.blank? %>
+      <% elsif @badge.custom_image.blank? %>
         // Load the current badge
         updateBadgeImagePreview();
       <% end %>
@@ -420,7 +420,7 @@
   }
 
   function goUploadMode() {
-    $("#badge_remove_uploaded_image").val(false);
+    $("#badge_remove_custom_image").val(false);
     $("#badge-buttons-design").hide();
     $("#badge-buttons-upload").show();
     $("#badge-image-editor").slideUp();
@@ -432,10 +432,10 @@
 
   function removeUpload() {
     // Blank out the upload if present and set the remove uploaded image hidden value
-    $("#badge_uploaded_image").val(""); 
+    $("#badge_custom_image").val(""); 
     if (badgeImageModeOnStart == "upload") {
       // We only need to remove the image if there was an upload to start with
-      $("#badge_remove_uploaded_image").val(true);
+      $("#badge_remove_custom_image").val(true);
     }
 
     $("#badge-buttons-upload").hide();
@@ -463,7 +463,7 @@
             <% else %>
               <%= image_tag "image-upload.png", id: "badge-image" %>
             <% end %>
-          <% elsif !@badge.errors[:uploaded_image].blank? %>
+          <% elsif !@badge.errors[:custom_image].blank? %>
             <%= image_tag "image-upload.png", id: "badge-image" %>
           <% else %>
             <img src="<%= group_badge_path(@group, @badge, format: :png) %>" id="badge-image"/>
@@ -508,10 +508,10 @@
       </div>
 
       <div id="badge-image-uploader" 
-        style="<%= ((@badge.image_mode == 'upload') && !@badge.errors[:uploaded_image].blank?) ? \
+        style="<%= ((@badge.image_mode == 'upload') && !@badge.errors[:custom_image].blank?) ? \
           '' : 'display:none' %>">
         <div id="badge_image_uploader">
-          <%= f.input :uploaded_image, as: :file, label: 'Badge Image File',
+          <%= f.input :custom_image, as: :file, label: 'Badge Image File',
             hint: ("<p><b>Only PNG images are supported.</b><p>" \
               + "<p>For best results use square images " \
               + "which are 500 pixels in width and height.</p>" \
@@ -523,8 +523,8 @@
               + "</ul></p>").html_safe, 
             input_html: { accept: 'image/png' },
             label_html: { style: "display:none;" } %>
-          <%= f.input :uploaded_image_cache, as: :hidden %>
-          <%= f.input :remove_uploaded_image, as: :hidden %>
+          <%= f.input :custom_image_cache, as: :hidden %>
+          <%= f.input :remove_custom_image, as: :hidden %>
         </div>
       </div>
       

@@ -15,10 +15,12 @@ class Poller
 
   # === FIELDS & VALIDATIONS === #
 
-  field :status,        type: String, default: 'pending'
-  field :completed,     type: Boolean, default: false
-  field :message,       type: String
-  field :data,          type: Hash
+  field :status,            type: String, default: 'pending'
+  field :completed,         type: Boolean, default: false
+  field :message,           type: String
+  field :waiting_message,   type: String
+  field :redirect_to,       type: String
+  field :data,              type: Hash
   
   validates :status, inclusion: { in: STATUS_VALUES, message: "%{value} is not a valid status" }
   

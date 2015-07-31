@@ -132,8 +132,8 @@ class BadgesController < ApplicationController
 
     if @badge.valid?
       # We need to Base64 encode the uploaded file if present
-      if params[:badge][:uploaded_image]
-        file = params[:badge][:uploaded_image]
+      if params[:badge][:custom_image]
+        file = params[:badge][:custom_image]
         file.tempfile.binmode
         file.tempfile = Base64.encode64(file.tempfile.read)
       end
@@ -158,32 +158,35 @@ class BadgesController < ApplicationController
   # PUT /group-url/badge-url?modal=true >> Redirects back to group with flash error on save failure
   # PUT /group-url/badge-url.json
   def update
+    # First build the badge as normal to make sure that it's valid
     @badge.current_user = current_user
     @badge.current_username = current_user.username
+    @badge.assign_attributes(params[:badge])
     @requirement_list = params[:rl]
     
-    respond_to do |format|
-      if @badge.update_attributes(params[:badge])
-        # First update the requirements (won't do anything if requirement list is blank)
-        @badge.update_requirement_list(@requirement_list)
-        
-        # Then redirect
-        format.html { redirect_to [@group, @badge], notice: 'Badge was successfully updated.' }
-        format.json { head :no_content }
-      else
-        set_editing_parameters
-        build_requirement_list if @requirement_list.blank? # rebuild from scratch if neede
-        @allow_url_editing = @badge.expert_logs.length < 2;
+    if @badge.valid?
+      # We need to Base64 encode the uploaded file if present
+      if params[:badge][:custom_image]
+        file = params[:badge][:custom_image]
+        file.tempfile.binmode
+        file.tempfile = Base64.encode64(file.tempfile.read)
+      end
+      
+      poller_id = @badge.update_async(current_user.id, params[:badge], @requirement_list)
+      
+      # Then redirect to the full page poller UI
+      redirect_to poller_path(@poller)
+    else
+      set_editing_parameters
+      build_requirement_list if @requirement_list.blank? # rebuild from scratch if needed
+      @allow_url_editing = @badge.expert_logs.length < 2;
 
-        format.html do 
-          if params[:modal]
-            flash[:error] = "There was a problem updating the badge, try again later.\nError Text: #{@badge.errors}"
-            render action: "show"
-          else
-            render action: "edit"
-          end
-        end
-        format.json { render json: @badge.errors, status: :unprocessable_entity }
+      if params[:modal]
+        flash[:error] = "There was a problem updating the badge, try again later.\n" \
+          + "Error Text: #{@badge.errors}"
+        render action: "show"
+      else
+        render action: "edit"
       end
     end
   end

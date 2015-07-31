@@ -163,12 +163,12 @@ class Badge
       creator = User.find(creator_id)
       
       # We need to Base64 decode the uploaded file if present (and build a new UploadedFile)
-      if badge_params['uploaded_image']
-        file = badge_params['uploaded_image']
+      if badge_params['custom_image']
+        file = badge_params['custom_image']
         tempfile = Tempfile.new('file')
         tempfile.binmode
         tempfile.write(Base64.decode64(file.tempfile))
-        badge_params['uploaded_image'] = \
+        badge_params['custom_image'] = \
           ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
             filename: file.original_filename, type: file.content_type, head: file.headers)
       end
@@ -202,6 +202,64 @@ class Badge
     end
   end
 
+  def update_async(current_user_id, badge_params, requirement_list)
+    poller = Poller.new
+    poller.waiting_message = 'Saving changes to badge...'
+    poller.save
+    Badge.delay(queue: 'high', retry: false).do_update_async(id, current_user_id, badge_params, 
+      requirement_list, poller.id)
+    poller.id
+  end
+
+  # Powers the update_async method above. Not intended to be run directly but could be.
+  def self.do_update_async(badge_id, current_user_id, badge_params, requirement_list, 
+      poller_id = nil)
+    begin
+      # First query for the core records
+      poller = Poller.find(poller_id) rescue nil
+      badge = Badge.find(badge_id)
+      user = User.find(current_user_id)
+      
+      # We need to Base64 decode the uploaded file if present (and build a new UploadedFile)
+      if badge_params['custom_image']
+        file = badge_params['custom_image']
+        tempfile = Tempfile.new('file')
+        tempfile.binmode
+        tempfile.write(Base64.decode64(file.tempfile))
+        badge_params['custom_image'] = \
+          ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
+            filename: file.original_filename, type: file.content_type, head: file.headers)
+      end
+
+      badge.current_user = user
+      badge.current_username = user.username
+
+      # Save the badge and then update the requirements if successful
+      badge.update_attributes!(badge_params)
+      badge.update_requirement_list(requirement_list)
+        
+      # Then save the results
+      if poller
+        poller.status = 'successful'
+        poller.message = "The '#{badge.name}' badge has been successfully updated!"
+        poller.redirect_to = group_badge_url(badge.group_id, badge.id)
+        poller.data = { badge_id: badge.id }
+        poller.save
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to update the badge, ' \
+          + "please try again. (Error message: #{e})"
+        poller.redirect_to = group_badge_url(badge.group_id, badge.id)
+        poller.data = { badge_id: badge.id }
+        poller.save
+      else
+        throw e
+      end
+    end
+  end
+
   # === INSTANCE METHODS === #
 
   def to_param
@@ -210,7 +268,7 @@ class Badge
 
   # Returns 'design' or 'upload' based on whether there is an uploaded badge image
   def image_mode
-    (uploaded_image.blank?) ? 'design' : 'upload'
+    (custom_image.blank?) ? 'design' : 'upload'
   end
 
   def tracks_progress?
@@ -466,28 +524,19 @@ protected
   end
 
   def build_badge_image
-    if image.nil? || image_frame_changed? || image_icon_changed? || image_color1_changed? \
-      || image_color2_changed?
-      # First build the image
+    if designed_image.blank? || image_frame_changed? || image_icon_changed? \
+        || image_color1_changed? || image_color2_changed?
+      
+      # First build the image and manually write it to the designed_image property
       badge_image = BadgeMaker.build_image(frame: image_frame, icon: image_icon, 
         color1: image_color1, color2: image_color2)
-      
-      # unless badge_image.nil?
-      #   self.image = badge_image.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
-      #   badge_image_wide = BadgeMaker.build_wide_image(badge_image)
-      #   self.image_wide = badge_image_wide.to_blob.force_encoding("ISO-8859-1").encode("UTF-8")
-      # end
-
-      # Then prepare the image for uploading to s3
-      tempfile = Tempfile.new('badge_image')
-      tempfile.binmode
-      tempfile.write(Base64.decode64(badge_image.tempfile))
-      self.designed_image = \
-        ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
-          filename: 'badge_image.png', type: badge_image.content_type, head: badge_image.headers)
-
-        # LEFT OFF HERE... next step is to think through the above (make sure i'm not misencoding) 
-        #                   then work through the rest of the callback process and fix everything
+      tempfile = Tempfile.open('designed_badge_image.png')
+      tempfile.write(File.read(badge_image.path))
+      tempfile.close
+      env = { "CONTENT_TYPE" => "image/png" }
+      headers = ActionDispatch::Http::Headers.new(env)
+      self.designed_image = ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
+        filename: 'badge_image.png', type: 'image/png', head: headers)
 
       # Then store the attribution information 
       # Note: The parameters will only be missing for test data, randomization for users will happen
