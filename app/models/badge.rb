@@ -104,10 +104,10 @@ class Badge
   before_validation :update_caps_field
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
-  before_save :build_badge_image
   before_save :update_terms
   after_create :add_creator_as_expert
   after_save :update_requirement_editability
+  before_update :clear_design_image_on_change
   before_update :move_badge_if_needed
 
   before_save :update_analytics
@@ -192,6 +192,7 @@ class Badge
 
       # Save the badge and then update the requirements if successful
       badge.save!
+      badge.build_badge_image unless badge.custom_image?
       badge.update_requirement_list(requirement_list)
         
       # Then save the results
@@ -247,6 +248,7 @@ class Badge
 
       # Save the badge and then update the requirements if successful
       badge.update_attributes!(badge_params)
+      badge.build_badge_image if !badge.designed_image? && !badge.custom_image?
       badge.update_requirement_list(requirement_list)
         
       # Then save the results
@@ -279,7 +281,7 @@ class Badge
 
   # Returns 'design' or 'upload' based on whether there is an uploaded badge image
   def image_mode
-    (custom_image.blank?) ? 'design' : 'upload'
+    (custom_image?) ? 'upload' : 'design'
   end
 
   def tracks_progress?
@@ -501,6 +503,40 @@ class Badge
     end
   end
 
+  # Builds the designed badge image based on the frame, icon and color fields using BadgeMaker
+  # Also saves the image to S3 and updates the attribution information
+  def build_badge_image  
+    # First build the image and manually write it to the designed_image property
+    badge_image = BadgeMaker.build_image(frame: image_frame, icon: image_icon, 
+      color1: image_color1, color2: image_color2)
+    badge_image_path = "#{File.dirname(badge_image.path)}/#{url || 'badge'}.png"
+    badge_image.write badge_image_path
+    self.designed_image = File.open(badge_image_path)
+    # self.store_designed_image!
+    self.save
+
+    # tempfile = Tempfile.open('designed_badge_image.png')
+    # tempfile.write(File.read(badge_image.path))
+    # tempfile.close
+    # env = { "CONTENT_TYPE" => "image/png" }
+    # headers = ActionDispatch::Http::Headers.new(env)
+    # self.designed_image = ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
+    #   filename: "#{url || 'badge'}.png", type: 'image/png', head: headers)
+
+
+    # Then store the attribution information 
+    # Note: The parameters will only be missing for test data, randomization for users will happen
+    #       client-side meaning that the potential for missing attribution info below is low.
+    self.image_attributions = []
+    frame_attribution = BadgeMaker.get_attribution :frames, image_frame
+    icon_attribution = BadgeMaker.get_attribution :icons, image_icon
+    self.image_attributions << frame_attribution unless frame_attribution.nil?
+    self.image_attributions << icon_attribution unless icon_attribution.nil?
+
+    # return
+    designed_image
+  end
+
 protected
   
   def set_default_values
@@ -531,32 +567,6 @@ protected
       self.info_sections = linkified_result[:text].split(SECTION_DIVIDER_REGEX)
       self.info_tags = linkified_result[:tags]
       self.info_tags_with_caps = linkified_result[:tags_with_caps]
-    end
-  end
-
-  def build_badge_image
-    if designed_image.blank? || image_frame_changed? || image_icon_changed? \
-        || image_color1_changed? || image_color2_changed?
-      
-      # First build the image and manually write it to the designed_image property
-      badge_image = BadgeMaker.build_image(frame: image_frame, icon: image_icon, 
-        color1: image_color1, color2: image_color2)
-      tempfile = Tempfile.open('designed_badge_image.png')
-      tempfile.write(File.read(badge_image.path))
-      tempfile.close
-      env = { "CONTENT_TYPE" => "image/png" }
-      headers = ActionDispatch::Http::Headers.new(env)
-      self.designed_image = ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
-        filename: "#{url || 'badge'}.png", type: 'image/png', head: headers)
-
-      # Then store the attribution information 
-      # Note: The parameters will only be missing for test data, randomization for users will happen
-      #       client-side meaning that the potential for missing attribution info below is low.
-      self.image_attributions = []
-      frame_attribution = BadgeMaker.get_attribution :frames, image_frame
-      icon_attribution = BadgeMaker.get_attribution :icons, image_icon
-      self.image_attributions << frame_attribution unless frame_attribution.nil?
-      self.image_attributions << icon_attribution unless icon_attribution.nil?
     end
   end
 
@@ -622,6 +632,14 @@ protected
       new_group = Group.find(move_to_group_id)
       self.move_badge_to new_group
       self.move_to_group_id = nil
+    end
+  end
+
+  # This method clears out the designed_image if any of the parameters have changed
+  def clear_design_image_on_change
+    if designed_image? || image_frame_changed? || image_icon_changed? || image_color1_changed? \
+        || image_color2_changed?
+      self.remove_designed_image!
     end
   end
 

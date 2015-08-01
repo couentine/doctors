@@ -3,7 +3,7 @@
 class S3BadgeUploader < CarrierWave::Uploader::Base
 
   include CarrierWave::MiniMagick
-
+  
   storage :fog
   
   def store_dir
@@ -34,6 +34,13 @@ class S3BadgeUploader < CarrierWave::Uploader::Base
     manipulate! do |img|
       img = BadgeMaker.build_wide_image(img)
     end
+  end
+
+  # NOTE: This is a hack to clear out the filenames because I was having issues changing the image
+  #       For more info refer to: https://github.com/carrierwaveuploader/carrierwave/issues/401
+  def clear_uploader
+    @file = @filename = @original_filename = @cache_id = @version = @storage = nil
+    model.send(:write_attribute, mounted_as, nil)
   end
 
 end
