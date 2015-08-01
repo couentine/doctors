@@ -242,7 +242,7 @@ class Badge
       if poller
         poller.status = 'successful'
         poller.message = "The '#{badge.name}' badge has been successfully updated!"
-        poller.redirect_to = group_badge_url(badge.group_id, badge.id)
+        poller.redirect_to = "/#{badge.group.url_with_caps}/#{badge.url_with_caps}"
         poller.data = { badge_id: badge.id }
         poller.save
       end
@@ -251,7 +251,7 @@ class Badge
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to update the badge, ' \
           + "please try again. (Error message: #{e})"
-        poller.redirect_to = group_badge_url(badge.group_id, badge.id)
+        poller.redirect_to = "/#{badge.group.url_with_caps}/#{badge.url_with_caps}"
         poller.data = { badge_id: badge.id }
         poller.save
       else

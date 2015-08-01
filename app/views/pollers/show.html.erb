@@ -1,0 +1,54 @@
+<% if @poller && (@poller.status == 'pending') %>
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+      startPoller("<%= @poller.id %>", refreshPoller, refreshPoller);
+    });
+
+    function refreshPoller() {
+      window.location.reload(); // will trigger redirect_to if specified
+    }
+
+  </script>
+<% end %>
+
+<div class="row add-top-margin">
+
+  <% if @poller %>
+
+    <% if @poller.status == 'pending' %>
+
+      <div class="well gray span7 offset2">
+        <i class="fa fa-refresh fa-spin header-icon"></i>
+        <h3><%= @poller.waiting_message || 'Waiting for changes to save...' %></h3>
+      </div>
+
+    <% elsif @poller.status == 'successful' %>
+
+      <div class="well well-lead span7 offset2">
+        <i class="fa fa-check-circle header-icon"></i>
+        <h3>Process complete</h3>
+        <p><%= @poller.message %></p>
+      </div>
+
+    <% else %>
+
+      <div class="well primary span7 offset2">
+        <i class="fa fa-exclamation-circle header-icon"></i>
+        <h3>An error occurred</h3>
+        <p><%= @poller.message %></p>
+      </div>
+
+    <% end %>
+  
+  <% else %>
+    
+    <div class="well well-lead span7 offset2">
+      <i class="fa fa-exclamation-circle header-icon"></i>
+      <h3>Nothing found</h3>
+      <p>Please check the link and try again.</p>
+    </div>
+
+  <% end %>
+
+</div>

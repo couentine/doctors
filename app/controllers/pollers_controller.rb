@@ -5,6 +5,11 @@ class PollersController < ApplicationController
   def show
     respond_to do |format|
       @poller = Poller.find(params[:id]) rescue nil
+      format.html do
+        if @poller && @poller.redirect_to
+          redirect_to @poller.redirect_to, notice: @poller.message
+        end # else render show.html.erb
+      end
       format.json { render json: @poller }
       format.png do
         begin
