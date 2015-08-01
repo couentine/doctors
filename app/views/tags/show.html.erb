@@ -145,7 +145,7 @@
         <div class="header-section">
 
           <span class="badge-link">
-            <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), [@group, @badge],
+            <%= link_to image_tag(@badge.image_url(:medium)), [@group, @badge],
               title: "Return to the badge page",
               data: { toggle: 'tooltip', placement: 'left' } %>
             <span class="badgename">

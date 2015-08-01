@@ -466,7 +466,7 @@
           <% elsif !@badge.errors[:custom_image].blank? %>
             <%= image_tag "image-upload.png", id: "badge-image" %>
           <% else %>
-            <img src="<%= group_badge_path(@group, @badge, format: :png) %>" id="badge-image"/>
+            <img src="<%= @badge.image_url(:medium) %>" id="badge-image"/>
           <% end %>
         </span>
 

@@ -7,7 +7,7 @@
   if @log.validation_status == 'validated'
     provide(:metadata_title, "#{@badge.name} awarded to #{@user.name}")
     provide(:metadata_description, @badge.summary)
-    provide(:metadata_image, group_badge_url(@group, @badge, format: :png) + '?f=wide')
+    provide(:metadata_image, @badge.image_url(:wide))
     provide(:metadata_image_width, '1000')
     provide(:metadata_image_height, '500')
     provide(:metadata_site_name, @group.name)
@@ -169,8 +169,8 @@
         <tbody>
           <tr>
             <td class="left-image with-right-image">
-              <%= link_to image_tag(group_badge_path(@group, @badge, format: :png)), 
-                [@group, @badge], title: 'View badge' %>
+              <%= link_to image_tag(@badge.image_url(:medium)), [@group, @badge], 
+                title: 'View badge' %>
             </td>
             <td class="left-panel with-right-image hidden-phone">
               <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>

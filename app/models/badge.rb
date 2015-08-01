@@ -115,12 +115,22 @@ class Badge
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
 
-  def image_as_url; "#{ENV['root_url']}/#{group.url}/#{url}.png"; end
+  def image_as_url; image_url; end
   def criteria_url; "#{ENV['root_url']}/#{group.url}/#{url}"; end
   def issuer_url; "#{ENV['root_url']}/#{group.url}.json"; end
 
   def badge_url
     "#{ENV['root_url'] || 'http://badgelist.com'}/#{group.url_with_caps}/#{url_with_caps}"
+  end
+
+  # Returns URL of the specified version of this badge's image
+  # Valid version values are nil (defaults to full size), :medium, :small, :wide
+  def image_url(version = nil)
+    if image_mode == 'upload'
+      custom_image_url(version)
+    else
+      designed_image_url(version)
+    end
   end
 
   # === BADGE TERMINOLOGY METHODS === #
@@ -170,7 +180,8 @@ class Badge
         tempfile.write(Base64.decode64(file.tempfile))
         badge_params['custom_image'] = \
           ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
-            filename: file.original_filename, type: file.content_type, head: file.headers)
+            filename: "#{badge_params['url'] || 'badge'}.png", type: file.content_type, 
+            head: file.headers)
       end
 
       badge = Badge.new(badge_params)
@@ -228,7 +239,7 @@ class Badge
         tempfile.write(Base64.decode64(file.tempfile))
         badge_params['custom_image'] = \
           ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
-            filename: file.original_filename, type: file.content_type, head: file.headers)
+            filename: "#{badge.url || 'badge'}.png", type: file.content_type, head: file.headers)
       end
 
       badge.current_user = user
@@ -536,7 +547,7 @@ protected
       env = { "CONTENT_TYPE" => "image/png" }
       headers = ActionDispatch::Http::Headers.new(env)
       self.designed_image = ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
-        filename: 'badge_image.png', type: 'image/png', head: headers)
+        filename: "#{url || 'badge'}.png", type: 'image/png', head: headers)
 
       # Then store the attribution information 
       # Note: The parameters will only be missing for test data, randomization for users will happen

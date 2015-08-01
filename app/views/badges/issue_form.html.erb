@@ -56,7 +56,7 @@
     <div class="form-header">
       <h1>Award the badge</h1>
       <div class="form-image frameless" 
-        style="background-image: url('<%= group_badge_path(@group, @badge, format: :png) %>');">
+        style="background-image: url('<%= @badge.image_url(:medium) %>');">
         &nbsp;
       </div>
     </div>

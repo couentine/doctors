@@ -326,7 +326,7 @@
         <tbody>
           <tr class="body-row">
             <td class="left-image">
-              <%= image_tag group_badge_path(@group, @badge, format: :png) %>
+              <%= image_tag @badge.image_url(:medium) %>
             </td>
             <td class="single-panel">
               <h1><%= @badge.name %></h1>

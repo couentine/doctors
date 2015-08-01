@@ -7,7 +7,7 @@ class S3BadgeUploader < CarrierWave::Uploader::Base
   storage :fog
   
   def store_dir
-    "u/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+    "u/#{model.class.to_s.underscore}/#{model.id}/#{mounted_as}"
   end
 
   # Process files as they are uploaded:

@@ -32,8 +32,8 @@
             <i class="fa fa-flag"></i>
           </div>
         <% end %>
-        <%= link_to image_tag(group_badge_path(group, badge, format: :png)), 
-          group_badge_path(group, badge), title: badge.name %><br/>
+        <%= link_to image_tag(badge.image_url(:medium)), group_badge_path(group, badge), 
+          title: badge.name %><br/>
       </td>
     </tr>
     <tr class="card-body-row">
