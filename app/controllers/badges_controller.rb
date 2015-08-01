@@ -134,7 +134,7 @@ class BadgesController < ApplicationController
       poller_id = @badge.update_async(current_user.id, params[:badge], @requirement_list)
       
       # Then redirect to the full page poller UI
-      redirect_to poller_path(@poller)
+      redirect_to poller_path(poller_id)
     else
       set_editing_parameters
       build_requirement_list if @requirement_list.blank? # rebuild from scratch if needed
