@@ -420,14 +420,19 @@
   }
 
   function goUploadMode() {
-    $("#badge_remove_custom_image").val(false);
-    $("#badge-buttons-design").hide();
-    $("#badge-buttons-upload").show();
-    $("#badge-image-editor").slideUp();
-    $("#badge-image-uploader").slideDown();
-    $("#badge-image").attr("src", "<%= image_path('image-upload.png') %>");
-    $("#toggle-badge-image-editor")
-      .html("<i class='fa fa-pencil'></i> Edit"); // Just in case we're in edit mode
+    <% if @badge.image_mode=='upload' %>
+      alert("You'll need to save your changes (by clicking the 'Update Badge' button below) "
+        + " before uploading another image.");
+    <% else %>
+      $("#badge_remove_custom_image").val(false);
+      $("#badge-buttons-design").hide();
+      $("#badge-buttons-upload").show();
+      $("#badge-image-editor").slideUp();
+      $("#badge-image-uploader").slideDown();
+      $("#badge-image").attr("src", "<%= image_path('image-upload.png') %>");
+      $("#toggle-badge-image-editor")
+        .html("<i class='fa fa-pencil'></i> Edit"); // Just in case we're in edit mode
+    <% end %>
   }
 
   function removeUpload() {

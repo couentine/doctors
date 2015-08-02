@@ -610,4 +610,43 @@ namespace :db do
     puts " >> Done."
   end
 
+  task migrate_badge_images_to_s3: :environment do
+    print "Updating #{Badge.count} badges"
+
+    Badge.each do |badge|
+      # First build the designed image
+      badge.rebuild_designed_image
+
+      # Then move the uploaded image from GridFS to S3 (if present)
+      if badge.uploaded_image?
+        badge.custom_image = badge.uploaded_image.file
+        if !badge.timeless.save
+          print "!"
+        end
+      end
+
+      print "."
+    end
+    
+    puts " >> Done."
+  end
+
+  task clear_old_badge_images: :environment do
+    print "Updating #{Badge.count} badges"
+
+    Badge.each do |badge|
+      badge.remove_uploaded_image! if badge.uploaded_image?
+      badge.image = nil
+      badge.image_wide = nil
+
+      if badge.timeless.save
+        print "."
+      else
+        print "!"
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end
