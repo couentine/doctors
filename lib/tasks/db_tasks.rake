@@ -614,18 +614,20 @@ namespace :db do
     print "Updating #{Badge.count} badges"
 
     Badge.each do |badge|
-      # First build the designed image
-      badge.rebuild_designed_image
+      begin
+        # First build the designed image
+        badge.rebuild_designed_image
 
-      # Then move the uploaded image from GridFS to S3 (if present)
-      if badge.uploaded_image?
-        badge.custom_image = badge.uploaded_image.file
-        if !badge.timeless.save
-          print "!"
+        # Then move the uploaded image from GridFS to S3 (if present)
+        if badge.uploaded_image?
+          badge.custom_image = badge.uploaded_image.file
+          badge.timeless.save!
         end
-      end
 
-      print "."
+        print "."
+      rescue
+        print "!"
+      end
     end
     
     puts " >> Done."
@@ -635,13 +637,14 @@ namespace :db do
     print "Updating #{Badge.count} badges"
 
     Badge.each do |badge|
-      badge.remove_uploaded_image! if badge.uploaded_image?
-      badge.image = nil
-      badge.image_wide = nil
+      begin
+        badge.remove_uploaded_image! if badge.uploaded_image?
+        badge.image = nil
+        badge.image_wide = nil
 
-      if badge.timeless.save
+        badge.timeless.save!
         print "."
-      else
+      rescue
         print "!"
       end
     end

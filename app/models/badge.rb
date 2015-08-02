@@ -127,9 +127,9 @@ class Badge
   # Valid version values are nil (defaults to full size), :medium, :small, :wide
   def image_url(version = nil)
     if image_mode == 'upload'
-      custom_image_url(version)
+      custom_image_url(version) || 'blank.png'
     else
-      designed_image_url(version)
+      designed_image_url(version) || 'blank.png'
     end
   end
 
@@ -553,7 +553,7 @@ protected
       #           technique that I like better (used in rebuild_designed_image) which is simpler,
       #           but for some reason it wasn't working reliably, especially when making changes
       #           to an existing badge.  So for now this is it.
-      
+
       # First build the image and manually write it to the designed_image property
       badge_image = BadgeMaker.build_image(frame: image_frame, icon: image_icon, 
         color1: image_color1, color2: image_color2)
