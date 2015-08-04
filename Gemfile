@@ -25,7 +25,6 @@ gem 'exception_notification'
 gem 'mini_magick', '~> 3.8.1'
 gem 'rqrcode_png'
 # gem 'font-awesome-sass'
-gem 'font-awesome-rails', '~> 4.3'
 # gem 'rouge'
 
 # gem 'mixpanel-ruby'
@@ -71,6 +70,10 @@ end
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
+
+  # Include this via gem for offline development only
+  # In production this is rendered using a CDN
+  gem 'font-awesome-rails', '~> 4.3'
 
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   # gem 'therubyracer', :platforms => :ruby
