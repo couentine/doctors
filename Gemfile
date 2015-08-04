@@ -25,7 +25,7 @@ gem 'exception_notification'
 gem 'mini_magick', '~> 3.8.1'
 gem 'rqrcode_png'
 # gem 'font-awesome-sass'
-gem 'font-awesome-rails', '~> 4.3'
+# gem 'font-awesome-rails', '~> 4.3'
 # gem 'rouge'
 
 # gem 'mixpanel-ruby'
