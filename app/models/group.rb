@@ -355,6 +355,8 @@ class Group
   def logo_url
     if image_url
       image_url
+    elsif ENV['cdn_asset_host']
+      "http://#{ENV['cdn_asset_host']}/assets/group-image-default.png"
     else
       "#{ENV['root_url']}/assets/group-image-default.png"
     end
