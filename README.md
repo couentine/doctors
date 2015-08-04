@@ -32,6 +32,8 @@ twitter_access_secret=abc123
 ULTRAHOOK_API_KEY=abc123
 INTERCOM_APP_ID=abc123
 INTERCOM_API_KEY=abc123
+WEB_CONCURRENCY=1
+MAX_THREADS=5
 ```
 
 ## Running foreman ##

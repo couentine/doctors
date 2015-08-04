@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 ruby '2.1.2'
 
 gem 'rails', '3.2.14'
-gem 'thin'
+gem 'puma'
 
 # HANK
 
@@ -19,6 +19,7 @@ gem 'simple_form', '~> 2.1.1'
 
 gem 'stripe'
 
+gem 'rack-timeout'
 gem 'browser_details'
 gem 'exception_notification'
 
