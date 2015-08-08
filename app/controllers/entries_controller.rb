@@ -74,7 +74,7 @@ class EntriesController < ApplicationController
   def edit
     # Create the carrierwave direct uploader if this is an image
     if @entry.format == 'image'
-      @uploader = @entry.direct_uploaded_image
+      @uploader = Entry.new.direct_uploaded_image
       @uploader.success_action_redirect = request.original_url
       @entry.uploaded_image_key = params[:key] if params[:key]
     end

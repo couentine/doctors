@@ -42,7 +42,7 @@
         <%= link_to image_tag(entry.uploaded_image_url(:preview)),
           "/#{group.to_param}/#{badge.to_param}/u/#{user.username}/#{entry.to_param}" %>
       <% else %>
-        <i class="fa fa-exclamation-circle"></i>
+        <h3><i class="fa fa-exclamation-circle"></i></h3>
       <% end %>
     </div>
 

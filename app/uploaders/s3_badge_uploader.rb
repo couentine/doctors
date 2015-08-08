@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class S3BadgeUploader < CarrierWave::Uploader::Base
-
   include CarrierWave::MiniMagick
+  include CarrierWave::MimeTypes
   
   storage :fog
   
@@ -11,6 +11,7 @@ class S3BadgeUploader < CarrierWave::Uploader::Base
   end
 
   # Process files as they are uploaded:
+  process :set_content_type
   process :resize_to_limit => [500, 500]
 
   version :medium do
