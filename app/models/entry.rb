@@ -42,7 +42,10 @@ class Entry
   field :current_username,                type: String
   field :flags,                           type: Array
 
+  mount_uploader :direct_uploaded_image,  S3DirectUploader
   mount_uploader :uploaded_image,         S3Uploader
+  field :uploaded_image_key,              type: String
+  field :processing_uploaded_image,       type: Boolean
 
   # === UNIVERSAL VALIDATIONS === #
   validates :log, presence: true
@@ -56,19 +59,21 @@ class Entry
   validates :body, presence: true, if: :body_is_required?
   validates :link_url, presence: true, format: { with: HTTP_URL_REGEX, \
     message: 'must be a valid link (remember the http)' }, if: :link_is_required?
-  validates :uploaded_image, presence: true, if: :image_is_required?
+  validates :uploaded_image_key, presence: true, if: :image_is_required?
   validates :link_url, format: { with: TWITTER_URL_REGEX, message: "must be a valid Twitter url" },\
     if: :tweet_is_required?
 
   # Which fields are accessible?
   attr_accessible :parent_tag, :summary, :format, :log_validated, :body, :link_url, \
-    :code_format, :uploaded_image
+    :code_format, :uploaded_image_key
 
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_validation :update_image_key
   before_save :process_parent_tag_and_content_changes
   before_save :update_body_versions # DO store the first value since it comes from the user
+  after_save :process_image
   after_create :update_log
   after_create :send_notifications
   after_destroy :check_log_validation_counts
@@ -259,6 +264,27 @@ protected
     end
   end
 
+  def update_image_key
+    if uploaded_image_key && uploaded_image_key_changed?
+      self.direct_uploaded_image.key = uploaded_image_key
+      self.processing_uploaded_image = true
+    end
+  end
+
+  def process_image
+    if processing_uploaded_image
+      Entry.delay(queue: 'high').do_process_image(id)
+    end
+  end
+
+  # Processes changes to the image from carrierwave direct key
+  def self.do_process_image(entry_id)
+    entry = Entry.find(entry_id)
+    entry.processing_uploaded_image = false
+    entry.remote_uploaded_image_url = entry.direct_uploaded_image.direct_fog_url(with_path: true)
+    entry.save!
+  end
+
   # This method takes care of updating the log as needed.
   def update_log
     if log_id && log
@@ -278,7 +304,6 @@ protected
       log.save
     end
   end
-
 
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations

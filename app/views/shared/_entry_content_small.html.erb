@@ -24,15 +24,29 @@
 
 <% elsif entry.format == 'image' %>
   
-  <!-- === IMAGE === -->
-  <div class="panel panel-entry-content panel-entry-content-image">
-    <% if entry.uploaded_image? %>
-      <%= link_to image_tag(entry.uploaded_image_url(:preview)),
-        "/#{group.to_param}/#{badge.to_param}/u/#{user.username}/#{entry.to_param}" %>
-    <% else %>
-      <i class="fa fa-exclamation-circle"></i>
-    <% end %>
-  </div>
+  <% if entry.processing_uploaded_image %>
+    
+    <!-- === IMAGE PROCESSING === -->
+    <div class="panel panel-entry-content panel-entry-content-text">
+      <h3>
+        <i class="fa fa-clock-o"></i>
+        Image is being processed, refresh the page to view.
+      </h3>
+    </div>
+  
+  <% else %>
+
+    <!-- === IMAGE === -->
+    <div class="panel panel-entry-content panel-entry-content-image">
+      <% if entry.uploaded_image? %>
+        <%= link_to image_tag(entry.uploaded_image_url(:preview)),
+          "/#{group.to_param}/#{badge.to_param}/u/#{user.username}/#{entry.to_param}" %>
+      <% else %>
+        <i class="fa fa-exclamation-circle"></i>
+      <% end %>
+    </div>
+
+  <% end %>
 
 <% elsif entry.format == 'code' %>
 

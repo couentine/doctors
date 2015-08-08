@@ -1,3 +1,7 @@
+<div class="spinner-wrapper" id="image-upload-spinner" style="display: none;">
+  <div class="spinner large secondary">&nbsp;</div>
+</div>
+
 <%= simple_form_for [@group, @badge, @log, @entry], html: {class: 'form-horizontal'} do |f| %>
 
   <div class="form-body">
@@ -117,53 +121,6 @@
         });
       </script>
     
-    <% elsif @entry.format == 'image' %>
-      
-      <!-- === IMAGE UPLOAD === -->
-
-      <%= f.input :uploaded_image, as: :file, label: 'Upload an Image',
-        input_html: { accept: 'image/*' } %>
-      <%= f.input :uploaded_image_cache, as: :hidden %>
-      <%= f.input :remove_uploaded_image, as: :hidden %>
-
-      <div class="control-group image_upload_button">
-        <label class="optional control-label">Upload an Image</label>
-        <div class="controls">
-          <a href="#" class="btn btn-success btn-large" id="select-image-file">
-            <i class="fa fa-file-image-o"></i>
-            Select an image file
-          </a>
-        </div>
-      </div>
-
-      <%= f.input :summary, as: :text, label: 'Caption (Optional)', 
-        input_html: { data: {
-        :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
-        cols: '200', rows: '5' } %>
-
-      <script type="text/javascript">
-        $(document).ready(function() {
-
-          // Clicking the pretty button clicks on the file input element instead
-          $("#select-image-file").click(function(e) {
-            $("#entry_uploaded_image").click();
-            e.preventDefault();
-          });
-          
-          // Update the display of the button when the file input element changes
-          $("#entry_uploaded_image").change(function() {
-            if ($(this).val())
-              $("#select-image-file").html("<i class='fa fa-file-image-o'></i> " 
-                + $(this).val().replace(/c:\\fakepath\\/gi, "")
-                + " <i class='fa fa-check'></i>");
-            else
-              $("#select-image-file").html("<i class='fa fa-file-image-o'></i> " 
-                + "Select an image file");
-          });
-
-        });
-      </script>
-
     <% elsif @entry.format == 'code' %>
 
       <!-- === CODE SNIPPET RESPONSE === -->
@@ -200,6 +157,70 @@
       <%= f.input :summary, as: :text, label: 'Description', input_html: { data: {
         :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
         cols: '200', rows: '5' } %>
+
+    <% elsif @entry.format == 'image' %>
+      
+      <!-- === IMAGE UPLOAD === -->
+
+      <%= f.input :uploaded_image_key, as: :hidden %>
+
+      <div class="control-group image_upload_button">
+        <label class="optional control-label">Upload an Image</label>
+        <div class="controls">
+          <% if @entry.uploaded_image_key %> 
+            <a href="#" class="btn btn-large disabled" id="image-uploaded">
+              <i class='fa fa-file-image-o'></i>
+              
+              <% if @entry.new_record? %>
+                Image Selected
+              <% elsif params[:key] %> 
+                New Image Selected
+              <% else %> 
+                Image Uploaded
+              <% end %> 
+              
+              <i class='fa fa-check'></i>
+            </a><br>
+            <a href="#" class="btn btn-link" id="select-image-file">
+              <i class="fa fa-times-circle"></i>
+              Select a different image
+            </a>
+          <% else %> 
+            <a href="#" class="btn btn-success btn-large" id="select-image-file">
+              <i class="fa fa-file-image-o"></i>
+              Select an image file
+            </a>
+          <% end %> 
+        </div>
+      </div>
+
+      <% if @entry.uploaded_image_key %> 
+        <!-- Don't show this until the file is uploaded -->
+        <%= f.input :summary, as: :text, label: 'Caption (Optional)', 
+          input_html: { data: {
+          :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH },
+          cols: '200', rows: '5' } %>
+      <% end %>
+
+      <script type="text/javascript">
+        $(document).ready(function() {
+
+          // Clicking the pretty button clicks on the file input element instead
+          $("#select-image-file").click(function(e) {
+            $("#s3_direct_uploader_direct_uploaded_image").click();
+            e.preventDefault();
+          });
+          
+          // Update the display of the button when the file input element changes
+          $("#s3_direct_uploader_direct_uploaded_image").change(function() {
+            if ($(this).val()) {
+              $("#image-upload-spinner").fadeIn();
+              $("#uploaded_image_form").submit();
+            }
+          });
+
+        });
+      </script>
 
     <% else %>
       
@@ -241,4 +262,16 @@
       end
     %>
   </div>
+
+<% end %>
+
+<!-- === IMAGE UPLOAD (CONTINUED) - CARRIERWAVE DIRECT FORM === -->
+
+<% if @entry.format == 'image' %>
+
+  <%= direct_upload_form_for(@uploader, html: 
+      { id: 'uploaded_image_form', style: 'display: none;'} ) do |u| %>
+    <%= u.file_field :direct_uploaded_image %>
+  <% end %>
+
 <% end %>

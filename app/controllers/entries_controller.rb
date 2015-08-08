@@ -47,7 +47,7 @@ class EntriesController < ApplicationController
     else
       # Create the entry
       @parent_tag_name = params[:tag]
-      @entry = Entry.new(parent_tag: @parent_tag_name)
+      @entry = Entry.new(parent_tag: @parent_tag_name, uploaded_image_key: params[:key])
       @entry.type = 'post'
       
       # Query the parent tag if present
@@ -60,13 +60,24 @@ class EntriesController < ApplicationController
         end
       end
 
+      # Create the carrierwave direct uploader if this is an image
+      if @entry.format == 'image'
+        @uploader = Entry.new.direct_uploaded_image
+        @uploader.success_action_redirect = request.original_url
+      end
+
       render :new
     end
   end
 
   # GET /group-url/badge-url/u/username/1/edit
   def edit
-    # nothing specific to do here
+    # Create the carrierwave direct uploader if this is an image
+    if @entry.format == 'image'
+      @uploader = @entry.direct_uploaded_image
+      @uploader.success_action_redirect = request.original_url
+      @entry.uploaded_image_key = params[:key] if params[:key]
+    end
   end
 
   # POST /group-url/badge-url/u/username/entries
@@ -97,10 +108,15 @@ class EntriesController < ApplicationController
         @entry.save # This commits the save to S3 for images and thus can error out
       rescue Exception => e
         @entry.errors[:base] << "There was an error saving your #{@type}. Please try again later."
+
+        # Create the carrierwave direct uploader if this is an image
+        if @entry.format == 'image'
+          @uploader = @entry.direct_uploaded_image
+          @uploader.success_action_redirect = request.original_url
+        end
       end
     end
 
-    
     # Now do the redirect
     if @entry.errors.count > 0
       if @entry.new_record?
@@ -156,6 +172,12 @@ class EntriesController < ApplicationController
           if @entry.type == 'validation'
             render :edit
           else
+            # Create the carrierwave direct uploader if this is an image
+            if @entry.format == 'image'
+              @uploader = @entry.direct_uploaded_image
+              @uploader.success_action_redirect = request.original_url
+            end
+
             render :edit
           end
         end

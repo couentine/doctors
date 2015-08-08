@@ -2,12 +2,11 @@
 
 class S3Uploader < CarrierWave::Uploader::Base
   include CarrierWave::MiniMagick
-  include CarrierWaveDirect::Uploader
-  # storage :fog
+  storage :fog
 
-  # def store_dir
-  #   "u/#{model.class.to_s.underscore}/#{model.id}"
-  # end
+  def store_dir
+    "u/#{model.class.to_s.underscore}/#{model.id}"
+  end
 
   version :thumb do
     process :resize_to_fit => [50, 50]
