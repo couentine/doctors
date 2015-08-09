@@ -11,6 +11,7 @@ class Badge
   MAX_SUMMARY_LENGTH = 140
   MAX_TERM_LENGTH = 15
   RECENT_DATE_THRESHOLD = 10.days # Used to filter "recent" activity & changes
+  IMAGE_KEY_IGNORE = '<<ignore>>'
   EDITABILITY_VALUES = ['experts', 'admins']
   AWARDABILITY_VALUES = ['experts', 'admins']
   JSON_FIELDS = [:group, :name, :summary, :word_for_expert, :word_for_learner]
@@ -50,17 +51,12 @@ class Badge
   field :image_icon,                      type: String
   field :image_color1,                    type: String
   field :image_color2,                    type: String
-  field :designed_image,                  type: String
-  mount_uploader :designed_image,         S3BadgeUploader
-  field :custom_image,                    type: String
-  mount_uploader :custom_image,           S3BadgeUploader
   field :image_attributions,              type: Array
+  mount_uploader :designed_image,         S3BadgeUploader
+  mount_uploader :custom_image,           S3BadgeUploader
+  mount_uploader :direct_custom_image,    S3DirectBadgeUploader
+  field :custom_image_key,                type: String
   
-  field :uploaded_image,                  type: String # RETIRED
-  mount_uploader :uploaded_image,         ImageUploader # RETIRED
-  field :image,                           type: Moped::BSON::Binary # RETIRED
-  field :image_wide,                      type: Moped::BSON::Binary # RETIRED
-
   field :current_user,                    type: String # used when logging info_versions
   field :current_username,                type: String # used when logging info_versions
   field :flags,                           type: Array
@@ -95,8 +91,8 @@ class Badge
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
     :editability, :awardability, :image_frame, :image_icon, :image_color1, :image_color2, 
-    :icon_search_text, :topic_list_text, :custom_image, :remove_custom_image,
-    :custom_image_cache, :send_validation_request_emails, :move_to_group_id
+    :icon_search_text, :topic_list_text, :custom_image_key, :send_validation_request_emails, 
+    :move_to_group_id
   
   # === CALLBACKS === #
 
@@ -104,11 +100,11 @@ class Badge
   before_validation :update_caps_field
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
-  before_save :build_badge_image
   before_save :update_terms
+  before_save :process_images
+  before_update :move_badge_if_needed
   after_create :add_creator_as_expert
   after_save :update_requirement_editability
-  before_update :move_badge_if_needed
 
   before_save :update_analytics
 
@@ -171,17 +167,6 @@ class Badge
       poller = Poller.find(poller_id) rescue nil
       group = Group.find(group_id)
       creator = User.find(creator_id)
-      
-      # We need to Base64 decode the uploaded file if present (and build a new UploadedFile)
-      if badge_params['custom_image']
-        file = badge_params['custom_image']
-        tempfile = Tempfile.new('file')
-        tempfile.binmode
-        tempfile.write(Base64.decode64(file.tempfile))
-        badge_params['custom_image'] = \
-          ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, filename: "badge.png", \
-            type: file.content_type, head: file.headers)
-      end
 
       badge = Badge.new(badge_params)
       badge.group = group
@@ -230,17 +215,6 @@ class Badge
       badge = Badge.find(badge_id)
       user = User.find(current_user_id)
       
-      # We need to Base64 decode the uploaded file if present (and build a new UploadedFile)
-      if badge_params['custom_image']
-        file = badge_params['custom_image']
-        tempfile = Tempfile.new('file')
-        tempfile.binmode
-        tempfile.write(Base64.decode64(file.tempfile))
-        badge_params['custom_image'] = \
-          ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, filename: "badge.png", 
-            type: file.content_type, head: file.headers)
-      end
-
       badge.current_user = user
       badge.current_username = user.username
 
@@ -277,8 +251,10 @@ class Badge
   end
 
   # Returns 'design' or 'upload' based on whether there is an uploaded badge image
+  # NOTE: Sometimes custom image gets set randomly so we have to verify the presence of the custom
+  #       image key as well, otherwise it returns a false positive in some cases.
   def image_mode
-    (custom_image?) ? 'upload' : 'design'
+    (!custom_image_key.blank? && custom_image?) ? 'upload' : 'design'
   end
 
   def tracks_progress?
@@ -526,6 +502,25 @@ protected
     end
   end
 
+  def process_images
+    if custom_image_key_changed? && !custom_image_key.blank? \
+        && (custom_image_key != IMAGE_KEY_IGNORE)
+      self.remote_custom_image_url = \
+        "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/#{custom_image_key}"
+    end
+
+    if custom_image_key.blank?
+      self.remove_custom_image = custom_image?
+    end
+    
+    if !designed_image? || image_frame_changed? || image_icon_changed? || image_color1_changed? \
+        || image_color2_changed?
+      self.build_badge_image
+    end
+
+    true
+  end
+
   def add_creator_as_expert
     log = Log.new
     log.badge = self
@@ -545,35 +540,32 @@ protected
   end
 
   def build_badge_image
-    if new_record? || !designed_image? || image_frame_changed? || image_icon_changed? \
-        || image_color1_changed? || image_color2_changed?
-      
-      # DEV NOTE: The technique I'm using below is weird and feels kind of hacky. I'm creating a 
-      #           temp file and passing in the stringified tempfile to the field. There's another
-      #           technique that I like better (used in rebuild_designed_image) which is simpler,
-      #           but for some reason it wasn't working reliably, especially when making changes
-      #           to an existing badge.  So for now this is it.
+    # DEV NOTE: The technique I'm using below is weird and feels kind of hacky. I'm creating a 
+    #           temp file and passing in the stringified tempfile to the field. There's another
+    #           technique that I like better (used in rebuild_designed_image) which is simpler,
+    #           but for some reason it wasn't working reliably, especially when making changes
+    #           to an existing badge.  So for now this is it.
 
-      # First build the image and manually write it to the designed_image property
-      badge_image = BadgeMaker.build_image(frame: image_frame, icon: image_icon, 
-        color1: image_color1, color2: image_color2)
-      tempfile = Tempfile.open('designed_badge_image.png')
-      tempfile.write(File.read(badge_image.path))
-      tempfile.close
-      env = { "CONTENT_TYPE" => "image/png" }
-      headers = ActionDispatch::Http::Headers.new(env)
-      self.designed_image = ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
-        filename: "badge.png", type: 'image/png', head: headers)
+    # First build the image and manually write it to the designed_image property
+    badge_image = BadgeMaker.build_image(frame: image_frame, icon: image_icon, 
+      color1: image_color1, color2: image_color2)
+    tempfile = Tempfile.open('designed_badge_image.png')
+    tempfile.write(File.read(badge_image.path))
+    tempfile.close
+    env = { "CONTENT_TYPE" => "image/png" }
+    headers = ActionDispatch::Http::Headers.new(env)
+    # self.designed_image = S3BadgeUploader.new
+    self.designed_image = ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, \
+      filename: "badge.png", type: 'image/png', head: headers)
 
-      # Then store the attribution information 
-      # Note: The parameters will only be missing for test data, randomization for users will happen
-      #       client-side meaning that the potential for missing attribution info below is low.
-      self.image_attributions = []
-      frame_attribution = BadgeMaker.get_attribution :frames, image_frame
-      icon_attribution = BadgeMaker.get_attribution :icons, image_icon
-      self.image_attributions << frame_attribution unless frame_attribution.nil?
-      self.image_attributions << icon_attribution unless icon_attribution.nil?
-    end
+    # Then store the attribution information 
+    # Note: The parameters will only be missing for test data, randomization for users will happen
+    #       client-side meaning that the potential for missing attribution info below is low.
+    self.image_attributions = []
+    frame_attribution = BadgeMaker.get_attribution :frames, image_frame
+    icon_attribution = BadgeMaker.get_attribution :icons, image_icon
+    self.image_attributions << frame_attribution unless frame_attribution.nil?
+    self.image_attributions << icon_attribution unless icon_attribution.nil?
   end
 
   def update_info_versions

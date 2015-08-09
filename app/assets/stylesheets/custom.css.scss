@@ -3201,6 +3201,7 @@ div.topic-list-card, div.group-list-card {
 /* === BADGE IMAGE MAKER === */
 
 .badge-maker {
+  .control-group { position: relative; }
 
   #badge-image-viewer {
     position: relative;
@@ -3279,14 +3280,17 @@ div.topic-list-card, div.group-list-card {
       font-size: 12px;
       line-height: 1.5em;
       margin-top: 10px;
-      color: $tertiary-medium;
+      color: $secondary-medium;
     }
     ul {
       font-size: 12px;
-      color: $tertiary-medium;
+      color: $secondary-medium;
     }
-    a { color: $tertiary-medium; }
-    a:focus, a:hover { color: $tertiary-dark; }
+    a:not(.btn) { 
+      color: $secondary-medium;
+      
+      &:focus, &:hover { color: $secondary-dark; }
+    }
     .header-wrap {
       display: block;
       float: left;

@@ -652,4 +652,22 @@ namespace :db do
     puts " >> Done."
   end
 
+  task populate_badge_image_keys: :environment do
+    print "Updating #{Badge.count} badges"
+
+    Badge.each do |badge|
+      begin
+        if badge.custom_image? && badge.custom_image_key.blank?
+          badge.custom_image_key = Badge::IMAGE_KEY_IGNORE
+          badge.timeless.save!
+        end
+        print "."
+      rescue
+        print "!"
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end

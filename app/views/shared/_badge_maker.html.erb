@@ -72,13 +72,22 @@
       setTextIcon($(this).val());
     });
 
-    // Check image file size after selection 
-    $('#badge_custom_image').bind('change', function() {
-      if ($(this).val().trim() != "") {
+    // Clicking the pretty upload button clicks on the file input element instead
+    $("#select-image-file-1,#select-image-file-2").click(function(e) {
+      $("#s3_direct_badge_uploader_direct_custom_image").click();
+      e.preventDefault();
+    });
+    
+    // Process the image file after selection
+    $("#s3_direct_badge_uploader_direct_custom_image").change(function() {
+      if ($(this).val()) {
         if (this.files[0].size > MAX_IMAGE_UPLOAD_SIZE) {
           alert("The image you have selected is too big. The maximum supported file size is "
             + MAX_IMAGE_UPLOAD_DESCRIPTION + ".");
           $(this).val("");
+        } else {
+          $("#upload-spinner").fadeIn();
+          $("#custom_image_form").submit();
         }
       }
     });
@@ -87,7 +96,7 @@
       <% if @badge.errors.blank? %>
         // Then select a random badge
         randomize();
-      <% elsif @badge.custom_image.blank? %>
+      <% elsif !@badge.custom_image_key %>
         // Load the current badge
         updateBadgeImagePreview();
       <% end %>
@@ -420,40 +429,48 @@
   }
 
   function goUploadMode() {
-    <% if @badge.image_mode=='upload' %>
-      alert("You'll need to save your changes (by clicking the 'Update Badge' button below) "
-        + " before uploading another image.");
-    <% else %>
-      $("#badge_remove_custom_image").val(false);
-      $("#badge-buttons-design").hide();
-      $("#badge-buttons-upload").show();
-      $("#badge-image-editor").slideUp();
-      $("#badge-image-uploader").slideDown();
-      $("#badge-image").attr("src", "<%= image_path('image-upload.png') %>");
-      $("#toggle-badge-image-editor")
-        .html("<i class='fa fa-pencil'></i> Edit"); // Just in case we're in edit mode
-    <% end %>
+    $("#new_badge input[type=submit]").attr("disabled", true); // disable the submit button
+    $("#badge-buttons-design").hide();
+    $("#badge-buttons-upload").show();
+    $("#badge-image-editor").slideUp();
+    $("#badge-image-uploader").slideDown();
+    $("#badge-image").attr("src", "<%= image_path('image-upload.png') %>");
+    $("#toggle-badge-image-editor")
+      .html("<i class='fa fa-pencil'></i> Edit"); // Just in case we're in edit mode
+    $("#s3_direct_badge_uploader_direct_custom_image").click();
   }
 
   function removeUpload() {
-    // Blank out the upload if present and set the remove uploaded image hidden value
-    $("#badge_custom_image").val(""); 
-    if (badgeImageModeOnStart == "upload") {
-      // We only need to remove the image if there was an upload to start with
-      $("#badge_remove_custom_image").val(true);
-    }
-
     $("#badge-buttons-upload").hide();
-    $("#badge-buttons-design").show();
     $("#badge-image-uploader").slideUp();
+    $("#image-uploaded-panel").hide();
+    $("#image-selection-panel").show();
+    $("#badge_custom_image_key").val(""); 
+    $("#badge-buttons-design").show();
+    
+    $("#new_badge input[type=submit]").attr("disabled", false); // re-enable the submit button
 
     updateBadgeImagePreview();
+  }
+
+  function processImageKey(imageKey) {
+    $("#badge_custom_image_key").val(imageKey);
+
+    $("#image-selection-panel").hide();
+    $("#image-uploaded-panel").show();
+    $("#upload-spinner").fadeOut();
+    
+    $("#new_badge input[type=submit]").attr("disabled", false); // re-enable the submit button
   }
 
 </script>
 
 <div class="badge-maker">
   <div class="control-group">
+    <div class="spinner-wrapper" id="upload-spinner" style="display: none;">
+      <div class="spinner large secondary">&nbsp;</div>
+    </div>
+
     <label class="control-label">Badge Image</label>
     <div class="controls">
       
@@ -516,20 +533,55 @@
         style="<%= ((@badge.image_mode == 'upload') && !@badge.errors[:custom_image].blank?) ? \
           '' : 'display:none' %>">
         <div id="badge_image_uploader">
-          <%= f.input :custom_image, as: :file, label: 'Badge Image File',
-            hint: ("<p><b>Only PNG images are supported.</b><p>" \
-              + "<p>For best results use square images " \
-              + "which are 500 pixels in width and height.</p>" \
-              + "<p><b>Pro-Tips</b><ul>" \
-              + "<li><a href='https://www.openbadges.me/designer.html' target='_blank'>" \
-              + "MyKnowledgeMap's tool</a> has lots of icons.</li>" \
-              + "<li><a href='https://www.imagefu.com/create/badge' target='_blank'>" \
-              + "Imagefu Badge Maker</a> works well for text badges.</li>" \
-              + "</ul></p>").html_safe, 
-            input_html: { accept: 'image/png' },
-            label_html: { style: "display:none;" } %>
-          <%= f.input :custom_image_cache, as: :hidden %>
-          <%= f.input :remove_custom_image, as: :hidden %>
+          <div id="image-uploaded-panel" 
+              style="<%= (@badge.custom_image_key.blank?) ? 'display:none' : '' %>">
+            <a href="#" class="btn btn-large disabled" id="image-uploaded" onclick="return false;">
+              <i class='fa fa-file-image-o'></i>
+              
+              <span id="image-uploaded-inner">
+                <% if @badge.new_record? %>
+                  Image Selected
+                <% else %> 
+                  Image Uploaded
+                <% end %> 
+              </span>
+              
+              <i class='fa fa-check'></i>
+            </a><br>
+            <a href="#" class="btn btn-link" id="select-image-file-2">
+              <i class="fa fa-times-circle"></i>
+              Select a different image
+            </a>
+          </div>
+          <div id="image-selection-panel"
+              style="<%= (@badge.custom_image_key.blank?) ? '' : 'display:none' %>">
+            <a href="#" class="btn btn-success btn-large" id="select-image-file-1">
+              <i class="fa fa-file-image-o"></i>
+              Select an image file
+            </a>
+          </div>
+
+          <p class="help-block">
+            <p><b>Only PNG images are supported.</b><p>
+            <p>For best results use square images which are 500 pixels in width and height.</p>
+            <p>
+              <b>Pro-Tips</b>
+              <ul>
+                <li>
+                  <a href='https://www.openbadges.me/designer.html' target='_blank'>
+                    MyKnowledgeMap's tool
+                  </a> has lots of icons.
+                </li>
+                <li>
+                  <a href='https://www.imagefu.com/create/badge' target='_blank'>
+                    Imagefu Badge Maker
+                  </a> works well for text badges.
+                </li>
+              </ul>
+            </p>
+          </p>
+
+          <%= f.input :custom_image_key, as: :hidden %>
         </div>
       </div>
       

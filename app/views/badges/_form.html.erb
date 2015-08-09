@@ -156,3 +156,13 @@
     %>
   </div>
 <% end %>
+
+<!-- === CARRIERWAVE DIRECT FORM === -->
+
+<%= direct_upload_form_for(@uploader, html: { id: 'custom_image_form', style: 'display: none;',
+    target: 'custom_image_result_frame' } ) do |u| %>
+  <%= u.file_field :direct_custom_image %>
+<% end %>
+
+<iframe id="custom_image_result_frame" name="custom_image_result_frame" 
+  style="display: none;"></iframe>

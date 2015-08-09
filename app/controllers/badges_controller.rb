@@ -65,7 +65,11 @@ class BadgesController < ApplicationController
   # GET /group-url/badges/new.json
   def new
     @badge = Badge.new(group: @group)
-    @allow_url_editing = true;
+    @allow_url_editing = true
+
+    # Create the carrierwave direct uploader
+    @uploader = Badge.new.direct_custom_image
+    @uploader.success_action_redirect = image_key_url
     
     respond_to do |format|
       format.html # new.html.erb
@@ -75,7 +79,11 @@ class BadgesController < ApplicationController
 
   # GET /group-url/badge-url/edit
   def edit
-    @allow_url_editing = @badge.expert_logs.length < 2;
+    @allow_url_editing = (@badge.expert_logs.length < 2)
+
+    # Create the carrierwave direct uploader
+    @uploader = Badge.new.direct_custom_image
+    @uploader.success_action_redirect = image_key_url
   end
 
   # POST /group-url/badges
@@ -90,13 +98,6 @@ class BadgesController < ApplicationController
     @requirement_list = params[:rl]
 
     if @badge.valid?
-      # We need to Base64 encode the uploaded file if present
-      if params[:badge][:custom_image]
-        file = params[:badge][:custom_image]
-        file.tempfile.binmode
-        file.tempfile = Base64.encode64(file.tempfile.read)
-      end
-      
       poller_id = Badge.create_async(@group.id, current_user.id, params[:badge], 
         @requirement_list)
       
@@ -107,6 +108,10 @@ class BadgesController < ApplicationController
     else
       set_editing_parameters
       @allow_url_editing = true;
+
+      # Create the carrierwave direct uploader
+      @uploader = @badge.direct_custom_image
+      @uploader.success_action_redirect = image_key_url
 
       flash[:error] = "There was an error creating the badge."
       render action: "new"
@@ -124,13 +129,6 @@ class BadgesController < ApplicationController
     @requirement_list = params[:rl]
     
     if @badge.valid?
-      # We need to Base64 encode the uploaded file if present
-      if params[:badge][:custom_image]
-        file = params[:badge][:custom_image]
-        file.tempfile.binmode
-        file.tempfile = Base64.encode64(file.tempfile.read)
-      end
-      
       poller_id = @badge.update_async(current_user.id, params[:badge], @requirement_list)
       
       # Then redirect to the full page poller UI
@@ -139,6 +137,10 @@ class BadgesController < ApplicationController
       set_editing_parameters
       build_requirement_list if @requirement_list.blank? # rebuild from scratch if needed
       @allow_url_editing = @badge.expert_logs.length < 2;
+
+      # Create the carrierwave direct uploader
+      @uploader = Badge.new.direct_custom_image
+      @uploader.success_action_redirect = image_key_url
 
       if params[:modal]
         flash[:error] = "There was a problem updating the badge, try again later.\n" \

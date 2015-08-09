@@ -10,6 +10,10 @@ class S3BadgeUploader < CarrierWave::Uploader::Base
     "u/#{model.class.to_s.underscore}/#{model.id}/#{mounted_as}"
   end
 
+  def filename
+    'badge.png'
+  end
+
   # Process files as they are uploaded:
   process :set_content_type
   process :resize_to_limit => [500, 500]
