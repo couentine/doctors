@@ -376,8 +376,8 @@
   var currentImageCreated; // helps only display latest image in case there are network delays
   var lastPoller;
   function imageGeneratorCompleted(poller) {
-    if ((currentImageCreated == null) || (poller.created_at > currentImageCreated)) {
-      currentImageCreated = poller.created_at;
+    if ((currentImageCreated == null) || (Date.parse(poller.created_at) > currentImageCreated)) {
+      currentImageCreated = Date.parse(poller.created_at);
       lastPoller = poller;
       $("#badge-image").attr('src', '/p/' + poller._id + '.png');
     }
@@ -429,6 +429,7 @@
   }
 
   function goUploadMode() {
+    currentImageCreated = Date.now(); // cancel any pending image generator pollers
     $("#new_badge input[type=submit]").attr("disabled", true); // disable the submit button
     $("#badge-buttons-design").hide();
     $("#badge-buttons-upload").show();
@@ -453,8 +454,10 @@
     updateBadgeImagePreview();
   }
 
+  var imageBaseURL = '<%= "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/" %>';
   function processImageKey(imageKey) {
     $("#badge_custom_image_key").val(imageKey);
+    $("#badge-image").attr("src", imageBaseURL + imageKey);
 
     $("#image-selection-panel").hide();
     $("#image-uploaded-panel").show();
@@ -468,7 +471,9 @@
 <div class="badge-maker">
   <div class="control-group">
     <div class="spinner-wrapper" id="upload-spinner" style="display: none;">
-      <div class="spinner large secondary">&nbsp;</div>
+      <div class="spinner-text large">
+        <i class="fa fa-refresh fa-spin"></i> Uploading...
+      </div>
     </div>
 
     <label class="control-label">Badge Image</label>

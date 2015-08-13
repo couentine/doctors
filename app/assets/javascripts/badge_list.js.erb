@@ -477,7 +477,8 @@ function registerEmbedCodeBoxes() {
 
 var INITIAL_POLLING_INTERVAL = 150;
 var POLLING_INTERVAL_DOUBLE_RATE = 2;
-var POLLING_MAX_TRIES = 15;
+var POLLING_MAX_INTERVAL = 8000;
+var POLLING_MAX_TRIES = 30;
 var POLLING_URL = "/p/";
 
 // This function starts a poller which queries "/p/pollerId.json"
@@ -490,8 +491,8 @@ function startPoller(pollerId, onCompleted, onError) {
 var tempPoller;
 function executePoller(pollerId, onCompleted, onError, numTries) {
   var poller;
-  var nextInterval = INITIAL_POLLING_INTERVAL 
-    * Math.pow(2, Math.floor(numTries/POLLING_INTERVAL_DOUBLE_RATE));
+  var nextInterval = Math.min(POLLING_MAX_INTERVAL,
+    INITIAL_POLLING_INTERVAL * Math.pow(2, Math.floor(numTries/POLLING_INTERVAL_DOUBLE_RATE)));
 
   try { 
     $.getJSON(POLLING_URL + pollerId + ".json", function(poller) {

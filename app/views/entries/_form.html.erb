@@ -1,5 +1,7 @@
 <div class="spinner-wrapper" id="image-upload-spinner" style="display: none;">
-  <div class="spinner large secondary">&nbsp;</div>
+  <div class="spinner-text large">
+    <i class="fa fa-refresh fa-spin"></i> Uploading...
+  </div>
 </div>
 
 <%= simple_form_for [@group, @badge, @log, @entry], html: {class: 'form-horizontal'} do |f| %>
@@ -167,28 +169,22 @@
       <div class="control-group image_upload_button">
         <label class="optional control-label">Upload an Image</label>
         <div class="controls">
-          <% if @entry.uploaded_image_key %> 
+          <% if @entry.uploaded_image_key.blank? %> 
+            <a href="#" class="btn btn-success btn-large" id="select-image-file">
+              <i class="fa fa-file-image-o"></i>
+              Select an image file
+            </a>
+          <% else %> 
             <a href="#" class="btn btn-large disabled" id="image-uploaded">
-              <i class='fa fa-file-image-o'></i>
-              
-              <% if @entry.new_record? %>
-                Image Selected
-              <% elsif params[:key] %> 
-                New Image Selected
-              <% else %> 
-                Image Uploaded
-              <% end %> 
+              <% thumbnail_src = \
+                "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/#{@entry.uploaded_image_key}" %>
+              <img src="<%= thumbnail_src %>" class="thumbnail"/>
               
               <i class='fa fa-check'></i>
             </a><br>
             <a href="#" class="btn btn-link" id="select-image-file">
               <i class="fa fa-times-circle"></i>
               Select a different image
-            </a>
-          <% else %> 
-            <a href="#" class="btn btn-success btn-large" id="select-image-file">
-              <i class="fa fa-file-image-o"></i>
-              Select an image file
             </a>
           <% end %> 
         </div>
@@ -253,7 +249,8 @@
         save_button_text = (@entry.new_record?) ? 'Post evidence' : 'Update my evidence'
       end
     %>
-    <%= f.button :submit, save_button_text, class: 'btn btn-primary' %>
+    <%= f.button :submit, save_button_text, class: 'btn btn-primary', 
+      disabled: @entry.uploaded_image_key.blank? %>
     <%= 
       if @entry.new_record?
         link_to "Cancel", [@group, @badge, @log], class: "btn"

@@ -68,6 +68,13 @@ textarea {
   resize: vertical;
 }
 
+img.thumbnail {
+  max-width: 100px;
+  max-height: 100px;
+  display: inline;
+  margin-right: 10px;
+}
+
 .add-top-margin { margin-top: 30px; }
 .no-border { border: none !important; }
 
@@ -425,6 +432,20 @@ table.table {
     &.secondary { border-color: $secondary-medium transparent $secondary-medium transparent; }
     &.tertiary { border-color: $tertiary-medium transparent $tertiary-medium transparent; }
   }
+  .spinner-text {
+    margin-top: 20px;
+    font-size: 22px;
+    color: black;
+    display: inline-block;
+    width: auto;
+    background-color: white;
+    border-radius: 3px;
+
+    &.large {
+      margin-top: 40px;
+      font-size: 30px;
+    }
+  }
 }
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }
@@ -443,7 +464,8 @@ table.table {
   background-size: 16px 16px;
 }
 
-.time-sensitive,a.time-sensitive,a.time-sensitive:visited,a.time-sensitive:hover,a.time-sensitive:focus {
+.time-sensitive,a.time-sensitive,a.time-sensitive:visited,a.time-sensitive:hover,
+    a.time-sensitive:focus {
   color: $primary-medium !important;
   font-weight: bold;
   span.caret { border-top-color: $primary-medium; }
@@ -3077,7 +3099,8 @@ div.topic-list-card, div.group-list-card {
       padding: 14px 10px 10px 10px;
       width: 90%;
     }
-    input[type="email"].signin:focus,input[type="password"].signin:focus,input[type="text"].signin:focus {
+    input[type="email"].signin:focus,input[type="password"].signin:focus,
+        input[type="text"].signin:focus {
       background-color: $really-light-gray !important;
     }
     .control-group.error {
@@ -3378,8 +3401,9 @@ div.topic-list-card, div.group-list-card {
           background-color: $secondary-really-light;
         }
         &.selected {
-          background: linear-gradient(45deg, $dark-white 25%, $secondary-really-light 25%, $secondary-really-light 50%,
-                                   $dark-white 50%, $dark-white 75%, $secondary-really-light 75%);
+          background: linear-gradient(45deg, $dark-white 25%, $secondary-really-light 25%, 
+            $secondary-really-light 50%, $dark-white 50%, $dark-white 75%, 
+            $secondary-really-light 75%);
           background-size: 16px 16px;
           opacity: 0.75;
         }
