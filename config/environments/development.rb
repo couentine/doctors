@@ -34,7 +34,12 @@ BadgeList::Application.configure do
   # config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 
   # Send email through gmail for this environment
-  config.action_mailer.delivery_method = :smtp
+  if ENV['disable_all_emails']
+    # Turn off emails if needed
+    config.action_mailer.delivery_method = :test
+  else
+    config.action_mailer.delivery_method = :smtp
+  end
   config.action_mailer.smtp_settings = {
     address:              'smtp.gmail.com',
     port:                 587,

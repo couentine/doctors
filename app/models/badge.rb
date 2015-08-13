@@ -508,10 +508,6 @@ protected
       self.remote_custom_image_url = \
         "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/#{custom_image_key}"
     end
-
-    if custom_image_key.blank?
-      self.remove_custom_image = custom_image?
-    end
     
     if !designed_image? || image_frame_changed? || image_icon_changed? || image_color1_changed? \
         || image_color2_changed?

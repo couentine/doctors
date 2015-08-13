@@ -35,6 +35,7 @@ INTERCOM_API_KEY=abc123
 WEB_CONCURRENCY=1
 MIN_THREADS=1
 MAX_THREADS=1
+disable_all_emails=false
 ```
 
 ## Running foreman ##

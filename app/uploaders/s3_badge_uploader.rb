@@ -11,7 +11,14 @@ class S3BadgeUploader < CarrierWave::Uploader::Base
   end
 
   def filename
-    'badge.png'
+    if original_filename
+      if model && model.read_attribute(mounted_as).present?
+        model.read_attribute(mounted_as)
+      else
+        # preferred standard filename
+        'badge.png'
+      end
+    end
   end
 
   # Process files as they are uploaded:
