@@ -60,6 +60,7 @@ group :development, :test do
   gem "binding_of_caller"
   gem 'rack-mini-profiler'
   gem 'ultrahook'
+  gem 'byebug'
 end
 
 group :test do

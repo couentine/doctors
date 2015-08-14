@@ -430,7 +430,7 @@
 
   function goUploadMode() {
     currentImageCreated = Date.now(); // cancel any pending image generator pollers
-    $("#new_badge input[type=submit]").attr("disabled", true); // disable the submit button
+    $("form input[type=submit]").attr("disabled", true); // disable the submit button
     $("#badge-buttons-design").hide();
     $("#badge-buttons-upload").show();
     $("#badge-image-editor").slideUp();
@@ -449,7 +449,7 @@
     $("#badge_custom_image_key").val(""); 
     $("#badge-buttons-design").show();
     
-    $("#new_badge input[type=submit]").attr("disabled", false); // re-enable the submit button
+    $("form input[type=submit]").attr("disabled", false); // re-enable the submit button
 
     updateBadgeImagePreview();
   }
@@ -463,7 +463,7 @@
     $("#image-uploaded-panel").show();
     $("#upload-spinner").fadeOut();
     
-    $("#new_badge input[type=submit]").attr("disabled", false); // re-enable the submit button
+    $("form input[type=submit]").attr("disabled", false); // re-enable the submit button
   }
 
 </script>

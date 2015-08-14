@@ -52,8 +52,8 @@ class Badge
   field :image_color1,                    type: String
   field :image_color2,                    type: String
   field :image_attributions,              type: Array
-  mount_uploader :designed_image,         S3BadgeUploader
   mount_uploader :custom_image,           S3BadgeUploader
+  mount_uploader :designed_image,         S3BadgeUploader
   mount_uploader :direct_custom_image,    S3DirectBadgeUploader
   field :custom_image_key,                type: String
   
@@ -98,10 +98,10 @@ class Badge
 
   before_validation :set_default_values, on: :create
   before_validation :update_caps_field
+  before_save :process_designed_image
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
   before_save :update_terms
-  before_save :process_images
   before_update :move_badge_if_needed
   after_create :add_creator_as_expert
   after_save :update_requirement_editability
@@ -174,6 +174,10 @@ class Badge
       badge.current_user = creator
       badge.current_username = creator.username
 
+      if !badge.custom_image_key.blank? && (badge.custom_image_key != IMAGE_KEY_IGNORE)
+        badge.update_custom_image
+      end
+
       # Save the badge and then update the requirements if successful
       badge.save!
       badge.update_requirement_list(requirement_list)
@@ -213,15 +217,23 @@ class Badge
       # First query for the core records
       poller = Poller.find(poller_id) rescue nil
       badge = Badge.find(badge_id)
+      original_custom_image_key = badge.custom_image_key
       user = User.find(current_user_id)
       
       badge.current_user = user
       badge.current_username = user.username
 
       # Save the badge and then update the requirements if successful
-      badge.update_attributes!(badge_params)
+      badge.update_attributes!(badge_params)      
       badge.update_requirement_list(requirement_list)
-        
+
+      # Update the custom image if needed
+      if (badge.custom_image_key != original_custom_image_key) && !badge.custom_image_key.blank? \
+          & (badge.custom_image_key != IMAGE_KEY_IGNORE)
+        badge.update_custom_image
+        badge.save!
+      end
+
       # Then save the results
       if poller
         poller.status = 'successful'
@@ -487,6 +499,13 @@ class Badge
     self.save!
   end
 
+  # Sets the image url based on the supplied image key (defaults to the model value)
+  # NOTE: You need to save the badge afterward to commit the new path to the DB.
+  def update_custom_image(image_key = custom_image_key)
+    self.remote_custom_image_url = \
+      "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/#{image_key}"
+  end
+
 protected
   
   def set_default_values
@@ -502,13 +521,7 @@ protected
     end
   end
 
-  def process_images
-    if custom_image_key_changed? && !custom_image_key.blank? \
-        && (custom_image_key != IMAGE_KEY_IGNORE)
-      self.remote_custom_image_url = \
-        "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/#{custom_image_key}"
-    end
-    
+  def process_designed_image
     if !designed_image? || image_frame_changed? || image_icon_changed? || image_color1_changed? \
         || image_color2_changed?
       self.build_badge_image
