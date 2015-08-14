@@ -142,6 +142,7 @@ class GroupsController < ApplicationController
         format.json { render json: @group, status: :created, location: @group, 
           filter_user: current_user }
       else
+        @allow_url_editing = true;
         format.html { render action: "new" }
         format.json { render json: @group.errors, status: :unprocessable_entity }
       end
