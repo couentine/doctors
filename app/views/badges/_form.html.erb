@@ -120,7 +120,7 @@
 
     <%= render 'shared/requirement_list_editor', f: f %>
 
-    <% if @current_user_is_admin %>
+    <% if @current_user_is_admin || @badge_list_admin %>
 
       <h2>
         Permissions &amp; Notifications
@@ -136,9 +136,12 @@
           include_blank: false, collection: @badge_awardability_options %>
 
         <%= f.input :send_validation_request_emails, as: :select, include_blank: false,
-          label: 'Validation request emails', collection: @send_email_options, 
-          hint: 'By default, validation request emails are sent automatically to those who can ' \
-            + 'award the badge whenever a learner completes all of the badge requirements.' %>
+          label: 'Feedback requeest emails', collection: @send_email_options, 
+          hint: 'By default, feedback request emails are sent automatically to those who can ' \
+            + 'award the badge whenever a learner completes all of the badge requirements.',
+          wrapper_html: {
+            style: ((!@badge.new_record && @badge.tracks_progress?) ? '' : 'display: none;') 
+          } %>
       </div>
 
     <% end %>

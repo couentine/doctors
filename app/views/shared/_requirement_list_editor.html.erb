@@ -142,6 +142,10 @@
       listItem.find(".action-bar").fadeOut();
       listItem.find(".removed-mode").fadeIn();
       listItem.data("is-deleted", "true");
+      listItem.addClass("isDeleted");
+
+      if ($(".rle-list-item:not(.isDeleted)").length == 0) 
+          $("div.badge_send_validation_request_emails").fadeOut();
 
       // Mark that the JSON now needs to be saved
       saveJSON = true;
@@ -156,6 +160,10 @@
         // Show the no requirements panel if needed
         if ($(".rle-list-item").length == 0) 
           $("#rle-no-requirements").slideDown();
+
+        // Hide the feedback request element if there are no requirements left
+        if ($(".rle-list-item:not(.isDeleted)").length == 0) 
+          $("div.badge_send_validation_request_emails").fadeOut();
       });
     }
   }
@@ -166,6 +174,10 @@
     listItem.find(".removed-mode").fadeOut();
     listItem.find(".action-bar").fadeIn();
     listItem.data("is-deleted", "false");
+    listItem.removeClass("isDeleted");
+
+    // Show the feedback request element
+    $("div.badge_send_validation_request_emails").fadeIn();
   }
 
   function addNewItem() {
@@ -179,6 +191,9 @@
     $("#rle-list-panel").append(buildListItem(nextIndex, item, true));
     activateListItem(nextIndex);
     getListItem(nextIndex).slideDown(function() { $(this).find(".rle-display-name").focus() });
+
+    // Show the feedback request element
+    $("div.badge_send_validation_request_emails").fadeIn();
 
     // Mark that the JSON now needs to be saved
     saveJSON = true;

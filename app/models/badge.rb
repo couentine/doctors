@@ -36,7 +36,7 @@ class Badge
   field :progress_tracking_enabled,       type: Boolean, default: true
   field :editability,                     type: String, default: 'experts'
   field :awardability,                    type: String, default: 'experts'
-  field :send_validation_request_emails,  type: Boolean, default: 'true'
+  field :send_validation_request_emails,  type: Boolean, default: true
   
   field :info,                            type: String
   field :info_sections,                   type: Array
@@ -473,6 +473,7 @@ class Badge
       
       # The last step is to update progress tracking boolean if needed
       self.progress_tracking_enabled = (new_requirement_count > 0)
+      self.send_validation_request_emails = false if !progress_tracking_enabled
       self.save if self.changed?
     end
   end

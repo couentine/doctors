@@ -36,7 +36,8 @@ BadgeList::Application.configure do
   # Send email through gmail for this environment
   if ENV['disable_all_emails']
     # Turn off emails if needed
-    config.action_mailer.delivery_method = :test
+    # config.action_mailer.delivery_method = :test
+    config.action_mailer.delivery_method = :smtp
   else
     config.action_mailer.delivery_method = :smtp
   end

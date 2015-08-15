@@ -670,4 +670,27 @@ namespace :db do
     puts " >> Done."
   end
 
+  # Goes back and sets send badge notifications to false for badges without requirements
+  task fix_badge_notification_settings: :environment do
+    badges = Badge.where(progress_tracking_enabled: false)
+
+    print "Updating #{badges.count} badges"
+
+    badges.each do |badge|
+      begin
+        if !badge.has_requirements?
+          badge.send_validation_request_emails = false
+          badge.timeless.save! if badge.changed?
+          print "*"
+        else
+          print "."
+        end
+      rescue
+        print "!"
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end
