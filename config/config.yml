@@ -9,46 +9,45 @@ defaults: &defaults
   # Subscription Plans
   subscription_plans:
     standard:
-      standard-100m-1:
-        name: Starter
-        amount: 5000
+      solo-1m-1:
+        name: Solo
+        amount: 500
         currency: usd
         interval: month
         trial_period_days: 14
-        statement_descriptor: Badge List Starter
-        users: 100
-        admins: -1
+        statement_descriptor: Badge List Solo
+        users: -1
+        admins: 1
         sub_groups: 0
-      standard-500m-1:
-        name: Basic
-        amount: 12000
+        features: []
+      team-1m-1:
+        name: Team
+        amount: 3000
         currency: usd
         interval: month
         trial_period_days: 14
-        statement_descriptor: Badge List Basic
-        users: 500
-        admins: -1
-        sub_groups: 1
-      standard-1000m-1:
-        name: Standard
-        amount: 20000
+        statement_descriptor: Badge List Team
+        users: -1
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+        - search
+      org-1m-1:
+        name: Org
+        amount: 13000
         currency: usd
         interval: month
         trial_period_days: 14
-        statement_descriptor: Badge List Standard
-        users: 1000
-        admins: -1
+        statement_descriptor: Badge List Org
+        users: -1
+        admins: 3
         sub_groups: 5
-      standard-5000m-1:
-        name: Premium
-        amount: 45000
-        currency: usd
-        interval: month
-        trial_period_days: 14
-        statement_descriptor: Badge List Premium
-        users: 5000
-        admins: -1
-        sub_groups: -1
+        sub_group_amount: 1000
+        features:
+        - community
+        - search
+        - branding
     k12:
       k12-1y-1:
         name: Single Teacher
@@ -56,62 +55,50 @@ defaults: &defaults
         currency: usd
         interval: year
         trial_period_days: 14
-        statement_descriptor: Badge List K12 Teacher
+        statement_descriptor: Badge List K12 Solo
         users: -1
         admins: 1
         sub_groups: 0
     free:
-      free-5m-1:
-        name: Free Mini
+      solo-free-1:
+        name: Free Solo
         amount: 0
         currency: usd
         interval: month
-        trial_period_days: 0
-        statement_descriptor: Badge List Free
-        users: 5
-        admins: -1
-        sub_groups: -1
-      free-100m-1:
-        name: Free Starter
-        amount: 0
-        currency: usd
-        interval: month
-        trial_period_days: 0
-        statement_descriptor: Badge List Free
-        users: 100
-        admins: -1
-        sub_groups: 0
-      free-500m-1:
-        name: Free Basic
-        amount: 0
-        currency: usd
-        interval: month
-        trial_period_days: 0
-        statement_descriptor: Badge List Free
-        users: 500
-        admins: -1
-        sub_groups: 1
-      free-unlimited-1:
-        name: Free Unlimited
-        amount: 0
-        currency: usd
-        interval: month
-        trial_period_days: 0
+        trial_period_days: 14
         statement_descriptor: Badge List Free
         users: -1
-        admins: -1
-        sub_groups: -1
-    trial:
-      trial-100m-1:
-        name: Trial Starter
+        admins: 1
+        sub_groups: 0
+        features: []
+      team-free-1:
+        name: Free Team
         amount: 0
         currency: usd
         interval: month
-        trial_period_days: 0
-        statement_descriptor: Badge List Trial
-        users: 100
-        admins: -1
+        trial_period_days: 14
+        statement_descriptor: Badge List Free
+        users: -1
+        admins: 3
         sub_groups: 0
+        features:
+        - community
+        - search
+      org-free-1:
+        name: Free Org
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 14
+        statement_descriptor: Badge List Free
+        users: -1
+        admins: 3
+        sub_groups: 5
+        sub_group_amount: 0
+        features:
+        - community
+        - search
+        - branding
     test:
       test-100d-1:
         name: Daily 100
@@ -123,6 +110,8 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
+        features:
+        - community
       test-100d-1t:
         name: Daily 100 with Trial
         amount: 200
@@ -133,6 +122,8 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
+        features:
+        - community
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:
