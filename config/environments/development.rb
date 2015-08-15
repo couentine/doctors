@@ -22,7 +22,6 @@ BadgeList::Application.configure do
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
 
-
   # Do not compress assets
   config.assets.compress = false
 
@@ -33,14 +32,8 @@ BadgeList::Application.configure do
   # MOVED this next line to application.rb, it uses an ENV variable now
   # config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 
-  # Send email through gmail for this environment
-  # if ENV['disable_all_emails']
-    # Turn off emails if needed
-    # config.action_mailer.delivery_method = :test
-    # config.action_mailer.delivery_method = :smtp
-  # else
-    config.action_mailer.delivery_method = :smtp
-  # end
+  # Send email through gmail for this environment 
+  config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address:              'smtp.gmail.com',
     port:                 587,
