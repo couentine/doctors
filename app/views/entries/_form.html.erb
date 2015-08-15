@@ -250,7 +250,7 @@
       end
     %>
     <%= f.button :submit, save_button_text, class: 'btn btn-primary', 
-      disabled: @entry.uploaded_image_key.blank? %>
+      disabled: ((@entry.format == 'image') && @entry.uploaded_image_key.blank?) %>
     <%= 
       if @entry.new_record?
         link_to "Cancel", [@group, @badge, @log], class: "btn"

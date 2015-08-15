@@ -67,12 +67,7 @@ BadgeList::Application.configure do
   # config.action_mailer.default_url_options = { :host => 'badgelist.com' }
 
   # Configure postmark gem (for email delivery)
-  if ENV['disable_all_emails']
-    # Turn off emails if needed
-    config.action_mailer.delivery_method = :test
-  else
-    config.action_mailer.delivery_method = :postmark
-  end
+  config.action_mailer.delivery_method = :postmark
   config.action_mailer.postmark_settings = { :api_key => ENV['POSTMARK_API_KEY'] }
 
   # Exception notification gem
