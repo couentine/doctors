@@ -365,24 +365,7 @@ protected
     # Note: The created_at condition is to filter out sample_data & migrations
     if validation_status_changed? && (updated_at > (Time.now - 2.hours))
       if (validation_status == 'requested') && badge.send_validation_request_emails
-        # Requests go out to all admins and (depending on awardability setting) any expert who
-        # has not opted out
-        user_ids_to_email = badge.group.admin_ids.clone
-
-        # First get all expert logs and run through them
-        badge.logs.where(validation_status: 'validated', detached_log: false).each do |log|
-          if user_ids_to_email.include? log.user_id # then just check if they've opted out
-            user_ids_to_email.delete log.user_id unless log.receive_validation_request_emails
-          else # then just check if we're awarding to non-admin experts
-            user_ids_to_email << log.user_id if badge.awardability == 'experts'
-          end
-        end
-
-        # Now query the users and send them each an email
-        User.where(:id.in => user_ids_to_email).each do |user_to_email|
-          UserMailer.delay.log_validation_request(user_to_email.id, self.user.id, badge.group_id, \
-            badge.id, self.id) 
-        end
+        Log.delay(queue: 'mailer').do_send_validation_requests(id)
       elsif validation_status == 'validated'
         UserMailer.delay.log_badge_issued(user.id, badge.group_id, badge.id, self.id) 
       end
@@ -392,6 +375,33 @@ protected
       if issue_status == 'retracted'
         UserMailer.delay.log_badge_retracted(user.id, badge.group_id, badge.id, self.id) 
       end
+    end
+  end
+
+  # This is called by send_notifications above in order to async the queueing of potentially
+  # hundreds of emails
+  def self.do_send_validation_requests(validated_log_id)
+    # Query the log & badge
+    validated_log = Log.find(validated_log_id)
+    badge = validated_log.badge
+    
+    # Requests go out to all admins and (depending on awardability setting) any expert who
+    # has not opted out
+    user_ids_to_email = badge.group.admin_ids.clone
+
+    # First get all expert logs and run through them
+    badge.logs.where(validation_status: 'validated', detached_log: false).each do |log|
+      if user_ids_to_email.include? log.user_id # then just check if they've opted out
+        user_ids_to_email.delete log.user_id unless log.receive_validation_request_emails
+      else # then just check if we're awarding to non-admin experts
+        user_ids_to_email << log.user_id if badge.awardability == 'experts'
+      end
+    end
+
+    # Now query the users and send them each an email
+    User.where(:id.in => user_ids_to_email).each do |user_to_email|
+      UserMailer.delay.log_validation_request(user_to_email.id, validated_log.user.id, \
+        badge.group_id, badge.id, validated_log.id) 
     end
   end
 
