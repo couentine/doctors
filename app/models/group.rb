@@ -52,6 +52,7 @@ class Group
   field :user_limit,                  type: Integer, default: 5
   field :admin_limit,                 type: Integer, default: 1
   field :sub_group_limit,             type: Integer, default: 0
+  field :features,                    type: Array, default: [] # = ['community', 'branding']
   field :total_user_count,            type: Integer, default: 0
   field :admin_count,                 type: Integer, default: 0
   field :member_count,                type: Integer, default: 0
@@ -175,6 +176,11 @@ class Group
     can_create_badges?
   end
 
+  # Returns whether or not the features array contains the specified 'feature' or :feature
+  def has?(feature)
+    !features.blank? && features.include?(feature.to_s)
+  end
+
   # Returns stripe_subscription_status as a readable string
   def subscription_status_string
     if private?
@@ -259,19 +265,8 @@ class Group
               + "at any time by selecting a plan and confirming your billing details." }
         end
       else
-        if (user_limit >= 0) && (total_user_count > (user_limit * 0.95))
-          { color: 'orange', icon: 'fa-check-circle', show_alert: true,
-            summary: "Subscription renews #{subscription_end_date.to_s(:short_date)}",
-            alert_title: "Your group is near its user limit",
-            alert_body: "You are currently using #{total_user_count} of the #{user_limit} " \
-              + "total users allowed with your current subscription. When you reach your limit " \
-              + "your group will continue to work, but no new users will be able to be added. " \
-              + "To ensure uninterrupted functionality we recommend either upgrading to a " \
-              + "larger plan or removing users from your group." }
-        else 
-          { color: 'green', icon: 'fa-check-circle', show_alert: false,
-            summary: "Subscription renews #{subscription_end_date.to_s(:short_date)}" }
-        end
+        { color: 'green', icon: 'fa-check-circle', show_alert: false,
+          summary: "Subscription renews #{subscription_end_date.to_s(:short_date)}" }
       end
     end
   end
@@ -717,10 +712,12 @@ protected
           self.user_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['users']
           self.admin_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['admins']
           self.sub_group_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['sub_groups']
+          self.features = ALL_SUBSCRIPTION_PLANS[subscription_plan]['features']
         else
           self.user_limit = 5
           self.admin_limit = 1
           self.sub_group_limit = 0
+          self.features = []
         end
       end
     else

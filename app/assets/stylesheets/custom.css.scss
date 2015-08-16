@@ -12,7 +12,7 @@ body {
   overflow: auto;
   background-color: $body-background-color !important;
   color: $dark-text-color;
-  font-family: 'Open Sans', Verdana, Arial !important;
+  font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
   font-size: 16px;
   line-height: 1.8em;
 
@@ -43,7 +43,7 @@ body {
   }
 }
 p,ol,ul,td {
-  font-family: 'Open Sans', Verdana, Arial !important;
+  font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
   font-size: 16px;
   line-height: 18px;
 }
@@ -2512,6 +2512,7 @@ div.topic-list-card, div.group-list-card {
       font-weight: bold;
       background-color: $really-light-gray;
       font-size: 40px;
+      line-height: 1.3em;
 
       .fa { color: $medium-gray; }
       .fa.fa-inverse { color: $really-light-gray; }
