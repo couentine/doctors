@@ -429,7 +429,7 @@ DEPENDENCIES
   mongoid (= 3.1.5)
   newrelic_rpm
   postmark-rails (~> 0.5.2)
-  puma
+  puma (= 2.12.3)
   rack-mini-profiler
   rack-timeout
   rails (= 3.2.14)

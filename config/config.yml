@@ -32,7 +32,6 @@ defaults: &defaults
         sub_groups: 0
         features:
         - community
-        - search
       org-1m-1:
         name: Org
         amount: 13000
@@ -46,11 +45,10 @@ defaults: &defaults
         sub_group_amount: 1000
         features:
         - community
-        - search
         - branding
     k12:
-      k12-1y-1:
-        name: Single Teacher
+      k12-solo-1y-1:
+        name: K12 Teacher (Annual)
         amount: 2500
         currency: usd
         interval: year
@@ -59,7 +57,60 @@ defaults: &defaults
         users: -1
         admins: 1
         sub_groups: 0
-    free:
+        features: []
+      k12-team-1m-1:
+        name: K12 Team
+        amount: 1500
+        currency: usd
+        interval: month
+        trial_period_days: 14
+        statement_descriptor: Badge List K12 Team
+        users: -1
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+      k12-org-1m-1:
+        name: K12 Org
+        amount: 6500
+        currency: usd
+        interval: month
+        trial_period_days: 14
+        statement_descriptor: Badge List K12 Org
+        users: -1
+        admins: 3
+        sub_groups: 5
+        sub_group_amount: 500
+        features:
+        - community
+        - branding
+      k12-team-1y-1:
+        name: K12 Team (Annual)
+        amount: 12000
+        currency: usd
+        interval: year
+        trial_period_days: 14
+        statement_descriptor: Badge List K12 Team
+        users: -1
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+      k12-org-1y-1:
+        name: K12 Org (Annual)
+        amount: 48000
+        currency: usd
+        interval: year
+        trial_period_days: 14
+        statement_descriptor: Badge List K12 Org
+        users: -1
+        admins: 3
+        sub_groups: 5
+        sub_group_amount: 500
+        features:
+        - community
+        - branding
+    internal:
       solo-free-1:
         name: Free Solo
         amount: 0
@@ -83,7 +134,6 @@ defaults: &defaults
         sub_groups: 0
         features:
         - community
-        - search
       org-free-1:
         name: Free Org
         amount: 0
@@ -97,7 +147,6 @@ defaults: &defaults
         sub_group_amount: 0
         features:
         - community
-        - search
         - branding
     test:
       test-100d-1:

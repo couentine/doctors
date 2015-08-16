@@ -46,6 +46,14 @@ using the ultrahook client.
 $ foreman start -f Procfile.dev
 ```
 
+### Example Procfile.dev ###
+
+```
+web: bundle exec puma -C config/puma.rb
+worker: bundle exec sidekiq
+ultrahook: ultrahook stripe http://localhost:5000/h/stripe_event
+```
+
 ## Stripe Webhooks ##
 
 WebhooksController is designed to accept the following events at the '/h/stripe_event' endpoint:
