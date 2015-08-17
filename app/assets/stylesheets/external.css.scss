@@ -40,6 +40,7 @@ section {
 }
 
 .add-top-margin { margin-top: 30px; }
+.no-padding { padding: 0 !important; }
 
 @media (min-width: 768px) {
   .show-when-small {
@@ -733,6 +734,7 @@ footer.bl-footer {
   }
   .tag-line {
     display: block;
+    font-weight: 300;
     padding: 15px;
     border-radius: 2px;
     margin: 15px;
@@ -843,35 +845,163 @@ footer.bl-footer {
 }
 
 .pricing-page-row {
-  background-color: $secondary-medium;
-  color: white;
+  background-color: $dark-white;
+  color: $dark-text-color;
+
+  .nav-tabs {
+    margin-bottom: 30px;
+
+    & > li {
+      font-size: 20px;
+
+      a {
+        font-weight: normal;
+        color: $light-text-color;
+      }
+
+      &.active {
+        a {
+          color: $medium-text-color;
+          font-weight: bold;
+        }
+      }
+    }
+  }
 
   &.page-banner-row {
     h1 {
-      color: white;
-      text-shadow: 2px 2px $secondary-dark;
+      padding-top: 20px;
+      color: $dark-text-color;
     }
     .tag-line {
-      background-color: $secondary-dark;
+      background-color: transparent;
+      font-size: 20px;
+      padding: 0;
     }
   }
-  &.table-row {
-    .row-inner {
-      background-color: $secondary-light;
-      border: 5px solid $secondary-light;
-      
-      table {
-        tr {
-          th { border-bottom: 1px solid $secondary-medium; }
+  &.section-banner-row {
+    text-align: center;
+    padding-top: 10px;
 
-          &.table-footer {
-            td { 
-              border-top: 1px solid $secondary-medium; 
-              color: $secondary-dark;
-              a { color: $secondary-dark; }
-            } 
-          }
+    .tag-line {
+      font-size: 20px;
+      font-weight: 300;
+    }
+  }
+  &.plan-container {
+    padding: 0 0 60px 0;
+  }
+}
+
+.plan-list-row {
+  padding: 0 !important;
+
+  .plan-col {
+    padding: 20px 0;
+    text-align: center;
+
+    .inner-col {
+      display: inline-block;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      background-color: $light-gray;
+      color: white;
+      font-size: 16px;
+      max-width: 220px;
+      text-align: center;
+
+      .hero-icon {
+        font-size: 50px;
+        margin: -56px auto 10px auto;
+        color: $primary-medium;
+        background-color: white;
+        width: 43px;
+        border-radius: 500px;
+        line-height: 1em;
+        height: 43px;
+      }
+      .title { 
+        font-size: 30px;
+        font-weight: 300;
+        margin: 10px 0 15px 0;
+      }
+      .price {
+        line-height: 80px;
+
+        .currency-symbol {
+          font-size: 30px;
+          position: relative;
+          top: -20px;
         }
+        .amount {
+          font-size: 70px;
+          letter-spacing: -2px;
+        }
+        .suffix {
+          position: relative;
+          top: -3px;
+        }
+      }
+      .feature-list ul {
+        list-style: none;
+        margin-left: 0;
+
+        li {
+          padding: 0 0 16px 0;
+          font-weight: 300;
+          font-size: 20px;
+        }
+        em { font-size: 80%; }
+      }
+      .the-button {
+        .btn {
+          background-image: none;
+          color: white;
+          border: none;
+          box-shadow: none;
+          text-shadow: none;
+        }
+      }
+      .asterisk {
+        font-size: 13px;
+        position: relative;
+        top: -7px;
+      }
+    }
+
+    &.solo {
+      text-align: right;
+      .inner-col {
+        background-color: $tertiary-light;
+        border: 1px solid $tertiary-really-light;
+        .the-button .btn { background-color: $tertiary-medium; }
+      }
+    }
+    &.team {
+      text-align: center;
+      .inner-col {
+        background-color: $secondary-light;
+        border: 1px solid $secondary-really-light;
+        .the-button .btn { background-color: $secondary-medium; }
+      }
+    }
+    &.org {
+      text-align: left;
+      .inner-col {
+        background-color: $primary-light;
+        border: 1px solid $primary-really-light;
+        .the-button .btn { background-color: $primary-medium; }
+      }
+    }
+    &.extras {
+      text-align: left;
+      .inner-col {
+        background-color: $primary-light;
+        border: 1px solid $primary-really-light;
+        margin-left: 5.1%;
+        .the-button .btn { background-color: $primary-medium; }
+        .title { margin: -15px 0 0 0; }
       }
     }
   }

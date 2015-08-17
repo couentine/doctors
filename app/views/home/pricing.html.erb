@@ -12,247 +12,271 @@
   <div class="span6 offset3">
     <h1>Badge List Pricing</h1>
     <span class="tag-line">
-      <span class="term" data-term="open-groups">Open groups</span> 
-      are free. All groups support unlimited users, unlimited badges and include
-      <span class="term" data-term="lifetime-hosting">lifetime hosting</span>.
+      (<span class="term" data-term="open-groups">Open groups</span> 
+      are free.)
     </span>
   </div>
 </div>
 
-<div class="row-fluid pricing-page-row sub-banner-row">
+<div class="row-fluid pricing-page-row section-banner-row">
   <div class="span6 offset3">
     <h2>Closed Groups</h2>
     <span class="tag-line">
       Include control over 
       <span class="term" data-term="privacy">privacy</span>
-      and <span class="term" data-term="membership">membership</span>.
+      and <span class="term" data-term="membership">membership</span>.<br>
+      Unlimited badges and groups.
     </span>
   </div>
 </div>
 
 <!-- === TAB BAR === -->
 
-<div class="row-fluid pricing-page-row sub-banner-row">
+<div class="row-fluid pricing-page-row">
   <div class="span6 offset3">
 
-    <ul class="nav nav-tabs">
-      <li class="active"><a href="#standard">Standard</a></li>
-      <li><a href="#k12">K12</a></li>
+    <ul class="nav nav-tabs" id="tab-bar">
+      <li class="active"><a href="#standard">Standard Pricing</a></li>
+      <li><a href="#k12">K12 Pricing</a></li>
     </ul>
 
   </div>
 </div>
 
-<div class="row-fluid pricing-page-row plan-list-row">
 
-  <div class="tab-content">
+<div class="row-fluid pricing-page-row plan-container">
+  <div class="span12">
+    <div class="tab-content">
 
-    <div class="tab-pane active" id="standard">
+      <!-- === STANDARD PRICING === -->
+        
+      <div class="tab-pane active" id="standard">
 
-      <!-- === SOLO PLAN === -->
+        <div class="row-fluid pricing-page-row plan-list-row">
 
-      <div class="span4 plan-col solo">
-        <div class="title">Solo</div>
-        <div class="price">
-          <span class="currency-symbol">$</span>
-          <span class="amount">5</span>
-          <span class="suffix">/ month</span>
-        </div>
-        <div class="feature-list">
-          <ul>
-            <li>
-              1 <span class="term" data-term="admin">admin</span>
-            </li>
-            <li>
-              1 <span class="term" data-term="badge-awarder">badge awarder</span>
-            </li>
-          </ul>
-        </div>
-        <div class="the-button">
-          <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
-        </div>
-      </div>
+          <!-- === SOLO PLAN === -->
 
-      <!-- === TEAM PLAN === -->
-
-      <div class="span4 plan-col team">
-        <div class="title">Team</div>
-        <div class="price">
-          <span class="currency-symbol">$</span>
-          <span class="amount">30</span>
-          <span class="suffix">/ month</span>
-        </div>
-        <div class="feature-list">
-          <ul>
-            <li>
-              3 <span class="term" data-term="admin">admins</span>
-            </li>
-            <li>
-              Unlimited <span class="term" data-term="badge-awarder">badge awarder</span>
-            </li>
-            <li>
-              <span class="term" data-term="community">Community features</span>
-            </li>
-          </ul>
-        </div>
-        <div class="the-button">
-          <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
-        </div>
-      </div>
-
-      <!-- === ORG PLAN === -->
-
-      <div class="span4 plan-col org">
-        <div class="title">Org</div>
-        <div class="price">
-          <span class="currency-symbol">$</span>
-          <span class="amount">130</span>
-          <span class="suffix">/ month</span>
-        </div>
-        <div class="feature-list">
-          <ul>
-            <li>
-              <em>Everything in Team and...</em>
-            </li>
-            <li>
-              5 <span class="term" data-term="sub-groups">sub-groups</span>
-              <span class="label">Coming soon</span>
-            </li>
-            <li>
-              <span class="term" data-term="branding">Custom branding</span>
-              <span class="label">Coming soon</span>
-            </li>
-          </ul>
-        </div>
-        <div class="the-button">
-          <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
-        </div>
-      </div>
-
-      <div class="row-fluid pricing-page-row plan-list-row">
-
-        <!-- === ORG PLAN === -->
-
-        <div class="span4 offset8 plan-col extras">
-          <div class="hero-icon"><i class="fa fa-plus"></i></div>
-          <div class="title">
-            Sub-Group
-            <span class="label">Coming soon</span>
+          <div class="span4 plan-col solo">
+            <div class="inner-col">
+              <div class="title">Solo</div>
+              <div class="price">
+                <span class="currency-symbol">$</span>
+                <span class="amount">5</span>
+                <span class="suffix">/ month</span>
+              </div>
+              <div class="feature-list">
+                <ul>
+                  <li>
+                    1 <span class="term" data-term="admin">admin</span>
+                    / <span class="term" data-term="badge-awarder">badge awarder</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="the-button">
+                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+              </div>
+            </div>
           </div>
-          <div class="price">
-            <span class="currency-symbol">$</span>
-            <span class="amount">10</span>
-            <span class="suffix">each</span>
+
+          <!-- === TEAM PLAN === -->
+
+          <div class="span4 plan-col team">
+            <div class="inner-col">
+              <div class="title">Team</div>
+              <div class="price">
+                <span class="currency-symbol">$</span>
+                <span class="amount">30</span>
+                <span class="suffix">/ month</span>
+              </div>
+              <div class="feature-list">
+                <ul>
+                  <li>
+                    3 <span class="term" data-term="admin">admins</span>
+                  </li>
+                  <li>
+                    Unlimited <span class="term" data-term="badge-awarder">badge awarders</span>
+                  </li>
+                  <li>
+                    <span class="term" data-term="community">Community features</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="the-button">
+                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+              </div>
+            </div>
           </div>
-        </div>
 
-      </div>
+          <!-- === ORG PLAN === -->
 
-    </div> <!-- /standard -->
-
-    <div class="tab-pane" id="k12">
-
-      <!-- === TEACHER PLAN === -->
-
-      <div class="span4 plan-col solo">
-        <div class="title">Solo</div>
-        <div class="price">
-          <span class="currency-symbol">$</span>
-          <span class="amount">5</span>
-          <span class="suffix">/ month</span>
-        </div>
-        <div class="feature-list">
-          <ul>
-            <li>
-              1 <span class="term" data-term="admin">admin</span>
-            </li>
-            <li>
-              1 <span class="term" data-term="badge-awarder">badge awarder</span>
-            </li>
-          </ul>
-        </div>
-        <div class="the-button">
-          <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
-        </div>
-      </div>
-
-      <!-- === TEAM PLAN === -->
-
-      <div class="span4 plan-col team">
-        <div class="title">Team</div>
-        <div class="price">
-          <span class="currency-symbol">$</span>
-          <span class="amount">30</span>
-          <span class="suffix">/ month</span>
-        </div>
-        <div class="feature-list">
-          <ul>
-            <li>
-              3 <span class="term" data-term="admin">admins</span>
-            </li>
-            <li>
-              Unlimited <span class="term" data-term="badge-awarder">badge awarder</span>
-            </li>
-            <li>
-              <span class="term" data-term="community">Community features</span>
-            </li>
-          </ul>
-        </div>
-        <div class="the-button">
-          <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
-        </div>
-      </div>
-
-      <!-- === ORG PLAN === -->
-
-      <div class="span4 plan-col org">
-        <div class="title">Org</div>
-        <div class="price">
-          <span class="currency-symbol">$</span>
-          <span class="amount">130</span>
-          <span class="suffix">/ month</span>
-        </div>
-        <div class="feature-list">
-          <ul>
-            <li>
-              <em>Everything in Team and...</em>
-            </li>
-            <li>
-              5 <span class="term" data-term="sub-groups">sub-groups</span>
-              <span class="label">Coming soon</span>
-            </li>
-            <li>
-              <span class="term" data-term="branding">Custom branding</span>
-              <span class="label">Coming soon</span>
-            </li>
-          </ul>
-        </div>
-        <div class="the-button">
-          <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
-        </div>
-      </div>
-
-      <div class="row-fluid pricing-page-row plan-list-row">
-
-        <!-- === ORG PLAN === -->
-
-        <div class="span4 offset8 plan-col extras">
-          <div class="hero-icon"><i class="fa fa-plus"></i></div>
-          <div class="title">
-            Sub-Group
-            <span class="label">Coming soon</span>
+          <div class="span4 plan-col org">
+            <div class="inner-col">
+              <div class="title">Org</div>
+              <div class="price">
+                <span class="currency-symbol">$</span>
+                <span class="amount">130</span>
+                <span class="suffix">/ month</span>
+              </div>
+              <div class="feature-list">
+                <ul>
+                  <li>
+                    <em>Everything in Team and...</em>
+                  </li>
+                  <li>
+                    5 <span class="term" data-term="sub-groups">sub-groups</span>
+                    <span class="asterisk"><i class="fa fa-asterisk"></i></span>
+                  </li>
+                  <li>
+                    <span class="term" data-term="branding">Custom branding</span>
+                    <span class="asterisk"><i class="fa fa-asterisk"></i></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="the-button">
+                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+              </div>
+            </div>
           </div>
-          <div class="price">
-            <span class="currency-symbol">$</span>
-            <span class="amount">10</span>
-            <span class="suffix">each</span>
+
+        </div> <!-- /.plan-list-row -->
+
+        <div class="row-fluid pricing-page-row plan-list-row">
+
+          <!-- === SUB-GROUP === -->
+
+          <div class="span4 offset8 plan-col extras">
+            <div class="inner-col">
+              <div class="hero-icon"><i class="fa fa-plus-circle"></i></div>
+              <div class="price">
+                <span class="currency-symbol">$</span>
+                <span class="amount">10</span>
+                <span class="suffix">per</span>
+              </div>
+              <div class="title">
+                Extra<br>Sub-Group
+                <span class="asterisk"><i class="fa fa-asterisk"></i></span>
+              </div>
+            </div>
           </div>
-        </div>
 
-      </div>
-      
-    </div> <!-- /k12 -->
+        </div> <!-- /.plan-list-row -->
+        
+      </div> <!-- /#standard.tab-pane -->
 
-  </div> <!-- /tab-content -->
+      <!-- === K12 PRICING === -->
 
-</div> <!-- /plan-list-row -->
+      <div class="tab-pane" id="k12">
+
+        <div class="row-fluid pricing-page-row plan-list-row">
+
+          <!-- === TEACHER PLAN === -->
+
+          <div class="span4 plan-col solo">
+            <div class="inner-col">
+              <div class="title">Teacher</div>
+              <div class="price">
+                <span class="currency-symbol">$</span>
+                <span class="amount">25</span>
+                <span class="suffix">/ year</span>
+              </div>
+              <div class="feature-list">
+                <ul>
+                  <li>
+                    1 <span class="term" data-term="teacher">teacher</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="the-button">
+                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+              </div>
+            </div>
+          </div>
+
+          <!-- === TEAM PLAN === -->
+
+          <div class="span4 plan-col team">
+            <div class="inner-col">
+              <div class="title">Team</div>
+              <div class="price">
+                <span class="currency-symbol">$</span>
+                <span class="amount">15</span>
+                <span class="suffix">/ month</span>
+              </div>
+              <div class="feature-list">
+                <ul>
+                  <li>
+                    3 <span class="term" data-term="admin">admins</span>
+                  </li>
+                  <li>
+                    Unlimited <span class="term" data-term="badge-awarder">badge awarders</span>
+                  </li>
+                  <li>
+                    <span class="term" data-term="community">Community features</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="the-button">
+                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+              </div>
+            </div>
+          </div>
+
+          <!-- === SCHOOL PLAN === -->
+
+          <div class="span4 plan-col org">
+            <div class="inner-col">
+              <div class="title">School</div>
+              <div class="price">
+                <span class="currency-symbol">$</span>
+                <span class="amount">65</span>
+                <span class="suffix">/ month</span>
+              </div>
+              <div class="feature-list">
+                <ul>
+                  <li>
+                    <em>Everything in Team and...</em>
+                  </li>
+                  <li>
+                    5 <span class="term" data-term="sub-groups">sub-groups</span>
+                    <span class="asterisk"><i class="fa fa-asterisk"></i></span>
+                  </li>
+                  <li>
+                    <span class="term" data-term="branding">Custom branding</span>
+                    <span class="asterisk"><i class="fa fa-asterisk"></i></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="the-button">
+                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+              </div>
+            </div>
+          </div>
+          
+        </div> <!-- /.plan-list-row -->
+
+        <div class="row-fluid pricing-page-row plan-list-row">
+
+          <!-- === SUB-PLAN PLAN === -->
+
+          <div class="span4 offset8 plan-col extras">
+            <div class="inner-col">
+              <div class="hero-icon"><i class="fa fa-plus-circle"></i></div>
+              <div class="price">
+                <span class="currency-symbol">$</span>
+                <span class="amount">5</span>
+                <span class="suffix">per</span>
+              </div>
+              <div class="title">
+                Extra<br>Sub-Group
+                <span class="asterisk"><i class="fa fa-asterisk"></i></span>
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- /.plan-list-row -->
+
+      </div> <!-- /#k12.tab-pane -->
+
+    </div> <!-- /.tab-content -->
+  </div> <!-- /.span -->
+</div> <!-- /.row -->

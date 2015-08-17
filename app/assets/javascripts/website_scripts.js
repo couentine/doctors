@@ -12,6 +12,9 @@ $(document).ready(function() {
     });
   }
 
-  $(".nav-tabs").tab();
+  $("#tab-bar a").click(function(e) {
+    e.preventDefault();
+    $(this).tab('show');
+  });
 
 });
