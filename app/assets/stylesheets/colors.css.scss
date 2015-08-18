@@ -30,6 +30,7 @@ $red-really-light: desaturate(lighten($red-medium, 40%), 5%);
 $red-light: desaturate(lighten($red-medium, 10%), 7%);
 $red-dark: saturate(darken($red-medium, 10%), 7%);
 
+$dark-gray: #999;
 $medium-gray: #ccc;
 $light-gray: #eaeaea;
 $really-light-gray: #eee;

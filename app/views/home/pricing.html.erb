@@ -1,5 +1,6 @@
 <% 
   provide(:title, "Pricing")
+  provide(:body_classes, "pricing-page")
 
   if user_signed_in? 
     link_path = new_group_path
@@ -23,9 +24,9 @@
     <h2>Closed Groups</h2>
     <span class="tag-line">
       Include control over 
-      <span class="term" data-term="privacy">privacy</span>
-      and <span class="term" data-term="membership">membership</span>.<br>
-      Unlimited badges and groups.
+      <span class="term" data-term="privacy-controls">privacy</span>
+      and <span class="term" data-term="membership-controls">membership</span>.<br>
+      All groups include unlimited badges and members.
     </span>
   </div>
 </div>
@@ -33,7 +34,7 @@
 <!-- === TAB BAR === -->
 
 <div class="row-fluid pricing-page-row">
-  <div class="span6 offset3">
+  <div class="span8 offset2">
 
     <ul class="nav nav-tabs" id="tab-bar">
       <li class="active"><a href="#standard">Standard Pricing</a></li>
@@ -42,7 +43,6 @@
 
   </div>
 </div>
-
 
 <div class="row-fluid pricing-page-row plan-container">
   <div class="span12">
@@ -68,7 +68,7 @@
                 <ul>
                   <li>
                     1 <span class="term" data-term="admin">admin</span>
-                    / <span class="term" data-term="badge-awarder">badge awarder</span>
+                    / <span class="term" data-term="one-badge-awarder">badge awarder</span>
                   </li>
                 </ul>
               </div>
@@ -94,7 +94,8 @@
                     3 <span class="term" data-term="admin">admins</span>
                   </li>
                   <li>
-                    Unlimited <span class="term" data-term="badge-awarder">badge awarders</span>
+                    Unlimited 
+                    <span class="term" data-term="unlimited-badge-awarders">badge awarders</span>
                   </li>
                   <li>
                     <span class="term" data-term="community">Community features</span>
@@ -128,7 +129,6 @@
                   </li>
                   <li>
                     <span class="term" data-term="branding">Custom branding</span>
-                    <span class="asterisk"><i class="fa fa-asterisk"></i></span>
                   </li>
                 </ul>
               </div>
@@ -208,7 +208,8 @@
                     3 <span class="term" data-term="admin">admins</span>
                   </li>
                   <li>
-                    Unlimited <span class="term" data-term="badge-awarder">badge awarders</span>
+                    Unlimited 
+                    <span class="term" data-term="unlimited-badge-awarders">badge awarders</span>
                   </li>
                   <li>
                     <span class="term" data-term="community">Community features</span>
@@ -242,7 +243,6 @@
                   </li>
                   <li>
                     <span class="term" data-term="branding">Custom branding</span>
-                    <span class="asterisk"><i class="fa fa-asterisk"></i></span>
                   </li>
                 </ul>
               </div>
@@ -280,3 +280,17 @@
     </div> <!-- /.tab-content -->
   </div> <!-- /.span -->
 </div> <!-- /.row -->
+
+<!-- === PRICING FOOTER === -->
+
+<div class="row-fluid pricing-page-row footer-row">
+  <div class="span8 offset2 inner-col">
+
+    <span class="tag-line">
+      <i class="fa fa-comments"></i> Want to talk? Email us at 
+      <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+    </span>
+
+  </div>
+</div>
+
