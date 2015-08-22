@@ -224,7 +224,7 @@ class Group
   # }
   def status_details_for_admins
     if public?
-      { color: 'green', summary: 'Free public group', icon: 'fa-check-circle', show_alert: false }
+      { color: 'green', summary: 'Free open group', icon: 'fa-check-circle', show_alert: false }
     else
       date_failed = stripe_payment_fail_date || Time.now
       date_retry = stripe_payment_retry_date || (Time.now + 3.days)

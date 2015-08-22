@@ -20,10 +20,10 @@ class GroupsController < ApplicationController
   # === CONSTANTS === #
 
   GROUP_TYPE_OPTIONS = [
-    ['<b>Open Group</b> <span>Anyone can join and everything is public.<br>'.html_safe \
-      + 'Free forever.</span>'.html_safe, 'open'],
-    ['<b>Closed Group</b> <span>You control privacy and membership.<br>'.html_safe \
-      + 'Plans start at $5 per month.</span>'.html_safe, 'private']
+    ['<b><i class="fa fa-globe"></i> Open Group</b><span>Anyone can join '.html_safe \
+      + 'and everything is public.<br>Free forever.</span>'.html_safe, 'open'],
+    ['<b><i class="fa fa-lock"></i> Closed Group</b><span>You control privacy '.html_safe \
+      + 'and membership.<br>Plans start at $5 per month.</span>'.html_safe, 'private']
   ]
 
   # === RESTFUL ACTIONS === #

@@ -361,7 +361,7 @@
                 <% elsif is_group_member || can_join_group  %>
                   This badge is awarded directly by <%= @badge.badge_awarders %>.
                 <% else %>
-                  This badge is part of a private group.
+                  This is a private badge.
                 <% end %>
               </span>
               <ul class="action-list">
@@ -792,8 +792,7 @@
     <div class="well span7 offset2">
       <h3>This is a private badge</h3>
       <p>
-        This badge belongs to a private group. 
-        Its contents are only visible to members.
+        The contents of this badge are only visible to group members.
       </p>
     </div>
   </div>

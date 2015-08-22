@@ -348,13 +348,13 @@
             <% @user.owned_groups.asc(:name).each do |group| %>
               <tr>
                 <td>
-                  <%= link_to group.name, group, title: "View the learning group" %>
+                  <%= link_to group.name, group, title: "View the group" %>
                 </td>
                 <td>
                   <% if group.private? %>
-                    <i class="fa fa-lock"></i> Private
+                    <i class="fa fa-lock"></i> Closed
                   <% else %>
-                    <i class="fa fa-globe"></i> Public
+                    <i class="fa fa-globe"></i> Open
                   <% end %>
                 </td>
                 <td>

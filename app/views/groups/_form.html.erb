@@ -31,7 +31,7 @@
       <% if @group.private? && (@group.stripe_subscription_status != 'canceled') %>
         $("#group_type_open").attr("disabled", true);
         $("#group_type_open").siblings("span")
-          .after("<em>(To make your group public, cancel the subscription first.)</em>")
+      .after("<em>(To change your group from open to closed, cancel the subscription first.)</em>")
       <% end %>
     <% end %>
 
@@ -64,7 +64,7 @@
       e.preventDefault();
     });
 
-    // Default to private if k12 pricing group
+    // Default to closed if k12 pricing group
     <% if @is_k12 %>
       $("#group_type_private").click();
     <% end %>
@@ -338,7 +338,7 @@
                 <i class="fa fa-gift"></i> 50% Off!
               </h3>
               <strong>Thank you for being an early Badge List user.</strong>
-              You've got the OG half off deal which means that any private groups that you own
+              You've got the OG half off deal which means that any closed groups that you own
               will permanently be 50% off for as long as you keep your Badge List account.
             </div>
           </div>

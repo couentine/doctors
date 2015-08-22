@@ -236,11 +236,11 @@
                 <%=
                   case @group.type
                     when "open"
-                      "<i class='fa fa-globe'></i> Public Group".html_safe
+                      "<i class='fa fa-globe'></i> Open Group".html_safe
                     when "closed"
-                      "<i class='fa fa-eye'></i> Public Group (Closed Membership)".html_safe
+                      "<i class='fa fa-eye'></i> Open Group (Closed Membership)".html_safe
                     when "private"
-                      "<i class='fa fa-lock'></i> Private Group".html_safe
+                      "<i class='fa fa-lock'></i> Closed Group".html_safe
                   end
                 %>
 
@@ -601,7 +601,7 @@
   
   <div class="row">
     <div class="well span7 offset2">
-      <h3>This is a private group</h3>
+      <h3>This is a closed group</h3>
       <p>
         The contents of this group are only visible to members.
       </p>
