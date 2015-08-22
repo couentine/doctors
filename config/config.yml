@@ -53,7 +53,7 @@ defaults: &defaults
         currency: usd
         interval: year
         trial_period_days: 14
-        statement_descriptor: Badge List K12 Solo
+        statement_descriptor: Badge List K12 Teacher
         users: -1
         admins: 1
         sub_groups: 0
@@ -71,12 +71,12 @@ defaults: &defaults
         features:
         - community
       k12-org-1m-1:
-        name: K12 Org
+        name: K12 School
         amount: 6500
         currency: usd
         interval: month
         trial_period_days: 14
-        statement_descriptor: Badge List K12 Org
+        statement_descriptor: Badge List K12 School
         users: -1
         admins: 3
         sub_groups: 5
@@ -97,12 +97,12 @@ defaults: &defaults
         features:
         - community
       k12-org-1y-1:
-        name: K12 Org (Annual)
+        name: K12 School (Annual)
         amount: 48000
         currency: usd
         interval: year
         trial_period_days: 14
-        statement_descriptor: Badge List K12 Org
+        statement_descriptor: Badge List K12 School
         users: -1
         admins: 3
         sub_groups: 5

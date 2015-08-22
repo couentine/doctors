@@ -18,13 +18,15 @@ $(document).ready(function() {
   });
 
   setupTermTooltips();
+  checkForLocationHash();
+  registerLocationHashEvents();
 
 });
 
 // TERM MESSAGE MAPPINGS
 
 var termMessages = {
-  "admin": "Group admins are able to create new badges, manage group membership and change "
+  "admin": "Only group admins are able to create new badges, manage group membership and change "
     + "group settings.",
   "branding": "Branding features include custom logos in emails and the ability to define "
     + " custom words for 'expert' and 'learner'.",
@@ -58,4 +60,32 @@ function setupTermTooltips() {
       container: 'body'
     });
   });
+}
+
+// Check for location url has and show tab if needed
+function checkForLocationHash() {
+  // Javascript to enable link to tab
+  var url = document.location.toString();
+  
+  if (url.match('#')) {
+    var hash = url.split('#')[1];
+
+    if ($('#'+hash).length > 0) {
+      if ($('#'+hash).hasClass('tab-pane')) {
+        $("#tab-bar a[href=#" + hash + "]").tab('show');
+      } else {
+        // Then scroll to the right part of the page (the default scroll is off due to the navbar)
+        $(window).scrollTop($("#"+hash).offset().top - 60);
+      }
+    }
+  }
+}
+
+// Changes the location hash when tabs are toggled
+function registerLocationHashEvents() {
+  $('.nav-tabs a').on('shown', function (e) {
+    var scrollTop = $(document).scrollTop();
+    window.location.hash = e.target.hash; 
+    $(document).scrollTop(scrollTop); // the browser will try to scroll down
+  })  
 }

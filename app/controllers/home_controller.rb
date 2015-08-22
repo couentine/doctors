@@ -25,7 +25,7 @@ class HomeController < ApplicationController
 
   # GET /pricing_k12
   def pricing_k12
-    render layout: 'website'
+    redirect_to '/pricing#k12'
   end
 
   # GET /privacy-policy
