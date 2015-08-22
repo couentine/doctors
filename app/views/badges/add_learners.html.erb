@@ -28,11 +28,11 @@
 
     <% if @group_is_blank %>
       <div class="form-body">
-        <h3>Your learning group is empty...</h3>
+        <h3>Your group is empty...</h3>
         <p>
-          Before you can add <%= @learners %> to this badge you need to add some folks to the learning group.
+          Before you can add <%= @learners %> to this badge you need to add some folks to the group.
           <br><br>
-          <%= link_to "<i class='fa fa-plus'></i> Invite learning group members".html_safe,
+          <%= link_to "<i class='fa fa-plus'></i> Invite group members".html_safe,
             add_group_members_path(@group, badges: [@badge.url]), class: "btn btn-primary" %>
         </p>
       </div>

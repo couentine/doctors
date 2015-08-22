@@ -322,7 +322,7 @@
                     <%= link_to '<i class="fa fa-ban"></i> Leave the group'.html_safe, \
                       leave_group_path(@group), method: :delete, class: 'btn btn-small', data: \
                         { confirm: \
-                          'Are you absolutely sure you want to leave this learning group?' } %>
+                          'Are you absolutely sure you want to leave this group?' } %>
                   </li>
                 <% elsif can_join_group %>
                   <li>
@@ -601,9 +601,9 @@
   
   <div class="row">
     <div class="well span7 offset2">
-      <h3>This is a private learning group</h3>
+      <h3>This is a private group</h3>
       <p>
-        The contents of this learning group are only visible to members.
+        The contents of this group are only visible to members.
       </p>
     </div>
   </div>

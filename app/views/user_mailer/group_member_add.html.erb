@@ -6,15 +6,15 @@
   <body>
     <% if @badges.blank? %>
       <p>
-        You've been added as a member to the <%= @group.name %> learning group in Badge List. 
+        You've been added as a member to the <%= @group.name %> group in Badge List. 
         You can now browse and join any of the badges in the group.
-        To view the learning group, login to Badge List as normal or click on the link below.
+        To view the group, login to Badge List as normal or click on the link below.
       </p>
     <% else %>
       <p>
         You've been added to <%= pluralize @badges.count, 'badge' %> in Badge List.
-        You've also been added as a member of the <%= @group.name %> learning group. 
-        To view the learning group and begin adding entries to your badge progress log, 
+        You've also been added as a member of the <%= @group.name %> group. 
+        To view the group and begin adding entries to your badge progress log, 
         login to Badge List as normal or click one of the links below.<br>
         <br>
         <strong>Badges you've been added to:</strong>

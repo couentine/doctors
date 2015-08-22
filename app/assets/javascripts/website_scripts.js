@@ -32,13 +32,13 @@ var termMessages = {
     + " custom words for 'expert' and 'learner'.",
   "community": "Community features include collaborative wiki pages and (COMING SOON) "
     + "group profile pages and group search.",
-  "lifetime-hosting": "If you ever decide to cancel your paid subscription all of the awarded "
-    + "badges and evidence will continue be hosted at no additional cost.",
+  "lifetime-hosting": "If you ever decide to cancel your paid subscription, all of the awarded "
+    + "badges and evidence will continue to be hosted at no additional cost.",
   "membership-controls": "Closed groups can only be joined if a user is invited by an admin.",
   "one-badge-awarder": "The Solo plan only supports badges which are awarded by the admin.",
   "open-groups": "Open groups allow anyone to join. All badges and evidence in open groups "
     + "are public and indexed by search engines.",
-  "privacy-controls": "Closed groups let admins to decide between three levels of privacy for "
+  "privacy-controls": "Closed groups let admins decide between three levels of privacy for "
     + "each badge and piece of required evidence: public, private and secret.",
   "sub-groups": "(COMING SOON) Sub-groups allow you to link multiple groups underneath your "
     + "primary group. This allows you to create separate collections of badges with "

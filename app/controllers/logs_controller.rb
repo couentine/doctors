@@ -71,10 +71,10 @@ class LogsController < ApplicationController
       if needs_to_join_group # group is open so we'll add the user to the members now
         @group.members << current_user
         if @group.save
-          message = 'You have joined both the learning group and the badge. ' \
+          message = 'You have joined both the group and the badge. ' \
             + 'The next step is to begin submitting evidence below.'
         else
-          message = 'An error occured while trying to add you to the learning group and badge.'
+          message = 'An error occured while trying to add you to the group and badge.'
           is_error = true
         end
       elsif log_already_exists

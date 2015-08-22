@@ -20,10 +20,10 @@ class GroupsController < ApplicationController
   # === CONSTANTS === #
 
   GROUP_TYPE_OPTIONS = [
-    ['<b>Public</b> <span>Anyone can join.<br>'.html_safe \
-      + 'Free for unlimited users.</span>'.html_safe, 'open'],
-    ['<b>Private</b> <span>You choose who can join the group.<br>'.html_safe \
-      + 'Free 14 day trial.</span>'.html_safe, 'private']
+    ['<b>Open Group</b> <span>Anyone can join and everything is public.<br>'.html_safe \
+      + 'Free forever.</span>'.html_safe, 'open'],
+    ['<b>Closed Group</b> <span>You control privacy and membership.<br>'.html_safe \
+      + 'Plans start at $5 per month.</span>'.html_safe, 'private']
   ]
 
   # === RESTFUL ACTIONS === #
@@ -138,7 +138,7 @@ class GroupsController < ApplicationController
     respond_to do |format|
       if @group.save
         format.html { redirect_to @group, 
-                      notice: 'Learning Group was successfully created.' }
+                      notice: 'Group was successfully created.' }
         format.json { render json: @group, status: :created, location: @group, 
           filter_user: current_user }
       else
@@ -156,7 +156,7 @@ class GroupsController < ApplicationController
     respond_to do |format|
       if @group.update_attributes(params[:group])
         format.html { redirect_to @group, 
-                      notice: 'Learning Group was successfully updated.' }
+                      notice: 'Group was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: "edit" }
@@ -178,7 +178,7 @@ class GroupsController < ApplicationController
     else
       respond_to do |format|
         format.html { redirect_to @group, 
-          alert: 'There was a problem deleting this learning group. ' \
+          alert: 'There was a problem deleting this group. ' \
           + 'You must first individually delete each of the badges in the group.' }
         format.json { head :no_content }
       end
@@ -222,7 +222,7 @@ class GroupsController < ApplicationController
 
   # DELETE /group-url/leave
   def leave
-    notice = "You aren't a member of this Learning Group, so you can't leave it."
+    notice = "You aren't a member of this group, so you can't leave it."
     
     # First leave the group
     if @group.has_member?(current_user)
@@ -267,7 +267,7 @@ class GroupsController < ApplicationController
         log_to_detach.save!
         detached_log_count += 1
       end
-      notice = "#{@user.name} has been removed from the learning group members"
+      notice = "#{@user.name} has been removed from the group members"
       notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
       notice += "."
     end
@@ -304,10 +304,10 @@ class GroupsController < ApplicationController
       if !@group.save
         notice = "There was a problem updating the group, please try again later."
       else
-        notice = "Learning Group invitation for #{email} has been sent."  
+        notice = "Group invitation for #{email} has been sent."  
       end
     else
-      notice = "There's no pending Learning Group invitation for #{email}."
+      notice = "There's no pending group invitation for #{email}."
     end
 
     redirect_to @group, :notice => notice
@@ -326,10 +326,10 @@ class GroupsController < ApplicationController
       if !@group.save
         notice = "There was a problem updating the group, please try again later."
       else
-        notice = "Learning Group invitation for #{email} has been revoked."  
+        notice = "Group invitation for #{email} has been revoked."  
       end
     else
-      notice = "There's no pending Learning Group invitation for #{email}."
+      notice = "There's no pending group invitation for #{email}."
     end
 
     redirect_to @group, :notice => notice

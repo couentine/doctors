@@ -337,7 +337,7 @@ class BadgesController < ApplicationController
         log = @badge.add_learner user
         log.add_validation current_user, @summary, @body, true
         redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
-          + "added as a learning group member."
+          + "added as a group member."
       end
     end
   end

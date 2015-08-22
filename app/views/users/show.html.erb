@@ -49,7 +49,7 @@
         <% if @this_is_current_user %>
           All of the badges you earn will show up here. To create some badges of your own...<br><br>
 
-          <%= link_to "<i class='fa fa-plus'></i> Create a new learning group".html_safe,
+          <%= link_to "<i class='fa fa-plus'></i> Create a new group".html_safe,
             new_group_path, class: 'btn btn-success' %>
         <% else %>
           This user hasn't earned any badges yet.
@@ -70,11 +70,11 @@
           <table class="header-table">
             <tr>
               <td>
-                <%= link_to group_image_tag_for(group), group, title: "View the learning group", class: "image-link" %>
+                <%= link_to group_image_tag_for(group), group, title: "View the group", class: "image-link" %>
               </td>
               <td>
                 <h2>
-                  <%= link_to group.name, group, title: "View the learning group" %>
+                  <%= link_to group.name, group, title: "View the group" %>
                 </h2>
                 <h3><%= group_type %></h3>
               </td>
@@ -134,7 +134,7 @@
           <% @user.groups.asc(:name).each do |group| %>
             <li>
               <%= link_to group_image_tag_for(group) + " " + group.name, group, 
-                title: "View the learning group" %>
+                title: "View the group" %>
               <span class="no-link">
                 <%= "#{@user.member_type_of(group.id).capitalize}" %>
               </span>
