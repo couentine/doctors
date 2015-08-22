@@ -359,7 +359,7 @@
                 </td>
                 <td>
                   <% if group.private? && group.subscription_plan %>
-                    <%= ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['name'] %> - 
+                    <%= group.subscription_plan_name %> - 
                     <% subscription_status = group.status_details_for_admins %>
                     <span class="label <%= subscription_status[:color] %>">
                       <i class="fa <%= subscription_status[:icon] %>"></i>

@@ -181,6 +181,17 @@ class Group
     !features.blank? && features.include?(feature.to_s)
   end
 
+  # Returns the name of this subsccription plan or just the id
+  def subscription_plan_name
+    if subscription_plan.blank?
+      'No plan selected'
+    elsif ALL_SUBSCRIPTION_PLANS[subscription_plan].blank?
+      subscription_plan
+    else
+      ALL_SUBSCRIPTION_PLANS[subscription_plan]['name']
+    end
+  end
+
   # Returns stripe_subscription_status as a readable string
   def subscription_status_string
     if private?

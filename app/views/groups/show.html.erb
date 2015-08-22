@@ -245,8 +245,7 @@
                 %>
 
                 <% if @group.private? && (@current_user_is_admin || @badge_list_admin) %>
-                  (<%= (@group.subscription_plan) ? \
-                    ALL_SUBSCRIPTION_PLANS[@group.subscription_plan]['name']:'No plan selected' %>)
+                  (<%= @group.subscription_plan_name %>)
                   <br>
                   <span class="label <%= status_details[:color] %>">
                     <i class="fa <%= status_details[:icon] %>"></i>

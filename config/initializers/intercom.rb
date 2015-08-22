@@ -110,7 +110,7 @@ IntercomRails.config do |config|
   # e.g. Messaging, Free, Pro, etc.
   config.company.plan = Proc.new do |group| 
     if group.subscription_plan
-      ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['name']
+      group.subscription_plan_name
     else
       nil
     end
@@ -120,7 +120,7 @@ IntercomRails.config do |config|
   # This is the amount the company spends each month on your app. If your company
   # has a plan, it will set the 'total value' of that plan appropriately.
   config.company.monthly_spend = Proc.new do |group| 
-    if group.subscription_plan
+    if group.subscription_plan && ALL_SUBSCRIPTION_PLANS[group.subscription_plan]
       if ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['interval'] == 'month'
         ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['amount'] / 100
       elsif ALL_SUBSCRIPTION_PLANS[group.subscription_plan]['interval'] == 'year'

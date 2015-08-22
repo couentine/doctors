@@ -219,8 +219,7 @@
           <div class="control-group">
             <label class="control-label">Current Plan &amp; Status</label>
             <div class="controls">
-              <%= (@group.subscription_plan) ? \
-                ALL_SUBSCRIPTION_PLANS[@group.subscription_plan]['name']:'No plan selected' %><br>
+              <%= @group.subscription_plan_name %><br>
               <span class="label <%= subscription_status[:color] %>">
                 <i class="fa <%= subscription_status[:icon] %>"></i>
                 <%= @group.subscription_status_string %> - 
