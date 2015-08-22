@@ -30,6 +30,8 @@ var termMessages = {
     + " custom words for 'expert' and 'learner'.",
   "community": "Community features include collaborative wiki pages and (COMING SOON) "
     + "group profile pages and group search.",
+  "lifetime-hosting": "If you ever decide to cancel your paid subscription all of the awarded "
+    + "badges and evidence will continue be hosted at no additional cost.",
   "membership-controls": "Closed groups can only be joined if a user is invited by an admin.",
   "one-badge-awarder": "The Solo plan only supports badges which are awarded by the admin.",
   "open-groups": "Open groups allow anyone to join. All badges and evidence in open groups "
