@@ -13,9 +13,6 @@ class Group
   JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 'image' => :image_url,
     'email' => :primary_email }
 
-  CUSTOMER_CODE_VALUES = ['valid_customer_code', 'kstreem', 'london-21', 'tokyo-15',
-    'paris-99', 'budapest-54', 'chicago-67', 'santiago-12'] # add new customers here
-
   PENDING_TRANSFER_FLAG = 'pending_transfer'
   PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
 

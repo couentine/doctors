@@ -22,7 +22,7 @@ class GroupsController < ApplicationController
   GROUP_TYPE_OPTIONS = [
     ['<b><i class="fa fa-globe"></i> Open Group</b><span>Anyone can join '.html_safe \
       + 'and everything is public.<br>Free forever.</span>'.html_safe, 'open'],
-    ['<b><i class="fa fa-lock"></i> Closed Group</b><span>You control privacy '.html_safe \
+    ['<b><i class="fa fa-users"></i> Closed Group</b><span>You control privacy '.html_safe \
       + 'and membership.<br>Plans start at $5 per month.</span>'.html_safe, 'private']
   ]
 
@@ -102,22 +102,36 @@ class GroupsController < ApplicationController
     end
   end
 
-  # GET /groups/new
+  # GET /groups/new?plan=abc123
   # GET /groups/new.json
-  # Accepts 'pg' parameter to set pricing group (only accepts 'k12' for now)
+  # Accepts 'plan' parameter to set pricing group (only accepts 'k12' for now)
+  # Also looks for :plan key on the current user's session
   def new
-    @group = Group.new
-    @group.creator = @group.owner = current_user
-    @group_type_options = GROUP_TYPE_OPTIONS
-    @badge_list_admin = current_user && current_user.admin?
-    @allow_url_editing = true;
+    subscription_plan = session[:plan]
+    if subscription_plan
+      session[:plan] = nil # clear this out for next time
+      redirect_to "/groups/new?plan=#{subscription_plan}"
+    else
+      @group = Group.new
+      @group.creator = @group.owner = current_user
+      @group_type_options = GROUP_TYPE_OPTIONS
+      @badge_list_admin = current_user && current_user.admin?
+      @allow_url_editing = true;
+      subscription_plan = params[:plan]
 
-    @is_k12 = (params[:pg] == 'k12')
-    @group.pricing_group = 'k12' if @is_k12
+      if subscription_plan
+        @group.type = 'private'
+        if ALL_SUBSCRIPTION_PLANS[subscription_plan] \
+            && ['standard', 'k12'].include?(SUBSCRIPTION_PRICING_GROUP[subscription_plan])
+          @group.pricing_group = SUBSCRIPTION_PRICING_GROUP[subscription_plan]
+          @group.subscription_plan = subscription_plan
+        end
+      end
 
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @group, filter_user: current_user }
+      respond_to do |format|
+        format.html # new.html.erb
+        format.json { render json: @group, filter_user: current_user }
+      end
     end
   end
 

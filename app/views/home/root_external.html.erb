@@ -24,7 +24,7 @@
       <li class="separator"><span>&nbsp;</span></li>
       <li>
         <i class="fa fa-list-alt"></i>
-        <strong>Evidence</strong> and expert <strong>validation</strong> 
+        <strong>Evidence</strong> and expert <strong>endorsement</strong> 
         are at the core of each badge.
       </li>
       <li class="separator"><span>&nbsp;</span></li>
@@ -107,8 +107,12 @@
   <div class="span6 offset3">
     
     <div class="row-inner">
-      <h2>Creating your first badge takes less than a minute.</h2>
-      <%= link_to 'Create an account', new_user_registration_path, class: 'btn btn-large' %>
+      <h2>Creating a badge group is free, fast and fun.</h2>
+      <% if current_user %>
+        <%= link_to 'Start right now', new_group_path, class: 'btn btn-large' %>
+      <% else %>
+        <%= link_to 'Start right now', new_user_registration_path, class: 'btn btn-large' %>
+      <% end %>
     </div>
     
     <div class="vertical-line top">&nbsp;</div>

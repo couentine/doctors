@@ -1,5 +1,11 @@
 <%
   half_off = @group.owner.has_flag? User::HALF_OFF_FLAG
+  if half_off
+    subscription_plan_hint = "<i class='fa fa-gift'></i> ".html_safe \
+      + "You'll pay 50% of the price listed above".html_safe
+  else 
+    subscription_plan_hint = "<a href='/pricing' target='_blank'>View plan details</a>".html_safe
+  end
 %>
 
 <script>
@@ -14,7 +20,8 @@
     <% else %>
       $("#cancel-subscription").click(function(e) {
         if (confirm("Are you sure you want to cancel your subscription? All of your group's "
-            + "content will still be available and you can create a new subscription at any time.")) {
+            + "content will still be available and you can create a new subscription at any "
+            + "time.")) {
           $('#cancel-subscription-spinner').fadeIn();
           $.ajax({
             url: "<%= cancel_subscription_path(@group) %>",
@@ -64,11 +71,9 @@
       e.preventDefault();
     });
 
-    // Default to closed if k12 pricing group
-    <% if @is_k12 %>
-      $("#group_type_private").click();
+    <% if @group.private? %>
+      $("#group_type_private").click(); // Fire the logic 
     <% end %>
-
 
     <% if @allow_url_editing %>
       // URL Editing Logic
@@ -192,8 +197,17 @@
       <% end %>
     </div>
 
-    <%= f.input :type, label: 'Group Type', as: :radio_buttons, label_html: { class: 'hidden' },
-                collection: @group_type_options %>
+    <div id="group-type-expanded" style="<%= (@group.private?) ? 'display: none;' : '' %>">
+      <%= f.input :type, label: 'Group Type', as: :radio_buttons, collection:@group_type_options %>
+    </div>
+    <div id="group-type-collapsed" style="<%= (@group.private?) ? '' : 'display: none;' %>">
+      <div class="control-group">
+        <label class="control-label">Group Type</label>
+        <div class="controls">
+          <b><i class="fa fa-users"></i> Closed Group</b>
+        </div>
+      </div>
+    </div>
 
     <!-- === SUBSCRIPTION DETAILS === -->
 
@@ -209,8 +223,6 @@
 
     <div id="subscription-details-panel" 
       style="<%= (subscription_panel_mode == 'none') ? 'display:none;' : '' %>">
-    
-      <h2>Subscription Details</h2>
 
       <% if subscription_panel_mode == 'view' %>
         <div id="view-subscription-panel">
@@ -275,19 +287,24 @@
           <%= f.input :new_subscription, label: 'Revive Subscription', as: :hidden %>
         <% end %>
 
-        <div class="control-group">
-          <div class="sub-header">
-            All plans come with a 14 day free trial.
-            (<a href="/pricing" target="_blank">View plan details</a>.)
+        <% if @badge_list_admin %>
+          <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, 
+            include_blank: false, collection: SUBSCRIPTION_OPTIONS['admin'], 
+            hint: subscription_plan_hint %>
+        <% else %> 
+          <div id="subscription_options_standard" 
+              style="<%= (@group.pricing_group == 'standard') ? '' : 'display: none;' %>">
+            <%= f.input :subscription_plan, label: 'Subscription Plan', as: :radio_buttons, 
+              include_blank: false, collection: SUBSCRIPTION_OPTIONS['standard'], 
+              hint: subscription_plan_hint %>
           </div>
-        </div>
-
-        <% subscription_options = (@badge_list_admin) ? SUBSCRIPTION_OPTIONS['admin'] \
-          : SUBSCRIPTION_OPTIONS[@group.pricing_group] %>
-        <%= f.input :subscription_plan, label: 'Subscription Plan', as: :select, 
-          include_blank: false, collection: subscription_options, 
-          hint: (half_off) ? "<i class='fa fa-gift'></i> ".html_safe \
-            + "You'll pay 50% of the price listed above".html_safe : '' %>
+          <div id="subscription_options_k12" 
+              style="<%= (@group.pricing_group == 'standard') ? 'display: none;' : '' %>">
+            <%= f.input :subscription_plan, label: 'Subscription Plan', as: :radio_buttons, 
+              include_blank: false, collection: SUBSCRIPTION_OPTIONS['k12'], 
+              hint: subscription_plan_hint %>
+          </div>
+        <% end %>
 
 
         <div id="has-credit-card-panel" 
@@ -316,33 +333,6 @@
             </div>
           </div>
         <% end %>
-
-        <% if @is_k12 %>
-          <div class="control-group">
-            <div class="sub-header">
-              <h3>
-                <i class="fa fa-gift"></i> K12 Teachers
-              </h3>
-              We <i class="fa fa-heart"></i> teachers so what you see above is our special 
-              pricing just for K12 educators. It includes unlimited students for a super low annual 
-              price. This deal is intended only for individual teachers so you'll only be able to 
-              have one admin in your group.  <br><br>
-              By creating a group with this plan you are promising that you're really a K12 teacher
-              and that you won't use the group for multiple teachers. Thank you so much!
-            </div>
-          </div>
-        <% elsif @group.owner.has_flag? User::HALF_OFF_FLAG %>
-          <div class="control-group">
-            <div class="sub-header">
-              <h3>
-                <i class="fa fa-gift"></i> 50% Off!
-              </h3>
-              <strong>Thank you for being an early Badge List user.</strong>
-              You've got the OG half off deal which means that any closed groups that you own
-              will permanently be 50% off for as long as you keep your Badge List account.
-            </div>
-          </div>
-        <% end %>
         
         <div class="control-group">
           <div class="sub-header">
@@ -359,21 +349,19 @@
 
     </div>
 
+    <!-- === EXTRA INFO === -->
+
+    <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
+                input_html: { class: 'input-xlarge' } %>
+
+    <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
+                input_html: { class: 'input-xlarge' } %>
+
+    <%= f.input :image_url, label: 'Group Image URL', 
+                placeholder: 'http://nasa.gov/logo.png',
+                input_html: { class: 'input-xlarge' } %>
+
     <% unless @group.new_record? %>
-
-      <!-- === EXTRA INFO === -->
-      
-      <h2>Extra information</h2>
-
-      <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL',
-                  input_html: { class: 'input-xlarge' } %>
-
-      <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
-                  input_html: { class: 'input-xlarge' } %>
-
-      <%= f.input :image_url, label: 'Group Image URL', 
-                  placeholder: 'http://nasa.gov/logo.png',
-                  input_html: { class: 'input-xlarge' } %>
 
       <!-- === GROUP OWNERSHIP === -->
 

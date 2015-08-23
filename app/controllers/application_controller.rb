@@ -42,9 +42,9 @@ class ApplicationController < ActionController::Base
       if !params[:join].blank?
         # If the 'join' parameter is set then store the badge id
         session[:join_badge_id] = params[:join]
-      elsif !params[:create_k12].blank?
-        # If they hit the registration page with the create_k12 param set then store it for later
-        session[:create_k12] = true
+      elsif !params[:plan].blank? && !current_user
+        # Save the group plan param if supplied
+        session[:new_group_plan] = params[:plan]
       end
     end
   end
@@ -56,12 +56,12 @@ class ApplicationController < ActionController::Base
 
     if badge
       "/#{badge.group.url}/#{badge.url}/join"
-    elsif session[:create_k12]
-      "/groups/new?pg=k12"
     elsif session[:user_return_to] == "/users/edit?d=ac"
       "/users/edit#add-card"
     elsif session[:user_return_to] == "/users/edit"
       "/users/edit"
+    elsif session[:new_group_plan]
+      "/groups/new?plan=#{session[:new_group_plan]}"
     else
       session[:previous_url] || root_path
     end

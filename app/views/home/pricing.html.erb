@@ -2,10 +2,10 @@
   provide(:title, "Pricing")
   provide(:body_classes, "pricing-page")
 
-  if user_signed_in? 
-    link_path = new_group_path
+  if current_user
+    link_path = "#{new_group_path}?plan="
   else
-    link_path = new_user_registration_path
+    link_path = "#{new_user_registration_path}?plan="
   end
 %>
 
@@ -86,7 +86,7 @@
                 </ul>
               </div>
               <div class="the-button">
-                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+                <%= link_to 'Create a group', link_path + 'solo-1m-1', class: 'btn btn-large' %>
               </div>
             </div>
           </div>
@@ -118,7 +118,7 @@
                 </ul>
               </div>
               <div class="the-button">
-                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+                <%= link_to 'Create a group', link_path + 'team-1m-1', class: 'btn btn-large' %>
               </div>
             </div>
           </div>
@@ -149,7 +149,7 @@
                 </ul>
               </div>
               <div class="the-button">
-                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+                <%= link_to 'Create a group', link_path + 'org-1m-1', class: 'btn btn-large' %>
               </div>
             </div>
           </div>
@@ -218,7 +218,8 @@
                 </ul>
               </div>
               <div class="the-button">
-                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+                <%= link_to 'Create a group', link_path + 'k12-teacher-1y-1', 
+                  class: 'btn btn-large' %>
               </div>
             </div>
           </div>
@@ -253,7 +254,7 @@
                 </ul>
               </div>
               <div class="the-button">
-                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+                <%= link_to 'Create a group', link_path + 'k12-team-1m-1', class: 'btn btn-large' %>
               </div>
             </div>
           </div>
@@ -287,7 +288,8 @@
                 </ul>
               </div>
               <div class="the-button">
-                <%= link_to 'Create a group', link_path, class: 'btn btn-large' %>
+                <%= link_to 'Create a group', link_path + 'k12-school-1m-1', 
+                  class: 'btn btn-large' %>
               </div>
             </div>
           </div>

@@ -16,6 +16,9 @@ defaults: &defaults
         interval: month
         trial_period_days: 14
         statement_descriptor: Badge List Solo
+        icon: fa-user
+        description: |
+          1 admin / badge awarder
         users: -1
         admins: 1
         sub_groups: 0
@@ -27,6 +30,9 @@ defaults: &defaults
         interval: month
         trial_period_days: 14
         statement_descriptor: Badge List Team
+        icon: fa-users
+        description: |
+          3 admins, unlimited badge awarders &amp; community features
         users: -1
         admins: 3
         sub_groups: 0
@@ -39,6 +45,10 @@ defaults: &defaults
         interval: month
         trial_period_days: 14
         statement_descriptor: Badge List Org
+        icon: fa-building
+        description: |
+          5 sub-groups with 3 admins each, unlimited badge awarders, 
+          community features &amp; custom branding
         users: -1
         admins: 3
         sub_groups: 5
@@ -47,13 +57,16 @@ defaults: &defaults
         - community
         - branding
     k12:
-      k12-solo-1y-1:
+      k12-teacher-1y-1:
         name: K12 Teacher (Annual)
         amount: 2500
         currency: usd
         interval: year
         trial_period_days: 14
         statement_descriptor: Badge List K12 Teacher
+        icon: fa-user
+        description: |
+          1 teacher, annual billing only
         users: -1
         admins: 1
         sub_groups: 0
@@ -65,18 +78,25 @@ defaults: &defaults
         interval: month
         trial_period_days: 14
         statement_descriptor: Badge List K12 Team
+        icon: fa-users
+        description: |
+          3 admins, unlimited badge awarders &amp; community features
         users: -1
         admins: 3
         sub_groups: 0
         features:
         - community
-      k12-org-1m-1:
+      k12-school-1m-1:
         name: K12 School
         amount: 6500
         currency: usd
         interval: month
         trial_period_days: 14
         statement_descriptor: Badge List K12 School
+        icon: fa-building
+        description: |
+          5 sub-groups with 3 admins each, unlimited badge awarders, 
+          community features &amp; custom branding
         users: -1
         admins: 3
         sub_groups: 5
@@ -91,18 +111,27 @@ defaults: &defaults
         interval: year
         trial_period_days: 14
         statement_descriptor: Badge List K12 Team
+        icon: fa-users
+        description: |
+          3 admins, unlimited badge awarders &amp; community features
+          (Includes discount for annual billing)
         users: -1
         admins: 3
         sub_groups: 0
         features:
         - community
-      k12-org-1y-1:
+      k12-school-1y-1:
         name: K12 School (Annual)
         amount: 48000
         currency: usd
         interval: year
         trial_period_days: 14
         statement_descriptor: Badge List K12 School
+        icon: fa-building
+        description: |
+          5 sub-groups with 3 admins each, unlimited badge awarders, 
+          community features &amp; custom branding<br>
+          (Includes discount for annual billing)
         users: -1
         admins: 3
         sub_groups: 5
@@ -118,6 +147,10 @@ defaults: &defaults
         interval: month
         trial_period_days: 14
         statement_descriptor: Badge List Free
+        icon: fa-star
+        description: |
+          Badge List Free
+          Badge List Free
         users: -1
         admins: 1
         sub_groups: 0
@@ -129,6 +162,10 @@ defaults: &defaults
         interval: month
         trial_period_days: 14
         statement_descriptor: Badge List Free
+        icon: fa-star
+        description: |
+          Badge List Free
+          Badge List Free
         users: -1
         admins: 3
         sub_groups: 0
@@ -141,6 +178,10 @@ defaults: &defaults
         interval: month
         trial_period_days: 14
         statement_descriptor: Badge List Free
+        icon: fa-star
+        description: |
+          Badge List Free
+          Badge List Free
         users: -1
         admins: 3
         sub_groups: 5
@@ -156,6 +197,10 @@ defaults: &defaults
         interval: day
         trial_period_days: 0
         statement_descriptor: Badge List Daily 100
+        icon: fa-star
+        description: |
+          Badge List Daily 100
+          Badge List Daily 100
         users: 100
         admins: -1
         sub_groups: 0
@@ -168,6 +213,10 @@ defaults: &defaults
         interval: day
         trial_period_days: 1
         statement_descriptor: Badge List Daily 100
+        icon: fa-star
+        description: |
+          Badge List Daily 100
+          Badge List Daily 100
         users: 100
         admins: -1
         sub_groups: 0
