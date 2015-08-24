@@ -57,11 +57,7 @@ $(document).ready(function() {
 });
 
 function checkForTooltips() {
-  $('a[data-toggle=tooltip],span[data-toggle=tooltip],li[data-toggle=tooltip],'
-    + 'img[data-toggle=tooltip],abbr[data-toggle=tooltip],i[data-toggle=tooltip],'
-    + 'a[rel=tooltip],span[rel=tooltip],li[rel=tooltip],button[data-toggle=tooltip]').tooltip({
-      container: 'body'
-    });
+  $('[data-toggle=tooltip],[rel=tooltip]').tooltip({ container: 'body' });
   
   // Do the text form tooltips (positioned right if big, bottom if small)
   var placement = ($(window).width() < 768) ? 'bottom' : 'right';

@@ -58,7 +58,7 @@ defaults: &defaults
         - branding
     k12:
       k12-teacher-1y-1:
-        name: K12 Teacher (Annual)
+        name: K12 Teacher Annual
         amount: 2500
         currency: usd
         interval: year
@@ -105,7 +105,7 @@ defaults: &defaults
         - community
         - branding
       k12-team-1y-1:
-        name: K12 Team (Annual)
+        name: K12 Team Annual
         amount: 12000
         currency: usd
         interval: year
@@ -121,7 +121,7 @@ defaults: &defaults
         features:
         - community
       k12-school-1y-1:
-        name: K12 School (Annual)
+        name: K12 School Annual
         amount: 48000
         currency: usd
         interval: year
@@ -130,7 +130,7 @@ defaults: &defaults
         icon: fa-building
         description: |
           5 sub-groups with 3 admins each, unlimited badge awarders, 
-          community features &amp; custom branding<br>
+          community features &amp; custom branding
           (Includes discount for annual billing)
         users: -1
         admins: 3

@@ -10,8 +10,8 @@ APP_CONFIG['subscription_plans'].each do |pricing_group, plans|
   plans.each do |plan_id, plan_fields|
     subscription_pricing_group[plan_id] = pricing_group
     subscription_options[pricing_group] << [
-      "<b><i class='fa #{plan_fields['icon']}'></i> #{plan_fields['name']}</b>".html_safe \
-        + "<span>#{plan_fields['description']}</span>".html_safe \
+      "<b title='#{plan_fields['description']}' data-toggle='tooltip'>".html_safe \
+        + "<i class='fa #{plan_fields['icon']}'></i> #{plan_fields['name']}</b>".html_safe \
         + "<span><em>$#{plan_fields['amount']/100} per #{plan_fields['interval']}".html_safe \
         + "</em></span>".html_safe,
       plan_id

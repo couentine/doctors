@@ -25,6 +25,10 @@ class GroupsController < ApplicationController
     ['<b><i class="fa fa-users"></i> Closed Group</b><span>You control privacy '.html_safe \
       + 'and membership.<br>Plans start at $5 per month.</span>'.html_safe, 'private']
   ]
+  PRICING_GROUP_OPTIONS = [
+    ['Standard Pricing', 'standard'],
+    ['K12 Pricing', 'k12']
+  ]
 
   # === RESTFUL ACTIONS === #
 
@@ -115,6 +119,7 @@ class GroupsController < ApplicationController
       @group = Group.new
       @group.creator = @group.owner = current_user
       @group_type_options = GROUP_TYPE_OPTIONS
+      @pricing_group_options = PRICING_GROUP_OPTIONS
       @badge_list_admin = current_user && current_user.admin?
       @allow_url_editing = true;
       subscription_plan = params[:plan]
@@ -138,6 +143,7 @@ class GroupsController < ApplicationController
   # GET /group-url/edit
   def edit
     @group_type_options = GROUP_TYPE_OPTIONS
+    @pricing_group_options = PRICING_GROUP_OPTIONS
     @allow_url_editing = (@group.member_ids.count == 0) || (@group.badge_ids.count == 0);
   end
 
@@ -147,6 +153,7 @@ class GroupsController < ApplicationController
     @group = Group.new(params[:group])
     @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
+    @pricing_group_options = PRICING_GROUP_OPTIONS
     @badge_list_admin = current_user && current_user.admin?
 
     respond_to do |format|
