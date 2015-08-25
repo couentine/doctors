@@ -4,15 +4,24 @@
 
 <div class="row">
   <div class="bl-form bl-form-group span10 offset1">
-    
-    <div class="form-header">
-      <h1>Edit group</h1>
-      <div class="form-image">
-        <i class="fa fa-group"></i>
+    <% if @transfer_mode %>
+      <div class="form-header">
+        <h1>Transfer group ownership</h1>
+        <div class="form-image">
+          <i class="fa fa-share"></i>
+        </div>
       </div>
-    </div>
 
-    <%= render 'form' %>
+      <%= render 'form_transfer' %>
+    <% else %>
+      <div class="form-header">
+        <h1>Edit group</h1>
+        <div class="form-image">
+          <i class="fa fa-group"></i>
+        </div>
+      </div>
 
+      <%= render 'form' %>
+    <% end %>
   </div>
 </div>

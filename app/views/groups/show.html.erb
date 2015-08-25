@@ -346,6 +346,11 @@
                       <ul class="dropdown-menu pull-right" role="menu" 
                           aria-labelledby="dropdown-settings">
                         <li>
+                          <%= link_to \
+                            '<i class="fa fa-share"></i> Transfer Group Ownership'.html_safe, 
+                            "#{edit_group_path}?transfer=true" %>
+                        </li>
+                        <li>
                           <%= link_to '<i class="fa fa-remove"></i> Delete Group'.html_safe, 
                             @group, method: :delete, data: \
                               { confirm: 'WARNING: THIS WILL PERMANENTLY DESTROY DATA. Are ' \

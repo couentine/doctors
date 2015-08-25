@@ -48,6 +48,7 @@
     <% end %>
 
     $("#group_type_private").click(function() {
+      $("#group_new_subscription").val("true"); // only relevant if edit mode
       $("#group-type-expanded").fadeOut(function() {
         $("#group-type-collapsed").fadeIn();
         $("#subscription-details-panel").fadeIn();
@@ -60,6 +61,7 @@
     });
     
     $("#switch-to-open").click(function(e) {
+      $("#group_new_subscription").val("false"); // only relevant if edit mode
       $("#group_type_open").click();
       $("#group-type-collapsed").fadeOut();
       $("#subscription-details-panel").fadeOut(function() {
@@ -72,29 +74,65 @@
 
     $("#group_pricing_group").change(function() {
       if ($(this).val() == "k12") {
-        $("#subscription_options_standard").fadeOut(function() {
-          $("#subscription_options_k12").fadeIn();
+        $("#subscription-options-standard").fadeOut(function() {
+          $("#subscription-options-k12").fadeIn();
         });
       } else {
-        $("#subscription_options_k12").fadeOut(function() {
-          $("#subscription_options_standard").fadeIn();
+        $("#subscription-options-k12").fadeOut(function() {
+          $("#subscription-options-standard").fadeIn();
         });
       }
     });
 
     $("#show-edit-subscription-panel").click(function(e) {
+      e.preventDefault();
       $("#view-subscription-panel").fadeOut(function() {
         $("#edit-subscription-panel").fadeIn();
       });
-      e.preventDefault();
     });
 
     $("#revive-subscription").click(function(e) {
+      e.preventDefault();
       $("#view-subscription-panel").fadeOut(function() {
         $("#edit-subscription-panel").fadeIn();
       });
       $("#group_new_subscription").val("true");
+    });
+
+    // Add Extra Info Buttons
+
+    $("#add-location").click(function(e) {
       e.preventDefault();
+      $(".control-group.group_location").fadeIn(function() {
+        $(this).find("input").focus();
+      });
+      if ($(this).parents("ul.button-list").find("li:visible").length < 2) {
+        $(this).parents(".control-group").fadeOut();
+      } else {
+        $(this).parent("li").fadeOut();
+      }
+    });
+    $("#add-website").click(function(e) {
+      e.preventDefault();
+      $(".control-group.group_website").fadeIn(function() {
+        $(this).find("input").focus();
+      });
+      if ($(this).parents("ul.button-list").find("li:visible").length < 2) {
+        $(this).parents(".control-group").fadeOut();
+      } else {
+        $(this).parent("li").fadeOut();
+      }
+    });
+    $("#add-image").click(function(e) {
+      e.preventDefault();
+      $(".control-group.group_image_url").fadeIn(function() {
+        $(this).find("input").focus();
+      });
+      if ($(this).parents("ul.button-list").find("li:visible").length < 2) {
+        $(this).parents(".control-group").fadeOut();
+      } else {
+        $(this).parent("li").fadeOut();
+      }
     });
 
     <% if @group.private? %>
@@ -142,18 +180,6 @@
     <% end %>
 
   });
-
-  function toggleExtraInfo() {
-    if ($('#form-extra-info').is(':visible')) {
-      $('#form-extra-info').slideUp();
-      $('#form-extra-info-toggle').val('Show Extra Info')
-      $('#group_name').focus()
-    } else {
-      $('#form-extra-info').slideDown();
-      $('#form-extra-info-toggle').val('Hide Extra Info')
-      $('#group_location').focus()
-    }
-  }
 
   // Converts "Test text like  this" > "Text-text-like-this"
   var MAX_URL_LENGTH = <%= Group::MAX_URL_LENGTH %>;
@@ -236,9 +262,6 @@
           </a>
         </div>
       </div>
-
-      <%= f.input :pricing_group, label: 'Pricing Group', as: :select, include_blank: false,
-        collection: @pricing_group_options, hint: pricing_group_hint %>
     </div>
 
     <!-- === SUBSCRIPTION DETAILS === -->
@@ -294,24 +317,16 @@
                 <% end %>
               <% end %>
             </div>
-          </div>  
-
-          <div class="control-group">
-            <div class="sub-header">
-              <em>
-                Have questions about your subscription?
-                Read our <a href="http://badgelist.com/help/docs/Paid-Subscription-FAQ" 
-                  target="_blank">Paid Subscription FAQ</a> or 
-                email us at <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
-              </em>
-            </div>
-          </div>        
+          </div> 
 
         </div> <!-- /view-subscription-panel -->
       <% end %>
 
       <div id="edit-subscription-panel" 
           style="<%= (subscription_panel_mode != 'view') ? '' : 'display:none;' %>">
+
+        <%= f.input :pricing_group, label: 'Pricing Group', as: :select, include_blank: false,
+          collection: @pricing_group_options, hint: pricing_group_hint %>
 
         <% if !@group.new_record? %>
           <%= f.input :new_subscription, label: 'Revive Subscription', as: :hidden %>
@@ -321,12 +336,12 @@
           <%= f.input :subscription_plan, label: subscription_plan_label, as: :select, 
             include_blank: false, collection: SUBSCRIPTION_OPTIONS['admin'] %>
         <% else %> 
-          <div id="subscription_options_standard" 
+          <div id="subscription-options-standard" 
               style="<%= (@group.pricing_group == 'standard') ? '' : 'display: none;' %>">
             <%= f.input :subscription_plan, label: subscription_plan_label, as: :radio_buttons, 
               include_blank: false, collection: SUBSCRIPTION_OPTIONS['standard'] %>
           </div>
-          <div id="subscription_options_k12" 
+          <div id="subscription-options-k12" 
               style="<%= (@group.pricing_group == 'standard') ? 'display: none;' : '' %>">
             <%= f.input :subscription_plan, label: subscription_plan_label, as: :radio_buttons, 
               include_blank: false, collection: SUBSCRIPTION_OPTIONS['k12'] %>
@@ -367,21 +382,22 @@
 
     <!-- === EXTRA INFO === -->
 
-    <div class="control-group">
+    <div class="control-group" 
+        style="<%= d?(@group.location.blank?||@group.website.blank?||@group.image_url.blank?) %>">
       <label class="control-label">Add Extra Info</label>
       <div class="controls">
         <ul class="button-list">
-          <li>
+          <li style="<%= d?(@group.location.blank?) %>">
             <a href="#" class="btn" id="add-location">
               <i class="fa fa-map-marker"></i> Location
             </a>
           </li>
-          <li>
+          <li style="<%= d?(@group.website.blank?) %>">
             <a href="#" class="btn" id="add-website">
               <i class="fa fa-link"></i> Website
             </a>
           </li>
-          <li>
+          <li style="<%= d?(@group.image_url.blank?) %>">
             <a href="#" class="btn" id="add-image">
               <i class="fa fa-picture-o"></i> Group Image
             </a>
@@ -391,36 +407,33 @@
     </div>
 
     <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL', 
-      input_html: { class: 'input-xlarge' }, wrapper_html: { style: 'display:none;'} %>
+      input_html: { class: 'input-xlarge' }, wrapper_html: { style: d?(!@group.location.blank?)} %>
 
     <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
-      input_html: { class: 'input-xlarge' }, wrapper_html: { style: 'display:none;'} %>
+      input_html: { class: 'input-xlarge' }, wrapper_html: { style: d?(!@group.website.blank?) } %>
 
     <%= f.input :image_url, label: 'Group Image URL', 
                 placeholder: 'http://nasa.gov/logo.png',
-      input_html: { class: 'input-xlarge' }, wrapper_html: { style: 'display:none;'} %>
+      input_html: { class: 'input-xlarge' }, wrapper_html: { style: d?(!@group.image_url.blank?)}%>
 
-    <% unless @group.new_record? %>
+    <% if @badge_list_admin && !@group.new_record? %>
+      
+      <!-- === BADGE LIST ADMIN PANEL === -->
 
-      <!-- === GROUP OWNERSHIP === -->
-
-      <h2>Transfer group ownership</h2>
-      <%= f.input :new_owner_username, label: 'New owner', 
-        placeholder: 'Enter Badge List username',
-        hint: 'This will instantly and irreversably transfer ownership of this group to the ' \
-        + 'user you specify (enter their Badge List username not their email). ' \
-        + 'Badge List will notify the new owner by email, but please be sure to ' \
-        + 'get their agreement beforehand.' %>
-
-      <% if @badge_list_admin %>
-        <!-- === BADGE LIST ADMIN STUFF === -->
-
+      <div id="bl-admin-panel" style="display: none;">
         <h2>Badge List Admin Panel</h2>
       
-        <%= f.input :user_limit, label: 'User Limit', input_html: { class: 'input-mini' } %>
         <%= f.input :admin_limit, label: 'Admin Limit', input_html: { class: 'input-mini' } %>
-        <%= f.input :sub_group_limit, label: 'User Limit', input_html: { class: 'input-mini' } %>
-      <% end %>
+        <%= f.input :sub_group_limit, label: 'Sub-Group Limit', 
+          input_html: { class: 'input-mini' } %>
+      </div>
+
+      <script type="text/javascript">
+        function showAdminPanel() {
+          $("#show-admin-panel").fadeOut();
+          $("#bl-admin-panel").fadeIn();
+        }
+      </script>
 
     <% end %>
   </div>  
@@ -430,6 +443,13 @@
       <i class="fa fa-credit-card"></i>
       Credit card required to continue
     </span>
+
+    <% if @badge_list_admin && !@group.new_record? %>
+      <a class="btn btn-link" id="show-admin-panel" style="border-radius: 500px;" 
+          onclick="showAdminPanel(); return false;">
+        <i class="fa fa-cog"></i>
+      </a>
+    <% end %>
 
     <%= f.button :submit, class: 'btn btn-primary', id: 'submit-group-form' %>
     <%= 

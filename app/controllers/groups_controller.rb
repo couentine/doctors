@@ -141,10 +141,12 @@ class GroupsController < ApplicationController
   end
 
   # GET /group-url/edit
+  # Accepts transfer=true param
   def edit
     @group_type_options = GROUP_TYPE_OPTIONS
     @pricing_group_options = PRICING_GROUP_OPTIONS
     @allow_url_editing = (@group.member_ids.count == 0) || (@group.badge_ids.count == 0);
+    @transfer_mode = params[:transfer]
   end
 
   # POST /groups
@@ -172,7 +174,9 @@ class GroupsController < ApplicationController
 
   # PUT /group-url
   # PUT /group-url.json
+  # Accepts transfer=true param
   def update
+    @transfer_mode = params[:transfer]
 
     respond_to do |format|
       if @group.update_attributes(params[:group])

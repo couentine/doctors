@@ -1,0 +1,28 @@
+<%
+  # NOTE: This form should only be displayed for an existing record. 
+  #       (You can't create and transfer the group at the same time.)
+%>
+
+<%= simple_form_for(@group, html: { class: 'form-horizontal' }) do |f| %>
+  <%= f.error_notification %>
+  
+  <div class="form-body">
+  
+    <!-- === GROUP OWNERSHIP === -->
+
+    <%= f.input :new_owner_username, label: "New owner's username", autofocus: true,
+      input_html: { class: 'input-xlarge' }, placeholder: 'Enter Badge List username (NOT email)',
+      hint: 'This will instantly and irreversably transfer ownership of this group to the ' \
+      + 'user you specify (enter their Badge List username not their email). ' \
+      + 'Badge List will notify the new owner by email, but please be sure to ' \
+      + 'get their agreement beforehand.' %>
+
+    <input type="hidden" name="transfer" value="true"/>
+
+  </div>  
+  
+  <div class="form-footer add-top-margin">
+    <%= f.button :submit, class: 'btn btn-primary', id: 'submit-group-form' %>
+    <%= link_to "Cancel", @group, class: "btn" %>
+  </div>
+<% end %>
