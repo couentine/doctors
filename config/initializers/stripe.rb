@@ -16,10 +16,12 @@ APP_CONFIG['subscription_plans'].each do |pricing_group, plans|
         + "</em></span>".html_safe,
       plan_id
     ]
-    subscription_options['admin'] << [
-      "#{plan_fields['name']} ($#{plan_fields['amount']/100} per #{plan_fields['interval']})",
-      plan_id
-    ]
+    unless pricing_group == 'retired'
+      subscription_options['admin'] << [
+        "#{plan_fields['name']} ($#{plan_fields['amount']/100} per #{plan_fields['interval']})",
+        plan_id
+      ]
+    end
   end
 end
 

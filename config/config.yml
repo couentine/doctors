@@ -222,6 +222,107 @@ defaults: &defaults
         sub_groups: 0
         features:
         - community
+    retired:
+      standard-100m-1:
+        name: Starter
+        amount: 5000
+        currency: usd
+        interval: month
+        trial_period_days: 14
+        statement_descriptor: Badge List Starter
+        users: 100
+        admins: -1
+        sub_groups: 0
+      standard-500m-1:
+        name: Basic
+        amount: 12000
+        currency: usd
+        interval: month
+        trial_period_days: 14
+        statement_descriptor: Badge List Basic
+        users: 500
+        admins: -1
+        sub_groups: 1
+      standard-1000m-1:
+        name: Standard
+        amount: 20000
+        currency: usd
+        interval: month
+        trial_period_days: 14
+        statement_descriptor: Badge List Standard
+        users: 1000
+        admins: -1
+        sub_groups: 5
+      standard-5000m-1:
+        name: Premium
+        amount: 45000
+        currency: usd
+        interval: month
+        trial_period_days: 14
+        statement_descriptor: Badge List Premium
+        users: 5000
+        admins: -1
+        sub_groups: -1
+      k12-1y-1:
+        name: Single Teacher
+        amount: 2500
+        currency: usd
+        interval: year
+        trial_period_days: 14
+        statement_descriptor: Badge List K12 Teacher
+        users: -1
+        admins: 1
+        sub_groups: 0
+      free-5m-1:
+        name: Free Mini
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Free
+        users: 5
+        admins: -1
+        sub_groups: -1
+      free-100m-1:
+        name: Free Starter
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Free
+        users: 100
+        admins: -1
+        sub_groups: 0
+      free-500m-1:
+        name: Free Basic
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Free
+        users: 500
+        admins: -1
+        sub_groups: 1
+      free-unlimited-1:
+        name: Free Unlimited
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Free
+        users: -1
+        admins: -1
+        sub_groups: -1
+      trial-100m-1:
+        name: Trial Starter
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Trial
+        users: 100
+        admins: -1
+        sub_groups: 0
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:

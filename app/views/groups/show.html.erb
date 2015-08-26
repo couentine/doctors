@@ -85,138 +85,186 @@
 
 </style>
 
-<!-- === MANAGE MEMBERS MODAL === -->
+<% if @current_user_is_admin || @badge_list_admin %>
 
-<div id="manage-invited-members" class="modal hide fade" tabindex="-1" role="dialog" 
- aria-labelledby="mimm-label" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="mimm-label">Manage Invited Members</h3>
-  </div>
+  <!-- === MANAGE MEMBERS MODAL === -->
 
-  <div class="modal-body">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Invitation Sent</th>
-          <th>Badges</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @group.invited_members.each do |u| %>
+  <div id="manage-invited-members" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Manage Invited Members</h3>
+    </div>
+
+    <div class="modal-body">
+      <table class="table table-striped">
+        <thead>
           <tr>
-            <td><%= u['name'] %></td>
-            <td><%= u['email'] %></td>
-            <td>
-              <%= u['invite_date'] ? 
-                    u['invite_date'].to_s(:short_date_time) 
-                    : 'No invitation sent yet' 
-              %>
-            </td>
-            <td>
-              <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
-              <%= u['validations'].map{|v| "#{v['badge']} (Issued)"}\
-                .join(', ') unless u['validations'].blank? %>
-            </td>
-            <td>
-              <%
-                if u['validations'].blank?
-                  delete_confirmation_message = "Are you absolutely sure you want to revoke this " \
-                    + "user's invitation?"
-                else
-                  delete_confirmation_message = "Are you absolutely sure you want to revoke this " \
-                    + "user's invitation? (WARNING: This invited user has been issued badges. " \
-                    + "Those badge validations will be lost if you revoke the invitation.)"
-                end
-              %>
-              <%= link_to '<i class="fa fa-envelope"></i>'.html_safe, 
-                  send_group_member_invitation_path(@group, u['email']), :method => :post,
-                  title: 'Resend invitation email' %> 
-              <%= link_to '<i class="fa fa-remove"></i>'.html_safe, 
-                  destroy_group_invited_member_path(@group, u['email']), :method => :delete,
-                  title: 'Revoke invitation', data: { 
-                  confirm: delete_confirmation_message } %>
-            </td>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Invitation Sent</th>
+            <th>Badges</th>
+            <th>Actions</th>
           </tr>
-        <% end %>
-    </tbody>
-    </table>
-  </div>
-
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
-
-<!-- === MANAGE ADMINS MODAL === -->
-
-<div id="manage-invited-admins" class="modal hide fade" tabindex="-1" role="dialog" 
- aria-labelledby="mimm-label" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="mimm-label">Manage Invited Admins</h3>
-  </div>
-
-  <div class="modal-body">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Invitation Sent</th>
-          <th>Badges</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @group.invited_admins.each do |u| %>
-          <tr>
-            <td><%= u['name'] %></td>
-            <td><%= u['email'] %></td>
-            <td>
-              <%= u['invite_date'] ? 
-                    u['invite_date'].to_s(:short_date_time) 
-                    : 'No invitation sent yet' 
-              %>
-            </td>
-            <td>
-              <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
-              <%= u['validations'].map{|v| "#{v['badge']} (Issued)"}\
-                .join(', ') unless u['validations'].blank? %>
-            </td>
-            <td>
-              <%
-                if u['validations'].blank?
-                  delete_confirmation_message = "Are you absolutely sure you want to revoke this " \
-                    + "user's invitation?"
-                else
-                  delete_confirmation_message = "Are you absolutely sure you want to revoke this " \
-                    + "user's invitation? (WARNING: This invited user has been issued badges. " \
-                    + "Those badge validations will be lost if you revoke the invitation.)"
-                end
-              %>
-              <%= link_to '<i class="fa fa-envelope"></i>'.html_safe, 
-                  send_group_admin_invitation_path(@group, u['email']), :method => :post,
-                  title: 'Resend invitation email' %> 
-              <%= link_to '<i class="fa fa-remove"></i>'.html_safe, 
-                  destroy_group_invited_admin_path(@group, u['email']), :method => :delete,
-                  title: 'Revoke invitation', data: { 
-                  confirm: delete_confirmation_message } %>
-            </td>
-          </tr>
-        <% end %>
+        </thead>
+        <tbody>
+          <% @group.invited_members.each do |u| %>
+            <tr>
+              <td><%= u['name'] %></td>
+              <td><%= u['email'] %></td>
+              <td>
+                <%= u['invite_date'] ? 
+                      u['invite_date'].to_s(:short_date_time) 
+                      : 'No invitation sent yet' 
+                %>
+              </td>
+              <td>
+                <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
+                <%= u['validations'].map{|v| "#{v['badge']} (Issued)"}\
+                  .join(', ') unless u['validations'].blank? %>
+              </td>
+              <td>
+                <%
+                  if u['validations'].blank?
+                    delete_confirmation_message = "Are you absolutely sure you want to revoke " \
+                      + "this user's invitation?"
+                  else
+                    delete_confirmation_message = "Are you absolutely sure you want to revoke " \
+                      + "this user's invitation? (WARNING: This invited user has been issued " \
+                      + "badges. Those badge validations will be lost if you revoke the " \
+                      + "invitation.)"
+                  end
+                %>
+                <%= link_to '<i class="fa fa-envelope"></i>'.html_safe, 
+                    send_group_member_invitation_path(@group, u['email']), :method => :post,
+                    title: 'Resend invitation email' %> 
+                <%= link_to '<i class="fa fa-remove"></i>'.html_safe, 
+                    destroy_group_invited_member_path(@group, u['email']), :method => :delete,
+                    title: 'Revoke invitation', data: { 
+                    confirm: delete_confirmation_message } %>
+              </td>
+            </tr>
+          <% end %>
       </tbody>
-    </table>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
   </div>
 
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
+  <!-- === MANAGE ADMINS MODAL === -->
 
+  <div id="manage-invited-admins" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Manage Invited Admins</h3>
+    </div>
+
+    <div class="modal-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Invitation Sent</th>
+            <th>Badges</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @group.invited_admins.each do |u| %>
+            <tr>
+              <td><%= u['name'] %></td>
+              <td><%= u['email'] %></td>
+              <td>
+                <%= u['invite_date'] ? 
+                      u['invite_date'].to_s(:short_date_time) 
+                      : 'No invitation sent yet' 
+                %>
+              </td>
+              <td>
+                <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
+                <%= u['validations'].map{|v| "#{v['badge']} (Issued)"}\
+                  .join(', ') unless u['validations'].blank? %>
+              </td>
+              <td>
+                <%
+                  if u['validations'].blank?
+                    delete_confirmation_message = "Are you absolutely sure you want to revoke " \
+                      + "this user's invitation?"
+                  else
+                    delete_confirmation_message = "Are you absolutely sure you want to revoke " \
+                      + "this user's invitation? (WARNING: This invited user has been issued " \
+                      + "badges. Those badge validations will be lost if you revoke the " \
+                      + "invitation.)"
+                  end
+                %>
+                <%= link_to '<i class="fa fa-envelope"></i>'.html_safe, 
+                    send_group_admin_invitation_path(@group, u['email']), :method => :post,
+                    title: 'Resend invitation email' %> 
+                <%= link_to '<i class="fa fa-remove"></i>'.html_safe, 
+                    destroy_group_invited_admin_path(@group, u['email']), :method => :delete,
+                    title: 'Revoke invitation', data: { 
+                    confirm: delete_confirmation_message } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+<% end %>
+
+<% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
+
+  <!-- === SUBSCRIPTION DETAILS MODAL === -->
+
+  <div id="subscription-details" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Subscription Details</h3>
+    </div>
+
+    <div class="modal-body">
+      <h4 class="<%= status_details[:color] %>">
+        <i class="fa <%= status_details[:icon] %>"></i>
+        <%= status_details[:alert_title] %>
+      </h4>
+      <p><b><%= status_details[:summary] %></b></p>
+      <p><%= status_details[:alert_body] %></p>
+      <ul>
+        <li><b>Current Plan:</b> <%= @group.subscription_plan_name %></li>
+        <li><b>Cost:</b> <%= @group.subscription_plan_cost %></li>
+        <li>
+          <b>Plan Limits:</b>
+          <%= (@group.user_limit<0) ? 'Unlimited users' : pluralize(@group.user_limit,'user') %>,
+          <%=(@group.admin_limit<0) ? 'Unlimited admins' : pluralize(@group.admin_limit,'admin')%>,
+          <%= (@group.sub_group_limit<0) ? \
+            'Unlimited sub-groups' : pluralize(@group.sub_group_limit,'sub-group') %>
+        </li>
+      </ul>
+    </div>
+
+    <div class="modal-footer">
+      <% pricing_url = (@group.pricing_group == 'k12') ? '/pricing#k12' : '/pricing' %>
+      <a href="<%= pricing_url %>" target="_blank" class="btn">
+        <i class="fa fa-list-alt"></i>
+        View plans &amp; pricing
+      </a>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+<% end %>
 
 <!-- === PAGE HEADER === -->
 
@@ -244,23 +292,22 @@
                   end
                 %>
 
-                <% if @group.private? && (@current_user_is_admin || @badge_list_admin) %>
-                  (<%= @group.subscription_plan_name %>)
+                <% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
+                  <br>
+                  <a href="#subscription-details" data-toggle="modal">
+                    <span class="label <%= status_details[:color] %>">
+                      <%= @group.subscription_plan_name %> - 
+                      <i class="fa <%= status_details[:icon] %>"></i>
+                      <%= @group.subscription_status_string %>
+                    </span>
+                  </a>
+                <% elsif @group.private? && @current_user_is_admin %>
                   <br>
                   <span class="label <%= status_details[:color] %>">
+                    <%= @group.subscription_plan_name %> - 
                     <i class="fa <%= status_details[:icon] %>"></i>
-                    <%= @group.subscription_status_string %> - 
-                    <%= status_details[:summary] %>
-                  </span> 
-
-                  <%
-                    limit_text = (@group.user_limit < 0) ? "#{@group.admin_limit} Teacher"\
-                      : "#{@group.user_limit} Users"
-                  %>
-                  <%= link_to "<span class='label'>#{limit_text}</span>".html_safe, 
-                    edit_group_path(@group), class: "label-link",
-                    title: "View your subscription plan details",
-                    data: { toggle: "tooltip", placement: "bottom" } %>
+                    <%= @group.subscription_status_string %>
+                  </span>
                 <% end %>
               </h3>
             </td>
@@ -332,6 +379,11 @@
                 <% end %>
                 <% if @current_user_is_owner || @badge_list_admin %>
                   <li>
+                    <a href="#subscription-details" data-toggle="modal" class='btn btn-small'>
+                      <i class="fa fa-info-circle"></i> Subscription details
+                    </a>
+                  </li>
+                  <li>
                     <%= link_to '<i class="fa fa-pencil"></i> Edit the group'.html_safe, 
                       edit_group_path, class: 'btn btn-small' %>
                   </li>
@@ -369,25 +421,6 @@
     </div>
   </div>
 </div>
-
-<% 
-  if @current_user_is_admin || @badge_list_admin
-    
-    if status_details[:show_alert]
-%>
-
-  <div class="well span9 offset1 <%= status_details[:color] %>">
-    <h3><%= status_details[:alert_title] %></h3>
-    <p>
-      <%= status_details[:alert_body] %>
-    </p>
-  </div>
-
-<% 
-    end
-
-  end 
-%>
 
 <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
 

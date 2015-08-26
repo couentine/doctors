@@ -179,7 +179,7 @@ class Group
     !features.blank? && features.include?(feature.to_s)
   end
 
-  # Returns the name of this subsccription plan or just the id
+  # Returns the name of this subscription plan or just the id
   def subscription_plan_name
     if subscription_plan.blank?
       'No plan selected'
@@ -187,6 +187,17 @@ class Group
       subscription_plan
     else
       ALL_SUBSCRIPTION_PLANS[subscription_plan]['name']
+    end
+  end
+
+  def subscription_plan_cost
+    if subscription_plan.blank?
+      'Free'
+    elsif ALL_SUBSCRIPTION_PLANS[subscription_plan].blank?
+      'None'
+    else
+      plan_fields = ALL_SUBSCRIPTION_PLANS[subscription_plan]
+      "$#{plan_fields['amount']/100} per #{plan_fields['interval']}"
     end
   end
 
@@ -237,8 +248,10 @@ class Group
           alert_title: "Group is in trial period",
           alert_body: ("Your private group trial ends on " \
                       + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}. " \
+                      + "Your card will be charged when the trial is complete. " \
                       + "If you have any questions, send us an email at " \
-                  + "<a href='mailto:solutions@badgelist.com'>solutions@badgelist.com.").html_safe }
+                      + "<a href='mailto:solutions@badgelist.com'>solutions@badgelist.com" \
+                      + "</a>.").html_safe }
       when 'past_due'
         { color: 'red', icon: 'fa-exclamation-circle', show_alert: true,
           summary: "Payment failed on #{date_failed.to_s(:short_date)}",
