@@ -66,7 +66,8 @@ class Group
   field :stripe_subscription_id,      type: String
   field :stripe_subscription_details, type: String
   field :stripe_subscription_status,  type: String, default: 'new'
-    # Possible Status Values = ['trialing', 'active', 'past_due', 'canceled', 'unpaid'] & 'new'
+    # Possible Status Values = ['trialing', 'active', 'past_due', 'canceled', 'unpaid'] 
+    #                          & 'new' & 'force-new'
   field :new_subscription,            type: Boolean # used to set subscription status to 'new'
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
@@ -193,7 +194,7 @@ class Group
   def subscription_status_string
     if private?
       case stripe_subscription_status
-      when 'trialing', 'new'
+      when 'trialing', 'new', 'force-new'
         'Trial'
       when 'active'
         'Active'
@@ -227,7 +228,7 @@ class Group
       date_retry = stripe_payment_retry_date || (Time.now + 3.days)
 
       case stripe_subscription_status
-      when 'new', 'trialing'
+      when 'new', 'force-new', 'trialing'
         { color: 'orange', summary: "Trial ends on " \
             + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}", 
           icon: 'fa-clock-o', show_alert: true,
@@ -692,13 +693,17 @@ protected
   def process_subscription_field_updates
     if private?
       if new_subscription
-        self.stripe_subscription_status = 'new'
+        if stripe_subscription_status == 'new'
+          self.stripe_subscription_status = 'force-new' # forces dirty state to fire callback
+        else
+          self.stripe_subscription_status = 'new'
+        end
         self.new_subscription = nil
       end
 
       if new_record? || stripe_subscription_status_changed?
         case stripe_subscription_status
-        when 'new', 'trialing', 'active', 'past_due'
+        when 'new', 'force-new', 'trialing', 'active', 'past_due'
           clear_flag PENDING_SUBSCRIPTION_FLAG
         when 'unpaid'
           set_flag PENDING_SUBSCRIPTION_FLAG
@@ -746,7 +751,8 @@ protected
 
   # This creates a new subscription when status moves to new
   def create_another_subscription
-    if private? && stripe_subscription_status_changed? && (stripe_subscription_status == 'new')
+    if private? && stripe_subscription_status_changed? \
+        && ((stripe_subscription_status == 'new') || (stripe_subscription_status == 'force-new'))
       if !stripe_subscription_id.blank? 
         # Then first we cancel the existing subscription (but don't update sub status after)
         cancel_stripe_subscription(false, true); # asynchronous
@@ -763,8 +769,8 @@ protected
   # Updates core fields in stripe if they change locally 
   # NOTE: It won't run if this callback is being fired by stripe itself
   def update_stripe_if_needed
-    if private? && (subscription_plan_changed? || stripe_subscription_card_changed?) \
-        && (context != 'stripe')
+    if private? && !stripe_subscription_id.blank? && (context != 'stripe') \
+        && (subscription_plan_changed? || stripe_subscription_card_changed?)
       update_stripe_subscription(true) # asynchronous
     end
   end
