@@ -430,14 +430,14 @@ private
   end
 
   def can_create_badges
-    unless @group.can_create_badges?
-      flash[:error] = "New badges cannot be created in an inactive group."
+    if @group.disabled?
+      flash[:error] = "New badges cannot be created in a disabled group."
       redirect_to @group
     end
   end
 
   def can_create_entries
-    unless @group.can_create_entries?
+    if @group.disabled?
       flash[:error] = "This badge cannot be awarded to new people while the group is inactive."
       redirect_to @group
     end

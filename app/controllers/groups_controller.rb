@@ -535,11 +535,9 @@ class GroupsController < ApplicationController
         end
       end
 
-      if @group.changed?
-        if !@group.save
-          flash[:error] = "There was a problem updating the group, please try again later."
-          render 'add_users'
-        end
+      if !@group.save
+        flash[:error] = "There was a problem updating the group, please try again later."
+        render 'add_users'
       end
     end
   end

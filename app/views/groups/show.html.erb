@@ -3,6 +3,7 @@
   can_join_group = @group.open? && !@current_user_is_admin && !@current_user_is_member
 
   status_details = @group.status_details_for_admins
+  admin_details = @group.admin_limit_details
 %>
 
 <script type="text/javascript">
@@ -579,7 +580,13 @@
           <% if @current_user_is_admin || @badge_list_admin %>
             
             <%= link_to '<i class="fa fa-plus"></i> Add Admins'.html_safe,
-                add_group_admins_path(@group), class: 'btn btn-small' %>
+              add_group_admins_path(@group), class: 'btn btn-small', 
+              disabled: !@group.can_add_admins? %>
+
+            <span class="label <%= admin_details[:color] %>" data-toggle="tooltip"
+               title="<%= admin_details[:summary] %>">
+              <%= admin_details[:label] %>
+            </span>
 
             <% unless @group.invited_admins.blank? %>
               <div class="btn-group">
@@ -619,7 +626,7 @@
             <% end %>
           <% end %>
             
-          <h2>Group Admins</h2>
+          <h2>Admins</h2>
         </div>
       </div>
     </div>

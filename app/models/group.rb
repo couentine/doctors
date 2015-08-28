@@ -50,8 +50,8 @@ class Group
   field :admin_limit,                 type: Integer, default: 1
   field :sub_group_limit,             type: Integer, default: 0
   field :features,                    type: Array, default: [] # = ['community', 'branding']
-  field :total_user_count,            type: Integer, default: 0
-  field :admin_count,                 type: Integer, default: 0
+  field :total_user_count,            type: Integer, default: 1
+  field :admin_count,                 type: Integer, default: 1
   field :member_count,                type: Integer, default: 0
   field :sub_group_count,             type: Integer, default: 0
   field :active_user_count,           type: Integer # RETIRED
@@ -102,7 +102,7 @@ class Group
   before_validation :update_caps_field
   before_create :add_creator_to_admins
   before_update :change_owner
-  before_save :update_counts
+  before_update :update_counts
   
   before_save :process_subscription_field_updates
   before_create :create_first_subscription
@@ -141,37 +141,57 @@ class Group
 
   # === LIMIT-FOCUSED INSTANCE METHODS === #
 
-  def can_add_members?
-    public? || ( \
-      ((user_limit < 0) || (total_user_count < user_limit)) \
-        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
-          || (stripe_subscription_status == 'unpaid'))
+  def disabled?
+    private? && ( \
+      ((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)) \
+        || (stripe_subscription_status == 'unpaid')
     )
+  end
+
+  def can_add_members?
+    public? || ((user_limit < 0) || (total_user_count < user_limit))
   end
 
   def can_add_admins?
-    public? || ( \
-      ((admin_limit < 0) || (admin_count < admin_limit)) \
-        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
-          || (stripe_subscription_status == 'unpaid'))
-    )
+    public? || ((admin_limit < 0) || (admin_count < admin_limit))
+  end
+
+  # Returns hash = {
+  #   color: 'default' or 'red'
+  #   label: one_or_two_word_summary_of_current_status,
+  #   summary: contents_of_detail_tooltip,
+  #   requires_attention: true or false
+  # }
+  def admin_limit_details
+    if public? || admin_limit.blank?
+      { color: 'default', requires_attention: false, label: 'Unlimited', 
+        summary: 'Public groups support unlimited admins.' }
+    elsif admin_limit < 0
+      { color: 'default', requires_attention: false, label: 'Unlimited', 
+        summary: 'Your plan supports unlimited admins.' }
+    elsif admin_count < admin_limit
+      { color: 'default', requires_attention: false, label: "Using #{admin_count}/#{admin_limit}", 
+        summary: "Your are currently using #{admin_count} out of #{admin_limit} available " \
+        + "admins for your plan." }
+    elsif admin_count == admin_limit
+      if admin_count == 1
+        { color: 'default', requires_attention: false, label: "None Remaining", 
+          summary: "Your subscription plan only supports 1 admin. " \
+          + "To get more admins you'll need to upgrade to a larger plan." }
+      else
+        { color: 'default', requires_attention: false, label: "None Remaining", 
+          summary: "You are currently using all #{admin_limit} of the available admins " \
+          + "for your plan. Reach out to support if you'd like to increase your limit." }
+      end
+    else
+      { color: 'red', requires_attention: true, label: "Over limit", 
+        summary: "You are currently using more than the #{admin_limit} admins supported by " \
+        + "your plan. Please remove #{admin_count - admin_limit} admins as soon as possible." }
+    end
   end
 
   def can_create_sub_groups?
-    public? || ( \
-      ((sub_group_limit < 0) || (sub_group_count < sub_group_limit)) \
-        && !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
-          || (stripe_subscription_status == 'unpaid'))
-    )
-  end
-
-  def can_create_badges?
-    public? || !((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
-      || (stripe_subscription_status == 'unpaid'))
-  end
-
-  def can_create_entries?
-    can_create_badges?
+    public? || ((sub_group_limit < 0) || (sub_group_count < sub_group_limit))
   end
 
   # Returns whether or not the features array contains the specified 'feature' or :feature
@@ -631,12 +651,14 @@ protected
   end
 
   def update_counts
-    if member_ids_changed? || admin_ids_changed?
-      self.total_user_count = member_ids.count + admin_ids.count
-    end
+    current_member_count = member_ids.count
+    current_admin_count = admin_ids.count
 
-    self.member_count = member_ids.count if member_ids_changed?
-    self.admin_count = admin_ids.count if admin_ids_changed?
+    if (current_member_count != member_count) || (current_admin_count != admin_count)
+      self.member_count = current_member_count
+      self.admin_count = current_admin_count
+      self.total_user_count = current_member_count + current_admin_count
+    end
   end
 
   def set_default_values
