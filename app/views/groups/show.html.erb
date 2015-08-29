@@ -248,7 +248,7 @@
         <li><b>Cost:</b> <%= @group.subscription_plan_cost %></li>
         <li>
           <b>Plan Limits:</b>
-          <%= (@group.user_limit<0) ? 'Unlimited users' : pluralize(@group.user_limit,'user') %>,
+        <%= (@group.user_limit<0) ? 'Unlimited members' : pluralize(@group.user_limit,'member') %>,
           <%=(@group.admin_limit<0) ? 'Unlimited admins' : pluralize(@group.admin_limit,'admin')%>,
           <%= (@group.sub_group_limit<0) ? \
             'Unlimited sub-groups' : pluralize(@group.sub_group_limit,'sub-group') %>
@@ -498,7 +498,8 @@
         <div class="tab-header <%= (@group.member_ids.empty?) ? 'empty' : '' %>">
           <% if @current_user_is_admin || @badge_list_admin %>
             <%= link_to '<i class="fa fa-plus"></i> Add Members'.html_safe,
-                add_group_members_path(@group), class: 'btn btn-small' %>
+                add_group_members_path(@group), class: 'btn btn-small',
+                disabled: !@group.can_add_members? %>
 
             <% if @group.private? %>
               <a href="#subscription-details" data-toggle="modal">

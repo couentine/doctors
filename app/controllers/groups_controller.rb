@@ -285,6 +285,7 @@ class GroupsController < ApplicationController
       notice = "#{@user.name} has been downgraded from an admin to a member."
     elsif params[:type] == 'member' && @group.has_member?(@user)
       @group.members.delete(@user)
+      @group.save
 
       # Then detach any logs
       @user.logs.where(:badge_id.in => @group.badge_ids).each do |log_to_detach|
@@ -399,6 +400,7 @@ class GroupsController < ApplicationController
   #   @group, @type, @invalid_emails, @upgraded_member_emails, @new_member_emails,
   #   @new_admin_emails, @skipped_member_emails, @skipped_admin_emails
   def create_users
+    flash[:error] = nil if flash[:error] # Clear error if present
     @type = params[:type] == 'admin' ? :admin : :member
     @notify_by_email = params[:notify_by_email] == "1"
     @new_admin_emails = []
@@ -434,14 +436,16 @@ class GroupsController < ApplicationController
       end
 
       if !valid_emails.empty?
-        if (@type == :admin) && (valid_emails.count > (@group.admin_limit - @group.admin_count))
+        if (@type == :admin) && (@group.admin_limit > 0) \
+            && (valid_emails.count > (@group.admin_limit - @group.admin_count))
           flash[:error] = "Oops! You've only got #{@group.admin_limit - @group.admin_count} " \
             + "admin spots available with your current subscription and it looks like you're " \
             + "trying to add another #{valid_emails.count} admins. Please contact support " \
             + "if you're interested in increasing your admin limit."
           render 'add_users'
-        elsif (@type == :user) && (valid_emails.count > (@group.user_limit - @group.user_count))
-          flash[:error] = "Oops! You've only got #{@group.user_limit - @group.user_count} " \
+        elsif (@type == :member) && (@group.user_limit > 0) \
+            && (valid_emails.count > (@group.user_limit - @group.member_count))
+          flash[:error] = "Oops! You've only got #{@group.user_limit - @group.member_count} " \
             + "member spots available with your current subscription and it looks like you're " \
             + "trying to add another #{valid_emails.count} members. You'll need to upgrade " \
             + "your groups subscription plan to increase your user limit."

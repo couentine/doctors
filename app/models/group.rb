@@ -149,7 +149,7 @@ class Group
   end
 
   def can_add_members?
-    public? || ((user_limit < 0) || (total_user_count < user_limit))
+    public? || ((user_limit < 0) || (member_count < user_limit))
   end
 
   # Returns hash = {
@@ -165,20 +165,20 @@ class Group
     elsif user_limit < 0
       { color: 'default', requires_attention: false, label: 'Unlimited', 
         summary: 'Your plan supports unlimited members.' }
-    elsif total_user_count < user_limit
+    elsif member_count < user_limit
       { color: 'default', requires_attention: false, 
-        label: "Using #{total_user_count}/#{user_limit}", 
-        summary: "You're currently using #{total_user_count} out of #{user_limit} available " \
+        label: "Using #{member_count}/#{user_limit}", 
+        summary: "You're currently using #{member_count} out of #{user_limit} available " \
         + "member spots for your plan." }
-    elsif total_user_count == user_limit
+    elsif member_count == user_limit
       { color: 'default', requires_attention: false, label: "None Remaining", 
         summary: "You are currently using all #{user_limit} of the available member spots for " \
-        + "your plan. Please contact support if you're interested in increasing your member " \
-        + "limit." }
+        + "your plan. To get more members you'll need to upgrade to a larger plan." }
     else
       { color: 'red', requires_attention: true, label: "Over limit", 
         summary: "You are currently using more than the #{user_limit} member spots supported by " \
-        + "your plan. Please remove #{total_user_count - user_limit} members as soon as possible."}
+        + "your plan. To fix this you will need to either remove #{member_count - user_limit} " \
+        + " members or upgrade to a larger plan as soon as possible." }
     end
   end
 
