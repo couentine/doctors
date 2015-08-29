@@ -305,14 +305,6 @@ class Badge
     logs.where(validation_status: 'validated', detached_log: false).desc(:next_entry_number)
   end
 
-  # Returns the email addresses of all waiting experts
-  def waiting_expert_emails
-    [group.invited_admins, group.invited_members].flatten.find_all do |item| 
-      !item["validations"].blank? \
-        && item["validations"].map{|v| v["badge"]}.include?(url)
-    end.map{ |item| item["email"] }
-  end
-
   # Returns all learners who are currently requesting validation
   # Reverse sorts logs by request/withdrawal date
   def requesting_learner_logs

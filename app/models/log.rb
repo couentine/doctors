@@ -325,8 +325,6 @@ protected
   def back_validate_if_needed
     if (validation_status == 'validated') && validation_status_changed?
       validation_threshold = badge.current_validation_threshold
-      logger.debug "+++back_validate_if_needed: log user = #{user.name}, validation count = " \
-        + "#{validation_count}, validation_threshold = #{validation_threshold}+++"
       time_string = Time.now.to_s(:full_date_time)
       
       if badge.expert_logs.count <= 1
@@ -334,11 +332,10 @@ protected
         body = "#{user.name} created the badge on #{time_string}" \
           + " and was automatically awarded the badge."
         self.add_validation(user, summary, body, true)
-      else
-        badge.logs.find_all do |log| 
-          log.validation_status == 'validated' && (log.validation_count < validation_threshold)
-        end.each do |devalidated_log|
-          logger.debug "+++back_validate_if_needed: devalidated_log = #{devalidated_log.inspect}+++"
+      elsif validation_threshold > 1
+        badge.logs.where(:validation_status => 'validated', \
+            :validation_count.lt => validation_threshold).each do |devalidated_log|
+          
           if devalidated_log.user == self.user
             summary = "Self-validation of founding expert"
             body = "#{user.name} was added as one of the founding experts on #{time_string}."\
@@ -348,7 +345,9 @@ protected
             body = "#{user.name} was added as one of the founding experts on #{time_string}."\
               + " This 'back-validation' was added automatically."
           end
+          
           devalidated_log.add_validation(user, summary, body, true, false)
+
         end
       end
     end

@@ -263,9 +263,7 @@ class GroupsController < ApplicationController
     end
 
     # Then detach any logs
-    current_user.logs.find_all do |log| 
-      !log.badge.nil? && (log.badge.group == @group) 
-    end.each do |log_to_detach|
+    current_user.logs.where(:badge_id.in => @group.badge_ids).each do |log_to_detach|
       log_to_detach.detached_log = true
       log_to_detach.save!
     end
@@ -287,7 +285,9 @@ class GroupsController < ApplicationController
       notice = "#{@user.name} has been downgraded from an admin to a member."
     elsif params[:type] == 'member' && @group.has_member?(@user)
       @group.members.delete(@user)
-      @user.logs.find_all { |log| log.badge.group == @group }.each do |log_to_detach|
+
+      # Then detach any logs
+      @user.logs.where(:badge_id.in => @group.badge_ids).each do |log_to_detach|
         log_to_detach.detached_log = true
         log_to_detach.save!
         detached_log_count += 1
