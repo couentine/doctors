@@ -3,6 +3,7 @@
   can_join_group = @group.open? && !@current_user_is_admin && !@current_user_is_member
 
   status_details = @group.status_details_for_admins
+  member_details = @group.member_limit_details
   admin_details = @group.admin_limit_details
 %>
 
@@ -496,8 +497,17 @@
           
         <div class="tab-header <%= (@group.member_ids.empty?) ? 'empty' : '' %>">
           <% if @current_user_is_admin || @badge_list_admin %>
-            <%= link_to '<i class="fa fa-plus"></i> Invite Members'.html_safe,
+            <%= link_to '<i class="fa fa-plus"></i> Add Members'.html_safe,
                 add_group_members_path(@group), class: 'btn btn-small' %>
+
+            <% if @group.private? %>
+              <a href="#subscription-details" data-toggle="modal">
+                <span class="label <%= member_details[:color] %>" data-toggle="tooltip"
+                   title="<%= member_details[:summary] %>">
+                  <%= member_details[:label] %>
+                </span>
+              </a>
+            <% end %>
 
             <% unless @group.invited_members.blank? %>
               <div class="btn-group">
@@ -583,10 +593,14 @@
               add_group_admins_path(@group), class: 'btn btn-small', 
               disabled: !@group.can_add_admins? %>
 
-            <span class="label <%= admin_details[:color] %>" data-toggle="tooltip"
-               title="<%= admin_details[:summary] %>">
-              <%= admin_details[:label] %>
-            </span>
+            <% if @group.private? %>
+              <a href="#subscription-details" data-toggle="modal">
+                <span class="label <%= admin_details[:color] %>" data-toggle="tooltip"
+                   title="<%= admin_details[:summary] %>">
+                  <%= admin_details[:label] %>
+                </span>
+              </a>
+            <% end %>
 
             <% unless @group.invited_admins.blank? %>
               <div class="btn-group">

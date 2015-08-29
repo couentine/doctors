@@ -432,114 +432,128 @@ class GroupsController < ApplicationController
         valid_emails << item[:email]
         name_from_email[item[:email]] = item[:name]
       end
-      
-      unless valid_emails.empty?
-        # query for users and build list of users that don't exist yet
-        match_results = match_emails_to_users(valid_emails)
-        users_to_add = match_results[:matched_users]
-        emails_to_invite = match_results[:unmatched_emails]
 
-        # First update analytics
-        IntercomEventWorker.perform_async({
-          'event_name' => (@type == :admin) ? 'group-admins-invite' : 'group-members-invite',
-          'email' => current_user.email,
-          'created_at' => Time.now.to_i,
-          'metadata' => {
-            'group_id' => @group.id.to_s,
-            'group_name' => @group.name,
-            'group_url' => @group.group_url,
-            'invitee_count' => valid_emails.count  
-          }
-        })
-
-        # For existing users: We can add them right away
-        unless users_to_add.empty?
-          badge_ids = []
-          if @type == :admin
-            users_to_add.each do |user|
-              if @group.has_admin?(user)
-                @skipped_admin_emails << user.email
-                @badges.each { |badge| badge.add_learner user }
-              else
-                @group.admins << user
-                @badges.each { |badge| badge.add_learner user }
-                if @notify_by_email
-                  UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, badge_ids)
-                end
-                if @group.has_member?(user)
-                  @group.members.delete(user)
-                  @upgraded_member_emails << user.email
-                else
-                  @new_admin_emails << user.email
-                end
-              end
-            end
-          else
-            users_to_add.each do |user|
-              if @group.has_member?(user)
-                @skipped_member_emails << user.email
-                @badges.each { |badge| badge.add_learner user }
-              elsif @group.has_admin?(user)
-                @skipped_admin_emails << user.email
-                @badges.each { |badge| badge.add_learner user }
-              else
-                @group.members << user
-                @badges.each { |badge| badge.add_learner user }
-                if @notify_by_email
-                  UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, badge_ids)
-                end
-                @new_member_emails << user.email
-              end
-            end
-          end
-        end
-
-        # Check if the group variables need initialization
-        @group.invited_admins = [] if @group.invited_admins.nil?
-        @group.invited_members = [] if @group.invited_members.nil?
-
-        # For new users: We will park them in an array of hashes on the group
-        if params[:notify_by_email]
-          invite_date = Time.now
+      if !valid_emails.empty?
+        if (@type == :admin) && (valid_emails.count > (@group.admin_limit - @group.admin_count))
+          flash[:error] = "Oops! You've only got #{@group.admin_limit - @group.admin_count} " \
+            + "admin spots available with your current subscription and it looks like you're " \
+            + "trying to add another #{valid_emails.count} admins. Please contact support " \
+            + "if you're interested in increasing your admin limit."
+          render 'add_users'
+        elsif (@type == :user) && (valid_emails.count > (@group.user_limit - @group.user_count))
+          flash[:error] = "Oops! You've only got #{@group.user_limit - @group.user_count} " \
+            + "member spots available with your current subscription and it looks like you're " \
+            + "trying to add another #{valid_emails.count} members. You'll need to upgrade " \
+            + "your groups subscription plan to increase your user limit."
+          render 'add_users'
         else
-          invite_date = nil
-        end
-        emails_to_invite.each do |email|
-          invited_user = {:email => email, 
-            :name => name_from_email[email], :invite_date => invite_date }
-          invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
+          # query for users and build list of users that don't exist yet
+          match_results = match_emails_to_users(valid_emails)
+          users_to_add = match_results[:matched_users]
+          emails_to_invite = match_results[:unmatched_emails]
 
-          if @group.has_invited_admin?(email)
-            @skipped_admin_emails << email
-          elsif @type == :admin
-            if @group.has_invited_member?(email)
-              @upgraded_member_emails << email
-              found_user = @group.invited_members.detect { |u| u["email"] == email}
-              @group.invited_members.delete(found_user) unless found_user.nil?
+          # First update analytics
+          IntercomEventWorker.perform_async({
+            'event_name' => (@type == :admin) ? 'group-admins-invite' : 'group-members-invite',
+            'email' => current_user.email,
+            'created_at' => Time.now.to_i,
+            'metadata' => {
+              'group_id' => @group.id.to_s,
+              'group_name' => @group.name,
+              'group_url' => @group.group_url,
+              'invitee_count' => valid_emails.count  
+            }
+          })
+
+          # For existing users: We can add them right away
+          unless users_to_add.empty?
+            badge_ids = []
+            if @type == :admin
+              users_to_add.each do |user|
+                if @group.has_admin?(user)
+                  @skipped_admin_emails << user.email
+                  @badges.each { |badge| badge.add_learner user }
+                else
+                  @group.admins << user
+                  @badges.each { |badge| badge.add_learner user }
+                  if @notify_by_email
+                    UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, badge_ids)
+                  end
+                  if @group.has_member?(user)
+                    @group.members.delete(user)
+                    @upgraded_member_emails << user.email
+                  else
+                    @new_admin_emails << user.email
+                  end
+                end
+              end
             else
-              @new_admin_emails << email
-            end
-            @group.invited_admins << invited_user
-            NewUserMailer.delay.group_admin_add(email, name_from_email[email],
-              current_user.id, @group.id, badge_ids) if @notify_by_email
-          else
-            if @group.has_invited_member?(email)
-              @skipped_member_emails << email
-            else
-              @group.invited_members << invited_user
-              @new_member_emails << email
-              NewUserMailer.delay.group_member_add(email, name_from_email[email],
-                current_user.id, @group.id, badge_ids) if @notify_by_email
+              users_to_add.each do |user|
+                if @group.has_member?(user)
+                  @skipped_member_emails << user.email
+                  @badges.each { |badge| badge.add_learner user }
+                elsif @group.has_admin?(user)
+                  @skipped_admin_emails << user.email
+                  @badges.each { |badge| badge.add_learner user }
+                else
+                  @group.members << user
+                  @badges.each { |badge| badge.add_learner user }
+                  if @notify_by_email
+                    UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, badge_ids)
+                  end
+                  @new_member_emails << user.email
+                end
+              end
             end
           end
-        end
-      end
 
-      if !@group.save
-        flash[:error] = "There was a problem updating the group, please try again later."
-        render 'add_users'
-      end
-    end
+          # Check if the group variables need initialization
+          @group.invited_admins = [] if @group.invited_admins.nil?
+          @group.invited_members = [] if @group.invited_members.nil?
+
+          # For new users: We will park them in an array of hashes on the group
+          if params[:notify_by_email]
+            invite_date = Time.now
+          else
+            invite_date = nil
+          end
+          emails_to_invite.each do |email|
+            invited_user = {:email => email, 
+              :name => name_from_email[email], :invite_date => invite_date }
+            invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
+
+            if @group.has_invited_admin?(email)
+              @skipped_admin_emails << email
+            elsif @type == :admin
+              if @group.has_invited_member?(email)
+                @upgraded_member_emails << email
+                found_user = @group.invited_members.detect { |u| u["email"] == email}
+                @group.invited_members.delete(found_user) unless found_user.nil?
+              else
+                @new_admin_emails << email
+              end
+              @group.invited_admins << invited_user
+              NewUserMailer.delay.group_admin_add(email, name_from_email[email],
+                current_user.id, @group.id, badge_ids) if @notify_by_email
+            else
+              if @group.has_invited_member?(email)
+                @skipped_member_emails << email
+              else
+                @group.invited_members << invited_user
+                @new_member_emails << email
+                NewUserMailer.delay.group_member_add(email, name_from_email[email],
+                  current_user.id, @group.id, badge_ids) if @notify_by_email
+              end
+            end
+          end
+          
+          if !@group.save
+            flash[:error] = "There was a problem updating the group, please try again later."
+            render 'add_users'
+          end
+        end # over limit tests
+      end # valid emails empty
+    end # can add admins test
   end
 
 private

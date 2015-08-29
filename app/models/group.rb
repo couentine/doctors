@@ -152,6 +152,36 @@ class Group
     public? || ((user_limit < 0) || (total_user_count < user_limit))
   end
 
+  # Returns hash = {
+  #   color: 'default' or 'red'
+  #   label: one_or_two_word_summary_of_current_status,
+  #   summary: contents_of_detail_tooltip,
+  #   requires_attention: true or false
+  # }
+  def member_limit_details
+    if public? || user_limit.blank?
+      { color: 'default', requires_attention: false, label: 'Unlimited', 
+        summary: 'Public groups support unlimited members.' }
+    elsif user_limit < 0
+      { color: 'default', requires_attention: false, label: 'Unlimited', 
+        summary: 'Your plan supports unlimited members.' }
+    elsif total_user_count < user_limit
+      { color: 'default', requires_attention: false, 
+        label: "Using #{total_user_count}/#{user_limit}", 
+        summary: "You're currently using #{total_user_count} out of #{user_limit} available " \
+        + "member spots for your plan." }
+    elsif total_user_count == user_limit
+      { color: 'default', requires_attention: false, label: "None Remaining", 
+        summary: "You are currently using all #{user_limit} of the available member spots for " \
+        + "your plan. Please contact support if you're interested in increasing your member " \
+        + "limit." }
+    else
+      { color: 'red', requires_attention: true, label: "Over limit", 
+        summary: "You are currently using more than the #{user_limit} member spots supported by " \
+        + "your plan. Please remove #{total_user_count - user_limit} members as soon as possible."}
+    end
+  end
+
   def can_add_admins?
     public? || ((admin_limit < 0) || (admin_count < admin_limit))
   end
@@ -171,22 +201,31 @@ class Group
         summary: 'Your plan supports unlimited admins.' }
     elsif admin_count < admin_limit
       { color: 'default', requires_attention: false, label: "Using #{admin_count}/#{admin_limit}", 
-        summary: "Your are currently using #{admin_count} out of #{admin_limit} available " \
-        + "admins for your plan." }
+        summary: "You're currently using #{admin_count} out of #{admin_limit} available " \
+        + "admin spots for your plan." }
     elsif admin_count == admin_limit
-      if admin_count == 1
+      if admin_limit == 1
         { color: 'default', requires_attention: false, label: "None Remaining", 
-          summary: "Your subscription plan only supports 1 admin. " \
+          summary: "Your subscription plan only includes 1 admin. " \
           + "To get more admins you'll need to upgrade to a larger plan." }
       else
         { color: 'default', requires_attention: false, label: "None Remaining", 
-          summary: "You are currently using all #{admin_limit} of the available admins " \
-          + "for your plan. Reach out to support if you'd like to increase your limit." }
+          summary: "You are currently using all #{admin_limit} of the available admin spots for " \
+          + "your plan. Please contact support if you're interested in increasing your admin " \
+          + "limit." }
       end
     else
-      { color: 'red', requires_attention: true, label: "Over limit", 
-        summary: "You are currently using more than the #{admin_limit} admins supported by " \
-        + "your plan. Please remove #{admin_count - admin_limit} admins as soon as possible." }
+      if admin_limit == 1
+        { color: 'red', requires_attention: true, label: "Over limit", 
+          summary: "Your subscription plan only supports 1 admin but you currently have " \
+          + "#{admin_count}. " \
+          + "To fix this you will need to either remove #{admin_count - admin_limit} admins or " \
+          + "upgrade to a larger plan as soon as possible." }
+      else
+        { color: 'red', requires_attention: true, label: "Over limit", 
+          summary: "You are currently using more than the #{admin_limit} admin spots supported " \
+          + "by your plan. Please remove #{admin_count - admin_limit} admins as soon as possible."}
+      end
     end
   end
 
