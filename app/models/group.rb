@@ -12,6 +12,7 @@ class Group
   JSON_FIELDS = [:name, :location, :type]
   JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 'image' => :image_url,
     'email' => :primary_email }
+  VISIBILITY_VALUES = ['public', 'private']
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
   PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
@@ -45,6 +46,10 @@ class Group
   field :flags,                       type: Array, default: []
   field :new_owner_username,          type: String
   field :previous_owner_id,           type: String
+  
+  field :member_visibility,           type: String, default: 'public'
+  field :admin_visibility,            type: String, default: 'public'
+  field :join_code,                   type: String
   
   field :user_limit,                  type: Integer, default: 5
   field :admin_limit,                 type: Integer, default: 1
@@ -84,8 +89,11 @@ class Group
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
   validates :website, url: true
   validates :image_url, url: true
-  validates :type, inclusion: { in: TYPE_VALUES, 
-                                message: "%{value} is not a valid Group Type" }
+  validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid Group Type" }
+  validates :member_visibility, inclusion: { in: VISIBILITY_VALUES, 
+    message: "%{value} is not a valid type of visibility" }
+  validates :admin_visibility, inclusion: { in: VISIBILITY_VALUES, 
+    message: "%{value} is not a valid type of visibility" }
   validates :creator, presence: true
   
   validate :new_owner_username_exists
@@ -94,7 +102,8 @@ class Group
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
     :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit,
-    :pricing_group, :subscription_plan, :stripe_subscription_card, :new_subscription
+    :pricing_group, :subscription_plan, :stripe_subscription_card, :new_subscription,
+    :member_visibility, :admin_visibility, :join_code
 
   # === CALLBACKS === #
 

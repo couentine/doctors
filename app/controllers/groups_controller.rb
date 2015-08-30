@@ -223,16 +223,19 @@ class GroupsController < ApplicationController
     end
   end
 
-  # POST /group-url/join
+  # POST /group-url/join?code=123
   def join
     notice = ""
+    join_code = params[:code]
 
     if @group.has_member?(current_user)
       notice = "You are already a member of this group."
     elsif @group.has_admin?(current_user)
       notice = "You are already an admin of this group."
-    elsif !@group.open?
+    elsif !@group.open? && (@group.join_code == nil) 
       notice = "This is a closed group, you cannot join without being invited."
+    elsif !@group.open? && (join_code != @group.join_code) 
+      notice = "Your invitation code is incorrect."
     else
       @group.members << current_user
       if @group.save
@@ -569,6 +572,16 @@ private
     @current_user_is_member = current_user && @group.has_member?(current_user)
     @current_user_is_owner = current_user && (@group.owner_id == current_user.id)
     @badge_list_admin = current_user && current_user.admin?
+
+    # Set user visibility variables
+    @can_see_members = @group.public? \
+      || (@group.member_visibility == 'public') \
+      || ((@group.member_visibility == 'private') \
+        && (@current_user_is_admin || @current_user_is_member))
+    @can_see_admins = @group.public? \
+      || (@group.admin_visibility == 'public') \
+      || ((@group.admin_visibility == 'private') \
+        && (@current_user_is_admin || @current_user_is_admin))
 
     # Set current group (for analytics) only if user is logged in and an admin
     @current_user_group = @group if @current_user_is_admin
