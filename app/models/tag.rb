@@ -29,7 +29,7 @@ class Tag
   field :format,              type: String, default: 'text'
   field :sort_order,          type: Integer
 
-  field :editability,         type: String, default: 'learners'
+  field :editability,         type: String, default: 'experts'
   field :privacy,             type: String, default: 'public'
   field :summary,             type: String
   field :wiki,                type: String

@@ -875,17 +875,24 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
 
       &.entry_log_validated b { display: inline !important; }
       &.radio_buttons .controls label.radio {
-        font-size: 20px;
-        margin-bottom: 20px;
+        font-size: 16px;
+        margin-bottom: 10px;
+        line-height: 1.3em;
 
         b {
           display: block;
           margin-bottom: 5px;
         }
-        span {
+        span:not(.label) {
           display: block;
           font-size: 16px;
           line-height: 1.6em;
+        }
+        span.label { 
+          background-color: $medium-gray; 
+          margin-left: 10px;
+          position: relative;
+          top: -1px;
         }
         em {
           display: block;
@@ -895,6 +902,7 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
         }
         small { color: $light-text-color; }
 
+        &.disabled { color: $medium-gray; }
         &:last-child { margin-bottom: 0; }
       }
     }
@@ -1054,6 +1062,10 @@ div.bl-form {
       margin: 0 5px 10px 5px;
       position: relative;
       top: 2px;
+    }
+    .left-button {
+      float: left;
+      border-radius: 500px;
     }
   } 
 }
@@ -1551,10 +1563,17 @@ form#group-add-users-form {
     margin-bottom: 0;
     font-size: 14px;
 
-    li {
+    &:not(.dropdown-menu)>li {
       padding-top: 4px;
       padding-bottom: 4px;
       line-height: 1.4em;
+    }
+    &.dropdown-menu>li {
+      a:focus,a:hover { 
+        color: $dark-text-color; 
+        background-color: $dark-white; 
+        background-image: none;
+      }
     }
   }
   .label {
@@ -1652,7 +1671,7 @@ form#group-add-users-form {
           float: right;
           text-align: right;
 
-          li {
+          &>li {
             display: inline-block;
             margin-right: 5px;
 
@@ -2012,8 +2031,19 @@ form#group-add-users-form {
     position: relative;
     top: -2px;
 
-    i.fa {
+    &>i.fa {
       font-size: 16px;
+    }
+    .btn {
+      padding: 0px 7px;
+      color: $light-text-color;
+      background-color: white;
+      border-radius: 500px;
+      position: relative;
+      top: -1px;
+      margin-left: 4px;
+      border: none;
+      text-shadow: none;
     }
   }
 
@@ -2021,8 +2051,8 @@ form#group-add-users-form {
     float: right;
     margin: 4px 6px 0 6px;
   }
-  .btn,.btn-group { float: right; }
-  .btn {
+  .btn:not(.h3-btn),.btn-group { float: right; }
+  .btn:not(.h3-btn) {
     margin: 0px 6px;
   }
   ul.dropdown-menu {
@@ -2036,12 +2066,12 @@ form#group-add-users-form {
   color: $light-text-color;
   border-radius: 2px;
 
-  .btn {
+  .btn:not(.h3-btn) {
     border-color: transparent;
     background-color: white;
     text-shadow: none;
 
-    &:not(.time-sensitive) { color: $light-text-color !important; }
+    &:not(.time-sensitive) { color: $light-text-color; }
   }
 
   &.merge-with-card {

@@ -40,18 +40,6 @@
 
   });
 
-  function toggleExtraInfo() {
-    if ($('#form-extra-info').is(':visible')) {
-      $('#form-extra-info').slideUp();
-      $('#form-extra-info-toggle').val('Show Settings')
-      $('#group_name').focus()
-    } else {
-      $('#form-extra-info').slideDown();
-      $('#form-extra-info-toggle').val('Hide Settings')
-      $('#group_location').focus()
-    }
-  }
-
   // Converts "Test text like  this" > "Text-text-like-this"
   function parameterizeText(s) {
     var returnValue = '';
@@ -120,36 +108,15 @@
 
     <%= render 'shared/requirement_list_editor', f: f %>
 
-    <% if @current_user_is_admin || @badge_list_admin %>
-
-      <h2>
-        Permissions &amp; Notifications
-        <input class="btn btn-link" type="button" id="form-extra-info-toggle" 
-          value="Show Settings" onclick="toggleExtraInfo()" />
-      </h2>
-
-      <div id="form-extra-info" style="display:none">
-        <%= f.input :editability, as: :select, label: 'Who can edit the badge?', 
-          include_blank: false, collection: @badge_editability_options %>
-
-        <%= f.input :awardability, as: :select, label: 'Who can award the badge?', 
-          include_blank: false, collection: @badge_awardability_options %>
-
-        <%= f.input :send_validation_request_emails, as: :select, include_blank: false,
-          label: 'Feedback requeest emails', collection: @send_email_options, 
-          hint: 'By default, feedback request emails are sent automatically to those who can ' \
-            + 'award the badge whenever a learner completes all of the badge requirements.',
-          wrapper_html: {
-            style: ((!@badge.new_record && @badge.tracks_progress?) ? '' : 'display: none;') 
-          } %>
-      </div>
-
-    <% end %>
-
   </div>
   
   <div class="form-footer">
     <%= f.button :submit, class: 'btn btn-primary' %>
+    <% if (@current_user_is_admin || @badge_list_admin) && !@badge.new_record? %>
+      <%= link_to "<i class='fa fa-wrench'></i> Badge Settings".html_safe, 
+        group_badge_path(@group, @badge) + '#badge-settings', class: "btn left-button", 
+          target: '_blank' %>
+    <% end %>
     <%= 
       if @badge.new_record?
         link_to "Cancel", @group, class: "btn"

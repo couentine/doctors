@@ -316,6 +316,71 @@
 
 <% end %>
 
+<% if @current_user_is_admin || @badge_list_admin %>
+
+  <!-- === BADGE SETTINGS MODAL === -->
+
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+      
+      <% if @group.private? && !@group.has?(:community) %>
+        // Community feature missing: Fix badge settings
+        $("#badge_editability_experts").attr("disabled", true).parent().addClass("disabled")
+          .append("<span class='label'>Requires Community Features</span>");
+        $("#badge_editability_admins").attr("checked", true);
+        $("#badge_awardability_experts").attr("disabled", true).parent().addClass("disabled")
+          .append("<span class='label'>Requires Community Features</span>");
+        $("#badge_awardability_admins").attr("checked", true);
+      <% end %>
+
+    });
+
+  </script>
+
+  <div id="badge-settings" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Badge settings</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <%= simple_form_for [@group, @badge], url: group_badge_path(@group, @badge), 
+              html: { id: 'badge-settings-form', class: 'form-horizontal' } do |f| %>
+
+            <%= f.input :editability, as: :radio_buttons, label: 'Who can edit the badge?', 
+              include_blank: false, collection: @badge_editability_options %>
+
+            <%= f.input :awardability, as: :radio_buttons, label: 'Who can award the badge?', 
+              include_blank: false, collection: @badge_awardability_options %>
+
+            <% if @badge.tracks_progress? %>
+              <%= f.input :send_validation_request_emails, as: :radio_buttons, include_blank: false,
+                label: 'Feedback requeest emails', collection: @send_email_options, 
+                hint: "By default, feedback request emails are sent automatically to those who " \
+                  + "can award the badge whenever a #{@badge.learner} completes all of the " \
+                  + "badge requirements." %>
+            <% end %>
+
+          <% end %>
+         </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" aria-hidden="true" 
+          onclick="$('#badge-settings-form').submit();">
+        Save changes
+      </button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+  </div>
+
+<% end %>
+
 
 <!-- === PAGE HEADER === -->
 
@@ -406,6 +471,11 @@
                       </a>
                       <ul class="dropdown-menu pull-right" role="menu"
                           aria-labelledby="dropdown-settings">
+                        <li>
+                          <%= link_to '<i class="fa fa-wrench"></i> '.html_safe \
+                            + 'Badge settings', '#badge-settings', data: { toggle: 'modal' } %>
+                        </li>
+                        <li class="divider"></li>
                         <% if @current_user_is_owner || @badge_list_admin  %>
                           <li>
                             <%= link_to '<i class="fa fa-arrow-circle-o-right"></i> '.html_safe \
@@ -451,14 +521,18 @@
 
             <h2>Required Evidence</h2>
             
-            <% if @can_edit_badge || @current_user_is_expert %>
+            <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
               <h3 class="collapse-when-small">
                 <% if @badge.editability == "admins" %>
-                  <i class="fa fa-key"></i> Only editable by group admins
-                <% elsif @show_progress %>
-                  <i class="fa fa-key"></i> Only editable by <%= @experts %>
+                  <i class="fa fa-key"></i> Editable by admins only
                 <% else %>
-                  <i class="fa fa-key"></i> Editable by all <%= @experts %>
+                  <i class="fa fa-key"></i> Editable by <%= @experts %>
+                <% end %>
+
+                <% if @current_user_is_admin || @badge_list_admin %>
+                  <a href="#badge-settings" class="btn h3-btn" data-toggle="modal">
+                    Settings
+                  </a>
                 <% end %>
               </h3>
             <% end %>
@@ -544,14 +618,18 @@
 
             <h2>Badge Overview</h2>
 
-            <% if @can_edit_badge || @current_user_is_expert %>
+            <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
               <h3 class="collapse-when-small">
                 <% if @badge.editability == "admins" %>
-                  <i class="fa fa-key"></i> Only editable by group admins
-                <% elsif @show_progress %>
-                  <i class="fa fa-key"></i> Only editable by <%= @experts %>
+                  <i class="fa fa-key"></i> Editable by admins only
                 <% else %>
-                  <i class="fa fa-key"></i> Editable by all <%= @experts %>
+                  <i class="fa fa-key"></i> Editable by <%= @experts %>
+                <% end %>
+
+                <% if @current_user_is_admin || @badge_list_admin %>
+                  <a href="#badge-settings" class="btn h3-btn" data-toggle="modal">
+                    Settings
+                  </a>
                 <% end %>
               </h3>
             <% end %>
@@ -675,6 +753,22 @@
             <% end %>
               
             <h2>Badge <%= @Experts %></h2>
+
+            <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
+              <h3 class="collapse-when-small">
+                <% if @badge.awardability == "admins" %>
+                  <i class="fa fa-key"></i> Awardable by admins only
+                <% else %>
+                  <i class="fa fa-key"></i> Awardable by <%= @experts %>
+                <% end %>
+
+                <% if @current_user_is_admin || @badge_list_admin %>
+                  <a href="#badge-settings" class="btn h3-btn" data-toggle="modal">
+                    Settings
+                  </a>
+                <% end %>
+              </h3>
+            <% end %>
           </div>
 
         </div>

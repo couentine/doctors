@@ -251,10 +251,11 @@ private
     if @tag_exists
       @can_edit_tag = @current_user_is_admin || @badge_list_admin \
         || (@current_user_is_expert && (@tag.editability == 'experts')) \
-        || ((@current_user_is_learner || @current_user_is_expert) && (@tag.editability == 'learners'))
+        || ((@current_user_is_learner || @current_user_is_expert) \
+          && (@tag.editability == 'learners'))
     else
-      @can_edit_tag = @current_user_is_expert || @current_user_is_learner \
-        || @current_user_is_admin || @badge_list_admin
+      @can_edit_tag = @current_user_is_admin || @badge_list_admin \
+        || (@group.has?(:community) && (@current_user_is_expert || @current_user_is_learner))
 
       if params[:tag].nil?
         @tag = Tag.new
@@ -310,8 +311,8 @@ private
 
     # Build editability options
     @tag_editability_options = [
-      ["#{@Experts} and #{@Learners}", 'learners'],
-      ["Only #{@Experts}", 'experts']
+      ["#{@Experts}, #{@Learners} and Admins", 'learners'],
+      ["Only #{@Experts} & Admins", 'experts']
     ]
     if @current_user_is_admin || @badge_list_admin
       @tag_editability_options << ['Only Group Admins', 'admins'] 

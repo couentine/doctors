@@ -51,6 +51,20 @@ class BadgesController < ApplicationController
         User.where(:id.in => user_ids).each do |user|
           @user_map[user_reverse_map[user.id]] = user
         end
+
+        # Configure the badge settings if needed
+        if @current_user_is_admin || @badge_list_admin
+          @badge_editability_options = [
+            ["Badge #{@badge.Experts} & Group Admins", 'experts'],
+            ["Only Group Admins", 'admins']
+          ]
+          @badge_awardability_options = @badge_editability_options
+
+          @send_email_options = [
+            ['Let each awarder opt-out (recommended)', true],
+            ['Send no emails to anyone', false]
+          ]
+        end
       end
       format.json do 
         @group = Group.find(params[:group_id]) || not_found
@@ -444,24 +458,6 @@ private
   end
 
   def set_editing_parameters
-    if @badge
-      @badge_editability_options = [
-        ["Badge #{@badge.Experts} & Group Admins", 'experts'],
-        ["Only Group Admins", 'admins']
-      ]
-    else
-      @badge_editability_options = [
-        ["Badge Experts & Group Admins", 'experts'],
-        ["Only Group Admins", 'admins']
-      ]
-    end
-    @badge_awardability_options = @badge_editability_options
-
-    @send_email_options = [
-      ['Let each awarder opt-out (recommended)', true],
-      ['Send no emails to anyone', false]
-    ]
-
     # Initialize the badge requirement list and related info
     @tag_format_map = {}
     @tag_format_options_string = ''

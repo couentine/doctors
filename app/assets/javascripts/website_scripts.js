@@ -28,8 +28,8 @@ $(document).ready(function() {
 var termMessages = {
   "admin": "Only group admins are able to create new badges, manage group membership and change "
     + "group settings.",
-  "branding": "Branding features include custom logos in emails and the ability to define "
-    + " custom words for 'expert' and 'learner'.",
+  "branding": "Branding features (COMING SOON) include custom colors and logo options on your "
+    + "Badge List site and in emails sent out from your group.",
   "community": "Community features include collaborative wiki pages and (COMING SOON) "
     + "group profile pages and group search.",
   "lifetime-hosting": "If you ever decide to cancel your paid subscription, all of the awarded "

@@ -34,8 +34,8 @@ class Badge
   field :word_for_expert,                 type: String, default: 'expert'
   field :word_for_learner,                type: String, default: 'learner'
   field :progress_tracking_enabled,       type: Boolean, default: true
-  field :editability,                     type: String, default: 'experts'
-  field :awardability,                    type: String, default: 'experts'
+  field :editability,                     type: String, default: 'admins'
+  field :awardability,                    type: String, default: 'admins'
   field :send_validation_request_emails,  type: Boolean, default: true
   
   field :info,                            type: String
