@@ -29,6 +29,10 @@ class GroupsController < ApplicationController
     ['Standard Pricing', 'standard'],
     ['K12 Pricing', 'k12']
   ]
+  GROUP_VISIBILITY_OPTIONS = [
+    ['<i class="fa fa-globe"></i> Public'.html_safe, 'public'],
+    ['<i class="fa fa-users"></i> Private'.html_safe, 'private']
+  ]
 
   # === RESTFUL ACTIONS === #
 
@@ -69,7 +73,13 @@ class GroupsController < ApplicationController
     # Get paginated versions of badges
     @badge_page = params[:pb] || 1
     @badge_page_size = params[:psb] || APP_CONFIG['page_size_small']
-    @badges = @group.badges.asc(:name).page(@badge_page).per(@badge_page_size)
+    if @current_user_is_member || @current_user_is_admin || @badge_list_admin
+      @badges = @group.badges.asc(:name).page(@badge_page).per(@badge_page_size)
+      # FIXME >> Need to filter out hidden badges
+    else
+      @badges = @group.badges.where(visibility: 'public').asc(:name).page(@badge_page)\
+        .per(@badge_page_size)
+    end
     @expert_count_map = {} # maps from badge id to expert count
     @learner_count_map = {} # maps from badge id to learner count
     @badge_ids = []
@@ -77,6 +87,8 @@ class GroupsController < ApplicationController
       @badge_ids << badge.id
       @expert_count_map[badge.id], @learner_count_map[badge.id] = 0, 0
     end
+
+    @group_visibility_options = GROUP_VISIBILITY_OPTIONS
 
     respond_to do |format|
       format.any(:html, :js) do # show.html.erb
@@ -235,7 +247,7 @@ class GroupsController < ApplicationController
     elsif !@group.open? && (@group.join_code == nil) 
       notice = "This is a closed group, you cannot join without being invited."
     elsif !@group.open? && (join_code != @group.join_code) 
-      notice = "Your invitation code is incorrect."
+      notice = "Your join code is incorrect."
     else
       @group.members << current_user
       if @group.save
@@ -577,11 +589,11 @@ private
     @can_see_members = @group.public? \
       || (@group.member_visibility == 'public') \
       || ((@group.member_visibility == 'private') \
-        && (@current_user_is_admin || @current_user_is_member))
+        && (@current_user_is_admin || @current_user_is_member || @badge_list_admin))
     @can_see_admins = @group.public? \
       || (@group.admin_visibility == 'public') \
       || ((@group.admin_visibility == 'private') \
-        && (@current_user_is_admin || @current_user_is_admin))
+        && (@current_user_is_admin || @current_user_is_admin || @badge_list_admin))
 
     # Set current group (for analytics) only if user is logged in and an admin
     @current_user_group = @group if @current_user_is_admin

@@ -452,6 +452,10 @@
     <% end %>
 
     <%= f.button :submit, class: 'btn btn-primary', id: 'submit-group-form' %>
+    <% if !@group.new_record? %>
+      <%= link_to "<i class='fa fa-wrench'></i> Group Settings".html_safe, 
+        group_path(@group) + '#settings', class: "btn left-button", target: '_blank' %>
+    <% end %>
     <%= 
       if @group.new_record?
         link_to "Cancel", root_path, class: "btn"

@@ -50,6 +50,7 @@ BadgeList::Application.routes.draw do
   # === MANUAL GROUP PATHS === #
   match ':group_id/cancel' => 'groups#cancel_subscription', via: :post, as: :cancel_subscription
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group
+  match ':group_id/join' => 'groups#join', via: :get
   match ':group_id/leave' => 'groups#leave', via: :delete, as: :leave_group
   match ':group_id/members/:user_id' => 'groups#destroy_user', 
         via: :delete, as: :destroy_group_member, defaults: { type: 'member' }

@@ -114,7 +114,7 @@
     <%= f.button :submit, class: 'btn btn-primary' %>
     <% if (@current_user_is_admin || @badge_list_admin) && !@badge.new_record? %>
       <%= link_to "<i class='fa fa-wrench'></i> Badge Settings".html_safe, 
-        group_badge_path(@group, @badge) + '#badge-settings', class: "btn left-button", 
+        group_badge_path(@group, @badge) + '#settings', class: "btn left-button", 
           target: '_blank' %>
     <% end %>
     <%= 

@@ -14,6 +14,7 @@ class Badge
   IMAGE_KEY_IGNORE = '<<ignore>>'
   EDITABILITY_VALUES = ['experts', 'admins']
   AWARDABILITY_VALUES = ['experts', 'admins']
+  VISIBILITY_VALUES = ['public', 'private', 'hidden']
   JSON_FIELDS = [:group, :name, :summary, :word_for_expert, :word_for_learner]
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps }
@@ -36,6 +37,7 @@ class Badge
   field :progress_tracking_enabled,       type: Boolean, default: true
   field :editability,                     type: String, default: 'admins'
   field :awardability,                    type: String, default: 'admins'
+  field :visibility,                      type: String, default: 'public'
   field :send_validation_request_emails,  type: Boolean, default: true
   
   field :info,                            type: String
@@ -83,6 +85,8 @@ class Badge
     message: "%{value} is not a valid type of editability" }
   validates :awardability, inclusion: { in: AWARDABILITY_VALUES, 
     message: "%{value} is not a valid type of awardability" }
+  validates :visibility, inclusion: { in: VISIBILITY_VALUES, 
+    message: "%{value} is not a valid type of visibility" }
   validates :group, presence: true
   validates :creator, presence: true
 
@@ -90,9 +94,9 @@ class Badge
 
   # Which fields are accessible?
   attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
-    :editability, :awardability, :image_frame, :image_icon, :image_color1, :image_color2, 
-    :icon_search_text, :topic_list_text, :custom_image_key, :send_validation_request_emails, 
-    :move_to_group_id
+    :editability, :awardability, :visibility, :image_frame, :image_icon, :image_color1, 
+    :image_color2, :icon_search_text, :topic_list_text, :custom_image_key, 
+    :send_validation_request_emails, :move_to_group_id
   
   # === CALLBACKS === #
 

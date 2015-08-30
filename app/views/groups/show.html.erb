@@ -87,6 +87,35 @@
 
 </style>
 
+<% if can_join_group && !current_user  %>
+  
+  <!-- === SIGN IN (TO JOIN GROUP) MODAL === -->
+
+  <div id="sign-in-to-join" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Sign in to continue<h3>
+    </div>
+
+    <div class="modal-body">
+      <p>To join this group, first you need to sign in or create a new account.<br><br></p>
+      <ul class="button-list">
+        <li>
+          <%= link_to 'Sign in', new_user_session_path(join_group: @group.id), 
+            class: 'btn btn-large btn-warning' %>
+        </li>
+        <li>
+          <%= link_to 'Create a new account', new_user_registration_path(join_group: @group.id), 
+            class: 'btn btn-large btn-success' %>
+        </li>
+      </ul>
+      <p>&nbsp;</p>
+    </div>
+  </div>
+
+<% end %>
+
 <% if @current_user_is_admin || @badge_list_admin %>
 
   <!-- === MANAGE MEMBERS MODAL === -->
@@ -223,7 +252,96 @@
     </div>
   </div>
 
-<% end %>
+  <!-- === GROUP SETTINGS MODAL === -->
+
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+      $("#join-code-enabled").change(function() {
+        if (this.checked) {
+          $(".control-group.group_join_code").fadeIn();
+          $("#group_join_code").focus();
+        } else {
+          $(".control-group.group_join_code").fadeOut(function() {
+            $("#group_join_code").val("");
+          });
+        }
+      });
+    });
+
+  </script>
+
+  <div id="settings" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Group settings</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <% if @group.private? %>
+            <%= simple_form_for @group, html: { id: 'settings-form', 
+                class: 'form-horizontal' } do |f| %>
+
+              <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
+                include_blank: false, collection: @group_visibility_options %>
+
+              <%= f.input :admin_visibility, as: :radio_buttons, label: 'Group Admin List', 
+                include_blank: false, collection: @group_visibility_options %>
+
+              <div class="control-group">
+                <label class="control-label" for="join-code-enabled">
+                  Allow Public Signup with Join Code?
+                </label>
+                <div class="controls">
+                  <% if @group.join_code.blank? %>
+                    <input type="checkbox" id="join-code-enabled">
+                  <% else %>
+                    <input type="checkbox" id="join-code-enabled" checked>
+                  <% end %>
+                </div>
+              </div>
+              <%= f.input :join_code, label: 'Join Code', 
+                hint: 'This code can either be manually entered by new members when they join or '\
+                  + 'you can point them to the link below and it will be pre-filled. ' \
+                  + '(The join code is not case sensitive and you can change or retract it at ' \
+                  + 'any time.)',
+                wrapper_html: { style: d?(!@group.join_code.blank?) } %>              
+
+            <% end %>
+          <% else %>
+            <p>
+              <%= @group.name %> is currently an Open Group.
+            </p>
+            <p>
+              You can switch to a Closed Group at any time to get advanced privacy and membership
+              controls.
+            </p>
+          <% end %>
+         </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <% if @group.private? %>
+        <button class="btn btn-primary" aria-hidden="true" 
+            onclick="$('#settings-form').submit();">
+          Save changes
+        </button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <% else %>
+        <a href="/pricing" target="_blank" class="btn btn-success">
+          <i class="fa fa-list-alt"></i>
+          View plans &amp; pricing
+        </a>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <% end %>
+    </div>
+  </div>
+
+<% end %> <!-- end if group or bl admin -->
 
 <% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
 
@@ -375,8 +493,13 @@
                   </li>
                 <% elsif can_join_group %>
                   <li>
-                    <%= link_to '<i class="fa fa-plus-circle"></i> Join the group'.html_safe, 
-                        join_group_path(@group), method: :post, class: 'btn btn-small' %>
+                    <% if current_user %>
+                      <%= link_to '<i class="fa fa-plus-circle"></i> Join the group'.html_safe, 
+                          join_group_path(@group), method: :post, class: 'btn btn-small' %>
+                    <% else %>
+                      <%= link_to '<i class="fa fa-plus-circle"></i> Join the group'.html_safe, 
+                          '#sign-in-to-join', class: 'btn btn-small', data: { toggle: 'modal' } %>
+                    <% end %>
                   </li>
                 <% end %>
                 <% if @current_user_is_owner || @badge_list_admin %>
@@ -389,7 +512,10 @@
                     <%= link_to '<i class="fa fa-pencil"></i> Edit the group'.html_safe, 
                       edit_group_path, class: 'btn btn-small' %>
                   </li>
+                <% end %>
                   
+                <% if @current_user_is_owner || @badge_list_admin \
+                    || (@group.private? && @current_user_is_admin) %>
                   <li class="collapsible">
                     <div class="dropdown">
                       <a href="#" class="dropdown-toggle" id="dropdown-settings" 
@@ -399,18 +525,29 @@
                       </a>
                       <ul class="dropdown-menu pull-right" role="menu" 
                           aria-labelledby="dropdown-settings">
-                        <li>
-                          <%= link_to \
-                            '<i class="fa fa-share"></i> Transfer Group Ownership'.html_safe, 
-                            "#{edit_group_path}?transfer=true" %>
-                        </li>
-                        <li>
-                          <%= link_to '<i class="fa fa-remove"></i> Delete Group'.html_safe, 
-                            @group, method: :delete, data: \
-                              { confirm: 'WARNING: THIS WILL PERMANENTLY DESTROY DATA. Are ' \
-                                + 'you absolutely sure you want to permanently delete this group?' 
-                              } %>
-                        </li>
+                        <% if @group.private? %>
+                          <li>
+                            <%= link_to '<i class="fa fa-wrench"></i> '.html_safe \
+                              + 'Group settings', '#settings', data: { toggle: 'modal' } %>
+                          </li>
+                          <% if @current_user_is_owner || @badge_list_admin %>
+                            <li class="divider"></li>
+                          <% end %>
+                        <% end %>
+
+                        <% if @current_user_is_owner || @badge_list_admin %>
+                          <li>
+                            <%= link_to \
+                              '<i class="fa fa-share"></i> Transfer Group Ownership'.html_safe, 
+                              "#{edit_group_path}?transfer=true" %>
+                          </li>
+                          <li>
+                            <%= link_to '<i class="fa fa-remove"></i> Delete Group'.html_safe, 
+                              @group, method: :delete, data: { confirm: 'WARNING: ' \
+                                + 'THIS WILL PERMANENTLY DESTROY DATA. Are you absolutely sure ' \
+                                + 'you want to permanently delete this group?' } %>
+                          </li>
+                        <% end %>
                       </ul>
                     </div>
                   </li>
@@ -424,69 +561,71 @@
   </div>
 </div>
 
-<% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
+<!-- === BADGES TAB === -->
 
-  <!-- === BADGES TAB === -->
+<div class="tab-pane active" id="badges">
 
-  <div class="tab-pane active" id="badges">
+  <div class="row">
+    <div class="span12">
+      <div class="tab-header first-on-page">
+        <% if @current_user_is_admin || @badge_list_admin %>
+          <%= link_to '<i class="fa fa-plus"></i> New Badge'.html_safe,
+              new_group_badge_path(@group), class: 'btn btn-small' %>
+        <% end %>
+
+        <h2>Badges</h2>
+      </div>
+
+      <% if @badges.empty? %>
+        <div class="well span7 offset2">
+          <% if @current_user_is_admin || @badge_list_admin %>
+            <h3>You haven't created any badges yet</h3>
+            <p>
+              Badges are collections of requirements which allow learners to post evidence.
+            </p>
+            <p>
+              <%= link_to '<i class="fa fa-plus"></i> Create a badge'.html_safe,
+                new_group_badge_path(@group), class: 'btn btn-success' %>
+            </p>
+          <% else %>
+            <h3>No badges yet</h3>
+            <% if @current_user_is_member %>
+              <p>When badges become available for you to earn you will see them here.</p>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% unless @badges.empty? %>
 
     <div class="row">
-      <div class="span12">
-        <div class="tab-header first-on-page">
-          <% if @current_user_is_admin || @badge_list_admin %>
-            <%= link_to '<i class="fa fa-plus"></i> New Badge'.html_safe,
-                new_group_badge_path(@group), class: 'btn btn-small' %>
-          <% end %>
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
+          data-bl-dyncol-width="12">
 
-          <h2>Badges</h2>
-        </div>
+        <%= render @badges, group: @group, requirements_map: @requirements_map, log_map: @log_map,
+          is_member: @current_user_is_member, is_admin: @current_user_is_admin,
+          expert_count_map: @expert_count_map, learner_count_map: @learner_count_map %>
 
-        <% if @group.badge_ids.empty? %>
-          <div class="well span7 offset2">
-            <h3>Got skills?</h3>
-            <p>
-              Badges help you recognize experts. A badge can also help you collect evidence from 
-              your learners.
-            </p>
-            <p>
-              <%= 
-                if @current_user_is_admin || @badge_list_admin
-                  link_to '<i class="fa fa-plus"></i> Create a badge'.html_safe,
-                  new_group_badge_path(@group), class: 'btn btn-success' 
-                end
-              %>
-            </p>
-          </div>
-        <% end %>
       </div>
     </div>
 
-    <% unless @badge_ids.empty? %>
-
-      <div class="row">
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
-            data-bl-dyncol-width="12">
-
-          <%= render @badges, group: @group, requirements_map: @requirements_map, log_map: @log_map,
-            is_member: @current_user_is_member, is_admin: @current_user_is_admin,
-            expert_count_map: @expert_count_map, learner_count_map: @learner_count_map %>
-
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="span12">
-          <div class="pagination-footer">
-            <div class="pagination" id="paginator-badges">
-              <%= paginate @badges, remote: true, param_name: 'pb' %>
-            </div>
+    <div class="row">
+      <div class="span12">
+        <div class="pagination-footer">
+          <div class="pagination" id="paginator-badges">
+            <%= paginate @badges, remote: true, param_name: 'pb' %>
           </div>
         </div>
       </div>
-    
-    <% end %>
+    </div>
+  
+  <% end %>
 
-  </div>
+</div>
+
+<% if @can_see_members %>
 
   <!-- === MEMBERS TAB === -->
 
@@ -545,10 +684,26 @@
                   </li>
                 </ul>
               </div>
-            <% end %>
-          <% end %>
+            <% end %> <!-- end inivited members -->
+          <% end %> <!-- end if admin -->
 
           <h2>Members</h2>
+
+          <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
+            <h3 class="collapse-when-small">
+              <% if @group.member_visibility == "public" %>
+                <i class="fa fa-globe"></i> Visible to public
+              <% else %>
+                <i class="fa fa-users"></i> Only visible to members
+              <% end %>
+
+              <% if @current_user_is_admin || @badge_list_admin %>
+                <a href="#settings" class="btn h3-btn" data-toggle="modal">
+                  Settings
+                </a>
+              <% end %>
+            </h3>
+          <% end %>
         </div>
 
       </div>
@@ -556,8 +711,7 @@
 
     <% if @group.member_ids.empty? %>
       <div class="well span7 offset2 gray empty">
-        <h3>Got members?</h3>
-        <p>Next Step: Invite them.</p>
+        <h3>No members yet</h3>
       </div>
     <% else %>
       <div class="row">
@@ -579,6 +733,10 @@
     <% end %>
 
   </div>
+
+<% end %> <!-- end if can see members -->
+
+<% if @can_see_admins %>
 
   <!-- === ADMINS TAB === -->
 
@@ -638,10 +796,26 @@
                   </li>
                 </ul>
               </div>
-            <% end %>
-          <% end %>
+            <% end %> <!-- end inivited admins -->
+          <% end %> <!-- end if admin -->
             
           <h2>Admins</h2>
+
+          <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
+            <h3 class="collapse-when-small">
+              <% if @group.admin_visibility == "public" %>
+                <i class="fa fa-globe"></i> Visible to public
+              <% else %>
+                <i class="fa fa-users"></i> Only visible to members
+              <% end %>
+
+              <% if @current_user_is_admin || @badge_list_admin %>
+                <a href="#settings" class="btn h3-btn" data-toggle="modal">
+                  Settings
+                </a>
+              <% end %>
+            </h3>
+          <% end %>
         </div>
       </div>
     </div>
@@ -657,15 +831,4 @@
     </div>
   </div>
 
-<% else %>
-  
-  <div class="row">
-    <div class="well span7 offset2">
-      <h3>This is a closed group</h3>
-      <p>
-        The contents of this group are only visible to members.
-      </p>
-    </div>
-  </div>
-
-<% end %>
+<% end %> <!-- end if can see admins -->

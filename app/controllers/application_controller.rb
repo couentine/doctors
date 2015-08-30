@@ -42,6 +42,9 @@ class ApplicationController < ActionController::Base
       if !params[:join].blank?
         # If the 'join' parameter is set then store the badge id
         session[:join_badge_id] = params[:join]
+      elsif !params[:join_group].blank?
+        session[:join_group_id] = params[:join_group]
+        session[:join_group_code] = params[:join_group_code]
       elsif !params[:plan].blank? && !current_user
         # Save the group plan param if supplied
         session[:new_group_plan] = params[:plan]
@@ -52,10 +55,18 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource)
     if !session[:join_badge_id].blank?
       badge = Badge.find(session[:join_badge_id]) rescue nil
+    elsif !session[:join_group_id].blank?
+      group = Group.find(session[:join_group_id]) rescue nil
     end
 
     if badge
       "/#{badge.group.url}/#{badge.url}/join"
+    elsif group
+      if session[:join_group_code]
+        "/#{group.url}/join?code=#{session[:join_group_code]}"
+      else
+        "/#{group.url}/join"
+      end
     elsif session[:user_return_to] == "/users/edit?d=ac"
       "/users/edit#add-card"
     elsif session[:user_return_to] == "/users/edit"
