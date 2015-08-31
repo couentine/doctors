@@ -1,6 +1,8 @@
 <% 
   provide(:title, @group.name)
   can_join_group = @group.open? && !@current_user_is_admin && !@current_user_is_member
+  can_join_group_with_code = @group.private? && !@current_user_is_admin \
+    && !@current_user_is_member && !@group.join_code.blank?
 
   status_details = @group.status_details_for_admins
   member_details = @group.member_limit_details
@@ -87,7 +89,7 @@
 
 </style>
 
-<% if can_join_group && !current_user  %>
+<% if (can_join_group || can_join_group_with_code) && !current_user  %>
   
   <!-- === SIGN IN (TO JOIN GROUP) MODAL === -->
 
@@ -102,15 +104,94 @@
       <p>To join this group, first you need to sign in or create a new account.<br><br></p>
       <ul class="button-list">
         <li>
-          <%= link_to 'Sign in', new_user_session_path(join_group: @group.id), 
-            class: 'btn btn-large btn-warning' %>
+          <%= link_to 'Sign in', new_user_session_path(join_group: @group.id, 
+            join_group_code: @join_code), class: 'btn btn-large btn-warning', data: 
+            { url_for_code:  new_user_session_path(join_group: @group.id, join_group_code: '') } %>
         </li>
         <li>
-          <%= link_to 'Create a new account', new_user_registration_path(join_group: @group.id), 
-            class: 'btn btn-large btn-success' %>
+          <%= link_to 'Create a new account', new_user_registration_path(join_group: @group.id,
+            join_group_code: @join_code), class: 'btn btn-large btn-success', data: 
+            { url_for_code:  new_user_registration_path(join_group: @group.id, join_group_code: '') } %>
         </li>
       </ul>
       <p>&nbsp;</p>
+    </div>
+  </div>
+
+<% end %>
+
+<% if can_join_group_with_code %>
+  
+  <!-- === ENTER JOIN CODE MODAL === -->
+
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+
+      $("#enter-join-code").on('shown', function() {
+        $("#join-code-input").focus();
+      });
+      
+      $("#join-code-input").keypress(function(e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          <% if current_user %>
+            $("#use-join-code").click();
+          <% else %>
+            $("#sign-in-with-join-code").click();
+          <% end %>
+        }
+      });
+
+      $("#use-join-code").click(function() {
+        document.location.href = "<%= join_group_path(@group, code: '') %>" 
+          + $("#join-code-input").val();
+      });
+
+      $("#sign-in-with-join-code").click(function() {
+        // Add the join code to the links
+        $("#sign-in-to-join ul.button-list li a.btn").each(function() {
+          $(this).attr("href", $(this).data("url-for-code") + $("#join-code-input").val());
+        });
+
+        // Then show the dialog
+        $("#enter-join-code").modal("hide");
+        $("#sign-in-to-join").modal("show");
+      });
+
+    });
+
+  </script>
+
+  <div id="enter-join-code" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Enter group join code<h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <form class="form-horizontal">
+            <div class="control-group">
+              <label class="control-label" for="join-code-input">Join Code</label>
+              <div class="controls">
+                <input type="text" id="join-code-input" value="<%= @join_code %>">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <% if current_user %>
+        <a href="#" id="use-join-code" class="btn btn-success">Join the Group</a>
+      <% else %>
+        <a href="#" id="sign-in-with-join-code" class="btn btn-success">Join the Group</a>
+      <% end %>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
     </div>
   </div>
 
@@ -259,13 +340,17 @@
     $(document).ready(function() {
       $("#join-code-enabled").change(function() {
         if (this.checked) {
-          $(".control-group.group_join_code").fadeIn();
+          $(".control-group.group_join_code,#join-url-preview-panel").fadeIn();
           $("#group_join_code").focus();
         } else {
-          $(".control-group.group_join_code").fadeOut(function() {
+          $(".control-group.group_join_code,#join-url-preview-panel").fadeOut(function() {
             $("#group_join_code").val("");
           });
         }
+      });
+
+      $("#group_join_code").change(function() {
+        $("#join-url-preview").val("<%= @group.group_url %>?code=" + $(this).val());
       });
     });
 
@@ -303,12 +388,24 @@
                   <% end %>
                 </div>
               </div>
+
               <%= f.input :join_code, label: 'Join Code', 
                 hint: 'This code can either be manually entered by new members when they join or '\
                   + 'you can point them to the link below and it will be pre-filled. ' \
                   + '(The join code is not case sensitive and you can change or retract it at ' \
                   + 'any time.)',
                 wrapper_html: { style: d?(!@group.join_code.blank?) } %>              
+
+              <div class="control-group" id="join-url-preview-panel" 
+                  style="<%= d? !@group.join_code.blank? %>">
+                <label class="control-label" for="join-url-preview">
+                  Group Link with Join Code
+                </label>
+                <div class="controls">
+                  <input type="text" id="join-url-preview" class="input-xlarge embed-code"
+                    value="<%= "#{@group.group_url}?code=#{@group.join_code}" %>">
+                </div>
+              </div>
 
             <% end %>
           <% else %>
@@ -467,7 +564,8 @@
             </td>
           </tr>
 
-          <tr class="footer-row <%= (can_join_group) ? 'highlight-secondary' : '' %>">
+          <tr 
+class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-secondary' : '' %>">
             <td colspan="4">
               <span class="label-text">
                 <% if @current_user_is_owner %>
@@ -478,6 +576,8 @@
                   You're a group member.
                 <% elsif can_join_group %>
                   This is an open group.
+                <% elsif can_join_group_with_code %>
+                  This is a closed group, but you can join if you've been given a code.
                 <% else %>
                   This is a closed group.
                 <% end %>
@@ -500,6 +600,11 @@
                       <%= link_to '<i class="fa fa-plus-circle"></i> Join the group'.html_safe, 
                           '#sign-in-to-join', class: 'btn btn-small', data: { toggle: 'modal' } %>
                     <% end %>
+                  </li>
+                <% elsif can_join_group_with_code %>
+                  <li>
+                    <%= link_to '<i class="fa fa-plus-circle"></i> Join the group'.html_safe, 
+                      '#enter-join-code', class: 'btn btn-small', data: { toggle: 'modal' } %>
                   </li>
                 <% end %>
                 <% if @current_user_is_owner || @badge_list_admin %>

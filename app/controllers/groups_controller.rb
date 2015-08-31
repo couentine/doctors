@@ -64,6 +64,7 @@ class GroupsController < ApplicationController
   # GET /group-url.json
   def show
     @badge_poller_id = params[:badge_poller]
+    @join_code = params[:code]
 
     # Get paginated versions of members
     @member_page = params[:pm] || 1
@@ -247,11 +248,15 @@ class GroupsController < ApplicationController
     elsif !@group.open? && (@group.join_code == nil) 
       notice = "This is a closed group, you cannot join without being invited."
     elsif !@group.open? && (join_code != @group.join_code) 
-      notice = "Your join code is incorrect."
+      notice = "The join code you entered (#{join_code}) is incorrect."
     else
       @group.members << current_user
       if @group.save
-        notice = "Welcome to the group!"
+        if join_code.blank?
+          notice = "Welcome to the group!"
+        else
+          notice = "Your join code was accepted, welcome to the group!"
+        end
       else
         notice = "There was a problem adding you to the group, please try again later."
       end
