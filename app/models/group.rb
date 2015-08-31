@@ -323,7 +323,7 @@ class Group
       when 'past_due'
         { color: 'red', icon: 'fa-exclamation-circle', show_alert: true,
           summary: "Payment failed on #{date_failed.to_s(:short_date)}",
-          alert_title: "There is a billing problem with your group",
+          alert_title: "There is a billing problem with the group",
           alert_body: "There was a problem renewing your subscription on " \
             + "#{date_failed.to_s(:short_date_time)}. Payment will be attempted again on " \
             + "#{date_retry.to_s(:short_date_time)}, please update your billing " \
@@ -331,7 +331,7 @@ class Group
       when 'unpaid'
         { color: 'red', icon: 'fa-exclamation-triangle', show_alert: true,
           summary: "Subscription expired on #{subscription_end_date.to_s(:short_date)}",
-          alert_title: "Your group is inactive due to failed payments",
+          alert_title: "Group is inactive due to failed payments",
           alert_body: "There was a problem renewing your subscription after several attempts. " \
             + "The final payment attempt was made on #{date_failed.to_s(:short_date_time)}. "\
             + "Your group will remain inactive until you update your billing details or change " \
@@ -341,7 +341,7 @@ class Group
         if (Time.now < subscription_end_date)
           { color: 'orange', icon: 'fa-clock-o', show_alert: true,
             summary: "Grace period expires #{subscription_end_date.to_s(:short_date)}",
-            alert_title: "Your group is currently inactive",
+            alert_title: "Group is currently inactive",
             alert_body: "Your group's subscription is currently inactive but within the two week " \
               + "grace period. The grace period expires on " \
               + "#{subscription_end_date.to_s(:short_date)}, after that all group content will " \
@@ -349,13 +349,14 @@ class Group
               + "group at any time just select a plan and confirm your billing details." }
         else
           { color: 'blue', icon: 'fa-close', show_alert: true,
-            summary: "Group is inactive", alert_title: "Your group is currently inactive",
+            summary: "Group is inactive", alert_title: "Group is currently inactive",
             alert_body: "Your group's subscription is currently inactive. All group content will " \
               + "remain online, but no new content can be posted. You can reactivate the group " \
               + "at any time by selecting a plan and confirming your billing details." }
         end
       else
         { color: 'green', icon: 'fa-check-circle', show_alert: false,
+          alert_title: "Group is active",
           summary: "Subscription renews #{subscription_end_date.to_s(:short_date)}" }
       end
     end

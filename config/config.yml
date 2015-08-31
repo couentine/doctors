@@ -233,6 +233,7 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
+        features: []
       standard-500m-1:
         name: Basic
         amount: 12000
@@ -243,6 +244,7 @@ defaults: &defaults
         users: 500
         admins: -1
         sub_groups: 1
+        features: []
       standard-1000m-1:
         name: Standard
         amount: 20000
@@ -253,6 +255,7 @@ defaults: &defaults
         users: 1000
         admins: -1
         sub_groups: 5
+        features: []
       standard-5000m-1:
         name: Premium
         amount: 45000
@@ -263,6 +266,7 @@ defaults: &defaults
         users: 5000
         admins: -1
         sub_groups: -1
+        features: []
       k12-1y-1:
         name: Single Teacher
         amount: 2500
@@ -273,6 +277,7 @@ defaults: &defaults
         users: -1
         admins: 1
         sub_groups: 0
+        features: []
       free-5m-1:
         name: Free Mini
         amount: 0
@@ -283,6 +288,7 @@ defaults: &defaults
         users: 5
         admins: -1
         sub_groups: -1
+        features: []
       free-100m-1:
         name: Free Starter
         amount: 0
@@ -293,6 +299,7 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
+        features: []
       free-500m-1:
         name: Free Basic
         amount: 0
@@ -303,6 +310,7 @@ defaults: &defaults
         users: 500
         admins: -1
         sub_groups: 1
+        features: []
       free-unlimited-1:
         name: Free Unlimited
         amount: 0
@@ -313,6 +321,7 @@ defaults: &defaults
         users: -1
         admins: -1
         sub_groups: -1
+        features: []
       trial-100m-1:
         name: Trial Starter
         amount: 0
@@ -323,6 +332,7 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
+        features: []
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:

@@ -693,4 +693,18 @@ namespace :db do
     puts " >> Done."
   end
 
+  task overwrite_private_group_visibility_settings: :environment do
+    print "Updating #{Group.where(type: 'private').count} private groups"
+    
+    Group.where(type: 'private').each do |group|
+      group.member_visibility = 'private'
+      group.admin_visibility = 'private'
+      group.timeless.save
+      
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end

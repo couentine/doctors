@@ -468,6 +468,14 @@
           <%= (@group.sub_group_limit<0) ? \
             'Unlimited sub-groups' : pluralize(@group.sub_group_limit,'sub-group') %>
         </li>
+        <li>
+          <b>Included Plan Features:</b>
+          <% if @group.features.blank? %>
+            None
+          <% else %>
+            <%= @group.features.map(&:capitalize).join(', ') %>
+          <% end %>
+        </li>
       </ul>
     </div>
 
@@ -608,11 +616,13 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                   </li>
                 <% end %>
                 <% if @current_user_is_owner || @badge_list_admin %>
-                  <li>
-                    <a href="#subscription-details" data-toggle="modal" class='btn btn-small'>
-                      <i class="fa fa-info-circle"></i> Subscription details
-                    </a>
-                  </li>
+                  <% if @group.private? %>
+                    <li>
+                      <a href="#subscription-details" data-toggle="modal" class='btn btn-small'>
+                        <i class="fa fa-info-circle"></i> Subscription details
+                      </a>
+                    </li>
+                  <% end %>
                   <li>
                     <%= link_to '<i class="fa fa-pencil"></i> Edit the group'.html_safe, 
                       edit_group_path, class: 'btn btn-small' %>
@@ -682,8 +692,8 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
       </div>
 
       <% if @badges.empty? %>
-        <div class="well span7 offset2">
-          <% if @current_user_is_admin || @badge_list_admin %>
+        <% if @current_user_is_admin || @badge_list_admin %>
+          <div class="well span7 offset2">
             <h3>You haven't created any badges yet</h3>
             <p>
               Badges are collections of requirements which allow learners to post evidence.
@@ -692,13 +702,15 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
               <%= link_to '<i class="fa fa-plus"></i> Create a badge'.html_safe,
                 new_group_badge_path(@group), class: 'btn btn-success' %>
             </p>
-          <% else %>
+          </div>
+        <% else %>
+          <div class="well gray span7 offset2">
             <h3>No badges yet</h3>
             <% if @current_user_is_member %>
               <p>When badges become available for you to earn you will see them here.</p>
             <% end %>
-          <% end %>
-        </div>
+          </div>
+        <% end %>
       <% end %>
     </div>
   </div>
@@ -739,7 +751,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
     <div class="row">
       <div class="span12">
           
-        <div class="tab-header <%= (@group.member_ids.empty?) ? 'empty' : '' %>">
+        <div class="tab-header">
           <% if @current_user_is_admin || @badge_list_admin %>
             <%= link_to '<i class="fa fa-plus"></i> Add Members'.html_safe,
                 add_group_members_path(@group), class: 'btn btn-small',
@@ -811,14 +823,16 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
           <% end %>
         </div>
 
+        <% if @group.member_ids.empty? %>
+          <div class="well span7 offset2 gray empty">
+            <h3>No members yet</h3>
+          </div>
+        <% end %>
+
       </div>
     </div>
 
-    <% if @group.member_ids.empty? %>
-      <div class="well span7 offset2 gray empty">
-        <h3>No members yet</h3>
-      </div>
-    <% else %>
+    <% if !@group.member_ids.empty? %>
       <div class="row">
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
              data-bl-dyncol-width="12">
