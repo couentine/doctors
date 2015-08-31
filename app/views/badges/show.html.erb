@@ -7,6 +7,8 @@
   can_join_badge = !is_badge_member && @show_progress && \
     (@current_user_is_admin || @current_user_is_member || @group.open?)
   can_join_group = !@current_user_is_member && !@current_user_is_admin && @group.open?
+
+  visibility_details = @badge.visibility_details
 %>
 
 <% content_for :extra_footer_text do %>
@@ -333,6 +335,12 @@
           .append("<span class='label'>Requires Community Features</span>");
         $("#badge_awardability_admins").attr("checked", true);
       <% end %>
+      
+      <% if @group.public? %>
+        // Public group: Fix badge settings
+        $("#badge_visibility_private").attr("disabled", true).parent().addClass("disabled")
+          .append("<span class='label'>Closed Groups Only</span>");
+      <% end %>
 
     });
 
@@ -350,6 +358,13 @@
         <div class="form-body">
           <%= simple_form_for [@group, @badge], url: group_badge_path(@group, @badge), 
               html: { id: 'settings-form', class: 'form-horizontal' } do |f| %>
+
+            <%= f.input :visibility, as: :radio_buttons, 
+              label: 'Who can see the badge and its contents?', 
+              hint: 'This setting controls the visibility of the badge itself as well as ' \
+                + 'all requirement and wiki pages. The visibility of posted evidence is set ' \
+                + 'on each individual requirement.', include_blank: false, 
+              collection: @badge_visibility_options %>
 
             <%= f.input :editability, as: :radio_buttons, label: 'Who can edit the badge?', 
               include_blank: false, collection: @badge_editability_options %>
@@ -394,7 +409,25 @@
               <%= image_tag @badge.image_url(:medium) %>
             </td>
             <td class="single-panel">
-              <h1><%= @badge.name %></h1>
+              <h1>
+                <%= @badge.name %>
+                
+                <% if @current_user_is_admin || @badge_list_admin %>
+                  <a href="#settings" class="label-link" data-toggle="modal" rel="tooltip"
+                      title="<%= visibility_details[:summary] %>">
+                    <span class="label">
+                      <i class="fa <%= visibility_details[:icon] %>"></i> 
+                      <%= visibility_details[:label] %>
+                    </span>
+                  </a>
+                <% else %>
+                  <span class="label" data-toggle="tooltip" 
+                      title="<%= visibility_details[:summary] %>">
+                    <i class="fa <%= visibility_details[:icon] %>"></i> 
+                    <%= visibility_details[:label] %>
+                  </span>
+                <% end %>
+              </h1>
               <h2>
                 <%= link_to @group.url_with_caps, @group, 
                   title: @group.name %>/<%= @badge.url_with_caps %>
@@ -503,7 +536,7 @@
   </div>
 </div>
 
-<% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
+<% if @can_see_badge %>
 
     <!-- === TOPIC LIST === -->
 
@@ -884,9 +917,9 @@
   
   <div class="row">
     <div class="well span7 offset2">
-      <h3>This is a private badge</h3>
+      <h3>This is a <%= visibility_details[:label].downcase %> badge</h3>
       <p>
-        The contents of this badge are only visible to group members.
+        The contents of this badge are <%= visibility_details[:summary].downcase %>.
       </p>
     </div>
   </div>

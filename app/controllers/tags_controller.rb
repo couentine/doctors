@@ -4,7 +4,6 @@ class TagsController < ApplicationController
   prepend_before_filter :find_parent_records, only: :index
   prepend_before_filter :find_all_records, except: :index
   before_filter :authenticate_user!, only: [:edit, :update, :destroy, :restore]
-  before_filter :can_view_tag, except: [:index]
   before_filter :can_edit_tag, only: [:edit, :update, :restore]
   before_filter :badge_expert, only: [:destroy]
   before_filter :set_editing_parameters, only: [:edit, :update]
@@ -228,6 +227,10 @@ private
     # Set current group (for analytics) only if user is logged in and an admin
     @current_user_group = @group if @current_user_is_admin
 
+    @can_see_badge = @current_user_is_admin || @badge_list_admin || @current_user_is_expert \
+      || @current_user_is_learner || (@badge.visibility == 'public') \
+      || ((@badge.visibility == 'private') && @current_user_is_member)
+
     # Define badge terminology shortcuts
     @expert = @badge.expert
     @experts = @badge.experts
@@ -268,7 +271,7 @@ private
     end
 
     # Figure out if the current user can see the entries in this tag
-    # NOTE: If this group is private then the controller takes care of bouncing non-members
+    # NOTE: If this group is private then the @can_see_badge param handles blocking non-members
     #       So we really only need to worry about the "secret" level of privacy. 
     #       (But it's not that hard to be super accurate so we will be.)
     @current_user_can_see_entries = (@tag.type == 'requirement') && (@badge_list_admin \
@@ -276,13 +279,6 @@ private
         || ((@tag.privacy == 'private') && (@current_user_is_member || @current_user_is_admin)) \
         || ((@tag.privacy == 'secret') && (@current_user_is_admin \
           || ((@badge.awardability == 'experts') && @current_user_is_expert))))
-  end
-
-  def can_view_tag
-    unless @group.public? || @current_user_is_member || @current_user_is_admin || @badge_list_admin
-      flash[:error] = "This is a private group."
-      redirect_to [@group, @badge]
-    end
   end
 
   def can_edit_tag

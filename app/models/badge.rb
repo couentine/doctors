@@ -152,6 +152,22 @@ class Badge
   def awarders;  (awardability == 'experts') ? experts : 'admins'; end
   def badge_awarders;  (awardability == 'experts') ? "badge #{experts}" : 'group admins'; end
 
+  # Returns hash = {
+  #   icon: fa-icon,
+  #   label: one_or_two_word_summary_of_current_status,
+  #   summary: contents_of_detail_tooltip
+  # }
+  def visibility_details
+    if visibility == 'hidden'
+      { icon: 'fa-eye-slash', label: 'Hidden', 
+        summary: "Only visible to badge #{learners}, badge #{experts} and group admins." }
+    elsif visibility == 'private'
+      { icon: 'fa-users', label: 'Private', summary: "Only visible to group members." }
+    else
+      { icon: 'fa-globe', label: 'Public', summary: "Visible to everyone." }
+    end
+  end
+
   # === ASYNC CLASS METHODS === #
 
   # Creates a new badge asynchronously and returns the id of a poller

@@ -5,7 +5,7 @@ class HomeController < ApplicationController
   def root
     if current_user
       @user = current_user
-      @groups = @user.groups.asc(:name)
+      @groups = @user.groups(false).asc(:name)
       render template: 'home/root_internal'
     else
       render template: 'home/root_external', layout: 'website'

@@ -9,6 +9,10 @@
   provide(:subheader_image, group_image_url_for(@group)) 
   provide(:include_rich_text, true)
 
+  if !@log.show_on_profile
+    provide(:no_index, true)
+  end
+
   if @log.validation_status == 'validated'
     log_user_type = 'expert'
   else

@@ -3,6 +3,10 @@
   provide(:include_rich_text, true)
   provide(:include_ob_issuer, true)
 
+  if !@log.show_on_profile
+    provide(:no_index, true)
+  end
+
   provide(:include_metadata, true)
   if @log.validation_status == 'validated'
     provide(:metadata_title, "#{@badge.name} awarded to #{@user.name}")

@@ -1580,9 +1580,14 @@ form#group-add-users-form {
     margin-top: 10px;
     padding: 3px 5px;
   }
+  h1 .label {
+    margin: 0 0 0 10px;
+    position: relative;
+    top: -5px;
+  }
   a.label-link:hover { text-decoration: none; border-bottom: none; }
   a,a:visited { color: $medium-text-color; }
-  a:not(.btn):focus,a:not(.btn):hover { 
+  a:not(.btn,.label-link):focus,a:not(.btn,.label-link):hover { 
     color: $dark-text-color;
     text-decoration: none;
     border-bottom: 1px dashed $dark-text-color;
@@ -2175,6 +2180,11 @@ div.info-card {
         font-weight: normal;
         margin: 6px 0;
         color: $medium-text-color;
+      }
+      .label {
+        margin-left: 10px;
+        position: relative;
+        top: -3px;
       }
     }
     span.card-text {

@@ -74,9 +74,14 @@ class GroupsController < ApplicationController
     # Get paginated versions of badges
     @badge_page = params[:pb] || 1
     @badge_page_size = params[:psb] || APP_CONFIG['page_size_small']
-    if @current_user_is_member || @current_user_is_admin || @badge_list_admin
+    if @current_user_is_admin || @badge_list_admin
       @badges = @group.badges.asc(:name).page(@badge_page).per(@badge_page_size)
-      # FIXME >> Need to filter out hidden badges
+    elsif @current_user_is_member
+      current_user_badge_ids = current_user.logs\
+        .where(:badge_id.in => @group.badge_ids).pluck(:badge_id)
+      @badges = @group.badges.any_of(
+          {:visibility.ne => 'hidden'}, {:id.in => current_user_badge_ids}
+        ).asc(:name).page(@badge_page).per(@badge_page_size)
     else
       @badges = @group.badges.where(visibility: 'public').asc(:name).page(@badge_page)\
         .per(@badge_page_size)

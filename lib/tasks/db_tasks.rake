@@ -707,4 +707,21 @@ namespace :db do
     puts " >> Done."
   end
 
+  task overwrite_badge_visibility_settings: :environment do
+    print "Updating #{Badge.count} badges"
+    
+    Badge.each do |badge|
+      if badge.group.private?
+        badge.visibility = 'private'
+      else
+        badge.visibility = 'public'
+      end
+      badge.timeless.save
+      
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end

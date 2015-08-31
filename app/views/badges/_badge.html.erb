@@ -9,6 +9,8 @@
   expert_count = expert_count_map[badge.id]
   learner_count = learner_count_map[badge.id]
 
+  visibility_details = badge.visibility_details
+
   if log
     is_expert = (log.validation_status == 'validated')
     is_learner = !is_learner
@@ -40,6 +42,13 @@
       <td class="card-body">
         <span class="card-headline">
           <%= link_to badge.name, group_badge_path(group, badge), title: badge.name %>
+          <% if is_member || is_admin %>
+            <span class="label" data-toggle="tooltip" 
+                title="<%= visibility_details[:summary] %>">
+              <i class="fa <%= visibility_details[:icon] %>"></i> 
+              <%= visibility_details[:label] %>
+            </span>
+          <% end %>
         </span>
         <span class="card-text">
           <p><%= badge.summary %></p>
@@ -56,12 +65,6 @@
                   %>
                   <%= link_to "#{icon_text} #{tag.display_name}".html_safe, 
                     group_badge_path(group, badge) + "/" + tag.name_with_caps %>
-                  <%= 
-                    link_to "<i class='fa #{tag.format_icon}'></i> Post".html_safe, 
-                      new_group_badge_log_entry_path(group, badge, log, tag: tag.name_with_caps), 
-                      class: 'btn btn-mini' \
-                    if is_learner || is_expert
-                  %>
                 </li>
               <% end %>
             </ul>

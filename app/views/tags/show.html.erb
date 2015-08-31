@@ -2,6 +2,8 @@
   provide(:full_title, "#{@tag.display_name} - #{@badge.name} - #{@group.name}")
   provide(:show_subheader, true)
   provide(:subheader_image, group_image_url_for(@group)) 
+
+  visibility_details = @badge.visibility_details
 %>
 
 <% content_for :subheader_links do %>
@@ -67,7 +69,18 @@
   <% end %>
 <% end %>
 
-<% if @tag_exists %>
+<% if !@can_see_badge %>
+
+  <div class="row add-top-margin">
+    <div class="well span7 offset2">
+      <h3>This is a <%= visibility_details[:label].downcase %> badge</h3>
+      <p>
+        The contents of this badge are <%= visibility_details[:summary].downcase %>
+      </p>
+    </div>
+  </div>
+
+<% elsif @tag_exists %>
 
   <!-- === TOPIC VERSION LIST === -->
 

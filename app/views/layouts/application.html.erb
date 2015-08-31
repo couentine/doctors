@@ -8,6 +8,10 @@
       <title><%= full_title(yield(:title)).html_safe %></title>
     <% end %>
 
+    <% if content_for? :no_index %>
+      <meta name="robots" content="noindex">
+    <% end %>
+
     <% if content_for? :include_ob_issuer %>
       <script src="https://backpack.openbadges.org/issuer.js"></script>
       <script type="text/javascript">

@@ -205,8 +205,16 @@ class User
   end
 
   # Queries for all groups (admins and members) in no particular order.
-  def groups
-    Group.where(:id.in => [admin_of_ids, member_of_ids].flatten)
+  # If public_only is set then it will filter out groups based on admin & member visbility
+  def groups(public_only = true)
+    if public_only
+      Group.any_of(
+        {:id.in => member_of_ids, member_visibility: 'public'}, 
+        {:id.in => admin_of_ids, admin_visibility: 'public'}
+      )
+    else
+      Group.where(:id.in => [admin_of_ids, member_of_ids].flatten)
+    end
   end
 
   def learner_of?(badge)

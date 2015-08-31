@@ -21,6 +21,11 @@ class BadgesController < ApplicationController
 
   EXPERT_WORDS = %w(expert master guide guru jedi)
   LEARNER_WORDS = %w(learner trainee student novice padawan)
+  BADGE_VISIBILITY_OPTIONS = [
+    ['<i class="fa fa-globe"></i> Everyone'.html_safe, 'public'],
+    ['<i class="fa fa-users"></i> Only Group Members'.html_safe, 'private'],
+    ['<i class="fa fa-eye-slash"></i> Only Badge Members &amp; Group Admins'.html_safe, 'hidden']
+  ]
 
   # === RESTFUL ACTIONS === #
 
@@ -53,6 +58,7 @@ class BadgesController < ApplicationController
         end
 
         # Configure the badge settings if needed
+        @badge_visibility_options = BADGE_VISIBILITY_OPTIONS
         if @current_user_is_admin || @badge_list_admin
           @badge_editability_options = [
             ["Badge #{@badge.Experts} & Group Admins", 'experts'],
@@ -106,6 +112,7 @@ class BadgesController < ApplicationController
     # First build the badge as normal to make sure that it's valid
     @badge = Badge.new(params[:badge])
     @badge.group = @group
+    @badge.visibility = 'private' if @group.private?
     @badge.creator = current_user
     @badge.current_user = current_user
     @badge.current_username = current_user.username
@@ -402,6 +409,10 @@ private
     if @current_user_is_learner || @current_user_is_expert
       @log = @badge.logs.find_by(user: current_user)
     end
+
+    @can_see_badge = @current_user_is_admin || @badge_list_admin || @current_user_is_expert \
+      || @current_user_is_learner || (@badge.visibility == 'public') \
+      || ((@badge.visibility == 'private') && @current_user_is_member)
 
     # Define badge terminology shortcuts
     @expert = @badge.expert
