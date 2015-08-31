@@ -116,8 +116,9 @@
 
 <% end %>
 
-<!-- === GROUP MEMBERSHIPS === -->
-<% if !@user.admin_of_ids.blank? || !@user.member_of_ids.blank? %>
+<% if !@user.groups.blank? %>
+  
+  <!-- === GROUP MEMBERSHIPS === -->
 
   <div class="row">
     <div class="span12">
