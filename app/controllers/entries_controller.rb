@@ -309,7 +309,7 @@ private
   end
 
   def can_create_entries
-    unless @group.can_create_entries?
+    if @group.disabled?
       flash[:error] = "You cannot post evidence since this group is currently inactive."
       redirect_to @group
     end
