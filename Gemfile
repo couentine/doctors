@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 ruby '2.1.2'
 
 gem 'rails', '3.2.14'
-gem 'puma', '2.12.3'
+gem 'puma', '2.13.4'
 
 # HANK
 
