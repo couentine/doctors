@@ -262,6 +262,19 @@ class GroupsController < ApplicationController
         else
           notice = "Your join code was accepted, welcome to the group!"
         end
+
+        # Then update analytics
+        IntercomEventWorker.perform_async({
+          'event_name' => 'group-join',
+          'email' => current_user.email,
+          'created_at' => Time.now.to_i,
+          'metadata' => {
+            'group_id' => @group.id.to_s,
+            'group_name' => @group.name,
+            'group_url' => @group.group_url,
+            'join_type' => 'joined'
+          }
+        })
       else
         notice = "There was a problem adding you to the group, please try again later."
       end
@@ -287,6 +300,19 @@ class GroupsController < ApplicationController
       end
     end
 
+    # Then update analytics
+    IntercomEventWorker.perform_async({
+      'event_name' => 'group-depart',
+      'email' => current_user.email,
+      'created_at' => Time.now.to_i,
+      'metadata' => {
+        'group_id' => @group.id.to_s,
+        'group_name' => @group.name,
+        'group_url' => @group.group_url,
+        'join_type' => 'left'
+      }
+    })
+
     # Then detach any logs
     current_user.logs.where(:badge_id.in => @group.badge_ids).each do |log_to_detach|
       log_to_detach.detached_log = true
@@ -311,6 +337,19 @@ class GroupsController < ApplicationController
     elsif params[:type] == 'member' && @group.has_member?(@user)
       @group.members.delete(@user)
       @group.save
+
+      # Then update analytics
+      IntercomEventWorker.perform_async({
+        'event_name' => 'group-depart',
+        'email' => @user.email,
+        'created_at' => Time.now.to_i,
+        'metadata' => {
+          'group_id' => @group.id.to_s,
+          'group_name' => @group.name,
+          'group_url' => @group.group_url,
+          'join_type' => 'removed'
+        }
+      })
 
       # Then detach any logs
       @user.logs.where(:badge_id.in => @group.badge_ids).each do |log_to_detach|
@@ -531,6 +570,19 @@ class GroupsController < ApplicationController
                     UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, badge_ids)
                   end
                   @new_member_emails << user.email
+
+                  # Then update analytics
+                  IntercomEventWorker.perform_async({
+                    'event_name' => 'group-join',
+                    'email' => user.email,
+                    'created_at' => Time.now.to_i,
+                    'metadata' => {
+                      'group_id' => @group.id.to_s,
+                      'group_name' => @group.name,
+                      'group_url' => @group.group_url,
+                      'join_type' => 'added'
+                    }
+                  })
                 end
               end
             end

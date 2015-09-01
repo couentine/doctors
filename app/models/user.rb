@@ -397,7 +397,21 @@ class User
           poller.data = card.to_hash
           poller.save
         end
+
+        # Then update analytics
+        IntercomEventWorker.perform_async({
+          'event_name' => 'stripe-card-add',
+          'email' => user.email,
+          'created_at' => Time.now.to_i
+        })
       else
+        # Then update analytics
+        IntercomEventWorker.perform_async({
+          'event_name' => 'stripe-card-rejected',
+          'email' => user.email,
+          'created_at' => Time.now.to_i
+        })
+
         throw "Card was rejected."
       end
     rescue Exception => e
@@ -462,6 +476,13 @@ class User
           poller.data = card.to_hash
           poller.save
         end
+
+        # Then update analytics
+        IntercomEventWorker.perform_async({
+          'event_name' => 'stripe-card-delete',
+          'email' => user.email,
+          'created_at' => Time.now.to_i
+        })
       else
         throw "There was a problem removing the card, please try again."
       end
@@ -555,6 +576,19 @@ protected
       invited_item = group.invited_members.detect { |u| u["email"] == (email || unconfirmed_email)}
       group.invited_members.delete(invited_item) if invited_item
       group.save
+
+      # Then update analytics
+      IntercomEventWorker.perform_async({
+        'event_name' => 'group-join',
+        'email' => email,
+        'created_at' => Time.now.to_i,
+        'metadata' => {
+          'group_id' => group.id.to_s,
+          'group_name' => group.name,
+          'group_url' => group.group_url,
+          'join_type' => 'invited'
+        }
+      })
 
       # Then add to any badges (as learner)
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|

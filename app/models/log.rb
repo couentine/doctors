@@ -332,23 +332,37 @@ protected
         body = "#{user.name} created the badge on #{time_string}" \
           + " and was automatically awarded the badge."
         self.add_validation(user, summary, body, true)
-      elsif validation_threshold > 1
-        badge.logs.where(:validation_status => 'validated', \
-            :validation_count.lt => validation_threshold).each do |devalidated_log|
-          
-          if devalidated_log.user == self.user
-            summary = "Self-validation of founding expert"
-            body = "#{user.name} was added as one of the founding experts on #{time_string}."\
-              + " This 'self-validation' was added automatically."
-          else
-            summary = "Back-validation of existing expert"
-            body = "#{user.name} was added as one of the founding experts on #{time_string}."\
-              + " This 'back-validation' was added automatically."
-          end
-          
-          devalidated_log.add_validation(user, summary, body, true, false)
+      else
+        if validation_threshold > 1
+          badge.logs.where(:validation_status => 'validated', \
+              :validation_count.lt => validation_threshold).each do |devalidated_log|
+            
+            if devalidated_log.user == self.user
+              summary = "Self-validation of founding expert"
+              body = "#{user.name} was added as one of the founding experts on #{time_string}."\
+                + " This 'self-validation' was added automatically."
+            else
+              summary = "Back-validation of existing expert"
+              body = "#{user.name} was added as one of the founding experts on #{time_string}."\
+                + " This 'back-validation' was added automatically."
+            end
+            
+            devalidated_log.add_validation(user, summary, body, true, false)
 
+          end
         end
+        
+        # This is an awarded badge so update analytics
+        IntercomEventWorker.perform_async({
+          'event_name' => 'badge-awarded',
+          'email' => user.email,
+          'created_at' => Time.now.to_i,
+          'metadata' => {
+            'badge_id' => badge.id.to_s,
+            'badge_name' => badge.name,
+            'badge_url' => badge.badge_url
+          }
+        })
       end
     end
   end
@@ -402,6 +416,18 @@ protected
     if issue_status_changed? && (updated_at > (Time.now - 1.hour))
       if issue_status == 'retracted'
         UserMailer.delay.log_badge_retracted(user.id, badge.group_id, badge.id, self.id) 
+
+        # Update analytics
+        IntercomEventWorker.perform_async({
+          'event_name' => 'badge-retracted',
+          'email' => user.email,
+          'created_at' => Time.now.to_i,
+          'metadata' => {
+            'badge_id' => badge.id.to_s,
+            'badge_name' => badge.name,
+            'badge_url' => badge.badge_url
+          }
+        })
       end
     end
   end

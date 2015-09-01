@@ -359,6 +359,19 @@ class BadgesController < ApplicationController
         log.add_validation current_user, @summary, @body, true
         redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
           + "added as a group member."
+
+        # Then update analytics
+        IntercomEventWorker.perform_async({
+          'event_name' => 'group-join',
+          'email' => user.email,
+          'created_at' => Time.now.to_i,
+          'metadata' => {
+            'group_id' => @group.id.to_s,
+            'group_name' => @group.name,
+            'group_url' => @group.group_url,
+            'join_type' => 'added'
+          }
+        })
       end
     end
   end

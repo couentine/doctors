@@ -856,6 +856,21 @@ protected
     if private? && !stripe_subscription_id.blank? && (context != 'stripe') \
         && (subscription_plan_changed? || stripe_subscription_card_changed?)
       update_stripe_subscription(true) # asynchronous
+
+      # Then update analytics
+      IntercomEventWorker.perform_async({
+        'event_name' => 'stripe-subscription-update',
+        'email' => user.email,
+        'created_at' => Time.now.to_i,
+        'metadata' => {
+          'group_id' => id.to_s,
+          'group_name' => name,
+          'group_url' => group_url,
+          'group_type' => type,
+          'old_plan' => subscription_plan_was,
+          'new_plan' => subscription_plan
+        }
+      })
     end
   end
 
@@ -879,7 +894,7 @@ protected
           'group_name' => name,
           'group_url' => group_url,
           'group_type' => type
-        },
+        }
       })
     end
   end

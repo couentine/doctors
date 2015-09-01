@@ -73,6 +73,19 @@ class LogsController < ApplicationController
         if @group.save
           message = 'You have joined both the group and the badge. ' \
             + 'The next step is to begin submitting evidence below.'
+
+          # Then update analytics
+          IntercomEventWorker.perform_async({
+            'event_name' => 'group-join',
+            'email' => current_user.email,
+            'created_at' => Time.now.to_i,
+            'metadata' => {
+              'group_id' => @group.id.to_s,
+              'group_name' => @group.name,
+              'group_url' => @group.group_url,
+              'join_type' => 'joined'
+            }
+          })
         else
           message = 'An error occured while trying to add you to the group and badge.'
           is_error = true

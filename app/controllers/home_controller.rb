@@ -20,6 +20,15 @@ class HomeController < ApplicationController
 
   # GET /pricing
   def pricing
+    # Update analytics if logged in
+    if current_user
+      IntercomEventWorker.perform_async({
+        'event_name' => 'viewed-pricing',
+        'email' => current_user.email,
+        'created_at' => Time.now.to_i
+      })
+    end
+
     render layout: 'website'
   end
 
