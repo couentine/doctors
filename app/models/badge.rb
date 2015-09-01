@@ -641,7 +641,7 @@ protected
       elsif (new_group.owner_id != group.owner_id)
         errors.add(:move_to_group_id, " is not a valid destination group. " \
           + "You can ony move this badge to a group you own.")
-      elsif !new_group.can_create_badges?
+      elsif new_group.disabled?
         errors.add(:move_to_group_id, " is currently inactive and cannot host new badges.")
       end
     end
