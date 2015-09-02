@@ -500,15 +500,13 @@ class GroupsController < ApplicationController
       end
 
       if !valid_emails.empty?
-        if (@type == :admin) && (@group.admin_limit > 0) \
-            && (valid_emails.count > (@group.admin_limit - @group.admin_count))
+        if (@type == :admin) && !@group.can_add_admins?(valid_emails.count)
           flash[:error] = "Oops! You've only got #{@group.admin_limit - @group.admin_count} " \
             + "admin spots available with your current subscription and it looks like you're " \
             + "trying to add another #{valid_emails.count} admins. Please contact support " \
             + "if you're interested in increasing your admin limit."
           render 'add_users'
-        elsif (@type == :member) && (@group.user_limit > 0) \
-            && (valid_emails.count > (@group.user_limit - @group.member_count))
+        elsif (@type == :member) && !@group.can_add_members?(valid_emails.count)
           flash[:error] = "Oops! You've only got #{@group.user_limit - @group.member_count} " \
             + "member spots available with your current subscription and it looks like you're " \
             + "trying to add another #{valid_emails.count} members. You'll need to upgrade " \

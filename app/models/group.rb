@@ -157,8 +157,8 @@ class Group
     )
   end
 
-  def can_add_members?
-    public? || ((user_limit < 0) || (member_count < user_limit))
+  def can_add_members?(how_many = 1)
+    public? || ((user_limit < 0) || ((member_count + how_many) <= user_limit))
   end
 
   # Returns hash = {
@@ -191,8 +191,8 @@ class Group
     end
   end
 
-  def can_add_admins?
-    public? || ((admin_limit < 0) || (admin_count < admin_limit))
+  def can_add_admins?(how_many = 1)
+    public? || ((admin_limit < 0) || ((admin_count + how_many) <= admin_limit))
   end
 
   # Returns hash = {
