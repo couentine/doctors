@@ -73,11 +73,11 @@ class Badge
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :url, presence: true, length: { within: 2..MAX_URL_LENGTH },
-            uniqueness: { scope: :group },
-            format: { with: /\A[\w-]+\Z/, 
-              message: "can only contain letters, numbers, dashes and underscores" },
-            exclusion: { in: APP_CONFIG['blocked_url_slugs'],
-                         message: "%{value} is a specially reserved url." }
+    uniqueness: { scope: :group, message:"The '%{value}' url is already being used in this group."},
+    format: { with: /\A[\w-]+\Z/, 
+      message: "can only contain letters, numbers, dashes and underscores" },
+    exclusion: { in: APP_CONFIG['blocked_url_slugs'],
+      message: "%{value} is a specially reserved url." }
   validates :summary, length: { maximum: MAX_SUMMARY_LENGTH }
   validates :word_for_expert, presence: true, length: { within: 3..MAX_TERM_LENGTH }
   validates :word_for_learner, length: { maximum: MAX_TERM_LENGTH }
@@ -102,6 +102,7 @@ class Badge
 
   before_validation :set_default_values, on: :create
   before_validation :update_caps_field
+  after_validation :copy_errors
   before_save :process_designed_image
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
@@ -531,6 +532,12 @@ protected
       self.url = nil
     else
       self.url = url_with_caps.downcase
+    end
+  end
+
+  def copy_errors
+    if errors && errors[:url]
+      errors[:name] = errors[:url]
     end
   end
 

@@ -76,16 +76,17 @@ class Group
   field :new_subscription,            type: Boolean # used to set subscription status to 'new'
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
-  validates :url_with_caps, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH },
-            format: { with: /\A[\w-]+\Z/, \
-              message: "can only contain letters, numbers, dashes and underscores" },
-            exclusion: { in: APP_CONFIG['blocked_url_slugs'],
-                         message: "%{value} is a specially reserved url." }
-  validates :url, presence: true, uniqueness: true, length: { within: 2..MAX_URL_LENGTH }, 
-            format: { with: /\A[\w-]+\Z/, \
-              message: "can only contain letters, numbers, dashes and underscores" },
-            exclusion: { in: APP_CONFIG['blocked_url_slugs'],
-                         message: "%{value} is a specially reserved url." }
+  validates :url_with_caps, presence: true, 
+    uniqueness: { message: "The '%{value}' url is already taken."}, 
+    length: { within: 2..MAX_URL_LENGTH }, format: { with: /\A[\w-]+\Z/,
+    message: "can only contain letters, numbers, dashes and underscores" },
+    exclusion: { in: APP_CONFIG['blocked_url_slugs'],
+    message: "%{value} is a specially reserved url." }
+  validates :url, presence: true, length: { within: 2..MAX_URL_LENGTH }, 
+    uniqueness: { message: "The '%{value}' url is already taken."}, format: { with: /\A[\w-]+\Z/,
+    message: "can only contain letters, numbers, dashes and underscores" },
+    exclusion: { in: APP_CONFIG['blocked_url_slugs'],
+    message: "%{value} is a specially reserved url." }
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
   validates :website, url: true
   validates :image_url, url: true
@@ -109,6 +110,7 @@ class Group
 
   before_validation :set_default_values, on: :create
   before_validation :update_caps_field
+  after_validation :copy_errors
   before_create :add_creator_to_admins
   before_update :change_owner
   before_update :update_counts
@@ -726,6 +728,12 @@ protected
       self.url = nil
     else
       self.url = url_with_caps.downcase
+    end
+  end
+
+  def copy_errors
+    if errors && errors[:url]
+      errors[:name] = errors[:url]
     end
   end
 

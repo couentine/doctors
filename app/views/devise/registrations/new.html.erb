@@ -2,6 +2,10 @@
   provide(:title, "Sign up")
   provide(:body_class, "signup")
   provide(:hide_footer, true)
+
+  if resource && resource.errors[:username]
+    resource.errors[:username_with_caps] = resource.errors[:username]
+  end
 %>
 
 <div class="row">
