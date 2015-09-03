@@ -3,7 +3,7 @@
   provide(:body_class, "signup")
   provide(:hide_footer, true)
 
-  if resource && resource.errors[:username]
+  if resource && !resource.errors[:username].blank?
     resource.errors[:username_with_caps] = resource.errors[:username]
   end
 %>

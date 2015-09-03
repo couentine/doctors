@@ -732,7 +732,7 @@ protected
   end
 
   def copy_errors
-    if errors && errors[:url]
+    if errors && !errors[:url].blank?
       errors[:name] = errors[:url]
     end
   end
