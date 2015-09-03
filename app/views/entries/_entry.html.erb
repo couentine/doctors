@@ -9,7 +9,7 @@
   log = log_map[entry.id] if log.nil?
   user = user_map[entry.id] if user.nil?
 
-  if log.validation_status == 'validated'
+  if log && log.validation_status == 'validated'
     log_user_type = 'expert'
   else
     log_user_type = 'learner'
