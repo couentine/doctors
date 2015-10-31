@@ -371,6 +371,10 @@ table.table {
 .label-warning { background-color: $primary-medium; }
 .label-important { background-color: $red-medium; }
 
+.lead {
+  font-weight: 300;
+}
+
 .input-xxlarge { 
   @media (min-width: 768px) {
     max-width: 60%;
