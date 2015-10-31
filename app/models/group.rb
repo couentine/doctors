@@ -533,7 +533,9 @@ class Group
   # - info_item_data: This will optionally result in the insertion of an info item 
   #     with type = "stripe-event" and name = "Invoice Payment"
   # - throw_errors: Set this to true to throw errors instead of logging them
-  # - queue_send_trial_ending_email: Set to true to send the trial_ending email 3 days before end
+  # - queue_send_trial_ending_email: 
+  #     Set to true to send the trial_ending email 3 days before end
+  #     Note: If this is a free group the trial_ending email will NOT be sent even if param is true
   def self.refresh_stripe_subscription(stripe_subscription_id, options = {})
     begin
       group = options[:group] \
@@ -868,7 +870,7 @@ protected
       # Then update analytics
       IntercomEventWorker.perform_async({
         'event_name' => 'stripe-subscription-update',
-        'email' => user.email,
+        'email' => owner.email,
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => id.to_s,
