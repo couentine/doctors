@@ -559,7 +559,8 @@ class Group
         group.stripe_payment_retry_date = options[:payment_retry_date]
         group.save
 
-        if options[:queue_send_trial_ending_email]
+        if options[:queue_send_trial_ending_email] && subscription && subscription.plan \
+            && (subscription.plan.amount > 0)
           # Schedule a reminder email to go out 3 days before the trial expires
           GroupMailer.delay_until(group.subscription_end_date - 3.days, retry: 5, queue: 'low')\
             .trial_ending(group.id)
