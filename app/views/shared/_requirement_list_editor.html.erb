@@ -11,6 +11,7 @@
   var maxTagTitleLength = <%= Tag::MAX_NAME_LENGTH %>;
   var maxTagSummaryLength = <%= Tag::MAX_SUMMARY_LENGTH %>;
   var saveJSON = <%= @badge.new_record? %>; // always save if new otherwise only save if changed
+  var formButtonClicked = false;
 
   $(document).ready(function() {
     // Build the list
@@ -19,8 +20,26 @@
     // Associate the new button
     $("#rle-add-requirement").click(function(e) { addNewItem(); e.preventDefault(); });
 
-    // Save to JSON on form save event
-    $("form").submit(function() { if (saveJSON) saveListToJSON(); });
+    $("form").submit(function() { 
+      if (saveJSON) {
+        saveListToJSON(); // Save the JSON before saving
+        formButtonClicked = true; // For the sake of the beforeunload event below
+      }
+    });
+
+    // Cancel button should also bypass the warning message
+    $("#cancel-button").click(function() { formButtonClicked = true; });
+
+    // Queue up a warning message on page unload if there are unsaved changes
+    if (!isNewBadge) {
+      $(window).on('beforeunload', function () {
+          if (saveJSON && !formButtonClicked) {
+            return 'Warning: The changes you\'ve made to the requirements have not yet been saved. '
+              + 'If you leave the page now these changes will be lost. ';
+              + 'To save them click the blue "Update Badge" button below.';
+          }
+      });
+    }
   });
 
   // Builds requirement list DOM elements from the requirementList object

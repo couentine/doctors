@@ -119,9 +119,9 @@
     <% end %>
     <%= 
       if @badge.new_record?
-        link_to "Cancel", @group, class: "btn"
+        link_to "Cancel", @group, class: "btn", id: "cancel-button"
       else 
-        link_to "Cancel", group_badge_path(@group, @badge), class: "btn"
+        link_to "Cancel", group_badge_path(@group, @badge), class: "btn", id: "cancel-button"
       end
     %>
   </div>
