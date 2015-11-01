@@ -99,7 +99,13 @@ class Log
   # === LOG METHODS === #
 
   def to_param
-    user? ? user.username : _id
+    if user_username_with_caps
+      user_username_with_caps
+    elsif user
+      user.username_with_caps
+    else
+      _id
+    end
   end
 
   def set_flag(flag)

@@ -318,12 +318,12 @@ class Badge
 
   # Returns all non-validated logs, sorted by entry counts (user name would require queries)
   def learner_logs
-    logs.where(:validation_status.ne => 'validated', detached_log: false).desc(:next_entry_number)
+    logs.where(:validation_status.ne => 'validated', detached_log: false).asc(:user_name)
   end
 
   # Returns all validated logs, sorted by entry counts (user name would require queries)
   def expert_logs
-    logs.where(validation_status: 'validated', detached_log: false).desc(:next_entry_number)
+    logs.where(validation_status: 'validated', detached_log: false).asc(:user_name)
   end
 
   # Returns all learners who are currently requesting validation

@@ -132,7 +132,7 @@
           <% @requesting_learner_logs.each do |log| %>
             <tr>
               <td>
-                <%= link_to log.user.name, [@group, @badge, log], title: "View progress log"  %>
+                <%= link_to log.user_name, [@group, @badge, log], title: "View progress log"  %>
               </td>
               <td><%= (log.date_withdrawn || log.date_requested).to_s(:full_date_time) %></td>
               <td>
@@ -172,7 +172,7 @@
         <% @badge.new_expert_logs.each do |log| %>
           <tr>
             <td>
-              <%= link_to log.user.name, [@group, @badge, log], 
+              <%= link_to log.user_name, [@group, @badge, log], 
                 title: "View #{@badge.progress_log}"  %>
             </td>
             <td><%= log.date_issued.to_s(:full_date_time) %></td>
@@ -824,7 +824,7 @@
           <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="experts" 
                data-bl-dyncol-width="12">
 
-              <%= render @expert_logs, badge: @badge, group: @group, user_map: @user_map, \
+              <%= render @expert_logs, badge: @badge, group: @group, \
                 is_admin: (@current_user_is_admin || @badge_list_admin), show_email: @show_emails %>
 
           </div>
@@ -879,7 +879,7 @@
                   <ul class="dropdown-menu">
                     <% @requesting_learner_logs.take(10).each do |log| %>
                       <li>
-                        <%= link_to "#{log.user.name}" \
+                        <%= link_to "#{log.user_name}" \
                           + " (#{log.date_withdrawn.nil? ? 'Requested' : 'Withdrawn'}"\
                           + " #{(log.date_withdrawn || log.date_requested).to_s(:short_date)})",
                           [@group, @badge, log], title: 'Click to add your expertise',
@@ -911,7 +911,7 @@
           <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="learners" 
                data-bl-dyncol-width="12">
 
-              <%= render @learner_logs, badge: @badge, group: @group, user_map: @user_map, \
+              <%= render @learner_logs, badge: @badge, group: @group, \
                 is_admin: (@current_user_is_admin || @badge_list_admin), show_email: @show_emails %>
 
           </div>
