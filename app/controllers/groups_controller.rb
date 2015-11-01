@@ -65,6 +65,7 @@ class GroupsController < ApplicationController
   def show
     @badge_poller_id = params[:badge_poller]
     @join_code = params[:code]
+    @show_emails = (@current_user_is_admin || @badge_list_admin) && params[:show_emails]
 
     # Get paginated versions of members
     @member_page = params[:pm] || 1

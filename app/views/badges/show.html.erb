@@ -755,6 +755,16 @@
                     badge_issue_path(@group, @badge), class: 'btn btn-small', id: 'award-badge' %>
               <% end %>
             <% end %>
+            
+            <% if @current_user_is_admin || @badge_list_admin %>
+              <% if @show_emails %>
+                <%= link_to '<i class="fa fa-eye-slash"></i> Hide emails'.html_safe,
+                    group_badge_path(@group, @badge), class: 'btn btn-small' %>
+              <% else %>
+                <%= link_to '<i class="fa fa-eye"></i> Show emails'.html_safe,
+                    group_badge_path(@group, @badge, show_emails: true), class: 'btn btn-small' %>
+              <% end %>
+            <% end %>
 
             <% unless @new_expert_logs.blank? %>
               <div class="btn-group">
@@ -815,7 +825,7 @@
                data-bl-dyncol-width="12">
 
               <%= render @expert_logs, badge: @badge, group: @group, user_map: @user_map, \
-                is_admin: @current_user_is_admin %>
+                is_admin: (@current_user_is_admin || @badge_list_admin), show_email: @show_emails %>
 
           </div>
         </div>
@@ -847,6 +857,16 @@
 
               <%= link_to "<i class='fa fa-plus'></i> Invite #{@learners}".html_safe,
                   add_badge_learners_path(@group, @badge), class: 'btn btn-small' %>
+
+              <% if @current_user_is_admin || @badge_list_admin %>
+                <% if @show_emails %>
+                  <%= link_to '<i class="fa fa-eye-slash"></i> Hide emails'.html_safe,
+                      group_badge_path(@group, @badge), class: 'btn btn-small' %>
+                <% else %>
+                  <%= link_to '<i class="fa fa-eye"></i> Show emails'.html_safe,
+                      group_badge_path(@group, @badge, show_emails: true), class: 'btn btn-small' %>
+                <% end %>
+              <% end %>
             
               <% if @can_award_badge && !@requesting_learner_logs.blank? %>
                 <div class="btn-group">
@@ -892,7 +912,7 @@
                data-bl-dyncol-width="12">
 
               <%= render @learner_logs, badge: @badge, group: @group, user_map: @user_map, \
-                is_admin: @current_user_is_admin %>
+                is_admin: (@current_user_is_admin || @badge_list_admin), show_email: @show_emails %>
 
           </div>
         </div>

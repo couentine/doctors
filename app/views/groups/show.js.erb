@@ -1,5 +1,5 @@
 <% unless @members.blank? %>
-  updateDynamicColumnContents('members', '<%= escape_javascript render(@members) %>');
+  updateDynamicColumnContents('members', '<%= escape_javascript render(@members, group: @group, show_email: @show_emails, is_admin: (@current_user_is_admin || @badge_list_admin)) %>');
   $('#paginator-members').html('<%= escape_javascript(paginate(@members, remote: true, param_name: "pm").to_s) %>');
 <% end %>
 

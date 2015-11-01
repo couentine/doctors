@@ -1,5 +1,5 @@
-updateDynamicColumnContents('experts', '<%= escape_javascript render(@expert_logs, badge: @badge, group: @group, user_map: @user_map, is_admin: @current_user_is_admin) %>');
+updateDynamicColumnContents('experts', '<%= escape_javascript render(@expert_logs, badge: @badge, group: @group, user_map: @user_map, is_admin: (@current_user_is_admin || @badge_list_admin), show_email: @show_emails) %>');
 $('#paginator-experts').html('<%= escape_javascript(paginate(@expert_logs, remote: true, param_name: "pe").to_s) %>');
 
-updateDynamicColumnContents('learners', '<%= escape_javascript render(@learner_logs, badge: @badge, group: @group, user_map: @user_map, is_admin: @current_user_is_admin) %>');
+updateDynamicColumnContents('learners', '<%= escape_javascript render(@learner_logs, badge: @badge, group: @group, user_map: @user_map, is_admin: (@current_user_is_admin || @badge_list_admin), show_email: @show_emails) %>');
 $('#paginator-learners').html('<%= escape_javascript(paginate(@learner_logs, remote: true, param_name: "pl").to_s) %>');

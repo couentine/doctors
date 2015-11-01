@@ -684,7 +684,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
     <div class="span12">
       <div class="tab-header first-on-page">
         <% if @current_user_is_admin || @badge_list_admin %>
-          <%= link_to '<i class="fa fa-plus"></i> New Badge'.html_safe,
+          <%= link_to '<i class="fa fa-plus"></i> New badge'.html_safe,
               new_group_badge_path(@group), class: 'btn btn-small' %>
         <% end %>
 
@@ -753,9 +753,17 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
           
         <div class="tab-header">
           <% if @current_user_is_admin || @badge_list_admin %>
-            <%= link_to '<i class="fa fa-plus"></i> Add Members'.html_safe,
+            <%= link_to '<i class="fa fa-plus"></i> Add members'.html_safe,
                 add_group_members_path(@group), class: 'btn btn-small',
                 disabled: !@group.can_add_members? %>
+
+            <% if @show_emails %>
+              <%= link_to '<i class="fa fa-eye-slash"></i> Hide emails'.html_safe,
+                  group_path(@group), class: 'btn btn-small' %>
+            <% else %>
+              <%= link_to '<i class="fa fa-eye"></i> Show emails'.html_safe,
+                  group_path(@group, show_emails: true), class: 'btn btn-small' %>
+            <% end %>
 
             <% if @group.private? %>
               <a href="#subscription-details" data-toggle="modal">
@@ -836,7 +844,8 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
       <div class="row">
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
              data-bl-dyncol-width="12">
-            <%= render @members %>
+            <%= render @members, group: @group, show_email: @show_emails,
+              is_admin: (@current_user_is_admin || @badge_list_admin) %>
         </div>
       </div>
 
@@ -867,9 +876,17 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
         <div class="tab-header">
           <% if @current_user_is_admin || @badge_list_admin %>
             
-            <%= link_to '<i class="fa fa-plus"></i> Add Admins'.html_safe,
+            <%= link_to '<i class="fa fa-plus"></i> Add admins'.html_safe,
               add_group_admins_path(@group), class: 'btn btn-small', 
               disabled: !@group.can_add_admins? %>
+
+            <% if @show_emails %>
+              <%= link_to '<i class="fa fa-eye-slash"></i> Hide emails'.html_safe,
+                  group_path(@group), class: 'btn btn-small' %>
+            <% else %>
+              <%= link_to '<i class="fa fa-eye"></i> Show emails'.html_safe,
+                  group_path(@group, show_emails: true), class: 'btn btn-small' %>
+            <% end %>
 
             <% if @group.private? %>
               <a href="#subscription-details" data-toggle="modal">
@@ -944,7 +961,8 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
       <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="admins" 
            data-bl-dyncol-width="12">
 
-        <%= render @group.admins.asc(:name) %>
+        <%= render @group.admins.asc(:name), group: @group, show_email: @show_emails,
+              is_admin: (@current_user_is_admin || @badge_list_admin) %>
       
       </div>
     </div>

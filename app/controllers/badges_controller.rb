@@ -38,6 +38,7 @@ class BadgesController < ApplicationController
         @first_view_after_issued = @log && @log.has_flag?('first_view_after_issued')
         @new_expert_logs = @badge.new_expert_logs.includes(:user)
         @requesting_learner_logs = @badge.requesting_learner_logs.includes(:user)
+        @show_emails = (@current_user_is_admin || @badge_list_admin) && params[:show_emails]
 
         # Get paginated versions of member and expert logs
         @page_learners = params[:pl] || 1

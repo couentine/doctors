@@ -1,7 +1,7 @@
 <%
   # Object Variables = log, badge, group
   # Map[log_id] Variables = user_map
-  # Boolan Variables = is_admin
+  # Boolan Variables = is_admin, show_email
   
   user = user_map[log.id]
 
@@ -41,7 +41,11 @@
               <%= link_to user.name, "/#{group.to_param}/#{badge.to_param}/u/#{user.username}", 
                 title: "View progress log" %>
             </h2>
-            <h3><%= user.username %></h3>
+            <% if show_email %>
+              <h3 class="email"><%= user.email %></h3>
+            <% else %>
+              <h3 class="username"><%= user.username %></h3>
+            <% end %>
           </span>
           <span class="card-content">
             <ul class="metric-list">
