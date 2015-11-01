@@ -48,6 +48,11 @@ class Log
   field :current_username,                    type: String # used when logging wiki_versions
   field :flags,                               type: Array, default: []
 
+  field :user_name,                           type: String # local cache of user info
+  field :user_username,                       type: String # local cache of user info
+  field :user_username_with_caps,             type: String # local cache of user info
+  field :user_email,                          type: String # local cache of user info
+
   validates :badge, presence: true
   validates :user, presence: true
   validates :validation_status, inclusion: { in: VALIDATION_STATUS_VALUES, 
@@ -62,6 +67,7 @@ class Log
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_create :set_user_fields
   before_save :update_wiki_sections
   before_save :update_wiki_versions, on: :update # Don't store the first (default) value
   before_save :update_stati
@@ -234,6 +240,14 @@ class Log
     entries.where(type: 'validation').desc(:updated_at)
   end
 
+  # This updates all of the user info cache fields on the log from the supplied user record
+  def update_user_fields_from(user_record)
+    self.user_name = user_record.name
+    self.user_username = user_record.username
+    self.user_username_with_caps = user_record.username_with_caps
+    self.user_email = user_record.email
+  end
+
   # === ASYNC CLASS METHODS === #
 
   # This is called by send_notifications above in order to async the queueing of potentially
@@ -267,6 +281,10 @@ protected
   
   def set_default_values
     self.date_started ||= Time.now
+  end
+
+  def set_user_fields
+    update_user_fields_from user
   end
 
   # Updates validation & issue status values

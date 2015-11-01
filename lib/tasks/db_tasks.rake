@@ -724,4 +724,15 @@ namespace :db do
     puts " >> Done."
   end
 
+  task update_log_user_caches: :environment do
+    print "Updating logs for #{User.count} users"
+    
+    User.each do |user|
+      User.update_log_user_fields user.id
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end

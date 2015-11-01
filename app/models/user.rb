@@ -103,6 +103,7 @@ class User
   before_create :set_signup_flags
   after_create :convert_group_invitations
   before_save :update_identity_hash
+  after_update :update_logs
 
   # === CLASS METHODS === #
 
@@ -119,6 +120,19 @@ class User
     end
 
     user
+  end
+
+  # === ASYNC CLASS METHODS === #
+
+  # Update the cached user details on all related logs
+  def self.update_log_user_fields(user_id)
+    user = User.find(user_id)
+    user.logs.each do |log|
+      log.update_user_fields_from user
+      log.timeless.save
+    end
+
+    return user.logs.count
   end
 
   # === INSTANCE METHODS === #
@@ -613,6 +627,13 @@ protected
     if email_changed?
       self.identity_salt = SecureRandom.hex
       self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+    end
+  end
+
+  # Updates the cached user info on related logs if needed
+  def update_logs
+    if name_changed? || username_with_caps_changed? || email_changed?
+      User.delay(queue: 'low').update_log_user_fields(self.id)
     end
   end
 
