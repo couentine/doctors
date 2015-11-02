@@ -81,6 +81,7 @@ img.thumbnail {
 }
 
 .add-top-margin { margin-top: 30px; }
+.no-bottom-margin { margin-bottom: 0 !important; }
 .no-border { border: none !important; }
 
 @media (min-width: 768px) {
@@ -2101,6 +2102,25 @@ form#group-add-users-form {
       color: $light-white !important;
     }
   }
+
+  &.bar-style {
+    background-color: $light-text-color;
+    border-bottom: none;
+    color: white;
+
+    &.tertiary {
+      background-color: $tertiary-medium;
+
+      .btn {
+        background-color: $tertiary-really-light;
+        color: $tertiary-dark;
+      }
+    }
+
+    &.square-bottom {
+      border-radius: 2px 2px 0 0;
+    }
+  }
 }
 .tab-footer {
   margin: 20px 0;
@@ -3923,4 +3943,19 @@ div.entry-card .card-body-row {
     color: $secondary-medium;
     text-decoration: none;
   }
+}
+
+/*=== USERDECK FORMATTING ===*/
+
+.ud-guides {
+  background-color: white;
+  border: 1px solid #eee;
+  color: #3b3b3b;
+  border-radius: 0 0 5px 5px;
+  padding: 30px;
+  margin-top: -30px;
+}
+
+.ud-search-btn {
+  background-color: $light-text-color !important;
 }

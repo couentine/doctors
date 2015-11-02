@@ -47,4 +47,9 @@ class HomeController < ApplicationController
     render layout: 'website'
   end
 
+  # GET /help
+  def help
+    # render help.html.erb
+  end
+
 end

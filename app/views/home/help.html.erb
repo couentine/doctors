@@ -1,0 +1,36 @@
+<% 
+  provide(:full_title, "Badge List Help")
+%>
+
+<div class="tab-pane add-top-margin no-bottom-margin">
+  <div class="row">
+    <div class="span12">
+      <div class="tab-header bar-style tertiary square-bottom">
+        <% if current_user %>
+          <a href="#" class="btn btn-small" onclick="Intercom('show'); return false;">
+            <i class="fa fa-comments"></i> Chat with us
+          </a>
+        <% end %>
+
+        <h2>Badge List Help</h2>
+        <h3>
+          <a class="btn h3-btn" href="#">
+            <i class="fa fa-home"></i> 
+            <span class="collapse-when-small">Help home</span>
+          </a>
+        </h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <a href="http://userdeck.net/g/NzS2YoLZwx5B4rFs" id="my-guides"></a>
+    <script src="https://widgets.userdeck.com/guides.js"></script>
+    <script>
+        UserDeck.factory("guides", {"key":"NzS2YoLZwx5B4rFs","el":"#my-guides","settings":{"sidenav":{"search":{"visible":true,"placeholder":"Search"}}}});
+    </script>
+    <noscript><a href="http://userdeck.com">Customer Support Software</a></noscript>
+  </div>
+</div>

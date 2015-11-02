@@ -19,6 +19,7 @@ BadgeList::Application.routes.draw do
   match 'pricing-k12' => 'home#pricing_k12', via: :get, as: :pricing_k12
   match 'privacy-policy' => 'home#privacy_policy', via: :get, as: :privacy_policy
   match 'terms-of-service' => 'home#terms_of_service', via: :get, as: :terms_of_service
+  match 'help-staging' => 'home#help', via: :get, as: :help
 
   # === ADMIN PATHS === #
   scope '/a' do
