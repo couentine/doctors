@@ -9,11 +9,11 @@ class GroupsController < ApplicationController
 
   prepend_before_filter :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :destroy_user, :send_invitation, :destroy_invited_user, :add_users, 
-    :create_users]
+    :create_users, :clear_bounce_log]
   before_filter :authenticate_user!, except: [:show]
   before_filter :group_member_or_admin, only: [:leave]
   before_filter :group_admin, only: [:destroy_user, :destroy_invited_user, :add_users, 
-    :create_users]
+    :create_users, :clear_bounce_log]
   before_filter :group_owner, only: [:edit, :update, :destroy, :cancel_subscription]
   before_filter :badge_list_admin, only: [:index]
 
@@ -65,6 +65,7 @@ class GroupsController < ApplicationController
   def show
     @badge_poller_id = params[:badge_poller]
     @join_code = params[:code]
+    @bl_admin_mode = @badge_list_admin && params[:bl_admin_mode]
     @show_emails = (@current_user_is_admin || @badge_list_admin) && params[:show_emails]
 
     # Get paginated versions of members
@@ -327,14 +328,16 @@ class GroupsController < ApplicationController
   # DELETE /group-url/admins/2, :id = 1, :user_id = 2, :type = admin
   def destroy_user
     @user = User.find(params[:user_id])
-    notice = "That user is not a #{params[:type]}!"
+    @notice = "That user is not a #{params[:type]}!"
+    @is_error = true
     detached_log_count = 0
 
     if params[:type] == 'admin' && @group.has_admin?(@user)
       @group.admins.delete(@user)
       @group.members << @user
       @group.save
-      notice = "#{@user.name} has been downgraded from an admin to a member."
+      @notice = "#{@user.name} has been downgraded from an admin to a member."
+      @is_error = false
     elsif params[:type] == 'member' && @group.has_member?(@user)
       @group.members.delete(@user)
       @group.save
@@ -358,23 +361,30 @@ class GroupsController < ApplicationController
         log_to_detach.save!
         detached_log_count += 1
       end
-      notice = "#{@user.name} has been removed from the group members"
-      notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
-      notice += "."
+      @notice = "#{@user.name} has been removed from the group members"
+      @notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
+      @notice += "."
+      @is_error = false
     end
 
-    redirect_to @group, :notice => notice
+    respond_to do |format|
+      format.html { redirect_to @group, :notice => @notice }
+      format.js # destroy_user.js.erb
+    end
   end
 
   # POST /group-url/invited_members/{email}/invitation, :type = member
   # POST /group-url/invited_admins/{email}/invitation, :type = admin
   def send_invitation
-    email = params[:email].downcase
+    @email = params[:email].downcase
+    @notice = nil
     invited_users = params[:type] == 'admin' ? 
                                     @group.invited_admins : @group.invited_members
-    found_user = invited_users.detect { |u| u["email"] == email}
+    found_user = invited_users.detect { |u| u["email"] == @email}
 
     if found_user
+      email_inactive = User.get_inactive_email_list.include? @email
+
       # Query for the badges if param is included
       if found_user["badges"].blank?
         @badges, badge_ids = [], []
@@ -383,49 +393,83 @@ class GroupsController < ApplicationController
         badge_ids = @badges.map{ |b| b.id }
       end
 
-      if params[:type] == 'admin'
-        NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
-                                      current_user.id, @group.id, badge_ids)
+      if email_inactive
+        found_user[:invite_date] = nil
+        # Mock a bounce so that the group admins can see that the email wasn't sent
+        @group.log_bounced_email(user.email, Time.now, true)
       else
-        NewUserMailer.delay.group_member_add(found_user["email"], found_user["name"], 
-                                      current_user.id, @group.id, badge_ids)
+        if params[:type] == 'admin'
+          NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
+            current_user.id, @group.id, badge_ids)
+        else
+          NewUserMailer.delay.group_member_add(found_user["email"], found_user["name"], 
+            current_user.id, @group.id, badge_ids)
+        end
+        found_user[:invite_date] = Time.now
       end
-      found_user[:invite_date] = Time.now
 
       if !@group.save
-        notice = "There was a problem updating the group, please try again later."
+        @notice = "There was a problem updating the group, please try again later."
+      elsif email_inactive
+        @notice = "The email address #{@email} is currently blocked and cannot receive messages. " \
+          + "But the user will still be added to the group when they create a Badge List account."  
       else
-        notice = "Group invitation for #{email} has been sent."  
+        @notice = "Invitation resent"  
       end
     else
-      notice = "There's no pending group invitation for #{email}."
+      @notice = "There is no pending group invitation for #{@email}."
     end
 
-    redirect_to @group, :notice => notice
+    respond_to do |format|
+      format.html { redirect_to @group, :notice => @notice }
+      format.js # send_invitation.js.erb
+    end
   end
 
   # DELETE /group-url/invited_members/{email}, :type = member
   # DELETE /group-url/invited_admins/{email}, :type = admin
   def destroy_invited_user
-    email = params[:email].downcase
+    @email = params[:email].downcase
+    @notice = nil
     invited_users = params[:type] == 'admin' ? 
                                     @group.invited_admins : @group.invited_members
-    found_user = invited_users.detect { |u| u["email"] == email}
+    found_user = invited_users.detect { |u| u["email"] == @email}
 
     if found_user
       invited_users.delete(found_user)
       if !@group.save
-        notice = "There was a problem updating the group, please try again later."
+        @notice = "There was a problem updating the group, please try again later."
       else
-        notice = "Group invitation for #{email} has been revoked."  
+        @notice = "Group invitation for #{@email} has been revoked."  
       end
     else
-      notice = "There's no pending group invitation for #{email}."
+      @notice = "There's no pending group invitation for #{@email}."
     end
 
-    redirect_to @group, :notice => notice
+    respond_to do |format|
+      format.html { redirect_to @group, :notice => @notice }
+      format.js # destroy_invited_user.js.erb
+    end
   end
 
+  # POST /group-url/clear_bounce_log
+  def clear_bounce_log
+    @notice = nil
+    
+    if @group.bounced_email_log.blank?
+      @notice = "The bounced email log is already empty!"
+    else
+      @group.bounced_email_log = []
+
+      if @group.save
+        @notice = "The bounced email log has been cleared."  
+      else
+        @notice = "There was a problem updating the group, please try again later."
+      end
+    end
+
+    redirect_to @group, :notice => @notice
+  end
 
   # GET /group-url/members/add?type=member
   # GET /group-url/admins/add?type=admin
@@ -544,7 +588,13 @@ class GroupsController < ApplicationController
                   @group.admins << user
                   @badges.each { |badge| badge.add_learner user }
                   if @notify_by_email
-                    UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, badge_ids)
+                    if user.email_inactive
+                      # Mock a bounce so that the group admins can see that the email wasn't sent
+                      @group.log_bounced_email(user.email, Time.now, true)
+                    else
+                      UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, 
+                        badge_ids)
+                    end
                   end
                   if @group.has_member?(user)
                     @group.members.delete(user)
@@ -566,7 +616,13 @@ class GroupsController < ApplicationController
                   @group.members << user
                   @badges.each { |badge| badge.add_learner user }
                   if @notify_by_email
-                    UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, badge_ids)
+                    if user.email_inactive
+                      # Mock a bounce so that the group admins can see that the email wasn't sent
+                      @group.log_bounced_email(user.email, Time.now, true)
+                    else
+                      UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, 
+                        badge_ids)
+                    end
                   end
                   @new_member_emails << user.email
 
@@ -590,6 +646,7 @@ class GroupsController < ApplicationController
           # Check if the group variables need initialization
           @group.invited_admins = [] if @group.invited_admins.nil?
           @group.invited_members = [] if @group.invited_members.nil?
+          inactive_email_list = User.get_inactive_email_list
 
           # For new users: We will park them in an array of hashes on the group
           if params[:notify_by_email]
@@ -598,6 +655,7 @@ class GroupsController < ApplicationController
             invite_date = nil
           end
           emails_to_invite.each do |email|
+            email_inactive = inactive_email_list.include? email
             invited_user = {:email => email, 
               :name => name_from_email[email], :invite_date => invite_date }
             invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
@@ -613,16 +671,32 @@ class GroupsController < ApplicationController
                 @new_admin_emails << email
               end
               @group.invited_admins << invited_user
-              NewUserMailer.delay.group_admin_add(email, name_from_email[email],
-                current_user.id, @group.id, badge_ids) if @notify_by_email
+              
+              if @notify_by_email
+                if email_inactive
+                  # Mock a bounce so that the group admins can see that the email wasn't sent
+                  @group.log_bounced_email(email, Time.now, true)
+                else
+                  NewUserMailer.delay.group_admin_add(email, name_from_email[email],
+                    current_user.id, @group.id, badge_ids)
+                end
+              end
             else
               if @group.has_invited_member?(email)
                 @skipped_member_emails << email
               else
                 @group.invited_members << invited_user
                 @new_member_emails << email
-                NewUserMailer.delay.group_member_add(email, name_from_email[email],
-                  current_user.id, @group.id, badge_ids) if @notify_by_email
+                
+                if @notify_by_email
+                  if email_inactive
+                    # Mock a bounce so that the group admins can see that the email wasn't sent
+                    @group.log_bounced_email(email, Time.now, true)
+                  else
+                    NewUserMailer.delay.group_member_add(email, name_from_email[email],
+                      current_user.id, @group.id, badge_ids) 
+                  end
+                end
               end
             end
           end

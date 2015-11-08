@@ -735,4 +735,28 @@ namespace :db do
     puts " >> Done."
   end
 
+  task backpopulate_postmark_bounce_history: :environment do
+    print "Querying postmark for all email bounces"
+
+    all_bounces = []
+    postmark_client = Postmark::ApiClient.new(ENV['POSTMARK_API_KEY'])
+    postmark_client.bounces.each do |bounce|
+      all_bounces << bounce
+      print "."
+    end
+
+    puts " >> Done."
+
+    all_bounces.reverse! # We want them ordered from oldest to newest (which is backwards)
+
+    print "Processing #{all_bounces.count} queried bounces"
+    all_bounces.each do |bounce|
+      bounced_at = DateTime.parse(bounce[:bounced_at]) rescue Time.now
+      User.track_bounce(bounce[:email], bounce[:inactive], bounced_at, bounce[:id])
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end

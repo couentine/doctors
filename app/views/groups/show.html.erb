@@ -212,23 +212,35 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Invitation Sent</th>
+            <th>Invitation</th>
             <th>Badges</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <% @group.invited_members.each do |u| %>
-            <tr>
-              <td><%= u['name'] %></td>
-              <td><%= u['email'] %></td>
+            <%
+              if u['validations'].blank?
+                delete_confirmation_message = "Are you absolutely sure you want to revoke " \
+                  + "this user's invitation?"
+              else
+                delete_confirmation_message = "Are you absolutely sure you want to revoke " \
+                  + "this user's invitation? (WARNING: This invited user has been issued " \
+                  + "badges. Those badge validations will be lost if you revoke the " \
+                  + "invitation.)"
+              end
+            %>
+            <tr class="invited-member-row" data-email="<%= u['email'] %>">
               <td>
-                <%= u['invite_date'] ? 
-                      u['invite_date'].to_s(:short_date_time) 
-                      : 'No invitation sent yet' 
-                %>
+                <%= u['email'] %>
+                <i class="fa fa-refresh fa-spin" data-email="<%= u['email'] %>" 
+                  style="display: none;"></i>
+                <br>
+                <span class="invitation-status">
+                  <%= u['invite_date'] ? 
+                        "Invited #{u['invite_date'].to_s(:short_date_time)}"
+                        : 'No invitation sent yet' %>
+                </span>
               </td>
               <td>
                 <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
@@ -236,28 +248,20 @@
                   .join(', ') unless u['validations'].blank? %>
               </td>
               <td>
-                <%
-                  if u['validations'].blank?
-                    delete_confirmation_message = "Are you absolutely sure you want to revoke " \
-                      + "this user's invitation?"
-                  else
-                    delete_confirmation_message = "Are you absolutely sure you want to revoke " \
-                      + "this user's invitation? (WARNING: This invited user has been issued " \
-                      + "badges. Those badge validations will be lost if you revoke the " \
-                      + "invitation.)"
-                  end
-                %>
-                <%= link_to '<i class="fa fa-envelope"></i>'.html_safe, 
-                    send_group_member_invitation_path(@group, u['email']), :method => :post,
-                    title: 'Resend invitation email' %> 
-                <%= link_to '<i class="fa fa-remove"></i>'.html_safe, 
-                    destroy_group_invited_member_path(@group, u['email']), :method => :delete,
-                    title: 'Revoke invitation', data: { 
-                    confirm: delete_confirmation_message } %>
+                <%= link_to '<i class="fa fa-envelope"></i> Resend'.html_safe, 
+                  send_group_member_invitation_path(@group, u['email']), :method => :post,
+                  title: 'Resend invitation email', remote: true,
+                  data: { toggle: 'tooltip', spinner: ".fa-spin[data-email='#{u['email']}']" }, 
+                  class: 'btn btn-small resend-button', style: 'margin-bottom: 6px;' %><br>
+                <%= link_to '<i class="fa fa-remove"></i> Revoke'.html_safe, 
+                  destroy_group_invited_member_path(@group, u['email']), :method => :delete,
+                  title: 'Revoke invitation', class: 'btn btn-small revoke-button', remote: true,
+                  data: { confirm: delete_confirmation_message, toggle: 'tooltip',
+                    spinner: ".fa-spin[data-email='#{u['email']}']" } %>
               </td>
             </tr>
           <% end %>
-      </tbody>
+        </tbody>
       </table>
     </div>
 
@@ -279,23 +283,35 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Invitation Sent</th>
+            <th>Invitation</th>
             <th>Badges</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <% @group.invited_admins.each do |u| %>
-            <tr>
-              <td><%= u['name'] %></td>
-              <td><%= u['email'] %></td>
+            <%
+              if u['validations'].blank?
+                delete_confirmation_message = "Are you absolutely sure you want to revoke " \
+                  + "this user's invitation?"
+              else
+                delete_confirmation_message = "Are you absolutely sure you want to revoke " \
+                  + "this user's invitation? (WARNING: This invited user has been issued " \
+                  + "badges. Those badge validations will be lost if you revoke the " \
+                  + "invitation.)"
+              end
+            %>
+            <tr class="invited-admin-row" data-email="<%= u['email'] %>">
               <td>
-                <%= u['invite_date'] ? 
-                      u['invite_date'].to_s(:short_date_time) 
-                      : 'No invitation sent yet' 
-                %>
+                <%= u['email'] %>
+                <i class="fa fa-refresh fa-spin" data-email="<%= u['email'] %>" 
+                  style="display: none;"></i>
+                <br>
+                <span class="invitation-status">
+                  <%= u['invite_date'] ? 
+                        "Invited #{u['invite_date'].to_s(:short_date_time)}"
+                        : 'No invitation sent yet' %>
+                </span>
               </td>
               <td>
                 <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
@@ -303,24 +319,16 @@
                   .join(', ') unless u['validations'].blank? %>
               </td>
               <td>
-                <%
-                  if u['validations'].blank?
-                    delete_confirmation_message = "Are you absolutely sure you want to revoke " \
-                      + "this user's invitation?"
-                  else
-                    delete_confirmation_message = "Are you absolutely sure you want to revoke " \
-                      + "this user's invitation? (WARNING: This invited user has been issued " \
-                      + "badges. Those badge validations will be lost if you revoke the " \
-                      + "invitation.)"
-                  end
-                %>
-                <%= link_to '<i class="fa fa-envelope"></i>'.html_safe, 
-                    send_group_admin_invitation_path(@group, u['email']), :method => :post,
-                    title: 'Resend invitation email' %> 
-                <%= link_to '<i class="fa fa-remove"></i>'.html_safe, 
-                    destroy_group_invited_admin_path(@group, u['email']), :method => :delete,
-                    title: 'Revoke invitation', data: { 
-                    confirm: delete_confirmation_message } %>
+                <%= link_to '<i class="fa fa-envelope"></i> Resend'.html_safe, 
+                  send_group_admin_invitation_path(@group, u['email']), :method => :post,
+                  title: 'Resend invitation email', remote: true,
+                  data: { toggle: 'tooltip', spinner: ".fa-spin[data-email='#{u['email']}']" }, 
+                  class: 'btn btn-small resend-button', style: 'margin-bottom: 6px;' %><br>
+                <%= link_to '<i class="fa fa-remove"></i> Revoke'.html_safe, 
+                  destroy_group_invited_admin_path(@group, u['email']), :method => :delete,
+                  title: 'Revoke invitation', class: 'btn btn-small revoke-button', remote: true,
+                  data: { confirm: delete_confirmation_message, toggle: 'tooltip',
+                    spinner: ".fa-spin[data-email='#{u['email']}']" } %>
               </td>
             </tr>
           <% end %>
@@ -663,6 +671,14 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                                 + 'you want to permanently delete this group?' } %>
                           </li>
                         <% end %>
+                        
+                        <% if @badge_list_admin %>
+                          <li class="divider"></li>
+                          <li>
+                              <%= link_to '<i class="fa fa-cog"></i> BL Admin Mode'.html_safe,
+                                  group_path(@group, bl_admin_mode: true) %>
+                          </li>
+                        <% end %>
                       </ul>
                     </div>
                   </li>
@@ -675,6 +691,73 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
     </div>
   </div>
 </div>
+
+
+<% if (@current_user_is_admin || @badge_list_admin) && !@group.bounced_email_log.blank? %>
+  
+  <!-- === EMAIL BOUNCE ALERT === -->
+
+  <div class="alert alert-error below-header-bar">
+    <strong>
+      <i class="fa fa-envelope"></i>
+      <i class="fa fa-exclamation"></i>&nbsp;&nbsp;
+      <%= @group.bounced_email_log.count %> emails have bounced
+    </strong>
+    to users in your group recently.
+    <a href="#bounced-email-log" class="btn btn-small ignore" data-toggle="modal">
+      Click here to view
+    </a>
+  </div>
+
+  <div id="bounced-email-log" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Bounced Email Log<h3>
+    </div>
+
+    <div class="modal-body">
+      <p>
+        This log records recent emails which could not be delivered to members of your group.
+        Emails are usually bounced either due to mistyped email addresses or due to filters
+        configured by the administrator of the user's email domain. 
+        Please reach out to Badge List support if you have any questions.
+      </p>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Bounced At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @group.bounced_email_log.each do |item| %>
+            <tr>
+              <td>
+                <%= item['email'] %>
+              </td>
+              <td>
+                <% if item['bounced_at'] && (item['bounced_at'].class == Time) %>
+                  <%= item['bounced_at'].to_s(:short_date_time) %>
+                <% else %>
+                  Unknown
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      <%= link_to 'Clear the log', clear_bounce_log_path(@group), method: :post, class: 'btn' %>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+<% end %>
+
 
 <!-- === BADGES TAB === -->
 
@@ -845,6 +928,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
              data-bl-dyncol-width="12">
             <%= render @members, group: @group, show_email: @show_emails,
+              bl_admin_mode: @bl_admin_mode, 
               is_admin: (@current_user_is_admin || @badge_list_admin) %>
         </div>
       </div>
@@ -962,7 +1046,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
            data-bl-dyncol-width="12">
 
         <%= render @group.admins.asc(:name), group: @group, show_email: @show_emails,
-              is_admin: (@current_user_is_admin || @badge_list_admin) %>
+          bl_admin_mode: @bl_admin_mode, is_admin: (@current_user_is_admin || @badge_list_admin) %>
       
       </div>
     </div>

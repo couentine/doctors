@@ -1,9 +1,23 @@
 <%
   # Object Variables = group
-  # Boolan Variables = is_admin, show_email
+  # Boolan Variables = is_admin, show_email, bl_admin_mode
 %>
 
-<div class="info-card user-card fixed-height" data-bl-dyncol="child">
+<div class="info-card user-card fixed-height" data-bl-dyncol="child" 
+    id="user-card-<%= user.username %>">
+  <div class="spinner-wrapper" style="display: none;" id="user-spinner-<%= user.username %>">
+    <i class="fa fa-refresh fa-spin spinner-icon"></i>
+  </div>
+  <div class="dark-overlay" style="display: none;">
+    <div class="overlay-inner">
+      <span class="overlay-icon">
+        <i class="fa fa-trash-o"></i>
+      </span>
+      <span class="overlay-text">
+        This user has been removed
+      </span>
+    </div>
+  </div>
   <table>
     <tr class="card-body-row">
       <td class="card-image" style="background-image: url('<%= gravatar_url_for user, :size => 150 %>')">
@@ -31,21 +45,78 @@
                 end
 
                 if path
-                  link_to '<i class="icon-remove"></i>'.html_safe, path,
+                  link_to '<i class="icon-remove"></i>'.html_safe, path, remote: true,
                           method: :delete, class: "user-card-delete", title: link_title,
-                          data: { toggle: "tooltip", placement: "bottom", confirm: link_confirm }
+                          data: { toggle: "tooltip", placement: "bottom", confirm: link_confirm,
+                            spinner: "#user-spinner-#{user.username}" }
                 end
               end 
             %>
           </span>
 
           <h2><%= link_to user.name, user, title: "View user profile" %></h2>
-          <% if show_email %>
+          <% if show_email || bl_admin_mode %>
             <h3><%= user.email %></h3>
           <% else %>
             <h3><%= user.username %></h3>
           <% end %>
         </span>
+
+        <% if bl_admin_mode %>
+          <span class="card-content">
+            <ul class="metric-list">
+              <% if user.email_inactive %>
+                <li data-toggle="tooltip" title="Unblock email" class="bl-admin-unblock">
+                  <%= link_to "<i class='fa fa-envelope-square'></i>".html_safe,
+                    user_unblock_path(user), method: :post, remote: true, 
+                    data: { spinner: "#user-spinner-#{user.username}" } %>
+                </li>
+              <% end %>
+              <% if !user.confirmed? %>
+                <li data-toggle="tooltip" title="Manually confirm account" class="bl-admin-confirm">
+                  <%= link_to "<i class='fa fa-check-square'></i>".html_safe,
+                    user_confirm_path(user), method: :post, remote: true, 
+                    data: { spinner: "#user-spinner-#{user.username}" } %>
+                </li>
+              <% end %>
+            </ul>
+          </span>
+        <% elsif is_admin %>
+          <% 
+            if user.email_inactive
+              tt = "Badge List's servers have been unable to deliver mail to #{user.email} " \
+                + "and the email address is now blocked. " \
+                + "Please contact support if you have any questions."
+            elsif (user.email_bounces || 0) > 0
+              tt = "Badge List's servers have been unable to deliver #{user.email_bounces} " \
+                + " emails to #{user.email} in the past 30 days. " \
+                + "If this continues the email address may be blocked. " \
+                + "Please contact support if you have any questions."
+            end
+          %>
+          <span class="card-content">
+            <ul class="metric-list">
+              <% if user.email_inactive %>
+                <li data-toggle="tooltip" title="<%= tt %>">
+                  <i class="fa fa-envelope red"></i>
+                </li>
+                <li data-toggle="tooltip" title="<%= tt %>">
+                  <i class="fa fa-ban red"></i>
+                </li>
+              <% elsif (user.email_bounces || 0) > 0 %>
+                <li data-toggle="tooltip" title="<%= tt %>">
+                  <i class="fa fa-envelope orange"></i>
+                </li>
+                <li data-toggle="tooltip" title="<%= tt %>">
+                  <i class="fa fa-exclamation orange"></i>
+                </li>
+              <% else %>
+                <li> &nbsp; </li> <!-- Ensures that the card is the right height when empty. -->
+              <% end %>
+            </ul>
+          </span>
+        <% end %>
+
         <span class="card-footline">
           Joined <%= user.created_at.to_s(:full_date) %>
         </span>

@@ -34,9 +34,19 @@
               data-toggle="dropdown" data-target="#">
             <%= gravatar_for current_user, :size => 23, :class => 'img-circle' %>
             <span id="header-currentuser-name"><%= current_user.name %></span>
+            <% if current_user.email_inactive %>
+              <i class="fa fa-exclamation-triangle red"></i>
+            <% end %>
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-header-currentuser">
+            <% if current_user.email_inactive %>
+              <li>
+                <a href="<%= edit_user_registration_path %>">
+                  <i class="fa fa-exclamation-triangle red"></i> Email blocked
+                </a>
+              </li>
+            <% end %>
             <li>
               <a href="<%= url_for(current_user) %>">
                 <i class="fa fa-shield"></i> Badge profile

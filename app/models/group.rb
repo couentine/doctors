@@ -17,6 +17,8 @@ class Group
   PENDING_TRANSFER_FLAG = 'pending_transfer'
   PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
 
+  BOUNCED_EMAIL_LOG_MAX_LENGTH = 100
+
   # === INSTANCE VARIABLES === #
 
   attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
@@ -43,6 +45,7 @@ class Group
   field :validation_threshold,        type: Integer, default: 1
   field :invited_admins,              type: Array, default: []
   field :invited_members,             type: Array, default: []
+  field :bounced_email_log,           type: Array, default: []
   field :flags,                       type: Array, default: []
   field :new_owner_username,          type: String
   field :previous_owner_id,           type: String
@@ -247,6 +250,13 @@ class Group
   # Returns whether or not the features array contains the specified 'feature' or :feature
   def has?(feature)
     !features.blank? && features.include?(feature.to_s)
+  end
+
+  # This method will append the passed item to the bounced email log and automatically shorten
+  # the log if it is over BOUNCED_EMAIL_LOG_MAX_LENGTH.
+  def log_bounced_email(email, bounced_at, is_inactive)
+    self.bounced_email_log << { email: email, bounced_at: bounced_at, is_inactive: is_inactive }
+    self.bounced_email_log = bounced_email_log.last(BOUNCED_EMAIL_LOG_MAX_LENGTH)
   end
 
   # Returns the name of this subscription plan or just the id
@@ -769,7 +779,9 @@ protected
         end
 
         # Notify the new owner
-        GroupMailer.delay(queue: 'low').group_transfer(id)
+        unless new_owner.email_inactive
+          GroupMailer.delay(queue: 'low').group_transfer(id)
+        end
       end
       self.new_owner_username = nil
     end
@@ -809,7 +821,7 @@ protected
           self.subscription_end_date = 2.weeks.from_now
 
           # Notify the user that their group is canceled
-          GroupMailer.delay(retry: 10, queue: 'low').subscription_canceled(id)
+          GroupMailer.delay(retry: 5, queue: 'low').subscription_canceled(id)
         else
           set_flag PENDING_SUBSCRIPTION_FLAG
         end

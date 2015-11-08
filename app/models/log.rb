@@ -278,8 +278,10 @@ class Log
 
     # Now query the users and send them each an email
     User.where(:id.in => user_ids_to_email).each do |user_to_email|
-      UserMailer.delay.log_validation_request(user_to_email.id, validated_log.user.id, \
-        badge.group_id, badge.id, validated_log.id) 
+      unless user_to_email.email_inactive
+        UserMailer.delay.log_validation_request(user_to_email.id, validated_log.user.id, \
+          badge.group_id, badge.id, validated_log.id) 
+      end
     end
   end
 
@@ -433,14 +435,18 @@ protected
       if (validation_status == 'requested') && badge.send_validation_request_emails
         Log.delay(queue: 'mailer').do_send_validation_requests(id)
       elsif validation_status == 'validated'
-        UserMailer.delay.log_badge_issued(user.id, badge.group_id, badge.id, self.id) 
+        unless user.email_inactive
+          UserMailer.delay.log_badge_issued(user.id, badge.group_id, badge.id, self.id) 
+        end
       end
     end
 
     if issue_status_changed? && (updated_at > (Time.now - 1.hour))
       if issue_status == 'retracted'
-        UserMailer.delay.log_badge_retracted(user.id, badge.group_id, badge.id, self.id) 
-
+        unless user.email_inactive
+          UserMailer.delay.log_badge_retracted(user.id, badge.group_id, badge.id, self.id) 
+        end
+        
         # Update analytics
         IntercomEventWorker.perform_async({
           'event_name' => 'badge-retracted',

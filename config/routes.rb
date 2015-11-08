@@ -34,6 +34,7 @@ BadgeList::Application.routes.draw do
   
   # === WEBHOOK PATHS === #
   match 'h/stripe_event' => 'webhooks#stripe_event', via: :post
+  match 'h/postmark_bounce' => 'webhooks#postmark_bounce', via: :post
 
   # === POLLER PATHS === #
   match 'p/:id' => 'pollers#show', via: :get, as: :poller
@@ -47,12 +48,15 @@ BadgeList::Application.routes.draw do
   match 'users/cards' => 'users#refresh_cards', via: :get, as: :refresh_cards
   match 'users/card/:id' => 'users#delete_card', via: :delete, as: :delete_card
   match 'users/payments' => 'users#payment_history', via: :get, as: :payment_history
+  match 'u/:id/confirm_account' => 'users#confirm_account', via: :post, as: :user_confirm
+  match 'u/:id/unblock_email' => 'users#unblock_email', via: :post, as: :user_unblock
 
   # === MANUAL GROUP PATHS === #
   match ':group_id/cancel' => 'groups#cancel_subscription', via: :post, as: :cancel_subscription
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group
   match ':group_id/join' => 'groups#join', via: :get
   match ':group_id/leave' => 'groups#leave', via: :delete, as: :leave_group
+  match ':group_id/clear_bounce_log' => 'groups#clear_bounce_log',via: :post,as: :clear_bounce_log
   match ':group_id/members/:user_id' => 'groups#destroy_user', 
         via: :delete, as: :destroy_group_member, defaults: { type: 'member' }
   match ':group_id/admins/:user_id' => 'groups#destroy_user', 

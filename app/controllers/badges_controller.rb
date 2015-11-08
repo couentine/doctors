@@ -229,15 +229,9 @@ class BadgesController < ApplicationController
         new_learner_log = @badge.add_learner(user)
         new_learner_count += 1
         
-        if @notify_by_email
-          begin
-            UserMailer.delay.log_new(user.id, current_user.id, @group.id, @badge.id, \
-              new_learner_log.id) 
-          rescue Exception => e
-            logger.error "+++badges_controller.create_learners: " \
-            + "There was an error sending an email to #{user}. " \
-            + "Exception = #{e.inspect}+++"
-          end
+        if @notify_by_email && !user.email_inactive
+          UserMailer.delay.log_new(user.id, current_user.id, @group.id, @badge.id, \
+            new_learner_log.id)
         end
       end
     end unless params[:usernames].blank?
@@ -305,24 +299,20 @@ class BadgesController < ApplicationController
             validations: [{ badge: @badge.url, summary: @summary, body: @body, user: current_user._id }] }
         end
 
-        # send the email and then save the group (if there's no error sending the email)
-        begin
-          NewUserMailer.delay.badge_issued(@email, nil, current_user.id, @group.id, @badge.id)
-          @group.save!
+        # Save the changes to the group and send the email (if not blocked)
+        @group.save!
+        if User.get_inactive_email_list.include? @email
           redirect_to [@group, @badge], 
-            notice: "A notice of badge achievement was sent to #{@email}. " \
-            + "Note: The user will have to create a Badge List account to accept the badge."
-        rescue Postmark::InvalidMessageError
-          logger.error "+++badges_controller.issue_save: " \
-            + "There was an INVALID MESSAGE ERROR while sending an email to #{@email}."
-          flash[:error] = "There was an error issuing the badge to the following email address: #{@email}."
-          render 'issue_form' 
-        rescue Exception => e
-          logger.error "+++badges_controller.issue_save: " \
-            + "There was an error sending an email to #{@email}. " \
-            + "Exception = #{e.inspect}+++"
-          flash[:error] = "There was an error issuing the badge to the following email address: #{@email}."
-          render 'issue_form'  
+            notice: "The badge has been awarded, but the recipient's email address "\
+            + "(#{@email}) is currently blocked so they will not receive an email notification. " \
+            + "They will still receive the badge automatically once they create a Badge List " \
+            + "account. Please reach out to support with any questions."
+        else
+          NewUserMailer.delay.badge_issued(@email, nil, current_user.id, @group.id, @badge.id)
+          redirect_to [@group, @badge], 
+            notice: "The badge has been awarded and the recipient has been notified "\
+            + "at #{@email}. As soon as the recipient creates a Badge List account, they will " \
+            + "be able to accept the badge."
         end
       elsif user.expert_of? @badge
         flash[:error] = "#{user.name} is already a badge expert! You can't issue them the badge twice."
@@ -348,8 +338,14 @@ class BadgesController < ApplicationController
         @group.save
         log = @badge.add_learner user
         log.add_validation current_user, @summary, @body, true
-        redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
-          + "added as a group member."
+        if user.email_inactive
+          redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
+            + "added as a group member. (Note: The user's email address is currently blocked " \
+            + "so they will not receive any email notifications.)"
+        else
+          redirect_to [@group, @badge], notice: "#{user.name} has been issued the badge and " \
+            + "added as a group member."
+        end
 
         # Then update analytics
         IntercomEventWorker.perform_async({

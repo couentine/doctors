@@ -10,6 +10,9 @@ class User
   MAX_USERNAME_LENGTH = 15
   JSON_FIELDS = [:name, :username, :username_with_caps]
 
+  INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'
+  MAX_EMAIL_BOUNCES = 3
+  EMAIL_BOUNCE_MEMORY = 14 # days
   HALF_OFF_FLAG = '50_percent_off'
 
   # === RELATIONSHIP === #
@@ -35,6 +38,10 @@ class User
   field :last_active_at,                type: Time # RETIRED
   field :active_months,                 type: Array # RETIRED
   field :page_views,                    type: Hash # RETIRED
+  field :email_inactive,                type: Boolean, default: false
+  field :email_bounces,                 type: Integer, default: 0
+  field :last_email_bounce_at,          type: Time
+  field :inactive_email_bounce_id,      type: Integer
 
   field :identity_hash,                 type: String
   field :identity_salt,                 type: String
@@ -101,8 +108,10 @@ class User
 
   before_validation :update_caps_field
   before_create :set_signup_flags
+  before_create :check_for_inactive_email
   after_create :convert_group_invitations
   before_save :update_identity_hash
+  before_update :process_email_change
   after_update :update_logs
 
   # === CLASS METHODS === #
@@ -120,6 +129,117 @@ class User
     end
 
     user
+  end
+
+  def self.get_inactive_email_list
+    inactive_email_list_item = InfoItem.find_by(key: INACTIVE_EMAIL_LIST_KEY) rescue nil
+    (inactive_email_list_item) ? (inactive_email_list_item.data['emails'] || []) : []
+  end
+
+  # Call this method to track a bounce of the passed email address
+  # If is_inactive is true this will block the email, otherwise it will track a bounce
+  # and potentially block the email if it's over the limit.
+  def self.track_bounce(email, is_inactive, bounced_at, bounce_id)
+    # First query for the user and the inactive email list (and create the list if missing)
+    user = User.find_by(email: email) rescue nil
+    inactive_email_list_item = InfoItem.find_by(key: INACTIVE_EMAIL_LIST_KEY) rescue nil
+    unless inactive_email_list_item
+      inactive_email_list_item = InfoItem.new
+      inactive_email_list_item.type = 'list'
+      inactive_email_list_item.name = 'Inactive Email List'
+      inactive_email_list_item.key = INACTIVE_EMAIL_LIST_KEY
+      inactive_email_list_item.data = { 'emails' => [] }
+      inactive_email_list_item.save
+    end
+    block_this_email = is_inactive
+    groups_to_update = []
+
+    # Now take the actions which are specific to whether or not there is a user record
+    if user
+      # First track the bounce count on the user record
+      if user.last_email_bounce_at.nil? \
+          || (user.last_email_bounce_at < (bounced_at - EMAIL_BOUNCE_MEMORY.days))
+        # Then "forget" the bounces and overwrite the existing fields
+        user.email_bounces = 1
+        user.last_email_bounce_at = bounced_at
+      else
+        # Increment the bounce count and check if we're over the threshold
+        user.email_bounces = (user.email_bounces || 0) + 1
+        user.last_email_bounce_at = [bounced_at, user.last_email_bounce_at].max
+        block_this_email ||= (user.email_bounces > MAX_EMAIL_BOUNCES)
+      end
+
+      # We'll log the bounce on all member and admin groups
+      # NOTE FOR IMPROVEMENT: If they are in multiple groups this will result in duplicate info
+      groups_to_update = Group.any_of(
+        { :id.in => user.admin_of_ids },
+        { :id.in => user.member_of_ids }
+      )
+
+      # Then set inactive details if needed
+      user.inactive_email_bounce_id = bounce_id if is_inactive
+      user.email_inactive = true if block_this_email
+      
+      user.save
+    else
+      # We'll log the bounce on all invitet member and admin groups
+      groups_to_update = Group.any_of(
+        { :invited_admins.elem_match => { :email => email } },
+        { :invited_members.elem_match => { :email => email } }
+      )
+    end
+
+    # Run through the groups that need updating
+    groups_to_update.each do |group|
+      group.log_bounced_email(email, bounced_at, is_inactive)
+      group.timeless.save
+    end
+
+    # Finally add the current email to the inactive email list if needed
+    if block_this_email && !inactive_email_list_item.data['emails'].include?(email)
+      inactive_email_list_item.data['emails'] << email
+      inactive_email_list_item.save
+    end
+  end
+
+  # Call this method to unblock the passed email address
+  # NOTE: Set include_postmark to attempt to activate bounce if there's a user record & bounce id
+  def self.unblock_email(email, include_postmark = false)
+    # First query for the user and the inactive email list (and create the list if missing)
+    user = User.find_by(email: email) rescue nil
+    inactive_email_list_item = InfoItem.find_by(key: INACTIVE_EMAIL_LIST_KEY) rescue nil
+    unless inactive_email_list_item
+      inactive_email_list_item = InfoItem.new
+      inactive_email_list_item.type = 'list'
+      inactive_email_list_item.name = 'Inactive Email List'
+      inactive_email_list_item.key = INACTIVE_EMAIL_LIST_KEY
+      inactive_email_list_item.data = { 'emails' => [] }
+      inactive_email_list_item.save
+    end
+    
+    # Next remove the current email from the inactive email list if needed
+    if inactive_email_list_item.data['emails'].include? email
+      inactive_email_list_item.data['emails'].delete email
+      inactive_email_list_item.save
+    end
+    
+    if user
+      # First update postmark if needed
+      if include_postmark && user.inactive_email_bounce_id
+        begin
+          postmark_client = Postmark::ApiClient.new(ENV['POSTMARK_API_KEY'])
+          postmark_client.activate_bounce(user.inactive_email_bounce_id)
+          user.inactive_email_bounce_id = nil
+        rescue Exception => e
+          logger.error "#=== User.unblock_email: Error unblocking #{email}. Error Msg: '#{e}'. ===#"
+        end
+      end
+      
+      # Set remaining fields and save
+      user.email_inactive = false
+      user.email_bounces = 0
+      user.save
+    end
   end
 
   # === ASYNC CLASS METHODS === #
@@ -551,6 +671,12 @@ protected
     end
   end
 
+  def check_for_inactive_email
+    if User.get_inactive_email_list.include? email
+      self.email_inactive = true
+    end
+  end
+
   # Finds any references to this user's email in the invited_admins/users arrays on groups.
   # When found it upgrades the invitation to an actual relationship.
   def convert_group_invitations
@@ -627,6 +753,15 @@ protected
     if email_changed?
       self.identity_salt = SecureRandom.hex
       self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+    end
+  end
+
+  def process_email_change
+    if email_changed?
+      self.email_inactive = false
+      self.email_bounces = 0
+      self.last_email_bounce_at = nil
+      self.inactive_email_bounce_id = nil
     end
   end
 

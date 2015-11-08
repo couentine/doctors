@@ -101,7 +101,7 @@ class LogsController < ApplicationController
         is_error = @log.new_record?
         if is_error
           message = 'An error occured while trying to create a progress log for you.' 
-        else
+        elsif !current_user.email_inactive
           UserMailer.delay.log_new(current_user.id, current_user.id, @group.id, @badge.id, @log.id)
         end
       end

@@ -34,6 +34,7 @@ var richTextEditors = [];
 
 $(document).ready(function() {
     checkForTooltips();
+    checkForSpinnerLinks();
     disableLinks();
     addAnchorsToPaginateLinks();
     initializeDynamicColumns();
@@ -68,6 +69,12 @@ function checkForTooltips() {
     });
   // Now activate the tooltip for the default focus element (if applicable)
   $('input[data-toggle=tooltip]:focus').tooltip('show');
+}
+
+function checkForSpinnerLinks() {
+  $("[data-spinner]").click(function() {
+    $($(this).data("spinner")).fadeIn();
+  });
 }
 
 // This checks the page for items with data-mark-overflow
