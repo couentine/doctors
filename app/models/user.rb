@@ -701,7 +701,7 @@ protected
         validating_user = User.find(v["user"]) rescue nil
         summary, body = v["summary"], v["body"]
 
-        unless badge.nil? || validating_user.nil? || summary.blank? || body.blank?
+        unless badge.nil? || validating_user.nil? || summary.blank?
           log = badge.add_learner self # does nothing but return the log if already added as learner
           log.add_validation validating_user, summary, body, true
         end
@@ -741,7 +741,7 @@ protected
         validating_user = User.find(v["user"]) rescue nil
         summary, body = v["summary"], v["body"]
 
-        unless badge.nil? || validating_user.nil? || summary.blank? || body.blank?
+        unless badge.nil? || validating_user.nil? || summary.blank?
           log = badge.add_learner self # does nothing but return the log if already added as learner
           log.add_validation validating_user, summary, body, true
         end
