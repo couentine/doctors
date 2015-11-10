@@ -78,7 +78,4 @@ BadgeList::Application.configure do
       :exception_recipients => %w{hank@kstreem.com}
     }
 
-  # Update the inactive email list from postmark
-  User.delay(queue: 'low').sync_postmark_bounces
-
 end
