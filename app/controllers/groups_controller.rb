@@ -12,9 +12,9 @@ class GroupsController < ApplicationController
     :create_users, :clear_bounce_log]
   before_filter :authenticate_user!, except: [:show]
   before_filter :group_member_or_admin, only: [:leave]
-  before_filter :group_admin, only: [:destroy_user, :destroy_invited_user, :add_users, 
+  before_filter :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
-  before_filter :group_owner, only: [:edit, :update, :destroy, :cancel_subscription]
+  before_filter :group_owner, only: [:edit, :destroy, :cancel_subscription]
   before_filter :badge_list_admin, only: [:index]
 
   # === CONSTANTS === #
