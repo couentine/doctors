@@ -396,7 +396,7 @@ class GroupsController < ApplicationController
       if email_inactive
         found_user[:invite_date] = nil
         # Mock a bounce so that the group admins can see that the email wasn't sent
-        @group.log_bounced_email(user.email, Time.now, true)
+        @group.log_bounced_email(@email, Time.now, true)
       else
         if params[:type] == 'admin'
           NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
