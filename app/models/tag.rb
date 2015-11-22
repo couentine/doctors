@@ -12,8 +12,15 @@ class Tag
   FORMAT_VALUES = ['text', 'link', 'image', 'tweet', 'code']
   EDITABILITY_VALUES = ['learners', 'experts', 'admins']
   PRIVACY_VALUES = ['public', 'private', 'secret']
-  JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :editability, :privacy, 
-    :wiki_sections, :tags, :tags_with_caps]
+  JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :type, :format, :summary, 
+    :wiki, :sort_order, :editability, :privacy, :tags, :tags_with_caps, :created_at,
+    :updated_at]
+  CLONE_FIELDS = [:_id, :name, :name_with_caps, :display_name, :type, :format, :summary, :wiki, 
+    :sort_order, :editability, :privacy, :created_at, :updated_at]
+
+  # === INSTANCE VARIABLES === #
+
+  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
 
   # === RELATIONSHIPS === #
 
@@ -42,6 +49,8 @@ class Tag
   field :current_username,    type: String # used when logging wiki_versions
   field :flags,               type: Array, default: []
 
+  field :json_clone,          type: Hash
+
   validates :badge, presence: true
   validates :name, presence: true, length: { within: 2..MAX_NAME_LENGTH }, 
     uniqueness: { scope: :badge }, exclusion: { in: APP_CONFIG['blocked_url_slugs'],
@@ -65,6 +74,8 @@ class Tag
   after_validation :copy_name_field_errors
   after_validation :update_wiki_sections
   after_validation :update_wiki_versions # DO store the first value since it comes from the user
+  before_save :update_json_clone
+  before_destroy :remove_from_badge
   after_save :update_child_entries
 
   # === TAG METHODS === #
@@ -127,6 +138,22 @@ class Tag
       end
     end
   end
+
+  # === TAG ASYNC METHODS === #
+
+  # Updates this tag's entry in the badge json clone
+  def self.update_in_badge_json_clone(tag_id)
+    tag = Tag.find(tag_id)
+    tag.badge.update_json_clone_tag(tag.json_clone)
+  end
+
+  # Deletes the specified tag entry from the badge json clone
+  def self.delete_from_badge_json_clone(badge_id, tag_json_clone)
+    badge = Badge.find(badge_id)
+    badge.update_json_clone_tag(tag_json_clone, true)
+  end
+
+  # === INSTANCE METHODS === #
 
   def to_param
     name_with_caps
@@ -198,6 +225,27 @@ protected
       elsif wiki_versions.last[:wiki] != wiki
         self.wiki_versions << current_version_row
       end
+    end
+  end
+
+  def update_json_clone
+    # First find the intersection of the fields to watch and the fields that have changed
+    clone_field_names = CLONE_FIELDS.map{ |field_symbol| field_symbol.to_s }
+    changed_clone_field_names = changed & clone_field_names
+
+    unless changed_clone_field_names.blank?
+      self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS)
+
+      # Update the badge unless we're being called from the context of a badge async update
+      if context != 'badge_async'
+        Tag.delay(retry: 3).update_in_badge_json_clone(id)
+      end
+    end
+  end
+  
+  def remove_from_badge
+    if context != 'badge_async'
+      Tag.delay(retry: 3).delete_from_badge_json_clone(json_clone)
     end
   end
 

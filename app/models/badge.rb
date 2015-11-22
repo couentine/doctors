@@ -15,9 +15,15 @@ class Badge
   EDITABILITY_VALUES = ['experts', 'admins']
   AWARDABILITY_VALUES = ['experts', 'admins']
   VISIBILITY_VALUES = ['public', 'private', 'hidden']
-  JSON_FIELDS = [:group, :name, :summary, :word_for_expert, :word_for_learner]
+  JSON_FIELDS = [:group, :name, :editability, :awardability, :info, :url, :url_with_caps,
+    :created_at, :updated_at]
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps }
+  
+  # Below are the badge-level fields included in the clone
+  # NOTE: Badge image is automatically checked for changes and included
+  CLONE_FIELDS = [:_id, :name, :summary, :editability, :awardability, :info, :url, :url_with_caps,
+    :created_at, :updated_at]
 
   # === RELATIONSHIPS === #
 
@@ -64,6 +70,8 @@ class Badge
   field :flags,                           type: Array
 
   field :move_to_group_id,                type: String
+  
+  field :json_clone,                      type: Hash
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH },
@@ -109,6 +117,7 @@ class Badge
   before_save :update_terms
   before_update :move_badge_if_needed
   after_create :add_creator_as_expert
+  before_save :update_json_clone_badge_fields
   after_save :update_requirement_editability
 
   before_save :update_analytics
@@ -465,6 +474,10 @@ class Badge
           end
         end
         
+# LEFT OFF AROUND HERE >>
+#  Next step is to tell the tags not to update the badge by setting the context to 'badge_async'
+#  Then I need to update the badge json myself
+
         # Now go back and create any requirement tags which are new
         requirement_name_map.each do |tag_name, r|
           unless matched_tag_names.include? tag_name
@@ -484,6 +497,9 @@ class Badge
         end
       end
       
+      # We need to reload the badge now to pull in updates to json_clone from child tags
+      self.reload
+
       # The last step is to update progress tracking boolean if needed
       self.progress_tracking_enabled = (new_requirement_count > 0)
       self.send_validation_request_emails = false if !progress_tracking_enabled
@@ -518,6 +534,25 @@ class Badge
   def update_custom_image(image_key = custom_image_key)
     self.remote_custom_image_url = \
       "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/#{image_key}"
+  end
+
+  # This updates or deletes the json clone copy of the specified tag located in json_clone['pages']
+  # If the specified tag does not exist it will be created
+  # If is_deleted is true then the specified entry will be deleted
+  def update_json_clone_tag(tag_json_clone, is_deleted = false)
+    self.json_clone['pages'] = [] if json_clone['pages'].nil?
+    tag_id = tag_json_clone['_id']
+    tag_item_index = json_clone['pages'].index { |item| item["_id"] == tag_id }
+
+    if tag_item_index
+      if is_deleted # then delete this item
+        self.json_clone['pages'].delete_at tag_item_index
+      else # update this item
+        self.json_clone['pages'][tag_item_index] = tag_json_clone
+      end
+    elsif !is_deleted # create this item
+      self.json_clone['pages'] << tag_json_clone
+    end
   end
 
 protected
@@ -624,6 +659,20 @@ protected
         self.word_for_learner = word_for_learner.gsub(/[^ A-Za-z]/, ' ').gsub(/ {2,}/, ' ')\
           .strip.downcase.singularize
       end
+    end
+  end
+
+  # This will update the badge fields ONLY and leave the pages list untouched
+  def update_json_clone_badge_fields
+    # First find the intersection of the fields to watch and the fields that have changed
+    clone_field_names = CLONE_FIELDS.map{ |field_symbol| field_symbol.to_s } \
+      + ['custom_image', 'designed_image']
+    changed_clone_field_names = changed & clone_field_names
+
+    unless changed_clone_field_names.blank?
+      pages_backup = json_clone['pages']
+      self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS)
+      self.json_clone['pages'] = pages_backup
     end
   end
 
