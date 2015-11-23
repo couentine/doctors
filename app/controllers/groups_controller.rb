@@ -88,39 +88,12 @@ class GroupsController < ApplicationController
       @badges = @group.badges.where(visibility: 'public').asc(:name).page(@badge_page)\
         .per(@badge_page_size)
     end
-    @expert_count_map = {} # maps from badge id to expert count
-    @learner_count_map = {} # maps from badge id to learner count
-    @badge_ids = []
-    @badges.each do |badge|
-      @badge_ids << badge.id
-      @expert_count_map[badge.id], @learner_count_map[badge.id] = 0, 0
-    end
 
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
 
     respond_to do |format|
-      format.any(:html, :js) do # show.html.erb
-        @requirements_map = {} # maps from badge id to requirements
-        Tag.where(:badge.in => @badge_ids, type: 'requirement').asc(:sort_order).each do |tag|
-          if @requirements_map.has_key? tag.badge_id
-            @requirements_map[tag.badge_id] << tag
-          else
-            @requirements_map[tag.badge_id] = [tag]
-          end
-        end
-
-        @log_map = {} # maps from badge id to log of current user if present
-        current_user.logs.where(:badge_id.in => @badge_ids).each do |log|
-          @log_map[log.badge_id] = log
-        end if current_user
-
-        Log.where(:badge.in => @badge_ids).each do |log|
-          if log.validation_status == 'validated'
-            @expert_count_map[log.badge_id] += 1
-          else
-            @learner_count_map[log.badge_id] += 1
-          end
-        end
+      format.any(:html, :js) do 
+        # show.html.erb
       end
       format.json { render json: @group, filter_user: current_user }
     end

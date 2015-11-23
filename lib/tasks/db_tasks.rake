@@ -759,4 +759,35 @@ namespace :db do
     puts " >> Done."
   end
 
+  task update_user_badge_lists: :environment do
+    print "Updating all users and badges linked to #{Log.count} logs"
+    
+    Log.each do |log|
+      Log.update_user_badge_lists log.id
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  task update_badge_json_clones: :environment do
+    print "Updating all json clone info for #{Badge.count} badges"
+    
+    Badge.each do |badge|
+      badge.update_json_clone_badge_fields
+
+      badge.tags.each do |tag|
+        tag.update_json_clone
+        tag.timeless.save
+
+        badge.update_json_clone_tag tag.json_clone
+      end
+
+      badge.timeless.save
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end

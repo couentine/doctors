@@ -43,6 +43,7 @@ class LogsController < ApplicationController
       respond_to do |format|
         format.html do
           @requirements = @badge.requirements
+          @requirements_json_clone = @badge.requirements_json_clone
         end
         format.embed { render layout: 'embed' }
         format.json { render json: @log, filter_user: current_user }

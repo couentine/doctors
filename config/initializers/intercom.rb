@@ -54,12 +54,13 @@ IntercomRails.config do |config|
     :username => :username_with_caps,
     :profile_url => :profile_url,
     :flags => :flags,
-    :admin => :admin,
-    :created_group_count => Proc.new{ |user| (user.created_group_ids || []).count },
-    :owned_group_count => Proc.new{ |user| (user.owned_group_ids || []).count },
-    :created_badge_count => Proc.new{ |user| (user.created_badge_ids || []).count },
-    :entry_count => Proc.new{ |user| (user.created_entry_ids || []).count }
+    :admin => :admin
   }
+  # Removed these because they were causing queries
+    # :created_group_count => Proc.new{ |user| (user.created_group_ids || []).count },
+    # :owned_group_count => Proc.new{ |user| (user.owned_group_ids || []).count },
+    # :created_badge_count => Proc.new{ |user| (user.created_badge_ids || []).count },
+    # :entry_count => Proc.new{ |user| (user.created_entry_ids || []).count }
 
   # == User -> Company association
   # A Proc that given a user returns an array of companies

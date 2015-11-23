@@ -50,6 +50,10 @@ class User
   field :stripe_default_source,         type: String
   field :stripe_cards,                  type: Array, default: []
 
+  field :expert_badge_ids,              type: Array, default: []
+  field :learner_badge_ids,             type: Array, default: []
+  field :all_badge_ids,                 type: Array, default: []
+
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
     uniqueness:true, format: { with: /\A[\w-]+\Z/, 
@@ -352,17 +356,11 @@ class User
   end
 
   def learner_of?(badge)
-    log = logs.find_by(badge_id: badge.id) rescue nil
-    
-    # Return value = 
-    !log.nil? && !log.detached_log && log.validation_status != 'validated'
+    learner_badge_ids.include? badge.id
   end
 
   def expert_of?(badge)
-    log = logs.find_by(badge_id: badge.id) rescue nil
-    
-    # Return value = 
-    !log.nil? && !log.detached_log && log.validation_status == 'validated'
+    expert_badge_ids.include? badge.id
   end
 
   def find_log(badge)

@@ -6,6 +6,6 @@
 <% end %>
 
 <% unless @badges.blank? %>
-  updateDynamicColumnContents('badges', '<%= escape_javascript render(@badges, group: @group, requirements_map: @requirements_map, log_map: @log_map, is_member: @current_user_is_member, is_admin: @current_user_is_admin, expert_count_map: @expert_count_map, learner_count_map: @learner_count_map) %>');
+  updateDynamicColumnContents('badges', '<%= escape_javascript render(@badges, group: @group, is_member: @current_user_is_member, is_admin: @current_user_is_admin) %>');
   $('#paginator-badges').html('<%= escape_javascript(paginate(@badges, remote: true, param_name: "pb").to_s) %>');
 <% end %>

@@ -49,7 +49,7 @@ class Tag
   field :current_username,    type: String # used when logging wiki_versions
   field :flags,               type: Array, default: []
 
-  field :json_clone,          type: Hash
+  field :json_clone,          type: Hash, default: {}
 
   validates :badge, presence: true
   validates :name, presence: true, length: { within: 2..MAX_NAME_LENGTH }, 
@@ -74,7 +74,7 @@ class Tag
   after_validation :copy_name_field_errors
   after_validation :update_wiki_sections
   after_validation :update_wiki_versions # DO store the first value since it comes from the user
-  before_save :update_json_clone
+  before_save :update_json_clone_if_needed
   before_destroy :remove_from_badge
   after_save :update_child_entries
 
@@ -141,16 +141,11 @@ class Tag
 
   # === TAG ASYNC METHODS === #
 
-  # Updates this tag's entry in the badge json clone
-  def self.update_in_badge_json_clone(tag_id)
-    tag = Tag.find(tag_id)
-    tag.badge.update_json_clone_tag(tag.json_clone)
-  end
-
-  # Deletes the specified tag entry from the badge json clone
-  def self.delete_from_badge_json_clone(badge_id, tag_json_clone)
+  # Updates (or deletes) this tag's entry in the badge json clone
+  def self.update_badge_json_clone(badge_id, tag_json_clone, is_deleted = false)
     badge = Badge.find(badge_id)
-    badge.update_json_clone_tag(tag_json_clone, true)
+    badge.update_json_clone_tag(tag_json_clone, is_deleted)
+    badge.save
   end
 
   # === INSTANCE METHODS === #
@@ -174,6 +169,10 @@ class Tag
   # group_type should equal the type field from the group record
   def privacy_text(group_type)
     return Tag.privacy_text(group_type, privacy)
+  end
+
+  def update_json_clone
+    self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS)
   end
 
 protected
@@ -228,24 +227,24 @@ protected
     end
   end
 
-  def update_json_clone
+  def update_json_clone_if_needed
     # First find the intersection of the fields to watch and the fields that have changed
     clone_field_names = CLONE_FIELDS.map{ |field_symbol| field_symbol.to_s }
     changed_clone_field_names = changed & clone_field_names
 
     unless changed_clone_field_names.blank?
-      self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS)
+      self.update_json_clone
 
       # Update the badge unless we're being called from the context of a badge async update
       if context != 'badge_async'
-        Tag.delay(retry: 3).update_in_badge_json_clone(id)
+        Tag.delay(retry: 3).update_badge_json_clone(badge_id, json_clone)
       end
     end
   end
   
   def remove_from_badge
     if context != 'badge_async'
-      Tag.delay(retry: 3).delete_from_badge_json_clone(json_clone)
+      Tag.delay(retry: 3).update_badge_json_clone(badge_id, json_clone, true)
     end
   end
 

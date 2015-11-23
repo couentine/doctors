@@ -460,6 +460,23 @@ class Group
     end
   end
 
+  # === CLONING METHODS === #
+
+  # Pass an array of badge json clones
+  # Returns the same array back with an added 'result' key with the following sub-keys:
+  #  'success' => true or false
+  #  'error_message' => string if !success
+  def create_badges_from_json_clones(badge_json_clones)
+    return_list = []
+
+    badge_json_clones.each do |badge_json_clone|
+      result = Badge.create_from_json_clone(self, badge_json_clone)
+      badge_json_clone['result'] = result
+    end
+
+    return_list
+  end
+
   # === ASYNC CLASS METHODS === #
 
   # Adds all of the user to the group unless they already exist as members or admins

@@ -47,6 +47,7 @@ class BadgesController < ApplicationController
         @learner_logs = @badge.learner_logs.page(@page_learners).per(@page_size)
         @expert_logs = @badge.expert_logs.page(@page_experts).per(@page_size)
         @requirements = @badge.requirements
+        @requirements_json_clone = @badge.requirements_json_clone
 
         # Configure the badge settings if needed
         @badge_visibility_options = BADGE_VISIBILITY_OPTIONS
