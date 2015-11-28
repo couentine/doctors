@@ -13,6 +13,7 @@ class Group
   JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 'image' => :image_url,
     'email' => :primary_email }
   VISIBILITY_VALUES = ['public', 'private']
+  COPYABILITY_VALUES = ['public', 'members', 'admins']
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
   PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
@@ -52,6 +53,7 @@ class Group
   
   field :member_visibility,           type: String, default: 'public'
   field :admin_visibility,            type: String, default: 'public'
+  field :badge_copyability,           type: String, default: 'public'
   field :join_code,                   type: String
   
   field :user_limit,                  type: Integer, default: 5
@@ -98,6 +100,8 @@ class Group
     message: "%{value} is not a valid type of visibility" }
   validates :admin_visibility, inclusion: { in: VISIBILITY_VALUES, 
     message: "%{value} is not a valid type of visibility" }
+  validates :badge_copyability, inclusion: { in: COPYABILITY_VALUES, 
+    message: "%{value} is not a valid type of copyability" }
   validates :creator, presence: true
   
   validate :new_owner_username_exists
@@ -107,7 +111,7 @@ class Group
   attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
     :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit,
     :pricing_group, :subscription_plan, :stripe_subscription_card, :new_subscription,
-    :member_visibility, :admin_visibility, :join_code
+    :member_visibility, :admin_visibility, :badge_copyability, :join_code
 
   # === CALLBACKS === #
 
@@ -462,19 +466,113 @@ class Group
 
   # === CLONING METHODS === #
 
-  # Pass an array of badge json clones
+  # Returns an array of badge json clones for the badges with the specified URLs
+  # Pass nil to get ALL badge json clones
+  def get_badge_json_clones(badge_urls = nil)
+    if badge_urls
+      badges.where(:url.in => badge_urls).map{ |badge| badge.json_clone }
+    else
+      badges.map{ |badge| badge.json_clone }
+    end
+  end
+
+  # Pass an array of badge json clones and a user to specify as the badge creator
   # Returns the same array back with an added 'result' key with the following sub-keys:
   #  'success' => true or false
   #  'error_message' => string if !success
-  def create_badges_from_json_clones(badge_json_clones)
+  def create_badges_from_json_clones(creator, badge_json_clones)
     return_list = []
 
     badge_json_clones.each do |badge_json_clone|
-      result = Badge.create_from_json_clone(self, badge_json_clone)
+      result = Badge.create_from_json_clone(creator, self, badge_json_clone)
       badge_json_clone['result'] = result
     end
 
     return_list
+  end
+
+  # Copies the badges with the specified urls from this group to destination group
+  # If async is set to true then the method will return the id of a poller
+  # NOTE: Passing nil for [badge_urls] will copy ALL badges
+  def copy_badges_to_group(creator_id, badge_urls, to_group_id, async = false)
+    if async
+      to_group = Group.find(to_group_id) rescue nil
+      to_group_name = (to_group) ? to_group.name : 'Unknown Group'
+      poller = Poller.new
+      poller.waiting_message = "Copying badges from '#{name}' to '#{to_group_name}'..."
+      poller.progress = 0 # this will put the poller into 'progress mode'
+      poller.save
+      Group.delay(queue: 'high').do_copy_badges_to_group(creator_id, self.id, badge_urls, 
+        to_group_id, poller.id)
+    else
+      Group.do_copy_badges_to_group(creator_id, nil, badge_urls, to_group_id, nil, from_group: self)
+    end
+  end
+
+  # Pass :from_group, :to_group or :creator into options to skip queries
+  def self.do_copy_badges_to_group(creator_id, from_group_id, badge_urls, to_group_id, 
+      poller_id=nil, options = {})
+    begin
+      # First query for the core records
+      poller = Poller.find(poller_id) rescue nil
+      creator = options[:creator] || User.find(creator_id)
+      from_group = options[:from_group] || Group.find(from_group_id)
+      to_group = options[:to_group] || Group.find(to_group_id)
+
+      # Now get the json and initialize our tracking variables
+      badge_json_clones = from_group.get_badge_json_clones
+      badge_count = badge_json_clones.count
+      progress_count, success_count, error_count = 0, 0, 0
+      last_error_message = nil
+      
+      # Loop through the badges and copy them, updating the poller progress as we go
+      badge_json_clones.each do |badge_json_clone|
+        result = Badge.create_from_json_clone(creator, to_group, badge_json_clone)
+        progress_count += 1
+        if result['success']
+          success_count += 1
+        else
+          error_count += 1
+          last_error_message = result['error_message']
+        end
+
+        if poller
+          poller.progress = progress_count * 100 / badge_count
+          poller.save
+        end
+      end
+        
+      # Then save the results
+      if poller
+        if success_count > 0
+          poller.status = 'successful'
+          poller.message = \
+            "#{pluralize success_count, 'badge'} successfully copied from '#{from_group.name}'."
+          if error_count > 0
+            poller.message += \
+              " (#{pluralize error_count, 'badge'} could not be copied due to errors.)"
+          end
+          poller.redirect_to "/#{to_group.url_with_caps}"
+          poller.data = { from_group: from_group.id, to_group: to_group_id, 
+            badge_urls: badge_urls }
+        else
+          poller.status = 'failed'
+          poller.message = 'None of the badges could be copied to your group due to errors. ' \
+            + "(Last Error Message: #{last_error_message})"
+          poller.save
+        end
+        poller.save
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to copy the badges, ' \
+          + "please try again. (Error message: #{e})"
+        poller.save
+      else
+        throw e
+      end
+    end
   end
 
   # === ASYNC CLASS METHODS === #

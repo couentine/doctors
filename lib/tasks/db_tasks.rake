@@ -763,7 +763,7 @@ namespace :db do
     print "Updating all users and badges linked to #{Log.count} logs"
     
     Log.each do |log|
-      Log.update_user_badge_lists log.id
+      Log.update_user_badge_lists(log.id) if log.badge && log.user
       print "."
     end
 

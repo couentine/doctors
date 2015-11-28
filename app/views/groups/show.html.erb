@@ -378,6 +378,9 @@
             <%= simple_form_for @group, html: { id: 'settings-form', 
                 class: 'form-horizontal' } do |f| %>
 
+              <%= f.input :badge_copyability, as: :radio_buttons, label: 'Ability to Copy Badges', 
+                include_blank: false, collection: @badge_copyability_options %>
+
               <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
                 include_blank: false, collection: @group_visibility_options %>
 
@@ -772,6 +775,24 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
         <% end %>
 
         <h2>Badges</h2>
+
+        <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
+          <h3 class="collapse-when-small">
+            <% if @group.badge_copyability == "public" %>
+              <i class="fa fa-globe"></i> Anyone can copy
+            <% elsif @group.badge_copyability == "members" %>
+              <i class="fa fa-users"></i> Only members can copy
+            <% else %>
+              <i class="fa fa-lock"></i> Only admins can copy
+            <% end %>
+
+            <% if @current_user_is_admin || @badge_list_admin %>
+              <a href="#settings" class="btn h3-btn" data-toggle="modal">
+                Settings
+              </a>
+            <% end %>
+          </h3>
+        <% end %>
       </div>
 
       <% if @badges.empty? %>

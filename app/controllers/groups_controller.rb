@@ -33,6 +33,11 @@ class GroupsController < ApplicationController
     ['<i class="fa fa-globe"></i> Public'.html_safe, 'public'],
     ['<i class="fa fa-users"></i> Private'.html_safe, 'private']
   ]
+  BADGE_COPYABILITY_OPTIONS = [
+    ['<i class="fa fa-globe"></i> Public'.html_safe, 'public'],
+    ['<i class="fa fa-users"></i> Only Members'.html_safe, 'members'],
+    ['<i class="fa fa-lock"></i> Only Admins'.html_safe, 'admins']
+  ]
 
   # === RESTFUL ACTIONS === #
 
@@ -90,6 +95,7 @@ class GroupsController < ApplicationController
     end
 
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
+    @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
 
     respond_to do |format|
       format.any(:html, :js) do 

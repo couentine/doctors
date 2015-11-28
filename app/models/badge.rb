@@ -45,6 +45,7 @@ class Badge
   field :awardability,                    type: String, default: 'admins'
   field :visibility,                      type: String, default: 'public'
   field :send_validation_request_emails,  type: Boolean, default: true
+  field :cloned_from_badge_id,            type: String # stored as a string id, not a relationship
   
   field :info,                            type: String
   field :info_sections,                   type: Array
@@ -84,7 +85,8 @@ class Badge
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :url, presence: true, length: { within: 2..MAX_URL_LENGTH },
-    uniqueness: { scope: :group, message:"The '%{value}' url is already being used in this group."},
+    uniqueness: { scope: :group, 
+      message:"The '%{value}' url is already being used in this group."},
     format: { with: /\A[\w-]+\Z/, 
       message: "can only contain letters, numbers, dashes and underscores" },
     exclusion: { in: APP_CONFIG['blocked_url_slugs'],
@@ -187,9 +189,58 @@ class Badge
   # Returns a hash with two keys:
   #  'success' => true or false
   #  'error_message' => string if !success
-  def self.create_from_json_clone(group, badge_json_clone)
-    # LEFT OFF HERE >> Next step.. copy the logic from do_create_async 
-    #     (and if there's an error saving it then pass it back in the result)
+  def self.create_from_json_clone(creator, group, badge_json_clone)
+    result = { 'success' => true, 'error_message' => nil }
+
+    begin
+      # First create the badge and assign the relationship fields
+      badge = Badge.new
+      badge.group = group
+      badge.creator = creator
+      badge.current_user = creator
+      badge.current_username = creator.username
+
+      # Now assign the fields from the json clone and create the badge
+      badge.cloned_from_badge_id = badge_json_clone['_id']
+      badge.name = badge_json_clone['name']
+      badge.summary = badge_json_clone['summary']
+      badge.url = badge_json_clone['url']
+      badge.url_with_caps = badge_json_clone['url_with_caps']
+      badge.awardability = badge_json_clone['awardability']
+      badge.editability = badge_json_clone['editability']
+      badge.info = badge_json_clone['info']
+      badge.remote_custom_image_url = badge_json_clone['image_url']
+      badge.custom_image_key = Badge::IMAGE_KEY_IGNORE # necessary to cause display of custom image
+      badge.save!
+
+      # Finally create the wiki & requirement pages
+      badge_json_clone['pages'].each do |tag_item|
+        new_tag = Tag.new()
+        new_tag.badge = badge
+        new_tag.type = tag_item['type']
+        new_tag.sort_order = tag_item['sort_order']
+        new_tag.name = tag_item['name']
+        new_tag.display_name = tag_item['display_name']
+        new_tag.name_with_caps = tag_item['name_with_caps']
+        new_tag.summary = tag_item['summary']
+        new_tag.format = tag_item['format']
+        new_tag.privacy = tag_item['privacy']
+        new_tag.editability = tag_item['editability']
+        new_tag.wiki = tag_item['wiki']
+
+        new_tag.context = 'badge_async' # prevent the badge update callback from firing
+        new_tag.save if new_tag.valid?
+
+        # Update the pages branch of the badge json clone
+        badge.update_json_clone_tag new_tag.json_clone
+      end
+    rescue Exception => e
+      result['success'] = false
+      result['error_message'] = "Error creating badge: #{e}"
+      result['badge'] = badge
+    end
+
+    result
   end
 
   # === ASYNC CLASS METHODS === #
@@ -476,18 +527,32 @@ class Badge
     end
   end
 
+  # Pass the 'pages' property from the badge json clone and this method transforms it and passes
+  # it to the update_requirement_list method
+  # NOTE: This method is not currently being used (it turned out to not be necessary for 
+  #       creating from json), but I'm leaving it around in case it's useful later.
+  def update_requirement_list_from_json_clone(badge_json_clone_pages)
+    requirement_list = badge_json_clone_pages.select{ |tag_item| tag_item['type']=='requirement' }\
+      .sort_by{ |tag_item| tag_item['sort_order'] }
+    update_requirement_list(requirement_list, true)
+  end
+
   # Call this method to processes changes to the requirement_list 
   # Also updates progress_tracking_enabled (and saves the badge record if needed)
   # NOTE: If requirement_list is blank then this method does nothing
-  def update_requirement_list(requirement_list)
+  def update_requirement_list(requirement_list, already_parsed = false)
     unless requirement_list.blank?
       # First parse the requirement list from JSON
-      parsed_list = JSON.parse requirement_list rescue nil
+      if already_parsed
+        parsed_list = requirement_list
+      else
+        parsed_list = JSON.parse requirement_list rescue nil
+      end
       new_requirement_count = 0 # used later to set progress tracking boolean
       
       if parsed_list.instance_of?(Array) # false if nil
         tag_ids, tag_names, matched_tag_names = [], [], []
-        requirement_id_map, requirement_name_map = {}, {} # maps from tag name/id > requirement item
+        requirement_id_map, requirement_name_map = {}, {} # map[tag name/id] = requirement item
         
         # Run through and build a list of tag ids and tag names to query
         parsed_list.each_with_index do |requirement, index|
@@ -506,14 +571,14 @@ class Badge
           end
         end
 
-        # Query for all existing requirement tags as well as any other tags referenced in the list 
+        # Query for all existing requirement tags as well as any other tags referenced in the list
         # (whether or not they are requirements)
         relevant_tags = tags.any_of({:id.in => tag_ids}, {:name.in => tag_names}, 
           {type: 'requirement'})
 
         # Run through and handle updates to existing tags
         relevant_tags.each do |tag|
-          # First try to find the requirement by id (for updating), then try by name (for promoting)
+          # First try to find requirement by id (for updating), then try by name (for promoting)
           r = requirement_id_map[tag.id.to_s] || requirement_name_map[tag.name]
           tag.context = 'badge_async' # this will prevent the badge update callback from firing
 
@@ -526,6 +591,7 @@ class Badge
             tag.format = r['format']
             tag.privacy = r['privacy']
             tag.summary = r['summary']
+            tag.wiki = r['wiki'] unless r['wiki'].blank?
 
             tag.save if tag.changed? && tag.valid?
             matched_tag_names << tag.name # This will have the NEW name if it changed
@@ -551,6 +617,7 @@ class Badge
             new_tag.summary = r['summary']
             new_tag.format = r['format']
             new_tag.privacy = r['privacy']
+            new_tag.wiki = r['wiki'] # NOTE: This is only set if creating from a json clone
 
             new_tag.context = 'badge_async' # prevent the badge update callback from firing
             new_tag.save if new_tag.valid?
@@ -592,6 +659,8 @@ class Badge
 
   # Sets the image url based on the supplied image key (defaults to the model value)
   # NOTE: You need to save the badge afterward to commit the new path to the DB.
+  # NOTE #2: This may not be necessary... on 11/27 I discovered that reinstalling imagemagick in 
+  #   my dev environment resolved the initial cause for this. Investigate later.
   def update_custom_image(image_key = custom_image_key)
     self.remote_custom_image_url = \
       "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/#{image_key}"

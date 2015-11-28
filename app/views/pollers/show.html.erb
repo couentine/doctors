@@ -1,12 +1,21 @@
 <% if @poller && (@poller.status == 'pending') %>
   <script type="text/javascript">
 
+    var progressMode = <%= !@poller.progress.nil? %>;
+
     $(document).ready(function() {
-      startPoller("<%= @poller.id %>", refreshPoller, refreshPoller);
+      if (progressMode)
+        startPoller("<%= @poller.id %>", refreshPoller, refreshPoller, updateProgress);
+      else
+        startPoller("<%= @poller.id %>", refreshPoller, refreshPoller);
     });
 
     function refreshPoller() {
       window.location.reload(); // will trigger redirect_to if specified
+    }
+
+    function updateProgress(progress) {
+      $(".progress .bar").width(progress.toString() + "%");
     }
 
   </script>
@@ -17,11 +26,20 @@
   <% if @poller %>
 
     <% if @poller.status == 'pending' %>
-
-      <div class="well gray span7 offset2">
-        <i class="fa fa-refresh fa-spin header-icon"></i>
-        <h3><%= @poller.waiting_message || 'Waiting for changes to save...' %></h3>
-      </div>
+      
+      <% if @poller.progress.nil? %>
+        <div class="well gray span7 offset2">
+          <i class="fa fa-refresh fa-spin header-icon"></i>
+          <h3><%= @poller.waiting_message || 'Waiting for changes to save...' %></h3>
+        </div>
+      <% else %>
+        <div class="well gray span7 offset2">
+          <h3><%= @poller.waiting_message || 'Waiting for changes to save...' %></h3>
+          <div class="progress progress-striped active poller-progress">
+            <div class="bar" style="width: <%= @poller.progress %>%;"></div>
+          </div>
+        </div>
+      <% end %>
 
     <% elsif @poller.status == 'successful' %>
 
