@@ -80,6 +80,8 @@ class Group
     #                          & 'new' & 'force-new'
   field :new_subscription,            type: Boolean # used to set subscription status to 'new'
 
+  field :badges_cache,                type: Hash, default: {} # key=badge_id, value=key_fields
+
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, 
     uniqueness: { message: "The '%{value}' url is already taken."}, 
@@ -122,6 +124,7 @@ class Group
   before_update :change_owner
   before_update :update_counts
   
+  before_save :update_private_defaults
   before_save :process_subscription_field_updates
   before_create :create_first_subscription
   before_update :create_another_subscription
@@ -464,30 +467,54 @@ class Group
     end
   end
 
+  # This updates or deletes the cached copy of the specified badge in the badges_cache
+  # If the specified badge does not exist in the cache already then it will be added
+  # If is_deleted is true then the specified badge will be deleted if present
+  def update_badge_cache(badge_json_clone, is_deleted = false)
+    badge_id = badge_json_clone['_id']
+    
+    if is_deleted
+      self.badges_cache.delete badge_id
+    else
+      self.badges_cache[badge_id] = {
+        'name' => badge_json_clone['name'],
+        'summary' => badge_json_clone['summary'],
+        'url' => badge_json_clone['url'],
+        'url_with_caps' => badge_json_clone['url_with_caps'],
+        'image_url' => badge_json_clone['image_url'],
+        'image_medium_url' => badge_json_clone['image_medium_url'],
+        'image_small_url' => badge_json_clone['image_small_url']
+      }
+    end
+  end
+
   # === CLONING METHODS === #
 
   # Returns an array of badge json clones for the badges with the specified URLs
   # Pass nil to get ALL badge json clones
   def get_badge_json_clones(badge_urls = nil)
-    if badge_urls
-      badges.where(:url.in => badge_urls).map{ |badge| badge.json_clone }
-    else
+    if badge_urls.blank?
       badges.map{ |badge| badge.json_clone }
+    else
+      badges.where(:url.in => badge_urls).map{ |badge| badge.json_clone }
     end
   end
 
   # Pass an array of badge json clones and a user to specify as the badge creator
   # Returns the same array back with an added 'result' key with the following sub-keys:
   #  'success' => true or false
-  #  'error_message' => string if !success
+  #  'error_message' => string (if !success)
+  #  'json_clone' => the json clone of the newly created badge (if success)
   def create_badges_from_json_clones(creator, badge_json_clones)
     return_list = []
 
     badge_json_clones.each do |badge_json_clone|
-      result = Badge.create_from_json_clone(creator, self, badge_json_clone)
-      badge_json_clone['result'] = result
+      result = Badge.create_from_json_clone(creator, self, badge_json_clone, 'group_async')
+      return_list << result
+      update_badge_cache result['json_clone'] if result['success']
     end
 
+    group.timeless.save! if group.changed?
     return_list
   end
 
@@ -500,10 +527,13 @@ class Group
       to_group_name = (to_group) ? to_group.name : 'Unknown Group'
       poller = Poller.new
       poller.waiting_message = "Copying badges from '#{name}' to '#{to_group_name}'..."
-      poller.progress = 0 # this will put the poller into 'progress mode'
+      poller.progress = 1 # this will put the poller into 'progress mode'
+      poller.data = { from_group_id: self.id, to_group_id: to_group_id, creator_id: creator_id,
+            badge_urls: badge_urls }
       poller.save
       Group.delay(queue: 'high').do_copy_badges_to_group(creator_id, self.id, badge_urls, 
         to_group_id, poller.id)
+      poller.id
     else
       Group.do_copy_badges_to_group(creator_id, nil, badge_urls, to_group_id, nil, from_group: self)
     end
@@ -520,16 +550,18 @@ class Group
       to_group = options[:to_group] || Group.find(to_group_id)
 
       # Now get the json and initialize our tracking variables
-      badge_json_clones = from_group.get_badge_json_clones
+      badge_json_clones = from_group.get_badge_json_clones(badge_urls)
       badge_count = badge_json_clones.count
       progress_count, success_count, error_count = 0, 0, 0
       last_error_message = nil
       
       # Loop through the badges and copy them, updating the poller progress as we go
       badge_json_clones.each do |badge_json_clone|
-        result = Badge.create_from_json_clone(creator, to_group, badge_json_clone)
+        result = Badge.create_from_json_clone(creator, to_group, badge_json_clone, 'group_async')
+        
         progress_count += 1
         if result['success']
+          to_group.update_badge_cache result['json_clone']
           success_count += 1
         else
           error_count += 1
@@ -542,24 +574,27 @@ class Group
         end
       end
         
-      # Then save the results
+      # Then save badge cache if needed (Note: we need to refresh the model but save the json)
+      if to_group.changed?
+        badges_cache_backup = to_group.badges_cache
+        to_group.reload
+        to_group.badges_cache = badges_cache_backup
+        to_group.timeless.save!
+      end
+
       if poller
         if success_count > 0
           poller.status = 'successful'
-          poller.message = \
-            "#{pluralize success_count, 'badge'} successfully copied from '#{from_group.name}'."
+          poller.message = "#{success_count} badges successfully copied " \
+            + "from '#{from_group.name}'."
           if error_count > 0
-            poller.message += \
-              " (#{pluralize error_count, 'badge'} could not be copied due to errors.)"
+            poller.message << " (#{error_count} badges could not be copied due to errors.)"
           end
-          poller.redirect_to "/#{to_group.url_with_caps}"
-          poller.data = { from_group: from_group.id, to_group: to_group_id, 
-            badge_urls: badge_urls }
+          poller.redirect_to = "/#{to_group.url_with_caps}"
         else
           poller.status = 'failed'
           poller.message = 'None of the badges could be copied to your group due to errors. ' \
             + "(Last Error Message: #{last_error_message})"
-          poller.save
         end
         poller.save
       end
@@ -908,6 +943,13 @@ protected
   def subscription_fields_valid
     if private?
       errors.add(:subscription_plan, 'is required') unless subscription_plan
+    end
+  end
+
+  def update_private_defaults
+    if new_record? || type_changed?
+      # Overwrite the badge copyability setting when we change between open & private
+      self.badge_copyability = (private?) ? 'admins' : 'public'
     end
   end
 

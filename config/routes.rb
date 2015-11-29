@@ -57,6 +57,8 @@ BadgeList::Application.routes.draw do
   match ':group_id/join' => 'groups#join', via: :get
   match ':group_id/leave' => 'groups#leave', via: :delete, as: :leave_group
   match ':group_id/clear_bounce_log' => 'groups#clear_bounce_log',via: :post,as: :clear_bounce_log
+  match ':group_id/copy_badges' => 'groups#copy_badges_form',via: :get, as: :copy_badges_form
+  match ':group_id/copy_badges' => 'groups#copy_badges_action',via: :post, as: :copy_badges_action
   match ':group_id/members/:user_id' => 'groups#destroy_user', 
         via: :delete, as: :destroy_group_member, defaults: { type: 'member' }
   match ':group_id/admins/:user_id' => 'groups#destroy_user', 

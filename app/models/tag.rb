@@ -173,6 +173,8 @@ class Tag
 
   def update_json_clone
     self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS)
+    self.json_clone['created_at'] ||= Time.now
+    self.json_clone['updated_at'] ||= Time.now
   end
 
 protected

@@ -9,12 +9,13 @@ class GroupsController < ApplicationController
 
   prepend_before_filter :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :destroy_user, :send_invitation, :destroy_invited_user, :add_users, 
-    :create_users, :clear_bounce_log]
+    :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action]
   before_filter :authenticate_user!, except: [:show]
   before_filter :group_member_or_admin, only: [:leave]
   before_filter :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
   before_filter :group_owner, only: [:edit, :destroy, :cancel_subscription]
+  before_filter :can_copy_badges, only: [:copy_badges_form, :copy_badges_action]
   before_filter :badge_list_admin, only: [:index]
 
   # === CONSTANTS === #
@@ -93,6 +94,7 @@ class GroupsController < ApplicationController
       @badges = @group.badges.where(visibility: 'public').asc(:name).page(@badge_page)\
         .per(@badge_page_size)
     end
+    @has_badges = !@badges.blank?
 
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
     @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
@@ -467,14 +469,9 @@ class GroupsController < ApplicationController
     elsif (@type == :member) && !@group.can_add_members?
       redirect_to @group, notice: 'You cannot add new members to this group.'
     else
-      # Query for the badges if param is included
       badge_urls = params["badges"] || []
-      @badge_list = []
-      @group.badges.asc(:name).each do |badge|
-        @badge_list << {
-          badge: badge,
-          selected: badge_urls.include?(badge.url)
-        }
+      @badge_options = @group.badges_cache.values.sort_by{ |bi| bi['name'] }.each do |badge_item|
+        badge_item['selected'] = badge_urls.include?(badge_item['url'])
       end
     end
   end
@@ -689,6 +686,45 @@ class GroupsController < ApplicationController
     end # can add admins test
   end
 
+  # GET /group-url/copy_badges
+  # Presents UI for selecting a list of badges and a destination group
+  def copy_badges_form
+    @to_group = Group.find(params[:to_group]) rescue nil
+    @to_group_options = current_user.admin_group_options except: [@group.id]
+    @badge_options = @group.badges_cache.values.sort_by{ |bi| bi['name'] }
+  end
+
+  # POST /group-url/copy_badges?to_group=url&badges[]=list_of_urls
+  # Starts the copying process and redirects to a progress tracking poller
+  # NOTE: Leave out the badges parameter to copy all of the badges
+  def copy_badges_action
+    @to_group = Group.find(params[:to_group]) rescue nil
+
+    if @to_group
+      if @to_group.id == @group.id
+        redirect_to :copy_badges_form, alert: 'You can\'t copy badges to the same group!'
+      else
+        if @badge_list_admin || current_user.admin_of?(@to_group)
+          # Process the badge urls
+          if params[:badges].blank?
+            @badge_urls = nil
+          else
+            @badge_urls = []
+            params[:badges].each { |url| @badge_urls << url.downcase unless url.blank? }
+          end
+
+          # Initiate the copy and redirect to the poller
+          poller_id = @group.copy_badges_to_group(current_user.id, @badge_urls, @to_group.id, true)
+          redirect_to poller_path(poller_id)
+        else
+          redirect_to :copy_badges_form, alert: 'You must be an admin of the destination group.'
+        end
+      end
+    else
+      redirect_to :copy_badges_form, alert: 'You must specify a valid destination group.'
+    end
+  end
+
 private
 
   def find_group
@@ -709,6 +745,11 @@ private
       || ((@group.admin_visibility == 'private') \
         && (@current_user_is_admin || @current_user_is_admin || @badge_list_admin))
 
+    # Set badge copyability variable
+    @can_copy_badges = @badge_list_admin || @current_user_is_admin \
+      || ((@group.badge_copyability == 'public') && current_user)   \
+      || ((@group.badge_copyability == 'members') && @current_user_is_member)
+      
     # Set current group (for analytics) only if user is logged in and an admin
     @current_user_group = @group if @current_user_is_admin
   end
@@ -732,6 +773,16 @@ private
       flash[:error] = "You must be a member or admin of #{@group.name} to do that!"
       redirect_to @group
     end 
+  end
+
+  def can_copy_badges
+    if !current_user
+      flash[:error] = "You must sign in to Badge List before you can copy badges."
+      redirect_to @group
+    elsif !@can_copy_badges
+      flash[:error] = "You do not have permission to copy badges from this group."
+      redirect_to @group
+    end
   end
 
   def badge_list_admin

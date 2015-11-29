@@ -770,20 +770,45 @@ namespace :db do
     puts " >> Done."
   end
 
-  task update_badge_json_clones: :environment do
-    print "Updating all json clone info for #{Badge.count} badges"
+  # NOTE: This is OK to run periodically in production.
+  task update_json_clones: :environment do
+    print "Updating all json clone info for #{Group.count} groups, #{Badge.count} badges " \
+      + "and #{Tag.count} tags"
+    group_index = 1
     
-    Badge.each do |badge|
-      badge.update_json_clone_badge_fields
+    Group.each do |group|
+      print ", #{group_index}:"
 
-      badge.tags.each do |tag|
-        tag.update_json_clone
-        tag.timeless.save
+      group.badges.each do |badge|
+        badge.update_json_clone_badge_fields(false)
+        group.update_badge_cache badge.json_clone
 
-        badge.update_json_clone_tag tag.json_clone
+        badge.tags.each do |tag|
+          tag.update_json_clone
+          tag.timeless.save
+          print "-"
+
+          badge.update_json_clone_tag tag.json_clone
+        end
+
+        badge.timeless.save
+        print "."
       end
 
-      badge.timeless.save
+      group.timeless.save
+      group_index += 1
+    end
+
+    puts " >> Done."
+  end
+
+  task overwrite_badge_copyability_on_private_groups: :environment do
+    print "Updating #{Group.where(type: 'private').count} private groups"
+    
+    Group.where(type: 'private').each do |group|
+      group.badge_copyability = 'admins'
+      group.timeless.save
+
       print "."
     end
 

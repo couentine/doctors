@@ -25,6 +25,10 @@ class Badge
   CLONE_FIELDS = [:_id, :name, :summary, :editability, :awardability, :info, :url, :url_with_caps,
     :created_at, :updated_at]
 
+  # === INSTANCE VARIABLES === #
+
+  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
+
   # === RELATIONSHIPS === #
 
   belongs_to :group
@@ -124,6 +128,7 @@ class Badge
   after_create :add_creator_as_expert
   before_save :update_json_clone_badge_fields_if_needed
   after_save :update_requirement_editability
+  before_destroy :remove_from_group_cache
 
   before_save :update_analytics
 
@@ -147,6 +152,8 @@ class Badge
       designed_image_url(version) || 'blank.png'
     end
   end
+  def image_medium_url; image_url(:medium); end
+  def image_small_url; image_url(:small); end
 
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields
@@ -186,15 +193,18 @@ class Badge
   # === CLONE CREATION METHOD === #
 
   # Creates a badge in the specified group from its json clone
+  # Use the badge_context parameter to set the 'context' used when creating and updating the badge
   # Returns a hash with two keys:
   #  'success' => true or false
-  #  'error_message' => string if !success
-  def self.create_from_json_clone(creator, group, badge_json_clone)
+  #  'error_message' => string (if !success)
+  #  'json_clone' => the json clone of the newly created badge (if success)
+  def self.create_from_json_clone(creator, group, badge_json_clone, badge_context = nil)
     result = { 'success' => true, 'error_message' => nil }
 
     begin
       # First create the badge and assign the relationship fields
       badge = Badge.new
+      badge.context = badge_context
       badge.group = group
       badge.creator = creator
       badge.current_user = creator
@@ -213,8 +223,8 @@ class Badge
       badge.custom_image_key = Badge::IMAGE_KEY_IGNORE # necessary to cause display of custom image
       badge.save!
 
-      # Finally create the wiki & requirement pages
-      badge_json_clone['pages'].each do |tag_item|
+      # Create the wiki & requirement pages
+      (badge_json_clone['pages'] || []).each do |tag_item|
         new_tag = Tag.new()
         new_tag.badge = badge
         new_tag.type = tag_item['type']
@@ -234,6 +244,10 @@ class Badge
         # Update the pages branch of the badge json clone
         badge.update_json_clone_tag new_tag.json_clone
       end
+
+      # Finally save the badge json add the json clone to the result
+      badge.save!
+      result['json_clone'] = badge.json_clone
     rescue Exception => e
       result['success'] = false
       result['error_message'] = "Error creating badge: #{e}"
@@ -667,12 +681,20 @@ class Badge
   end
 
   # This will update the badge fields ONLY and leave the pages list untouched
+  # Set the parameter to control whether the group is updated
   # NOTE: It will manually update the image_url field
-  def update_json_clone_badge_fields
+  def update_json_clone_badge_fields(also_update_group_badge_cache = true)
     pages_backup = json_clone['pages']
     self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS, 
-      methods: [:image_url])
+      methods: [:image_url, :image_medium_url, :image_small_url])
     self.json_clone['pages'] = pages_backup
+    self.json_clone['created_at'] ||= Time.now
+    self.json_clone['updated_at'] ||= Time.now
+
+    if also_update_group_badge_cache
+      group.update_badge_cache json_clone
+      group.timeless.save
+    end
   end
 
   # This updates or deletes the json clone copy of the specified tag located in json_clone['pages']
@@ -806,8 +828,9 @@ protected
     clone_field_names = CLONE_FIELDS.map{ |field_symbol| field_symbol.to_s }
     changed_clone_field_names = changed & clone_field_names
 
-    if !changed_clone_field_names.blank? || designed_image_changed? || custom_image_changed?
-      self.update_json_clone_badge_fields 
+    if !changed_clone_field_names.blank? || (image_url != json_clone['image_url'])
+      update_group = (context != 'group_async')
+      update_json_clone_badge_fields update_group
     end
   end
 
@@ -818,6 +841,13 @@ protected
         tag.editability = self.editability
         tag.timeless.save
       end
+    end
+  end
+
+  def remove_from_group_cache
+    if context != 'group_async'
+      group.update_badge_cache json_clone, true
+      group.timeless.save
     end
   end
 

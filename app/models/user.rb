@@ -302,6 +302,19 @@ class User
     return_list
   end
 
+  # Gets UI-ready list of groups for which this user is an admin
+  # Accepts "except" option to exclude a particular list of ids
+  def admin_group_options(options = {})
+    return_list = []
+    excluded_group_ids = options[:except] || []
+    
+    admin_of.each do |group|
+      return_list << [group.name, group.id] unless excluded_group_ids.include? group.id
+    end
+
+    return_list.sort_by{ |item| item.first }
+  end
+
   def set_flag(flag)
     self.flags << flag unless flags.include? flag
   end

@@ -197,6 +197,34 @@
 
 <% end %>
 
+<% if !current_user && (@group.badge_copyability == 'public') %>
+  
+  <!-- === SIGN IN (TO COPY BADGES) MODAL === -->
+
+  <div id="sign-in-to-copy-badges" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Sign in to continue<h3>
+    </div>
+
+    <div class="modal-body">
+      <p>To copy badges, first you need to sign in or create a new account.<br><br></p>
+      <ul class="button-list">
+        <li>
+          <%= link_to 'Sign in', new_user_session_path, class: 'btn btn-large btn-warning' %>
+        </li>
+        <li>
+          <%= link_to 'Create a new account', new_user_registration_path, 
+            class: 'btn btn-large btn-success' %>
+        </li>
+      </ul>
+      <p>&nbsp;</p>
+    </div>
+  </div>
+
+<% end %>
+
 <% if @current_user_is_admin || @badge_list_admin %>
 
   <!-- === MANAGE MEMBERS MODAL === -->
@@ -774,6 +802,16 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
               new_group_badge_path(@group), class: 'btn btn-small' %>
         <% end %>
 
+        <% if @has_badges %>
+          <% if @can_copy_badges %>
+            <%= link_to '<i class="fa fa-copy"></i> Copy badges'.html_safe,
+                copy_badges_form_path(@group), class: 'btn btn-small' %>
+          <% elsif !current_user && (@group.badge_copyability == 'public') %>
+            <%= link_to '<i class="fa fa-copy"></i> Copy badges'.html_safe,
+              '#sign-in-to-copy-badges', class: 'btn btn-small', data: { toggle: 'modal' } %>
+          <% end %>
+        <% end %>
+
         <h2>Badges</h2>
 
         <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
@@ -795,7 +833,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
         <% end %>
       </div>
 
-      <% if @badges.empty? %>
+      <% if !@has_badges %>
         <% if @current_user_is_admin || @badge_list_admin %>
           <div class="well span7 offset2">
             <h3>You haven't created any badges yet</h3>
@@ -819,7 +857,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
     </div>
   </div>
 
-  <% unless @badges.empty? %>
+  <% if @has_badges %>
 
     <div class="row">
       <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="badges" 
