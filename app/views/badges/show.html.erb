@@ -73,41 +73,6 @@
 
 <% end %>
 
-<% if @can_edit_badge %>
-
-  <!-- === BADGE INFO VERSIONS === -->
-
-    <script type="text/javascript">
-      var badgeInfoVersions = 
-        <%= if @badge.info_versions.nil?
-              "[]" 
-            else
-              raw @badge.info_versions.to_json
-            end %>;
-
-      $(document).ready(function() {
-        
-        if (badgeInfoVersions.length > 1) {
-          var userName;
-          for (var i in badgeInfoVersions) {
-            userName = badgeInfoVersions[i].username;
-            if (userName == null) userName = "Badge List System";
-            $('#badge-versions').append("<option value='"+i+"'>v" + (parseInt(i)+1) + " - "
-              + userName + " ("+badgeInfoVersions[i].updated_at_text+")"
-              + "</option>");
-          }
-          $('#badge-versions').change(function() {
-            if ($(this).val() >= 0)
-              $('#badge_info').siblings("iframe").contents().find("body").html(badgeInfoVersions[$(this).val()].info);
-          });
-        } else
-          $('#badge-versions-section').hide();
-
-      });
-    </script>
-
-<% end %>
-
 <% if @can_award_badge %>
 
   <!-- === FEEDBACK REQUESTS MODAL === -->
@@ -650,15 +615,6 @@
             <div class="form-body">
               <%= f.input :info, as: :text, label: 'Edit Badge Overview', 
                 input_html: { class: "huge-text-area rich-text-area" } %>
-              
-              <div class="control-group" id="badge-versions-section">
-                <label class="control-label">Restore Previous Versions</label>
-                <div class="controls">
-                  <select id="badge-versions">
-                    <option value="-1">--- Browse previous versions ---</option>
-                  </select>
-                </div>
-              </div>
             </div>
 
             <div class="form-footer">
