@@ -45,20 +45,42 @@
     </div>
 
     <% if @to_group_options.blank? %>
+    
+      <% if @current_user_is_admin %>
 
-      <div class="form-body">
-        <h3>You don't have any groups to copy badges to yet</h3>
-        <p>
-          In order to copy badges, you'll first need to be the admin for at least one group.
-          <br><br>
-          <%= link_to "<i class='fa fa-plus'></i> Create a new group now".html_safe,
-            new_group_path, class: "btn btn-primary" %>
-        </p>
-      </div>
+        <div class="form-body">
+          <h3>This is your only group</h3>
+          <p>
+            You don't currently have another group to copy these badges to. In order to copy 
+            badges from this group, you'll first need to be the admin for at least one 
+            additional group.
+            <br><br>
+            <%= link_to "<i class='fa fa-plus'></i> Create a new group now".html_safe,
+              new_group_path, class: "btn btn-primary" %>
+          </p>
+        </div>
 
-      <div class="form-footer">
-        &nbsp;
-      </div>
+        <div class="form-footer">
+          &nbsp;
+        </div>
+
+      <% else %>
+
+        <div class="form-body">
+          <h3>You don't have any groups to copy badges to yet</h3>
+          <p>
+            In order to copy badges, you'll first need to be the admin for at least one group.
+            <br><br>
+            <%= link_to "<i class='fa fa-plus'></i> Create a new group now".html_safe,
+              new_group_path, class: "btn btn-primary" %>
+          </p>
+        </div>
+
+        <div class="form-footer">
+          &nbsp;
+        </div>
+
+      <% end %>
 
     <% elsif @badge_options.blank? %>
 
