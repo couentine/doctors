@@ -349,8 +349,7 @@
                 <% end %>
               </h1>
               <h2>
-                <%= link_to @group.url_with_caps, @group, 
-                  title: @group.name %>/<%= @badge.url_with_caps %>
+                <%= link_to @group.name, @group, title: "View group page" %>
               </h2>
               <h3>
                 <%= @badge.summary %>

@@ -101,6 +101,17 @@
 
     // Add Extra Info Buttons
 
+    $("#add-description").click(function(e) {
+      e.preventDefault();
+      $(".control-group.group_description").fadeIn(function() {
+        $(this).find("textarea").focus();
+      });
+      if ($(this).parents("ul.button-list").find("li:visible").length < 2) {
+        $(this).parents(".control-group").fadeOut();
+      } else {
+        $(this).parent("li").fadeOut();
+      }
+    });
     $("#add-location").click(function(e) {
       e.preventDefault();
       $(".control-group.group_location").fadeIn(function() {
@@ -214,7 +225,7 @@
 <%= simple_form_for(@group, html: { class: 'form-horizontal' }) do |f| %>
   <%= f.error_notification %>
   <div class="form-body">
-    <%= f.input :name, label: 'Group Name', placeholder: 'NASA Astronaut Training',
+    <%= f.input :name, label: 'Group Name', placeholder: 'Example: NASA Astronaut Training',
       autofocus: true, input_html: { class: 'input-xlarge' } %>
 
     <div id="url-panel">
@@ -383,10 +394,16 @@
     <!-- === EXTRA INFO === -->
 
     <div class="control-group" 
-        style="<%= d?(@group.location.blank?||@group.website.blank?||@group.image_url.blank?) %>">
+        style="<%= d?(@group.description.blank?||@group.location.blank?||@group.website.blank?\
+          ||@group.image_url.blank?) %>">
       <label class="control-label">Add Extra Info</label>
       <div class="controls">
         <ul class="button-list">
+          <li style="<%= d?(@group.description.blank?) %>">
+            <a href="#" class="btn" id="add-description">
+              <i class="fa fa-info-circle"></i> Description
+            </a>
+          </li>
           <li style="<%= d?(@group.location.blank?) %>">
             <a href="#" class="btn" id="add-location">
               <i class="fa fa-map-marker"></i> Location
@@ -406,14 +423,19 @@
       </div>
     </div>
 
-    <%= f.input :location, label: 'Location', placeholder: 'Titusville, FL', 
+    <%= f.input :description, as: :text, label: 'Description', 
+      placeholder: 'Describe the purpose of your group', input_html: { data: {
+        :'character-count' => true, :'max-length' => Group::MAX_DESCRIPTION_LENGTH } },
+        wrapper_html: { style: d?(!@group.description.blank?)} %>
+
+    <%= f.input :location, label: 'Location', placeholder: 'Where is your group located?', 
       input_html: { class: 'input-xlarge' }, wrapper_html: { style: d?(!@group.location.blank?)} %>
 
-    <%= f.input :website, label: 'Website', placeholder: 'http://www.nasa.gov',
+    <%= f.input :website, label: 'Website', placeholder: 'Enter your group\'s website',
       input_html: { class: 'input-xlarge' }, wrapper_html: { style: d?(!@group.website.blank?) } %>
 
     <%= f.input :image_url, label: 'Group Image URL', 
-                placeholder: 'http://nasa.gov/logo.png',
+                placeholder: 'Enter the URL of an image',
       input_html: { class: 'input-xlarge' }, wrapper_html: { style: d?(!@group.image_url.blank?)}%>
 
     <% if @badge_list_admin && !@group.new_record? %>

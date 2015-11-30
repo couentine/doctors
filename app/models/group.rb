@@ -7,7 +7,8 @@ class Group
 
   MAX_NAME_LENGTH = 50
   MAX_URL_LENGTH = 30
-  MAX_LOCATION_LENGTH = 200
+  MAX_DESCRIPTION_LENGTH = 140
+  MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type]
   JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 'image' => :image_url,
@@ -38,6 +39,7 @@ class Group
   field :name,                        type: String
   field :url,                         type: String
   field :url_with_caps,               type: String
+  field :description,                 type: String
   field :location,                    type: String
   field :website,                     type: String
   field :image_url,                   type: String
@@ -94,6 +96,7 @@ class Group
     message: "can only contain letters, numbers, dashes and underscores" },
     exclusion: { in: APP_CONFIG['blocked_url_slugs'],
     message: "%{value} is a specially reserved url." }
+  validates :description, length: { maximum: MAX_DESCRIPTION_LENGTH }
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
   validates :website, url: true
   validates :image_url, url: true
@@ -110,14 +113,15 @@ class Group
   validate :subscription_fields_valid
 
   # Which fields are accessible?
-  attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
-    :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit,
-    :pricing_group, :subscription_plan, :stripe_subscription_card, :new_subscription,
-    :member_visibility, :admin_visibility, :badge_copyability, :join_code
+  attr_accessible :name, :url_with_caps, :description, :location, :website, :image_url, :type, 
+    :customer_code, :validation_threshold, :new_owner_username, :user_limit, :admin_limit, 
+    :sub_group_limit, :pricing_group, :subscription_plan, :stripe_subscription_card, 
+    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code
 
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_validation :update_validated_fields
   before_validation :update_caps_field
   after_validation :copy_errors
   before_create :add_creator_to_admins
@@ -883,6 +887,18 @@ protected
     end
     if !image_url.blank? && !image_url.downcase.start_with?("http")
         self.image_url = "http://#{image_url}"
+    end
+  end
+  
+  def update_validated_fields
+    # This should make it impossible to ever trigger the max description length validation
+    if description && (description.length > MAX_DESCRIPTION_LENGTH)
+      self.description = description[0, MAX_DESCRIPTION_LENGTH]
+    end
+
+    # This should make it impossible to ever trigger the max location length validation
+    if location && (location.length > MAX_LOCATION_LENGTH)
+      self.location = location[0, MAX_LOCATION_LENGTH]
     end
   end
 

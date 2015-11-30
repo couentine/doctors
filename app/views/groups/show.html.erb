@@ -543,8 +543,7 @@
             </td>
             <td class="left-panel">
               <h1><%= @group.name %></h1>
-              <h2><%= @group.url_with_caps %></h2>
-              <h3>
+              <h2>
                 <%=
                   case @group.type
                     when "open"
@@ -573,7 +572,13 @@
                     <%= @group.subscription_status_string %>
                   </span>
                 <% end %>
-              </h3>
+              </h2>
+              
+              <% if @group.description %>
+                <h3>
+                  <%= @group.description %>
+                </h3>
+              <% end %>
             </td>
             
             <td class="separator hidden-phone with-footer"><span>&nbsp;</span></td>
