@@ -557,7 +557,12 @@ class Group
       to_group = options[:to_group] || Group.find(to_group_id)
 
       # Now get the json and initialize our tracking variables
-      badge_json_clones = from_group.get_badge_json_clones(badge_urls)
+      badge_json_clones = from_group.get_badge_json_clones(badge_urls).select do |badge_item|
+        creator.admin || creator.admin_of?(from_group)       \
+          || (badge_item['visibility'] == 'public')           \
+          || creator.learner_or_expert_of?(badge_item['_id'])  \
+          || (creator.member_of?(from_group) && (badge_item['visibility'] == 'private'))
+      end
       badge_count = badge_json_clones.count
       progress_count, success_count, error_count = 0, 0, 0
       last_error_message = nil

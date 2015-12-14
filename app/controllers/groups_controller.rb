@@ -691,7 +691,25 @@ class GroupsController < ApplicationController
   def copy_badges_form
     @to_group = Group.find(params[:to_group]) rescue nil
     @to_group_options = current_user.admin_group_options except: [@group.id]
-    @badge_options = @group.badges_cache.values.sort_by{ |bi| bi['name'] }
+
+    # Now filter down the badge options based on the current user
+    if @current_user_is_admin || @badge_list_admin
+      @badge_options = @group.badges_cache.values
+    elsif @current_user_is_member
+      @badge_options = []
+      @group.badges_cache.each do |badge_id, badge_item|
+        if (badge_item['visibility'] == 'public') || (badge_item['visibility'] == 'private') \
+            || current_user.learner_or_expert_of?(badge_id)
+          @badge_options << badge_item
+        end
+      end
+    else # they have to be logged in to get here so they are at least a user
+      @badge_options = @group.badges_cache.values.select! do |badge_item| 
+        badge_item['visibility'] == 'public'
+      end
+    end
+    
+    @badge_options.sort_by!{ |bi| bi['name'] }
   end
 
   # POST /group-url/copy_badges?to_group=url&badges[]=list_of_urls
@@ -712,6 +730,22 @@ class GroupsController < ApplicationController
             @badge_urls = []
             params[:badges].each { |url| @badge_urls << url.downcase unless url.blank? }
           end
+
+          # Then update analytics
+          IntercomEventWorker.perform_async({
+            'event_name' => 'copy-badges',
+            'email' => current_user.email,
+            'created_at' => Time.now.to_i,
+            'metadata' => {
+              'from_group_id' => @group.id.to_s,
+              'from_group_name' => @group.name,
+              'from_group_url' => @group.group_url,
+              'to_group_id' => @to_group.id.to_s,
+              'to_group_name' => @to_group.name,
+              'to_group_url' => @to_group.group_url,
+              'badge_count' => @badge_urls.blank? ? -1 : @badge_urls.count
+            }
+          })
 
           # Initiate the copy and redirect to the poller
           poller_id = @group.copy_badges_to_group(current_user.id, @badge_urls, @to_group.id, true)

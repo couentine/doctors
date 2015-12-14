@@ -344,6 +344,10 @@ class User
     admin_of_ids.include?(group.id)
   end
 
+  def member_or_admin_of?(group)
+    member_of?(group) || admin_of?(group)
+  end
+
   # Doesn't use any queries, returns :admin or :member or :none
   def member_type_of(group_id)
     if admin_of_ids.include? group_id
@@ -368,12 +372,39 @@ class User
     end
   end
 
-  def learner_of?(badge)
-    learner_badge_ids.include? badge.id
+  # Pass the badge OR the id of the badge
+  def learner_of?(badge_or_id)
+    case badge_or_id.class.to_s
+    when 'Badge'
+      learner_badge_ids.include? badge_or_id.id
+    when 'Moped::BSON::ObjectId'
+      learner_badge_ids.include? badge_or_id
+    when 'String'
+      learner_badge_ids.include? Moped::BSON::ObjectId(badge_or_id)
+    else
+      throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. " \
+        + "(Accepted types are Badge, ObjectId or String.)"
+    end
   end
 
-  def expert_of?(badge)
-    expert_badge_ids.include? badge.id
+  # Pass the badge OR the id of the badge
+  def expert_of?(badge_or_id)
+    case badge_or_id.class.to_s
+    when 'Badge'
+      expert_badge_ids.include? badge_or_id.id
+    when 'Moped::BSON::ObjectId'
+      expert_badge_ids.include? badge_or_id
+    when 'String'
+      expert_badge_ids.include? Moped::BSON::ObjectId(badge_or_id)
+    else
+      throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. " \
+        + "(Accepted types are Badge, ObjectId or String.)"
+    end
+  end
+
+  # Pass the badge OR the id of the badge
+  def learner_or_expert_of?(badge_or_id)
+    learner_of?(badge_or_id) || expert_of?(badge_or_id)
   end
 
   def find_log(badge)
