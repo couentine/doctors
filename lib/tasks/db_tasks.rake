@@ -785,6 +785,7 @@ namespace :db do
 
         badge.tags.each do |tag|
           tag.update_json_clone
+          tag.context = 'badge_async' # prevent the badge update callback from firing
           tag.timeless.save
           print "-"
 

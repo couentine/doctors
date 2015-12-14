@@ -23,7 +23,7 @@ class Badge
   # Below are the badge-level fields included in the clone
   # NOTE: Badge image is automatically checked for changes and included
   CLONE_FIELDS = [:_id, :name, :summary, :editability, :awardability, :info, :url, :url_with_caps,
-    :created_at, :updated_at]
+    :created_at, :updated_at, :visibility]
 
   # === INSTANCE VARIABLES === #
 
@@ -216,8 +216,9 @@ class Badge
       badge.summary = badge_json_clone['summary']
       badge.url = badge_json_clone['url']
       badge.url_with_caps = badge_json_clone['url_with_caps']
-      badge.awardability = badge_json_clone['awardability']
-      badge.editability = badge_json_clone['editability']
+      badge.awardability = badge_json_clone['awardability'] || 'admins'
+      badge.editability = badge_json_clone['editability'] || 'admins'
+      badge.visibility = badge_json_clone['visibility'] || 'public'
       badge.info = badge_json_clone['info']
       badge.remote_custom_image_url = badge_json_clone['image_url']
       badge.custom_image_key = Badge::IMAGE_KEY_IGNORE # necessary to cause display of custom image

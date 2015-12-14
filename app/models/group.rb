@@ -482,6 +482,9 @@ class Group
     else
       self.badges_cache[badge_id] = {
         'name' => badge_json_clone['name'],
+        'editability' => badge_json_clone['editability'],
+        'awardability' => badge_json_clone['awardability'],
+        'visibility' => badge_json_clone['visibility'],
         'summary' => badge_json_clone['summary'],
         'url' => badge_json_clone['url'],
         'url_with_caps' => badge_json_clone['url_with_caps'],
