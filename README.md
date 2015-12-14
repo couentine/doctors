@@ -8,10 +8,12 @@ the Postmark gem for email. It also uses Redis (hosted now on on RedisCloud) for
 1. Install the basics: Xcode, Homebrew, Git, Github RVM, Ruby & Rails >> [Instructions here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac) >> Be sure to install the current app version of ruby (2.1.2)
 2. Install mongodb: [Instructions here](https://docs.mongodb.org/v3.0/tutorial/install-mongodb-on-os-x/)
 3. Install redis: [Instructions here](http://jasdeep.ca/2012/05/installing-redis-on-mac-os-x/)
-4. Connect to the [Github Repo](https://github.com/hankish/badgelist) and pull down the master branch
-5. Setup your environment variable file (.env)
-5. Run bundle install
-6. Run foreman start
+4. Install imagemagick >> brew install imagemagick
+5. Install foreman >> gem install foreman
+6. Connect to the [Github Repo](https://github.com/hankish/badgelist) and pull down the master branch
+7. Setup your environment variable file (.env)
+8. Run bundle install
+9. Run foreman start
 
 ## Required Environment Variables ##
 
