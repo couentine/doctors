@@ -231,7 +231,7 @@
             </div>
           <% end %>
 
-          <% @tag.wiki_sections.each do |section_text| %>
+          <% (@tag.wiki_sections || []).each do |section_text| %>
             <div class="section-container"><%= section_text.html_safe %></div>
           <% end %>
         </div>
