@@ -709,7 +709,7 @@ class GroupsController < ApplicationController
       end
     end
     
-    @badge_options.sort_by!{ |bi| bi['name'] }
+    @badge_options.sort_by!{ |bi| bi['name'] } unless @badge_options.blank?
   end
 
   # POST /group-url/copy_badges?to_group=url&badges[]=list_of_urls
