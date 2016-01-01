@@ -6,7 +6,7 @@
     provide(:full_title, "#{@entry.summary} - #{@badge.name}")
   end
   provide(:show_subheader, true)
-  provide(:subheader_image, group_image_url_for(@group)) 
+  provide(:subheader_image, @group.avatar_image_url(:small)) 
   provide(:include_rich_text, true)
 
   if !@log.show_on_profile
@@ -86,8 +86,8 @@
       <div class="header-section">
 
         <span class="log-user-link">
-          <%= link_to gravatar_for(@user, \
-            class: "img-circle #{log_user_type}", size: 200), [@group, @badge, @log],
+          <%= link_to image_tag(@user.avatar_image_url(:medium), \
+            class: "gravatar img-circle #{log_user_type}", size: 200), [@group, @badge, @log],
             title: "View #{@user.name}'s #{@badge.progress_log}",
             data: { toggle: 'tooltip', placement: 'left' } %>
           <span class="username">
@@ -97,8 +97,9 @@
 
         <% if @entry.creator != @user %>
           <span class="creator-user-link">
-            <%= link_to gravatar_for(@entry.creator, class: "img-circle expert", 
-              username: @entry.current_username), [@group, @badge, @log], 
+            <%= link_to image_tag(@entry.creator.avatar_image_url(:medium), 
+              class: "gravatar img-circle expert", username: @entry.current_username), 
+              [@group, @badge, @log], 
               title: "Posted by #{@entry.current_username}",
               data: { toggle: 'tooltip', placement: 'left' } %>
             <span class="arrow">&#9654;</span>

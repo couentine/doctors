@@ -9,6 +9,7 @@ class User
   MAX_NAME_LENGTH = 200
   MAX_USERNAME_LENGTH = 15
   JSON_FIELDS = [:name, :username, :username_with_caps]
+  JSON_MOCK_FIELDS = { :avatar_image_url => :avatar_image_url }
 
   INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'
   MAX_EMAIL_BOUNCES = 3
@@ -43,6 +44,11 @@ class User
   field :last_email_bounce_at,          type: Time
   field :inactive_email_bounce_id,      type: Integer
 
+  mount_uploader :direct_avatar,        S3DirectUploader
+  mount_uploader :avatar,               S3AvatarUploader
+  field :avatar_key,                    type: String
+  field :processing_avatar,             type: Boolean
+
   field :identity_hash,                 type: String
   field :identity_salt,                 type: String
 
@@ -72,7 +78,7 @@ class User
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :name, :username_with_caps, :password, :password_confirmation, 
-    :remember_me
+    :remember_me, :avatar_key
 
   # === STANDARD DEVISE FIELDS === #
 
@@ -111,12 +117,36 @@ class User
   # === CALLBACKS === #
 
   before_validation :update_caps_field
+  before_validation :update_avatar_key
   before_create :set_signup_flags
   before_create :check_for_inactive_email
   after_create :convert_group_invitations
   before_save :update_identity_hash
+  after_save :process_avatar
   before_update :process_email_change
   after_update :update_logs
+
+  # === USER MOCK FIELD METHODS === #
+
+  def user_url
+    "#{ENV['root_url'] || 'http://badgelist.com'}/u/#{username_with_caps}"
+  end
+
+  # Returns URL of the specified version of this user's avatar (uses gravatar as a backup)
+  # Valid version values are nil (defaults to full size), :medium, :small
+  def avatar_image_url(version = nil)
+    return_value = avatar_url(version) || gravatar_url(version)
+  end
+  def avatar_image_medium_url; avatar_url(:medium); end
+  def avatar_image_small_url; avatar_url(:small); end
+
+  # Returns URL of this user's gravatar (accepts same version values as avatar_image_url method)
+  def gravatar_url(version = nil)
+    email_temp = (email || 'nonexistentuser@example.com').downcase
+    gravatar_id = Digest::MD5::hexdigest(email_temp)
+    size_map = { nil => 500, medium: 200, small: 50 }
+    "https://secure.gravatar.com/avatar/#{gravatar_id}?s=#{size_map[version]}&d=mm"
+  end
 
   # === CLASS METHODS === #
 
@@ -683,6 +713,39 @@ protected
       self.username = username_with_caps.downcase
     end
   end
+
+  def update_avatar_key
+    if new_record? || avatar_key_changed?
+      self.direct_avatar.key = avatar_key
+      self.processing_avatar = true
+    end
+  end
+
+  def process_avatar
+    if processing_avatar
+      User.delay(queue: 'high', retry: 5).do_process_avatar(id)
+    end
+  end
+
+  # Processes changes to the image from carrierwave direct key
+  def self.do_process_avatar(user_id)
+    user = User.find(user_id)
+    user.processing_avatar = false
+
+    if !user.direct_avatar.blank?
+      user.remote_avatar_url = user.direct_avatar.direct_fog_url(with_path: true)
+      
+      if !user.save
+        # If there was an error then clear out the uploaded image and use the default
+        user.avatar_key = nil
+        user.save! # This should trigger the callback again calling a new instance of this method
+      end
+    else
+      # Use the default image
+      user.remote_avatar_url = user.gravatar_url
+      user.save!
+    end
+  end  
 
   # Sets one or more of the following flags: 
   #   invited-member, invited-admin, invited-learner, invited-expert, organic-signup

@@ -1,7 +1,7 @@
 <% 
   provide(:title, "Copy badges - #{@group.name}") 
   provide(:show_subheader, true)
-  provide(:subheader_image, group_image_url_for(@group)) 
+  provide(:subheader_image, @group.avatar_image_url(:small)) 
 %>
 
 <% content_for :subheader_links do %>

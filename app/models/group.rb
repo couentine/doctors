@@ -11,8 +11,8 @@ class Group
   MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type]
-  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 'image' => :image_url,
-    'email' => :primary_email }
+  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 
+    'image_url' => :avatar_image_url, 'email' => :primary_email }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
 
@@ -20,6 +20,9 @@ class Group
   PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
 
   BOUNCED_EMAIL_LOG_MAX_LENGTH = 100
+
+  DEFAULT_GROUP_AVATAR_PATH = 'app/assets/images/default-group-avatar.png'
+  DEFAULT_GROUP_AVATAR_FILE = 'default-group-avatar.png'
 
   # === INSTANCE VARIABLES === #
 
@@ -36,53 +39,58 @@ class Group
 
   # === FIELDS & VALIDATIONS === #
 
-  field :name,                        type: String
-  field :url,                         type: String
-  field :url_with_caps,               type: String
-  field :description,                 type: String
-  field :location,                    type: String
-  field :website,                     type: String
-  field :image_url,                   type: String
-  field :type,                        type: String, default: 'open'
-  field :customer_code,               type: String
-  field :validation_threshold,        type: Integer, default: 1
-  field :invited_admins,              type: Array, default: []
-  field :invited_members,             type: Array, default: []
-  field :bounced_email_log,           type: Array, default: []
-  field :flags,                       type: Array, default: []
-  field :new_owner_username,          type: String
-  field :previous_owner_id,           type: String
+  field :name,                            type: String
+  field :url,                             type: String
+  field :url_with_caps,                   type: String
+  field :description,                     type: String
+  field :location,                        type: String
+  field :website,                         type: String
+  field :type,                            type: String, default: 'open'
+  field :customer_code,                   type: String
+  field :validation_threshold,            type: Integer, default: 1
+  field :invited_admins,                  type: Array, default: []
+  field :invited_members,                 type: Array, default: []
+  field :bounced_email_log,               type: Array, default: []
+  field :flags,                           type: Array, default: []
+  field :new_owner_username,              type: String
+  field :previous_owner_id,               type: String
   
-  field :member_visibility,           type: String, default: 'public'
-  field :admin_visibility,            type: String, default: 'public'
-  field :badge_copyability,           type: String, default: 'public'
-  field :join_code,                   type: String
+  field :image_url,                       type: String # RETIRED FIELD
+  mount_uploader :direct_avatar,          S3DirectUploader
+  mount_uploader :avatar,                 S3AvatarUploader
+  field :avatar_key,                      type: String
+  field :processing_avatar,       type: Boolean
   
-  field :user_limit,                  type: Integer, default: 5
-  field :admin_limit,                 type: Integer, default: 1
-  field :sub_group_limit,             type: Integer, default: 0
-  field :features,                    type: Array, default: [] # = ['community', 'branding']
-  field :total_user_count,            type: Integer, default: 1
-  field :admin_count,                 type: Integer, default: 1
-  field :member_count,                type: Integer, default: 0
-  field :sub_group_count,             type: Integer, default: 0
-  field :active_user_count,           type: Integer # RETIRED
-  field :monthly_active_users,        type: Hash # RETIRED
+  field :member_visibility,               type: String, default: 'public'
+  field :admin_visibility,                type: String, default: 'public'
+  field :badge_copyability,               type: String, default: 'public'
+  field :join_code,                       type: String
   
-  field :pricing_group,               type: String, default: 'standard'
-  field :subscription_plan,           type: String # values are defined in config.yml
-  field :subscription_end_date,       type: Time
-  field :stripe_payment_fail_date,    type: Time
-  field :stripe_payment_retry_date,   type: Time
-  field :stripe_subscription_card,    type: String
-  field :stripe_subscription_id,      type: String
-  field :stripe_subscription_details, type: String
-  field :stripe_subscription_status,  type: String, default: 'new'
+  field :user_limit,                      type: Integer, default: 5
+  field :admin_limit,                     type: Integer, default: 1
+  field :sub_group_limit,                 type: Integer, default: 0
+  field :features,                        type: Array, default: [] # = ['community', 'branding']
+  field :total_user_count,                type: Integer, default: 1
+  field :admin_count,                     type: Integer, default: 1
+  field :member_count,                    type: Integer, default: 0
+  field :sub_group_count,                 type: Integer, default: 0
+  field :active_user_count,               type: Integer # RETIRED
+  field :monthly_active_users,            type: Hash # RETIRED
+  
+  field :pricing_group,                   type: String, default: 'standard'
+  field :subscription_plan,               type: String # values are defined in config.yml
+  field :subscription_end_date,           type: Time
+  field :stripe_payment_fail_date,        type: Time
+  field :stripe_payment_retry_date,       type: Time
+  field :stripe_subscription_card,        type: String
+  field :stripe_subscription_id,          type: String
+  field :stripe_subscription_details,     type: String
+  field :stripe_subscription_status,      type: String, default: 'new'
     # Possible Status Values = ['trialing', 'active', 'past_due', 'canceled', 'unpaid'] 
     #                          & 'new' & 'force-new'
-  field :new_subscription,            type: Boolean # used to set subscription status to 'new'
+  field :new_subscription,                type: Boolean # used to set subscription status to 'new'
 
-  field :badges_cache,                type: Hash, default: {} # key=badge_id, value=key_fields
+  field :badges_cache,                    type: Hash, default: {} # key=badge_id, value=key_fields
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, 
@@ -116,11 +124,13 @@ class Group
   attr_accessible :name, :url_with_caps, :description, :location, :website, :image_url, :type, 
     :customer_code, :validation_threshold, :new_owner_username, :user_limit, :admin_limit, 
     :sub_group_limit, :pricing_group, :subscription_plan, :stripe_subscription_card, 
-    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code
+    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code,
+    :avatar_key
 
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_validation :update_avatar_key
   before_validation :update_validated_fields
   before_validation :update_caps_field
   after_validation :copy_errors
@@ -131,6 +141,7 @@ class Group
   before_save :update_private_defaults
   before_save :process_subscription_field_updates
   before_create :create_first_subscription
+  after_save :process_avatar
   before_update :create_another_subscription
   after_update :update_stripe_if_needed
   before_destroy :cancel_subscription_on_destroy
@@ -146,6 +157,14 @@ class Group
   def group_url
     "#{ENV['root_url'] || 'http://badgelist.com'}/#{url_with_caps}"
   end
+
+  # Returns URL of the specified version of this group's avatar
+  # Valid version values are nil (defaults to full size), :medium, :small
+  def avatar_image_url(version = nil)
+    avatar_url(version) || DEFAULT_GROUP_AVATAR_FILE
+  end
+  def avatar_image_medium_url; avatar_url(:medium); end
+  def avatar_image_small_url; avatar_url(:small); end
 
   # === GROUP METHODS === #
 
@@ -898,6 +917,39 @@ protected
     end
   end
   
+  def update_avatar_key
+    if new_record? || avatar_key_changed?
+      self.direct_avatar.key = avatar_key
+      self.processing_avatar = true
+    end
+  end
+
+  def process_avatar
+    if processing_avatar
+      Group.delay(queue: 'high', retry: 5).do_process_avatar(id)
+    end
+  end
+
+  # Processes changes to the image from carrierwave direct key
+  def self.do_process_avatar(group_id)
+    group = Group.find(group_id)
+    group.processing_avatar = false
+
+    if !group.direct_avatar.blank?
+      group.remote_avatar_url = group.direct_avatar.direct_fog_url(with_path: true)
+      
+      if !group.save
+        # If there was an error then clear out the uploaded image and use the default
+        group.avatar_key = nil
+        group.save! # This should trigger the callback again calling a new instance of this method
+      end
+    else
+      # Use the default image
+      group.avatar = Rails.root.join(DEFAULT_GROUP_AVATAR_PATH).open
+      group.save!
+    end
+  end
+
   def update_validated_fields
     # This should make it impossible to ever trigger the max description length validation
     if description && (description.length > MAX_DESCRIPTION_LENGTH)

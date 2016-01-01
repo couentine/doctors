@@ -8,6 +8,77 @@
   end
 %>
 
+<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
+<script type="text/javascript">
+  
+  var MAX_IMAGE_UPLOAD_SIZE = 7000000;
+  var MAX_IMAGE_UPLOAD_DESCRIPTION = "6 megabytes";
+
+  var params_name='<%=j params[:name] unless params[:name].blank? %>';
+  var params_email='<%=j params[:email] unless params[:email].blank? %>';
+
+  $(document).ready(function() {
+    if (params_name != '') $('#user_name').val(params_name);
+    if (params_email != '') $('#user_email').val(params_email);
+
+    // Update gravatar & dynamically show profile photo on form
+    $("#user_email").focusout(function() {
+      // Only update the image if they haven't already uploaded a file
+      if (!$("#user_avatar_key").val()) {
+        $("#user-image").attr("src", gravatarURL($(this).val()));
+      }
+
+      // Only force display of profile photo on form if the email is non-blank
+      if ($(this).val()) {
+        $("div.image_upload_button").fadeIn();  
+      }
+    });
+
+    // IMAGE UPLOAD
+
+    // Clicking the pretty upload button clicks on the file input element instead
+    $("#select-image-file").click(function(e) {
+      $("#s3_direct_uploader_direct_avatar").click();
+      e.preventDefault();
+    });
+    
+    // Process the image file after selection
+    $("#s3_direct_uploader_direct_avatar").change(function() {
+      if ($(this).val()) {
+        if (this.files[0].size > MAX_IMAGE_UPLOAD_SIZE) {
+          alert("The image you have selected is too big. The maximum supported file size is "
+            + MAX_IMAGE_UPLOAD_DESCRIPTION + ".");
+          $(this).val("");
+        } else {
+          $("#select-image-file").fadeOut(function() {
+            $("#upload-spinner").fadeIn();
+          });
+          $("form input[type=submit]").attr("disabled", true); // disable the submit button
+          $("#avatar_form").submit();
+        }
+      }
+    });
+  });
+
+  function gravatarURL(email) {
+    return "https://secure.gravatar.com/avatar/" + CryptoJS.MD5(email.toLowerCase()) 
+      + "?s=200&d=mm";
+  }
+
+  var imageBaseURL = '<%= "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/" %>';
+  function processImageKey(imageKey) {
+    $("#user_avatar_key").val(imageKey);
+    $("#user-image").attr("src", imageBaseURL + imageKey);
+
+    $("#upload-spinner").fadeOut(function() {
+      $("#select-image-file").fadeIn();
+    });
+    
+    $("form input[type=submit]").attr("disabled", false); // re-enable the submit button
+  }
+
+</script>
+
 <div class="row">
 
   <div class="span8 offset2">
@@ -17,29 +88,60 @@
         <h2>Create a new account</h2>
       </div>
       
-      <div class="signin-form bl-form-no-labels">
-        <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
+      <div class="registration-form">
+        <%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name),
+            html: { class: 'form-horizontal' }) do |f| %>
           <div class="form-body">
 
             <%= f.error_notification %>
 
-            <%= f.input :name, :required => true, :autofocus => true, :placeholder => 'Your full name', :input_html => { :class => 'signin' } %>
-            <%= f.input :username_with_caps, :required => true, :placeholder => 'Pick a username', :input_html => { :class => 'signin' } %>
-            <%= f.input :email, :required => true, :placeholder => 'Your email', :input_html => { :class => 'signin' } %>
-            <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'signin' } %>
-            
+            <%= f.input :name, label: 'Your full name', placeholder: 'Jane Lee', 
+              required: true, autofocus: true, input_html: { class: 'signin' } %>
+            <%= f.input :email, label: 'Your email', placeholder: 'jane@lee.com', 
+              required: true, input_html: { class: 'signin' } %>
+            <%= f.input :username_with_caps, label: 'Pick a username', placeholder: 'Jane123', 
+              required: true, input_html: { class: 'signin' } %>
+            <%= f.input :password, label: 'Enter a password', required: true, 
+              input_html: { class: 'signin' } %>
 
-            <div class="controls">
-              <%= f.button :submit, "Create an account", :class => 'btn-large btn-success' %>
-              <%= link_to "Already have an account?", new_user_session_path, class: 'btn btn-link' %>
-              <p class="button-info-block">
-                By clicking "Create an account", you agree to our 
-                <a href="/terms-of-service" target="_blank">terms of service</a> and 
-                <a href="/privacy-policy" target="_blank">privacy policy</a>.
-              </p>
+            <!-- === PROFILE IMAGE === -->
+
+            <%= f.input :avatar_key, as: :hidden %>
+            <div class="control-group image_upload_button" style="<%= d? !@user.email.blank? %>">
+              <label class="optional control-label">Profile Image</label>
+              <div class="controls">
+                <% if @manual_user_image_path.blank? %>
+                  <%= image_tag @user.avatar_image_url(:small), id: 'user-image',
+                    class: 'thumbnail small' %>
+                <% else %>
+                  <%= image_tag @manual_user_image_path, id: 'user-image',
+                    class: 'thumbnail small' %>
+                <% end %>
+
+                <a href="#" class="btn" id="select-image-file">
+                  <i class="fa fa-upload"></i>
+                  Upload an image file
+                </a>
+                <a href="#" class="btn disabled" id="upload-spinner" disabled="true" 
+                    style="display: none;">
+                  <i class="fa fa-refresh fa-spin"></i>
+                  Uploading...
+                </a>
+              </div>
             </div>
 
           </div>
+            
+          <div class="form-footer add-top-margin">
+            <%= f.button :submit, "Create an account", :class => 'btn-large btn-success' %><br>
+            <%= link_to "Already have an account?", new_user_session_path, class: 'btn btn-link' %>
+            <p class="button-info-block">
+              By clicking "Create an account", you agree to our 
+              <a href="/terms-of-service" target="_blank">terms of service</a> and 
+              <a href="/privacy-policy" target="_blank">privacy policy</a>.
+            </p>
+          </div>
+
         <% end %>
       </div>
       
@@ -51,15 +153,13 @@
 
 </div>
 
-<script>
-  
-  var params_name='<%=j params[:name] unless params[:name].blank? %>';
-  var params_email='<%=j params[:email] unless params[:email].blank? %>';
+<!-- === CARRIERWAVE DIRECT FORM === -->
 
-  $(document).ready(function() {
-    if (params_name != '') $('#user_name').val(params_name);
-    if (params_email != '') $('#user_email').val(params_email);
-  });
+<%= direct_upload_form_for(@uploader, html: { id: 'avatar_form', style: 'display: none;',
+    target: 'avatar_result_frame' } ) do |u| %>
+  <%= u.file_field :direct_avatar, accept: 'image/*' %>
+<% end %>
 
-</script>
+<iframe id="avatar_result_frame" name="avatar_result_frame" 
+  style="display: none;"></iframe>
 

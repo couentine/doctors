@@ -81,7 +81,7 @@
             <% @users.each do |user| %>
               <tr>
                 <td>
-                  <%= gravatar_for user, class: "img-circle", size: 20 %> 
+                  <%= image_tag user.avatar_image_url(:small), class: 'img-circle', size: '20x20' %>
                   <a href="<%= user_path(user) %>">
                     <%= user.name %>
                   </a>

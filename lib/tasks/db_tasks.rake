@@ -724,6 +724,7 @@ namespace :db do
     puts " >> Done."
   end
 
+  # NOTE: This is OK to run periodically in production.
   task update_log_user_caches: :environment do
     print "Updating logs for #{User.count} users"
     
@@ -809,6 +810,36 @@ namespace :db do
     Group.where(type: 'private').each do |group|
       group.badge_copyability = 'admins'
       group.timeless.save
+
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  task backpopulate_group_avatars: :environment do
+    print "Updating #{Group.count} groups"
+    
+    # Run through them backwards (to minimize user impact since this is a somewhat slow process)
+    Group.desc(:updated_at).each do |group|
+      unless group.image_url.blank?
+        group.remote_avatar_url = group.image_url
+        group.timeless.save
+      end
+
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  task backpopulate_user_avatars: :environment do
+    print "Updating #{User.count} users"
+    
+    # Run through them backwards (to minimize user impact since this is a somewhat slow process)
+    User.desc(:updated_at).each do |user|
+      user.remote_avatar_url = user.gravatar_url
+      user.timeless.save
 
       print "."
     end

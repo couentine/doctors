@@ -13,7 +13,7 @@
     <table>
       <tr class="card-body-row">
         <td class="card-image" 
-        style="background-image: url('<%= gravatar_url_for_email log.user_email, size: 150 %>')">
+        style="background-image: url('<%= log.user_avatar_image_medium_url %>')">
           <%= link_to '&nbsp;'.html_safe, group_badge_log_path(group, badge, log), 
             title: "View progress log", class: 'image-link' %>
         </td>

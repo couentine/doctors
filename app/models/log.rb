@@ -56,6 +56,9 @@ class Log
   field :user_username,                       type: String # local cache of user info
   field :user_username_with_caps,             type: String # local cache of user info
   field :user_email,                          type: String # local cache of user info
+  field :user_avatar_image_url,               type: String # local cache of user info
+  field :user_avatar_image_medium_url,        type: String # local cache of user info
+  field :user_avatar_image_small_url,         type: String # local cache of user info
 
   validates :badge, presence: true
   validates :user, presence: true
@@ -314,6 +317,9 @@ class Log
     self.user_username = user_record.username
     self.user_username_with_caps = user_record.username_with_caps
     self.user_email = user_record.email
+    self.user_avatar_image_url = user_record.avatar_image_url
+    self.user_avatar_image_medium_url = user_record.avatar_image_medium_url
+    self.user_avatar_image_small_url = user_record.avatar_image_small_url
   end
 
   # === ASYNC CLASS METHODS === #

@@ -44,7 +44,7 @@
 
       <div class="primary-header span12">
         <span class="header-image"> 
-          <%= gravatar_for(@user, :size => 100, :class => 'img-circle') %>
+          <%= image_tag @user.avatar_image_url(:medium), class: 'img-circle' %>
         </span>
         <span class="header-text">
           <h1><%= @user.name %></h1>
@@ -93,7 +93,8 @@
           <table class="header-table">
             <tr>
               <td>
-                <%= link_to group_image_tag_for(group), group, title: "View the group", class: "image-link" %>
+                <%= link_to image_tag(group.avatar_image_url(:medium)), group, 
+                  title: "View the group", class: "image-link" %>
               </td>
               <td>
                 <h2>
@@ -157,7 +158,7 @@
         <ul>
           <% @user.groups.asc(:name).each do |group| %>
             <li>
-              <%= link_to group_image_tag_for(group) + " " + group.name, group, 
+              <%= link_to image_tag(group.avatar_image_url(:small)) + " " + group.name, group, 
                 title: "View the group" %>
               <span class="no-link">
                 <%= "#{@user.member_type_of(group.id).capitalize}" %>

@@ -46,7 +46,8 @@
       
       <div class="card-footline-row">      
         <span class="log-gravatar">
-          <%= link_to gravatar_for(user, class: "img-circle #{log_user_type}"), 
+          <%= link_to image_tag(user.avatar_image_url(:small), 
+            class: "gravatar img-circle #{log_user_type}"), 
             "/#{group.to_param}/#{badge.to_param}/u/#{user.username}",
             title: "View #{user.name}'s #{badge.progress_log}", data: { toggle: 'tooltip' } %>
           <abbr class="username <%= log_user_type %>" data-toggle="tooltip" 
@@ -57,7 +58,7 @@
         
         <% if entry.creator_id != log.user_id %>
           <span class="creator-gravatar">
-            <img src="<%= gravatar_url_for entry.creator %>" 
+            <img src="<%= entry.creator.avatar_image_url(:small) %>" 
               class="gravatar img-circle <%= log_user_type %>"
               title="Posted by <%= entry.current_username %>"
               data-placement="bottom" data-toggle="tooltip">

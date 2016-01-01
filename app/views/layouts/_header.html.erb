@@ -32,7 +32,8 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" id="dropdown-header-currentuser" role="button" 
               data-toggle="dropdown" data-target="#">
-            <%= gravatar_for current_user, :size => 23, :class => 'img-circle' %>
+            <%= image_tag current_user.avatar_image_url(:small), class: 'img-circle', 
+              size: '23x23' %>
             <span id="header-currentuser-name"><%= current_user.name %></span>
             <% if current_user.email_inactive %>
               <i class="fa fa-exclamation-triangle red"></i>
@@ -61,10 +62,8 @@
               </a>
             </li>
             <li>
-              <a href="https://en.gravatar.com/connect/?source=_signup" target="_blank" data-toggle=
-                  "tooltip" data-placement="bottom" 
-                  title="Badge List uses Gravatar to display your profile picture.">
-                <i class="fa fa-picture-o"></i> Change photo
+              <a href="<%= edit_user_registration_path %>#upload-image">
+                <i class="fa fa-picture-o"></i> Update profile image
               </a>
             </li> 
             <% if current_user.admin? %>

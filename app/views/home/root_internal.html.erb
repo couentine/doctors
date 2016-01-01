@@ -58,7 +58,7 @@
       <ul>
         <% @groups.each do |group| %>
           <li>
-            <%= link_to group_image_tag_for(group) + group.name, group,
+            <%= link_to image_tag(group.avatar_image_url(:small)) + group.name, group,
               title: "View the group" %>
           </li>
         <% end %> <!-- END @groups -->

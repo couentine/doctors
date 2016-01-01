@@ -125,6 +125,10 @@ class GroupsController < ApplicationController
       @allow_url_editing = true;
       subscription_plan = params[:plan]
 
+      # Create the carrierwave direct uploader
+      @uploader = Group.new.direct_avatar
+      @uploader.success_action_redirect = image_key_url
+
       if subscription_plan
         @group.type = 'private'
         if ALL_SUBSCRIPTION_PLANS[subscription_plan] \
@@ -148,6 +152,10 @@ class GroupsController < ApplicationController
     @pricing_group_options = PRICING_GROUP_OPTIONS
     @allow_url_editing = (@group.member_ids.count == 0) || (@group.badge_ids.count == 0);
     @transfer_mode = params[:transfer]
+
+    # Create the carrierwave direct uploader
+    @uploader = Group.new.direct_avatar
+    @uploader.success_action_redirect = image_key_url
   end
 
   # POST /groups
@@ -167,6 +175,11 @@ class GroupsController < ApplicationController
           filter_user: current_user }
       else
         @allow_url_editing = true;
+        
+        # Create the carrierwave direct uploader
+        @uploader = @group.direct_avatar
+        @uploader.success_action_redirect = image_key_url
+
         format.html { render action: "new" }
         format.json { render json: @group.errors, status: :unprocessable_entity }
       end
@@ -185,6 +198,10 @@ class GroupsController < ApplicationController
                       notice: 'Group was successfully updated.' }
         format.json { head :no_content }
       else
+        # Create the carrierwave direct uploader
+        @uploader = Group.new.direct_avatar
+        @uploader.success_action_redirect = image_key_url
+        
         format.html { render action: "edit" }
         format.json { render json: @group.errors, status: :unprocessable_entity }
       end

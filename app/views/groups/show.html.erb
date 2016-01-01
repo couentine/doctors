@@ -20,6 +20,50 @@
     });
   });
   
+  <% if @group.processing_avatar %>
+
+    var MAX_AVATAR_POLL_TRIES = 50;
+    var AVATAR_POLLING_INTERVAL = 300;
+    var GROUP_URL = "<%= @group.group_url %>";
+
+    // Start the poller
+    $(document).ready(function() {
+      setTimeout(function() { checkForAvatar(1); }, AVATAR_POLLING_INTERVAL);
+    });
+
+    function checkForAvatar(numTries) {
+      try {
+        $.getJSON(GROUP_URL, function(group) {
+          if (group == null) {
+            checkForAvatarError();
+          } else {
+            if (!group.processing_avatar) {
+              setTimeout(function() { checkForAvatarComplete(group); }, AVATAR_POLLING_INTERVAL);
+            } else if (numTries <= MAX_AVATAR_POLL_TRIES) {
+              setTimeout(function() { checkForAvatar(numTries + 1); }, AVATAR_POLLING_INTERVAL);
+            } else {
+              checkForAvatarError();
+            }
+          }
+        });
+      } catch (e) {
+        checkForAvatarError();
+      }
+    }
+
+    function checkForAvatarComplete(group) {
+      $("td.left-image img").attr("src", group.image_url);
+      $("#processing-avatar-overlay").fadeOut();
+    }
+
+    function checkForAvatarError() {
+      $("#processing-avatar-overlay i.fa").removeClass("fa-spin fa-refresh")
+        .addClass("fa-exclamation-circle red");
+    }
+
+
+  <% end %>
+
   <% if @badge_poller_id %>
 
     // Start the badge poller
@@ -539,7 +583,20 @@
         <tbody>
           <tr>
             <td class="left-image">
-              <%= group_image_tag_for @group %>
+              <%= image_tag @group.avatar_image_url(:medium) %>
+              <% if @group.processing_avatar %>
+                <div class="spinner-wrapper" id="processing-avatar-overlay">
+                  <div class="spinner-text large">
+                    <i class="fa fa-refresh fa-spin"></i>
+                  </div>
+                </div>
+              <% elsif @current_user_is_owner || @badge_list_admin %>
+                <div class="btn-overlay hidden-until-hover">
+                  <%= link_to '<i class="fa fa-pencil"></i> Edit image'.html_safe, 
+                    edit_group_path, class: 'btn btn-small' %>
+                </div>
+              <% end %>
+
             </td>
             <td class="left-panel">
               <h1><%= @group.name %></h1>

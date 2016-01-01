@@ -78,6 +78,12 @@ img.thumbnail {
   max-height: 100px;
   display: inline;
   margin-right: 10px;
+  overflow: hidden;
+
+  &.small {
+    max-width: 50px;
+    max-height: 50px;
+  }
 }
 
 .add-top-margin { margin-top: 30px; }
@@ -1699,6 +1705,19 @@ form#group-add-users-form {
 
           &:hover, &:focus { opacity: 1; }
         }
+
+        &.hidden-until-hover {
+          a.btn { 
+            opacity: 0; 
+            transition: opacity .25s ease-in-out;
+            -moz-transition: opacity .25s ease-in-out;
+            -webkit-transition: opacity .25s ease-in-out;
+          }
+        }
+      }
+
+      &:hover, &:focus {
+        .btn-overlay.hidden-until-hover a.btn { opacity: 1; }
       }
     }
     td.left-image { background-color: $really-light-gray; }
@@ -3342,6 +3361,48 @@ div.topic-list-card, div.group-list-card {
   }
   .form-actions {
     margin-top: 0px
+  }
+}
+
+.registration-form {
+  padding: 20px 20px 2px 20px;
+
+  .form-body {
+    .control-group {
+      label {
+        color: $light-text-color;
+        font-size: 18px;
+        font-style: italic;
+        margin-top: 9px;
+
+        abbr { display: none; }
+      }
+
+      input[type="email"].signin,input[type="password"].signin,input[type="text"].signin {
+        border-radius: 0 !important;
+        border-top: none !important;
+        border-right: none !important;
+        border-left: none !important;
+        border-bottom: 1px solid $medium-gray !important;
+        box-shadow: none !important;
+        font-size: 20px;
+        padding: 14px 10px 10px 10px;
+        width: 90%;
+      }
+      input[type="email"].signin:focus,input[type="password"].signin:focus,
+          input[type="text"].signin:focus {
+        background-color: $really-light-gray !important;
+      }
+      
+      &.error {
+        .controls {
+          .help-inline { color: $red-medium; font-style: italic; }
+        }
+      }
+    }
+  }
+  .form-footer {
+    text-align: center;
   }
 }
 
