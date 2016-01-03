@@ -10,7 +10,7 @@ class S3AvatarUploader < CarrierWave::Uploader::Base
   end
 
   process :set_content_type
-  process :resize_to_fill => [500, 500]
+  process :resize_and_pad => [500, 500]
 
   version :medium do
     process :resize_to_fill => [200, 200]

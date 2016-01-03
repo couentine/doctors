@@ -29,6 +29,15 @@
     // Start the poller
     $(document).ready(function() {
       setTimeout(function() { checkForAvatar(1); }, AVATAR_POLLING_INTERVAL);
+
+      $("td.left-image img").error(function() {
+        $("#processing-avatar-overlay").fadeIn();
+        
+        setTimeout(function() {
+          $("#processing-avatar-overlay").fadeOut();
+          $("td.left-image img").attr("src", $("td.left-image img").attr("src"));
+        }, 300);
+      });
     });
 
     function checkForAvatar(numTries) {
