@@ -1,6 +1,4 @@
 class LogsController < ApplicationController
-  include UsersHelper
-  
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy]
   prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy]
   before_filter :authenticate_user!, only: [:create, :edit, :update, :destroy]

@@ -526,7 +526,7 @@ class GroupsController < ApplicationController
         badge_ids = @badges.map{ |b| b.id }
       end
 
-      # Parse the emails using the UsersHelper function
+      # Parse the emails using the EmailTools function
       parsed_emails = parse_emails(params[:emails])
       @invalid_emails = parsed_emails[:invalid]
       valid_email_names = parsed_emails[:valid]
