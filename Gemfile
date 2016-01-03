@@ -23,7 +23,7 @@ gem 'rack-timeout'
 gem 'browser_details'
 gem 'exception_notification'
 
-gem 'mini_magick', '~> 3.8.1'
+gem 'mini_magick'
 gem 'rqrcode_png'
 # gem 'font-awesome-sass'
 # gem 'font-awesome-rails', '~> 4.3'
