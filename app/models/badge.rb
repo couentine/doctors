@@ -140,7 +140,7 @@ class Badge
   def issuer_url; "#{ENV['root_url']}/#{group.url}.json"; end
 
   def badge_url
-    "#{ENV['root_url'] || 'http://badgelist.com'}/#{group.url_with_caps}/#{url_with_caps}"
+    "#{ENV['root_url'] || 'http://www.badgelist.com'}/#{group.url_with_caps}/#{url_with_caps}"
   end
 
   # Returns URL of the specified version of this badge's image
