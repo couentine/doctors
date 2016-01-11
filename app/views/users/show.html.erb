@@ -45,6 +45,12 @@
       <div class="primary-header span12">
         <span class="header-image"> 
           <%= image_tag @user.avatar_image_url(:medium), class: 'img-circle' %>
+          <% if @this_is_current_user %>
+            <div class="btn-overlay hidden-until-hover">
+              <%= link_to "<i class='fa fa-pencil'></i> Edit image".html_safe,
+                edit_user_registration_path + '#upload-image', class: 'btn btn-small' %>  
+            </div>
+          <% end %>
         </span>
         <span class="header-text">
           <h1><%= @user.name %></h1>

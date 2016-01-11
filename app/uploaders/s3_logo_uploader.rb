@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class S3AvatarUploader < CarrierWave::Uploader::Base
+class S3LogoUploader < CarrierWave::Uploader::Base
   include CarrierWave::MiniMagick
   include CarrierWave::MimeTypes
   storage :fog
@@ -10,14 +10,14 @@ class S3AvatarUploader < CarrierWave::Uploader::Base
   end
 
   process :set_content_type
-  process :resize_to_fill => [500, 500]
+  process :resize_to_fit => [500, 500]
 
   version :medium do
-    process :resize_to_fill => [200, 200]
+    process :resize_to_fit => [200, 200]
   end
 
   version :small do
-    process :resize_to_fill => [50, 50]
+    process :resize_to_fit => [50, 50]
   end
 
   # Add a white list of extensions which are allowed to be uploaded.

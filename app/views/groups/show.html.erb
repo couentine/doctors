@@ -599,13 +599,13 @@
                     <i class="fa fa-refresh fa-spin"></i>
                   </div>
                 </div>
-              <% elsif @current_user_is_owner || @badge_list_admin %>
+              <% end %>
+              <% if @current_user_is_owner || @badge_list_admin %>
                 <div class="btn-overlay hidden-until-hover">
                   <%= link_to '<i class="fa fa-pencil"></i> Edit image'.html_safe, 
                     edit_group_path, class: 'btn btn-small' %>
                 </div>
               <% end %>
-
             </td>
             <td class="left-panel">
               <h1><%= @group.name %></h1>

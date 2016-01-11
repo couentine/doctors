@@ -57,9 +57,9 @@ class Group
   
   field :image_url,                       type: String # RETIRED FIELD
   mount_uploader :direct_avatar,          S3DirectUploader
-  mount_uploader :avatar,                 S3AvatarUploader
+  mount_uploader :avatar,                 S3LogoUploader
   field :avatar_key,                      type: String
-  field :processing_avatar,       type: Boolean
+  field :processing_avatar,               type: Boolean
   
   field :member_visibility,               type: String, default: 'public'
   field :admin_visibility,                type: String, default: 'public'

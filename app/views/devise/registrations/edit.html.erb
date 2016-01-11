@@ -87,6 +87,15 @@
       }
     });
 
+    $("td.left-image img").error(function() {
+      $("#upload-spinner").fadeIn();
+      
+      setTimeout(function() {
+        $("#upload-spinner").fadeOut();
+        $("td.left-image img").attr("src", $("td.left-image img").attr("src"));
+      }, 300);
+    });
+
   });
 
   // PROFILE IMAGE RELATED FUNCTIONS
@@ -127,7 +136,10 @@
 
   function checkForAvatarComplete(user) {
     $("#upload-spinner").fadeOut(function() {
+      $("td.left-image img").attr("src", user.avatar_image_url);
+      $("#dropdown-header-currentuser img").attr("src", user.avatar_image_url);
       $("#select-image-file").fadeIn();
+      document.location.hash = "";
     });
   }
 
