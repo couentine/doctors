@@ -729,8 +729,12 @@ namespace :db do
     print "Updating logs for #{User.count} users"
     
     User.each do |user|
-      User.update_log_user_fields user.id
-      print "."
+      begin
+        User.update_log_user_fields user.id
+        print "."
+      rescue
+        print "!"
+      end
     end
 
     puts " >> Done."
