@@ -30,8 +30,10 @@
           <%= label_tag :emails, "New #{@type.to_s.capitalize} Emails", class: "control-label" %>
           <div class="controls">
             <%= text_area_tag :emails, params[:emails], size: "150x4", autofocus: true,
-                placeholder: 'josh.cassada@nasa.gov, "Jessica U. Meir, Ph.D." <j.meir@nasa.gov>, "Anne McClain" <anne.mcclain@nasa.gov>',
-                class: "span6" %>
+              placeholder: 'josh.cassada@nasa.gov, "Jessica U. Meir, Ph.D." <j.meir@nasa.gov>, ' \
+                + '"Anne McClain" <anne.mcclain@nasa.gov>', class: "span6", 
+              data: { :'character-count' => true, 
+                :'max-length' => GroupsController::MAX_EMAIL_TEXT_LENGTH } %>
             <br/>
             <%= check_box_tag :notify_by_email, "1", true %>
             <%= label_tag :notify_by_email, "Notify new #{@type.to_s.pluralize} by email",

@@ -20,6 +20,7 @@ class GroupsController < ApplicationController
 
   # === CONSTANTS === #
 
+  MAX_EMAIL_TEXT_LENGTH = 1500
   GROUP_TYPE_OPTIONS = [
     ['<b><i class="fa fa-globe"></i> Open Group</b><span>Anyone can join '.html_safe \
       + 'and everything is public.<br>Free forever.</span>'.html_safe, 'open'],
@@ -527,7 +528,8 @@ class GroupsController < ApplicationController
       end
 
       # Parse the emails using the EmailTools function
-      parsed_emails = parse_emails(params[:emails])
+      raw_email_text = (params[:emails] || '').first MAX_EMAIL_TEXT_LENGTH
+      parsed_emails = parse_emails(raw_email_text)
       @invalid_emails = parsed_emails[:invalid]
       valid_email_names = parsed_emails[:valid]
       valid_emails = []
