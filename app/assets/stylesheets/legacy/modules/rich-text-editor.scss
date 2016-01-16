@@ -1,0 +1,17 @@
+/* === RICH TEXT EDITOR === */
+
+  body.wysihtml5-editor {  
+    code {
+      display: block;
+      background-color: $really-light-gray;
+      border-radius: 5px;
+      border: 1px solid $light-gray;
+      padding: 10px;
+      margin: 10px 10px 10px 5px;
+      color: $dark-text-color;
+    }
+
+    &:focus code {
+      background-color: $light-white;
+    }
+  }
