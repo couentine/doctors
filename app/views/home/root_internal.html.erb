@@ -6,6 +6,7 @@
 
 <!-- === ACCOUNT STATUS WARNINGS === -->
 
+<!--
 <% if !current_user.confirmed? || current_user.pending_reconfirmation? %>
   <div class="well tertiary add-top-margin">
     <i class="fa fa-exclamation-triangle header-icon"></i>
@@ -16,9 +17,11 @@
     </p>
   </div>
 <% end %>
+-->
 
 <!-- === PAGE HEADER === -->
 
+<!--
 <div class="row">
   <div class="span12">
     <div class="home-page-header">
@@ -34,9 +37,11 @@
     </div>
   </div>
 </div>
+-->
 
 <% if @groups.blank? %>
 
+<!--
   <div class="row">
     <div class="group-col well well-lead inset-well">
       <i class="fa fa-info-circle header-icon"></i>
@@ -49,9 +54,11 @@
         new_group_path, class: 'btn btn-large btn-success' %>
     </div>
   </div>
+-->
 
 <% else %>
-      
+
+<!--
   <div class="row home-group-row">
     <div class="group-col">
 
@@ -61,11 +68,12 @@
             <%= link_to image_tag(group.avatar_image_url(:small)) + group.name, group,
               title: "View the group" %>
           </li>
-        <% end %> <!-- END @groups -->
+        <% end %> <!- - END @groups - ->
       </ul>
 
     </div>
   </div>
+-->
 
 <% end %>
 

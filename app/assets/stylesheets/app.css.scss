@@ -1,0 +1,27 @@
+/* ================================================== */
+/* ||                                              || */
+/* ||  APP LAYOUT                                  || */
+/* ||                                              || */
+/* ||  Material design layout for signed in app.   || */
+/* ||                                              || */
+/* ================================================== */
+
+/* === BASE STYLES === */
+
+  @import "base/app-variables";
+
+/* === LAYOUT-SPECIFIC STYLES === */
+
+  @import "app/typography";
+  @import "app/layout";
+
+/* === COMPONENTS === */
+
+  @import "app/components/links";
+  @import "app/components/buttons";
+
+/* === MODULES === */
+  
+  @import "app/modules/header";
+  @import "app/modules/footer";
+  

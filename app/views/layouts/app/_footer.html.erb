@@ -1,0 +1,18 @@
+<footer class="mdl-mini-footer">
+  <div class="mdl-mini-footer__middle-section">
+    <ul class="mdl-mini-footer__link-list">
+      <li>
+        Badge List is made in San Francisco by 
+        <a href="http://kstreem.com" target="_blank">Knowledgestreem</a>.
+      </li>
+      <li><%= link_to 'Privacy Policy', privacy_policy_path %></li>
+      <li><%= link_to 'Terms of Service', terms_of_service_path %></li>
+    </ul>
+  </div>
+
+  <% if content_for? :extra_footer_text %>
+    <div class="mdl-mini-footer__right-section">
+      <%= yield :extra_footer_text %>
+    </div>
+  <% end %>
+</footer>

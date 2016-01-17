@@ -1,0 +1,307 @@
+/* ================================================== */
+/* ============>> APP COLOR DEFINITIONS <<=========== */
+/* ================================================== */
+
+@import "material-design-lite-1.0.6/src/color-definitions";
+
+$color-primary: $palette-orange-500;
+$color-primary-dark: $palette-orange-700;
+$color-accent: $palette-light-green-500;
+$color-primary-contrast: $color-white;
+$color-accent-contrast: $color-white;
+
+@import "material-design-lite-1.0.6/src/variables";
+
+/* ==========  Color Variables (Unneeded colors are commented out for now)  ========== */
+
+/* Reds */
+$red-50: unquote("rgb(#{$palette-red-50})");
+$red-100: unquote("rgb(#{$palette-red-100})");
+$red-200: unquote("rgb(#{$palette-red-200})");
+$red-300: unquote("rgb(#{$palette-red-300})");
+$red-400: unquote("rgb(#{$palette-red-400})");
+$red-500: unquote("rgb(#{$palette-red-500})");
+$red-600: unquote("rgb(#{$palette-red-600})");
+$red-700: unquote("rgb(#{$palette-red-700})");
+$red-800: unquote("rgb(#{$palette-red-800})");
+$red-900: unquote("rgb(#{$palette-red-900})");
+$red-A100: unquote("rgb(#{$palette-red-A100})");
+$red-A200: unquote("rgb(#{$palette-red-A200})");
+$red-A400: unquote("rgb(#{$palette-red-A400})");
+$red-A700: unquote("rgb(#{$palette-red-A700})");
+
+/* Pinks */
+// $pink-50: unquote("rgb(#{$palette-pink-50})");
+// $pink-100: unquote("rgb(#{$palette-pink-100})");
+// $pink-200: unquote("rgb(#{$palette-pink-200})");
+// $pink-300: unquote("rgb(#{$palette-pink-300})");
+// $pink-400: unquote("rgb(#{$palette-pink-400})");
+// $pink-500: unquote("rgb(#{$palette-pink-500})");
+// $pink-600: unquote("rgb(#{$palette-pink-600})");
+// $pink-700: unquote("rgb(#{$palette-pink-700})");
+// $pink-800: unquote("rgb(#{$palette-pink-800})");
+// $pink-900: unquote("rgb(#{$palette-pink-900})");
+// $pink-A100: unquote("rgb(#{$palette-pink-A100})");
+// $pink-A200: unquote("rgb(#{$palette-pink-A200})");
+// $pink-A400: unquote("rgb(#{$palette-pink-A400})");
+// $pink-A700: unquote("rgb(#{$palette-pink-A700})");
+
+/* Purples */
+// $purple-50: unquote("rgb(#{$palette-purple-50})");
+// $purple-100: unquote("rgb(#{$palette-purple-100})");
+// $purple-200: unquote("rgb(#{$palette-purple-200})");
+// $purple-300: unquote("rgb(#{$palette-purple-300})");
+// $purple-400: unquote("rgb(#{$palette-purple-400})");
+// $purple-500: unquote("rgb(#{$palette-purple-500})");
+// $purple-600: unquote("rgb(#{$palette-purple-600})");
+// $purple-700: unquote("rgb(#{$palette-purple-700})");
+// $purple-800: unquote("rgb(#{$palette-purple-800})");
+// $purple-900: unquote("rgb(#{$palette-purple-900})");
+// $purple-A100: unquote("rgb(#{$palette-purple-A100})");
+// $purple-A200: unquote("rgb(#{$palette-purple-A200})");
+// $purple-A400: unquote("rgb(#{$palette-purple-A400})");
+// $purple-A700: unquote("rgb(#{$palette-purple-A700})");
+
+/* Deep-purples */
+// $deep-purple-50: unquote("rgb(#{$palette-deep-purple-50})");
+// $deep-purple-100: unquote("rgb(#{$palette-deep-purple-100})");
+// $deep-purple-200: unquote("rgb(#{$palette-deep-purple-200})");
+// $deep-purple-300: unquote("rgb(#{$palette-deep-purple-300})");
+// $deep-purple-400: unquote("rgb(#{$palette-deep-purple-400})");
+// $deep-purple-500: unquote("rgb(#{$palette-deep-purple-500})");
+// $deep-purple-600: unquote("rgb(#{$palette-deep-purple-600})");
+// $deep-purple-700: unquote("rgb(#{$palette-deep-purple-700})");
+// $deep-purple-800: unquote("rgb(#{$palette-deep-purple-800})");
+// $deep-purple-900: unquote("rgb(#{$palette-deep-purple-900})");
+// $deep-purple-A100: unquote("rgb(#{$palette-deep-purple-A100})");
+// $deep-purple-A200: unquote("rgb(#{$palette-deep-purple-A200})");
+// $deep-purple-A400: unquote("rgb(#{$palette-deep-purple-A400})");
+// $deep-purple-A700: unquote("rgb(#{$palette-deep-purple-A700})");
+
+/* Indigos */
+// $indigo-50: unquote("rgb(#{$palette-indigo-50})");
+// $indigo-100: unquote("rgb(#{$palette-indigo-100})");
+// $indigo-200: unquote("rgb(#{$palette-indigo-200})");
+// $indigo-300: unquote("rgb(#{$palette-indigo-300})");
+// $indigo-400: unquote("rgb(#{$palette-indigo-400})");
+// $indigo-500: unquote("rgb(#{$palette-indigo-500})");
+// $indigo-600: unquote("rgb(#{$palette-indigo-600})");
+// $indigo-700: unquote("rgb(#{$palette-indigo-700})");
+// $indigo-800: unquote("rgb(#{$palette-indigo-800})");
+// $indigo-900: unquote("rgb(#{$palette-indigo-900})");
+// $indigo-A100: unquote("rgb(#{$palette-indigo-A100})");
+// $indigo-A200: unquote("rgb(#{$palette-indigo-A200})");
+// $indigo-A400: unquote("rgb(#{$palette-indigo-A400})");
+// $indigo-A700: unquote("rgb(#{$palette-indigo-A700})");
+
+/* Blues */
+$blue-50: unquote("rgb(#{$palette-blue-50})");
+$blue-100: unquote("rgb(#{$palette-blue-100})");
+$blue-200: unquote("rgb(#{$palette-blue-200})");
+$blue-300: unquote("rgb(#{$palette-blue-300})");
+$blue-400: unquote("rgb(#{$palette-blue-400})");
+$blue-500: unquote("rgb(#{$palette-blue-500})");
+$blue-600: unquote("rgb(#{$palette-blue-600})");
+$blue-700: unquote("rgb(#{$palette-blue-700})");
+$blue-800: unquote("rgb(#{$palette-blue-800})");
+$blue-900: unquote("rgb(#{$palette-blue-900})");
+$blue-A100: unquote("rgb(#{$palette-blue-A100})");
+$blue-A200: unquote("rgb(#{$palette-blue-A200})");
+$blue-A400: unquote("rgb(#{$palette-blue-A400})");
+$blue-A700: unquote("rgb(#{$palette-blue-A700})");
+
+/* Light-blues */
+$light-blue-50: unquote("rgb(#{$palette-light-blue-50})");
+$light-blue-100: unquote("rgb(#{$palette-light-blue-100})");
+$light-blue-200: unquote("rgb(#{$palette-light-blue-200})");
+$light-blue-300: unquote("rgb(#{$palette-light-blue-300})");
+$light-blue-400: unquote("rgb(#{$palette-light-blue-400})");
+$light-blue-500: unquote("rgb(#{$palette-light-blue-500})");
+$light-blue-600: unquote("rgb(#{$palette-light-blue-600})");
+$light-blue-700: unquote("rgb(#{$palette-light-blue-700})");
+$light-blue-800: unquote("rgb(#{$palette-light-blue-800})");
+$light-blue-900: unquote("rgb(#{$palette-light-blue-900})");
+$light-blue-A100: unquote("rgb(#{$palette-light-blue-A100})");
+$light-blue-A200: unquote("rgb(#{$palette-light-blue-A200})");
+$light-blue-A400: unquote("rgb(#{$palette-light-blue-A400})");
+$light-blue-A700: unquote("rgb(#{$palette-light-blue-A700})");
+
+/* Cyans */
+// $cyan-50: unquote("rgb(#{$palette-cyan-50})");
+// $cyan-100: unquote("rgb(#{$palette-cyan-100})");
+// $cyan-200: unquote("rgb(#{$palette-cyan-200})");
+// $cyan-300: unquote("rgb(#{$palette-cyan-300})");
+// $cyan-400: unquote("rgb(#{$palette-cyan-400})");
+// $cyan-500: unquote("rgb(#{$palette-cyan-500})");
+// $cyan-600: unquote("rgb(#{$palette-cyan-600})");
+// $cyan-700: unquote("rgb(#{$palette-cyan-700})");
+// $cyan-800: unquote("rgb(#{$palette-cyan-800})");
+// $cyan-900: unquote("rgb(#{$palette-cyan-900})");
+// $cyan-A100: unquote("rgb(#{$palette-cyan-A100})");
+// $cyan-A200: unquote("rgb(#{$palette-cyan-A200})");
+// $cyan-A400: unquote("rgb(#{$palette-cyan-A400})");
+// $cyan-A700: unquote("rgb(#{$palette-cyan-A700})");
+
+/* Teals */
+// $teal-50: unquote("rgb(#{$palette-teal-50})");
+// $teal-100: unquote("rgb(#{$palette-teal-100})");
+// $teal-200: unquote("rgb(#{$palette-teal-200})");
+// $teal-300: unquote("rgb(#{$palette-teal-300})");
+// $teal-400: unquote("rgb(#{$palette-teal-400})");
+// $teal-500: unquote("rgb(#{$palette-teal-500})");
+// $teal-600: unquote("rgb(#{$palette-teal-600})");
+// $teal-700: unquote("rgb(#{$palette-teal-700})");
+// $teal-800: unquote("rgb(#{$palette-teal-800})");
+// $teal-900: unquote("rgb(#{$palette-teal-900})");
+// $teal-A100: unquote("rgb(#{$palette-teal-A100})");
+// $teal-A200: unquote("rgb(#{$palette-teal-A200})");
+// $teal-A400: unquote("rgb(#{$palette-teal-A400})");
+// $teal-A700: unquote("rgb(#{$palette-teal-A700})");
+
+/* Greens */
+$green-50: unquote("rgb(#{$palette-green-50})");
+$green-100: unquote("rgb(#{$palette-green-100})");
+$green-200: unquote("rgb(#{$palette-green-200})");
+$green-300: unquote("rgb(#{$palette-green-300})");
+$green-400: unquote("rgb(#{$palette-green-400})");
+$green-500: unquote("rgb(#{$palette-green-500})");
+$green-600: unquote("rgb(#{$palette-green-600})");
+$green-700: unquote("rgb(#{$palette-green-700})");
+$green-800: unquote("rgb(#{$palette-green-800})");
+$green-900: unquote("rgb(#{$palette-green-900})");
+$green-A100: unquote("rgb(#{$palette-green-A100})");
+$green-A200: unquote("rgb(#{$palette-green-A200})");
+$green-A400: unquote("rgb(#{$palette-green-A400})");
+$green-A700: unquote("rgb(#{$palette-green-A700})");
+
+/* Light-greens */
+$light-green-50: unquote("rgb(#{$palette-light-green-50})");
+$light-green-100: unquote("rgb(#{$palette-light-green-100})");
+$light-green-200: unquote("rgb(#{$palette-light-green-200})");
+$light-green-300: unquote("rgb(#{$palette-light-green-300})");
+$light-green-400: unquote("rgb(#{$palette-light-green-400})");
+$light-green-500: unquote("rgb(#{$palette-light-green-500})");
+$light-green-600: unquote("rgb(#{$palette-light-green-600})");
+$light-green-700: unquote("rgb(#{$palette-light-green-700})");
+$light-green-800: unquote("rgb(#{$palette-light-green-800})");
+$light-green-900: unquote("rgb(#{$palette-light-green-900})");
+$light-green-A100: unquote("rgb(#{$palette-light-green-A100})");
+$light-green-A200: unquote("rgb(#{$palette-light-green-A200})");
+$light-green-A400: unquote("rgb(#{$palette-light-green-A400})");
+$light-green-A700: unquote("rgb(#{$palette-light-green-A700})");
+
+/* Limes */
+$lime-50: unquote("rgb(#{$palette-lime-50})");
+$lime-100: unquote("rgb(#{$palette-lime-100})");
+$lime-200: unquote("rgb(#{$palette-lime-200})");
+$lime-300: unquote("rgb(#{$palette-lime-300})");
+$lime-400: unquote("rgb(#{$palette-lime-400})");
+$lime-500: unquote("rgb(#{$palette-lime-500})");
+$lime-600: unquote("rgb(#{$palette-lime-600})");
+$lime-700: unquote("rgb(#{$palette-lime-700})");
+$lime-800: unquote("rgb(#{$palette-lime-800})");
+$lime-900: unquote("rgb(#{$palette-lime-900})");
+$lime-A100: unquote("rgb(#{$palette-lime-A100})");
+$lime-A200: unquote("rgb(#{$palette-lime-A200})");
+$lime-A400: unquote("rgb(#{$palette-lime-A400})");
+$lime-A700: unquote("rgb(#{$palette-lime-A700})");
+
+/* Yellows */
+$yellow-50: unquote("rgb(#{$palette-yellow-50})");
+$yellow-100: unquote("rgb(#{$palette-yellow-100})");
+$yellow-200: unquote("rgb(#{$palette-yellow-200})");
+$yellow-300: unquote("rgb(#{$palette-yellow-300})");
+$yellow-400: unquote("rgb(#{$palette-yellow-400})");
+$yellow-500: unquote("rgb(#{$palette-yellow-500})");
+$yellow-600: unquote("rgb(#{$palette-yellow-600})");
+$yellow-700: unquote("rgb(#{$palette-yellow-700})");
+$yellow-800: unquote("rgb(#{$palette-yellow-800})");
+$yellow-900: unquote("rgb(#{$palette-yellow-900})");
+$yellow-A100: unquote("rgb(#{$palette-yellow-A100})");
+$yellow-A200: unquote("rgb(#{$palette-yellow-A200})");
+$yellow-A400: unquote("rgb(#{$palette-yellow-A400})");
+$yellow-A700: unquote("rgb(#{$palette-yellow-A700})");
+
+/* Ambers */
+$amber-50: unquote("rgb(#{$palette-amber-50})");
+$amber-100: unquote("rgb(#{$palette-amber-100})");
+$amber-200: unquote("rgb(#{$palette-amber-200})");
+$amber-300: unquote("rgb(#{$palette-amber-300})");
+$amber-400: unquote("rgb(#{$palette-amber-400})");
+$amber-500: unquote("rgb(#{$palette-amber-500})");
+$amber-600: unquote("rgb(#{$palette-amber-600})");
+$amber-700: unquote("rgb(#{$palette-amber-700})");
+$amber-800: unquote("rgb(#{$palette-amber-800})");
+$amber-900: unquote("rgb(#{$palette-amber-900})");
+$amber-A100: unquote("rgb(#{$palette-amber-A100})");
+$amber-A200: unquote("rgb(#{$palette-amber-A200})");
+$amber-A400: unquote("rgb(#{$palette-amber-A400})");
+$amber-A700: unquote("rgb(#{$palette-amber-A700})");
+
+/* Oranges */
+$orange-50: unquote("rgb(#{$palette-orange-50})");
+$orange-100: unquote("rgb(#{$palette-orange-100})");
+$orange-200: unquote("rgb(#{$palette-orange-200})");
+$orange-300: unquote("rgb(#{$palette-orange-300})");
+$orange-400: unquote("rgb(#{$palette-orange-400})");
+$orange-500: unquote("rgb(#{$palette-orange-500})");
+$orange-600: unquote("rgb(#{$palette-orange-600})");
+$orange-700: unquote("rgb(#{$palette-orange-700})");
+$orange-800: unquote("rgb(#{$palette-orange-800})");
+$orange-900: unquote("rgb(#{$palette-orange-900})");
+$orange-A100: unquote("rgb(#{$palette-orange-A100})");
+$orange-A200: unquote("rgb(#{$palette-orange-A200})");
+$orange-A400: unquote("rgb(#{$palette-orange-A400})");
+$orange-A700: unquote("rgb(#{$palette-orange-A700})");
+
+/* Deep-oranges */
+$deep-orange-50: unquote("rgb(#{$palette-deep-orange-50})");
+$deep-orange-100: unquote("rgb(#{$palette-deep-orange-100})");
+$deep-orange-200: unquote("rgb(#{$palette-deep-orange-200})");
+$deep-orange-300: unquote("rgb(#{$palette-deep-orange-300})");
+$deep-orange-400: unquote("rgb(#{$palette-deep-orange-400})");
+$deep-orange-500: unquote("rgb(#{$palette-deep-orange-500})");
+$deep-orange-600: unquote("rgb(#{$palette-deep-orange-600})");
+$deep-orange-700: unquote("rgb(#{$palette-deep-orange-700})");
+$deep-orange-800: unquote("rgb(#{$palette-deep-orange-800})");
+$deep-orange-900: unquote("rgb(#{$palette-deep-orange-900})");
+$deep-orange-A100: unquote("rgb(#{$palette-deep-orange-A100})");
+$deep-orange-A200: unquote("rgb(#{$palette-deep-orange-A200})");
+$deep-orange-A400: unquote("rgb(#{$palette-deep-orange-A400})");
+$deep-orange-A700: unquote("rgb(#{$palette-deep-orange-A700})");
+
+/* Browns */
+// $brown-50: unquote("rgb(#{$palette-brown-50})");
+// $brown-100: unquote("rgb(#{$palette-brown-100})");
+// $brown-200: unquote("rgb(#{$palette-brown-200})");
+// $brown-300: unquote("rgb(#{$palette-brown-300})");
+// $brown-400: unquote("rgb(#{$palette-brown-400})");
+// $brown-500: unquote("rgb(#{$palette-brown-500})");
+// $brown-600: unquote("rgb(#{$palette-brown-600})");
+// $brown-700: unquote("rgb(#{$palette-brown-700})");
+// $brown-800: unquote("rgb(#{$palette-brown-800})");
+// $brown-900: unquote("rgb(#{$palette-brown-900})");
+
+/* Greys */
+$grey-50: unquote("rgb(#{$palette-grey-50})");
+$grey-100: unquote("rgb(#{$palette-grey-100})");
+$grey-200: unquote("rgb(#{$palette-grey-200})");
+$grey-300: unquote("rgb(#{$palette-grey-300})");
+$grey-400: unquote("rgb(#{$palette-grey-400})");
+$grey-500: unquote("rgb(#{$palette-grey-500})");
+$grey-600: unquote("rgb(#{$palette-grey-600})");
+$grey-700: unquote("rgb(#{$palette-grey-700})");
+$grey-800: unquote("rgb(#{$palette-grey-800})");
+$grey-900: unquote("rgb(#{$palette-grey-900})");
+
+/* Blue-greys */
+$blue-grey-50: unquote("rgb(#{$palette-blue-grey-50})");
+$blue-grey-100: unquote("rgb(#{$palette-blue-grey-100})");
+$blue-grey-200: unquote("rgb(#{$palette-blue-grey-200})");
+$blue-grey-300: unquote("rgb(#{$palette-blue-grey-300})");
+$blue-grey-400: unquote("rgb(#{$palette-blue-grey-400})");
+$blue-grey-500: unquote("rgb(#{$palette-blue-grey-500})");
+$blue-grey-600: unquote("rgb(#{$palette-blue-grey-600})");
+$blue-grey-700: unquote("rgb(#{$palette-blue-grey-700})");
+$blue-grey-800: unquote("rgb(#{$palette-blue-grey-800})");
+$blue-grey-900: unquote("rgb(#{$palette-blue-grey-900})");

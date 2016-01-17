@@ -1,0 +1,34 @@
+<header class="mdl-layout__header mdl-layout__header--waterfall is-casting-shadow">
+  <div class="mdl-layout-icon">
+    <span class="mdl-layout__title">
+      <%= link_to image_tag('badge-list-shield-square.png'), root_path, class: "logo", 
+        title: "Badge List Home" %>
+    </span>
+  </div>
+  
+  <% # Top row, always visible %>
+  <div class="mdl-layout__header-row">
+    <div class="mdl-layout-spacer"></div>
+    <nav class="mdl-navigation">
+      <%= link_to "<i class='fa fa-close'></i> Sign out".html_safe, 
+        destroy_user_session_path, method: :delete, class: 'mdl-navigation__link' %>
+    </nav>
+  </div>
+  
+  <% # Bottom row, not visible on scroll %>
+  <div class="mdl-layout__header-row">
+    <div class="mdl-layout-spacer"></div>
+    <!-- Navigation -->
+    <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" href="/community">
+        <i class="fa fa-users"></i> Community
+      </a>
+      <a class="mdl-navigation__link" href="/help/docs">
+        <i class="fa fa-question-circle"></i> Help Docs
+      </a>
+      <a class="mdl-navigation__link" href="/w">
+        <i class="fa fa-globe"></i> Website
+      </a>
+    </nav>
+  </div>
+</header>
