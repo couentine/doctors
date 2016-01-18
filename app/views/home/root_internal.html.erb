@@ -4,20 +4,53 @@
   provide(:show_subheader, false)
 %>
 
-<!-- === ACCOUNT STATUS WARNINGS === -->
+<!-- === USER INFO === -->
 
-<!--
-<% if !current_user.confirmed? || current_user.pending_reconfirmation? %>
-  <div class="well tertiary add-top-margin">
-    <i class="fa fa-exclamation-triangle header-icon"></i>
-    <h2>Email verification needed</h2>
-    <p>
-      You need to click the verification link to confirm your Badge List account.
-      (<%= link_to 'Click here to get a new link', new_confirmation_path(:user) %>)
-    </p>
+<div class="page-header user-header user-header--home">
+  <div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+    <div class="mdl-cell mdl-cell--8-col">
+      <div class="page-header__image">
+        <%= image_tag @user.avatar_image_url(:medium), class: 'img--user img--header' %>
+        <%= link_to "<i class='fa fa-pencil'></i>".html_safe, 
+          edit_user_registration_path + '#upload-image', 
+          class: 'overlay-button overlay-button--round' %>
+      </div>
+      <div class="page-header__primary">
+        <h2><%= @user.name %></h2>
+        <h3><%= @user.username %></h3>
+        <div class="page-header__buttons">
+          <% if !@user.confirmed? || @user.pending_reconfirmation? %>
+            <!-- === ACCOUNT STATUS WARNING === -->
+            
+            <span class="label label--warning">
+              <i class="fa fa-exclamation-triangle header-icon"></i>
+              Your email address needs verification
+            </span>
+            <br>
+          <% end %>
+
+          <%= link_to "Manage Account", edit_user_registration_path, 
+            class: 'mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect' %>
+        </div>
+      </div>
+      <div class="page-header__secondary" 
+          onclick="document.location.href='<%= @user.user_url %>'">
+        <div class="widget ribbon-widget">
+          <div class="widget--inner">
+            <span class="widget--inner-label-number <%= @badge_count_digit_class %>">
+              <%= @badge_count %>
+            </span>
+            <span class="widget--inner-label-text">badges</span>
+          </div>
+          
+        </div>
+      </div>
+    </div>
   </div>
-<% end %>
--->
+</div>
+
+
 
 <!-- === PAGE HEADER === -->
 

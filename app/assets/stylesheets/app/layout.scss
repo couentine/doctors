@@ -2,4 +2,44 @@
 /* ===================>> LAYOUT <<=================== */
 /* ================================================== */
 
-/* === ??? === */
+/* === APP HEADER === */
+
+header.mdl-layout__header {
+  background-color: white;
+  border-top: 4px solid $orange-600;
+
+  .mdl-layout-icon {
+    overflow: visible;
+    top: 18px;
+    
+    @media (min-width: 841px) { top: 25px; left: 30px }
+  }
+  a.logo {
+    img {
+      height: 1.5em;
+
+      @media (min-width: 841px) {
+        height: 2em;
+      }
+    }
+  }
+}
+
+/* === APP FOOTER === */
+
+footer.mdl-mini-footer {
+  .mdl-mini-footer__middle-section {
+    margin: 0 auto;
+  }
+}
+
+/* === PAGE CONTENT === */
+
+.page-content {
+  @media (min-width: $grid-tablet-breakpoint) {
+    padding-top: 15px;
+  }
+  @media (min-width: $grid-desktop-breakpoint) {
+    padding-top: 30px;
+  }
+}

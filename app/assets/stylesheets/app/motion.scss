@@ -1,0 +1,17 @@
+/* ================================================== */
+/* ===================>> MOTION <<=================== */
+/* ================================================== */
+
+/* === TRANSITIONS === */
+
+div {
+  transition: background-color 0.1s; -webkit-transition: background-color 0.1s;
+}
+
+div, span {
+  transition: color 0.1s; -webkit-transition: color 0.1s;
+}
+
+a {
+  transition: opacity 0.2s; -webkit-transition: opacity 0.2s;
+}

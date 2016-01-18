@@ -6,6 +6,16 @@ class HomeController < ApplicationController
     if current_user
       @user = current_user
       @groups = @user.groups(false).asc(:name)
+      
+      @badge_count = @user.expert_badge_ids.count
+      if @badge_count >= 100
+        @badge_count_digit_class = 'triple-digit'
+      elsif @badge_count >= 10
+        @badge_count_digit_class = 'double-digit'
+      else
+        @badge_count_digit_class = 'single-digit'
+      end
+
       render template: 'home/root_internal', layout: 'app'
     else
       render template: 'home/root_external', layout: 'website'

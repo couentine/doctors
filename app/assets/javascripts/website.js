@@ -6,4 +6,4 @@
 //= require bootstrap
 //= require browser_details
 //= require jquery-ui-1.11.4.custom/jquery-ui.min.js
-//= require website_scripts
+//= require website/all

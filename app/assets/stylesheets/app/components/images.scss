@@ -1,0 +1,18 @@
+/* ================================================== */
+/* ===================>> IMAGES <<=================== */
+/* ================================================== */
+
+.img--user { 
+  border-radius: 500px; 
+  border: 2px solid $grey-50;
+}
+.img--header {
+  width: 70px;
+  
+  @media (min-width: $grid-tablet-breakpoint) {
+    width: 120px;
+  }
+  @media (min-width: $grid-desktop-breakpoint) {
+    width: 150px;
+  }
+}

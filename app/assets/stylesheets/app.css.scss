@@ -14,14 +14,16 @@
 
   @import "app/typography";
   @import "app/layout";
+  @import "app/motion";
 
 /* === COMPONENTS === */
 
   @import "app/components/links";
   @import "app/components/buttons";
+  @import "app/components/images";
 
 /* === MODULES === */
   
-  @import "app/modules/header";
-  @import "app/modules/footer";
+  @import "app/modules/headers";
+  @import "app/modules/widgets";
   

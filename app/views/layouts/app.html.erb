@@ -63,19 +63,22 @@
 
   <body class="<%= "with-subheader" if content_for?(:show_subheader) \
     %> <%= yield(:body_class) if content_for?(:body_class) %>" >
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-      <%= render 'layouts/app/header' %>
-      <% flash.each do |key, value| %>
-        <%= content_tag(:div, value, class: "alert alert-#{key}") %>
-      <% end %>
+    <div class="mdl-layout__container">
+      <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <%= render 'layouts/app/header' %>
 
-      <main class="mdl-layout__content">
-        <div class="page-content">
-          <%= yield %>
-        </div>
-      </main>
+        <main class="mdl-layout__content">
+          <div class="page-content">
+            <% flash.each do |key, value| %>
+              <%= content_tag(:div, value, class: "alert alert-#{key}") %>
+            <% end %>
 
-      <%= render 'layouts/app/footer' unless content_for?(:hide_footer) %>
+            <%= yield %>
+          </div>
+
+          <%= render 'layouts/app/footer' unless content_for?(:hide_footer) %>
+        </main>
+      </div>
     </div>
   </body>
 
