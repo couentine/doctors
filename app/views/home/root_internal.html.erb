@@ -51,26 +51,29 @@
 </div>
 
 
+<!-- === GROUPS === -->
 
-<!-- === PAGE HEADER === -->
-
-<!--
-<div class="row">
-  <div class="span12">
-    <div class="home-page-header">
-      <% if @groups.blank? %>
-        <h2>No groups or badges yet...</h2><br>
-      <% else %>
-        <div class="primary-button">
-          <%= link_to '<i class="fa fa-plus"></i>'.html_safe, 
-            new_group_path, class: 'btn btn-success' %>
-        </div>
-        <h2>Your Groups</h2>
-      <% end %>
+<div class="section-header">
+  <div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--10-col mdl-cell--6-col-tablet mdl-cell--3-col-phone">
+      <h3>Groups</h3>
+    </div>
+    <div class="mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
+      <ul class="section-header__button-list">
+        <li>
+          <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
+            <i class="material-icons">search</i>
+          </button>
+        </li>
+        <li>
+          <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
+            <i class="material-icons">add</i>
+          </button>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
--->
 
 <% if @groups.blank? %>
 
@@ -91,22 +94,26 @@
 
 <% else %>
 
-<!--
-  <div class="row home-group-row">
-    <div class="group-col">
-
-      <ul>
+  <div class="section-list">
+    <div class="mdl-grid">
+      <div class="mdl-cell mdl-cell--12-col">
         <% @groups.each do |group| %>
-          <li>
-            <%= link_to image_tag(group.avatar_image_url(:small)) + group.name, group,
-              title: "View the group" %>
-          </li>
-        <% end %> <!- - END @groups - ->
-      </ul>
-
+          <div class="mdl-card">
+            <div class="mdl-card__title"><%= group.name %></div>
+            <div class="mdl-card__media">
+              <%= image_tag group.avatar_image_url %>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <%= group.description %>
+            </div>
+            <div class="mdl-card__actions">
+            Test
+            </div>
+          </div>
+        <% end %> <!-- END @groups -->
+      </div>
     </div>
   </div>
--->
 
 <% end %>
 

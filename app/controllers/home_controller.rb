@@ -15,7 +15,7 @@ class HomeController < ApplicationController
       else
         @badge_count_digit_class = 'single-digit'
       end
-
+      
       render template: 'home/root_internal', layout: 'app'
     else
       render template: 'home/root_external', layout: 'website'

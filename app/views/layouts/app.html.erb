@@ -64,15 +64,22 @@
   <body class="<%= "with-subheader" if content_for?(:show_subheader) \
     %> <%= yield(:body_class) if content_for?(:body_class) %>" >
     <div class="mdl-layout__container">
+      <% unless flash.blank? %>
+        <div class="flash-alert__container">
+          <% flash.each do |key, value| %>
+            <div class="flash-alert flash-alert--<%= key %> mdl-shadow--6dp">
+              <a class="flash-alert__button" href="#"><i class="fa fa-close"></i></a>
+              <span class="flash-alert__message"><%= value %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
       <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
         <%= render 'layouts/app/header' %>
 
         <main class="mdl-layout__content">
           <div class="page-content">
-            <% flash.each do |key, value| %>
-              <%= content_tag(:div, value, class: "alert alert-#{key}") %>
-            <% end %>
-
             <%= yield %>
           </div>
 
