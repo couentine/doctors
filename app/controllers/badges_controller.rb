@@ -1,21 +1,21 @@
 class BadgesController < ApplicationController
   
-  prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy, 
+  prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy, 
     :entries_index, :add_learners, :create_learners, :issue_form, :issue_save, :move]
-  prepend_before_filter :find_all_records, only: [:edit, :update, :destroy, 
+  prepend_before_action :find_all_records, only: [:edit, :update, :destroy, 
     :entries_index, :add_learners, :create_learners, :issue_form, :issue_save, :move]
-  before_filter :authenticate_user!, except: [:show, :entries_index]
-  before_filter :group_owner, only: [:move]
-  before_filter :group_admin, only: [:new, :create, :destroy]
-  before_filter :can_award, only: [:issue_form, :issue_save]
-  before_filter :can_edit, only: [:edit, :update, :add_learners, :create_learners]
-  before_filter :set_editing_parameters, only: [:new, :edit]
-  before_filter :build_requirement_list, only: [:new, :edit]
+  before_action :authenticate_user!, except: [:show, :entries_index]
+  before_action :group_owner, only: [:move]
+  before_action :group_admin, only: [:new, :create, :destroy]
+  before_action :can_award, only: [:issue_form, :issue_save]
+  before_action :can_edit, only: [:edit, :update, :add_learners, :create_learners]
+  before_action :set_editing_parameters, only: [:new, :edit]
+  before_action :build_requirement_list, only: [:new, :edit]
 
   # === LIMIT-FOCUSED FILTERS === #
 
-  before_filter :can_create_badges, only: [:new, :create]
-  before_filter :can_create_entries, only: [:issue_form, :issue_save]
+  before_action :can_create_badges, only: [:new, :create]
+  before_action :can_create_entries, only: [:issue_form, :issue_save]
 
   # === CONSTANTS === #
 
@@ -102,7 +102,7 @@ class BadgesController < ApplicationController
   # POST /group-url/badges.json
   def create
     # First build the badge as normal to make sure that it's valid
-    @badge = Badge.new(params[:badge])
+    @badge = Badge.new(badge_params)
     @badge.group = @group
     @badge.visibility = 'private' if @group.private?
     @badge.creator = current_user
@@ -111,7 +111,7 @@ class BadgesController < ApplicationController
     @requirement_list = params[:rl]
 
     if @badge.valid?
-      poller_id = Badge.create_async(@group.id, current_user.id, params[:badge], 
+      poller_id = Badge.create_async(@group.id, current_user.id, badge_params, 
         @requirement_list)
       
       # Then redirect to the group with the poller passed
@@ -138,11 +138,11 @@ class BadgesController < ApplicationController
     # First build the badge as normal to make sure that it's valid
     @badge.current_user = current_user
     @badge.current_username = current_user.username
-    @badge.assign_attributes(params[:badge])
+    @badge.assign_attributes(badge_params)
     @requirement_list = params[:rl]
     
     if @badge.valid?
-      poller_id = @badge.update_async(current_user.id, params[:badge], @requirement_list)
+      poller_id = @badge.update_async(current_user.id, badge_params, @requirement_list)
       
       # Then redirect to the full page poller UI
       redirect_to poller_path(poller_id)
@@ -498,6 +498,13 @@ private
   # Build from badge
   def build_requirement_list
     @requirement_list = (@badge) ? @badge.build_requirement_list : '[]'
+  end
+
+  def badge_params
+    params.require(:badge).permit(:name, :url_with_caps, :summary, :info, :word_for_expert, 
+      :word_for_learner, :editability, :awardability, :visibility, :image_frame, :image_icon, 
+      :image_color1, :image_color2, :icon_search_text, :topic_list_text, :custom_image_key, 
+      :send_validation_request_emails, :move_to_group_id)
   end
 
 end

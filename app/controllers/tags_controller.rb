@@ -1,12 +1,12 @@
 class TagsController < ApplicationController
   include StringTools
 
-  prepend_before_filter :find_parent_records, only: :index
-  prepend_before_filter :find_all_records, except: :index
-  before_filter :authenticate_user!, only: [:edit, :update, :destroy, :restore]
-  before_filter :can_edit_tag, only: [:edit, :update, :restore]
-  before_filter :badge_expert, only: [:destroy]
-  before_filter :set_editing_parameters, only: [:edit, :update]
+  prepend_before_action :find_parent_records, only: :index
+  prepend_before_action :find_all_records, except: :index
+  before_action :authenticate_user!, only: [:edit, :update, :destroy, :restore]
+  before_action :can_edit_tag, only: [:edit, :update, :restore]
+  before_action :badge_expert, only: [:destroy]
+  before_action :set_editing_parameters, only: [:edit, :update]
 
   # === RESTFUL ACTIONS === #
 
@@ -118,7 +118,7 @@ class TagsController < ApplicationController
 
     respond_to do |format|
       if @tag_exists
-        if @tag.update_attributes(params[:tag])
+        if @tag.update_attributes(tag_params)
           format.html do
             flash[:notice] = "#{@tag.type.capitalize} page was successfully updated."
             redirect_to [@group, @badge, @tag]
@@ -266,7 +266,7 @@ private
         @tag.name = @tag.name_with_caps.downcase
         @tag.display_name = detagify_string(@tag.name_with_caps)
       else
-        @tag = Tag.new(params[:tag])
+        @tag = Tag.new(tag_params)
       end
     end
 
@@ -323,6 +323,11 @@ private
         privacy_string
       ]
     end
+  end
+
+  def tag_params
+    params.require(:tag).permit(:display_name, :type, :format, :sort_order, :summary, :wiki, 
+      :editability, :privacy)
   end
 
 end

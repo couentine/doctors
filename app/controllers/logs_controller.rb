@@ -1,9 +1,9 @@
 class LogsController < ApplicationController
-  prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy]
-  prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy]
-  before_filter :authenticate_user!, only: [:create, :edit, :update, :destroy]
-  before_filter :log_owner, only: [:edit, :destroy]
-  before_filter :group_admin_or_log_owner, only: [:update]
+  prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy]
+  prepend_before_action :find_all_records, only: [:show, :edit, :update, :destroy]
+  before_action :authenticate_user!, only: [:create, :edit, :update, :destroy]
+  before_action :log_owner, only: [:edit, :destroy]
+  before_action :group_admin_or_log_owner, only: [:update]
 
   # === RESTFUL ACTIONS === #
 
@@ -130,7 +130,7 @@ class LogsController < ApplicationController
     @log.current_username = current_user.username
 
     respond_to do |format|
-      if @log.update_attributes(params[:log])
+      if @log.update_attributes(log_params)
         format.html { redirect_to [@group, @badge, @log], 
           notice: "#{@badge.progress_log.capitalize} was successfully updated." }
         format.json { head :no_content }
@@ -216,6 +216,11 @@ private
       flash[:error] = "That action is restricted to group admins or the log owner."
       redirect_to [@group, @badge, @log]
     end
+  end
+
+  def log_params
+    params.require(:log).permit(:show_on_profile, :detached_log, :date_started, :date_requested, 
+      :date_withdrawn, :date_sent_to_backpack, :wiki, :receive_validation_request_emails)
   end
 
 end

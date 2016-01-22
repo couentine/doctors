@@ -1,23 +1,23 @@
 source 'https://rubygems.org'
 ruby '2.1.2'
 
-gem 'rails', '3.2.14'
-gem 'puma', '2.13.4'
+gem 'rails', '4.2.5'
+gem 'puma', '~> 2.15'
 
 # HANK
 
-gem 'mongoid', '3.1.5'
-gem 'bson_ext', '1.9.2'
-gem 'redis'
-gem 'sidekiq'
+gem 'mongoid', '~> 5.0'
+# gem 'bson_ext', '1.9.2'
+gem 'redis', '~> 3.2.2'
+gem 'sidekiq', '~> 4.0'
 
 gem 'sinatra', :require => nil
 
 gem 'bootstrap-sass', '2.3.2.2'
 gem 'faker'
-gem 'simple_form', '~> 2.1.1'
+gem 'simple_form', '~> 3.2'
 
-gem 'stripe'
+gem 'stripe', '~> 1.33'
 
 gem 'rack-timeout'
 gem 'browser_details'
@@ -35,28 +35,28 @@ gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 gem 'carrierwave_direct'
 gem 'fog'
 gem 'newrelic_rpm'
-gem 'intercom', '~> 3.0.6'
+gem 'intercom', '~> 3.0'
 gem 'intercom-rails'
 
 # Pagination
 
-gem 'kaminari', '~> 0.16.1'
+gem 'kaminari', '~> 0.16.3'
 gem 'kaminari-bootstrap', '~> 0.1.3'
 
 
 # Email
-gem 'postmark-rails', '~> 0.5.2'
+gem 'postmark-rails', '~> 0.5'
 
 # Users
-gem 'devise', '~> 3.3.0'
+gem 'devise', '~> 3.5'
 gem 'devise-async'
 
 # Twitter
 gem 'twitter'
 
 group :development, :test do
-  gem 'rspec-rails', '~> 2.0'
-  gem "better_errors", '1.1.0'
+  gem 'rspec-rails', '~> 3.4'
+  gem "better_errors", '~> 2.1'
   gem "binding_of_caller"
   gem 'rack-mini-profiler'
   gem 'ultrahook'
@@ -68,16 +68,14 @@ group :test do
   gem 'factory_girl_rails', '~> 4.0'
 end
 
-# Gems used only for assets and not required
-# in production environments by default.
-group :assets do
-  gem 'sass-rails',   '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
 
-  # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-  # gem 'therubyracer', :platforms => :ruby
+gem 'sass-rails',   '~> 5.0'
+gem 'coffee-rails', '~> 4.1'
 
-  gem 'uglifier', '>= 1.0.3'
-end
+# See https://github.com/sstephenson/execjs#readme for more supported runtimes
+# gem 'therubyracer', :platforms => :ruby
 
-gem 'jquery-rails', '~> 3.1.2'
+gem 'uglifier', '~> 2.7'
+
+gem 'jquery-rails', '~> 4.1'
+

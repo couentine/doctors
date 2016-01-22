@@ -64,10 +64,6 @@ class Tag
   validates :privacy, inclusion: { in: PRIVACY_VALUES, 
     message: "%{value} is not a valid type of privacy" }
 
-  # Which fields are accessible?
-  attr_accessible :display_name, :type, :format, :sort_order, :summary, :wiki, :editability, 
-    :privacy
-
   # === CALLBACKS === #
 
   before_validation :update_validated_fields

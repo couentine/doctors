@@ -1,6 +1,6 @@
 class BadgeMakerController < ApplicationController
 
-  before_filter :authenticate_user!  
+  before_action :authenticate_user!  
 
   # GET /i.json?frame=square&icon=pencil&c1=ffffff&c2=000000
   # Starts asyncronous generation of the badge image and returns the poller id

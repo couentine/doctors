@@ -2,7 +2,7 @@ class InfoItemsController < ApplicationController
 
   # === FILTERS === #
 
-  before_filter :badge_list_admin
+  before_action :badge_list_admin
 
   # GET /a/info_items
   # Accepts page parameters: page, page_size, sort_by, sort_order, type

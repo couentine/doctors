@@ -1,8 +1,8 @@
 class UsersController < ApplicationController
   
-  before_filter :authenticate_user!, only: [:index, :add_card, :delete_card, :payment_history,
+  before_action :authenticate_user!, only: [:index, :add_card, :delete_card, :payment_history,
     :confirm_account, :unblock_email, :update_image]
-  before_filter :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
+  before_action :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
 
   # GET /a/users
   # GET /a/users.json
@@ -162,6 +162,12 @@ private
     unless current_user && current_user.admin?
       redirect_to '/'
     end  
+  end
+
+  # This isn't being used yet
+  def user_params
+    params.require(:user).permit(:email, :name, :username_with_caps, :password, 
+      :password_confirmation, :remember_me, :avatar_key)
   end
 
 end

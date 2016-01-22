@@ -1,0 +1,28 @@
+/* ================================================== */
+/* ==========>> APP VARIABLES & SETTINGS <<========== */
+/* ================================================== */
+
+/* === First load variables so we can use them in our definitions === */
+
+@import "base/app-base-colors";
+
+/* === Override MDL Defaults (Use palette colors for these) === */
+
+$color-primary: $palette-orange-500;
+$color-primary-dark: $palette-orange-700;
+$color-accent: $palette-light-green-500;
+$color-primary-contrast: $color-white;
+$color-accent-contrast: $color-white;
+
+/* === Override MDL Defaults (Use actual colors for these) === */
+
+$text-color-primary: $grey-900;
+$preferred_font: 'Lato', 'Open Sans', Verdana, Arial !important;
+
+/* === Load MDL variables === */
+
+@import "shared/material-design-lite-1.0.6/src/variables";
+
+/* === Set Custom Variables === */
+
+$body-background-color: $grey-200;

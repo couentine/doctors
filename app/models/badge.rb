@@ -108,12 +108,6 @@ class Badge
   validates :creator, presence: true
 
   validate :move_to_group_id_is_valid
-
-  # Which fields are accessible?
-  attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
-    :editability, :awardability, :visibility, :image_frame, :image_icon, :image_color1, 
-    :image_color2, :icon_search_text, :topic_list_text, :custom_image_key, 
-    :send_validation_request_emails, :move_to_group_id
   
   # === CALLBACKS === #
 

@@ -63,10 +63,6 @@ class Entry
   validates :link_url, format: { with: TWITTER_URL_REGEX, message: "must be a valid Twitter url" },\
     if: :tweet_is_required?
 
-  # Which fields are accessible?
-  attr_accessible :parent_tag, :summary, :format, :log_validated, :body, :link_url, \
-    :code_format, :uploaded_image_key
-
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create

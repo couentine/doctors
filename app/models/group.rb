@@ -120,13 +120,6 @@ class Group
   validate :new_owner_username_exists
   validate :subscription_fields_valid
 
-  # Which fields are accessible?
-  attr_accessible :name, :url_with_caps, :description, :location, :website, :image_url, :type, 
-    :customer_code, :validation_threshold, :new_owner_username, :user_limit, :admin_limit, 
-    :sub_group_limit, :pricing_group, :subscription_plan, :stripe_subscription_card, 
-    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code,
-    :avatar_key
-
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
