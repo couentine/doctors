@@ -1,0 +1,38 @@
+/* ================================================== */
+/* ==================>> ALERTS <<==================== */
+/* ================================================== */
+
+/* === FLASH ALERTS === */
+
+  .flash-alert__container {
+    position: absolute;
+    top: 90px; right: 0; left: 0;
+    z-index: 100;
+  }
+
+  .flash-alert {
+    max-width: 500px;
+    margin: 10px auto;
+    padding: 0.4em;
+    opacity: 0.9;
+    background-color: $orange-200;
+    border: 1px solid $orange-100; border-radius: 3px;
+    text-align: center;
+    text-shadow: 0px 0px 3px white;
+
+    &.flash-alert--error {
+      background-color: $red-200;
+      border-color: $red-100;
+    }
+    &.flash-alert--success {
+      background-color: $light-green-200;
+      border-color: $light-green-100;
+    }
+  }
+
+  .flash-alert__button {
+    float: right;
+    margin: 0 0.5em;
+    color: inherit;
+    text-shadow: none;
+  }
