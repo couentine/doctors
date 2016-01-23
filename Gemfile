@@ -17,6 +17,9 @@ gem 'bootstrap-sass', '2.3.2.2'
 gem 'faker'
 gem 'simple_form', '~> 3.2'
 
+# gem 'sprockets', '2.11.3'
+gem 'polymer-rails', '1.0.8'
+
 gem 'stripe', '~> 1.33'
 
 gem 'rack-timeout'

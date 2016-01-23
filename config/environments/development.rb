@@ -18,12 +18,8 @@ BadgeList::Application.configure do
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
 
-  # Expands the lines which load the assets
+  # Debug mode disables concatenation and preprocessing of assets.
   config.assets.debug = true
-
-  # For devise
-  # MOVED this next line to application.rb, it uses an ENV variable now
-  # config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 
   # Send email through gmail for this environment 
   config.action_mailer.delivery_method = :smtp
@@ -36,5 +32,4 @@ BadgeList::Application.configure do
     enable_starttls_auto: true  }
 
   config.log_level = :debug
-
 end

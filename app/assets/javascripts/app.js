@@ -1,3 +1,4 @@
+//= require webcomponentsjs/webcomponents-lite
 //= require jquery
 //= require jquery_ujs
 //= require shared/jquery.autosize.min.js
