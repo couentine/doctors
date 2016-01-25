@@ -25,6 +25,7 @@
 
       <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js">
       </script>
+      <%= stylesheet_link_tag 'base/app-variables-polymer' %>
       <%= stylesheet_link_tag 'app', media: 'all' %>
       <%= javascript_include_tag 'app' %>
       <%= html_import_tag 'application' %>
@@ -74,37 +75,30 @@
 
   <% #=== PAGE BODY ===# %>
 
-  <body class="<%= "with-subheader" if content_for?(:show_subheader) \
-    %> <%= yield(:body_class) if content_for?(:body_class) %>" >
-
-    <div class="mdl-layout__container">
+  <body class="<%= yield(:body_class) if content_for?(:body_class) %>" >
       
-      <% #=== PAGE ALERTS ===# %>
+    <% #=== PAGE ALERTS ===# %>
 
-        <% unless flash.blank? %>
-          <div class="flash-alert__container">
-            <% flash.each do |key, value| %>
-              <div class="flash-alert flash-alert--<%= key %> mdl-shadow--6dp">
-                <a class="flash-alert__button" href="#"><i class="fa fa-close"></i></a>
-                <span class="flash-alert__message"><%= value %></span>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
+      <% unless flash.blank? %>
+        <div class="flash-alert__container">
+          <% flash.each do |key, value| %>
+            <div class="flash-alert flash-alert--<%= key %> mdl-shadow--6dp">
+              <a class="flash-alert__button" href="#"><i class="fa fa-close"></i></a>
+              <span class="flash-alert__message"><%= value %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
 
-      <% #=== FLASH ALERT ===# %>
+    <% #=== HEADER, PAGE CONTENT & FOOTER ===# %>
+
       <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
         <%= render 'layouts/app/header' %>
 
-        <main class="mdl-layout__content">
-          <div class="page-content">
-            <%= yield %>
-          </div>
-
-          <%= render 'layouts/app/footer' unless content_for?(:hide_footer) %>
-        </main>
+        <%= yield %>
+        
+        <%= render 'layouts/app/footer' unless content_for?(:hide_footer) %>
       </div>
-    </div>
 
   </body>
 

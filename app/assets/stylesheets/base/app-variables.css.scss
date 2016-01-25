@@ -1,0 +1,19 @@
+/* ================================================== */
+/* =======>> APP VARIABLES & SETTINGS (SASS) <<====== */
+/* ================================================== */
+
+/* === NOTE: All edits need to be made to the SASS and Polymer versions of this file. === */
+
+  @import "base/app-base-colors";
+
+/* === Material Design Colors & Settings === */
+
+  $text-color-primary: $grey-900;
+  $text-color-accent: $grey-50;
+  $app-font: 'Lato', 'Open Sans', Verdana, Arial !important;
+
+/* === Custom Variables === */
+
+  $body-background-color: $grey-200;
+  $grid-desktop-breakpoint: 840px !default;
+  $grid-tablet-breakpoint: 480px !default;

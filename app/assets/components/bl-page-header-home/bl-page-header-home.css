@@ -1,0 +1,49 @@
+
+
+.outer {
+  display: flex;
+}
+.inner {
+  width: 800px;
+  max-width: 100%;
+  margin: auto;
+}
+
+.image { 
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 1em 0 0;
+  position: relative;
+}
+img { 
+  border-radius: 500px; 
+  border: 2px solid var(--grey-50);
+  width: 70px;
+}
+img @media (min-width: var(--grid-tablet-breakpoint)) {
+  width: 120px;
+}
+img @media (min-width: var(--grid-desktop-breakpoint)) {
+  width: 150px;
+}
+
+.primary-header { 
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 1em;
+}
+.secondary-header { 
+  display: inline-block;
+  vertical-align: top;
+  padding-top: 0.4em;
+}
+
+.buttons {
+  margin-top: 10px;
+}
+
+:host ::content h2, :host ::content h3 { margin: 0; }
+
+:host ::content .buttons .label { 
+  margin-bottom: 1em;
+}

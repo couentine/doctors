@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+paper-toolbar {
+  --paper-toolbar-background: white;
+  --paper-toolbar-color: --text-color-primary;
+
+  --paper-toolbar: {
+    border-top: 4px solid var(--paper-orange-600);
+  };
+  
+  --paper-toolbar-content: {
+  };
+}
+
+a {
+  color: var(--paper-grey-700);
+  text-decoration: none;
+}
+a i.fa { margin-right: 0.1em; }
+a.logo img { height: 1.5em; }
+a.logo img @media (min-width: 841px) { height: 2em; }
+a.nav-link { margin-left: 1.5em; }

@@ -6,35 +6,63 @@
 
 <!-- === ACCOUNT STATUS WARNINGS === -->
 
-<% if !current_user.confirmed? || current_user.pending_reconfirmation? %>
-  <div class="well tertiary add-top-margin">
-    <i class="fa fa-exclamation-triangle header-icon"></i>
-    <h2>Email verification needed</h2>
-    <p>
-      You need to click the verification link to confirm your Badge List account.
-      (<%= link_to 'Click here to get a new link', new_confirmation_path(:user) %>)
-    </p>
+<bl-page-header-home image-url="<%= @user.avatar_image_url(:medium) %>" 
+    image-link="<%= edit_user_registration_path + '#upload-image' %>" image-link-icon="pencil">
+  <h2><%= @user.name %></h2>
+  <h3><%= @user.username %></h3>
+  <div class="buttons">
+    <% if !@user.confirmed? || @user.pending_reconfirmation? %>
+      <!-- === ACCOUNT STATUS WARNING === -->
+      
+      <span class="label label--warning">
+        <i class="fa fa-exclamation-triangle header-icon"></i>
+        Your email address needs verification
+      </span>
+      <br>
+    <% end %>
+
+    <bl-button link="<%= edit_user_registration_path %>" raised>
+      Manage Account
+    </bl-button>
   </div>
-<% end %>
+  <div class="extra-info">
+    <div class="widget ribbon-widget">
+      <div class="widget--inner">
+        <span class="widget--inner-label-number <%= @badge_count_digit_class %>">
+          <%= @badge_count %>
+        </span>
+        <span class="widget--inner-label-text">badges</span>
+      </div>
+    </div>
+  </div>
+</bl-page-header-home>
 
-<!-- === PAGE HEADER === -->
 
-<div class="row">
-  <div class="span12">
-    <div class="home-page-header">
-      <% if @groups.blank? %>
-        <h2>No groups or badges yet...</h2><br>
-      <% else %>
-        <div class="primary-button">
-          <%= link_to '<i class="fa fa-plus"></i>'.html_safe, 
-            new_group_path, class: 'btn btn-success' %>
-        </div>
-        <h2>Your Groups</h2>
-      <% end %>
+
+<!-- === GROUPS === -->
+<!--
+<div class="section-header">
+  <div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--10-col mdl-cell--6-col-tablet mdl-cell--3-col-phone">
+      <h3>Groups</h3>
+    </div>
+    <div class="mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
+      <ul class="section-header__button-list">
+        <li>
+          <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
+            <i class="material-icons">search</i>
+          </button>
+        </li>
+        <li>
+          <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
+            <i class="material-icons">add</i>
+          </button>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
-
+-->
 <% if @groups.blank? %>
 
   <div class="row">
@@ -51,21 +79,27 @@
   </div>
 
 <% else %>
-      
-  <div class="row home-group-row">
-    <div class="group-col">
-
-      <ul>
+<!--
+  <div class="section-list">
+    <div class="mdl-grid">
+      <div class="mdl-cell mdl-cell--12-col">
         <% @groups.each do |group| %>
-          <li>
-            <%= link_to image_tag(group.avatar_image_url(:small)) + group.name, group,
-              title: "View the group" %>
-          </li>
-        <% end %> <!-- END @groups -->
-      </ul>
-
+          <div class="mdl-card">
+            <div class="mdl-card__title"><%= group.name %></div>
+            <div class="mdl-card__media">
+              <%= image_tag group.avatar_image_url %>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <%= group.description %>
+            </div>
+            <div class="mdl-card__actions">
+            Test
+            </div>
+          </div>
+        <% end %> <!- - END @groups - ->
+      </div>
     </div>
   </div>
-
+-->
 <% end %>
 

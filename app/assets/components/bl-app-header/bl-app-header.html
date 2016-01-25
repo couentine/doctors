@@ -1,0 +1,31 @@
+<dom-module id="bl-app-header">
+  <link rel="stylesheet" href="base/app-variables-polymer.css">
+  <link rel="stylesheet" href="bl-app-header.css" />
+  
+  <template>
+    <paper-header-panel class="flex">
+      <paper-toolbar class="medium-tall" bottom-justify="end">
+        <a class="logo" href="/" title="Badge List Home">
+          <img src$="{{logoUrl}}">
+        </a>
+        <span class="flex"></span>
+        <a class="signout" href$="{{signoutUrl}}" title="Badge List Home" data-method="delete">
+          <i class="fa fa-close"></i> Sign Out
+        </a>
+        <div class="bottom">
+          <a class="nav-link" href="/community">
+            <i class="fa fa-users"></i> Community
+          </a>
+          <a class="nav-link" href="/help/docs">
+            <i class="fa fa-question-circle"></i> Help Docs
+          </a>
+          <a class="nav-link" href="/w">
+            <i class="fa fa-globe"></i> Website
+          </a>
+        </div>
+      </paper-toolbar>
+    </paper-header-panel>
+  </template>
+
+  <script src="bl-app-header.js"></script>
+</dom-module>
