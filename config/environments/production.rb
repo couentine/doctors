@@ -46,9 +46,8 @@ BadgeList::Application.configure do
   config.action_controller.asset_host = ENV['cdn_asset_host'] || 'cdn.badgelist.com'
 
   # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
-  # Commenting this out for now...
-    # config.assets.precompile += ['website.css', 'website.js', 'requirement-list-editor.css', \
-      # 'embed.css', 'embed.js']
+  config.assets.precompile += ['website.css', 'website.js', 'requirement-list-editor.css', \
+    'embed.css', 'embed.js']
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false

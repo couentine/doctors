@@ -24,10 +24,6 @@ module BadgeList
     # Custom directories with classes and modules you want to be autoloadable.
     config.autoload_paths += %W(#{config.root}/lib/modules)
 
-    # Update sass load paths
-    config.sass.load_paths << \
-        File.expand_path('vendor/assets/stylesheets/material-design-lite-1.0.6/src')
-
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
     # config.plugins = [ :exception_notification, :ssl_requirement, :all ]

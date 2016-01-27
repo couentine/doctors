@@ -1,5 +1,4 @@
 class ApplicationController < ActionController::Base
-  layout 'legacy' # Default to legacy layout for now
   protect_from_forgery
   before_filter :log_activity
   after_filter :store_location
