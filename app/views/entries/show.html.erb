@@ -95,7 +95,7 @@
           </span>
         </span>
 
-        <% if @entry.creator != @user %>
+        <% if (@entry.creator != @user) && !@entry.creator.nil? %>
           <span class="creator-user-link">
             <%= link_to image_tag(@entry.creator.avatar_image_url(:medium), 
               class: "gravatar img-circle expert", username: @entry.current_username), 

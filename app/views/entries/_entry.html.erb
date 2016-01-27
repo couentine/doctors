@@ -56,7 +56,7 @@
           </abbr>
         </span>
         
-        <% if entry.creator_id != log.user_id %>
+        <% if (entry.creator_id != log.user_id) && !entry.creator.nil? %>
           <span class="creator-gravatar">
             <img src="<%= entry.creator.avatar_image_url(:small) %>" 
               class="gravatar img-circle <%= log_user_type %>"
