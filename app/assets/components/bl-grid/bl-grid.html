@@ -1,0 +1,27 @@
+<dom-module id="bl-grid">
+  <link rel="stylesheet" href="bl-grid.css" />
+
+  <template>
+
+    <template is="dom-if" if="{{equals(class, 'group')}}">
+      <div class="grid">
+        <template is="dom-if" if="{{!has(groups)}}">
+          <content select=".placeholder"></content>
+        </template>
+
+        <template is="dom-if" if="{{has(groups)}}">
+          <template is="dom-repeat" items="{{groups}}">
+            <bl-grid-item class="group" group="{{item}}"></bl-grid-item>
+          </template>
+        </template>
+      </div>
+
+      <div class="next-page" hidden$="{{!hasNextPage}}">
+        <bl-button type="raised">Load More</bl-button>
+      </div>
+    </template>
+
+  </template>
+
+  <script src="bl-grid.js"></script>
+</dom-module>

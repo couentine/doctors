@@ -1,0 +1,24 @@
+<dom-module id="bl-grid-item">
+  <link rel="stylesheet" href="bl-grid-item.css" />
+  
+  <template>
+
+    <template is="dom-if" if="{{has(group)}}">
+      <paper-material elevation="0" animated on-mouseover="goHover"
+            on-mouseout="stopHover">
+        <a href$="{{group.badgelist_url}}" class="group item-inner">
+          <paper-ripple></paper-ripple>
+          <div class="image">
+            <img src$="{{group.image_url}}">
+          </div>
+          <div class="label">
+            <h3>{{group.name}}</h3>
+          </div>
+        </a>
+      </paper-material>
+    </template>
+    
+  </template>
+
+  <script src="bl-grid-item.js"></script>
+</dom-module>

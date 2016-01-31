@@ -1,5 +1,30 @@
-<bl-app-header 
-  logo-url="<%= asset_url('badge-list-shield-square.png') %>"
-  signout-url="<%= destroy_user_session_path %>"
->
+<bl-app-header>
+  <%= link_to image_tag(asset_url('badge-list-shield-square.png')), root_path, class: 'logo', 
+    title: 'Badge List Home' %>
+  
+  <%= link_to "<i class='fa fa-close'></i> Sign Out".html_safe, destroy_user_session_path, 
+    data: { method: :delete }, class: 'signout', title: 'Sign out of Badge List' %>
+
+  <div class="bottom">
+    <ul class="nav-links">
+        <li>
+          <a class="nav-link" href="/community">
+            <i class="fa fa-users"></i> 
+            <span class="nav-link-text">Community</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" href="/help/docs">
+            <i class="fa fa-question-circle"></i>
+            <span class="nav-link-text">Help Docs</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" href="/w">
+            <i class="fa fa-globe"></i>
+            <span class="nav-link-text">Website</span>
+          </a>
+        </li>
+    </ul>
+  </div>
 </bl-app-header>

@@ -1,0 +1,46 @@
+/* === HOST STYLES === */
+
+  :host {
+    display: block;
+  }
+  
+  :host ::content .placeholder {
+    display: flex;
+    flex: 1 100%;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0.25em; padding: 1.5em;
+    background-color: white;
+    color: rgb(158,158,158);
+    text-align: center;
+  }
+    :host ::content .placeholder i {
+      font-size: 3em;
+      display: block;
+    }
+    :host ::content .placeholder .message {
+      display: block;
+    }
+    :host ::content .placeholder .message p:last-child {
+      margin-bottom: 0;
+    }
+
+/* === COMPONENT STYLES === */
+
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 0.25em;
+  }
+
+  .next-page {
+    display: flex;
+    justify-content: center;
+    margin: 1em 0;
+  }
+    .next-page bl-button {
+      margin: auto;
+      background: rgb(94,53,177);
+      color: white;
+    }

@@ -1,0 +1,69 @@
+/* === LAYOUT & BASE STYLES === */
+
+  :host { display: block; }
+  .outer {
+    font-size: 3.125rem;
+    height: 1.3em;
+    cursor: pointer;
+    position: relative;
+  }
+    .outer:hover .inner {
+      color: white;
+    }
+
+/* === INNER STYLE === */
+
+  .inner {
+    box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
+    width: 1em; height: 1em;
+    position: relative;
+    border: none;
+    border-radius: 1em; -webkit-border-radius: 1em;
+    -o-text-overflow: clip;
+    text-overflow: clip;
+    margin: 0 auto 0.3em auto;
+    text-align: center;
+    z-index: 2;
+    background: rgb(76,175,80);
+    color: rgb(200,230,201);
+  }
+  .inner::before {
+    box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
+    content: "";
+    position: absolute;
+    top: 0.7em; left: -0.1em;
+    border: 0.4em solid rgba(0,0,0,0);
+    border-top: 0 solid; border-bottom: 0.7em solid rgb(76,175,80);
+    text-overflow: clip; -o-text-overflow: clip;
+    text-shadow: none;
+    transform: rotateZ(-140deg); -webkit-transform: rotateZ(-140deg);
+    z-index: 1;
+  }
+  .inner::after {
+    box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
+    position: absolute;
+    content: "";
+    top: 0.7em; right: -0.1em;
+    border: 0.4em solid rgba(0,0,0,0);
+    border-top: 0 solid; border-bottom: 0.7em solid rgb(76,175,80);
+    text-overflow: clip; -o-text-overflow: clip;
+    text-shadow: none;
+    transform: rotateZ(140deg); -webkit-transform: rotateZ(140deg);
+    z-index: 1;
+  }
+    .number {
+      text-align: center;
+      position: absolute;
+      left: 0; right: 0;
+      z-index: 3;
+      letter-spacing: -0.02em;
+    }
+      .single-digit { font-size: 0.65em; top: 0.42em; left: -0.03em; }
+      .double-digit { font-size: 0.6em; top: 0.4em; left: -0.04em; }
+      .triple-digit { font-size: 0.46em; top: 0.55em; left: -0.03em; }
+
+  .text { 
+    color: rgb(117,117,117);
+    font-size: 0.26em;
+    text-align: center;
+  }

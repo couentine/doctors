@@ -10,9 +10,10 @@ class Group
   MAX_DESCRIPTION_LENGTH = 140
   MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
-  JSON_FIELDS = [:name, :location, :type]
-  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 
-    'image_url' => :avatar_image_url, 'email' => :primary_email }
+  JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
+  JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'email' => :primary_email, 
+    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'badgelist_url' => :group_url, 
+    'url' => :issuer_website }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
 
@@ -158,6 +159,8 @@ class Group
   end
   def avatar_image_medium_url; avatar_url(:medium); end
   def avatar_image_small_url; avatar_url(:small); end
+
+  def badge_count; badges_cache.count; end
 
   # === GROUP METHODS === #
 

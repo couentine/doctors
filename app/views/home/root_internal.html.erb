@@ -4,102 +4,66 @@
   provide(:show_subheader, false)
 %>
 
-<!-- === ACCOUNT STATUS WARNINGS === -->
+<!-- === PAGE HEADER === -->
 
-<bl-page-header-home image-url="<%= @user.avatar_image_url(:medium) %>" 
-    image-link="<%= edit_user_registration_path + '#upload-image' %>" image-link-icon="pencil">
-  <h2><%= @user.name %></h2>
-  <h3><%= @user.username %></h3>
-  <div class="buttons">
-    <% if !@user.confirmed? || @user.pending_reconfirmation? %>
-      <!-- === ACCOUNT STATUS WARNING === -->
-      
-      <span class="label label--warning">
-        <i class="fa fa-exclamation-triangle header-icon"></i>
-        Your email address needs verification
-      </span>
-      <br>
-    <% end %>
-
-    <bl-button link="<%= edit_user_registration_path %>" raised>
-      Manage Account
-    </bl-button>
-  </div>
-  <div class="extra-info">
-    <div class="widget ribbon-widget">
-      <div class="widget--inner">
-        <span class="widget--inner-label-number <%= @badge_count_digit_class %>">
-          <%= @badge_count %>
-        </span>
-        <span class="widget--inner-label-text">badges</span>
-      </div>
-    </div>
-  </div>
+<bl-page-header-home>
+  <%= image_tag @user.avatar_image_url(:medium), class: 'primary' %>
+  <%= link_to "<i class='fa fa-pencil'></i>".html_safe, 
+    edit_user_registration_path + '#upload-image', class: 'primary-overlay' %>
+  
+  <h1><%= @user.name %></h1>
+  <div class="subtitle"><%= @user.username %></div>
+  
+  <bl-button type="raised" link="<%= edit_user_registration_path %>" class="primary">
+    Manage Account
+  </bl-button>
+  
+  <% if !@user.confirmed? || @user.pending_reconfirmation? %>
+    <!-- === ACCOUNT STATUS WARNING === -->
+    
+    <bl-label class="primary warning">
+      <i class="fa fa-exclamation-triangle"></i>
+      Your email address needs verification
+    </bl-label>
+  <% end %>
+  
+  <bl-widget-badge-count class="widget" count="<%= @badge_count %>"></bl-widget-badge-count>
 </bl-page-header-home>
 
-
-
 <!-- === GROUPS === -->
-<!--
-<div class="section-header">
-  <div class="mdl-grid">
-    <div class="mdl-cell mdl-cell--10-col mdl-cell--6-col-tablet mdl-cell--3-col-phone">
-      <h3>Groups</h3>
-    </div>
-    <div class="mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
-      <ul class="section-header__button-list">
-        <li>
-          <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
-            <i class="material-icons">search</i>
-          </button>
-        </li>
-        <li>
-          <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
-            <i class="material-icons">add</i>
-          </button>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
--->
-<% if @groups.blank? %>
 
-  <div class="row">
-    <div class="group-col well well-lead inset-well">
-      <i class="fa fa-info-circle header-icon"></i>
-      <ul>
-        <li><strong>Step 1:</strong> Create a group<br></li>
-        <li><strong>Step 2:</strong> Build badges<br></li>
-        <li><Strong>Step 3:</Strong> Invite learners to share evidence</li>
-      </ul><br>
-      <%= link_to "<i class='fa fa-plus'></i> Create a new group".html_safe,
-        new_group_path, class: 'btn btn-large btn-success' %>
-    </div>
-  </div>
+<bl-subheader>
+  <h2>Your groups</h2>
+  <ul class="buttons">
+    <li>
+      <bl-button type="flat" target="_blank"
+          link="http://blog.badgelist.com/post/134502755750/open-group-list">
+        <i class="fa fa-globe"></i> Browse
+      </bl-button>
+    </li>
+    <li>
+      <bl-button type="flat" link="<%= new_group_path %>">
+        <i class="fa fa-plus"></i> Create
+      </bl-button>
+    </li>
+  </ul>
+</bl-subheader>
 
-<% else %>
-<!--
-  <div class="section-list">
-    <div class="mdl-grid">
-      <div class="mdl-cell mdl-cell--12-col">
-        <% @groups.each do |group| %>
-          <div class="mdl-card">
-            <div class="mdl-card__title"><%= group.name %></div>
-            <div class="mdl-card__media">
-              <%= image_tag group.avatar_image_url %>
-            </div>
-            <div class="mdl-card__supporting-text">
-              <%= group.description %>
-            </div>
-            <div class="mdl-card__actions">
-            Test
-            </div>
-          </div>
-        <% end %> <!- - END @groups - ->
-      </div>
+<bl-grid class="group" groups='<%= @groups_hash.to_json %>' next-page="<%= @groups_next_page %>"
+    next-page-url="<%= root_url(format: :json, query: 'group') + '&gp=' %>">
+  <div class="placeholder">
+    <i class="fa fa-users"></i>
+    <div class="message">
+      <p><b>You haven't joined any groups yet.</b></p> 
+      <p>
+        To get started click the browse or create buttons above or check out the 
+        <a href="/community">Badge List Community</a>.
+      </p>
     </div>
   </div>
--->
-<% end %>
+</bl-grid>
+
+
+
+
 

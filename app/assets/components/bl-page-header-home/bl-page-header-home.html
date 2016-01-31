@@ -1,28 +1,26 @@
 <dom-module id="bl-page-header-home">
-  <link rel="stylesheet" href="base/app-variables-polymer.css" />
   <link rel="stylesheet" href="bl-page-header-home.css" />
   
   <template>
 
-    <div class="outer">
-      <div class="inner">
-        <div class="image">
-          <img src$="{{imageUrl}}">
-          <a href$="{{imageLink}}" class="button-overlay">
-            <i class$="fa fa-{{imageLinkIcon}}"></i>
-          </a>
-        </div>
-        
-        <div class="primary-header">
-          <content select="h2"></content>
-          <content select="h3"></content>
-          <content select=".buttons"></content>
-        </div>
-        
-        <div class="secondary-header">
-          <content select=".extra-info"></content>
-        </div>
+    <div class="wrapper">
+
+      <div class="primary-image-wrapper">
+        <content select="img.primary"></content>
+        <content select="a.primary-overlay"></content>
       </div>
+      
+      <div class="primary-header">
+        <content select="h1"></content>
+        <content select=".subtitle"></content>
+        <content select="bl-label.primary"></content>
+        <content select="bl-button.primary"></content>
+      </div>
+      
+      <div class="secondary-header">
+        <content select=".widget"></content>
+      </div>
+
     </div>
 
   </template>

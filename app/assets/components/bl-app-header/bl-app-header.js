@@ -1,9 +1,3 @@
 Polymer({
-  is: "bl-app-header",
-  
-  properties: {
-    logoUrl: String,
-    signoutUrl: String
-  }
+  is: "bl-app-header"
 });
-

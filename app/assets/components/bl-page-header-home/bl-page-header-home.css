@@ -1,49 +1,77 @@
+/* === LAYOUT & BASE STYLES === */
 
+  font-size: 1rem;
+  line-height: 1.3em;
 
-.outer {
-  display: flex;
-}
-.inner {
-  width: 800px;
-  max-width: 100%;
-  margin: auto;
-}
+  .wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 1em;
+  }
 
-.image { 
-  display: inline-block;
-  vertical-align: top;
-  margin: 0 1em 0 0;
-  position: relative;
-}
-img { 
-  border-radius: 500px; 
-  border: 2px solid var(--grey-50);
-  width: 70px;
-}
-img @media (min-width: var(--grid-tablet-breakpoint)) {
-  width: 120px;
-}
-img @media (min-width: var(--grid-desktop-breakpoint)) {
-  width: 150px;
-}
+/* === PRIMARY SECTION === */
 
-.primary-header { 
-  display: inline-block;
-  vertical-align: top;
-  margin-right: 1em;
-}
-.secondary-header { 
-  display: inline-block;
-  vertical-align: top;
-  padding-top: 0.4em;
-}
+  .primary-image-wrapper { 
+    display: inline-block;
+    vertical-align: top;
+    margin: 0 1em 0 0;
+    position: relative;
+    width: 70px; height: 70px;
+    flex: none;
+  }
+  @media (min-width: 480px) { .primary-image-wrapper { width: 120px; height: 120px; } }
+  @media (min-width: 840px) { .primary-image-wrapper { width: 150px; height: 150px; } }
+    :host ::content img.primary { 
+      display: block;
+      border-radius: 500px; 
+      border: 2px solid rgb(250,250,250);
+      width: 66px;
+    }
+    @media (min-width: 480px) { :host ::content img.primary { width: 116px; } }
+    @media (min-width: 840px) { :host ::content img.primary { width: 146px; } }
 
-.buttons {
-  margin-top: 10px;
-}
+    :host ::content a.primary-overlay {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      color: white;
+      background-color: rgb(3,169,244);
+      opacity: 0;
+      text-align: center;
+      font-size: 3em;
+      padding-top: 0.3em;
+      border-radius: 500px;
+    }
+      :host ::content a.primary-overlay:hover, 
+      :host ::content a.primary-overlay:hover:focus {
+        opacity: 0.5;
+      }
+      @media (min-width: 480px) { :host ::content a.primary-overlay { font-size: 4.5em; } }
+      @media (min-width: 840px) { :host ::content a.primary-overlay { font-size: 5rem; } }
 
-:host ::content h2, :host ::content h3 { margin: 0; }
+  .primary-header { 
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 1em;
+    flex: 1 1 auto;
+    max-width: 27em;
+  }
+    :host ::content h1 {
+      font-size: 2em;
+      margin: 0 0 0.1em 0;
+    }
+    :host ::content .subtitle { 
+      font-size: 1.8em;
+      margin: 0 0 0.1em 0;
+    }
+    :host ::content bl-button.primary { 
+      display: block;
+      margin: 1em 0 0 -0.3em; 
+    }
+    :host ::content bl-label.primary { margin-top: 1em; }
 
-:host ::content .buttons .label { 
-  margin-bottom: 1em;
-}
+/* === SECONDARY SECTION === */
+  
+  .secondary-header { 
+    vertical-align: top;
+    flex: none;
+  }

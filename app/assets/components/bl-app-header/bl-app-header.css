@@ -1,24 +1,37 @@
-:host {
-  display: block;
-}
+/* === LAYOUT & BASE STYLES === */
 
-paper-toolbar {
-  --paper-toolbar-background: white;
-  --paper-toolbar-color: --text-color-primary;
+  :host { 
+    display: block;
+    font-size: 1rem; 
+    margin-bottom: 1em;
+  }
+    :host ::content a {
+      color: rgb(97,97,97);
+      text-decoration: none;
+    }
+    :host ::content a i.fa { margin-right: 0.1em; }
+    :host ::content a.logo img { height: 1.5em; }
+      @media (min-width: 840px) { :host ::content a.logo img { height: 2em; } }
+    
+    :host ::content ul.nav-links { 
+      display: inline-block;
+      list-style: none;
+      margin: 0; padding: 0;
+    }
+      :host ::content ul.nav-links li { 
+        display: inline-block;
+        margin-left: 1.5em; 
+      }
+      :host ::content .nav-link-text { display: none; }
+      @media (min-width: 480px) { :host ::content .nav-link-text { display: inline; } }
 
-  --paper-toolbar: {
-    border-top: 4px solid var(--paper-orange-600);
-  };
-  
-  --paper-toolbar-content: {
-  };
-}
+/* === CHILD ELEMENT STYLES === */
 
-a {
-  color: var(--paper-grey-700);
-  text-decoration: none;
-}
-a i.fa { margin-right: 0.1em; }
-a.logo img { height: 1.5em; }
-a.logo img @media (min-width: 841px) { height: 2em; }
-a.nav-link { margin-left: 1.5em; }
+  paper-toolbar {
+    --paper-toolbar-background: white;
+    --paper-toolbar-color: --text-color-primary;
+
+    --paper-toolbar: {
+      border-top: 4px solid var(--paper-orange-600);
+    };
+  }

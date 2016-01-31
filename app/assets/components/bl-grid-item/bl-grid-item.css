@@ -1,0 +1,58 @@
+/* === HOST STYLES === */
+
+  :host {
+    display: flex;
+    flex: 1 300px;
+    margin: 0.25em;
+  }
+
+/* === COMPONENT STYLES === */
+
+  paper-material {
+    display: flex;
+    width: 100%;
+    background-color: white;
+  }
+
+/* === GROUP === */
+
+  a.group.item-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    color: white; background-color: rgb(126,87,194);
+    text-decoration: none;
+  }
+  a.group.item-inner:visited { color: white; }
+    .group .image {
+      flex: none;
+      text-align: center;
+      margin: auto 0;
+    }
+      .group img {
+        display: inline-block;
+        max-width: 10em; max-height: 10em;
+        margin: 1em;
+      }
+    .group .label {
+      flex: none;
+      background-color: rgba(255, 255, 255, 0.3);
+      padding: 1em;
+    }
+      .group h3 {
+        font-size: 1.3em;
+        display: block;
+        margin: 0;
+        font-weight: 600;
+      }
+      .group ul.properties {
+        display: flex;
+        justify-content: flex-start;
+        list-style: none;
+        margin: 0; padding: 0;
+      }
+        .group ul.properties li {
+          display: block;
+          margin: 0 0.8em 0 0;
+        }

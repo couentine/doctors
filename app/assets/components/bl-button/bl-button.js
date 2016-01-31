@@ -2,7 +2,16 @@ Polymer({
   is: "bl-button",
 
   properties: {
-    raised: Boolean,
-    link: String
+    type: String,
+    link: String,
+    target: String,
+    raised: {
+      type: String,
+      computed: "isRaised(type)"
+    }
+  },
+
+  isRaised: function(type) {
+    return type == "raised";
   }
 });
