@@ -24,8 +24,9 @@
     margin: 0 auto 0.3em auto;
     text-align: center;
     z-index: 2;
-    background: rgb(76,175,80);
-    color: rgb(200,230,201);
+    background: rgb(255,152,0);
+    color: rgb(255,224,178);
+    box-shadow: 2px 1px 0px rgb(230,81,0);
   }
   .inner::before {
     box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
@@ -33,7 +34,7 @@
     position: absolute;
     top: 0.7em; left: -0.1em;
     border: 0.4em solid rgba(0,0,0,0);
-    border-top: 0 solid; border-bottom: 0.7em solid rgb(76,175,80);
+    border-top: 0 solid; border-bottom: 0.7em solid rgb(255,152,0);
     text-overflow: clip; -o-text-overflow: clip;
     text-shadow: none;
     transform: rotateZ(-140deg); -webkit-transform: rotateZ(-140deg);
@@ -45,7 +46,7 @@
     content: "";
     top: 0.7em; right: -0.1em;
     border: 0.4em solid rgba(0,0,0,0);
-    border-top: 0 solid; border-bottom: 0.7em solid rgb(76,175,80);
+    border-top: 0 solid; border-bottom: 0.7em solid rgb(255,152,0);
     text-overflow: clip; -o-text-overflow: clip;
     text-shadow: none;
     transform: rotateZ(140deg); -webkit-transform: rotateZ(140deg);
@@ -66,4 +67,5 @@
     color: rgb(117,117,117);
     font-size: 0.26em;
     text-align: center;
+    display: none;
   }

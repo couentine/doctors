@@ -9,6 +9,10 @@ class HomeController < ApplicationController
       @query = params[:query] || 'all'
       @badge_count = @user.expert_badge_ids.count # doesn't result in a query
       
+      flash[:notice] = 'This is an important but non-critical message.'
+      flash[:success] = 'This is longer'
+      flash[:warning] = 'OMG! Something huge happened. It\'s bad.'
+
       if @query.in? ['all', 'group']
         @groups_current_page = (params[:gp] || 1).to_i
         @groups_hash = @user.groups(false).asc(:name).page(@groups_current_page).per(@page_size)\

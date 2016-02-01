@@ -29,9 +29,9 @@
 
   paper-toolbar {
     --paper-toolbar-background: white;
-    --paper-toolbar-color: --text-color-primary;
+    --paper-toolbar-color: rgb(97,97,97);
 
     --paper-toolbar: {
-      border-top: 4px solid var(--paper-orange-600);
+      border-top: 4px solid rgb(251,140,0);
     };
   }
