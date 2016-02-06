@@ -9,11 +9,11 @@ class HomeController < ApplicationController
       @query = params[:query] || 'all'
       @badge_count = @user.expert_badge_ids.count # doesn't result in a query
       
-      flash[:notice] = 'This is an important but non-critical message.'
-      flash[:success] = 'This is longer'
-      flash[:warning] = 'OMG! Something huge happened. It\'s bad.'
+      # flash[:notice] = 'This is an important but non-critical message.'
+      # flash[:success] = 'This is longer'
+      # flash[:warning] = 'OMG! Something huge happened. It\'s bad.'
 
-      if @query.in? ['all', 'group']
+      if @query.in? ['all', 'groups']
         @groups_current_page = (params[:gp] || 1).to_i
         @groups_hash = @user.groups(false).asc(:name).page(@groups_current_page).per(@page_size)\
             .map do |group| 
@@ -29,17 +29,25 @@ class HomeController < ApplicationController
         end
       end
       
-      if @query.in? ['all', 'badge']
-        # FIXME
+      if @query.in? ['all', 'badges']
+        @badges_current_page = (params[:bp] || 1).to_i
+        @badges_hash = Badge.where(:id.in => @user.learner_badge_ids).asc(:name)\
+            .page(@badges_current_page).per(@page_size).map { |badge| badge.as_json }
+        
+        if Badge.where(:id.in => @user.learner_badge_ids).count > (@page_size*@badges_current_page)
+          @badges_next_page = @badges_current_page + 1
+        else
+          @badges_next_page = nil
+        end
       end
 
       respond_to do |format|
         format.html { render template: 'home/root_internal', layout: 'app' }
         format.json do
-          if @query == 'group'
+          if @query == 'groups'
             render json: { next_page: @groups_next_page, groups: @groups_hash }
-          elsif @query == 'badge'
-            render json: nil # FIXME
+          elsif @query == 'badges'
+            render json: { next_page: @badges_next_page, badges: @badges_hash }
           else
             render json: nil
           end

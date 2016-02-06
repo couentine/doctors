@@ -30,6 +30,26 @@
   <bl-widget-badge-count class="widget" count="<%= @badge_count %>"></bl-widget-badge-count>
 </bl-page-header-home>
 
+<!-- === BADGES === -->
+
+<bl-subheader>
+  <h2>Badges in progress</h2>
+</bl-subheader>
+
+<bl-grid mode="badges" badges='<%= @badges_hash.to_json %>' next-page="<%= @badges_next_page %>"
+    next-page-url="<%= root_url(format: :json, query: 'badges') + '&bp=' %>">
+  <div class="placeholder">
+    <i class="fa fa-shield"></i>
+    <div class="message">
+      <p><b>You aren't working on any badges.</b></p> 
+      <p>
+        Once you join a badge it will show up here! (Hint: We've got some badges for you in the 
+        <a href="/community">Badge List Community</a>.)
+      </p>
+    </div>
+  </div>
+</bl-grid>
+
 <!-- === GROUPS === -->
 
 <bl-subheader>
@@ -49,15 +69,15 @@
   </ul>
 </bl-subheader>
 
-<bl-grid class="group" groups='<%= @groups_hash.to_json %>' next-page="<%= @groups_next_page %>"
-    next-page-url="<%= root_url(format: :json, query: 'group') + '&gp=' %>">
+<bl-grid mode="groups" groups='<%= @groups_hash.to_json %>' next-page="<%= @groups_next_page %>"
+    next-page-url="<%= root_url(format: :json, query: 'groups') + '&gp=' %>">
   <div class="placeholder">
     <i class="fa fa-users"></i>
     <div class="message">
-      <p><b>You haven't joined any groups yet.</b></p> 
+      <p><b>You aren't a member of any groups yet.</b></p> 
       <p>
-        To get started click the browse or create buttons above or check out the 
-        <a href="/community">Badge List Community</a>.
+        To get started click one of the buttons above to create a new group 
+        or browse for a public group to join.
       </p>
     </div>
   </div>

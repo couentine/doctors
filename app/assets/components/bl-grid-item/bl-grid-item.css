@@ -16,8 +16,92 @@
   paper-material {
     display: flex;
     width: 100%;
-    background-color: rgb(189,189,189);
+    background-color: transparent;
   }
+
+/* === SHARED === */
+
+  a {
+    transition: background-color 0.5s; -webkit-transition: background-color 0.5s;
+  }
+
+/* === BADGE === */
+
+  a.badge.item-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 100%;
+    color: rgb(66, 66, 66);
+    background-color: transparent; 
+    text-decoration: none;
+    padding: 1em 1em 1.5em 1em;
+  }  
+  a.badge.item-inner:visited { color: rgb(66, 66, 66); }
+  a.badge.item-inner:hover,
+  a.badge.item-inner:focus { background-color: rgb(255,224,178); }
+    .badge .image {
+      text-align: center;
+      flex: none;
+      z-index: 2;
+    }
+      .badge img {
+        display: inline-block;
+        max-width: 10em; max-height: 10em;
+      }
+    .badge .label {
+      flex: none;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      top: -0.6em
+    }
+    .badge h3 {
+      font-size: 1.3em;
+      display: inline-block;
+      margin: 0;
+      font-weight: 600;
+      background-color: rgb(224,224,224);
+      color: rgb(97,97,97);
+      padding: 0.2em 0.6em;
+      position: relative;
+      margin: 0 1.8em;
+    }
+      .badge h3 strong { font-weight: 600; }
+      .ribbon:before, .ribbon:after {
+        content: "";
+        position: absolute;
+        display: block;
+        bottom: -1em;
+        border: 1em solid rgb(189,189,189);
+        z-index: -1;
+      }
+      .ribbon:before {
+        left: -1.5em;
+        border-right-width: 1.5em;
+        border-left-color: transparent;
+      }
+      .ribbon:after {
+        right: -1.5em;
+        border-left-width: 1.5em;
+        border-right-color: transparent;
+      }
+      .ribbon .ribbon-content:before, .ribbon .ribbon-content:after {
+        content: "";
+        position: absolute;
+        display: block;
+        border-style: solid;
+        border-color: rgb(158,158,158) transparent transparent transparent;
+        bottom: -1em;
+      }
+      .ribbon .ribbon-content:before {
+        left: 0;
+        border-width: 1em 0 0 1em;
+      }
+      .ribbon .ribbon-content:after {
+        right: 0;
+        border-width: 1em 1em 0 0;
+      }
 
 /* === GROUP === */
 

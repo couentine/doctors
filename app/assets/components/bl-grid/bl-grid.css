@@ -41,6 +41,7 @@
   }
     .next-page bl-button {
       margin: auto;
-      background: rgb(0,131,143);
       color: white;
     }
+    .next-page bl-button.badges { background: rgb(239,108,0); }
+    .next-page bl-button.groups { background: rgb(0,131,143); }

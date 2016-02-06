@@ -3,10 +3,26 @@
   
   <template>
 
-    <template is="dom-if" if="{{has(group)}}">
+    <template is="dom-if" if="{{isBadgeMode}}">
+      <paper-material elevation="0" animated>
+        <a href$="{{badge.full_url}}" class="badge item-inner">
+          <paper-ripple></paper-ripple>
+          <div class="image">
+            <img src$="{{badge.image_medium}}">
+          </div>
+          <div class="label">
+            <h3 class="ribbon">
+              <strong class="ribbon-content">{{badge.name}}</strong>
+            </h3>
+          </div>
+        </a>
+      </paper-material>
+    </template>
+
+    <template is="dom-if" if="{{isGroupMode}}">
       <paper-material elevation="0" animated on-mouseover="goHover"
             on-mouseout="stopHover">
-        <a href$="{{group.badgelist_url}}" class="group item-inner">
+        <a href$="{{group.full_url}}" class="group item-inner">
           <paper-ripple></paper-ripple>
           <div class="image">
             <img src$="{{translateImageUrl(group.image_url)}}">

@@ -2,23 +2,45 @@ Polymer({
   is: "bl-grid-item",
 
   properties: {
-    class: String,
+    // Required
+    mode: String, // = ['badge', 'group']
+    
+    // Optional
+    options: Object,
+
+    // Mode-specifid
+    badge: {
+      type: Object,
+      observer: 'itemChanged'
+    },
     group: {
       type: Object,
-      observer: 'groupChanged'
+      observer: 'itemChanged'
+    },
+
+    // Computed properties
+    isBadgeMode: {
+      type: Boolean,
+      computed: "_isBadgeMode(mode)"
+    },
+    isGroupMode: {
+      type: Boolean,
+      computed: "_isGroupMode(mode)"
     }
   },
 
+  // Computed properties
+  _isBadgeMode: function(mode) { return mode == "badge"; },
+  _isGroupMode: function(mode) { return mode == "group"; },
+
+  // Events
   ready: function() {
-    this.groupChanged(this.group);
+    if (this.mode == "group") this.itemChanged(this.group);
+    else if (this.mode == "badge") this.itemChanged(this.badge);
   },
-  groupChanged: function(newValue) {
+  itemChanged: function(newValue) {
     if (newValue) this.hidden = false;
     else this.hidden = true;
-  },
-
-  has: function(objectVariable) {
-    return (objectVariable != null) && (objectVariable != undefined);
   },
   goHover: function() {
     this.$$("paper-material").elevation = 5;
@@ -26,6 +48,8 @@ Polymer({
   stopHover: function() {
     this.$$("paper-material").elevation = 0;
   },
+  
+  // Helpers
   translateImageUrl: function(imageUrl) {
     // Needs translation to clear up the default state
     if (imageUrl == "default-group-avatar.png")

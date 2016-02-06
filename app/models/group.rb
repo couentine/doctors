@@ -12,7 +12,7 @@ class Group
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
   JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'email' => :primary_email, 
-    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'badgelist_url' => :group_url, 
+    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url, 
     'url' => :issuer_website }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']

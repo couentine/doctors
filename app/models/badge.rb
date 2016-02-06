@@ -18,7 +18,9 @@ class Badge
   JSON_FIELDS = [:group, :name, :editability, :awardability, :info, :url, :url_with_caps,
     :created_at, :updated_at]
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
-    'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps }
+    'image_medium' => :image_medium_url, 'image_small' => :image_small_url, 
+    'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps,
+    'full_url' => :badge_url }
   
   # Below are the badge-level fields included in the clone
   # NOTE: Badge image is automatically checked for changes and included
