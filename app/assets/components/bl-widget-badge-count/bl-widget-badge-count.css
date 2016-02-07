@@ -2,14 +2,16 @@
 
   :host { display: block; }
   .outer {
-    font-size: 3.125rem;
+    display: block;
+    font-size: 4rem;
     height: 1.3em;
-    cursor: pointer;
     position: relative;
+    text-decoration: none;
+    color: rgb(255,224,178);
   }
-    .outer:hover .inner {
-      color: white;
-    }
+  @media (min-width: 480px) {
+    .outer { font-size: 4.5rem; }
+  }
 
 /* === INNER STYLE === */
 
@@ -25,9 +27,11 @@
     text-align: center;
     z-index: 2;
     background: rgb(255,152,0);
-    color: rgb(255,224,178);
     box-shadow: 2px 1px 0px rgb(230,81,0);
+    transition: background-color 0.5s; -webkit-transition: background-color 0.5s;
   }
+  .outer:hover .inner,
+  .outer:focus .inner { background: rgb(245,124,0); }
   .inner::before {
     box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
     content: "";
@@ -39,6 +43,7 @@
     text-shadow: none;
     transform: rotateZ(-140deg); -webkit-transform: rotateZ(-140deg);
     z-index: 1;
+    transition: border-bottom-color 0.5s; -webkit-transition: border-bottom-color 0.5s;
   }
   .inner::after {
     box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
@@ -51,7 +56,12 @@
     text-shadow: none;
     transform: rotateZ(140deg); -webkit-transform: rotateZ(140deg);
     z-index: 1;
+    transition: border-bottom-color 0.5s; -webkit-transition: border-bottom-color 0.5s;
   }
+  .outer:hover .inner::before,
+  .outer:focus .inner::before,
+  .outer:hover .inner::after,
+  .outer:focus .inner::after { border-bottom-color: rgb(245,124,0); }
     .number {
       text-align: center;
       position: absolute;
@@ -59,13 +69,6 @@
       z-index: 3;
       letter-spacing: -0.02em;
     }
-      .single-digit { font-size: 0.65em; top: 0.42em; left: -0.03em; }
-      .double-digit { font-size: 0.6em; top: 0.4em; left: -0.04em; }
-      .triple-digit { font-size: 0.46em; top: 0.55em; left: -0.03em; }
-
-  .text { 
-    color: rgb(117,117,117);
-    font-size: 0.26em;
-    text-align: center;
-    display: none;
-  }
+      .single-digit { font-size: 0.65em; top: 0.52em; left: -0.03em; }
+      .double-digit { font-size: 0.6em; top: 0.5em; left: -0.04em; }
+      .triple-digit { font-size: 0.46em; top: 0.65em; left: -0.03em; }

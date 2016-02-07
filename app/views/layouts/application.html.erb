@@ -78,10 +78,12 @@
       
     <% #=== PAGE ALERTS ===# %>
 
-      <% unless flash.blank? %>
-        <% flash.each do |key, value| %>
-          <bl-toast text="<%= value %>" class="<%= key %>" opened></bl-toast>
-        <% end %>
+      <% unless false && flash.blank? %>
+        <bl-toast-container>
+          <% flash.each do |key, value| %>
+            <bl-toast text="<%= value %>" class="<%= key %>"></bl-toast>
+          <% end %>
+        </bl-toast-container>
       <% end %>
 
     <% #=== HEADER, PAGE CONTENT & FOOTER ===# %>

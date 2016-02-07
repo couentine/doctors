@@ -27,7 +27,8 @@
     </bl-label>
   <% end %>
   
-  <bl-widget-badge-count class="widget" count="<%= @badge_count %>"></bl-widget-badge-count>
+  <bl-widget-badge-count class="widget" count="<%= @badge_count %>"
+    link="<%= user_path(current_user) %>"></bl-widget-badge-count>
 </bl-page-header-home>
 
 <!-- === BADGES === -->
@@ -43,8 +44,7 @@
     <div class="message">
       <p><b>You aren't working on any badges.</b></p> 
       <p>
-        Once you join a badge it will show up here! (Hint: We've got some badges for you in the 
-        <a href="/community">Badge List Community</a>.)
+        Maybe check out the <a href="/community">Badge List Community</a>?
       </p>
     </div>
   </div>

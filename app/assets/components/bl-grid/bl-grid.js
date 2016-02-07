@@ -23,7 +23,7 @@ Polymer({
       value: function() {  return []; }
     },
 
-    // Computed properties
+    // Computed
     isBadgesMode: {
       type: Boolean,
       computed: "_isBadgesMode(mode)"
@@ -60,17 +60,23 @@ Polymer({
 
   // Helpers
   loadNextPage: function() {
+    var nextPageButton = this.$$("#next-page-button");
     var self = this; // Hold onto the context variable
+    
+    if (!nextPageButton.disabled) {
+      nextPageButton.disabled = true;
 
-    $.getJSON(this.nextPageUrl + this.nextPage, function(result) {
-      if (result) {
-        // Add all of the new results to the array (this will auto update the dom-repeat)
-        for (var i = 0; i <= result[self.mode].length; i++) 
-          self.push(self.mode, result[self.mode][i]);
-        
-        // Store the new value of nextPage
-        self.nextPage = result.next_page;
-      }
-    });
+      $.getJSON(this.nextPageUrl + this.nextPage, function(result) {
+        if (result) {
+          // Add all of the new results to the array (this will auto update the dom-repeat)
+          for (var i = 0; i <= result[self.mode].length; i++) 
+            self.push(self.mode, result[self.mode][i]);
+          
+          // Store the new value of nextPage and re-enable the next page button
+          self.nextPage = result.next_page;
+          nextPageButton.disabled = false;
+        }
+      });
+    }
   }
 });

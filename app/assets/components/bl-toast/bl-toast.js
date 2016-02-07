@@ -2,7 +2,11 @@ Polymer({
   is: "bl-toast",
 
   properties: {
-    text: String,
-    opened: Boolean
+    class: String,
+    text: String
+  },
+
+  closeToast: function() {
+    $(this).fadeOut();
   }
 });

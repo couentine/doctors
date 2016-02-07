@@ -2,9 +2,19 @@ Polymer({
   is: "bl-button",
 
   properties: {
+    // Required
     type: String,
+    
+    // Optional
+    disabled: {
+      type: Boolean,
+      reflectToAttribute: true,
+      notify: true
+    },
     link: String,
     target: String,
+
+    // Computed
     raised: {
       type: String,
       computed: "isRaised(type)"

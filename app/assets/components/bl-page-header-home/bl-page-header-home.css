@@ -1,13 +1,23 @@
 /* === LAYOUT & BASE STYLES === */
 
-  font-size: 1rem;
-  line-height: 1.3em;
+  
+  :host {
+    display: block;
+    font-size: 1rem;
+    line-height: 1.3em;
+    padding-top: 1em;
+    background-color: rgb(224,224,224);
+    border-bottom: 1px solid rgb(189,189,189);
+  }
 
   .wrapper {
     display: flex;
     justify-content: center;
     padding: 1em;
   }
+    .secondary-header {
+      padding-top: 0.6em;
+    }
 
 /* === PRIMARY SECTION === */
 
@@ -34,16 +44,17 @@
       position: absolute;
       top: 0; right: 0; bottom: 0; left: 0;
       color: white;
-      background-color: rgb(3,169,244);
       opacity: 0;
       text-align: center;
       font-size: 3em;
       padding-top: 0.3em;
       border-radius: 500px;
+      filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2));
+      -webkit-filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2)); 
     }
       :host ::content a.primary-overlay:hover, 
       :host ::content a.primary-overlay:hover:focus {
-        opacity: 0.5;
+        opacity: 0.65;
       }
       @media (min-width: 480px) { :host ::content a.primary-overlay { font-size: 4.5em; } }
       @media (min-width: 840px) { :host ::content a.primary-overlay { font-size: 5rem; } }
@@ -64,8 +75,8 @@
       margin: 0 0 0.1em 0;
     }
     :host ::content bl-button.primary { 
-      display: block;
       margin: 1em 0 0 -0.3em; 
+      background-color: white;
     }
     :host ::content bl-label.primary { margin-top: 1em; }
 

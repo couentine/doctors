@@ -8,10 +8,6 @@ class HomeController < ApplicationController
       @page_size = APP_CONFIG['page_size_small']
       @query = params[:query] || 'all'
       @badge_count = @user.expert_badge_ids.count # doesn't result in a query
-      
-      # flash[:notice] = 'This is an important but non-critical message.'
-      # flash[:success] = 'This is longer'
-      # flash[:warning] = 'OMG! Something huge happened. It\'s bad.'
 
       if @query.in? ['all', 'groups']
         @groups_current_page = (params[:gp] || 1).to_i
