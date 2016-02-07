@@ -20,7 +20,7 @@ class Badge
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'image_medium' => :image_medium_url, 'image_small' => :image_small_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps,
-    'full_url' => :badge_url }
+    'full_url' => :badge_url, 'id' => :id_string, '_id' => :id_string }
   
   # Below are the badge-level fields included in the clone
   # NOTE: Badge image is automatically checked for changes and included
@@ -151,6 +151,10 @@ class Badge
   def image_medium_url; image_url(:medium); end
   def image_small_url; image_url(:small); end
 
+  def id_string
+    id.to_s
+  end
+
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields
 
@@ -274,7 +278,7 @@ class Badge
       group = Group.find(group_id)
       creator = User.find(creator_id)
 
-      badge = Badge.new(badge_params)
+      badge = Badge.new(badge_params.permit(BadgesController::PERMITTED_PARAMS))
       badge.group = group
       badge.creator = creator
       badge.current_user = creator
@@ -330,7 +334,7 @@ class Badge
       badge.current_username = user.username
 
       # Save the badge and then update the requirements if successful
-      badge.update_attributes!(badge_params)      
+      badge.update_attributes!(badge_params.permit(BadgesController::PERMITTED_PARAMS))
       badge.update_requirement_list(requirement_list)
 
       # Update the custom image if needed

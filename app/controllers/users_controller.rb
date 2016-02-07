@@ -51,7 +51,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       format.json do     
         @poller_id = current_user.add_stripe_card(params[:stripe_token], true)
-        render json: { poller_id: @poller_id }
+        render json: { poller_id: @poller_id.to_s }
       end
     end
   end
@@ -63,7 +63,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       format.json do     
         @poller_id = current_user.delete_stripe_card(params[:id], true)
-        render json: { poller_id: @poller_id }
+        render json: { poller_id: @poller_id.to_s }
       end
     end
   end

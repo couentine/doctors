@@ -20,6 +20,12 @@ class GroupsController < ApplicationController
 
   # === CONSTANTS === #
 
+  PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, 
+    :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
+    :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
+    :stripe_subscription_card, :new_subscription, :member_visibility, :admin_visibility, 
+    :badge_copyability, :join_code, :avatar_key]
+
   MAX_EMAIL_TEXT_LENGTH = 1500
   GROUP_TYPE_OPTIONS = [
     ['<b><i class="fa fa-globe"></i> Open Group</b><span>Anyone can join '.html_safe \
@@ -237,7 +243,7 @@ class GroupsController < ApplicationController
     respond_to do |format|
       format.json do     
         @poller_id = @group.cancel_stripe_subscription(true, true)
-        render json: { poller_id: @poller_id }
+        render json: { poller_id: @poller_id.to_s }
       end
     end
   end
@@ -845,11 +851,7 @@ private
   end
 
   def group_params
-    params.require(:group).permit(:name, :url_with_caps, :description, :location, :website, 
-      :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
-      :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
-      :stripe_subscription_card, :new_subscription, :member_visibility, :admin_visibility, 
-      :badge_copyability, :join_code, :avatar_key)
+    params.require(:group).permit(PERMITTED_PARAMS)
   end
 
 end

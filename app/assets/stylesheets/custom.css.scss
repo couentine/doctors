@@ -959,11 +959,13 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
       }
 
       &.entry_log_validated b { display: inline !important; }
-      &.radio_buttons .controls label.radio {
+      &.radio_buttons .controls span.radio {
         font-size: 16px;
         margin-bottom: 10px;
         line-height: 1.3em;
+        display: inline-block;
 
+        label { font-size: 16px; line-height: 1.3; }
         b {
           display: block;
           margin-bottom: 5px;
@@ -1157,7 +1159,7 @@ div.bl-form {
 
 .bl-form-group {
   .group_type {
-    label.radio {
+    span.radio {
       padding: 20px 20px 20px 40px;
       border-radius: 3px;
       background-color: $really-light-gray;
@@ -1210,7 +1212,7 @@ div.bl-form {
   }
   .group_subscription_plan {
     p.help-block { margin-top: 0 !important; }
-    label.radio {
+    span.radio {
       display: inline-block;
       margin-right: 20px;
       margin-left: 1px;

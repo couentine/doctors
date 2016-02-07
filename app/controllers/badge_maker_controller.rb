@@ -14,7 +14,7 @@ class BadgeMakerController < ApplicationController
       format.json do     
         @poller_id = BadgeMaker.build_image(async: true, frame: @frame, icon: @icon, 
           color1: @color1, color2: @color2)
-        render json: { poller_id: @poller_id }
+        render json: { poller_id: @poller_id.to_s }
       end
     end
   end

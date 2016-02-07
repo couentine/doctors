@@ -13,7 +13,7 @@ class Group
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
   JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'email' => :primary_email, 
     'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url, 
-    'url' => :issuer_website }
+    'url' => :issuer_website, 'id' => :id_string, '_id' => :id_string }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
 
@@ -161,6 +161,10 @@ class Group
   def avatar_image_small_url; avatar_url(:small); end
 
   def badge_count; badges_cache.count; end
+
+  def id_string
+    id.to_s
+  end
 
   # === GROUP METHODS === #
 

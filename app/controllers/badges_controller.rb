@@ -19,6 +19,11 @@ class BadgesController < ApplicationController
 
   # === CONSTANTS === #
 
+  PERMITTED_PARAMS = [:name, :url_with_caps, :summary, :info, :word_for_expert, 
+    :word_for_learner, :editability, :awardability, :visibility, :image_frame, :image_icon, 
+    :image_color1, :image_color2, :icon_search_text, :topic_list_text, :custom_image_key, 
+    :send_validation_request_emails, :move_to_group_id]
+      
   EXPERT_WORDS = %w(expert master guide guru jedi)
   LEARNER_WORDS = %w(learner trainee student novice padawan)
   BADGE_VISIBILITY_OPTIONS = [
@@ -501,10 +506,7 @@ private
   end
 
   def badge_params
-    params.require(:badge).permit(:name, :url_with_caps, :summary, :info, :word_for_expert, 
-      :word_for_learner, :editability, :awardability, :visibility, :image_frame, :image_icon, 
-      :image_color1, :image_color2, :icon_search_text, :topic_list_text, :custom_image_key, 
-      :send_validation_request_emails, :move_to_group_id)
+    params.require(:badge).permit(PERMITTED_PARAMS)
   end
 
 end

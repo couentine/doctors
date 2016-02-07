@@ -5,9 +5,9 @@
 
     $(document).ready(function() {
       if (progressMode)
-        startPoller("<%= @poller.id %>", refreshPoller, refreshPoller, updateProgress);
+        startPoller("<%= @poller.id.to_s %>", refreshPoller, refreshPoller, updateProgress);
       else
-        startPoller("<%= @poller.id %>", refreshPoller, refreshPoller);
+        startPoller("<%= @poller.id.to_s %>", refreshPoller, refreshPoller);
     });
 
     function refreshPoller() {

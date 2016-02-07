@@ -379,6 +379,7 @@
   var currentImageCreated; // helps only display latest image in case there are network delays
   var lastPoller;
   function imageGeneratorCompleted(poller) {
+    console.log(poller);
     if ((currentImageCreated == null) || (Date.parse(poller.created_at) > currentImageCreated)) {
       currentImageCreated = Date.parse(poller.created_at);
       lastPoller = poller;
