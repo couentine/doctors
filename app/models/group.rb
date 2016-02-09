@@ -497,9 +497,9 @@ class Group
     badge_id = badge_json_clone['_id']
     
     if is_deleted
-      self.badges_cache.delete badge_id
+      self.badges_cache.delete badge_id.to_s
     else
-      self.badges_cache[badge_id] = {
+      self.badges_cache[badge_id.to_s] = {
         'name' => badge_json_clone['name'],
         'editability' => badge_json_clone['editability'],
         'awardability' => badge_json_clone['awardability'],

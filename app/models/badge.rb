@@ -271,8 +271,15 @@ class Badge
   end
   
   # Powers the create_async method above. Not intended to be run directly but could be.
+  # Example of badge creation in a console (NOTE: I'm getting an error on this for the moment.):
+  #   g, u = Group.first, User.first
+  #   bp = ActionController::Parameters.new({ name: 'Test Badge 1', summary: 'Testing', 
+  #     url_with_caps: 'test-badge-1', image_frame: 'circle', image_icon: 'pen', 
+  #     image_color1: 'FFFFFF', image_color2: '000000' })
+  #   rl = [{ display_name:'Item 1', format:'text' }, { display_name:'Item 2', format:'image' }]
+  #   b = Badge.do_create_async(g.id, u.id, bp, rl)
   def self.do_create_async(group_id, creator_id, badge_params, requirement_list, poller_id = nil)
-    begin
+    # begin
       # First query for the core records
       poller = Poller.find(poller_id) rescue nil
       group = Group.find(group_id)
@@ -299,16 +306,16 @@ class Badge
         poller.data = { badge_id: badge.id }
         poller.save
       end
-    rescue Exception => e
-      if poller
-        poller.status = 'failed'
-        poller.message = 'An error occurred while trying to create the badge, ' \
-          + "please try again. (Error message: #{e})"
-        poller.save
-      else
-        throw e
-      end
-    end
+    # rescue Exception => e
+    #   if poller
+    #     poller.status = 'failed'
+    #     poller.message = 'An error occurred while trying to create the badge, ' \
+    #       + "please try again. (Error message: #{e})"
+    #     poller.save
+    #   else
+    #     throw e
+    #   end
+    # end
   end
 
   def update_async(current_user_id, badge_params, requirement_list)
