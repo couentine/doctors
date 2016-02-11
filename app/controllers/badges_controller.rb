@@ -390,7 +390,7 @@ private
 
   def find_parent_records
     @group = Group.find(params[:group_id]) || not_found
-    @current_user_is_owner = current_user && (current_user.id == @group.owner_id)
+    @current_user_is_owner = current_user && @group.owner_id && (current_user.id == @group.owner_id)
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)
     @badge_list_admin = current_user && current_user.admin?

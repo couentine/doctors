@@ -219,9 +219,16 @@
               </div>
             </div>
 
-            <%= f.input :move_to_group_id, label: 'Select Destination Group', as: :select, 
-              include_blank: false, collection: [['Groups that you own...', '']] \
-                + @group.owner.owned_group_options(except: [@group.id]) %>
+            <% if @group.owner %>
+              <%= f.input :move_to_group_id, label: 'Select Destination Group', as: :select, 
+                include_blank: false, collection: [['Groups that you own...', '']] \
+                  + @group.owner.owned_group_options(except: [@group.id]) %>
+            <% else %>
+              <p>ADMIN NOTE: The current group owner is BLANK so the options below are yours.</p>
+              <%= f.input :move_to_group_id, label: 'Select Destination Group', as: :select, 
+                include_blank: false, collection: [['Groups that you own...', '']] \
+                  + current_user.owned_group_options(except: [@group.id]) %>
+            <% end %>
 
           <% end %>
          </div>        

@@ -20,7 +20,7 @@ class Badge
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'image_medium' => :image_medium_url, 'image_small' => :image_small_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps,
-    'full_url' => :badge_url, 'id' => :id_string, '_id' => :id_string }
+    'full_url' => :badge_url }
   
   # Below are the badge-level fields included in the clone
   # NOTE: Badge image is automatically checked for changes and included
@@ -150,10 +150,6 @@ class Badge
   end
   def image_medium_url; image_url(:medium); end
   def image_small_url; image_url(:small); end
-
-  def id_string
-    id.to_s
-  end
 
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields
@@ -303,7 +299,7 @@ class Badge
       if poller
         poller.status = 'successful'
         poller.message = "The '#{badge.name}' badge has been successfully created!"
-        poller.data = { badge_id: badge.id }
+        poller.data = { badge_id: badge.id.to_s }
         poller.save
       end
     # rescue Exception => e
@@ -356,7 +352,7 @@ class Badge
         poller.status = 'successful'
         poller.message = "The '#{badge.name}' badge has been successfully updated!"
         poller.redirect_to = "/#{badge.group.url_with_caps}/#{badge.url_with_caps}"
-        poller.data = { badge_id: badge.id }
+        poller.data = { badge_id: badge.id.to_s }
         poller.save
       end
     rescue Exception => e
@@ -365,7 +361,7 @@ class Badge
         poller.message = 'An error occurred while trying to update the badge, ' \
           + "please try again. (Error message: #{e})"
         poller.redirect_to = "/#{badge.group.url_with_caps}/#{badge.url_with_caps}"
-        poller.data = { badge_id: badge.id }
+        poller.data = { badge_id: badge.id.to_s }
         poller.save
       else
         throw e
@@ -536,7 +532,7 @@ class Badge
       list = []
       requirements.each do |tag|
         list << {
-          id: tag.id,
+          id: tag.id.to_s,
           display_name: tag.display_name,
           summary: (tag.summary.blank? || (tag.summary == 'null')) ? '' : tag.summary,
           format: tag.format,
@@ -695,6 +691,7 @@ class Badge
     pages_backup = json_clone['pages']
     self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS, 
       methods: [:image_url, :image_medium_url, :image_small_url])
+    self.json_clone['id'] = self.json_clone['_id'] = self.id.to_s # stringify
     self.json_clone['pages'] = pages_backup
     self.json_clone['created_at'] ||= Time.now
     self.json_clone['updated_at'] ||= Time.now

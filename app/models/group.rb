@@ -13,7 +13,7 @@ class Group
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
   JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'email' => :primary_email, 
     'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url, 
-    'url' => :issuer_website, 'id' => :id_string, '_id' => :id_string }
+    'url' => :issuer_website }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
 
@@ -161,10 +161,6 @@ class Group
   def avatar_image_small_url; avatar_url(:small); end
 
   def badge_count; badges_cache.count; end
-
-  def id_string
-    id.to_s
-  end
 
   # === GROUP METHODS === #
 
@@ -494,12 +490,12 @@ class Group
   # If the specified badge does not exist in the cache already then it will be added
   # If is_deleted is true then the specified badge will be deleted if present
   def update_badge_cache(badge_json_clone, is_deleted = false)
-    badge_id = badge_json_clone['_id']
+    badge_id = badge_json_clone['_id'].to_s
     
     if is_deleted
-      self.badges_cache.delete badge_id.to_s
+      self.badges_cache.delete badge_id
     else
-      self.badges_cache[badge_id.to_s] = {
+      self.badges_cache[badge_id] = {
         'name' => badge_json_clone['name'],
         'editability' => badge_json_clone['editability'],
         'awardability' => badge_json_clone['awardability'],
@@ -554,8 +550,8 @@ class Group
       poller = Poller.new
       poller.waiting_message = "Copying badges from '#{name}' to '#{to_group_name}'..."
       poller.progress = 1 # this will put the poller into 'progress mode'
-      poller.data = { from_group_id: self.id, to_group_id: to_group_id, creator_id: creator_id,
-            badge_urls: badge_urls }
+      poller.data = { from_group_id: self.id.to_s, to_group_id: to_group_id.to_s, 
+        creator_id: creator_id.to_s, badge_urls: badge_urls }
       poller.save
       Group.delay(queue: 'high').do_copy_badges_to_group(creator_id, self.id, badge_urls, 
         to_group_id, poller.id)
@@ -701,7 +697,7 @@ class Group
       trial_end: options[:trial_end],
       metadata: {
         description: "#{group.name} (#{group.url})",
-        group_id: group.id,
+        group_id: group.id.to_s,
         group_url: group.url,
         group_name: group.name,
         group_website: group.website

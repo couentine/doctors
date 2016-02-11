@@ -9,8 +9,7 @@ class User
   MAX_NAME_LENGTH = 200
   MAX_USERNAME_LENGTH = 15
   JSON_FIELDS = [:name, :username, :username_with_caps]
-  JSON_MOCK_FIELDS = { :avatar_image_url => :avatar_image_url, :id => :id_string, 
-    '_id' => :id_string }
+  JSON_MOCK_FIELDS = { :avatar_image_url => :avatar_image_url }
 
   INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'
   MAX_EMAIL_BOUNCES = 3
@@ -143,10 +142,6 @@ class User
     gravatar_id = Digest::MD5::hexdigest(email_temp)
     size_map = { nil => 500, medium: 200, small: 50 }
     "https://secure.gravatar.com/avatar/#{gravatar_id}?s=#{size_map[version]}&d=mm"
-  end
-
-  def id_string
-    id.to_s
   end
 
   # === CLASS METHODS === #
