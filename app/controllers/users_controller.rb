@@ -1,7 +1,8 @@
 class UsersController < ApplicationController
   
-  before_filter :authenticate_user!, only: [:index, :add_card, :delete_card, :payment_history]
-  before_filter :badge_list_admin, only: [:index]
+  before_filter :authenticate_user!, only: [:index, :add_card, :delete_card, :payment_history,
+    :confirm_account, :unblock_email, :update_image]
+  before_filter :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
 
   # GET /a/users
   # GET /a/users.json
@@ -85,6 +86,75 @@ class UsersController < ApplicationController
     end
   end
 
+  # POST /u/username/confirm_account
+  def confirm_account
+    respond_to do |format|
+      format.js do
+        begin
+          @user = User.find(params[:id]) || not_found
+
+          if @user.confirmed?
+            @notice = "Account already confirmed!"
+            @success = true
+          else
+            @user.skip_confirmation!
+            @user.save!
+            @success = true
+            @notice = "Account confirmed."
+          end
+        rescue Exception => e
+          @success = false
+          @notice = "Error: #{e}"
+        end
+      end
+    end
+  end
+
+  # POST /u/username/unblock_email
+  def unblock_email
+    respond_to do |format|
+      format.js do
+        begin
+          @user = User.find(params[:id]) || not_found
+          
+          if @user.email_inactive
+            User.unblock_email(@user.email, true)
+            @success = true
+            @notice = "Email unblocked."
+          else
+            @notice = "Email isn't blocked!"
+            @success = true
+          end
+        rescue Exception => e
+          @success = false
+          @notice = "Error: #{e}"
+        end
+      end
+    end
+  end
+
+  # POST /u/username/update_image?avatar_key=abc/123.png
+  def update_image
+    @user = User.find(params[:id]) || not_found
+
+    respond_to do |format|
+      format.js do
+        if @user == current_user
+          @user.avatar_key = params[:avatar_key]
+          if @user.save
+            @success = true
+            @notice = "Image updated successfully."
+          else
+            @success = false
+            @notice = "There was a problem updating the image."
+          end
+        else
+          @success = false
+          @notice = "You can only update your own image."
+        end
+      end
+    end
+  end
 
 private
 

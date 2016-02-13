@@ -3,6 +3,18 @@
 This repository stores the code that powers Badge List. It uses Mongoid (hosted now on MongoLab) for persistence and 
 the Postmark gem for email. It also uses Redis (hosted now on on RedisCloud) for queueing along with Sidekiq for asynch operations.
 
+## Setting up your dev environment (OS X) ##
+
+1. Install the basics: Xcode, Homebrew, Git, Github RVM, Ruby & Rails >> [Instructions here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac) >> Be sure to install the current app version of ruby (2.1.2)
+2. Install mongodb: [Instructions here](https://docs.mongodb.org/v3.0/tutorial/install-mongodb-on-os-x/)
+3. Install redis: [Instructions here](http://jasdeep.ca/2012/05/installing-redis-on-mac-os-x/)
+4. Install imagemagick >> brew install imagemagick
+5. Install foreman >> gem install foreman
+6. Connect to the [Github Repo](https://github.com/hankish/badgelist) and pull down the master branch
+7. Setup your environment variable file (.env)
+8. Run bundle install
+9. Run foreman start
+
 ## Required Environment Variables ##
 
 Key aspects of the app are managed with environment variables.  It's important to use a foreman
@@ -36,6 +48,7 @@ WEB_CONCURRENCY=1
 MIN_THREADS=1
 MAX_THREADS=1
 disable_all_emails=false
+POSTMARK_WEBHOOK_KEY=abc123
 ```
 
 ## Running foreman ##

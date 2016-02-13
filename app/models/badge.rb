@@ -15,9 +15,19 @@ class Badge
   EDITABILITY_VALUES = ['experts', 'admins']
   AWARDABILITY_VALUES = ['experts', 'admins']
   VISIBILITY_VALUES = ['public', 'private', 'hidden']
-  JSON_FIELDS = [:group, :name, :summary, :word_for_expert, :word_for_learner]
+  JSON_FIELDS = [:group, :name, :editability, :awardability, :info, :url, :url_with_caps,
+    :created_at, :updated_at]
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps }
+  
+  # Below are the badge-level fields included in the clone
+  # NOTE: Badge image is automatically checked for changes and included
+  CLONE_FIELDS = [:_id, :name, :summary, :editability, :awardability, :info, :url, :url_with_caps,
+    :created_at, :updated_at, :visibility]
+
+  # === INSTANCE VARIABLES === #
+
+  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
 
   # === RELATIONSHIPS === #
 
@@ -39,6 +49,7 @@ class Badge
   field :awardability,                    type: String, default: 'admins'
   field :visibility,                      type: String, default: 'public'
   field :send_validation_request_emails,  type: Boolean, default: true
+  field :cloned_from_badge_id,            type: String # stored as a string id, not a relationship
   
   field :info,                            type: String
   field :info_sections,                   type: Array
@@ -64,6 +75,11 @@ class Badge
   field :flags,                           type: Array
 
   field :move_to_group_id,                type: String
+  
+  field :json_clone,                      type: Hash, default: {}
+  field :expert_user_ids,                 type: Array, default: []
+  field :learner_user_ids,                type: Array, default: []
+  field :all_user_ids,                    type: Array, default: []
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH },
@@ -73,7 +89,8 @@ class Badge
             exclusion: { in: APP_CONFIG['blocked_url_slugs'],
                          message: "%{value} is a specially reserved url." }
   validates :url, presence: true, length: { within: 2..MAX_URL_LENGTH },
-    uniqueness: { scope: :group, message:"The '%{value}' url is already being used in this group."},
+    uniqueness: { scope: :group, 
+      message:"The '%{value}' url is already being used in this group."},
     format: { with: /\A[\w-]+\Z/, 
       message: "can only contain letters, numbers, dashes and underscores" },
     exclusion: { in: APP_CONFIG['blocked_url_slugs'],
@@ -109,7 +126,9 @@ class Badge
   before_save :update_terms
   before_update :move_badge_if_needed
   after_create :add_creator_as_expert
+  before_save :update_json_clone_badge_fields_if_needed
   after_save :update_requirement_editability
+  before_destroy :remove_from_group_cache
 
   before_save :update_analytics
 
@@ -121,7 +140,7 @@ class Badge
   def issuer_url; "#{ENV['root_url']}/#{group.url}.json"; end
 
   def badge_url
-    "#{ENV['root_url'] || 'http://badgelist.com'}/#{group.url_with_caps}/#{url_with_caps}"
+    "#{ENV['root_url'] || 'http://www.badgelist.com'}/#{group.url_with_caps}/#{url_with_caps}"
   end
 
   # Returns URL of the specified version of this badge's image
@@ -133,6 +152,8 @@ class Badge
       designed_image_url(version) || 'blank.png'
     end
   end
+  def image_medium_url; image_url(:medium); end
+  def image_small_url; image_url(:small); end
 
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields
@@ -167,6 +188,74 @@ class Badge
     else
       { icon: 'fa-globe', label: 'Public', summary: "Visible to everyone." }
     end
+  end
+
+  # === CLONE CREATION METHOD === #
+
+  # Creates a badge in the specified group from its json clone
+  # Use the badge_context parameter to set the 'context' used when creating and updating the badge
+  # Returns a hash with two keys:
+  #  'success' => true or false
+  #  'error_message' => string (if !success)
+  #  'json_clone' => the json clone of the newly created badge (if success)
+  def self.create_from_json_clone(creator, group, badge_json_clone, badge_context = nil)
+    result = { 'success' => true, 'error_message' => nil }
+
+    begin
+      # First create the badge and assign the relationship fields
+      badge = Badge.new
+      badge.context = badge_context
+      badge.group = group
+      badge.creator = creator
+      badge.current_user = creator
+      badge.current_username = creator.username
+
+      # Now assign the fields from the json clone and create the badge
+      badge.cloned_from_badge_id = badge_json_clone['_id']
+      badge.name = badge_json_clone['name']
+      badge.summary = badge_json_clone['summary']
+      badge.url = badge_json_clone['url']
+      badge.url_with_caps = badge_json_clone['url_with_caps']
+      badge.awardability = badge_json_clone['awardability'] || 'admins'
+      badge.editability = badge_json_clone['editability'] || 'admins'
+      badge.visibility = badge_json_clone['visibility'] || 'public'
+      badge.info = badge_json_clone['info']
+      badge.remote_custom_image_url = badge_json_clone['image_url']
+      badge.custom_image_key = Badge::IMAGE_KEY_IGNORE # necessary to cause display of custom image
+      badge.save!
+
+      # Create the wiki & requirement pages
+      (badge_json_clone['pages'] || []).each do |tag_item|
+        new_tag = Tag.new()
+        new_tag.badge = badge
+        new_tag.type = tag_item['type']
+        new_tag.sort_order = tag_item['sort_order']
+        new_tag.name = tag_item['name']
+        new_tag.display_name = tag_item['display_name']
+        new_tag.name_with_caps = tag_item['name_with_caps']
+        new_tag.summary = tag_item['summary']
+        new_tag.format = tag_item['format']
+        new_tag.privacy = tag_item['privacy']
+        new_tag.editability = tag_item['editability']
+        new_tag.wiki = tag_item['wiki']
+
+        new_tag.context = 'badge_async' # prevent the badge update callback from firing
+        new_tag.save if new_tag.valid?
+
+        # Update the pages branch of the badge json clone
+        badge.update_json_clone_tag new_tag.json_clone
+      end
+
+      # Finally save the badge json add the json clone to the result
+      badge.save!
+      result['json_clone'] = badge.json_clone
+    rescue Exception => e
+      result['success'] = false
+      result['error_message'] = "Error creating badge: #{e}"
+      result['badge'] = badge
+    end
+
+    result
   end
 
   # === ASYNC CLASS METHODS === #
@@ -299,11 +388,11 @@ class Badge
   end
 
   def has_requirements?
-    !requirements.blank?
+    !requirements_json_clone.blank?
   end
 
   def has_wikis?
-    !wikis.blank?
+    !wikis_json_clone.blank?
   end
 
   # Return tags with type = 'requirement' sorted by sort_order
@@ -311,9 +400,37 @@ class Badge
     tags.where(type: 'requirement').order_by(:sort_order.asc)
   end
 
+  # Returns all requirement entries from the pages branch of the badge json clone (sorted in order)
+  def requirements_json_clone
+    if json_clone && json_clone['pages']
+      json_clone['pages'].select{ |tag_item| tag_item['type'] == 'requirement' }\
+        .sort_by{ |tag_item| tag_item['sort_order'] } 
+    else
+      []
+    end
+  end
+
   # Return all non-requiremetn tags sorted by name
   def wikis
     tags.where(:type.ne => 'requirement').order_by(:name.asc)
+  end
+
+  # Returns all wiki entries from the pages branch of the badge json clone (sorted by name)
+  def wikis_json_clone
+    if json_clone && json_clone['pages']
+      json_clone['pages'].select{ |tag_item| tag_item['type'] == 'wiki' }\
+        .sort_by{ |tag_item| tag_item['name'] } 
+    else
+      []
+    end
+  end
+
+  def learner_count
+    learner_user_ids.count
+  end
+
+  def expert_count
+    expert_user_ids.count
   end
 
   # Returns all non-validated logs, sorted by entry counts (user name would require queries)
@@ -345,17 +462,35 @@ class Badge
   # Return value = the newly created/reattached log
   def add_learner(user, date_started = nil)
     the_log = logs.find_by(user: user) rescue nil
+    update_badge = false
     
     if the_log
       if the_log.detached_log
         the_log.detached_log = false
+        the_log.context = 'badge_add' # This will suppress the badge update callback
         the_log.save
+        update_badge = true
       end
     else
       the_log = Log.new(date_started: date_started)
       the_log.badge = self
       the_log.user = user
+      the_log.context = 'badge_add' # This will suppress the badge update callback
       the_log.save
+      update_badge = true
+    end
+
+    if update_badge
+      self.all_user_ids << user.id unless self.all_user_ids.include? user.id
+      if the_log.validation_status == 'validated'
+        self.expert_user_ids << user.id unless self.expert_user_ids.include? user.id
+        self.learner_user_ids.delete user.id if self.learner_user_ids.include? user.id
+      else
+        self.expert_user_ids.delete user.id if self.expert_user_ids.include? user.id
+        self.learner_user_ids << user.id unless self.learner_user_ids.include? user.id
+      end
+
+      self.timeless.save if self.changed?
     end
 
     the_log
@@ -364,7 +499,7 @@ class Badge
   # Returns the ACTUAL validation threshold based on the group settings AND the badge expert count
   def current_validation_threshold
     # NOTE: I'm removing this for now since it requires an extra query.
-    return [expert_logs.count, 1].min
+    return [expert_count, 1].min
     
     # validation_threshold = expert_logs.count
 
@@ -407,18 +542,32 @@ class Badge
     end
   end
 
+  # Pass the 'pages' property from the badge json clone and this method transforms it and passes
+  # it to the update_requirement_list method
+  # NOTE: This method is not currently being used (it turned out to not be necessary for 
+  #       creating from json), but I'm leaving it around in case it's useful later.
+  def update_requirement_list_from_json_clone(badge_json_clone_pages)
+    requirement_list = badge_json_clone_pages.select{ |tag_item| tag_item['type']=='requirement' }\
+      .sort_by{ |tag_item| tag_item['sort_order'] }
+    update_requirement_list(requirement_list, true)
+  end
+
   # Call this method to processes changes to the requirement_list 
   # Also updates progress_tracking_enabled (and saves the badge record if needed)
   # NOTE: If requirement_list is blank then this method does nothing
-  def update_requirement_list(requirement_list)
+  def update_requirement_list(requirement_list, already_parsed = false)
     unless requirement_list.blank?
       # First parse the requirement list from JSON
-      parsed_list = JSON.parse requirement_list rescue nil
+      if already_parsed
+        parsed_list = requirement_list
+      else
+        parsed_list = JSON.parse requirement_list rescue nil
+      end
       new_requirement_count = 0 # used later to set progress tracking boolean
       
       if parsed_list.instance_of?(Array) # false if nil
         tag_ids, tag_names, matched_tag_names = [], [], []
-        requirement_id_map, requirement_name_map = {}, {} # maps from tag name/id > requirement item
+        requirement_id_map, requirement_name_map = {}, {} # map[tag name/id] = requirement item
         
         # Run through and build a list of tag ids and tag names to query
         parsed_list.each_with_index do |requirement, index|
@@ -437,15 +586,16 @@ class Badge
           end
         end
 
-        # Query for all existing requirement tags as well as any other tags referenced in the list 
+        # Query for all existing requirement tags as well as any other tags referenced in the list
         # (whether or not they are requirements)
         relevant_tags = tags.any_of({:id.in => tag_ids}, {:name.in => tag_names}, 
           {type: 'requirement'})
 
         # Run through and handle updates to existing tags
         relevant_tags.each do |tag|
-          # First try to find the requirement by id (for updating), then try by name (for promoting)
+          # First try to find requirement by id (for updating), then try by name (for promoting)
           r = requirement_id_map[tag.id.to_s] || requirement_name_map[tag.name]
+          tag.context = 'badge_async' # this will prevent the badge update callback from firing
 
           if r # then this tag is being updated
             tag.type = (r['is_deleted']) ? 'wiki' : 'requirement'
@@ -456,6 +606,7 @@ class Badge
             tag.format = r['format']
             tag.privacy = r['privacy']
             tag.summary = r['summary']
+            tag.wiki = r['wiki'] unless r['wiki'].blank?
 
             tag.save if tag.changed? && tag.valid?
             matched_tag_names << tag.name # This will have the NEW name if it changed
@@ -463,6 +614,9 @@ class Badge
             tag.type = 'wiki'
             tag.save
           end
+          
+          # Update the pages branch of the badge json clone
+          update_json_clone_tag tag.json_clone
         end
         
         # Now go back and create any requirement tags which are new
@@ -478,8 +632,13 @@ class Badge
             new_tag.summary = r['summary']
             new_tag.format = r['format']
             new_tag.privacy = r['privacy']
+            new_tag.wiki = r['wiki'] # NOTE: This is only set if creating from a json clone
 
+            new_tag.context = 'badge_async' # prevent the badge update callback from firing
             new_tag.save if new_tag.valid?
+
+            # Update the pages branch of the badge json clone
+            update_json_clone_tag new_tag.json_clone
           end
         end
       end
@@ -515,9 +674,47 @@ class Badge
 
   # Sets the image url based on the supplied image key (defaults to the model value)
   # NOTE: You need to save the badge afterward to commit the new path to the DB.
+  # NOTE #2: This may not be necessary... on 11/27 I discovered that reinstalling imagemagick in 
+  #   my dev environment resolved the initial cause for this. Investigate later.
   def update_custom_image(image_key = custom_image_key)
     self.remote_custom_image_url = \
       "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/#{image_key}"
+  end
+
+  # This will update the badge fields ONLY and leave the pages list untouched
+  # Set the parameter to control whether the group is updated
+  # NOTE: It will manually update the image_url field
+  def update_json_clone_badge_fields(also_update_group_badge_cache = true)
+    pages_backup = json_clone['pages']
+    self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS, 
+      methods: [:image_url, :image_medium_url, :image_small_url])
+    self.json_clone['pages'] = pages_backup
+    self.json_clone['created_at'] ||= Time.now
+    self.json_clone['updated_at'] ||= Time.now
+
+    if also_update_group_badge_cache
+      group.update_badge_cache json_clone
+      group.timeless.save
+    end
+  end
+
+  # This updates or deletes the json clone copy of the specified tag located in json_clone['pages']
+  # If the specified tag does not exist it will be created
+  # If is_deleted is true then the specified entry will be deleted
+  def update_json_clone_tag(tag_json_clone, is_deleted = false)
+    self.json_clone['pages'] = [] if json_clone['pages'].nil?
+    tag_id = tag_json_clone['_id']
+    tag_item_index = json_clone['pages'].index { |item| item["_id"] == tag_id }
+
+    if tag_item_index
+      if is_deleted # then delete this item
+        self.json_clone['pages'].delete_at tag_item_index
+      else # update this item
+        self.json_clone['pages'][tag_item_index] = tag_json_clone
+      end
+    elsif !is_deleted # create this item
+      self.json_clone['pages'] << tag_json_clone
+    end
   end
 
 protected
@@ -627,6 +824,17 @@ protected
     end
   end
 
+  def update_json_clone_badge_fields_if_needed
+    # First find the intersection of the fields to watch and the fields that have changed
+    clone_field_names = CLONE_FIELDS.map{ |field_symbol| field_symbol.to_s }
+    changed_clone_field_names = changed & clone_field_names
+
+    if !changed_clone_field_names.blank? || (image_url != json_clone['image_url'])
+      update_group = (context != 'group_async')
+      update_json_clone_badge_fields update_group
+    end
+  end
+
   # If the badge editability is changed this method propogates that change to the requirement tags
   def update_requirement_editability
     if editability_changed?
@@ -634,6 +842,13 @@ protected
         tag.editability = self.editability
         tag.timeless.save
       end
+    end
+  end
+
+  def remove_from_group_cache
+    if context != 'group_async'
+      group.update_badge_cache json_clone, true
+      group.timeless.save
     end
   end
 

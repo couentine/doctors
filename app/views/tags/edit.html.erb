@@ -1,7 +1,7 @@
 <% 
   provide(:title, "Edit Page (#{@tag.display_name}) - #{@badge.name}")
   provide(:show_subheader, true)
-  provide(:subheader_image, group_image_url_for(@group)) 
+  provide(:subheader_image, @group.avatar_image_url(:small)) 
   provide(:include_rich_text, true) 
 %>
 

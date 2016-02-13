@@ -13,6 +13,10 @@ class Log
   JSON_MOCK_FIELDS = { 'uid' => :_id,  'badge' => :badge_url, 'issuedOn' => :date_issued_stamp,
     'evidence' => :evidence_url }
   
+  # === INSTANCE VARIABLES === #
+
+  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
+
   # === RELATIONSHIPS === #
 
   belongs_to :badge
@@ -52,6 +56,9 @@ class Log
   field :user_username,                       type: String # local cache of user info
   field :user_username_with_caps,             type: String # local cache of user info
   field :user_email,                          type: String # local cache of user info
+  field :user_avatar_image_url,               type: String # local cache of user info
+  field :user_avatar_image_medium_url,        type: String # local cache of user info
+  field :user_avatar_image_small_url,         type: String # local cache of user info
 
   validates :badge, presence: true
   validates :user, presence: true
@@ -73,6 +80,9 @@ class Log
   before_save :update_stati
   after_save :back_validate_if_needed
   after_save :send_notifications
+
+  after_save :update_user_if_needed
+  after_destroy :update_user_after_destroy
 
   # === LOG MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -96,7 +106,62 @@ class Log
 
   def verify; { type: 'hosted', url: assertion_url }; end
 
-  # === LOG METHODS === #
+  # === LOG CLASS ASYNC METHODS === #
+
+  # If log still exists then pass only the first param
+  # If log is deleted then pass only the user and badge ids
+  # Set skip_badge_update to avoid touching the badge record
+  def self.update_user_badge_lists(log_id, user_id = nil, badge_id = nil, skip_badge_update = false)
+    # First query the records
+    if log_id
+      log = Log.find(log_id)
+      user = log.user
+      badge = log.badge
+    else
+      log = nil
+      user = User.find(user_id)
+      badge = Badge.find(badge_id)
+    end
+    
+    # Then update the badge list fields on the user record
+    if log && !log.detached_log
+      user.all_badge_ids << badge.id unless user.all_badge_ids.include? badge.id
+      badge.all_user_ids << user.id if !skip_badge_update && !badge.all_user_ids.include?(user.id)
+
+      if log.validation_status == 'validated'
+        user.expert_badge_ids << badge.id unless user.expert_badge_ids.include? badge.id
+        user.learner_badge_ids.delete badge.id if user.learner_badge_ids.include? badge.id
+
+        unless skip_badge_update
+          badge.expert_user_ids << user.id unless badge.expert_user_ids.include? user.id
+          badge.learner_user_ids.delete user.id if badge.learner_user_ids.include? user.id
+        end
+      else
+        user.expert_badge_ids.delete badge.id if user.expert_badge_ids.include? badge.id
+        user.learner_badge_ids << badge.id unless user.learner_badge_ids.include? badge.id
+
+        unless skip_badge_update
+          badge.expert_user_ids.delete user.id if badge.expert_user_ids.include? user.id
+          badge.learner_user_ids << user.id unless badge.learner_user_ids.include? user.id
+        end
+      end
+    else
+      user.all_badge_ids.delete badge.id if user.all_badge_ids.include? badge.id
+      user.expert_badge_ids.delete badge.id if user.expert_badge_ids.include? badge.id
+      user.learner_badge_ids.delete badge.id if user.learner_badge_ids.include? badge.id
+      
+      unless skip_badge_update
+        badge.all_user_ids.delete user.id if badge.all_user_ids.include? user.id
+        badge.expert_user_ids.delete user.id if badge.expert_user_ids.include? user.id
+        badge.learner_user_ids.delete user.id if badge.learner_user_ids.include? user.id
+      end
+    end
+
+    user.timeless.save if user.changed?
+    badge.timeless.save if !skip_badge_update && badge.changed?
+  end
+
+  # === LOG INSTANCE METHODS === #
 
   def to_param
     if user_username_with_caps
@@ -252,6 +317,9 @@ class Log
     self.user_username = user_record.username
     self.user_username_with_caps = user_record.username_with_caps
     self.user_email = user_record.email
+    self.user_avatar_image_url = user_record.avatar_image_url
+    self.user_avatar_image_medium_url = user_record.avatar_image_medium_url
+    self.user_avatar_image_small_url = user_record.avatar_image_small_url
   end
 
   # === ASYNC CLASS METHODS === #
@@ -278,8 +346,10 @@ class Log
 
     # Now query the users and send them each an email
     User.where(:id.in => user_ids_to_email).each do |user_to_email|
-      UserMailer.delay.log_validation_request(user_to_email.id, validated_log.user.id, \
-        badge.group_id, badge.id, validated_log.id) 
+      unless user_to_email.email_inactive
+        UserMailer.delay.log_validation_request(user_to_email.id, validated_log.user.id, \
+          badge.group_id, badge.id, validated_log.id) 
+      end
     end
   end
 
@@ -427,20 +497,38 @@ protected
     (validation_count - rejection_count) >= validation_threshold
   end
 
+  # Call from after destroy
+  def update_user_after_destroy
+    Log.delay.update_user_badge_lists(nil, user_id, badge_id)
+  end
+  
+  # Call from after save
+  def update_user_if_needed
+    if new_record? || detached_log_changed? \
+        || (validation_status_changed? && (validation_status == 'validated')) \
+        || (issue_status_changed? && (issue_status == 'retracted'))
+      Log.delay.update_user_badge_lists(id, nil, nil, context == 'badge_add')
+    end
+  end
+
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
     if validation_status_changed? && (updated_at > (Time.now - 2.hours))
       if (validation_status == 'requested') && badge.send_validation_request_emails
         Log.delay(queue: 'mailer').do_send_validation_requests(id)
       elsif validation_status == 'validated'
-        UserMailer.delay.log_badge_issued(user.id, badge.group_id, badge.id, self.id) 
+        unless user.email_inactive
+          UserMailer.delay.log_badge_issued(user.id, badge.group_id, badge.id, self.id) 
+        end
       end
     end
 
     if issue_status_changed? && (updated_at > (Time.now - 1.hour))
       if issue_status == 'retracted'
-        UserMailer.delay.log_badge_retracted(user.id, badge.group_id, badge.id, self.id) 
-
+        unless user.email_inactive
+          UserMailer.delay.log_badge_retracted(user.id, badge.group_id, badge.id, self.id) 
+        end
+        
         # Update analytics
         IntercomEventWorker.perform_async({
           'event_name' => 'badge-retracted',

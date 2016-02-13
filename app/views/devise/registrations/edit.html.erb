@@ -13,6 +13,9 @@
 
 <script>
 
+  var MAX_IMAGE_UPLOAD_SIZE = 7000000;
+  var MAX_IMAGE_UPLOAD_DESCRIPTION = "6 megabytes";
+
   var deletedCardId;
   var paymentHistoryPage = 1;
 
@@ -51,8 +54,101 @@
     if (window.location.hash == "#add-card") {
       $("#add-card").click();
     }
+    
+    // Check for upload image hash on startup
+    if (window.location.hash == "#upload-image") {
+      $("td.left-image .btn-overlay .btn")
+        .css("opacity", 1)
+        .tooltip({ title: 'Click here to upload a new profile image.', placement: 'bottom' })
+        .tooltip('show');
+    }
+
+    // IMAGE UPLOAD
+
+    // Clicking the upload button clicks on the file input element
+    $("#select-image-file").click(function(e) {
+      $("#s3_direct_uploader_direct_avatar").click();
+      e.preventDefault();
+    });
+    
+    // Process the image file after selection
+    $("#s3_direct_uploader_direct_avatar").change(function() {
+      if ($(this).val()) {
+        if (this.files[0].size > MAX_IMAGE_UPLOAD_SIZE) {
+          alert("The image you have selected is too big. The maximum supported file size is "
+            + MAX_IMAGE_UPLOAD_DESCRIPTION + ".");
+          $(this).val("");
+        } else {
+          $("#select-image-file").fadeOut(function() {
+            $("#upload-spinner").fadeIn();
+          });
+          $("#avatar_form").submit();
+        }
+      }
+    });
+
+    $("td.left-image img").error(function() {
+      $("#upload-spinner").fadeIn();
+      
+      setTimeout(function() {
+        $("#upload-spinner").fadeOut();
+        $("td.left-image img").attr("src", $("td.left-image img").attr("src"));
+      }, 300);
+    });
 
   });
+
+  // PROFILE IMAGE RELATED FUNCTIONS
+
+  var MAX_AVATAR_POLL_TRIES = 50;
+  var AVATAR_POLLING_INTERVAL = 300;
+  var USER_URL = "<%= @user.user_url %>";
+
+  var imageBaseURL = '<%= "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/" %>';
+  function processImageKey(imageKey) {
+    // Set the hidden form field and submit the form
+    $("#user_avatar_key").val(imageKey);
+    $("#upload-image-form").submit(); // update_image.js.erb contains the next step
+
+    // Then set the image to the unmodified version
+    $("td.left-image img").attr("src", imageBaseURL + imageKey);
+  }
+
+  function checkForAvatar(numTries) {
+    try {
+      $.getJSON(USER_URL, function(user) {
+        if (user == null) {
+          checkForAvatarError();
+        } else {
+          if (!user.processing_avatar) {
+            setTimeout(function() { checkForAvatarComplete(user); }, AVATAR_POLLING_INTERVAL);
+          } else if (numTries <= MAX_AVATAR_POLL_TRIES) {
+            setTimeout(function() { checkForAvatar(numTries + 1); }, AVATAR_POLLING_INTERVAL);
+          } else {
+            checkForAvatarError();
+          }
+        }
+      });
+    } catch (e) {
+      checkForAvatarError();
+    }
+  }
+
+  function checkForAvatarComplete(user) {
+    $("#upload-spinner").fadeOut(function() {
+      $("td.left-image img").attr("src", user.avatar_image_url);
+      $("#dropdown-header-currentuser img").attr("src", user.avatar_image_url);
+      $("#select-image-file").fadeIn();
+      document.location.hash = "";
+    });
+  }
+
+  function checkForAvatarError() {
+    $("#upload-spinner i.fa").removeClass("fa-spin fa-refresh")
+      .addClass("fa-exclamation-circle red");
+  }
+
+  // PAYMENT FUNCTION
 
   // Loads current page of payments
   function loadPaymentHistoryPage() {
@@ -186,8 +282,33 @@
   end 
 %>
 
+<!-- === ACCOUNT STATUS WARNINGS === -->
+
+<% if @user.email_inactive %>
+  <div class="well primary add-top-margin">
+    <i class="fa fa-envelope header-icon"></i>
+    <h2>Your email address is blocked</h2>
+    <p>
+      Badge List has been unable to deliver emails to your address (<%= @user.email %>).
+      Please check with your email administrator to confirm that emails from badgelist.com are 
+      not being blocked on your domain. 
+      You may also want to check the spam filters on your email software.
+    </p>
+    <p>
+      <strong>
+        Until this problem is resolved you will not be able to receive any emails from Badge List,
+        including password reset and account confirmation links.
+      </strong>
+    </p>
+    <p>
+      Once you have fixed the problem with email delivery please contact Badge List support 
+      to have your email address reactivated.
+    </p>
+  </div>
+<% end %>
+
 <% if !@user.confirmed? || @user.pending_reconfirmation? %>
-  <div class="well well-tertiary add-top-margin">
+  <div class="well tertiary add-top-margin">
     <i class="fa fa-exclamation-triangle header-icon"></i>
     <h2>Email verification needed</h2>
     <p>
@@ -205,12 +326,15 @@
         <tbody>
           <tr class="body-row">
             <td class="left-image">
-              <%= gravatar_for(@user, :size => 100, :class => 'img-circle') %>
-              <div class="btn-overlay">
-                <a href="https://en.gravatar.com/connect/?source=_signup" target="_blank" 
-                    data-toggle="tooltip" data-placement="bottom" class="btn btn-small"
-                    title="Badge List uses Gravatar to display your profile picture.">
-                  <i class="fa fa-pencil"></i> Edit photo
+              <%= image_tag @user.avatar_image_url(:medium), class: 'img-circle' %>
+              <div class="spinner-wrapper" id="upload-spinner" style="display: none;">
+                <div class="spinner-text large">
+                  <i class="fa fa-refresh fa-spin"></i>
+                </div>
+              </div>
+              <div class="btn-overlay hidden-until-hover">
+                <a href="#" class="btn btn-small" id="select-image-file">
+                  <i class="fa fa-upload"></i> Upload image
                 </a>
               </div>
             </td>
@@ -549,4 +673,24 @@
       </p>
     </div>
   </div>
+</div>
+
+<!-- === CARRIERWAVE DIRECT FORM === -->
+
+<%= direct_upload_form_for(@uploader, html: { id: 'avatar_form', style: 'display: none;',
+    target: 'avatar_result_frame' } ) do |u| %>
+  <%= u.file_field :direct_avatar, accept: 'image/*' %>
+<% end %>
+
+<iframe id="avatar_result_frame" name="avatar_result_frame" style="display: none;"></iframe>
+
+<!-- === UPLOAD PROFILE IMAGE FORM === -->
+
+<div id="upload-image-panel" style="display: none;">
+  <%= form_tag(user_update_image_path(@user), id: 'upload-image-form', method: :post, 
+      remote: true) do %>
+    
+    <input type="hidden" name="avatar_key" id="user_avatar_key">
+
+  <% end %>
 </div>

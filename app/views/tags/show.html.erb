@@ -1,7 +1,7 @@
 <% 
   provide(:full_title, "#{@tag.display_name} - #{@badge.name} - #{@group.name}")
   provide(:show_subheader, true)
-  provide(:subheader_image, group_image_url_for(@group)) 
+  provide(:subheader_image, @group.avatar_image_url(:small)) 
 
   visibility_details = @badge.visibility_details
 %>
@@ -231,7 +231,7 @@
             </div>
           <% end %>
 
-          <% @tag.wiki_sections.each do |section_text| %>
+          <% (@tag.wiki_sections || []).each do |section_text| %>
             <div class="section-container"><%= section_text.html_safe %></div>
           <% end %>
         </div>

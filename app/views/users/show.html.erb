@@ -2,10 +2,33 @@
   provide(:title, @user.name)
 %>
 
-<!-- === ACCOUNT STATUS WARNING === -->
+<!-- === ACCOUNT STATUS WARNINGS === -->
+
+<% if @this_is_current_user && @user.email_inactive %>
+  <div class="well primary add-top-margin">
+    <i class="fa fa-envelope header-icon"></i>
+    <h2>Your email address is blocked</h2>
+    <p>
+      Badge List has been unable to deliver emails to your address (<%= @user.email %>).
+      Please check with your email administrator to confirm that emails from badgelist.com are 
+      not being blocked on your domain. 
+      You may also want to check the spam filters on your email software.
+    </p>
+    <p>
+      <strong>
+        Until this problem is resolved you will not be able to receive any emails from Badge List,
+        including password reset and account confirmation links.
+      </strong>
+    </p>
+    <p>
+      Once you have fixed the problem with email delivery please contact Badge List support 
+      to have your email address reactivated.
+    </p>
+  </div>
+<% end %>
 
 <% if @this_is_current_user && (!@user.confirmed? || @user.pending_reconfirmation?) %>
-  <div class="well well-tertiary add-top-margin">
+  <div class="well tertiary add-top-margin">
     <i class="fa fa-exclamation-triangle header-icon"></i>
     <h2>Email verification needed</h2>
     <p>
@@ -21,7 +44,13 @@
 
       <div class="primary-header span12">
         <span class="header-image"> 
-          <%= gravatar_for(@user, :size => 100, :class => 'img-circle') %>
+          <%= image_tag @user.avatar_image_url(:medium), class: 'img-circle' %>
+          <% if @this_is_current_user %>
+            <div class="btn-overlay hidden-until-hover">
+              <%= link_to "<i class='fa fa-pencil'></i> Edit image".html_safe,
+                edit_user_registration_path + '#upload-image', class: 'btn btn-small' %>  
+            </div>
+          <% end %>
         </span>
         <span class="header-text">
           <h1><%= @user.name %></h1>
@@ -70,7 +99,8 @@
           <table class="header-table">
             <tr>
               <td>
-                <%= link_to group_image_tag_for(group), group, title: "View the group", class: "image-link" %>
+                <%= link_to image_tag(group.avatar_image_url(:medium)), group, 
+                  title: "View the group", class: "image-link" %>
               </td>
               <td>
                 <h2>
@@ -134,7 +164,7 @@
         <ul>
           <% @user.groups.asc(:name).each do |group| %>
             <li>
-              <%= link_to group_image_tag_for(group) + " " + group.name, group, 
+              <%= link_to image_tag(group.avatar_image_url(:small)) + " " + group.name, group, 
                 title: "View the group" %>
               <span class="no-link">
                 <%= "#{@user.member_type_of(group.id).capitalize}" %>

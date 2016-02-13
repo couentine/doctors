@@ -724,11 +724,127 @@ namespace :db do
     puts " >> Done."
   end
 
+  # NOTE: This is OK to run periodically in production.
   task update_log_user_caches: :environment do
     print "Updating logs for #{User.count} users"
     
     User.each do |user|
-      User.update_log_user_fields user.id
+      begin
+        User.update_log_user_fields user.id
+        print "."
+      rescue
+        print "!"
+      end
+    end
+
+    puts " >> Done."
+  end
+
+  task backpopulate_postmark_bounce_history: :environment do
+    print "Querying postmark for all email bounces"
+
+    all_bounces = []
+    postmark_client = Postmark::ApiClient.new(ENV['POSTMARK_API_KEY'])
+    postmark_client.bounces.each do |bounce|
+      all_bounces << bounce
+      print "."
+    end
+
+    puts " >> Done."
+
+    all_bounces.reverse! # We want them ordered from oldest to newest (which is backwards)
+
+    print "Processing #{all_bounces.count} queried bounces"
+    all_bounces.each do |bounce|
+      bounced_at = DateTime.parse(bounce[:bounced_at]) rescue Time.now
+      User.track_bounce(bounce[:email], bounce[:inactive], bounced_at, bounce[:id])
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  task update_user_badge_lists: :environment do
+    print "Updating all users and badges linked to #{Log.count} logs"
+    
+    Log.each do |log|
+      Log.update_user_badge_lists(log.id) if log.badge && log.user
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  # NOTE: This is OK to run periodically in production.
+  task update_json_clones: :environment do
+    print "Updating all json clone info for #{Group.count} groups, #{Badge.count} badges " \
+      + "and #{Tag.count} tags"
+    group_index = 1
+    
+    Group.each do |group|
+      print ", #{group_index}:"
+
+      group.badges.each do |badge|
+        badge.update_json_clone_badge_fields(false)
+        group.update_badge_cache badge.json_clone
+
+        badge.tags.each do |tag|
+          tag.update_json_clone
+          tag.context = 'badge_async' # prevent the badge update callback from firing
+          tag.timeless.save
+          print "-"
+
+          badge.update_json_clone_tag tag.json_clone
+        end
+
+        badge.timeless.save
+        print "."
+      end
+
+      group.timeless.save
+      group_index += 1
+    end
+
+    puts " >> Done."
+  end
+
+  task overwrite_badge_copyability_on_private_groups: :environment do
+    print "Updating #{Group.where(type: 'private').count} private groups"
+    
+    Group.where(type: 'private').each do |group|
+      group.badge_copyability = 'admins'
+      group.timeless.save
+
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  task backpopulate_group_avatars: :environment do
+    print "Updating #{Group.count} groups"
+    
+    # Run through them backwards (to minimize user impact since this is a somewhat slow process)
+    Group.desc(:updated_at).each do |group|
+      unless group.image_url.blank?
+        group.remote_avatar_url = group.image_url
+        group.timeless.save
+      end
+
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  task backpopulate_user_avatars: :environment do
+    print "Updating #{User.count} users"
+    
+    # Run through them backwards (to minimize user impact since this is a somewhat slow process)
+    User.desc(:updated_at).each do |user|
+      user.remote_avatar_url = user.gravatar_url
+      user.timeless.save
+
       print "."
     end
 

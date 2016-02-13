@@ -20,7 +20,9 @@
     </div>
 
     <div class="card-body-row">
-      <div class="body-image"><%= gravatar_for @user, size: 110 %></div>
+      <div class="body-image">
+        <%= image_tag @user.avatar_image_url(:medium) %>
+      </div>
       <div class="body-title"><%= @user.name %></div>
       <div class="body-content">
         received this badge on <br><%= @log.date_issued.to_s(:full_date) %>

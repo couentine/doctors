@@ -1,0 +1,11 @@
+<% if @success %>
+  $("#user-card-<%= @user.username %> .bl-admin-unblock").html(
+    "<i class='fa fa-smile-o green'></i>"
+  );
+<% else %>
+  $("#user-card-<%= @user.username %> .bl-admin-unblock").html(
+    "<i class='fa fa-frown-o red'></i>"
+  );
+<% end %>
+
+$("#user-spinner-<%= @user.username %>").fadeOut();

@@ -397,22 +397,27 @@ class BadgeMaker
 private
 
   def self.composite_with_mask(source_image, overlay_image, mask_image, output_extension = 'png', &block)
-    begin
-      second_tempfile = Tempfile.new(output_extension)
-      second_tempfile.binmode
-    ensure
-      second_tempfile.close
-    end
+    # OLD LOGIC
 
-    command = MiniMagick::CommandBuilder.new("composite")
-    block.call(command) if block
-    command.push(source_image.path)
-    command.push(overlay_image.path)
-    command.push(mask_image.path)
-    command.push(second_tempfile.path)
+    # begin
+    #   second_tempfile = Tempfile.new(output_extension)
+    #   second_tempfile.binmode
+    # ensure
+    #   second_tempfile.close
+    # end
 
-    source_image.run(command)
-    return MiniMagick::Image.new(second_tempfile.path, second_tempfile)
+    # command = MiniMagick::CommandBuilder.new("composite")
+    # block.call(command) if block
+    # command.push(source_image.path)
+    # command.push(overlay_image.path)
+    # command.push(mask_image.path)
+    # command.push(second_tempfile.path)
+
+    # source_image.run(command)
+    # return MiniMagick::Image.new(second_tempfile.path, second_tempfile)
+
+    # NEW LOGIC
+    overlay_image.composite(source_image, output_extension, mask_image)
   end
 
 end

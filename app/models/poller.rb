@@ -21,6 +21,7 @@ class Poller
   field :waiting_message,   type: String
   field :redirect_to,       type: String
   field :data,              type: Hash
+  field :progress,          type: Integer # set 0 to 100 or leave nil
   
   validates :status, inclusion: { in: STATUS_VALUES, message: "%{value} is not a valid status" }
   

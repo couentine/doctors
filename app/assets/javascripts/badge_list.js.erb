@@ -34,6 +34,7 @@ var richTextEditors = [];
 
 $(document).ready(function() {
     checkForTooltips();
+    checkForSpinnerLinks();
     disableLinks();
     addAnchorsToPaginateLinks();
     initializeDynamicColumns();
@@ -68,6 +69,12 @@ function checkForTooltips() {
     });
   // Now activate the tooltip for the default focus element (if applicable)
   $('input[data-toggle=tooltip]:focus').tooltip('show');
+}
+
+function checkForSpinnerLinks() {
+  $("[data-spinner]").click(function() {
+    $($(this).data("spinner")).fadeIn();
+  });
 }
 
 // This checks the page for items with data-mark-overflow
@@ -476,34 +483,56 @@ var POLLING_INTERVAL_DOUBLE_RATE = 2;
 var POLLING_MAX_INTERVAL = 8000;
 var POLLING_MAX_TRIES = 30;
 var POLLING_URL = "/p/";
+var PROGRESS_MODE_POLLING_INTERVAL = 500;
+var PROGRESS_MODE_POLLING_MAX_TRIES = 600;
 
 // This function starts a poller which queries "/p/pollerId.json"
 // The function onCompleted will be run when the poller completes with the poller object as a param
 // The function onError will be run with no params if the polling URL returns null
-function startPoller(pollerId, onCompleted, onError) {
-  setTimeout(function() { executePoller(pollerId, onCompleted, onError, 1); }, 
+// NOTE: If you include onUpdateProgress then the polling rate stays constant after the inital
+//       poll and runs for a longer time.
+function startPoller(pollerId, onCompleted, onError, onUpdateProgress) {
+  setTimeout(function() { executePoller(pollerId, onCompleted, onError, onUpdateProgress, 1); }, 
     INITIAL_POLLING_INTERVAL);
 }
 var tempPoller;
-function executePoller(pollerId, onCompleted, onError, numTries) {
-  var poller;
-  var nextInterval = Math.min(POLLING_MAX_INTERVAL,
-    INITIAL_POLLING_INTERVAL * Math.pow(2, Math.floor(numTries/POLLING_INTERVAL_DOUBLE_RATE)));
+function executePoller(pollerId, onCompleted, onError, onUpdateProgress, numTries) {
+  var poller; var nextInterval; var maxTries;
+  var progressMode = (onUpdateProgress != undefined);
+
+  if (progressMode) {
+    nextInterval = PROGRESS_MODE_POLLING_INTERVAL;
+    maxTries = PROGRESS_MODE_POLLING_MAX_TRIES;
+  } else {
+    nextInterval = Math.min(POLLING_MAX_INTERVAL,
+      INITIAL_POLLING_INTERVAL * Math.pow(2, Math.floor(numTries/POLLING_INTERVAL_DOUBLE_RATE)));
+    maxTries = POLLING_MAX_TRIES;
+  }
 
   try { 
     $.getJSON(POLLING_URL + pollerId + ".json", function(poller) {
       if (poller == null) {
         onError();
-      } else if (poller.completed) {
-        onCompleted(poller);
-      } else if (numTries < POLLING_MAX_TRIES) {
-        setTimeout(function() { executePoller(pollerId, onCompleted, onError, numTries + 1); }, 
-          nextInterval); 
       } else {
-        onError();
+        if (progressMode) onUpdateProgress(poller.progress);
+        
+        if (poller.completed) {
+          onCompleted(poller);
+        } else if (numTries < maxTries) {
+          setTimeout(
+            function() { 
+              executePoller(pollerId, onCompleted, onError, onUpdateProgress, numTries + 1); 
+            }, 
+            nextInterval); 
+        } else {
+          onError();
+        }
       }
     });
-  } catch (e) { onError(); }
+  } catch (e) { 
+    if (progressMode) onUpdateProgress(poller.progress);
+    onError(); 
+  }
 }
 
 function unixTimeToString(unix_timestamp){

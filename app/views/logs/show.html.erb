@@ -225,7 +225,7 @@
             <td class="right-image with-left-image">
               <span class="header-image">
                 <a href="<%= user_path(@user) %>" title="View user profile">
-                  <%= gravatar_for @user, size: 150, class: "img-circle" %>
+                  <%= image_tag @user.avatar_image_url(:medium), class: 'img-circle' %>
                 </a>
               </span>
             </td>
@@ -395,11 +395,11 @@
 
 <% end %>
 
-<% if @show_progress && (!@requirements.blank? || @current_user_is_log_owner) %>
+<% if @show_progress && (!@requirements_json_clone.blank? || @current_user_is_log_owner) %>
 
   <!-- === EVIDENCE === -->
 
-  <% if !@requirements.blank? %>
+  <% if !@requirements_json_clone.blank? %>
 
     <!-- === TABLE OF CONTENTS === -->
 

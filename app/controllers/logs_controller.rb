@@ -1,6 +1,4 @@
 class LogsController < ApplicationController
-  include UsersHelper
-  
   prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy]
   prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy]
   before_filter :authenticate_user!, only: [:create, :edit, :update, :destroy]
@@ -43,6 +41,7 @@ class LogsController < ApplicationController
       respond_to do |format|
         format.html do
           @requirements = @badge.requirements
+          @requirements_json_clone = @badge.requirements_json_clone
         end
         format.embed { render layout: 'embed' }
         format.json { render json: @log, filter_user: current_user }
@@ -101,7 +100,7 @@ class LogsController < ApplicationController
         is_error = @log.new_record?
         if is_error
           message = 'An error occured while trying to create a progress log for you.' 
-        else
+        elsif !current_user.email_inactive
           UserMailer.delay.log_new(current_user.id, current_user.id, @group.id, @badge.id, @log.id)
         end
       end

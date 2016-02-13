@@ -25,7 +25,7 @@ module EmailTools
   #   :valid => {array of hashes with :email and :name keys}
   #   :invalid => {array of invalid email strings}
   def parse_emails(emails)
-    valid_emails, invalid_emails = [], []
+    valid_emails, invalid_emails, unique_emails = [], [], []
     
     if emails
       emails.gsub(/[;|\n]/, ",").split(/,/).each do |potential_full_email|
@@ -39,7 +39,10 @@ module EmailTools
             else
               name = nil
             end
-            valid_emails << { :email => email, :name => name }
+            unless unique_emails.include? email
+              valid_emails << { :email => email, :name => name }
+              unique_emails << email
+            end
           else
             invalid_emails << potential_full_email
           end

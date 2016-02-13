@@ -1,0 +1,145 @@
+<% 
+  provide(:title, "Copy badges - #{@group.name}") 
+  provide(:show_subheader, true)
+  provide(:subheader_image, @group.avatar_image_url(:small)) 
+%>
+
+<% content_for :subheader_links do %>
+  <li>
+    <%= link_to @group.url, group_path(@group) %>
+    <span class="divider">/</span>
+  </li>
+  <li class="active">Copy badges</li>
+<% end %>
+
+<script type="text/javascript">
+  
+  $(document).ready(function() {
+
+    $("#select-all-badges").click(function(e) {
+      if ($(this).data("mode") == "none") {
+        $("input[name='badges[]']:checkbox").prop("checked", false);
+        $(this).data("mode", "all");
+        $(this).text("Select all");
+      } else {
+        $("input[name='badges[]']:checkbox").prop("checked", true);
+        $(this).data("mode", "none");
+        $(this).text("Select none");
+      }
+
+      e.preventDefault();
+    });
+
+  });
+
+</script>
+
+<div class="row">
+  <div class="bl-form bl-form-members span10 offset1">
+    
+    <div class="form-header">
+      <h1>Copy badges from <%= @group.name %></h1>
+      <div class="form-image">
+        <i class="fa fa-copy"></i>
+      </div>
+    </div>
+
+    <% if @to_group_options.blank? %>
+    
+      <% if @current_user_is_admin %>
+
+        <div class="form-body">
+          <h3>This is your only group</h3>
+          <p>
+            You don't currently have another group to copy these badges to. In order to copy 
+            badges from this group, you'll first need to be the admin for at least one 
+            additional group.
+            <br><br>
+            <%= link_to "<i class='fa fa-plus'></i> Create a new group now".html_safe,
+              new_group_path, class: "btn btn-primary" %>
+          </p>
+        </div>
+
+        <div class="form-footer">
+          &nbsp;
+        </div>
+
+      <% else %>
+
+        <div class="form-body">
+          <h3>You don't have any groups to copy badges to yet</h3>
+          <p>
+            In order to copy badges, you'll first need to be the admin for at least one group.
+            <br><br>
+            <%= link_to "<i class='fa fa-plus'></i> Create a new group now".html_safe,
+              new_group_path, class: "btn btn-primary" %>
+          </p>
+        </div>
+
+        <div class="form-footer">
+          &nbsp;
+        </div>
+
+      <% end %>
+
+    <% elsif @badge_options.blank? %>
+
+      <div class="form-body">
+        <h3>This group doesn't have any badges to copy</h3>
+        <p>
+          Come back here once some badges have been created.
+        </p>
+      </div>
+
+      <div class="form-footer">
+        &nbsp;
+      </div>
+
+    <% else %>
+      
+      <%= form_tag(copy_badges_action_path(@group), method: :post, id: "select-group-form", 
+          class: 'form-horizontal') do %>
+
+        <div class="form-body">
+
+          <div class="control-group">
+            <%= label_tag :to_group, "Select destination group", class: "control-label" %>
+            <div class="controls">
+              <%= select_tag :to_group, 
+                options_from_collection_for_select(@to_group_options, 'last', 'first'),  
+                include_blank: false, autofocus: true %>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <%= label_tag :badges, "Select badges to copy", class: "control-label" %>
+            <div class="controls">
+              <a class="btn btn-small" href="#" id="select-all-badges">Select all</a><br>
+              <ul class="unstyled badge-icons">
+                <% @badge_options.each do |item| %>
+                  <li>
+                    <label class="checkbox">
+                      <%= check_box_tag 'badges[]', item['url'], item['selected'] %> 
+                      <%= image_tag item['image_small_url'], class: 'badge-icon', 
+                        title: item['name'], data: { toggle: 'tooltip' } %>
+                    </label>
+                  </li>
+                <% end %>
+              </ul>
+              <br/>
+            </div>
+          </div>
+
+        </div>
+        
+        <div class="form-footer">
+          <%= button_tag "Copy badges", type: 'submit', class: 'btn btn-primary' %>
+          <%= link_to 'Cancel', @group, class: 'btn' %> 
+        </div>
+
+      <% end %>
+
+    <% end %>
+
+  </div>
+</div>

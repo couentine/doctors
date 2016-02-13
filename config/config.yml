@@ -343,6 +343,7 @@ defaults: &defaults
    - badge
    - badges
    - cancel
+   - copy_badges
    - create
    - delete
    - destroy
@@ -372,6 +373,8 @@ defaults: &defaults
    - perm_assets
    - pricing
    - privacy-policy
+   - select_badges
+   - select_group
    - show
    - support
    - update

@@ -7,15 +7,22 @@ class Group
 
   MAX_NAME_LENGTH = 50
   MAX_URL_LENGTH = 30
-  MAX_LOCATION_LENGTH = 200
+  MAX_DESCRIPTION_LENGTH = 140
+  MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type]
-  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 'image' => :image_url,
-    'email' => :primary_email }
+  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 
+    'image_url' => :avatar_image_url, 'email' => :primary_email }
   VISIBILITY_VALUES = ['public', 'private']
+  COPYABILITY_VALUES = ['public', 'members', 'admins']
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
   PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
+
+  BOUNCED_EMAIL_LOG_MAX_LENGTH = 100
+
+  DEFAULT_GROUP_AVATAR_PATH = 'app/assets/images/default-group-avatar.png'
+  DEFAULT_GROUP_AVATAR_FILE = 'default-group-avatar.png'
 
   # === INSTANCE VARIABLES === #
 
@@ -32,48 +39,58 @@ class Group
 
   # === FIELDS & VALIDATIONS === #
 
-  field :name,                        type: String
-  field :url,                         type: String
-  field :url_with_caps,               type: String
-  field :location,                    type: String
-  field :website,                     type: String
-  field :image_url,                   type: String
-  field :type,                        type: String, default: 'open'
-  field :customer_code,               type: String
-  field :validation_threshold,        type: Integer, default: 1
-  field :invited_admins,              type: Array, default: []
-  field :invited_members,             type: Array, default: []
-  field :flags,                       type: Array, default: []
-  field :new_owner_username,          type: String
-  field :previous_owner_id,           type: String
+  field :name,                            type: String
+  field :url,                             type: String
+  field :url_with_caps,                   type: String
+  field :description,                     type: String
+  field :location,                        type: String
+  field :website,                         type: String
+  field :type,                            type: String, default: 'open'
+  field :customer_code,                   type: String
+  field :validation_threshold,            type: Integer, default: 1
+  field :invited_admins,                  type: Array, default: []
+  field :invited_members,                 type: Array, default: []
+  field :bounced_email_log,               type: Array, default: []
+  field :flags,                           type: Array, default: []
+  field :new_owner_username,              type: String
+  field :previous_owner_id,               type: String
   
-  field :member_visibility,           type: String, default: 'public'
-  field :admin_visibility,            type: String, default: 'public'
-  field :join_code,                   type: String
+  field :image_url,                       type: String # RETIRED FIELD
+  mount_uploader :direct_avatar,          S3DirectUploader
+  mount_uploader :avatar,                 S3LogoUploader
+  field :avatar_key,                      type: String
+  field :processing_avatar,               type: Boolean
   
-  field :user_limit,                  type: Integer, default: 5
-  field :admin_limit,                 type: Integer, default: 1
-  field :sub_group_limit,             type: Integer, default: 0
-  field :features,                    type: Array, default: [] # = ['community', 'branding']
-  field :total_user_count,            type: Integer, default: 1
-  field :admin_count,                 type: Integer, default: 1
-  field :member_count,                type: Integer, default: 0
-  field :sub_group_count,             type: Integer, default: 0
-  field :active_user_count,           type: Integer # RETIRED
-  field :monthly_active_users,        type: Hash # RETIRED
+  field :member_visibility,               type: String, default: 'public'
+  field :admin_visibility,                type: String, default: 'public'
+  field :badge_copyability,               type: String, default: 'public'
+  field :join_code,                       type: String
   
-  field :pricing_group,               type: String, default: 'standard'
-  field :subscription_plan,           type: String # values are defined in config.yml
-  field :subscription_end_date,       type: Time
-  field :stripe_payment_fail_date,    type: Time
-  field :stripe_payment_retry_date,   type: Time
-  field :stripe_subscription_card,    type: String
-  field :stripe_subscription_id,      type: String
-  field :stripe_subscription_details, type: String
-  field :stripe_subscription_status,  type: String, default: 'new'
+  field :user_limit,                      type: Integer, default: 5
+  field :admin_limit,                     type: Integer, default: 1
+  field :sub_group_limit,                 type: Integer, default: 0
+  field :features,                        type: Array, default: [] # = ['community', 'branding']
+  field :total_user_count,                type: Integer, default: 1
+  field :admin_count,                     type: Integer, default: 1
+  field :member_count,                    type: Integer, default: 0
+  field :sub_group_count,                 type: Integer, default: 0
+  field :active_user_count,               type: Integer # RETIRED
+  field :monthly_active_users,            type: Hash # RETIRED
+  
+  field :pricing_group,                   type: String, default: 'standard'
+  field :subscription_plan,               type: String # values are defined in config.yml
+  field :subscription_end_date,           type: Time
+  field :stripe_payment_fail_date,        type: Time
+  field :stripe_payment_retry_date,       type: Time
+  field :stripe_subscription_card,        type: String
+  field :stripe_subscription_id,          type: String
+  field :stripe_subscription_details,     type: String
+  field :stripe_subscription_status,      type: String, default: 'new'
     # Possible Status Values = ['trialing', 'active', 'past_due', 'canceled', 'unpaid'] 
     #                          & 'new' & 'force-new'
-  field :new_subscription,            type: Boolean # used to set subscription status to 'new'
+  field :new_subscription,                type: Boolean # used to set subscription status to 'new'
+
+  field :badges_cache,                    type: Hash, default: {} # key=badge_id, value=key_fields
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, 
@@ -87,6 +104,7 @@ class Group
     message: "can only contain letters, numbers, dashes and underscores" },
     exclusion: { in: APP_CONFIG['blocked_url_slugs'],
     message: "%{value} is a specially reserved url." }
+  validates :description, length: { maximum: MAX_DESCRIPTION_LENGTH }
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
   validates :website, url: true
   validates :image_url, url: true
@@ -95,28 +113,35 @@ class Group
     message: "%{value} is not a valid type of visibility" }
   validates :admin_visibility, inclusion: { in: VISIBILITY_VALUES, 
     message: "%{value} is not a valid type of visibility" }
+  validates :badge_copyability, inclusion: { in: COPYABILITY_VALUES, 
+    message: "%{value} is not a valid type of copyability" }
   validates :creator, presence: true
   
   validate :new_owner_username_exists
   validate :subscription_fields_valid
 
   # Which fields are accessible?
-  attr_accessible :name, :url_with_caps, :location, :website, :image_url, :type, :customer_code, 
-    :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit,
-    :pricing_group, :subscription_plan, :stripe_subscription_card, :new_subscription,
-    :member_visibility, :admin_visibility, :join_code
+  attr_accessible :name, :url_with_caps, :description, :location, :website, :image_url, :type, 
+    :customer_code, :validation_threshold, :new_owner_username, :user_limit, :admin_limit, 
+    :sub_group_limit, :pricing_group, :subscription_plan, :stripe_subscription_card, 
+    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code,
+    :avatar_key
 
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_validation :update_avatar_key
+  before_validation :update_validated_fields
   before_validation :update_caps_field
   after_validation :copy_errors
   before_create :add_creator_to_admins
   before_update :change_owner
   before_update :update_counts
   
+  before_save :update_private_defaults
   before_save :process_subscription_field_updates
   before_create :create_first_subscription
+  after_save :process_avatar
   before_update :create_another_subscription
   after_update :update_stripe_if_needed
   before_destroy :cancel_subscription_on_destroy
@@ -130,8 +155,16 @@ class Group
   def issuer_website; (website.blank?) ? "#{ENV['root_url']}/#{url}" : website; end
 
   def group_url
-    "#{ENV['root_url'] || 'http://badgelist.com'}/#{url_with_caps}"
+    "#{ENV['root_url'] || 'http://www.badgelist.com'}/#{url_with_caps}"
   end
+
+  # Returns URL of the specified version of this group's avatar
+  # Valid version values are nil (defaults to full size), :medium, :small
+  def avatar_image_url(version = nil)
+    avatar_url(version) || DEFAULT_GROUP_AVATAR_FILE
+  end
+  def avatar_image_medium_url; avatar_url(:medium); end
+  def avatar_image_small_url; avatar_url(:small); end
 
   # === GROUP METHODS === #
 
@@ -247,6 +280,13 @@ class Group
   # Returns whether or not the features array contains the specified 'feature' or :feature
   def has?(feature)
     !features.blank? && features.include?(feature.to_s)
+  end
+
+  # This method will append the passed item to the bounced email log and automatically shorten
+  # the log if it is over BOUNCED_EMAIL_LOG_MAX_LENGTH.
+  def log_bounced_email(email, bounced_at, is_inactive)
+    self.bounced_email_log << { email: email, bounced_at: bounced_at, is_inactive: is_inactive }
+    self.bounced_email_log = bounced_email_log.last(BOUNCED_EMAIL_LOG_MAX_LENGTH)
   end
 
   # Returns the name of this subscription plan or just the id
@@ -447,6 +487,157 @@ class Group
       "http://#{ENV['cdn_asset_host']}/assets/group-image-default.png"
     else
       "#{ENV['root_url']}/assets/group-image-default.png"
+    end
+  end
+
+  # This updates or deletes the cached copy of the specified badge in the badges_cache
+  # If the specified badge does not exist in the cache already then it will be added
+  # If is_deleted is true then the specified badge will be deleted if present
+  def update_badge_cache(badge_json_clone, is_deleted = false)
+    badge_id = badge_json_clone['_id']
+    
+    if is_deleted
+      self.badges_cache.delete badge_id
+    else
+      self.badges_cache[badge_id] = {
+        'name' => badge_json_clone['name'],
+        'editability' => badge_json_clone['editability'],
+        'awardability' => badge_json_clone['awardability'],
+        'visibility' => badge_json_clone['visibility'],
+        'summary' => badge_json_clone['summary'],
+        'url' => badge_json_clone['url'],
+        'url_with_caps' => badge_json_clone['url_with_caps'],
+        'image_url' => badge_json_clone['image_url'],
+        'image_medium_url' => badge_json_clone['image_medium_url'],
+        'image_small_url' => badge_json_clone['image_small_url']
+      }
+    end
+  end
+
+  # === CLONING METHODS === #
+
+  # Returns an array of badge json clones for the badges with the specified URLs
+  # Pass nil to get ALL badge json clones
+  def get_badge_json_clones(badge_urls = nil)
+    if badge_urls.blank?
+      badges.map{ |badge| badge.json_clone }
+    else
+      badges.where(:url.in => badge_urls).map{ |badge| badge.json_clone }
+    end
+  end
+
+  # Pass an array of badge json clones and a user to specify as the badge creator
+  # Returns the same array back with an added 'result' key with the following sub-keys:
+  #  'success' => true or false
+  #  'error_message' => string (if !success)
+  #  'json_clone' => the json clone of the newly created badge (if success)
+  def create_badges_from_json_clones(creator, badge_json_clones)
+    return_list = []
+
+    badge_json_clones.each do |badge_json_clone|
+      result = Badge.create_from_json_clone(creator, self, badge_json_clone, 'group_async')
+      return_list << result
+      update_badge_cache result['json_clone'] if result['success']
+    end
+
+    group.timeless.save! if group.changed?
+    return_list
+  end
+
+  # Copies the badges with the specified urls from this group to destination group
+  # If async is set to true then the method will return the id of a poller
+  # NOTE: Passing nil for [badge_urls] will copy ALL badges
+  def copy_badges_to_group(creator_id, badge_urls, to_group_id, async = false)
+    if async
+      to_group = Group.find(to_group_id) rescue nil
+      to_group_name = (to_group) ? to_group.name : 'Unknown Group'
+      poller = Poller.new
+      poller.waiting_message = "Copying badges from '#{name}' to '#{to_group_name}'..."
+      poller.progress = 1 # this will put the poller into 'progress mode'
+      poller.data = { from_group_id: self.id, to_group_id: to_group_id, creator_id: creator_id,
+            badge_urls: badge_urls }
+      poller.save
+      Group.delay(queue: 'high').do_copy_badges_to_group(creator_id, self.id, badge_urls, 
+        to_group_id, poller.id)
+      poller.id
+    else
+      Group.do_copy_badges_to_group(creator_id, nil, badge_urls, to_group_id, nil, from_group: self)
+    end
+  end
+
+  # Pass :from_group, :to_group or :creator into options to skip queries
+  def self.do_copy_badges_to_group(creator_id, from_group_id, badge_urls, to_group_id, 
+      poller_id=nil, options = {})
+    begin
+      # First query for the core records
+      poller = Poller.find(poller_id) rescue nil
+      creator = options[:creator] || User.find(creator_id)
+      from_group = options[:from_group] || Group.find(from_group_id)
+      to_group = options[:to_group] || Group.find(to_group_id)
+
+      # Now get the json and initialize our tracking variables
+      badge_json_clones = from_group.get_badge_json_clones(badge_urls).select do |badge_item|
+        creator.admin || creator.admin_of?(from_group)       \
+          || (badge_item['visibility'] == 'public')           \
+          || creator.learner_or_expert_of?(badge_item['_id'])  \
+          || (creator.member_of?(from_group) && (badge_item['visibility'] == 'private'))
+      end
+      badge_count = badge_json_clones.count
+      progress_count, success_count, error_count = 0, 0, 0
+      last_error_message = nil
+      
+      # Loop through the badges and copy them, updating the poller progress as we go
+      badge_json_clones.each do |badge_json_clone|
+        result = Badge.create_from_json_clone(creator, to_group, badge_json_clone, 'group_async')
+        
+        progress_count += 1
+        if result['success']
+          to_group.update_badge_cache result['json_clone']
+          success_count += 1
+        else
+          error_count += 1
+          last_error_message = result['error_message']
+        end
+
+        if poller
+          poller.progress = progress_count * 100 / badge_count
+          poller.save
+        end
+      end
+        
+      # Then save badge cache if needed (Note: we need to refresh the model but save the json)
+      if to_group.changed?
+        badges_cache_backup = to_group.badges_cache
+        to_group.reload
+        to_group.badges_cache = badges_cache_backup
+        to_group.timeless.save!
+      end
+
+      if poller
+        if success_count > 0
+          poller.status = 'successful'
+          poller.message = "#{success_count} badges successfully copied " \
+            + "from '#{from_group.name}'."
+          if error_count > 0
+            poller.message << " (#{error_count} badges could not be copied due to errors.)"
+          end
+          poller.redirect_to = "/#{to_group.url_with_caps}"
+        else
+          poller.status = 'failed'
+          poller.message = 'None of the badges could be copied to your group due to errors. ' \
+            + "(Last Error Message: #{last_error_message})"
+        end
+        poller.save
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to copy the badges, ' \
+          + "please try again. (Error message: #{e})"
+        poller.save
+      else
+        throw e
+      end
     end
   end
 
@@ -725,6 +916,51 @@ protected
         self.image_url = "http://#{image_url}"
     end
   end
+  
+  def update_avatar_key
+    if new_record? || avatar_key_changed?
+      self.direct_avatar.key = avatar_key
+      self.processing_avatar = true
+    end
+  end
+
+  def process_avatar
+    if processing_avatar
+      Group.delay(queue: 'high', retry: 5).do_process_avatar(id)
+    end
+  end
+
+  # Processes changes to the image from carrierwave direct key
+  def self.do_process_avatar(group_id)
+    group = Group.find(group_id)
+    group.processing_avatar = false
+
+    if !group.direct_avatar.blank?
+      group.remote_avatar_url = group.direct_avatar.direct_fog_url(with_path: true)
+      
+      if !group.save
+        # If there was an error then clear out the uploaded image and use the default
+        group.avatar_key = nil
+        group.save! # This should trigger the callback again calling a new instance of this method
+      end
+    else
+      # Use the default image
+      group.avatar = Rails.root.join(DEFAULT_GROUP_AVATAR_PATH).open
+      group.save!
+    end
+  end
+
+  def update_validated_fields
+    # This should make it impossible to ever trigger the max description length validation
+    if description && (description.length > MAX_DESCRIPTION_LENGTH)
+      self.description = description[0, MAX_DESCRIPTION_LENGTH]
+    end
+
+    # This should make it impossible to ever trigger the max location length validation
+    if location && (location.length > MAX_LOCATION_LENGTH)
+      self.location = location[0, MAX_LOCATION_LENGTH]
+    end
+  end
 
   def update_caps_field
     if url_with_caps.nil?
@@ -769,7 +1005,9 @@ protected
         end
 
         # Notify the new owner
-        GroupMailer.delay(queue: 'low').group_transfer(id)
+        unless new_owner.email_inactive
+          GroupMailer.delay(queue: 'low').group_transfer(id)
+        end
       end
       self.new_owner_username = nil
     end
@@ -781,6 +1019,13 @@ protected
   def subscription_fields_valid
     if private?
       errors.add(:subscription_plan, 'is required') unless subscription_plan
+    end
+  end
+
+  def update_private_defaults
+    if new_record? || type_changed?
+      # Overwrite the badge copyability setting when we change between open & private
+      self.badge_copyability = (private?) ? 'admins' : 'public'
     end
   end
 
@@ -809,7 +1054,7 @@ protected
           self.subscription_end_date = 2.weeks.from_now
 
           # Notify the user that their group is canceled
-          GroupMailer.delay(retry: 10, queue: 'low').subscription_canceled(id)
+          GroupMailer.delay(retry: 5, queue: 'low').subscription_canceled(id)
         else
           set_flag PENDING_SUBSCRIPTION_FLAG
         end

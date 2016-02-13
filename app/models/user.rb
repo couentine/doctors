@@ -9,7 +9,11 @@ class User
   MAX_NAME_LENGTH = 200
   MAX_USERNAME_LENGTH = 15
   JSON_FIELDS = [:name, :username, :username_with_caps]
+  JSON_MOCK_FIELDS = { :avatar_image_url => :avatar_image_url }
 
+  INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'
+  MAX_EMAIL_BOUNCES = 3
+  EMAIL_BOUNCE_MEMORY = 14 # days
   HALF_OFF_FLAG = '50_percent_off'
 
   # === RELATIONSHIP === #
@@ -35,6 +39,15 @@ class User
   field :last_active_at,                type: Time # RETIRED
   field :active_months,                 type: Array # RETIRED
   field :page_views,                    type: Hash # RETIRED
+  field :email_inactive,                type: Boolean, default: false
+  field :email_bounces,                 type: Integer, default: 0
+  field :last_email_bounce_at,          type: Time
+  field :inactive_email_bounce_id,      type: Integer
+
+  mount_uploader :direct_avatar,        S3DirectUploader
+  mount_uploader :avatar,               S3AvatarUploader
+  field :avatar_key,                    type: String
+  field :processing_avatar,             type: Boolean
 
   field :identity_hash,                 type: String
   field :identity_salt,                 type: String
@@ -42,6 +55,10 @@ class User
   field :stripe_customer_id,            type: String
   field :stripe_default_source,         type: String
   field :stripe_cards,                  type: Array, default: []
+
+  field :expert_badge_ids,              type: Array, default: []
+  field :learner_badge_ids,             type: Array, default: []
+  field :all_badge_ids,                 type: Array, default: []
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
@@ -61,7 +78,7 @@ class User
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :name, :username_with_caps, :password, :password_confirmation, 
-    :remember_me
+    :remember_me, :avatar_key
 
   # === STANDARD DEVISE FIELDS === #
 
@@ -100,10 +117,36 @@ class User
   # === CALLBACKS === #
 
   before_validation :update_caps_field
+  before_validation :update_avatar_key
   before_create :set_signup_flags
+  before_create :check_for_inactive_email
   after_create :convert_group_invitations
   before_save :update_identity_hash
+  after_save :process_avatar
+  before_update :process_email_change
   after_update :update_logs
+
+  # === USER MOCK FIELD METHODS === #
+
+  def user_url
+    "#{ENV['root_url'] || 'http://www.badgelist.com'}/u/#{username_with_caps}"
+  end
+
+  # Returns URL of the specified version of this user's avatar (uses gravatar as a backup)
+  # Valid version values are nil (defaults to full size), :medium, :small
+  def avatar_image_url(version = nil)
+    return_value = avatar_url(version) || gravatar_url(version)
+  end
+  def avatar_image_medium_url; avatar_url(:medium); end
+  def avatar_image_small_url; avatar_url(:small); end
+
+  # Returns URL of this user's gravatar (accepts same version values as avatar_image_url method)
+  def gravatar_url(version = nil)
+    email_temp = (email || 'nonexistentuser@example.com').downcase
+    gravatar_id = Digest::MD5::hexdigest(email_temp)
+    size_map = { nil => 500, medium: 200, small: 50 }
+    "https://secure.gravatar.com/avatar/#{gravatar_id}?s=#{size_map[version]}&d=mm"
+  end
 
   # === CLASS METHODS === #
 
@@ -120,6 +163,117 @@ class User
     end
 
     user
+  end
+
+  def self.get_inactive_email_list
+    inactive_email_list_item = InfoItem.find_by(key: INACTIVE_EMAIL_LIST_KEY) rescue nil
+    (inactive_email_list_item) ? (inactive_email_list_item.data['emails'] || []) : []
+  end
+
+  # Call this method to track a bounce of the passed email address
+  # If is_inactive is true this will block the email, otherwise it will track a bounce
+  # and potentially block the email if it's over the limit.
+  def self.track_bounce(email, is_inactive, bounced_at, bounce_id)
+    # First query for the user and the inactive email list (and create the list if missing)
+    user = User.find_by(email: email) rescue nil
+    inactive_email_list_item = InfoItem.find_by(key: INACTIVE_EMAIL_LIST_KEY) rescue nil
+    unless inactive_email_list_item
+      inactive_email_list_item = InfoItem.new
+      inactive_email_list_item.type = 'list'
+      inactive_email_list_item.name = 'Inactive Email List'
+      inactive_email_list_item.key = INACTIVE_EMAIL_LIST_KEY
+      inactive_email_list_item.data = { 'emails' => [] }
+      inactive_email_list_item.save
+    end
+    block_this_email = is_inactive
+    groups_to_update = []
+
+    # Now take the actions which are specific to whether or not there is a user record
+    if user
+      # First track the bounce count on the user record
+      if user.last_email_bounce_at.nil? \
+          || (user.last_email_bounce_at < (bounced_at - EMAIL_BOUNCE_MEMORY.days))
+        # Then "forget" the bounces and overwrite the existing fields
+        user.email_bounces = 1
+        user.last_email_bounce_at = bounced_at
+      else
+        # Increment the bounce count and check if we're over the threshold
+        user.email_bounces = (user.email_bounces || 0) + 1
+        user.last_email_bounce_at = [bounced_at, user.last_email_bounce_at].max
+        block_this_email ||= (user.email_bounces > MAX_EMAIL_BOUNCES)
+      end
+
+      # We'll log the bounce on all member and admin groups
+      # NOTE FOR IMPROVEMENT: If they are in multiple groups this will result in duplicate info
+      groups_to_update = Group.any_of(
+        { :id.in => user.admin_of_ids },
+        { :id.in => user.member_of_ids }
+      )
+
+      # Then set inactive details if needed
+      user.inactive_email_bounce_id = bounce_id if is_inactive
+      user.email_inactive = true if block_this_email
+      
+      user.save
+    else
+      # We'll log the bounce on all invitet member and admin groups
+      groups_to_update = Group.any_of(
+        { :invited_admins.elem_match => { :email => email } },
+        { :invited_members.elem_match => { :email => email } }
+      )
+    end
+
+    # Run through the groups that need updating
+    groups_to_update.each do |group|
+      group.log_bounced_email(email, bounced_at, is_inactive)
+      group.timeless.save
+    end
+
+    # Finally add the current email to the inactive email list if needed
+    if block_this_email && !inactive_email_list_item.data['emails'].include?(email)
+      inactive_email_list_item.data['emails'] << email
+      inactive_email_list_item.save
+    end
+  end
+
+  # Call this method to unblock the passed email address
+  # NOTE: Set include_postmark to attempt to activate bounce if there's a user record & bounce id
+  def self.unblock_email(email, include_postmark = false)
+    # First query for the user and the inactive email list (and create the list if missing)
+    user = User.find_by(email: email) rescue nil
+    inactive_email_list_item = InfoItem.find_by(key: INACTIVE_EMAIL_LIST_KEY) rescue nil
+    unless inactive_email_list_item
+      inactive_email_list_item = InfoItem.new
+      inactive_email_list_item.type = 'list'
+      inactive_email_list_item.name = 'Inactive Email List'
+      inactive_email_list_item.key = INACTIVE_EMAIL_LIST_KEY
+      inactive_email_list_item.data = { 'emails' => [] }
+      inactive_email_list_item.save
+    end
+    
+    # Next remove the current email from the inactive email list if needed
+    if inactive_email_list_item.data['emails'].include? email
+      inactive_email_list_item.data['emails'].delete email
+      inactive_email_list_item.save
+    end
+    
+    if user
+      # First update postmark if needed
+      if include_postmark && user.inactive_email_bounce_id
+        begin
+          postmark_client = Postmark::ApiClient.new(ENV['POSTMARK_API_KEY'])
+          postmark_client.activate_bounce(user.inactive_email_bounce_id)
+          user.inactive_email_bounce_id = nil
+        rescue Exception => e
+          logger.error "#=== User.unblock_email: Error unblocking #{email}. Error Msg: '#{e}'. ===#"
+        end
+      end
+      
+      # Set remaining fields and save
+      user.email_inactive = false
+      user.email_bounces = 0
+      user.save
+    end
   end
 
   # === ASYNC CLASS METHODS === #
@@ -143,7 +297,7 @@ class User
 
   # Returns full URL to this user's profile based on current root URL
   def profile_url
-    "#{ENV['root_url'] || 'http://badgelist.com'}/u/#{username_with_caps}"
+    "#{ENV['root_url'] || 'http://www.badgelist.com'}/u/#{username_with_caps}"
   end
 
   # Updates last_active
@@ -178,6 +332,19 @@ class User
     return_list
   end
 
+  # Gets UI-ready list of groups for which this user is an admin
+  # Accepts "except" option to exclude a particular list of ids
+  def admin_group_options(options = {})
+    return_list = []
+    excluded_group_ids = options[:except] || []
+    
+    admin_of.each do |group|
+      return_list << [group.name, group.id] unless excluded_group_ids.include? group.id
+    end
+
+    return_list.sort_by{ |item| item.first }
+  end
+
   def set_flag(flag)
     self.flags << flag unless flags.include? flag
   end
@@ -207,6 +374,10 @@ class User
     admin_of_ids.include?(group.id)
   end
 
+  def member_or_admin_of?(group)
+    member_of?(group) || admin_of?(group)
+  end
+
   # Doesn't use any queries, returns :admin or :member or :none
   def member_type_of(group_id)
     if admin_of_ids.include? group_id
@@ -231,18 +402,39 @@ class User
     end
   end
 
-  def learner_of?(badge)
-    log = logs.find_by(badge_id: badge.id) rescue nil
-    
-    # Return value = 
-    !log.nil? && !log.detached_log && log.validation_status != 'validated'
+  # Pass the badge OR the id of the badge
+  def learner_of?(badge_or_id)
+    case badge_or_id.class.to_s
+    when 'Badge'
+      learner_badge_ids.include? badge_or_id.id
+    when 'Moped::BSON::ObjectId'
+      learner_badge_ids.include? badge_or_id
+    when 'String'
+      learner_badge_ids.include? Moped::BSON::ObjectId(badge_or_id)
+    else
+      throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. " \
+        + "(Accepted types are Badge, ObjectId or String.)"
+    end
   end
 
-  def expert_of?(badge)
-    log = logs.find_by(badge_id: badge.id) rescue nil
-    
-    # Return value = 
-    !log.nil? && !log.detached_log && log.validation_status == 'validated'
+  # Pass the badge OR the id of the badge
+  def expert_of?(badge_or_id)
+    case badge_or_id.class.to_s
+    when 'Badge'
+      expert_badge_ids.include? badge_or_id.id
+    when 'Moped::BSON::ObjectId'
+      expert_badge_ids.include? badge_or_id
+    when 'String'
+      expert_badge_ids.include? Moped::BSON::ObjectId(badge_or_id)
+    else
+      throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. " \
+        + "(Accepted types are Badge, ObjectId or String.)"
+    end
+  end
+
+  # Pass the badge OR the id of the badge
+  def learner_or_expert_of?(badge_or_id)
+    learner_of?(badge_or_id) || expert_of?(badge_or_id)
   end
 
   def find_log(badge)
@@ -522,6 +714,39 @@ protected
     end
   end
 
+  def update_avatar_key
+    if new_record? || avatar_key_changed?
+      self.direct_avatar.key = avatar_key
+      self.processing_avatar = true
+    end
+  end
+
+  def process_avatar
+    if processing_avatar
+      User.delay(queue: 'high', retry: 5).do_process_avatar(id)
+    end
+  end
+
+  # Processes changes to the image from carrierwave direct key
+  def self.do_process_avatar(user_id)
+    user = User.find(user_id)
+    user.processing_avatar = false
+
+    if !user.direct_avatar.blank?
+      user.remote_avatar_url = user.direct_avatar.direct_fog_url(with_path: true)
+      
+      if !user.save
+        # If there was an error then clear out the uploaded image and use the default
+        user.avatar_key = nil
+        user.save! # This should trigger the callback again calling a new instance of this method
+      end
+    else
+      # Use the default image
+      user.remote_avatar_url = user.gravatar_url
+      user.save!
+    end
+  end  
+
   # Sets one or more of the following flags: 
   #   invited-member, invited-admin, invited-learner, invited-expert, organic-signup
   def set_signup_flags
@@ -551,6 +776,12 @@ protected
     end
   end
 
+  def check_for_inactive_email
+    if User.get_inactive_email_list.include? email
+      self.email_inactive = true
+    end
+  end
+
   # Finds any references to this user's email in the invited_admins/users arrays on groups.
   # When found it upgrades the invitation to an actual relationship.
   def convert_group_invitations
@@ -575,7 +806,7 @@ protected
         validating_user = User.find(v["user"]) rescue nil
         summary, body = v["summary"], v["body"]
 
-        unless badge.nil? || validating_user.nil? || summary.blank? || body.blank?
+        unless badge.nil? || validating_user.nil? || summary.blank?
           log = badge.add_learner self # does nothing but return the log if already added as learner
           log.add_validation validating_user, summary, body, true
         end
@@ -615,7 +846,7 @@ protected
         validating_user = User.find(v["user"]) rescue nil
         summary, body = v["summary"], v["body"]
 
-        unless badge.nil? || validating_user.nil? || summary.blank? || body.blank?
+        unless badge.nil? || validating_user.nil? || summary.blank?
           log = badge.add_learner self # does nothing but return the log if already added as learner
           log.add_validation validating_user, summary, body, true
         end
@@ -627,6 +858,15 @@ protected
     if email_changed?
       self.identity_salt = SecureRandom.hex
       self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+    end
+  end
+
+  def process_email_change
+    if email_changed?
+      self.email_inactive = false
+      self.email_bounces = 0
+      self.last_email_bounce_at = nil
+      self.inactive_email_bounce_id = nil
     end
   end
 

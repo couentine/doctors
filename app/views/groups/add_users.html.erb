@@ -1,7 +1,7 @@
 <% 
   provide(:title, "Add #{@type.to_s.capitalize.pluralize} - #{@group.name}") 
   provide(:show_subheader, true)
-  provide(:subheader_image, group_image_url_for(@group)) 
+  provide(:subheader_image, @group.avatar_image_url(:small)) 
 %>
 
 <% content_for :subheader_links do %>
@@ -30,8 +30,10 @@
           <%= label_tag :emails, "New #{@type.to_s.capitalize} Emails", class: "control-label" %>
           <div class="controls">
             <%= text_area_tag :emails, params[:emails], size: "150x4", autofocus: true,
-                placeholder: 'josh.cassada@nasa.gov, "Jessica U. Meir, Ph.D." <j.meir@nasa.gov>, "Anne McClain" <anne.mcclain@nasa.gov>',
-                class: "span6" %>
+              placeholder: 'josh.cassada@nasa.gov, "Jessica U. Meir, Ph.D." <j.meir@nasa.gov>, ' \
+                + '"Anne McClain" <anne.mcclain@nasa.gov>', class: "span6", 
+              data: { :'character-count' => true, 
+                :'max-length' => GroupsController::MAX_EMAIL_TEXT_LENGTH } %>
             <br/>
             <%= check_box_tag :notify_by_email, "1", true %>
             <%= label_tag :notify_by_email, "Notify new #{@type.to_s.pluralize} by email",
@@ -39,16 +41,17 @@
           </div>
         </div>
 
-        <% unless @badge_list.blank? %>
+        <% unless @badge_options.blank? %>
           <div class="control-group">
             <%= label_tag :badges, "(Optional) Invite to badges", class: "control-label" %>
             <div class="controls">
-              <ul class="unstyled">
-                <% @badge_list.each do |item| %>
+              <ul class="unstyled badge-icons">
+                <% @badge_options.each do |item| %>
                   <li>
                     <label class="checkbox">
-                      <%= check_box_tag 'badges[]', item[:badge].url, item[:selected] %> 
-                      <%= item[:badge].name %>
+                      <%= check_box_tag 'badges[]', item['url'], item['selected'] %> 
+                      <%= image_tag item['image_small_url'], class: 'badge-icon', 
+                        title: item['name'], data: { toggle: 'tooltip' } %>
                     </label>
                   </li>
                 <% end %>

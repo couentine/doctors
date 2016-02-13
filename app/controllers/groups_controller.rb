@@ -9,16 +9,18 @@ class GroupsController < ApplicationController
 
   prepend_before_filter :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :destroy_user, :send_invitation, :destroy_invited_user, :add_users, 
-    :create_users]
+    :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action]
   before_filter :authenticate_user!, except: [:show]
   before_filter :group_member_or_admin, only: [:leave]
-  before_filter :group_admin, only: [:destroy_user, :destroy_invited_user, :add_users, 
-    :create_users]
-  before_filter :group_owner, only: [:edit, :update, :destroy, :cancel_subscription]
+  before_filter :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
+    :create_users, :clear_bounce_log]
+  before_filter :group_owner, only: [:edit, :destroy, :cancel_subscription]
+  before_filter :can_copy_badges, only: [:copy_badges_form, :copy_badges_action]
   before_filter :badge_list_admin, only: [:index]
 
   # === CONSTANTS === #
 
+  MAX_EMAIL_TEXT_LENGTH = 1500
   GROUP_TYPE_OPTIONS = [
     ['<b><i class="fa fa-globe"></i> Open Group</b><span>Anyone can join '.html_safe \
       + 'and everything is public.<br>Free forever.</span>'.html_safe, 'open'],
@@ -32,6 +34,11 @@ class GroupsController < ApplicationController
   GROUP_VISIBILITY_OPTIONS = [
     ['<i class="fa fa-globe"></i> Public'.html_safe, 'public'],
     ['<i class="fa fa-users"></i> Private'.html_safe, 'private']
+  ]
+  BADGE_COPYABILITY_OPTIONS = [
+    ['<i class="fa fa-globe"></i> Public'.html_safe, 'public'],
+    ['<i class="fa fa-users"></i> Only Members'.html_safe, 'members'],
+    ['<i class="fa fa-lock"></i> Only Admins'.html_safe, 'admins']
   ]
 
   # === RESTFUL ACTIONS === #
@@ -65,6 +72,7 @@ class GroupsController < ApplicationController
   def show
     @badge_poller_id = params[:badge_poller]
     @join_code = params[:code]
+    @bl_admin_mode = @badge_list_admin && params[:bl_admin_mode]
     @show_emails = (@current_user_is_admin || @badge_list_admin) && params[:show_emails]
 
     # Get paginated versions of members
@@ -87,39 +95,14 @@ class GroupsController < ApplicationController
       @badges = @group.badges.where(visibility: 'public').asc(:name).page(@badge_page)\
         .per(@badge_page_size)
     end
-    @expert_count_map = {} # maps from badge id to expert count
-    @learner_count_map = {} # maps from badge id to learner count
-    @badge_ids = []
-    @badges.each do |badge|
-      @badge_ids << badge.id
-      @expert_count_map[badge.id], @learner_count_map[badge.id] = 0, 0
-    end
+    @has_badges = !@badges.blank?
 
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
+    @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
 
     respond_to do |format|
-      format.any(:html, :js) do # show.html.erb
-        @requirements_map = {} # maps from badge id to requirements
-        Tag.where(:badge.in => @badge_ids, type: 'requirement').asc(:sort_order).each do |tag|
-          if @requirements_map.has_key? tag.badge_id
-            @requirements_map[tag.badge_id] << tag
-          else
-            @requirements_map[tag.badge_id] = [tag]
-          end
-        end
-
-        @log_map = {} # maps from badge id to log of current user if present
-        current_user.logs.where(:badge_id.in => @badge_ids).each do |log|
-          @log_map[log.badge_id] = log
-        end if current_user
-
-        Log.where(:badge.in => @badge_ids).each do |log|
-          if log.validation_status == 'validated'
-            @expert_count_map[log.badge_id] += 1
-          else
-            @learner_count_map[log.badge_id] += 1
-          end
-        end
+      format.any(:html, :js) do 
+        # show.html.erb
       end
       format.json { render json: @group, filter_user: current_user }
     end
@@ -142,6 +125,10 @@ class GroupsController < ApplicationController
       @badge_list_admin = current_user && current_user.admin?
       @allow_url_editing = true;
       subscription_plan = params[:plan]
+
+      # Create the carrierwave direct uploader
+      @uploader = Group.new.direct_avatar
+      @uploader.success_action_redirect = image_key_url
 
       if subscription_plan
         @group.type = 'private'
@@ -166,6 +153,10 @@ class GroupsController < ApplicationController
     @pricing_group_options = PRICING_GROUP_OPTIONS
     @allow_url_editing = (@group.member_ids.count == 0) || (@group.badge_ids.count == 0);
     @transfer_mode = params[:transfer]
+
+    # Create the carrierwave direct uploader
+    @uploader = Group.new.direct_avatar
+    @uploader.success_action_redirect = image_key_url
   end
 
   # POST /groups
@@ -185,6 +176,11 @@ class GroupsController < ApplicationController
           filter_user: current_user }
       else
         @allow_url_editing = true;
+        
+        # Create the carrierwave direct uploader
+        @uploader = @group.direct_avatar
+        @uploader.success_action_redirect = image_key_url
+
         format.html { render action: "new" }
         format.json { render json: @group.errors, status: :unprocessable_entity }
       end
@@ -203,6 +199,10 @@ class GroupsController < ApplicationController
                       notice: 'Group was successfully updated.' }
         format.json { head :no_content }
       else
+        # Create the carrierwave direct uploader
+        @uploader = Group.new.direct_avatar
+        @uploader.success_action_redirect = image_key_url
+        
         format.html { render action: "edit" }
         format.json { render json: @group.errors, status: :unprocessable_entity }
       end
@@ -327,14 +327,16 @@ class GroupsController < ApplicationController
   # DELETE /group-url/admins/2, :id = 1, :user_id = 2, :type = admin
   def destroy_user
     @user = User.find(params[:user_id])
-    notice = "That user is not a #{params[:type]}!"
+    @notice = "That user is not a #{params[:type]}!"
+    @is_error = true
     detached_log_count = 0
 
     if params[:type] == 'admin' && @group.has_admin?(@user)
       @group.admins.delete(@user)
       @group.members << @user
       @group.save
-      notice = "#{@user.name} has been downgraded from an admin to a member."
+      @notice = "#{@user.name} has been downgraded from an admin to a member."
+      @is_error = false
     elsif params[:type] == 'member' && @group.has_member?(@user)
       @group.members.delete(@user)
       @group.save
@@ -358,23 +360,30 @@ class GroupsController < ApplicationController
         log_to_detach.save!
         detached_log_count += 1
       end
-      notice = "#{@user.name} has been removed from the group members"
-      notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
-      notice += "."
+      @notice = "#{@user.name} has been removed from the group members"
+      @notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
+      @notice += "."
+      @is_error = false
     end
 
-    redirect_to @group, :notice => notice
+    respond_to do |format|
+      format.html { redirect_to @group, :notice => @notice }
+      format.js # destroy_user.js.erb
+    end
   end
 
   # POST /group-url/invited_members/{email}/invitation, :type = member
   # POST /group-url/invited_admins/{email}/invitation, :type = admin
   def send_invitation
-    email = params[:email].downcase
+    @email = params[:email].downcase
+    @notice = nil
     invited_users = params[:type] == 'admin' ? 
                                     @group.invited_admins : @group.invited_members
-    found_user = invited_users.detect { |u| u["email"] == email}
+    found_user = invited_users.detect { |u| u["email"] == @email}
 
     if found_user
+      email_inactive = User.get_inactive_email_list.include? @email
+
       # Query for the badges if param is included
       if found_user["badges"].blank?
         @badges, badge_ids = [], []
@@ -383,49 +392,83 @@ class GroupsController < ApplicationController
         badge_ids = @badges.map{ |b| b.id }
       end
 
-      if params[:type] == 'admin'
-        NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
-                                      current_user.id, @group.id, badge_ids)
+      if email_inactive
+        found_user[:invite_date] = nil
+        # Mock a bounce so that the group admins can see that the email wasn't sent
+        @group.log_bounced_email(@email, Time.now, true)
       else
-        NewUserMailer.delay.group_member_add(found_user["email"], found_user["name"], 
-                                      current_user.id, @group.id, badge_ids)
+        if params[:type] == 'admin'
+          NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
+            current_user.id, @group.id, badge_ids)
+        else
+          NewUserMailer.delay.group_member_add(found_user["email"], found_user["name"], 
+            current_user.id, @group.id, badge_ids)
+        end
+        found_user[:invite_date] = Time.now
       end
-      found_user[:invite_date] = Time.now
 
       if !@group.save
-        notice = "There was a problem updating the group, please try again later."
+        @notice = "There was a problem updating the group, please try again later."
+      elsif email_inactive
+        @notice = "The email address #{@email} is currently blocked and cannot receive messages. " \
+          + "But the user will still be added to the group when they create a Badge List account."  
       else
-        notice = "Group invitation for #{email} has been sent."  
+        @notice = "Invitation resent"  
       end
     else
-      notice = "There's no pending group invitation for #{email}."
+      @notice = "There is no pending group invitation for #{@email}."
     end
 
-    redirect_to @group, :notice => notice
+    respond_to do |format|
+      format.html { redirect_to @group, :notice => @notice }
+      format.js # send_invitation.js.erb
+    end
   end
 
   # DELETE /group-url/invited_members/{email}, :type = member
   # DELETE /group-url/invited_admins/{email}, :type = admin
   def destroy_invited_user
-    email = params[:email].downcase
+    @email = params[:email].downcase
+    @notice = nil
     invited_users = params[:type] == 'admin' ? 
                                     @group.invited_admins : @group.invited_members
-    found_user = invited_users.detect { |u| u["email"] == email}
+    found_user = invited_users.detect { |u| u["email"] == @email}
 
     if found_user
       invited_users.delete(found_user)
       if !@group.save
-        notice = "There was a problem updating the group, please try again later."
+        @notice = "There was a problem updating the group, please try again later."
       else
-        notice = "Group invitation for #{email} has been revoked."  
+        @notice = "Group invitation for #{@email} has been revoked."  
       end
     else
-      notice = "There's no pending group invitation for #{email}."
+      @notice = "There's no pending group invitation for #{@email}."
     end
 
-    redirect_to @group, :notice => notice
+    respond_to do |format|
+      format.html { redirect_to @group, :notice => @notice }
+      format.js # destroy_invited_user.js.erb
+    end
   end
 
+  # POST /group-url/clear_bounce_log
+  def clear_bounce_log
+    @notice = nil
+    
+    if @group.bounced_email_log.blank?
+      @notice = "The bounced email log is already empty!"
+    else
+      @group.bounced_email_log = []
+
+      if @group.save
+        @notice = "The bounced email log has been cleared."  
+      else
+        @notice = "There was a problem updating the group, please try again later."
+      end
+    end
+
+    redirect_to @group, :notice => @notice
+  end
 
   # GET /group-url/members/add?type=member
   # GET /group-url/admins/add?type=admin
@@ -444,14 +487,9 @@ class GroupsController < ApplicationController
     elsif (@type == :member) && !@group.can_add_members?
       redirect_to @group, notice: 'You cannot add new members to this group.'
     else
-      # Query for the badges if param is included
       badge_urls = params["badges"] || []
-      @badge_list = []
-      @group.badges.asc(:name).each do |badge|
-        @badge_list << {
-          badge: badge,
-          selected: badge_urls.include?(badge.url)
-        }
+      @badge_options = @group.badges_cache.values.sort_by{ |bi| bi['name'] }.each do |badge_item|
+        badge_item['selected'] = badge_urls.include?(badge_item['url'])
       end
     end
   end
@@ -489,8 +527,9 @@ class GroupsController < ApplicationController
         badge_ids = @badges.map{ |b| b.id }
       end
 
-      # Parse the emails using the UsersHelper function
-      parsed_emails = parse_emails(params[:emails])
+      # Parse the emails using the EmailTools function
+      raw_email_text = (params[:emails] || '').first MAX_EMAIL_TEXT_LENGTH
+      parsed_emails = parse_emails(raw_email_text)
       @invalid_emails = parsed_emails[:invalid]
       valid_email_names = parsed_emails[:valid]
       valid_emails = []
@@ -544,7 +583,13 @@ class GroupsController < ApplicationController
                   @group.admins << user
                   @badges.each { |badge| badge.add_learner user }
                   if @notify_by_email
-                    UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, badge_ids)
+                    if user.email_inactive
+                      # Mock a bounce so that the group admins can see that the email wasn't sent
+                      @group.log_bounced_email(user.email, Time.now, true)
+                    else
+                      UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, 
+                        badge_ids)
+                    end
                   end
                   if @group.has_member?(user)
                     @group.members.delete(user)
@@ -566,7 +611,13 @@ class GroupsController < ApplicationController
                   @group.members << user
                   @badges.each { |badge| badge.add_learner user }
                   if @notify_by_email
-                    UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, badge_ids)
+                    if user.email_inactive
+                      # Mock a bounce so that the group admins can see that the email wasn't sent
+                      @group.log_bounced_email(user.email, Time.now, true)
+                    else
+                      UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, 
+                        badge_ids)
+                    end
                   end
                   @new_member_emails << user.email
 
@@ -590,6 +641,7 @@ class GroupsController < ApplicationController
           # Check if the group variables need initialization
           @group.invited_admins = [] if @group.invited_admins.nil?
           @group.invited_members = [] if @group.invited_members.nil?
+          inactive_email_list = User.get_inactive_email_list
 
           # For new users: We will park them in an array of hashes on the group
           if params[:notify_by_email]
@@ -598,6 +650,7 @@ class GroupsController < ApplicationController
             invite_date = nil
           end
           emails_to_invite.each do |email|
+            email_inactive = inactive_email_list.include? email
             invited_user = {:email => email, 
               :name => name_from_email[email], :invite_date => invite_date }
             invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
@@ -613,16 +666,32 @@ class GroupsController < ApplicationController
                 @new_admin_emails << email
               end
               @group.invited_admins << invited_user
-              NewUserMailer.delay.group_admin_add(email, name_from_email[email],
-                current_user.id, @group.id, badge_ids) if @notify_by_email
+              
+              if @notify_by_email
+                if email_inactive
+                  # Mock a bounce so that the group admins can see that the email wasn't sent
+                  @group.log_bounced_email(email, Time.now, true)
+                else
+                  NewUserMailer.delay.group_admin_add(email, name_from_email[email],
+                    current_user.id, @group.id, badge_ids)
+                end
+              end
             else
               if @group.has_invited_member?(email)
                 @skipped_member_emails << email
               else
                 @group.invited_members << invited_user
                 @new_member_emails << email
-                NewUserMailer.delay.group_member_add(email, name_from_email[email],
-                  current_user.id, @group.id, badge_ids) if @notify_by_email
+                
+                if @notify_by_email
+                  if email_inactive
+                    # Mock a bounce so that the group admins can see that the email wasn't sent
+                    @group.log_bounced_email(email, Time.now, true)
+                  else
+                    NewUserMailer.delay.group_member_add(email, name_from_email[email],
+                      current_user.id, @group.id, badge_ids) 
+                  end
+                end
               end
             end
           end
@@ -634,6 +703,79 @@ class GroupsController < ApplicationController
         end # over limit tests
       end # valid emails empty
     end # can add admins test
+  end
+
+  # GET /group-url/copy_badges
+  # Presents UI for selecting a list of badges and a destination group
+  def copy_badges_form
+    @to_group = Group.find(params[:to_group]) rescue nil
+    @to_group_options = current_user.admin_group_options except: [@group.id]
+
+    # Now filter down the badge options based on the current user
+    if @current_user_is_admin || @badge_list_admin
+      @badge_options = @group.badges_cache.values
+    elsif @current_user_is_member
+      @badge_options = []
+      @group.badges_cache.each do |badge_id, badge_item|
+        if (badge_item['visibility'] == 'public') || (badge_item['visibility'] == 'private') \
+            || current_user.learner_or_expert_of?(badge_id)
+          @badge_options << badge_item
+        end
+      end
+    else # they have to be logged in to get here so they are at least a user
+      @badge_options = @group.badges_cache.values.select! do |badge_item| 
+        badge_item['visibility'] == 'public'
+      end
+    end
+    
+    @badge_options.sort_by!{ |bi| bi['name'] } unless @badge_options.blank?
+  end
+
+  # POST /group-url/copy_badges?to_group=url&badges[]=list_of_urls
+  # Starts the copying process and redirects to a progress tracking poller
+  # NOTE: Leave out the badges parameter to copy all of the badges
+  def copy_badges_action
+    @to_group = Group.find(params[:to_group]) rescue nil
+
+    if @to_group
+      if @to_group.id == @group.id
+        redirect_to :copy_badges_form, alert: 'You can\'t copy badges to the same group!'
+      else
+        if @badge_list_admin || current_user.admin_of?(@to_group)
+          # Process the badge urls
+          if params[:badges].blank?
+            @badge_urls = nil
+          else
+            @badge_urls = []
+            params[:badges].each { |url| @badge_urls << url.downcase unless url.blank? }
+          end
+
+          # Then update analytics
+          IntercomEventWorker.perform_async({
+            'event_name' => 'copy-badges',
+            'email' => current_user.email,
+            'created_at' => Time.now.to_i,
+            'metadata' => {
+              'from_group_id' => @group.id.to_s,
+              'from_group_name' => @group.name,
+              'from_group_url' => @group.group_url,
+              'to_group_id' => @to_group.id.to_s,
+              'to_group_name' => @to_group.name,
+              'to_group_url' => @to_group.group_url,
+              'badge_count' => @badge_urls.blank? ? -1 : @badge_urls.count
+            }
+          })
+
+          # Initiate the copy and redirect to the poller
+          poller_id = @group.copy_badges_to_group(current_user.id, @badge_urls, @to_group.id, true)
+          redirect_to poller_path(poller_id)
+        else
+          redirect_to :copy_badges_form, alert: 'You must be an admin of the destination group.'
+        end
+      end
+    else
+      redirect_to :copy_badges_form, alert: 'You must specify a valid destination group.'
+    end
   end
 
 private
@@ -656,6 +798,11 @@ private
       || ((@group.admin_visibility == 'private') \
         && (@current_user_is_admin || @current_user_is_admin || @badge_list_admin))
 
+    # Set badge copyability variable
+    @can_copy_badges = @badge_list_admin || @current_user_is_admin \
+      || ((@group.badge_copyability == 'public') && current_user)   \
+      || ((@group.badge_copyability == 'members') && @current_user_is_member)
+      
     # Set current group (for analytics) only if user is logged in and an admin
     @current_user_group = @group if @current_user_is_admin
   end
@@ -679,6 +826,16 @@ private
       flash[:error] = "You must be a member or admin of #{@group.name} to do that!"
       redirect_to @group
     end 
+  end
+
+  def can_copy_badges
+    if !current_user
+      flash[:error] = "You must sign in to Badge List before you can copy badges."
+      redirect_to @group
+    elsif !@can_copy_badges
+      flash[:error] = "You do not have permission to copy badges from this group."
+      redirect_to @group
+    end
   end
 
   def badge_list_admin

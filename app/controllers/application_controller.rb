@@ -37,7 +37,9 @@ class ApplicationController < ActionController::Base
   def store_location
     if ((request.format == "text/html") || (request.content_type == "text/html"))
       # Store the last url as long as it isn't a /users path
-      session[:previous_url] = request.fullpath unless request.fullpath =~ /\/users/
+      if !(request.fullpath =~ /\/users/) && !(request.fullpath =~ /\/j\/image_key/)
+        session[:previous_url] = request.fullpath
+      end
 
       if !params[:join].blank?
         # If the 'join' parameter is set then store the badge id

@@ -1,23 +1,13 @@
 <%
   # Boolean Variables = is_member, is_admin
   # Object Variables = badge, group
-  # Map[badge_id] Variables = log_map (of current_user for this badge if present), requirements_map,
-  #                           expert_count_map, learner_count_map
 
-  log = log_map[badge.id]
-  requirements = requirements_map[badge.id]
-  expert_count = expert_count_map[badge.id]
-  learner_count = learner_count_map[badge.id]
-
+  expert_count = badge.expert_count
+  learner_count = badge.learner_count
   visibility_details = badge.visibility_details
 
-  if log
-    is_expert = (log.validation_status == 'validated')
-    is_learner = !is_learner
-  else
-    is_expert = false
-    is_learner = false
-  end
+  is_expert = current_user && current_user.expert_of?(badge)
+  is_learner = current_user && current_user.learner_of?(badge)
 %>
 
 <div class="info-card badge-card <%= (is_expert) ? 'awarded' : '' %>" 
@@ -53,18 +43,19 @@
         <span class="card-text">
           <p><%= badge.summary %></p>
           
-          <% unless requirements.blank? %>
+          <% unless badge.requirements_json_clone.blank? %>
             <h4>Required Evidence</h4>
             <ul class="topic-list">
-              <% requirements.each do |tag| %>
+              <% badge.requirements_json_clone.each do |tag_item| %>
                 <li>
                   <%
                     icon_text = "<span class='fa-stack single-stack'>" \
                       + "<i class='fa fa-square fa-stack-2x'></i>"      \
-                      + "<i class='fa #{tag.format_icon} fa-stack-1x fa-inverse'></i></span>"
+                      + "<i class='fa #{Tag.format_icon(tag_item['format'])} " \
+                        + "fa-stack-1x fa-inverse'></i></span>"
                   %>
-                  <%= link_to "#{icon_text} #{tag.display_name}".html_safe, 
-                    group_badge_path(group, badge) + "/" + tag.name_with_caps %>
+                  <%= link_to "#{icon_text} #{tag_item['display_name']}".html_safe, 
+                    group_badge_path(group, badge) + "/" + tag_item['name_with_caps'] %>
                 </li>
               <% end %>
             </ul>

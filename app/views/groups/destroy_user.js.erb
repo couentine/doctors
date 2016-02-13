@@ -1,0 +1,8 @@
+$("#user-card-<%= @user.username %> .overlay-text").text("<%= @notice %>");
+if (<%= @is_error %>) {
+  $("#user-card-<%= @user.username %> .overlay-icon").html(
+    "<i class='fa fa-exclamation-circle'></i>"
+  );
+}
+$("#user-card-<%= @user.username %> .dark-overlay").fadeIn();
+$("#user-card-<%= @user.username %> .spinner-wrapper").fadeOut();
