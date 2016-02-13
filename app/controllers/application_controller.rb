@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  layout 'legacy' # Default to legacy layout for now
   protect_from_forgery
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :log_activity
