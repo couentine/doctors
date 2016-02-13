@@ -50,7 +50,7 @@ module BadgeList
     # config.active_record.schema_format = :sql
 
     # Version of your assets, change this if you want to expire all your assets
-    config.assets.version = '1.0'
+    config.assets.version = '2.0'
 
     # For devise
     config.assets.initialize_on_precompile = false
