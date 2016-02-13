@@ -2,4 +2,3 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require embed_scripts

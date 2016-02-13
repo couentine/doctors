@@ -1,8 +1,23 @@
-/* === IMPORT SITE COLORS AND BOOTSTRAP === */
+/* ================================================== */
+/* ||                                              || */
+/* ||  EMBEDDED LAYOUT                             || */
+/* ||                                              || */
+/* ||  Used for iframe embeds.                     || */
+/* ||  Single file for fast load times.            || */
+/* ||                                              || */
+/* ================================================== */
 
-@import "colors";
+/* === BASE STYLES === */
 
-/* === DEFINE STYLES === */
+@import "base/legacy-colors";
+
+/* === SHARED STYLES === */
+
+@import "shared/animate.min";
+
+/* ================================================== */
+/* ===============>> STYLE DEFINITIONS <<============ */
+/* ================================================== */
 
 /* === UNIVERSAL === */
 

@@ -8,12 +8,12 @@
       <title><%= full_title(yield(:title)).html_safe %></title>
     <% end %>
 
-    <%= render 'layouts/analytics' if Rails.env.production? %>
-    <%= render 'layouts/fonts' %>
-    <%= stylesheet_link_tag    "website", media: "all" %>
+    <%= render 'layouts/shared/analytics' if Rails.env.production? %>
+    <%= render 'layouts/shared/fonts' %>
+    <%= stylesheet_link_tag "website", media: "all" %>
     <%= javascript_include_tag "website" %>
     <%= csrf_meta_tags %>
-    <%= render 'layouts/shim' %>
+    <%= render 'layouts/shared/shim' %>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="<%= image_path('badge-list-icon-32-square.png') %>" />
 
@@ -42,7 +42,7 @@
     body_classes += ' ' + yield(:body_classes) if content_for?(:body_classes)
   %>
   <body class="<%= body_classes %> ">
-    <%= render 'layouts/website_header' %>
+    <%= render 'layouts/website/header' %>
     <div class="container-fluid">
       <%= yield %>
       <% unless content_for? :hide_flash %>
@@ -52,7 +52,7 @@
           <% end %>
         </div>
       <% end %>
-      <%= render 'layouts/website_footer' unless content_for?(:hide_footer) %>
+      <%= render 'layouts/website/footer' unless content_for?(:hide_footer) %>
     </div>
   </body>
 
