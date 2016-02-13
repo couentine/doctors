@@ -29,8 +29,8 @@ ruby '2.1.2'
   gem 'simple_form', '~> 3.2'
   gem 'kaminari', '~> 0.16.3'
   gem 'kaminari-bootstrap', '~> 0.1.3'
-  gem 'polymer-rails', '1.0.8'
-  gem 'polymer-elements-rails', '1.0.1'
+  gem 'polymer-rails', '~> 1.2.4'
+  gem 'polymer-elements-rails', '~> 1.0.1'
 
 #=== ERRORS & DEBUGGING ===#
 
