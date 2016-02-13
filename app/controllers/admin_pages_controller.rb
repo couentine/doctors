@@ -1,6 +1,6 @@
 class AdminPagesController < ApplicationController
 
-  before_filter :badge_list_admin
+  before_action :badge_list_admin
   
   # GET /a
   # This shows the main admin tools menu

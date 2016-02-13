@@ -1,7 +1,9 @@
 class ApplicationController < ActionController::Base
+  layout 'legacy' # Default to legacy layout for now
   protect_from_forgery
-  before_filter :log_activity
-  after_filter :store_location
+  before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :log_activity
+  after_action :store_location
 
   # unless Rails.application.config.consider_all_requests_local
     # rescue_from Exception, with: :render_500
@@ -84,6 +86,24 @@ private
 
   def log_activity
     current_user.log_activity if current_user
+  end
+
+protected
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.for(:sign_up) do |u| 
+      u.permit(:name, :username_with_caps, :avatar_key, :email, :password, :password_confirmation, 
+        :remember_me) 
+    end
+
+    devise_parameter_sanitizer.for(:sign_in) do |u| 
+      u.permit(:email, :password, :remember_me) 
+    end
+
+    devise_parameter_sanitizer.for(:account_update) do |u| 
+      u.permit(:name, :username_with_caps, :avatar_key, :email, :password, :password_confirmation, 
+        :current_password) 
+    end
   end
 
 end

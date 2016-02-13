@@ -1,15 +1,15 @@
 class EntriesController < ApplicationController
-  prepend_before_filter :find_parent_records, except: [:show, :edit, :update, :destroy]
-  prepend_before_filter :find_all_records, only: [:show, :edit, :update, :destroy]
-  before_filter :authenticate_user!, only: [:edit, :new, :create, :update, :destroy]
-  before_filter :visible_to_current_user, only: [:show]
-  before_filter :entry_creator, only: [:edit, :update]
-  before_filter :log_owner_or_entry_creator, only: [:destroy]
-  before_filter :can_post_to_log, only: [:new, :create]
+  prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy]
+  prepend_before_action :find_all_records, only: [:show, :edit, :update, :destroy]
+  before_action :authenticate_user!, only: [:edit, :new, :create, :update, :destroy]
+  before_action :visible_to_current_user, only: [:show]
+  before_action :entry_creator, only: [:edit, :update]
+  before_action :log_owner_or_entry_creator, only: [:destroy]
+  before_action :can_post_to_log, only: [:new, :create]
 
   # === LIMIT-FOCUSED FILTERS === #
 
-  before_filter :can_create_entries, only: [:new, :create]
+  before_action :can_create_entries, only: [:new, :create]
 
   # === RESTFUL ACTIONS === #
 
@@ -95,24 +95,24 @@ class EntriesController < ApplicationController
       @entry = @log.add_validation current_user, params[:entry][:summary], params[:entry][:body],
         @log_validated
     else
-      @entry = Entry.new(params[:entry])
+      @entry = Entry.new(entry_params)
       @entry.type = 'post'
       @entry.log = @log
       @entry.creator = current_user
       @entry.current_user = current_user
       @entry.current_username = current_user.username
       
-      begin
-        @entry.save # This commits the save to S3 for images and thus can error out
-      rescue Exception => e
-        @entry.errors[:base] << "There was an error saving your #{@type}. Please try again later."
+      @entry.save # This commits the save to S3 for images and thus can error out
+      # begin
+      # rescue Exception => e
+      #   @entry.errors[:base] << "There was an error saving your #{@type}. Please try again later."
 
-        # Create the carrierwave direct uploader if this is an image
-        if @entry.format == 'image'
-          @uploader = @entry.direct_uploaded_image
-          @uploader.success_action_redirect = request.original_url
-        end
-      end
+      #   # Create the carrierwave direct uploader if this is an image
+      #   if @entry.format == 'image'
+      #     @uploader = @entry.direct_uploaded_image
+      #     @uploader.success_action_redirect = request.original_url
+      #   end
+      # end
     end
 
     # Now do the redirect
@@ -160,7 +160,7 @@ class EntriesController < ApplicationController
           redirect_to [@group, @badge, @log, @entry], notice: 'Feedback was successfully updated.'
         end
         format.json { head :no_content }
-      elsif @entry.update_attributes(params[:entry])
+      elsif @entry.update_attributes(entry_params)
         format.html do
           redirect_to [@group, @badge, @log, @entry], notice: 'Post was successfully updated.'
         end
@@ -311,6 +311,11 @@ private
       flash[:error] = "You cannot post evidence since this group is currently inactive."
       redirect_to @group
     end
+  end
+
+  def entry_params
+    params.require(:entry).permit(:parent_tag, :summary, :format, :log_validated, :body, :link_url,
+      :code_format, :uploaded_image_key)
   end
 
 end

@@ -1,6 +1,6 @@
 class BadgeMakerController < ApplicationController
 
-  before_filter :authenticate_user!  
+  before_action :authenticate_user!  
 
   # GET /i.json?frame=square&icon=pencil&c1=ffffff&c2=000000
   # Starts asyncronous generation of the badge image and returns the poller id
@@ -14,7 +14,7 @@ class BadgeMakerController < ApplicationController
       format.json do     
         @poller_id = BadgeMaker.build_image(async: true, frame: @frame, icon: @icon, 
           color1: @color1, color2: @color2)
-        render json: { poller_id: @poller_id }
+        render json: { poller_id: @poller_id.to_s }
       end
     end
   end

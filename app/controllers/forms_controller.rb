@@ -2,7 +2,7 @@ class FormsController < ApplicationController
 
   # === FILTERS === #
 
-  before_filter :authenticate_user!, only: [:user_demo]
+  before_action :authenticate_user!, only: [:user_demo]
 
   # === CONSTANTS === #
 

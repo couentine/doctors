@@ -1,0 +1,18 @@
+:host {
+  display: inline-block;
+  border-radius: 3px;
+}
+
+/* === COMPONENT STYLES === */
+
+  a {
+    display: inline-block;
+    color: inherit;
+    border-radius: 3px;
+    text-decoration: none;
+  }
+
+  paper-button {
+    display: inline-block;
+    margin: 0;
+  }

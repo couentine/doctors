@@ -7,18 +7,24 @@ class GroupsController < ApplicationController
   # Non-RESTful Actions >> :leave, :destroy_user, :destroy_invited_user, 
   #                        :add_users, :create_users
 
-  prepend_before_filter :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
+  prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :destroy_user, :send_invitation, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action]
-  before_filter :authenticate_user!, except: [:show]
-  before_filter :group_member_or_admin, only: [:leave]
-  before_filter :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
+  before_action :authenticate_user!, except: [:show]
+  before_action :group_member_or_admin, only: [:leave]
+  before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
-  before_filter :group_owner, only: [:edit, :destroy, :cancel_subscription]
-  before_filter :can_copy_badges, only: [:copy_badges_form, :copy_badges_action]
-  before_filter :badge_list_admin, only: [:index]
+  before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
+  before_action :can_copy_badges, only: [:copy_badges_form, :copy_badges_action]
+  before_action :badge_list_admin, only: [:index]
 
   # === CONSTANTS === #
+
+  PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, 
+    :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
+    :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
+    :stripe_subscription_card, :new_subscription, :member_visibility, :admin_visibility, 
+    :badge_copyability, :join_code, :avatar_key]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   GROUP_TYPE_OPTIONS = [
@@ -162,7 +168,7 @@ class GroupsController < ApplicationController
   # POST /groups
   # POST /groups.json
   def create
-    @group = Group.new(params[:group])
+    @group = Group.new(group_params)
     @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
     @pricing_group_options = PRICING_GROUP_OPTIONS
@@ -194,7 +200,7 @@ class GroupsController < ApplicationController
     @transfer_mode = params[:transfer]
 
     respond_to do |format|
-      if @group.update_attributes(params[:group])
+      if @group.update_attributes(group_params)
         format.html { redirect_to @group, 
                       notice: 'Group was successfully updated.' }
         format.json { head :no_content }
@@ -237,7 +243,7 @@ class GroupsController < ApplicationController
     respond_to do |format|
       format.json do     
         @poller_id = @group.cancel_stripe_subscription(true, true)
-        render json: { poller_id: @poller_id }
+        render json: { poller_id: @poller_id.to_s }
       end
     end
   end
@@ -842,6 +848,10 @@ private
     unless current_user && current_user.admin?
       redirect_to '/'
     end  
+  end
+
+  def group_params
+    params.require(:group).permit(PERMITTED_PARAMS)
   end
 
 end

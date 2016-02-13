@@ -10,9 +10,9 @@ class Group
   MAX_DESCRIPTION_LENGTH = 140
   MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
-  JSON_FIELDS = [:name, :location, :type]
-  JSON_MOCK_FIELDS = { 'slug' => :url_with_caps, 'url' => :issuer_website, 
-    'image_url' => :avatar_image_url, 'email' => :primary_email }
+  JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
+  JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'url' => :issuer_website,
+    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
 
@@ -120,13 +120,6 @@ class Group
   validate :new_owner_username_exists
   validate :subscription_fields_valid
 
-  # Which fields are accessible?
-  attr_accessible :name, :url_with_caps, :description, :location, :website, :image_url, :type, 
-    :customer_code, :validation_threshold, :new_owner_username, :user_limit, :admin_limit, 
-    :sub_group_limit, :pricing_group, :subscription_plan, :stripe_subscription_card, 
-    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code,
-    :avatar_key
-
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
@@ -143,6 +136,7 @@ class Group
   before_create :create_first_subscription
   after_save :process_avatar
   before_update :create_another_subscription
+  after_update :update_child_badges
   after_update :update_stripe_if_needed
   before_destroy :cancel_subscription_on_destroy
   
@@ -165,6 +159,8 @@ class Group
   end
   def avatar_image_medium_url; avatar_url(:medium); end
   def avatar_image_small_url; avatar_url(:small); end
+
+  def badge_count; badges_cache.count; end
 
   # === GROUP METHODS === #
 
@@ -494,7 +490,7 @@ class Group
   # If the specified badge does not exist in the cache already then it will be added
   # If is_deleted is true then the specified badge will be deleted if present
   def update_badge_cache(badge_json_clone, is_deleted = false)
-    badge_id = badge_json_clone['_id']
+    badge_id = badge_json_clone['_id'].to_s
     
     if is_deleted
       self.badges_cache.delete badge_id
@@ -554,8 +550,8 @@ class Group
       poller = Poller.new
       poller.waiting_message = "Copying badges from '#{name}' to '#{to_group_name}'..."
       poller.progress = 1 # this will put the poller into 'progress mode'
-      poller.data = { from_group_id: self.id, to_group_id: to_group_id, creator_id: creator_id,
-            badge_urls: badge_urls }
+      poller.data = { from_group_id: self.id.to_s, to_group_id: to_group_id.to_s, 
+        creator_id: creator_id.to_s, badge_urls: badge_urls }
       poller.save
       Group.delay(queue: 'high').do_copy_badges_to_group(creator_id, self.id, badge_urls, 
         to_group_id, poller.id)
@@ -643,6 +639,17 @@ class Group
 
   # === ASYNC CLASS METHODS === #
 
+  # Update the cached badge details on all related badges
+  def self.update_child_badge_fields(group_id)
+    group = Group.find(group_id)
+    group.badges.each do |badge|
+      badge.update_group_fields_from group
+      badge.timeless.save
+    end
+
+    return group.badges.count
+  end
+
   # Adds all of the user to the group unless they already exist as members or admins
   def bulk_add_members(user_ids, async = false)
     if async
@@ -701,7 +708,7 @@ class Group
       trial_end: options[:trial_end],
       metadata: {
         description: "#{group.name} (#{group.url})",
-        group_id: group.id,
+        group_id: group.id.to_s,
         group_url: group.url,
         group_name: group.name,
         group_website: group.website
@@ -938,7 +945,10 @@ protected
     if !group.direct_avatar.blank?
       group.remote_avatar_url = group.direct_avatar.direct_fog_url(with_path: true)
       
-      if !group.save
+      if group.save
+        # If it worked then update all of the child badges
+        Group.delay(queue: 'low').update_child_badge_fields(self.id)
+      else
         # If there was an error then clear out the uploaded image and use the default
         group.avatar_key = nil
         group.save! # This should trigger the callback again calling a new instance of this method
@@ -1010,6 +1020,13 @@ protected
         end
       end
       self.new_owner_username = nil
+    end
+  end
+
+  # Updates the cached group info on child badges if needed
+  def update_child_badges
+    if name_changed? || url_with_caps_changed?
+      Group.delay(queue: 'low').update_child_badge_fields(self.id)
     end
   end
 

@@ -36,6 +36,14 @@ class Poller
     poller = Poller.find(poller_id) rescue nil
     poller.delete if poller
   end
+  
+  # === JSON OUTPUT === #
+
+  def as_json(options={})
+    return_value = super(options)
+    return_value['_id'] = return_value['id'] = id.to_s
+    return_value
+  end
 
 protected
   

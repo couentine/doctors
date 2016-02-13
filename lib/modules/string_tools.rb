@@ -107,7 +107,7 @@ module StringTools
   end
 
   # Extracts tweet id (integer) from tweet url or returns 0
-  def extract_tweet_id(tweet_url)
+  def self.extract_tweet_id(tweet_url)
     tweet_id = 0
     
     if !tweet_url.blank?

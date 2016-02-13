@@ -18,7 +18,9 @@ class Badge
   JSON_FIELDS = [:group, :name, :editability, :awardability, :info, :url, :url_with_caps,
     :created_at, :updated_at]
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
-    'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps }
+    'image_medium' => :image_medium_url, 'image_small' => :image_small_url, 
+    'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps,
+    'full_url' => :badge_url }
   
   # Below are the badge-level fields included in the clone
   # NOTE: Badge image is automatically checked for changes and included
@@ -81,6 +83,14 @@ class Badge
   field :learner_user_ids,                type: Array, default: []
   field :all_user_ids,                    type: Array, default: []
 
+  field :group_name,                      type: String # local cache of group info
+  field :group_url,                       type: String # local cache of group info
+  field :group_url_with_caps,             type: String # local cache of group info
+  field :group_full_url,                  type: String # local cache of group info
+  field :group_avatar_image_url,          type: String # local cache of group info
+  field :group_avatar_image_medium_url,   type: String # local cache of group info
+  field :group_avatar_image_small_url,    type: String # local cache of group info
+
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH },
             uniqueness: { scope: :group },
@@ -108,18 +118,13 @@ class Badge
   validates :creator, presence: true
 
   validate :move_to_group_id_is_valid
-
-  # Which fields are accessible?
-  attr_accessible :name, :url_with_caps, :summary, :info, :word_for_expert, :word_for_learner,
-    :editability, :awardability, :visibility, :image_frame, :image_icon, :image_color1, 
-    :image_color2, :icon_search_text, :topic_list_text, :custom_image_key, 
-    :send_validation_request_emails, :move_to_group_id
   
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
   before_validation :update_caps_field
   after_validation :copy_errors
+  before_create :set_group_fields
   before_save :process_designed_image
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
@@ -135,12 +140,21 @@ class Badge
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
 
-  def image_as_url; image_url; end
-  def criteria_url; "#{ENV['root_url']}/#{group.url}/#{url}"; end
-  def issuer_url; "#{ENV['root_url']}/#{group.url}.json"; end
+  def image_as_url 
+    image_url
+  end
+
+  def criteria_url
+    "#{ENV['root_url']}/#{group_url_with_caps || group.url}/#{url}"
+  end
+  
+  def issuer_url
+    "#{ENV['root_url']}/#{group_url || group.url}.json"
+  end
 
   def badge_url
-    "#{ENV['root_url'] || 'http://www.badgelist.com'}/#{group.url_with_caps}/#{url_with_caps}"
+    "#{ENV['root_url'] || 'http://www.badgelist.com'}" \
+      + "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
   end
 
   # Returns URL of the specified version of this badge's image
@@ -188,6 +202,17 @@ class Badge
     else
       { icon: 'fa-globe', label: 'Public', summary: "Visible to everyone." }
     end
+  end
+
+  # This updates all of the user info cache fields on the log from the supplied user record
+  def update_group_fields_from(group_record)
+    self.group_name = group_record.name
+    self.group_url = group_record.url
+    self.group_url_with_caps = group_record.url_with_caps
+    self.group_full_url = group_record.group_url
+    self.group_avatar_image_url = group_record.avatar_image_url
+    self.group_avatar_image_medium_url = group_record.avatar_image_medium_url
+    self.group_avatar_image_small_url = group_record.avatar_image_small_url
   end
 
   # === CLONE CREATION METHOD === #
@@ -271,14 +296,21 @@ class Badge
   end
   
   # Powers the create_async method above. Not intended to be run directly but could be.
+  # Example of badge creation in a console (NOTE: I'm getting an error on this for the moment.):
+  #   g, u = Group.first, User.first
+  #   bp = ActionController::Parameters.new({ name: 'Test Badge 1', summary: 'Testing', 
+  #     url_with_caps: 'test-badge-1', image_frame: 'circle', image_icon: 'pen', 
+  #     image_color1: 'FFFFFF', image_color2: '000000' })
+  #   rl = [{ display_name:'Item 1', format:'text' }, { display_name:'Item 2', format:'image' }]
+  #   b = Badge.do_create_async(g.id, u.id, bp, rl)
   def self.do_create_async(group_id, creator_id, badge_params, requirement_list, poller_id = nil)
-    begin
+    # begin
       # First query for the core records
       poller = Poller.find(poller_id) rescue nil
       group = Group.find(group_id)
       creator = User.find(creator_id)
 
-      badge = Badge.new(badge_params)
+      badge = Badge.new(badge_params.permit(BadgesController::PERMITTED_PARAMS))
       badge.group = group
       badge.creator = creator
       badge.current_user = creator
@@ -296,19 +328,19 @@ class Badge
       if poller
         poller.status = 'successful'
         poller.message = "The '#{badge.name}' badge has been successfully created!"
-        poller.data = { badge_id: badge.id }
+        poller.data = { badge_id: badge.id.to_s }
         poller.save
       end
-    rescue Exception => e
-      if poller
-        poller.status = 'failed'
-        poller.message = 'An error occurred while trying to create the badge, ' \
-          + "please try again. (Error message: #{e})"
-        poller.save
-      else
-        throw e
-      end
-    end
+    # rescue Exception => e
+    #   if poller
+    #     poller.status = 'failed'
+    #     poller.message = 'An error occurred while trying to create the badge, ' \
+    #       + "please try again. (Error message: #{e})"
+    #     poller.save
+    #   else
+    #     throw e
+    #   end
+    # end
   end
 
   def update_async(current_user_id, badge_params, requirement_list)
@@ -334,7 +366,7 @@ class Badge
       badge.current_username = user.username
 
       # Save the badge and then update the requirements if successful
-      badge.update_attributes!(badge_params)      
+      badge.update_attributes!(badge_params.permit(BadgesController::PERMITTED_PARAMS))
       badge.update_requirement_list(requirement_list)
 
       # Update the custom image if needed
@@ -349,7 +381,7 @@ class Badge
         poller.status = 'successful'
         poller.message = "The '#{badge.name}' badge has been successfully updated!"
         poller.redirect_to = "/#{badge.group.url_with_caps}/#{badge.url_with_caps}"
-        poller.data = { badge_id: badge.id }
+        poller.data = { badge_id: badge.id.to_s }
         poller.save
       end
     rescue Exception => e
@@ -358,7 +390,7 @@ class Badge
         poller.message = 'An error occurred while trying to update the badge, ' \
           + "please try again. (Error message: #{e})"
         poller.redirect_to = "/#{badge.group.url_with_caps}/#{badge.url_with_caps}"
-        poller.data = { badge_id: badge.id }
+        poller.data = { badge_id: badge.id.to_s }
         poller.save
       else
         throw e
@@ -529,7 +561,7 @@ class Badge
       list = []
       requirements.each do |tag|
         list << {
-          id: tag.id,
+          id: tag.id.to_s,
           display_name: tag.display_name,
           summary: (tag.summary.blank? || (tag.summary == 'null')) ? '' : tag.summary,
           format: tag.format,
@@ -654,6 +686,9 @@ class Badge
   def move_badge_to(new_group)
     if group_id != new_group.id
       self.group = new_group
+
+      # Update the group cache fields
+      self.update_group_fields_from new_group
       
       # Now run the bulk addition of members asynchronously (no poller for now)
       all_user_ids = logs.map{ |log| log.user_id }
@@ -688,6 +723,7 @@ class Badge
     pages_backup = json_clone['pages']
     self.json_clone = self.as_json(use_default_method: true, only: CLONE_FIELDS, 
       methods: [:image_url, :image_medium_url, :image_small_url])
+    self.json_clone['id'] = self.json_clone['_id'] = self.id.to_s # stringify
     self.json_clone['pages'] = pages_backup
     self.json_clone['created_at'] ||= Time.now
     self.json_clone['updated_at'] ||= Time.now
@@ -736,6 +772,10 @@ protected
     if errors && !errors[:url].blank?
       errors[:name] = errors[:url]
     end
+  end
+
+  def set_group_fields
+    update_group_fields_from group
   end
 
   def process_designed_image
