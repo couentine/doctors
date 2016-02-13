@@ -70,6 +70,7 @@ class Entry
   before_save :process_parent_tag_and_content_changes
   before_save :update_body_versions # DO store the first value since it comes from the user
   after_save :process_image
+  after_save :process_tweet
   after_create :update_log
   after_create :send_notifications
   after_destroy :check_log_validation_counts
@@ -79,7 +80,7 @@ class Entry
   # === ENTRY METHODS === #
 
   def to_param
-    entry_number || _id
+    entry_number.to_s || _id.to_s
   end
 
   # Validation methods
@@ -158,6 +159,62 @@ class Entry
     end
   end
 
+  # === ASYNC METHODS === #
+
+  def self.refresh_tweet(entry_id)
+    entry = Entry.find(entry_id)
+
+    begin
+      # Now attempt to pull down the tweet body using the twitter API
+      tweet_id = StringTools.extract_tweet_id(entry.link_url)
+      tweet = $twitter.status(tweet_id)
+      entry.summary = tweet.text
+
+      # Now that we have the tweet, let's store some metadata
+      entry.link_metadata = {
+        'tweet_id' => tweet.id,
+        'tweet_favorite_count' => tweet.favorite_count,
+        'tweet_filter_level' => tweet.filter_level,
+        'tweet_in_reply_to_screen_name' => tweet.in_reply_to_screen_name,
+        'tweet_in_reply_to_status_id' => tweet.in_reply_to_status_id,
+        'tweet_in_reply_to_user_id' => tweet.in_reply_to_user_id,
+        'tweet_lang' => tweet.lang,
+        'tweet_retweet_count' => tweet.retweet_count,
+        'tweet_source' => tweet.source,
+        'tweet_text' => tweet.text,
+        'tweet_user_id' => tweet.user.id,
+        'tweet_user_screen_name' => tweet.user.screen_name,
+        'tweet_user_connections' => tweet.user.connections,
+        'tweet_user_description' => tweet.user.description,
+        'tweet_user_favourites_count' => tweet.user.favourites_count,
+        'tweet_user_followers_count' => tweet.user.followers_count,
+        'tweet_user_friends_count' => tweet.user.friends_count,
+        'tweet_user_lang' => tweet.user.lang,
+        'tweet_user_listed_count' => tweet.user.listed_count,
+        'tweet_user_location' => tweet.user.location,
+        'tweet_user_name' => tweet.user.name,
+        'tweet_user_statuses_count' => tweet.user.statuses_count,
+        'tweet_user_time_zone' => tweet.user.time_zone,
+        'tweet_user_utc_offset' => tweet.user.utc_offset
+      }
+
+      # Switch out the instances of Twitter::NullObject (they cause an IO error on save)
+      entry.link_metadata.each do |key, value|
+        entry.link_metadata[key] = nil if value.nil? && (value != nil)
+      end
+
+      # Save it inside of the rescue block just in case another error creeps in
+      entry.save!
+    rescue Exception => e
+      # Nothing found so rather than throw an error we'll just set the summary to an error value.
+      entry.summary = "No tweet found! Please check the link and try again." 
+      entry.link_metadata = {
+        'tweet_exception' => e.to_s
+      }
+      entry.save!
+    end
+  end
+
 protected
   
   def set_default_values
@@ -189,45 +246,12 @@ protected
       end
     end
     
-    # Now attempt to pull down the tweet body using the twitter API
     if (format == 'tweet') && link_url_changed? && !link_url.blank?
-      begin
-        tweet_id = extract_tweet_id(link_url)
-        tweet = $twitter.status(tweet_id)
-        self.summary = tweet.text
+      self.summary = 'Loading tweet, refresh to view...'
+      self.link_metadata = {}
+    end
 
-        # Now that we have the tweet, let's store some metadata
-        self.link_metadata = {
-          'tweet_id' => tweet.id,
-          'tweet_favorite_count' => tweet.favorite_count,
-          'tweet_filter_level' => tweet.filter_level,
-          'tweet_in_reply_to_screen_name' => tweet.in_reply_to_screen_name,
-          'tweet_in_reply_to_status_id' => tweet.in_reply_to_status_id,
-          'tweet_in_reply_to_user_id' => tweet.in_reply_to_user_id,
-          'tweet_lang' => tweet.lang,
-          'tweet_retweet_count' => tweet.retweet_count,
-          'tweet_source' => tweet.source,
-          'tweet_text' => tweet.text,
-          'tweet_user_id' => tweet.user.id,
-          'tweet_user_screen_name' => tweet.user.screen_name,
-          'tweet_user_connections' => tweet.user.connections,
-          'tweet_user_description' => tweet.user.description,
-          'tweet_user_favourites_count' => tweet.user.favourites_count,
-          'tweet_user_followers_count' => tweet.user.followers_count,
-          'tweet_user_friends_count' => tweet.user.friends_count,
-          'tweet_user_lang' => tweet.user.lang,
-          'tweet_user_listed_count' => tweet.user.listed_count,
-          'tweet_user_location' => tweet.user.location,
-          'tweet_user_name' => tweet.user.name,
-          'tweet_user_statuses_count' => tweet.user.statuses_count,
-          'tweet_user_time_zone' => tweet.user.time_zone,
-          'tweet_user_utc_offset' => tweet.user.utc_offset,
-        }
-      rescue Exception => e
-        # Nothing found so rather than throw an error we'll just set the summary to an error value.
-        self.summary = "No tweet found! Please check the link and try again." 
-      end
-    elsif (format == 'link') && link_url_changed? && !link_url.blank?
+    if (format == 'link') && link_url_changed? && !link_url.blank?
       # Transform special links into other sorts of embeds
       self.body = transform_link link_url
     end
@@ -270,6 +294,13 @@ protected
   def process_image
     if processing_uploaded_image
       Entry.delay(queue: 'high').do_process_image(id)
+    end
+  end
+
+  def process_tweet
+    if (format == 'tweet') && link_url_changed? && !link_url.blank?
+      # Queue up the twitter API call
+      Entry.delay.refresh_tweet(self.id)
     end
   end
 

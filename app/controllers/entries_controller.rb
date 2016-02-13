@@ -102,17 +102,17 @@ class EntriesController < ApplicationController
       @entry.current_user = current_user
       @entry.current_username = current_user.username
       
-      begin
-        @entry.save # This commits the save to S3 for images and thus can error out
-      rescue Exception => e
-        @entry.errors[:base] << "There was an error saving your #{@type}. Please try again later."
+      @entry.save # This commits the save to S3 for images and thus can error out
+      # begin
+      # rescue Exception => e
+      #   @entry.errors[:base] << "There was an error saving your #{@type}. Please try again later."
 
-        # Create the carrierwave direct uploader if this is an image
-        if @entry.format == 'image'
-          @uploader = @entry.direct_uploaded_image
-          @uploader.success_action_redirect = request.original_url
-        end
-      end
+      #   # Create the carrierwave direct uploader if this is an image
+      #   if @entry.format == 'image'
+      #     @uploader = @entry.direct_uploaded_image
+      #     @uploader.success_action_redirect = request.original_url
+      #   end
+      # end
     end
 
     # Now do the redirect

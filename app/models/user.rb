@@ -731,7 +731,10 @@ protected
     if !user.direct_avatar.blank?
       user.remote_avatar_url = user.direct_avatar.direct_fog_url(with_path: true)
       
-      if !user.save
+      if user.save
+        # If it worked then update all of the related logs
+        User.delay(queue: 'low').update_log_user_fields(user_id)
+      else
         # If there was an error then clear out the uploaded image and use the default
         user.avatar_key = nil
         user.save! # This should trigger the callback again calling a new instance of this method

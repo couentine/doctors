@@ -90,12 +90,18 @@ private
 protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.for(:sign_up) do |u|
-     u.permit(:name, :username_with_caps, :avatar_key)
+    devise_parameter_sanitizer.for(:sign_up) do |u| 
+      u.permit(:name, :username_with_caps, :avatar_key, :email, :password, :password_confirmation, 
+        :remember_me) 
     end
 
-    devise_parameter_sanitizer.for(:account_update) do |u|
-      u.permit(:name, :username_with_caps, :avatar_key)
+    devise_parameter_sanitizer.for(:sign_in) do |u| 
+      u.permit(:email, :password, :remember_me) 
+    end
+
+    devise_parameter_sanitizer.for(:account_update) do |u| 
+      u.permit(:name, :username_with_caps, :avatar_key, :email, :password, :password_confirmation, 
+        :current_password) 
     end
   end
 

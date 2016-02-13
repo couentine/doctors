@@ -12,11 +12,6 @@
     edit_user_registration_path + '#upload-image', class: 'primary-overlay' %>
   
   <h1><%= @user.name %></h1>
-  <div class="subtitle"><%= @user.username %></div>
-  
-  <bl-button type="raised" link="<%= edit_user_registration_path %>" class="primary">
-    Manage Account
-  </bl-button>
   
   <% if !@user.confirmed? || @user.pending_reconfirmation? %>
     <!-- === ACCOUNT STATUS WARNING === -->
@@ -25,7 +20,13 @@
       <i class="fa fa-exclamation-triangle"></i>
       Your email address needs verification
     </bl-label>
+  <% else %>
+    <div class="subtitle"><%= @user.username %></div>
   <% end %>
+  
+  <bl-button type="raised" link="<%= edit_user_registration_path %>" class="primary">
+    Manage Account
+  </bl-button>
   
   <bl-widget-badge-count class="widget" count="<%= @badge_count %>"
     link="<%= user_path(current_user) %>"></bl-widget-badge-count>

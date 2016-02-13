@@ -11,9 +11,8 @@ class Group
   MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
-  JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'email' => :primary_email, 
-    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url, 
-    'url' => :issuer_website }
+  JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'url' => :issuer_website,
+    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
 
@@ -137,6 +136,7 @@ class Group
   before_create :create_first_subscription
   after_save :process_avatar
   before_update :create_another_subscription
+  after_update :update_child_badges
   after_update :update_stripe_if_needed
   before_destroy :cancel_subscription_on_destroy
   
@@ -639,6 +639,17 @@ class Group
 
   # === ASYNC CLASS METHODS === #
 
+  # Update the cached badge details on all related badges
+  def self.update_child_badge_fields(group_id)
+    group = Group.find(group_id)
+    group.badges.each do |badge|
+      badge.update_group_fields_from group
+      badge.timeless.save
+    end
+
+    return group.badges.count
+  end
+
   # Adds all of the user to the group unless they already exist as members or admins
   def bulk_add_members(user_ids, async = false)
     if async
@@ -934,7 +945,10 @@ protected
     if !group.direct_avatar.blank?
       group.remote_avatar_url = group.direct_avatar.direct_fog_url(with_path: true)
       
-      if !group.save
+      if group.save
+        # If it worked then update all of the child badges
+        Group.delay(queue: 'low').update_child_badge_fields(self.id)
+      else
         # If there was an error then clear out the uploaded image and use the default
         group.avatar_key = nil
         group.save! # This should trigger the callback again calling a new instance of this method
@@ -1006,6 +1020,13 @@ protected
         end
       end
       self.new_owner_username = nil
+    end
+  end
+
+  # Updates the cached group info on child badges if needed
+  def update_child_badges
+    if name_changed? || url_with_caps_changed?
+      Group.delay(queue: 'low').update_child_badge_fields(self.id)
     end
   end
 

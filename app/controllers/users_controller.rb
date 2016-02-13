@@ -4,6 +4,11 @@ class UsersController < ApplicationController
     :confirm_account, :unblock_email, :update_image]
   before_action :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
 
+  # === CONTSTANTS === #
+
+  PERMITTED_PARAMS = [:email, :name, :username_with_caps, :password, :password_confirmation, 
+    :remember_me, :avatar_key]
+
   # GET /a/users
   # GET /a/users.json
   # Accepts page parameters: page, page_size, sort_by, sort_order, flag
@@ -164,10 +169,9 @@ private
     end  
   end
 
-  # This isn't being used yet
+  # This method isn't being used yet, directly since the registration controll handles signup
   def user_params
-    params.require(:user).permit(:email, :name, :username_with_caps, :password, 
-      :password_confirmation, :remember_me, :avatar_key)
+    params.require(:user).permit(PERMITTED_PARAMS)
   end
 
 end

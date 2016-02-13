@@ -851,4 +851,20 @@ namespace :db do
     puts " >> Done."
   end
 
+  # NOTE: This is OK to run periodically in production.
+  task update_badge_group_caches: :environment do
+    print "Updating badge group caches for #{Group.count} groups"
+    
+    Group.each do |group|
+      begin
+        Group.update_child_badge_fields group.id
+        print "."
+      rescue
+        print "!"
+      end
+    end
+
+    puts " >> Done."
+  end
+
 end

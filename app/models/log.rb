@@ -165,7 +165,7 @@ class Log
     elsif user
       user.username_with_caps
     else
-      _id
+      _id.to_s
     end
   end
 

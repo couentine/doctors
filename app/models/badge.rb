@@ -83,6 +83,14 @@ class Badge
   field :learner_user_ids,                type: Array, default: []
   field :all_user_ids,                    type: Array, default: []
 
+  field :group_name,                      type: String # local cache of group info
+  field :group_url,                       type: String # local cache of group info
+  field :group_url_with_caps,             type: String # local cache of group info
+  field :group_full_url,                  type: String # local cache of group info
+  field :group_avatar_image_url,          type: String # local cache of group info
+  field :group_avatar_image_medium_url,   type: String # local cache of group info
+  field :group_avatar_image_small_url,    type: String # local cache of group info
+
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH },
             uniqueness: { scope: :group },
@@ -116,6 +124,7 @@ class Badge
   before_validation :set_default_values, on: :create
   before_validation :update_caps_field
   after_validation :copy_errors
+  before_create :set_group_fields
   before_save :process_designed_image
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
@@ -131,12 +140,21 @@ class Badge
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
 
-  def image_as_url; image_url; end
-  def criteria_url; "#{ENV['root_url']}/#{group.url}/#{url}"; end
-  def issuer_url; "#{ENV['root_url']}/#{group.url}.json"; end
+  def image_as_url 
+    image_url
+  end
+
+  def criteria_url
+    "#{ENV['root_url']}/#{group_url_with_caps || group.url}/#{url}"
+  end
+  
+  def issuer_url
+    "#{ENV['root_url']}/#{group_url || group.url}.json"
+  end
 
   def badge_url
-    "#{ENV['root_url'] || 'http://www.badgelist.com'}/#{group.url_with_caps}/#{url_with_caps}"
+    "#{ENV['root_url'] || 'http://www.badgelist.com'}" \
+      + "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
   end
 
   # Returns URL of the specified version of this badge's image
@@ -184,6 +202,17 @@ class Badge
     else
       { icon: 'fa-globe', label: 'Public', summary: "Visible to everyone." }
     end
+  end
+
+  # This updates all of the user info cache fields on the log from the supplied user record
+  def update_group_fields_from(group_record)
+    self.group_name = group_record.name
+    self.group_url = group_record.url
+    self.group_url_with_caps = group_record.url_with_caps
+    self.group_full_url = group_record.group_url
+    self.group_avatar_image_url = group_record.avatar_image_url
+    self.group_avatar_image_medium_url = group_record.avatar_image_medium_url
+    self.group_avatar_image_small_url = group_record.avatar_image_small_url
   end
 
   # === CLONE CREATION METHOD === #
@@ -657,6 +686,9 @@ class Badge
   def move_badge_to(new_group)
     if group_id != new_group.id
       self.group = new_group
+
+      # Update the group cache fields
+      self.update_group_fields_from new_group
       
       # Now run the bulk addition of members asynchronously (no poller for now)
       all_user_ids = logs.map{ |log| log.user_id }
@@ -740,6 +772,10 @@ protected
     if errors && !errors[:url].blank?
       errors[:name] = errors[:url]
     end
+  end
+
+  def set_group_fields
+    update_group_fields_from group
   end
 
   def process_designed_image
