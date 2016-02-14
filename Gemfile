@@ -21,7 +21,8 @@ ruby '2.1.2'
 
 #=== FRONT-END ===#
   
-  gem 'sass-rails',   '~> 5.0'
+  gem 'sprockets-rails', '~> 2.3.3'
+  gem 'sass-rails', '~> 5.0'
   gem 'coffee-rails', '~> 4.1'
   gem 'uglifier', '~> 2.7'
   gem 'jquery-rails', '~> 4.1'
@@ -30,7 +31,8 @@ ruby '2.1.2'
   gem 'kaminari', '~> 0.16.3'
   gem 'kaminari-bootstrap', '~> 0.1.3'
   gem 'polymer-rails', '~> 1.2.4'
-  gem 'polymer-elements-rails', '~> 1.0.1'
+  # gem 'polymer-elements-rails', '~> 1.0.1'
+  gem 'polymer-elements-rails', github: 'alchapone/polymer-elements-rails'
 
 #=== ERRORS & DEBUGGING ===#
 
