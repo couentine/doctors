@@ -21,7 +21,7 @@ ruby '2.1.2'
 
 #=== FRONT-END ===#
   
-  gem 'sprockets-rails', '~> 2.3.3'
+  gem 'sprockets-rails', '~> 3.0.1'
   gem 'sass-rails', '~> 5.0'
   gem 'coffee-rails', '~> 4.1'
   gem 'uglifier', '~> 2.7'
