@@ -20,7 +20,7 @@ class ApplicationController < ActionController::Base
   def render_404(exception)
     @not_found_path = exception.message
     respond_to do |format|
-      format.html { render template: 'errors/not_found', layout: 'layouts/application', 
+      format.html { render template: 'errors/not_found', layout: 'layouts/legacy', 
         status: 404 }
       format.all { render nothing: true, status: 404 }
     end
@@ -30,7 +30,7 @@ class ApplicationController < ActionController::Base
     logger.info exception.backtrace.join("\n")
     @error_message = exception.backtrace.join("\n")
     respond_to do |format|
-      format.html { render template: 'errors/internal_server_error', layout: 'layouts/application', 
+      format.html { render template: 'errors/internal_server_error', layout: 'layouts/legacy', 
         status: 500 }
       format.all { render nothing: true, status: 500}
     end
