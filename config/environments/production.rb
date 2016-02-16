@@ -47,8 +47,8 @@ BadgeList::Application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server
   config.action_controller.asset_host = ENV['cdn_asset_host'] || 'cdn.badgelist.com'
 
-  # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
-  config.assets.precompile =  ['*.js', '*.css', '*.css.erb'] 
+  # Precompile additional assets
+  # config.assets.precompile =  ['*.js', '*.css', '*.css.erb'] 
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false

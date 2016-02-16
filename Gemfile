@@ -66,5 +66,6 @@ ruby '2.1.2'
     gem 'factory_girl_rails', '~> 4.0'
   end
 
-
-
+  group :production do
+    gem 'rails_12factor', '~> 0.0.3'
+  end
