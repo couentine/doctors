@@ -58,17 +58,5 @@ module BadgeList
 
     config.assets.precompile += %w( rich-text-editor.css )
 
-    # Configure CORS to allow for serving of javascript and font assets from CloudFront
-    config.middleware.insert_before 0, 'Rack::Cors' do
-      allow do
-        origins '*'
-
-        resource '/assets/*',
-          headers: :any,
-          methods: [:get],
-          max_age: 3628800
-      end
-    end
-
   end
 end
