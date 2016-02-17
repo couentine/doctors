@@ -76,10 +76,6 @@ class User
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, 
     :validatable, :confirmable, :lockable, :async
 
-  # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :name, :username_with_caps, :password, :password_confirmation, 
-    :remember_me, :avatar_key
-
   # === STANDARD DEVISE FIELDS === #
 
   ## Database authenticatable
@@ -407,10 +403,10 @@ class User
     case badge_or_id.class.to_s
     when 'Badge'
       learner_badge_ids.include? badge_or_id.id
-    when 'Moped::BSON::ObjectId'
+    when 'BSON::ObjectId'
       learner_badge_ids.include? badge_or_id
     when 'String'
-      learner_badge_ids.include? Moped::BSON::ObjectId(badge_or_id)
+      learner_badge_ids.include? BSON::ObjectId.from_string(badge_or_id)
     else
       throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. " \
         + "(Accepted types are Badge, ObjectId or String.)"
@@ -422,10 +418,10 @@ class User
     case badge_or_id.class.to_s
     when 'Badge'
       expert_badge_ids.include? badge_or_id.id
-    when 'Moped::BSON::ObjectId'
+    when 'BSON::ObjectId'
       expert_badge_ids.include? badge_or_id
     when 'String'
-      expert_badge_ids.include? Moped::BSON::ObjectId(badge_or_id)
+      expert_badge_ids.include? BSON::ObjectId.from_string(badge_or_id)
     else
       throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. " \
         + "(Accepted types are Badge, ObjectId or String.)"
@@ -735,7 +731,10 @@ protected
     if !user.direct_avatar.blank?
       user.remote_avatar_url = user.direct_avatar.direct_fog_url(with_path: true)
       
-      if !user.save
+      if user.save
+        # If it worked then update all of the related logs
+        User.delay(queue: 'low').update_log_user_fields(user_id)
+      else
         # If there was an error then clear out the uploaded image and use the default
         user.avatar_key = nil
         user.save! # This should trigger the callback again calling a new instance of this method

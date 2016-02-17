@@ -1,8 +1,13 @@
 class UsersController < ApplicationController
   
-  before_filter :authenticate_user!, only: [:index, :add_card, :delete_card, :payment_history,
+  before_action :authenticate_user!, only: [:index, :add_card, :delete_card, :payment_history,
     :confirm_account, :unblock_email, :update_image]
-  before_filter :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
+  before_action :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
+
+  # === CONTSTANTS === #
+
+  PERMITTED_PARAMS = [:email, :name, :username_with_caps, :password, :password_confirmation, 
+    :remember_me, :avatar_key]
 
   # GET /a/users
   # GET /a/users.json
@@ -51,7 +56,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       format.json do     
         @poller_id = current_user.add_stripe_card(params[:stripe_token], true)
-        render json: { poller_id: @poller_id }
+        render json: { poller_id: @poller_id.to_s }
       end
     end
   end
@@ -63,7 +68,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       format.json do     
         @poller_id = current_user.delete_stripe_card(params[:id], true)
-        render json: { poller_id: @poller_id }
+        render json: { poller_id: @poller_id.to_s }
       end
     end
   end
@@ -162,6 +167,11 @@ private
     unless current_user && current_user.admin?
       redirect_to '/'
     end  
+  end
+
+  # This method isn't being used yet, directly since the registration controll handles signup
+  def user_params
+    params.require(:user).permit(PERMITTED_PARAMS)
   end
 
 end

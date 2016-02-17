@@ -42,7 +42,7 @@ class RegistrationsController < Devise::RegistrationsController
       @uploader = resource.direct_avatar
       @uploader.success_action_redirect = image_key_url
       @manual_user_image_path = "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/" \
-        + @user.direct_avatar.key
+        + resource.direct_avatar.key
 
       clean_up_passwords resource
       # set_minimum_password_length # >> Triggers an error, ignoring for now.

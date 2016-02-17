@@ -1,7 +1,7 @@
 module JSONFilter
   
   # === CONSTANTS === #
-  DEFAULT_JSON_FIELDS = [:_id] # Fields to always include
+  DEFAULT_JSON_FIELDS = [] # Fields to always include
   
   # Filters the json properties based on what the filter_user can see
   # Looks for the following constants in the model (self.class::CONSTANT)
@@ -42,6 +42,9 @@ module JSONFilter
         return_value = super(only: only, methods: methods)
       end
 
+      # Now stringify the ids
+      return_value['id'] = return_value['_id'] = self.id.to_s
+      
       # Now add the mock fields if present
       self.class::JSON_MOCK_FIELDS.each do |key, value|
         return_value[key] = eval("self.#{value}")

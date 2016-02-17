@@ -1,0 +1,37 @@
+<dom-module id="bl-grid">
+  <link rel="stylesheet" href="bl-grid.css" />
+
+  <template>
+
+    <div class="grid">
+      <template is="dom-if" if="{{showPlaceholder}}">
+        <content select=".placeholder"></content>
+      </template>
+
+      <template is="dom-if" if="{{!showPlaceholder}}">
+        
+        <template is="dom-if" if="{{isBadgesMode}}">
+          <template id="item-repeat" is="dom-repeat" items="{{badges}}">
+            <bl-grid-item class="badge" mode="badge" badge="{{item}}"></bl-grid-item>
+          </template>
+        </template>
+
+        <template is="dom-if" if="{{isGroupsMode}}">
+          <template id="item-repeat" is="dom-repeat" items="{{groups}}">
+            <bl-grid-item class="group" mode="group" group="{{item}}"></bl-grid-item>
+          </template>
+        </template>
+
+      </template>
+    </div>
+
+    <div class="next-page" hidden$="{{!hasNextPage}}">
+      <bl-button id="next-page-button" class$="{{mode}}" type="raised" on-click="loadNextPage">
+        Load More
+      </bl-button>
+    </div>
+
+  </template>
+
+  <script src="bl-grid.js"></script>
+</dom-module>

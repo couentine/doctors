@@ -1,12 +1,54 @@
 class HomeController < ApplicationController
 
-  # GET / 
+  # GET /?gp=1&bp=1&query=group
   # This renders the appropriate root layout based on whether user is signed in
   def root
     if current_user
       @user = current_user
-      @groups = @user.groups(false).asc(:name)
-      render template: 'home/root_internal'
+      @page_size = APP_CONFIG['page_size_small']
+      @query = params[:query] || 'all'
+      @badge_count = @user.expert_badge_ids.count # doesn't result in a query
+
+      if @query.in? ['all', 'groups']
+        @groups_current_page = (params[:gp] || 1).to_i
+        @groups_hash = @user.groups(false).asc(:name).page(@groups_current_page).per(@page_size)\
+            .map do |group| 
+          j = group.as_json
+          j['member_type'] = @user.member_type_of(group.id).to_s # = ['admin', 'member', 'none']
+          j
+        end
+        
+        if @user.groups(false).count > (@page_size * @groups_current_page)
+          @groups_next_page = @groups_current_page + 1
+        else
+          @groups_next_page = nil
+        end
+      end
+      
+      if @query.in? ['all', 'badges']
+        @badges_current_page = (params[:bp] || 1).to_i
+        @badges_hash = Badge.where(:id.in => @user.learner_badge_ids).asc(:name)\
+            .page(@badges_current_page).per(@page_size).map { |badge| badge.as_json }
+        
+        if Badge.where(:id.in => @user.learner_badge_ids).count > (@page_size*@badges_current_page)
+          @badges_next_page = @badges_current_page + 1
+        else
+          @badges_next_page = nil
+        end
+      end
+
+      respond_to do |format|
+        format.html { render template: 'home/root_internal', layout: 'app' }
+        format.json do
+          if @query == 'groups'
+            render json: { next_page: @groups_next_page, groups: @groups_hash }
+          elsif @query == 'badges'
+            render json: { next_page: @badges_next_page, badges: @badges_hash }
+          else
+            render json: nil
+          end
+        end
+      end
     else
       render template: 'home/root_external', layout: 'website'
     end

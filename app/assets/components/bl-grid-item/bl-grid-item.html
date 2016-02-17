@@ -1,0 +1,38 @@
+<dom-module id="bl-grid-item">
+  <link rel="stylesheet" href="bl-grid-item.css" />
+  
+  <template>
+
+    <template is="dom-if" if="{{isBadgeMode}}">
+      <paper-material elevation="0" animated>
+        <a href$="{{badge.full_url}}" class="badge item-inner">
+          <paper-ripple></paper-ripple>
+          <div class="image">
+            <img src$="{{badge.image_medium}}">
+          </div>
+          <div class="label">
+            <h3>{{badge.name}}</h3>
+          </div>
+        </a>
+      </paper-material>
+    </template>
+
+    <template is="dom-if" if="{{isGroupMode}}">
+      <paper-material elevation="0" animated on-mouseover="goHover"
+            on-mouseout="stopHover">
+        <a href$="{{group.full_url}}" class="group item-inner">
+          <paper-ripple></paper-ripple>
+          <div class="image">
+            <img src$="{{translateImageUrl(group.image_url)}}">
+          </div>
+          <div class="label">
+            <h3>{{group.name}}</h3>
+          </div>
+        </a>
+      </paper-material>
+    </template>
+    
+  </template>
+
+  <script src="bl-grid-item.js"></script>
+</dom-module>

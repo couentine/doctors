@@ -66,10 +66,6 @@ class Log
                                 message: "%{value} is not a valid badge validation status" }
   validates :issue_status, inclusion: { in: ISSUE_STATUS_VALUES, 
                                 message: "%{value} is not a valid badge issue status" }
-  
-  # Which fields are accessible?
-  attr_accessible :show_on_profile, :detached_log, :date_started, :date_requested, 
-    :date_withdrawn, :date_sent_to_backpack, :wiki, :receive_validation_request_emails
 
   # === CALLBACKS === #
 
@@ -169,7 +165,7 @@ class Log
     elsif user
       user.username_with_caps
     else
-      _id
+      _id.to_s
     end
   end
 
