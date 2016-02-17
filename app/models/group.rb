@@ -23,6 +23,11 @@ class Group
 
   DEFAULT_GROUP_AVATAR_PATH = 'app/assets/images/default-group-avatar.png'
   DEFAULT_GROUP_AVATAR_FILE = 'default-group-avatar.png'
+  DEFAULT_GROUP_AVATAR_REMOTE_URL = {
+    nil => 'https://badgelist.s3.amazonaws.com/images/default-group-avatar.png',
+    :medium => 'https://badgelist.s3.amazonaws.com/images/default-group-avatar-200.png',
+    :small => 'https://badgelist.s3.amazonaws.com/images/default-group-avatar-50.png'
+  }
 
   # === INSTANCE VARIABLES === #
 
@@ -155,7 +160,7 @@ class Group
   # Returns URL of the specified version of this group's avatar
   # Valid version values are nil (defaults to full size), :medium, :small
   def avatar_image_url(version = nil)
-    avatar_url(version) || DEFAULT_GROUP_AVATAR_FILE
+    avatar_url(version) || DEFAULT_GROUP_AVATAR_REMOTE_URL[version]
   end
   def avatar_image_medium_url; avatar_url(:medium); end
   def avatar_image_small_url; avatar_url(:small); end
