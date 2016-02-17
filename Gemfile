@@ -33,6 +33,7 @@ ruby '2.1.2'
   gem 'polymer-rails', '~> 1.2.4'
   # gem 'polymer-elements-rails', '~> 1.0.1'
   gem 'polymer-elements-rails', github: 'alchapone/polymer-elements-rails'
+  gem 'rack-cors', :require => 'rack/cors'
 
 #=== ERRORS & DEBUGGING ===#
 

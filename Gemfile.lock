@@ -309,6 +309,7 @@ GEM
       postmark (~> 1.7.0)
     puma (2.16.0)
     rack (1.6.4)
+    rack-cors (0.4.0)
     rack-mini-profiler (0.9.8)
       rack (>= 1.1.3)
     rack-protection (1.5.3)
@@ -474,6 +475,7 @@ DEPENDENCIES
   polymer-rails (~> 1.2.4)
   postmark-rails (~> 0.5)
   puma (~> 2.15)
+  rack-cors
   rack-mini-profiler
   rack-timeout
   rails (= 4.2.5)
