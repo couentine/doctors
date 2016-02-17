@@ -867,4 +867,22 @@ namespace :db do
     puts " >> Done."
   end
 
+  task populate_blank_group_avatars: :environment do
+    print "Updating #{Group.where(image_url: nil).count} blank avatar groups"
+    
+    # Run through them backwards
+    Group.where(image_url: nil).desc(:updated_at).each do |group|
+      if group.avatar?
+        print "!"
+      else
+        group.remote_avatar_url = \
+    'https://badgelist.s3.amazonaws.com/u/group/56c3b38be87b738c15000073/default-group-avatar.png'
+        group.timeless.save
+        print "."
+      end
+    end
+
+    puts " >> Done."
+  end
+
 end
