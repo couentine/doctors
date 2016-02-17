@@ -8,11 +8,10 @@ require 'rack/cors'
 use Rack::Cors do
   allow do
     origins 'http://localhost', '127.0.0.1', 'http://bl-staging-mango.herokuapp.com', \
-      'www.badgelist.com', 'badgelist.com'
+      'http://www.badgelist.com', 'http://badgelist.com'
 
     resource '/assets/*',
       headers: :any,
-      methods: [:get, :head, :options],
-      max_age: 3628800
+      methods: [:get, :head, :options]
   end
 end
