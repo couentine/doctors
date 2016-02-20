@@ -2,6 +2,7 @@ class Log
   include Mongoid::Document
   include Mongoid::Timestamps
   include JSONFilter
+  include JSONTemplater
   include StringTools
 
   # === CONSTANTS === #
@@ -12,6 +13,13 @@ class Log
   JSON_METHODS = [:recipient, :verify]
   JSON_MOCK_FIELDS = { 'uid' => :_id,  'badge' => :badge_url, 'issuedOn' => :date_issued_stamp,
     'evidence' => :evidence_url }
+
+  JSON_TEMPLATES = {
+    list_item: [:id, :validation_status, :date_started, :date_requested, :date_withdrawn, 
+      :date_issued, :date_retracted, :date_originally_issued, :validation_count, :rejection_count,
+      :user_name, :user_username_with_caps, :user_avatar_image_url, :user_avatar_image_medium_url,
+      :user_avatar_image_small_url, :created_at, :updated_at]
+  }
   
   # === INSTANCE VARIABLES === #
 
@@ -60,6 +68,8 @@ class Log
   field :user_avatar_image_medium_url,        type: String # local cache of user info
   field :user_avatar_image_small_url,         type: String # local cache of user info
 
+  field :validations_cache,                   type: Hash, default: {} # user_id => key_fields
+
   validates :badge, presence: true
   validates :user, presence: true
   validates :validation_status, inclusion: { in: VALIDATION_STATUS_VALUES, 
@@ -77,7 +87,9 @@ class Log
   after_save :back_validate_if_needed
   after_save :send_notifications
 
+  after_save :update_badge_validation_request_count
   after_save :update_user_if_needed
+  after_destroy :update_badge_validation_request_count
   after_destroy :update_user_after_destroy
 
   # === LOG MOCK FIELD METHODS === #
@@ -102,7 +114,105 @@ class Log
 
   def verify; { type: 'hosted', url: assertion_url }; end
 
+  # === LOG CLASS METHODS === #
+
+  # Returns hash of the passed logs with their child posts injected as an 'posts' hash list.
+  # Posts will be sorted by parent_tag asc, then by entry_number asc
+  # WARNING: This method does not currently filter out posts which are private or secret due to
+  #          the privacy settings of their parent tags.
+  # Use the log_json_template & post_json_template options to specify the json templates used.
+  def self.full_logs_as_json(log_criteria, 
+      options = { log_json_template: :list_item, post_json_template: :log_item })
+    log_ids, return_list = [], []
+    log_map = {} # log_id => log_hash_in_return_list
+    current_hash = {}
+
+    # First loop through the queried logs and build out the return list and the log map
+    log_criteria.each do |log|
+      log_ids << log.id
+      current_hash = log.json_from_template(options[:log_json_template])
+      current_hash[:posts] = []
+      log_map[log.id] = current_hash
+      return_list << current_hash
+    end
+
+    # Now query for the posts, then loop through and add results into the existing list
+    Entry.where(:log_id.in => log_ids, :type => 'post').order_by(:parent_tag.asc, 
+        :entry_number.asc).each do |entry|
+      log_map[entry.log_id][:posts] << entry.json_from_template(options[:post_json_template])
+    end
+
+    return_list
+  end
+
   # === LOG CLASS ASYNC METHODS === #
+
+  # Runs the add_validation method on all of the passed logs
+  # Returns a poller id if run in async mode
+  # NOTE: You can technically use this method to validate logs across multiple badges but that
+  #       seems like a sloppy / bad idea and is not currently implemented in the UI.
+  def self.add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
+      overwrite_existing = true, async = false)
+    if async
+      poller = Poller.new
+      poller.waiting_message = "Posting feedback for #{log_ids.count} logs..."
+      poller.progress = 1 # this will put the poller into 'progress mode'
+      poller.data = { log_ids: log_ids.map{ |id| id.to_s }, creator_user_id: creator_user_id.to_s,
+        summary: summary, body: body, logs_validated: logs_validated, 
+        overwrite_existing: overwrite_existing }
+      poller.save
+
+      Log.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
+        overwrite_existing, poller.id)
+    else
+      Log.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
+        overwrite_existing)
+    end
+  end
+
+  def self.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
+      overwrite_existing = true, poller_id = nil)
+    begin
+      # Query for the core records
+      poller = Poller.find(poller_id) rescue nil
+      creator_user = User.find(creator_user_id)
+      logs = Log.where(:id.in => log_ids)
+
+      # Initialize vars
+      badge_ids = [] # keeps track of the badges (though for now this is used for a single badge)
+      log_count = logs.count
+      progress_count = 0
+      
+      # Now loop through and add the validations
+      logs.each do |log|
+        log.context = 'bulk_validation' # this skips the updating of the badge validation count
+        log.add_validation(creator_user, summary, body, logs_validated, overwrite_existing)
+        progress_count += 1
+
+        # Keep track of the badge so we can update it's validation count later
+        badge_ids << log.badge_id unless badge_ids.include? log.badge_id
+        
+        if poller
+          poller.progress = progress_count * 100 / log_count
+          poller.save if poller.changed? # don't hit the DB unless the number has changed
+        end
+      end
+
+      # Now we need to update the badge validation counts (doing it all at once is more efficient)
+      badge_ids.each do |badge_id|
+        Badge.update_validation_request_count(badge_id)
+      end
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = 'An error occurred while trying to post feedback, ' \
+          + "please try again. (Error message: #{e})"
+        poller.save
+      else
+        throw e
+      end
+    end
+  end
 
   # If log still exists then pass only the first param
   # If log is deleted then pass only the user and badge ids
@@ -186,6 +296,7 @@ class Log
   end
 
   # Adds or updates a validation entry to the log and returns it
+  # Also updates log validations cache
   # NOTE: Doesn't work for new records.
   # log_validated = Boolean
   # Set overwrite_existing=false if you do NOT want to overwrite & save a existing validation
@@ -203,6 +314,14 @@ class Log
         entry.current_user = creator_user
         entry.current_username = creator_user.username
         entry.save
+
+        # Then update the validations cache
+        self.validations_cache[creator_user.id.to_s] = {
+          'entry_id' => entry.id,
+          'log_validated' => log_validated,
+          'summary' => summary,
+          'body' => body
+        }
 
         # Then increment the counts
         if log_validated
@@ -222,8 +341,16 @@ class Log
             self.validation_count -= 1
             self.rejection_count += 1
           end
-          self.save
         end
+
+        # Then update the validations cache and save
+        self.validations_cache[creator_user.id.to_s] = {
+          'entry_id' => entry.id,
+          'log_validated' => log_validated,
+          'summary' => summary,
+          'body' => body
+        }
+        self.save
 
         entry.current_user = creator_user
         entry.current_username = creator_user.username
@@ -491,6 +618,17 @@ protected
     
     # Return value = 
     (validation_count - rejection_count) >= validation_threshold
+  end
+
+  # Updates the badge field if needed (can be called after update or destroy)
+  def update_badge_validation_request_count
+    unless context == 'bulk_validation'
+      # If it goes into or out of the requested state then we need to update the count field
+      if (destroyed? || validation_status_changed? || detached_log_changed?) \
+          && ((validation_status == 'requested') || (validation_status_was == 'requested'))
+        Badge.delay(queue: 'low', retry: 'false').update_validation_request_count(badge_id)
+      end
+    end
   end
 
   # Call from after destroy

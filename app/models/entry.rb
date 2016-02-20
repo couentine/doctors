@@ -2,6 +2,7 @@ class Entry
   include Mongoid::Document
   include Mongoid::Timestamps
   include JSONFilter
+  include JSONTemplater
   include StringTools
 
   # === CONSTANTS === #
@@ -11,6 +12,11 @@ class Entry
   FORMAT_VALUES = ['text', 'link', 'image', 'tweet', 'code']
   JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, 
     :body_sections, :tags, :tags_with_caps]
+
+  JSON_TEMPLATES = {
+    log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :linkified_summary, :type,
+      :format, :format_icon, :parent_tag, :body_sections, :link_url, :code_format]
+  }
   
   # === RELATIONSHIPS === #
 
@@ -345,11 +351,15 @@ protected
   # Update the log if this was a validation
   def check_log_validation_counts
     if type == 'validation'
+      # Update the log validation counts
       if log_validated
         log.validation_count -= 1
       else
         log.rejection_count -= 1
       end
+      
+      # Then remove this item from the log validations cache and save
+      log.validations_cache.delete creator_id.to_s
       log.save
     end
   end

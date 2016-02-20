@@ -82,6 +82,7 @@ class Badge
   field :expert_user_ids,                 type: Array, default: []
   field :learner_user_ids,                type: Array, default: []
   field :all_user_ids,                    type: Array, default: []
+  field :validation_request_count,        type: Integer, default: 0
 
   field :group_name,                      type: String # local cache of group info
   field :group_url,                       type: String # local cache of group info
@@ -396,6 +397,12 @@ class Badge
         throw e
       end
     end
+  end
+
+  def self.update_validation_request_count(badge_id)
+    badge = Badge.find(badge_id)
+    badge.validation_request_count = badge.requesting_learner_logs.count
+    badge.timeless.save if badge.changed?
   end
 
   # === INSTANCE METHODS === #
