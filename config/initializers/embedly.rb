@@ -1,0 +1,1 @@
+$embedly = Embedly::API.new key: ENV['embedly_api_key']

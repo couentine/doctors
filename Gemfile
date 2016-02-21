@@ -49,6 +49,7 @@ ruby '2.1.2'
   gem 'intercom-rails'
   gem 'postmark-rails', '~> 0.5'
   gem 'twitter'
+  gem 'embedly'
 
 #=== DEVELOPMENT / TEST ===#
 

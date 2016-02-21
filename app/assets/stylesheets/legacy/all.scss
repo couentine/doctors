@@ -2553,6 +2553,35 @@ div.badge-card {
     } 
   }
 }
+.panel-entry-content-link-enhanced {
+  h3 { margin-top: 0 !important; }
+  .link-provider {
+    display: block;
+    font-weight: bold;
+    color: $light-text-color;
+  }
+  .link-description { 
+    display: block;
+    margin-bottom: 10px; 
+  }
+  .link-thumbnail-wrapper { display: block; }
+  img.link-thumbnail { 
+    display: block;
+
+    &.small { max-height: 300px; }
+  }
+  .link-embed {
+    display: block;
+    
+    iframe { 
+      display: block;
+      width: 100%;
+    }
+
+    &:not(.small) iframe  { min-height: 450px; }
+    &.small iframe { max-height: 300px; }
+  }
+}
 .panel-entry-content-tweet a {
   background-color: $tertiary-light;
   display: inline-block;
@@ -3994,7 +4023,7 @@ div.entry-card .card-body-row {
   position: relative;
 
   div.card-body-inner {
-    max-height: 400px;
+    max-height: 500px;
     padding: 5px 10px 5px 10px;
     position: relative;
     overflow: hidden;

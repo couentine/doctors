@@ -105,6 +105,10 @@ GEM
     diff-lcs (1.2.5)
     domain_name (0.5.20160128)
       unf (>= 0.0.5, < 1.0.0)
+    embedly (1.9.1)
+      json
+      oauth
+      querystring
     equalizer (0.0.10)
     erubis (2.7.0)
     exception_notification (4.1.4)
@@ -294,6 +298,7 @@ GEM
       mini_portile2 (~> 2.0.0.rc2)
     nokogumbo (1.4.2)
       nokogiri
+    oauth (0.5.0)
     origin (2.2.0)
     orm_adapter (0.5.0)
     polymer-rails (1.2.4.1)
@@ -308,6 +313,7 @@ GEM
       actionmailer (>= 3.0.0)
       postmark (~> 1.7.0)
     puma (2.16.0)
+    querystring (0.1.0)
     rack (1.6.4)
     rack-cors (0.4.0)
     rack-mini-profiler (0.9.8)
@@ -459,6 +465,7 @@ DEPENDENCIES
   coffee-rails (~> 4.1)
   devise (~> 3.5)
   devise-async
+  embedly
   exception_notification
   factory_girl_rails (~> 4.0)
   faker

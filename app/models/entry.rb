@@ -76,6 +76,7 @@ class Entry
   before_save :process_parent_tag_and_content_changes
   before_save :update_body_versions # DO store the first value since it comes from the user
   after_save :process_image
+  after_save :process_link
   after_save :process_tweet
   after_create :update_log
   after_create :send_notifications
@@ -167,6 +168,71 @@ class Entry
 
   # === ASYNC METHODS === #
 
+  def self.refresh_link(entry_id, timeless_save = false)
+    entry = Entry.find(entry_id)
+
+    begin
+      # Now attempt to pull down link info from the Embed.ly API
+      result = $embedly.oembed(url: entry.link_url)
+      
+      # Now that we have the result we convert it to a hash (the fields are in the 'table' key)
+      if !result.blank? && result.first && !result.first.as_json['table'].blank?
+        entry.link_metadata = result.first.as_json['table']
+      end
+
+      # Save it inside of the rescue block just in case another error creeps in
+      if timeless_save
+        entry.timeless.save!
+      else
+        entry.save!
+      end
+    rescue Exception => e
+      # Save the error in the link meta data
+      entry.link_metadata = {
+        'embedly_exception' => e.to_s
+      }
+      entry.save!
+
+      # Then throw the error so it is retried by sidekiq
+      throw e
+    end
+  end
+
+  # Call this function from a console to recursively refresh links on all entries in the DB where
+  # link_metadata['type'] is nil. This method uses sidekiq to spread itself out into batches run
+  # once per second. Each batch contains 2/3rds of EMBEDLY_RATE_LIMIT.
+  # Specify stop_after to have the process stop after a certain number of entries.
+  # To keep running until all of the links are populated set stop_after to -1.
+  # NOTE: If all of the attempts throw an error then the method will fail and throw the last error.
+  def self.refresh_blank_links(stop_after, current_count = 0)
+    # Initialize the variables
+    error_count = 0
+    last_error = nil
+    batch_size = (ENV['EMBEDLY_RATE_LIMIT'] || 15) * 2 / 3
+
+    # Build the batch query (randomly sample so we don't get stuck if there are bad ones)
+    entry_batch = Entry.where(format: 'link', 'link_metadata.type' => nil).sample(batch_size)
+    batch_count = entry_batch.count
+
+    entry_batch.each do |entry|
+      begin
+        Entry.refresh_link(entry.id, true) # timeless_save = true
+      rescue Exception => e
+        error_count += 1
+        last_error = e
+      end
+    end
+
+    # Now increment the count and schedule the next run if needed
+    current_count += batch_count
+    if (error_count > 0) && (error_count == batch_count)
+      # If everything was an error, stop the train
+      throw last_error
+    elsif (batch_count > 0) && ((stop_after < 0) || (current_count < stop_after))
+      Entry.delay_for(1.second).refresh_blank_links(stop_after, current_count)
+    end
+  end
+
   def self.refresh_tweet(entry_id)
     entry = Entry.find(entry_id)
 
@@ -253,12 +319,14 @@ protected
     end
     
     if (format == 'tweet') && link_url_changed? && !link_url.blank?
+      self.link_url = link_url.strip
       self.summary = 'Loading tweet, refresh to view...'
       self.link_metadata = {}
     end
 
     if (format == 'link') && link_url_changed? && !link_url.blank?
       # Transform special links into other sorts of embeds
+      self.link_url = link_url.strip
       self.body = transform_link link_url
     end
 
@@ -300,6 +368,13 @@ protected
   def process_image
     if processing_uploaded_image
       Entry.delay(queue: 'high').do_process_image(id)
+    end
+  end
+
+  def process_link
+    if (format == 'link') && link_url_changed? && !link_url.blank?
+      # Queue up the embedly API call
+      Entry.delay.refresh_link(self.id)
     end
   end
 
