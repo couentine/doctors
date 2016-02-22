@@ -74,7 +74,8 @@
 
   <% #=== PAGE BODY ===# %>
 
-  <body class="<%= yield(:body_class) if content_for?(:body_class) %>" unresolved>
+  <body class="<%= yield(:body_class) if content_for?(:body_class) %>" 
+    unresolved>
       
     <% #=== PAGE ALERTS ===# %>
 
@@ -86,15 +87,11 @@
         </bl-toast-container>
       <% end %>
 
-    <% #=== HEADER, PAGE CONTENT & FOOTER ===# %>
+    <% #=== PAGE CONTENT & FOOTER (HEAER IS HANDLED IN EACH PAGE) ===# %>
 
-      <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-        <%= render 'layouts/app/header' %>
-
-        <%= yield %>
+      <%= yield %>
         
-        <%= render 'layouts/app/footer' unless content_for?(:hide_footer) %>
-      </div>
+      <%= render 'layouts/app/footer' unless content_for?(:hide_footer) %>
 
   </body>
 
