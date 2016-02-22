@@ -2,6 +2,7 @@ class Badge
   include Mongoid::Document
   include Mongoid::Timestamps
   include JSONFilter
+  include JSONTemplater
   include StringTools
 
   # === CONSTANTS === #
@@ -21,6 +22,11 @@ class Badge
     'image_medium' => :image_medium_url, 'image_small' => :image_small_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps,
     'full_url' => :badge_url }
+
+  JSON_TEMPLATES = {
+    tab_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
+      :image_url, :image_medium_url, :image_small_url]
+  }
   
   # Below are the badge-level fields included in the clone
   # NOTE: Badge image is automatically checked for changes and included

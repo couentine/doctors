@@ -147,39 +147,40 @@ class Log
 
   # === LOG CLASS ASYNC METHODS === #
 
-  # Runs the add_validation method on all of the passed logs
+  # Runs the add_validation method on the logs belonging to the users with all of the passed 
+  # usernames for the specified badge. (Invalid usernames will be ignored.)
   # Returns a poller id if run in async mode
-  # NOTE: You can technically use this method to validate logs across multiple badges but that
-  #       seems like a sloppy / bad idea and is not currently implemented in the UI.
-  def self.add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
+  def self.add_validations(badge_id, log_usernames, creator_user_id, summary, body, logs_validated, 
       overwrite_existing = true, async = false)
     if async
       poller = Poller.new
-      poller.waiting_message = "Posting feedback for #{log_ids.count} logs..."
-      poller.progress = 1 # this will put the poller into 'progress mode'
-      poller.data = { log_ids: log_ids.map{ |id| id.to_s }, creator_user_id: creator_user_id.to_s,
-        summary: summary, body: body, logs_validated: logs_validated, 
-        overwrite_existing: overwrite_existing }
+      poller.waiting_message = "Posting feedback for #{log_usernames.count} logs..."
+      poller.progress = 0 # this will put the poller into 'progress mode'
+      poller.data = { badge_id: badge_id.to_s, log_usernames: log_usernames, 
+        creator_user_id: creator_user_id.to_s, summary: summary, body: body, 
+        logs_validated: logs_validated, overwrite_existing: overwrite_existing }
       poller.save
 
-      Log.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
-        overwrite_existing, poller.id)
+      Log.delay.do_add_validations(badge_id, log_usernames, creator_user_id, 
+        summary, body, logs_validated, overwrite_existing, poller.id)
+
+      poller.id
     else
-      Log.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
-        overwrite_existing)
+      Log.do_add_validations(badge_id, log_usernames, creator_user_id, summary, body, 
+        logs_validated, overwrite_existing)
     end
   end
 
-  def self.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
-      overwrite_existing = true, poller_id = nil)
+  def self.do_add_validations(badge_id, log_usernames, creator_user_id, summary, body, 
+      logs_validated, overwrite_existing = true, poller_id = nil)
     begin
       # Query for the core records
       poller = Poller.find(poller_id) rescue nil
       creator_user = User.find(creator_user_id)
-      logs = Log.where(:id.in => log_ids)
+      badge = Badge.find(badge_id)
+      logs = badge.logs.where(:user_username.in => log_usernames)
 
       # Initialize vars
-      badge_ids = [] # keeps track of the badges (though for now this is used for a single badge)
       log_count = logs.count
       progress_count = 0
       
@@ -188,9 +189,6 @@ class Log
         log.context = 'bulk_validation' # this skips the updating of the badge validation count
         log.add_validation(creator_user, summary, body, logs_validated, overwrite_existing)
         progress_count += 1
-
-        # Keep track of the badge so we can update it's validation count later
-        badge_ids << log.badge_id unless badge_ids.include? log.badge_id
         
         if poller
           poller.progress = progress_count * 100 / log_count
@@ -198,10 +196,8 @@ class Log
         end
       end
 
-      # Now we need to update the badge validation counts (doing it all at once is more efficient)
-      badge_ids.each do |badge_id|
-        Badge.update_validation_request_count(badge_id)
-      end
+      # Now we need to update the badge validation count
+      Badge.update_validation_request_count(badge.id)
     rescue Exception => e
       if poller
         poller.status = 'failed'
