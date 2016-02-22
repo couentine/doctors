@@ -3,6 +3,7 @@
   :host { 
     display: block;
     font-size: 1rem; 
+    height: 5em;
   }
     :host ::content a {
       color: rgb(97,97,97);

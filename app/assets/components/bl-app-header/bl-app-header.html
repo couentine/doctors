@@ -2,8 +2,8 @@
   <link rel="stylesheet" href="bl-app-header.css" />
   
   <template>
-    
-    <paper-header-panel class="flex">
+    <!--
+    <paper-header-panel mode="waterfall">
       <paper-toolbar class="medium-tall" bottom-justify="end">
         
         <content select="a.logo"></content>
@@ -12,6 +12,12 @@
         <content select=".bottom"></content>
 
       </paper-toolbar>
+    </paper-header-panel>
+    -->
+
+    <paper-header-panel mode="waterfall">
+      <div class="paper-header">standard</div>
+      <div class="content fit">content fits 100% below the header</div>
     </paper-header-panel>
 
   </template>
