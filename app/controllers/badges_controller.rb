@@ -176,7 +176,7 @@ class BadgesController < ApplicationController
     @badge.destroy
 
     respond_to do |format|
-      format.html { redirect_to @group, notice: "The badge has been deleted." } # fixme: redirect to the learning group
+      format.html { redirect_to @group, notice: "The badge has been deleted." }
       format.json { head :no_content }
     end
   end

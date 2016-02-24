@@ -5,42 +5,31 @@
 
   <template>
 
-    <paper-header-panel mode="waterfall" class="flex">
-      <paper-toolbar class="medium-tall">
+    <paper-header-panel mode="{{headerMode}}" class$="{{headerPanelClass}}">
+
+      <paper-toolbar class$="{{toolbarClass}}" bottom-justify="end">
+        <div class="toolbar top">
           <a class="logo" title="Badge List Home" href="/">
             <img src="<%= url.asset_url('badge-list-shield-square.png') %>">
           </a>
           
-          <a href="/users/sign_out" class="signout" data-method="delete">
-            <i class="fa fa-close"></i> Sign Out
-          </a>
+          <template is="dom-if" if="{{isAppbarMode_Home}}">
+            <a href="/users/sign_out" class="signout" data-method="delete">
+              <i class="fa fa-close"></i> Sign Out
+            </a>
+          </template>
+          <template is="dom-if" if="{{isAppbarMode_Standard}}">
+            <!-- FIXME -->
+          </template>
+        </div>
 
-          <div class="bottom">
-            <ul class="nav-links">
-              <li>
-                <a class="nav-link" href="/community">
-                <i class="fa fa-users"></i> 
-                <span class="nav-link-text">Community</span>
-                </a>
-              </li>
-              <li>
-                <a class="nav-link" href="/help/docs">
-                <i class="fa fa-question-circle"></i>
-                <span class="nav-link-text">Help Docs</span>
-                </a>
-              </li>
-              <li>
-                <a class="nav-link" href="/w">
-                <i class="fa fa-globe"></i>
-                <span class="nav-link-text">Website</span>
-                </a>
-              </li>
-            </ul>
-          </div>
+        <content select=".toolbar.middle"></content>
+        <content select=".toolbar.bottom"></content>
       </paper-toolbar>
-      <content></content>
-    </paper-header-panel>
+      
+      <content select=".content"></content>
 
+    </paper-header-panel>
 
   </template>
 

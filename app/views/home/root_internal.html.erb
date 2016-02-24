@@ -2,86 +2,112 @@
   provide(:title, "Home")
 %>
 
-<bl-app-container>
+<bl-app-container color-mode="home" appbar-mode="home" header-mode="waterfall" 
+  toolbar-mode="medium-tall">
 
-  <!-- === PAGE HEADER === -->
-
-  <bl-page-header-home>
-    <%= image_tag @user.avatar_image_url(:medium), class: 'primary' %>
-    <%= link_to "<i class='fa fa-pencil'></i>".html_safe, 
-      edit_user_registration_path + '#upload-image', class: 'primary-overlay' %>
-    
-    <h1><%= @user.name %></h1>
-    
-    <% if !@user.confirmed? || @user.pending_reconfirmation? %>
-      <!-- === ACCOUNT STATUS WARNING === -->
-      
-      <bl-label class="primary warning">
-        <i class="fa fa-exclamation-triangle"></i>
-        Your email address needs verification
-      </bl-label>
-    <% else %>
-      <div class="subtitle"><%= @user.username %></div>
-    <% end %>
-    
-    <bl-button type="raised" link="<%= edit_user_registration_path %>" class="primary">
-      Manage Account
-    </bl-button>
-    
-    <bl-widget-badge-count class="widget" count="<%= @badge_count %>"
-      link="<%= user_path(current_user) %>"></bl-widget-badge-count>
-  </bl-page-header-home>
-
-  <!-- === BADGES === -->
-
-  <bl-subheader>
-    <h2>Badges in progress</h2>
-  </bl-subheader>
-
-  <bl-grid mode="badges" badges='<%= @badges_hash.to_json %>' next-page="<%= @badges_next_page %>"
-      next-page-url="<%= root_url(format: :json, query: 'badges') + '&bp=' %>">
-    <div class="placeholder">
-      <i class="fa fa-shield"></i>
-      <div class="message">
-        <p><b>You aren't working on any badges.</b></p> 
-        <p>
-          Maybe check out the <a href="/community">Badge List Community</a>?
-        </p>
-      </div>
-    </div>
-  </bl-grid>
-
-  <!-- === GROUPS === -->
-
-  <bl-subheader>
-    <h2>Your groups</h2>
-    <ul class="buttons">
+  <div class="toolbar bottom">
+    <ul class="nav-links">
       <li>
-        <bl-button type="flat" target="_blank"
-            link="http://blog.badgelist.com/post/134502755750/open-group-list">
-          <i class="fa fa-globe"></i> Browse
-        </bl-button>
+        <a class="nav-link" href="/community">
+        <i class="fa fa-users"></i> 
+        <span class="nav-link-text">Community</span>
+        </a>
       </li>
       <li>
-        <bl-button type="flat" link="<%= new_group_path %>">
-          <i class="fa fa-plus"></i> Create
-        </bl-button>
+        <a class="nav-link" href="/help/docs">
+        <i class="fa fa-question-circle"></i>
+        <span class="nav-link-text">Help Docs</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="/w">
+        <i class="fa fa-globe"></i>
+        <span class="nav-link-text">Website</span>
+        </a>
       </li>
     </ul>
-  </bl-subheader>
+  </div>
 
-  <bl-grid mode="groups" groups='<%= @groups_hash.to_json %>' next-page="<%= @groups_next_page %>"
-      next-page-url="<%= root_url(format: :json, query: 'groups') + '&gp=' %>">
-    <div class="placeholder">
-      <i class="fa fa-users"></i>
-      <div class="message">
-        <p><b>You aren't a member of any groups yet.</b></p> 
-        <p>
-          To get started click one of the buttons above to create a new group 
-          or browse for a public group to join.
-        </p>
+  <div class="content">
+    <!-- === PAGE HEADER === -->
+
+    <bl-page-header-home>
+      <%= image_tag @user.avatar_image_url(:medium), class: 'primary' %>
+      <%= link_to "<i class='fa fa-pencil'></i>".html_safe, 
+        edit_user_registration_path + '#upload-image', class: 'primary-overlay' %>
+      
+      <h1><%= @user.name %></h1>
+      
+      <% if !@user.confirmed? || @user.pending_reconfirmation? %>
+        <!-- === ACCOUNT STATUS WARNING === -->
+        
+        <bl-label class="primary warning">
+          <i class="fa fa-exclamation-triangle"></i>
+          Your email address needs verification
+        </bl-label>
+      <% else %>
+        <div class="subtitle"><%= @user.username %></div>
+      <% end %>
+      
+      <bl-button type="raised" link="<%= edit_user_registration_path %>" class="primary">
+        Manage Account
+      </bl-button>
+      
+      <bl-widget-badge-count class="widget" count="<%= @badge_count %>"
+        link="<%= user_path(current_user) %>"></bl-widget-badge-count>
+    </bl-page-header-home>
+
+    <!-- === BADGES === -->
+
+    <bl-subheader>
+      <h2>Badges in progress</h2>
+    </bl-subheader>
+
+    <bl-grid mode="badges" badges='<%= @badges_hash.to_json %>' next-page="<%= @badges_next_page %>"
+        next-page-url="<%= root_url(format: :json, query: 'badges') + '&bp=' %>">
+      <div class="placeholder">
+        <i class="fa fa-shield"></i>
+        <div class="message">
+          <p><b>You aren't working on any badges.</b></p> 
+          <p>
+            Maybe check out the <a href="/community">Badge List Community</a>?
+          </p>
+        </div>
       </div>
-    </div>
-  </bl-grid>
+    </bl-grid>
+
+    <!-- === GROUPS === -->
+
+    <bl-subheader>
+      <h2>Your groups</h2>
+      <ul class="buttons">
+        <li>
+          <bl-button type="flat" target="_blank"
+              link="http://blog.badgelist.com/post/134502755750/open-group-list">
+            <i class="fa fa-globe"></i> Browse
+          </bl-button>
+        </li>
+        <li>
+          <bl-button type="flat" link="<%= new_group_path %>">
+            <i class="fa fa-plus"></i> Create
+          </bl-button>
+        </li>
+      </ul>
+    </bl-subheader>
+
+    <bl-grid mode="groups" groups='<%= @groups_hash.to_json %>' next-page="<%= @groups_next_page %>"
+        next-page-url="<%= root_url(format: :json, query: 'groups') + '&gp=' %>">
+      <div class="placeholder">
+        <i class="fa fa-users"></i>
+        <div class="message">
+          <p><b>You aren't a member of any groups yet.</b></p> 
+          <p>
+            To get started click one of the buttons above to create a new group 
+            or browse for a public group to join.
+          </p>
+        </div>
+      </div>
+    </bl-grid>
+  </div>
 
 </bl-app-container>
