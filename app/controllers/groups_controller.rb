@@ -797,15 +797,19 @@ class GroupsController < ApplicationController
     end
   end
 
-  # === REQUESTS === #
+  # === REVIEWS === #
 
-  # GET /group-url/requests?badge=badge-url&p=1&ps=50
-  # Presents UI for seeing all pending validation requests and allows bulk validation
-  # If badge isn't set it will default to the first badge alphabetically.
-  # The page variable is mostly just intended to be called for the json version
-  def index_requests
+  # GET /group-url/reviews?badge=badge-url&page=1&page_size=50&sort_by=date_requested
+  #                        &sort_order=asc&query=learners
+  # Presents UI for seeing all pending validation requests / existing experts for all badges
+  # and allows bulk validation. If badge isn't set it will default to the first badge 
+  # alphabetically. The page variable is mostly just intended to be called for the json version.
+  # NOTE: @badges_hash is a hash with two keys. :learners contains all of the badges with pending
+  #   learner feedback requests, @experts has all of the badges with more than 1 expert.
+  def reviews
     sort_fields = ['date_requested', 'user_name'] # defaults to first value
     sort_orders = ['asc', 'desc'] # defaults to first value
+    query_options = ['learners', 'experts']
 
     badge_param = params['badge'].to_s.downcase
     @next_page = nil
@@ -814,58 +818,66 @@ class GroupsController < ApplicationController
     @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
     @sort_order = \
       (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
+    @query = (query_options.include? params['query']) ? params['query'] : query_options.first
     @badge_url, @badge_id = nil, nil
-    @badges_hash = []
+    @badges_hash = { learners: [], experts: [] }
     @full_logs_hash = []
+    badge_hash_map = {} # badge_url => badge_hash
 
     # No  need to hit the DB again unless there are badges
     if @group.badge_count > 0
       # First we need to build the badge criteria
       if @current_user_is_admin || @badge_list_admin
         # Admins can access everything
-        badge_criteria = @group.badges.where(:validation_request_count.gt => 0)
+        learner_badge_criteria = @group.badges.where(:validation_request_count.gt => 0)
+        expert_badge_criteria = @group.badges.exists('expert_user_ids.1' => true)
       else
         # Non-admins can only access badges which they can award
-        badge_criteria = @group.badges.where(:validation_request_count.gt => 0, 
+        learner_badge_criteria = @group.badges.where(:validation_request_count.gt => 0, 
           :awardability => 'experts', :expert_user_ids.in => [current_user.id])
+        expert_badge_criteria = @group.badges.exists('expert_user_ids.1' => true)\
+          .where(:awardability => 'experts', :expert_user_ids.in => [current_user.id])
+      end
+      query_badge_criteria = (@query=='experts') ? expert_badge_criteria : learner_badge_criteria
+
+      if request.format == 'html'
+        # If this is the initial page load, then we need to query the badge hashes
+        learner_badge_criteria.asc(:name).each do |badge| 
+          badge_hash = badge.json_from_template(:list_item)
+          badge_hash_map[badge.url] = badge_hash
+          @badges_hash[:learners] << badge_hash
+        end
+        expert_badge_criteria.asc(:name).each do |badge| 
+          badge_hash = badge_hash_map[badge.url] || badge.json_from_template(:list_item)
+          badge_hash_map[badge.url] = badge_hash # in case we need to
+          @badges_hash[:experts] << badge_hash
+        end
+        
+        # Set variables only if the param is accurate 
+        # Leave blank if invalid (user will be presented with badge selection screen on load)
+        # NOTE: The way this is currently written only verifies access not if param matches query
+        if badge_hash_map.has_key? badge_param 
+          @badge_url = badge_hash_map[badge_param][:url]
+          @badge_id = badge_hash_map[badge_param][:id]
+        end
+      elsif request.format == 'json'
+        # If this is a followup json query for logs then we just need to verify the badge
+        badge = query_badge_criteria.where(url: badge_param).first
+        if badge
+          @badge_url = badge.url
+          @badge_id = badge.id
+        end
       end
 
-      # There's no need to do anything if there are no pending requests to see
-      if badge_criteria.count > 0
-        if request.format == 'html'
-          # If this is the initial page load, then we need to query the whole badges hash
-          badge_criteria.asc(:name).each do |badge| 
-            @badges_hash << badge.json_from_template(:tab_list_item)
-            
-            # Set variables only if the param is accurate
-            if badge.url == badge_param 
-              @badge_url = badge.url
-              @badge_id = badge.id
-            end
-          end
-
-          # Default to the first badge if the param was missing or invalid
-          if @badge_url.blank?
-            @badge_url = @badges_hash.first['url'] 
-            @badge_id = @badges_hash.first['id'] 
-          end
-        elsif request.format == 'json'
-          # If this is a followup json query for logs then we just need to verify the badge
-          badge = badge_criteria.where(url: badge_param).first
-          if badge
-            @badge_url = badge.url
-            @badge_id = badge.id
-          end
-        end
-
-        # Now build the logs, but only if the badge param is set
-        unless @badge_id.blank?
-          log_criteria = Log.where(badge_id: @badge_id, validation_status: 'requested', 
-            detached_log: false).sort_by("#{@sort_by} #{@sort_order}").page(@page).per(@page_size)
-          @full_logs_hash = Log.full_logs_as_json(log_criteria, 
-            log_json_template: :list_item, post_json_template: :log_item)
-          @next_page = @page + 1 if log_criteria.count > (@page_size * @page)
-        end
+      # Now build the logs, but only if the badge param is set
+      unless @badge_id.blank?
+        query_status = (@query == 'experts') ? 'validated' : 'requested'
+        log_criteria = Log.where(badge_id: @badge_id, validation_status: query_status, 
+          detached_log: false, :user_id.ne => current_user.id).page(@page).per(@page_size)\
+          .sort_by("#{@sort_by} #{@sort_order}")
+        @full_logs_hash = Log.full_logs_as_json(log_criteria, log_json_template: :list_item, 
+          post_json_template: :log_item)
+        @next_page = @page + 1 if log_criteria.count > (@page_size * @page)
       end
     end
 
@@ -873,8 +885,9 @@ class GroupsController < ApplicationController
     respond_to do |format|
       format.html { render template: 'groups/index_requests', layout: 'app' }
       format.json do
-        render json: { badge_id: @badge_id, badge_url: @badge_url, logs: @full_logs_hash,
-          next_page: @next_page }
+        render json: { badge_id: @badge_id, badge_url: @badge_url, query: @query, page: @page,
+          page_size: @page_size, sort_by: @sort_by, sort_order: @sort_order,
+          logs: @full_logs_hash, next_page: @next_page }
       end
     end
   end

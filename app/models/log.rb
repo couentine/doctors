@@ -18,7 +18,7 @@ class Log
     list_item: [:id, :validation_status, :date_started, :date_requested, :date_withdrawn, 
       :date_issued, :date_retracted, :date_originally_issued, :validation_count, :rejection_count,
       :user_name, :user_username_with_caps, :user_avatar_image_url, :user_avatar_image_medium_url,
-      :user_avatar_image_small_url, :created_at, :updated_at]
+      :user_avatar_image_small_url, :created_at, :updated_at, :validating_user_ids]
   }
   
   # === INSTANCE VARIABLES === #
@@ -113,6 +113,10 @@ class Log
   end
 
   def verify; { type: 'hosted', url: assertion_url }; end
+
+  def validating_user_ids
+    validations_cache.keys
+  end
 
   # === LOG CLASS METHODS === #
 

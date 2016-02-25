@@ -24,7 +24,7 @@ class Badge
     'full_url' => :badge_url }
 
   JSON_TEMPLATES = {
-    tab_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
+    list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
       :image_url, :image_medium_url, :image_small_url]
   }
   
