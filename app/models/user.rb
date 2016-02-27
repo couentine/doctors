@@ -2,6 +2,7 @@ class User
   include Mongoid::Document
   include Mongoid::Timestamps
   include JSONFilter
+  include JSONTemplater
 
   # === CONSTANTS === #
   
@@ -10,6 +11,11 @@ class User
   MAX_USERNAME_LENGTH = 15
   JSON_FIELDS = [:name, :username, :username_with_caps]
   JSON_MOCK_FIELDS = { :avatar_image_url => :avatar_image_url }
+
+  JSON_TEMPLATES = {
+    current_user: [:id, :name, :username, :username_with_caps, :admin, :avatar_image_url, 
+      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive]
+  }
 
   INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'
   MAX_EMAIL_BOUNCES = 3

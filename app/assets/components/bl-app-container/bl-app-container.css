@@ -13,7 +13,10 @@
     list-style: none;
     margin: 0; padding: 0;
   }
-    :host ::content .toolbar a { text-decoration: none; }
+    :host ::content .toolbar a { 
+      text-decoration: none;
+      color: inherit;
+    }
     :host ::content .toolbar a i.fa { margin-right: 0.1em; }
     :host ::content .toolbar ul.nav-links li { 
       display: inline-block;
@@ -24,23 +27,66 @@
       :host ::content .toolbar .nav-link-text { display: inline; } 
     }
 
-/* === HEADER (THIS COMPONENT) === */
+/* === PAPER HEADER PANEL === */
 
   paper-header-panel {
     -ms-flex: 1;
     -webkit-flex: 1;
     flex: 1;
-  }
-    paper-toolbar {
-      .home-colors {
-        --paper-toolbar-background: white;
-        --paper-toolbar-color: rgb(97,97,97);
 
-        --paper-toolbar: {
-          border-top: 4px solid rgb(251,140,0);
-        };
-      }
-    }
+    --paper-header-panel: {
+      background-color: white;
+      color: rgb(97,97,97);
+      border-top: 4px solid rgb(251,140,0);
+    };
+  }
+
+/* === PAPER SCROLL HEADER PANEL === */
+
+  paper-scroll-header-panel {
+    -ms-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+    height: 100%;
+    border-top: 4px solid rgb(251,140,0);
+
+    --paper-scroll-header-panel-full-header: { 
+      color: rgb(97,97,97);
+      background-color: white; 
+    };
+    --paper-scroll-header-panel-condensed-header: { 
+      color: rgb(97,97,97);
+      background-color: white; 
+    };
+
+  }
+  paper-scroll-header-panel.color-background {
+    --paper-scroll-header-panel-full-header: { 
+      background-color: transparent;
+      color: white;
+    };
+    --paper-scroll-header-panel-condensed-header: { 
+      background-color: rgba(0,0,0,0.25);
+      color: white;
+    };
+  }
+  paper-scroll-header-panel.group-color {
+    border-top: 4px solid rgb(3,155,229);
+    background-color: rgb(41,182,246);
+  }
+
+/* === PAPER TOOLBAR === */
+
+  paper-toolbar {
+    background-color: transparent;
+    -webkit-transform-origin: left center;
+    transform-origin: left center;
+    color: rgb(97,97,97);
+  }
+  paper-toolbar.color-background {
+    background-color: transparent;
+    color: white; 
+  }
     .toolbar.top { width: 100%; }
     .toolbar.top a {
       color: rgb(97,97,97);
@@ -48,6 +94,27 @@
     }
     .toolbar.top a.signout { float: right; }
     .toolbar.top a i.fa { margin-right: 0.1em; }
+    .toolbar.top a.logo { 
+      display: inline-block;
+      margin-top: 0.5em;
+    }
     .toolbar.top a.logo img { height: 1.5em; }
       @media (min-width: 840px) { .toolbar.top a.logo img { height: 2em; } }
   
+    paper-menu-button.current-user {
+      float: right;
+      display: inline-block;
+    }
+      .dropdown-trigger { display: inline-block; }
+      img.current-user { 
+        height: 1.5em; 
+        border: 0.15em solid white;
+        border-radius: 500px;
+        display: inline-block;
+      }
+      .dropdown-trigger i.fa {
+        display: inline-block;
+      }
+      @media (min-width: 840px) { 
+        img.current-user.dropdown-trigger { height: 2em; } 
+      }

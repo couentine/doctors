@@ -87,11 +87,9 @@
         </bl-toast-container>
       <% end %>
 
-    <% #=== PAGE CONTENT & FOOTER (HEAER IS HANDLED IN EACH PAGE) ===# %>
+    <% #=== PAGE CONTENT (HEADER & FOOTER IS HANDLED IN APP CONTAINER COMPONENT) ===# %>
 
       <%= yield %>
-        
-      <%= render 'layouts/app/footer' unless content_for?(:hide_footer) %>
 
   </body>
 

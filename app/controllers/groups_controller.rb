@@ -9,10 +9,10 @@ class GroupsController < ApplicationController
 
   prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :destroy_user, :send_invitation, :destroy_invited_user, :add_users, 
-    :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, :index_requests, 
+    :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, :reviews, 
     :create_validations]
   before_action :authenticate_user!, except: [:show]
-  before_action :group_member_or_admin, only: [:leave, :index_requests, :create_validations]
+  before_action :group_member_or_admin, only: [:leave, :reviews, :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
@@ -883,7 +883,7 @@ class GroupsController < ApplicationController
 
     # Now we can respond
     respond_to do |format|
-      format.html { render template: 'groups/index_requests', layout: 'app' }
+      format.html { render template: 'groups/reviews', layout: 'app' }
       format.json do
         render json: { badge_id: @badge_id, badge_url: @badge_url, query: @query, page: @page,
           page_size: @page_size, sort_by: @sort_by, sort_order: @sort_order,
