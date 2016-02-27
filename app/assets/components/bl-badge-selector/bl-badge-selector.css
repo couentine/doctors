@@ -1,0 +1,18 @@
+/* === BASE STYLES === */
+
+  :host {
+    display: inline-block;
+  }
+
+/* === EXPANDED === */
+
+  .expanded-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 2em;
+    background-color: white;
+    color: rgb(97,97,97);
+  }

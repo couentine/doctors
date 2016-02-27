@@ -3,10 +3,20 @@
 %>
 
 <bl-app-container color-mode="group" appbar-mode="standard" header-mode="condensable"
-  toolbar-mode="tall" background-mode="color" current-user="<%= @current_user_hash.to_json %>">
+  toolbar-mode="tall" background-mode="color" current-user="<%= current_user.cuhj %>">
 
   <div class="toolbar bottom">
-    Content here
+    <bl-badge-selector badge-sets="<%= @badge_sets.to_json %>" 
+        selected-badge-id="<%= @badge_id.to_s %>" 
+        badge-set-labels="<%= @badge_set_labels.to_json %>">
+      <h2>Select a badge</h2>
+      <div class="subtitle">
+        This is an explanation of stuff and things. This is an explanation of stuff and things.
+      </div>
+      <div class="no-badge-selected">
+        <i class="fa fa-times"></i>
+      </div>
+    </bl-badge-selector>
   </div>
 
   <div class="content">

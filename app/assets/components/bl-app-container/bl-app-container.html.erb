@@ -54,9 +54,9 @@
                     class="current-user">
                 </div>
                 <paper-menu class="dropdown-content">
-                  <paper-item>
+                  <paper-item hidden="{{!currentUser.email_inactive}}" class="error">
                     <a href="/users/edit">
-                      <i class="fa fa-exclamation-triangle red"></i> Email blocked
+                      <i class="fa fa-exclamation-triangle"></i> Email blocked
                     </a>
                   </paper-item>
                   <paper-item>
@@ -74,7 +74,7 @@
                       <i class="fa fa-picture-o"></i> Update profile image
                     </a>
                   </paper-item> 
-                  <paper-item>
+                  <paper-item hidden="{{!currentUser.admin}}">
                     <a href="/a">
                       <i class="fa fa-cogs"></i> Admin tools
                     </a>

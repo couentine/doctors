@@ -43,7 +43,7 @@ Polymer({
     else this.hidden = true;
   },
   goHover: function() {
-    this.$$("paper-material").elevation = 5;
+    this.$$("paper-material").elevation = 3;
   },
   stopHover: function() {
     this.$$("paper-material").elevation = 0;

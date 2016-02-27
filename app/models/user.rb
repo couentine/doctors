@@ -150,6 +150,11 @@ class User
     "https://secure.gravatar.com/avatar/#{gravatar_id}?s=#{size_map[version]}&d=mm"
   end
 
+  # cuhj = current user hash json
+  def cuhj
+    return json_from_template(:current_user).to_json
+  end
+
   # === CLASS METHODS === #
 
   # This will find by ObjectId OR by username

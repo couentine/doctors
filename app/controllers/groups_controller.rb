@@ -852,6 +852,8 @@ class GroupsController < ApplicationController
           badge_hash_map[badge.url] = badge_hash # in case we need to
           @badges_hash[:experts] << badge_hash
         end
+        @badge_sets = [@badges_hash[:learners], @badges_hash[:experts]]
+        @badge_set_labels = ['Pending feedback requests', 'All reviewable badges']
         
         # Set variables only if the param is accurate 
         # Leave blank if invalid (user will be presented with badge selection screen on load)

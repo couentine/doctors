@@ -3,7 +3,6 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :log_activity
-  before_action :set_hash_variables
   after_action :store_location
 
   # unless Rails.application.config.consider_all_requests_local
@@ -87,10 +86,6 @@ private
 
   def log_activity
     current_user.log_activity if current_user
-  end
-
-  def set_hash_variables
-    @current_user_hash = (current_user) ? current_user.json_from_template(:current_user) : nil
   end
 
 protected

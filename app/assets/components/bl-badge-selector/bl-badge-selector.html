@@ -1,0 +1,23 @@
+<dom-module id="bl-badge-selector">
+  <link rel="stylesheet" href="bl-badge-selector.css" />
+
+  <template>
+
+    <div class="container" hidden="{{expanded}}">
+      <template is="dom-if" if="{{badgeSelected}}">
+        <bl-badge badge="{{selectedBadge}}"></bl-badge>
+      </template>
+      <content select=".no-badge-selected" hidden="{{badgeSelected}}"></content>
+    </div>
+
+    <div class="expanded-container" hidden="{{!expanded}}">
+      <content select="h2"></content>
+      <content select=".subtitle"></content>
+
+
+    </div>
+
+  </template>
+
+  <script src="bl-badge-selector.js"></script>
+</dom-module>

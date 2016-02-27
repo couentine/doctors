@@ -7,12 +7,7 @@
       <paper-material elevation="0" animated>
         <a href$="{{badge.full_url}}" class="badge item-inner">
           <paper-ripple></paper-ripple>
-          <div class="image">
-            <img src$="{{badge.image_medium}}">
-          </div>
-          <div class="label">
-            <h3>{{badge.name}}</h3>
-          </div>
+          <bl-badge badge="{{badge}}"></bl-badge>
         </a>
       </paper-material>
     </template>
