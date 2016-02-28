@@ -10,8 +10,8 @@ class Log
   ISSUE_STATUS_VALUES = ['unissued', 'issued', 'retracted']
   JSON_FIELDS = [:user, :validation_status, :issue_status]
   JSON_METHODS = [:recipient, :verify]
-  JSON_MOCK_FIELDS = { 'uid' => :_id,  'badge' => :badge_url, 'issuedOn' => :date_issued_stamp,
-    'evidence' => :evidence_url }
+  JSON_MOCK_FIELDS = { 'uid' => :id_string,  'badge' => :badge_url, 
+    'issuedOn' => :date_issued_stamp, 'evidence' => :evidence_url }
   
   # === INSTANCE VARIABLES === #
 
@@ -101,6 +101,8 @@ class Log
   end
 
   def verify; { type: 'hosted', url: assertion_url }; end
+
+  def id_string; id.to_s; end
 
   # === LOG CLASS ASYNC METHODS === #
 
