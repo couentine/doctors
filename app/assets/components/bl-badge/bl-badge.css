@@ -16,7 +16,8 @@
     flex: none;
     z-index: 2;
   }
-    img {
+    img,
+    .image i {
       filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.2));
       -webkit-filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.2)); 
 
@@ -27,7 +28,8 @@
       -kthtml-transition: all 0.2s linear;
       transition: all 0.2s linear;
     }
-    .wrapper:hover img { 
+    .wrapper:hover img,
+    .wrapper:hover .image i { 
       filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2));
       -webkit-filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2)); 
     }
@@ -35,6 +37,13 @@
         display: inline-block;
         max-width: 7em; max-height: 7em;
       }
+    .image i {
+      font-size: 7em;
+      color: rgb(97,97,97);
+      line-height: 0.8em;
+      border-radius: 500px;
+      background-color: white;
+    }
   .label {
     flex: none;
     text-align: center;
@@ -52,4 +61,5 @@
     max-width: 10em;
     border: 1px solid rgba(224,224,224, 0.7);
     border-radius: 0.4em;
+    @apply(--bl-badge-title);
   }

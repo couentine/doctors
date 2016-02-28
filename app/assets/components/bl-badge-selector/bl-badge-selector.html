@@ -3,17 +3,51 @@
 
   <template>
 
+    <!-- === COLLAPSED VIEW === -->
     <div class="container" hidden="{{expanded}}">
-      <template is="dom-if" if="{{badgeSelected}}">
-        <bl-badge badge="{{selectedBadge}}"></bl-badge>
-      </template>
-      <content select=".no-badge-selected" hidden="{{badgeSelected}}"></content>
+      <h1>Review Progress Logs</h1>
+      <a href="#" on-tap="expand" id="badge-expand-link">
+        <bl-badge badge="{{selectedBadge}}" blank-badge-text="No Badge Selected"></bl-badge>
+      </a>
+      <a href="#" on-tap="expand" id="label-expand-link">
+        <i class="fa fa-retweet"></i>
+        Switch
+      </a>
     </div>
 
+    <!-- === EXPANDED VIEW === -->
     <div class="expanded-container" hidden="{{!expanded}}">
+      <a class="close-link" href="#" on-tap="close">
+        <i class="fa fa-close"></i>
+      </a>
+
       <content select="h2"></content>
       <content select=".subtitle"></content>
 
+      <paper-tabs selected="{{selectedBadgeSetIndex}}">
+        <template is="dom-repeat" items="{{badgeSetLabels}}">
+          <paper-tab>{{item}}</paper-tab>
+        </template>
+      </paper-tabs>
+
+      <iron-pages selected="{{selectedBadgeSetIndex}}">
+        <template is="dom-repeat" items="{{badgeSets}}">
+          <div class="badge-grid">
+            
+            <template is="dom-repeat" items="{{item}}">
+              <a href="#" on-tap="selectThisBadge" class="badge select-link"
+                  data-badge-url="{{item.url}}">
+                <bl-badge badge="{{item}}"></bl-badge>
+              </a>
+            </template>
+
+            <div class="placeholder" hidden="true">
+              There are no badges that meet this criteria.
+            </div>
+        
+          </div>
+        </template>
+      </iron-pages>
 
     </div>
 

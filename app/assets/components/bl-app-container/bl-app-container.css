@@ -8,6 +8,10 @@
 
 /* === HEADER (HOST) === */
   
+  :host ::content .toolbar.center {
+    margin: 0 auto;
+    text-align: center;
+  }
   :host ::content .toolbar ul.nav-links { 
     display: inline-block;
     list-style: none;
@@ -26,6 +30,25 @@
     @media (min-width: 350px) { 
       :host ::content .toolbar .nav-link-text { display: inline; } 
     }
+  :host ::content .custom-logo {
+    margin-top: 0.5em;
+    display: inline-flex;
+  }
+    :host ::content .custom-logo i { 
+      font-size: 1.3em;
+      display: inline-block; 
+      margin: 0.1em 0 0 0;
+    }
+    :host ::content .custom-logo img {
+      height: 1.5em;
+      display: inline-block;
+      margin: 0 0 0 0.3em;
+      border-radius: 3px;
+    }
+      @media (min-width: 840px) { 
+        :host ::content .custom-logo i { font-size: 2em; } 
+        :host ::content .custom-logo img { height: 2em; } 
+      }
 
 /* === PAPER HEADER PANEL === */
 
@@ -82,6 +105,7 @@
   paper-toolbar {
     -webkit-transform-origin: left center;
     transform-origin: left center;
+    overflow: visible;
   }
   paper-toolbar.standard-background {
     background-color: transparent;
@@ -90,6 +114,9 @@
   paper-toolbar.color-background {
     background-color: transparent;
     color: white; 
+  }
+  paper-toolbar.badge-selector {
+    height: 250px;
   }
     .toolbar.top { width: 100%; }
     .toolbar.top a {
@@ -109,6 +136,9 @@
       float: right;
       display: inline-block;
     }
+      paper-menu {
+        z-index: 100;
+      }
       .dropdown-trigger { 
         display: inline-block; 
         cursor: pointer;

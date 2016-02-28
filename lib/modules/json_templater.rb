@@ -28,4 +28,9 @@ module JSONTemplater
     end
   end
 
+  # This is a shortcut method for brevity when desired
+  def json(key, options = { stringify_ids: true })
+    return json_from_template(key, options)
+  end
+
 end

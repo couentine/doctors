@@ -5,7 +5,7 @@
 
     <template is="dom-if" if="{{isBadgeMode}}">
       <paper-material elevation="0" animated>
-        <a href$="{{badge.full_url}}" class="badge item-inner">
+        <a href$="{{badge.full_path}}" class="badge item-inner">
           <paper-ripple></paper-ripple>
           <bl-badge badge="{{badge}}"></bl-badge>
         </a>
@@ -15,10 +15,10 @@
     <template is="dom-if" if="{{isGroupMode}}">
       <paper-material elevation="0" animated on-mouseover="goHover"
             on-mouseout="stopHover">
-        <a href$="{{group.full_url}}" class="group item-inner">
+        <a href$="{{group.full_path}}" class="group item-inner">
           <paper-ripple></paper-ripple>
           <div class="image">
-            <img src$="{{translateImageUrl(group.image_url)}}">
+            <img src$="{{translateImageUrl(group.avatar_image_url)}}">
           </div>
           <div class="label">
             <h3>{{group.name}}</h3>

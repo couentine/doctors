@@ -150,9 +150,9 @@ class User
     "https://secure.gravatar.com/avatar/#{gravatar_id}?s=#{size_map[version]}&d=mm"
   end
 
-  # cuhj = current user hash json
-  def cuhj
-    return json_from_template(:current_user).to_json
+  # JSON Template String Shortcuts
+  def json_cu
+    return json(:current_user).to_json
   end
 
   # === CLASS METHODS === #

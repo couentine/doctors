@@ -15,6 +15,7 @@ Polymer({
       type: String,
       value: 'standard' // = ['standard', 'color']
     },
+    hasCustomLogo: Boolean,
     headerMode: {
       type: String,
       value: 'standard' //= paper-header-panel modes OR 'condensable' for paper-scroll-header-panel

@@ -810,6 +810,7 @@ class GroupsController < ApplicationController
     sort_fields = ['date_requested', 'user_name'] # defaults to first value
     sort_orders = ['asc', 'desc'] # defaults to first value
     query_options = ['learners', 'experts']
+    @badge_set_labels = ['Pending requests', 'All badges']
 
     badge_param = params['badge'].to_s.downcase
     @next_page = nil
@@ -819,6 +820,7 @@ class GroupsController < ApplicationController
     @sort_order = \
       (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
     @query = (query_options.include? params['query']) ? params['query'] : query_options.first
+    @query_index = (@query == 'learners') ? 0 : 1
     @badge_url, @badge_id = nil, nil
     @badges_hash = { learners: [], experts: [] }
     @full_logs_hash = []
@@ -853,7 +855,6 @@ class GroupsController < ApplicationController
           @badges_hash[:experts] << badge_hash
         end
         @badge_sets = [@badges_hash[:learners], @badges_hash[:experts]]
-        @badge_set_labels = ['Pending feedback requests', 'All reviewable badges']
         
         # Set variables only if the param is accurate 
         # Leave blank if invalid (user will be presented with badge selection screen on load)

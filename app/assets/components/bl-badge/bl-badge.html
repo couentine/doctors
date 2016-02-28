@@ -5,10 +5,16 @@
 
     <div class="wrapper">
       <div class="image">
-        <img src$="{{badge.image_medium}}">
+        <template is="dom-if" if="{{hasBadge}}">
+          <img src$="{{badge.image_medium_url}}">
+        </template>
+        
+        <template is="dom-if" if="{{!hasBadge}}">
+          <i class$="{{blankBadgeIconClass}}"></i>
+        </template>
       </div>
       <div class="label">
-        <h3>{{badge.name}}</h3>
+        <h3>{{badgeName}}</h3>
       </div>
     </div>
 

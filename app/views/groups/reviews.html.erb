@@ -2,19 +2,28 @@
   provide(:title, "Pending Requests - #{@group.name}")
 %>
 
-<bl-app-container color-mode="group" appbar-mode="standard" header-mode="condensable"
-  toolbar-mode="tall" background-mode="color" current-user="<%= current_user.cuhj %>">
+<style type="text/css">
+  .no-badge-icon {
+    font-size: 3em;
+  }
+</style>
 
-  <div class="toolbar bottom">
+<bl-app-container color-mode="group" appbar-mode="standard" header-mode="condensable"
+  toolbar-mode="badge-selector" background-mode="color" current-user="<%= current_user.json_cu %>"
+  header-height="250" condensed-header-height="80" has-custom-logo="true">
+  
+  <a href="<%= "/#{@group.url}" %>" class="custom-logo back-link">
+    <i class="fa fa-chevron-left"></i>
+    <%= image_tag @group.avatar_image_small_url, class: 'logo' %>
+  </a>
+  <div class="toolbar bottom center fit">
     <bl-badge-selector badge-sets="<%= @badge_sets.to_json %>" 
-        selected-badge-id="<%= @badge_id.to_s %>" 
-        badge-set-labels="<%= @badge_set_labels.to_json %>">
+        selected-badge-set-index="<%= @query_index %>" selected-badge-url="<%= @badge_url.to_s %>" 
+        expanded="<%= @badge_url.blank? %>" badge-set-labels="<%= @badge_set_labels.to_json %>">
       <h2>Select a badge</h2>
       <div class="subtitle">
-        This is an explanation of stuff and things. This is an explanation of stuff and things.
-      </div>
-      <div class="no-badge-selected">
-        <i class="fa fa-times"></i>
+        Select a badge below to view the progress logs of badge learners and experts.
+        After selecting a badge you'll be able to submit feedback on multiple logs at once.
       </div>
     </bl-badge-selector>
   </div>

@@ -25,7 +25,7 @@ class Badge
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
-      :image_url, :image_medium_url, :image_small_url]
+      :image_url, :image_medium_url, :image_small_url, :full_url, :full_path]
   }
   
   # Below are the badge-level fields included in the clone
@@ -162,6 +162,11 @@ class Badge
   def badge_url
     "#{ENV['root_url'] || 'http://www.badgelist.com'}" \
       + "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
+  end
+  def full_url; badge_url; end
+
+  def full_path
+    "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
   end
 
   # Returns URL of the specified version of this badge's image
