@@ -308,7 +308,7 @@ class Badge
   end
   
   # Powers the create_async method above. Not intended to be run directly but could be.
-  # Example of badge creation in a console (NOTE: I'm getting an error on this for the moment.):
+  # Example of badge creation in a console:
   #   g, u = Group.first, User.first
   #   bp = ActionController::Parameters.new({ name: 'Test Badge 1', summary: 'Testing', 
   #     url_with_caps: 'test-badge-1', image_frame: 'circle', image_icon: 'pen', 
@@ -750,6 +750,8 @@ class Badge
       group.update_badge_cache json_clone
       group.timeless.save
     end
+
+    true
   end
 
   # This updates or deletes the json clone copy of the specified tag located in json_clone['pages']
@@ -776,6 +778,9 @@ protected
   def set_default_values
     self.info ||= APP_CONFIG['default_badge_info']
     self.flags ||= []
+    if expert_user_ids.blank? && !creator_id.blank?
+      self.expert_user_ids = [creator_id]
+    end
   end
 
   def update_caps_field
@@ -807,6 +812,7 @@ protected
 
   def add_creator_as_expert
     log = Log.new
+    log.context = 'badge_back_validation' # This will prevent recursive callbacks
     log.badge = self
     log.user = creator
     log.save! 
@@ -821,6 +827,8 @@ protected
       self.info_tags = linkified_result[:tags]
       self.info_tags_with_caps = linkified_result[:tags_with_caps]
     end
+
+    true
   end
 
   def build_badge_image
@@ -880,6 +888,8 @@ protected
           .strip.downcase.singularize
       end
     end
+
+    true
   end
 
   def update_json_clone_badge_fields_if_needed

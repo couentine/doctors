@@ -18,6 +18,10 @@ class Entry
       :format, :format_icon, :parent_tag, :body_sections, :link_url, :code_format]
   }
   
+  # === INSTANCE VARIABLES === #
+
+  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
+
   # === RELATIONSHIPS === #
 
   belongs_to :log

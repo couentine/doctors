@@ -622,7 +622,7 @@ protected
 
   # Updates the badge field if needed (can be called after update or destroy)
   def update_badge_validation_request_count
-    unless context == 'bulk_validation'
+    unless context.in? ['bulk_validation', 'badge_back_validation']
       # If it goes into or out of the requested state then we need to update the count field
       if (destroyed? || validation_status_changed? || detached_log_changed?) \
           && ((validation_status == 'requested') || (validation_status_was == 'requested'))
@@ -641,7 +641,9 @@ protected
     if new_record? || detached_log_changed? \
         || (validation_status_changed? && (validation_status == 'validated')) \
         || (issue_status_changed? && (issue_status == 'retracted'))
-      Log.delay.update_user_badge_lists(id, nil, nil, context == 'badge_add')
+      # NOTE: The final parameter will suppress badge updates in certain contexts.
+      Log.delay.update_user_badge_lists(id, nil, nil, 
+        context.in?(['badge_add', 'badge_back_validation']))
     end
   end
 
