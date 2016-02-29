@@ -24,8 +24,8 @@ class Badge
     'full_url' => :badge_url }
 
   JSON_TEMPLATES = {
-    list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
-      :image_url, :image_medium_url, :image_small_url, :full_url, :full_path]
+    list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
+      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path]
   }
   
   # Below are the badge-level fields included in the clone

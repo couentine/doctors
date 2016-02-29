@@ -1,10 +1,14 @@
 <% 
-  provide(:title, "Pending Requests - #{@group.name}")
+  provide(:title, "Feedback Requests - #{@group.name}")
 %>
 
 <style type="text/css">
   .no-badge-icon {
     font-size: 3em;
+  }
+  h1 {
+    font-size: 1.5em;
+    margin: 0 0 0.5em 0;
   }
 </style>
 
@@ -17,9 +21,9 @@
     <%= image_tag @group.avatar_image_small_url, class: 'logo' %>
   </a>
   <div class="toolbar bottom center fit">
-    <bl-badge-selector badge-sets="<%= @badge_sets.to_json %>" 
-        selected-badge-set-index="<%= @query_index %>" selected-badge-url="<%= @badge_url.to_s %>" 
-        expanded="<%= @badge_url.blank? %>" badge-set-labels="<%= @badge_set_labels.to_json %>">
+    <h1>Feedback Requests</h1>
+    <bl-badge-selector badges="<%= @badges.to_json %>" selected-badge-url="<%= @badge_url.to_s %>" 
+        expanded="<%= @badge_url.blank? %>">
       <h2>Select a badge</h2>
       <div class="subtitle">
         Select a badge below to view the progress logs of badge learners and experts.

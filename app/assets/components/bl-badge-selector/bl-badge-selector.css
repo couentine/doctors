@@ -8,10 +8,6 @@
 
 /* === NON-EXPANDED === */
 
-  .container h1 {
-    font-size: 1.5em;
-    margin: 0 0 0.5em 0;
-  }
   .container bl-badge {
     margin-bottom: 1em;
 
@@ -71,19 +67,12 @@
       flex: 1;
     }
     .placeholder {
-      margin: 3em 1em;
-      color: rgb(255,167,38);
-      font-style: italic;
-      text-align: center;
       flex: 1;
+      margin: 3em 1em;
+      padding: 1em;
+      color: rgb(97,97,97);
+      font-weight: bold;
+      text-align: center;
+      border: 2px solid rgb(97,97,97);
+      border-radius: 2px;
     }
-
-/* === TABS === */
-
-  paper-tabs {
-    margin: 0 0 1em 0;
-    --paper-tabs-selection-bar-color: rgb(255,167,38);
-    --paper-tabs: {
-      color: rgb(255,167,38);
-    };
-  }

@@ -3,6 +3,8 @@
   :host {
     display: flex;
     justify-content: center;
+    font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+    font-size: 1rem;
   }
 
 /* === BADGE STYLES === */
@@ -10,6 +12,7 @@
   .wrapper {
     display: flex;
     flex-direction: column;
+    font-size: 1rem;
   }
   .image {
     text-align: center;
@@ -46,20 +49,41 @@
     }
   .label {
     flex: none;
-    text-align: center;
     z-index: 1;
     margin-top: -1em;
   }
-  h3 {
-    font-size: 1.1em;
-    display: inline-block;
-    margin: 0;
-    font-weight: 600;
-    background-color: rgb(250,250,250);
-    color: rgb(97,97,97);
-    padding: 0.8em;
-    max-width: 10em;
-    border: 1px solid rgba(224,224,224, 0.7);
-    border-radius: 0.4em;
-    @apply(--bl-badge-title);
-  }
+    .title {
+      display: inline-block;
+      background-color: rgb(250,250,250);
+      font-size: 1em;
+      padding: 0.8em;
+      max-width: 10em;
+      border: 1px solid rgba(224,224,224, 0.7);
+      border-radius: 0.4em;
+      font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+      @apply(--bl-badge-title);
+    }
+      h3 {
+        display: block;
+        margin: 0;
+        font-size: 0.9em;
+        font-weight: 600;
+        color: rgb(97,97,97);
+        text-align: center;
+      }
+      ul.metric-list {
+        list-style: none;
+        padding: 0;
+        margin: 1em 0 0 0;
+        color: rgb(97,97,97);
+        font-size: 0.8em;
+        display: block;
+      } 
+        ul.metric-list li {
+          display: inline-block;
+          margin: 0 0.5em 0 0;
+        }
+        ul.metric-list i {
+          color: rgb(249,168,37);
+          margin: 0 0.15em 0 0;
+        }

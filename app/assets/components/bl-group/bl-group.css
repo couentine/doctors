@@ -1,0 +1,39 @@
+/* === BASE LAYOUT === */
+
+  :host {
+    display: flex;
+    font-size: 1rem;
+  }
+
+/* === GROUP STYLES === */
+
+  .inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    color: rgb(66,66,66); 
+    background-color: var(--item-background-color, rgb(179,229,252));
+    text-decoration: none;
+  }
+    .image {
+      flex: none;
+      text-align: center;
+      margin: auto 0;
+    }
+      img {
+        display: inline-block;
+        max-width: 10em; max-height: 10em;
+        margin: 1em;
+      }
+    .label {
+      flex: none;
+      background-color: rgba(255, 255, 255, 0.3);
+      padding: 1em;
+    }
+      h3 {
+        font-size: 1.3em;
+        display: block;
+        margin: 0;
+        font-weight: 600;
+      }

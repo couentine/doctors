@@ -9,10 +9,10 @@ class GroupsController < ApplicationController
 
   prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :destroy_user, :send_invitation, :destroy_invited_user, :add_users, 
-    :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, :reviews, 
+    :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, :review, :full_logs, 
     :create_validations]
   before_action :authenticate_user!, except: [:show]
-  before_action :group_member_or_admin, only: [:leave, :reviews, :create_validations]
+  before_action :group_member_or_admin, only: [:leave, :review, :full_logs, :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
@@ -799,98 +799,102 @@ class GroupsController < ApplicationController
 
   # === REVIEWS === #
 
-  # GET /group-url/reviews?badge=badge-url&page=1&page_size=50&sort_by=date_requested
-  #                        &sort_order=asc&query=learners
+  # GET /group-url/review?badge=badge-url
   # Presents UI for seeing all pending validation requests / existing experts for all badges
-  # and allows bulk validation. If badge isn't set it will default to the first badge 
-  # alphabetically. The page variable is mostly just intended to be called for the json version.
-  # NOTE: @badges_hash is a hash with two keys. :learners contains all of the badges with pending
-  #   learner feedback requests, @experts has all of the badges with more than 1 expert.
-  def reviews
-    sort_fields = ['date_requested', 'user_name'] # defaults to first value
-    sort_orders = ['asc', 'desc'] # defaults to first value
-    query_options = ['learners', 'experts']
-    @badge_set_labels = ['Pending requests', 'All badges']
+  # and allows bulk validation. If badge isn't set it will display a badge selection UI.
+  # This method basically just queries for the badges, the actual logs come from full_logs.
+  def review
+    @badge_set_labels = ['Pending requests', 'Other badges']
 
     badge_param = params['badge'].to_s.downcase
-    @next_page = nil
-    @page = params['p'] || 1
-    @page_size = [(params['ps'] || 100).abs, 100].min # no more than 100, default to 100
-    @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
-    @sort_order = \
-      (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
-    @query = (query_options.include? params['query']) ? params['query'] : query_options.first
-    @query_index = (@query == 'learners') ? 0 : 1
     @badge_url, @badge_id = nil, nil
-    @badges_hash = { learners: [], experts: [] }
-    @full_logs_hash = []
-    badge_hash_map = {} # badge_url => badge_hash
+    @badges, @full_logs_hash = [], []
+    valid_badge_map = {} # badge_url => badge_id
 
     # No  need to hit the DB again unless there are badges
     if @group.badge_count > 0
       # First we need to build the badge criteria
       if @current_user_is_admin || @badge_list_admin
         # Admins can access everything
-        learner_badge_criteria = @group.badges.where(:validation_request_count.gt => 0)
-        expert_badge_criteria = @group.badges.exists('expert_user_ids.1' => true)
+        badge_criteria = @group.badges.where(:validation_request_count.gt => 0)
       else
         # Non-admins can only access badges which they can award
-        learner_badge_criteria = @group.badges.where(:validation_request_count.gt => 0, 
+        badge_criteria = @group.badges.where(:validation_request_count.gt => 0, 
           :awardability => 'experts', :expert_user_ids.in => [current_user.id])
-        expert_badge_criteria = @group.badges.exists('expert_user_ids.1' => true)\
-          .where(:awardability => 'experts', :expert_user_ids.in => [current_user.id])
       end
-      query_badge_criteria = (@query=='experts') ? expert_badge_criteria : learner_badge_criteria
 
-      if request.format == 'html'
-        # If this is the initial page load, then we need to query the badge hashes
-        learner_badge_criteria.asc(:name).each do |badge| 
-          badge_hash = badge.json_from_template(:list_item)
-          badge_hash_map[badge.url] = badge_hash
-          @badges_hash[:learners] << badge_hash
-        end
-        expert_badge_criteria.asc(:name).each do |badge| 
-          badge_hash = badge_hash_map[badge.url] || badge.json_from_template(:list_item)
-          badge_hash_map[badge.url] = badge_hash # in case we need to
-          @badges_hash[:experts] << badge_hash
-        end
-        @badge_sets = [@badges_hash[:learners], @badges_hash[:experts]]
-        
-        # Set variables only if the param is accurate 
-        # Leave blank if invalid (user will be presented with badge selection screen on load)
-        # NOTE: The way this is currently written only verifies access not if param matches query
-        if badge_hash_map.has_key? badge_param 
-          @badge_url = badge_hash_map[badge_param][:url]
-          @badge_id = badge_hash_map[badge_param][:id]
-        end
-      elsif request.format == 'json'
-        # If this is a followup json query for logs then we just need to verify the badge
-        badge = query_badge_criteria.where(url: badge_param).first
-        if badge
-          @badge_url = badge.url
-          @badge_id = badge.id
-        end
+      # Now do the actual query
+      badge_criteria.asc(:name).each do |badge| 
+        @badges << badge.json(:list_item)
+        valid_badge_map[badge.url] = badge.id
+      end
+      
+      # Set variables only if the param is accurate 
+      # Leave blank if invalid (user will be presented with badge selection screen on load)
+      # NOTE: The way this is currently written only verifies access not if param matches query
+      if valid_badge_map.has_key? badge_param 
+        @badge_url = badge_param
+        @badge_id = valid_badge_map[badge_param]
+      end
+    end
+
+    # Now we can respond
+    render layout: 'app'
+  end
+
+  # GET /group-url/full_logs?badge=badge-url&page=1&page_size=50&sort_by=date_requested
+  #                        &sort_order=asc
+  # This is a JSON only method for querying for the full logs that are at requested status for the
+  # specified badge. It will first check that the user has access to the specified badge.
+  def full_logs
+    sort_fields = ['date_requested', 'user_name'] # defaults to first value
+    sort_orders = ['asc', 'desc'] # defaults to first value
+
+    badge_param = params['badge'].to_s.downcase
+    @page = params['p'] || 1
+    @page_size = [(params['ps'] || 50).abs, 50].min # no more than 50, default to 50
+    @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
+    @sort_order = \
+      (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
+    
+    @badge_url, @badge_id, @next_page = nil, nil, nil
+    @full_logs_hash, valid_badge_urls = [], []
+
+    # No need to hit the DB again unless there are badges
+    if @group.badge_count > 0
+      # First we need to build the badge criteria
+      if @current_user_is_admin || @badge_list_admin
+        # Admins can access everything
+        badge_criteria = @group.badges
+      else
+        # Non-admins can only access badges which they can award
+        badge_criteria = @group.badges.where(:awardability => 'experts', 
+          :expert_user_ids.in => [current_user.id])
+      end
+      
+      # Now we do the badge query in order to confirm that the user has access
+      badge = badge_criteria.where(url: badge_param).first
+      if badge
+        @badge_url = badge.url
+        @badge_id = badge.id
       end
 
       # Now build the logs, but only if the badge param is set
       unless @badge_id.blank?
-        query_status = (@query == 'experts') ? 'validated' : 'requested'
-        log_criteria = Log.where(badge_id: @badge_id, validation_status: query_status, 
+        log_criteria = Log.where(badge_id: @badge_id, validation_status: 'requested', 
           detached_log: false, :user_id.ne => current_user.id).page(@page).per(@page_size)\
           .sort_by("#{@sort_by} #{@sort_order}")
-        @full_logs_hash = Log.full_logs_as_json(log_criteria, log_json_template: :list_item, 
-          post_json_template: :log_item)
+        @full_logs_hash = Log.full_logs_as_json(log_criteria)
         @next_page = @page + 1 if log_criteria.count > (@page_size * @page)
       end
     end
 
     # Now we can respond
     respond_to do |format|
-      format.html { render template: 'groups/reviews', layout: 'app' }
       format.json do
-        render json: { badge_id: @badge_id, badge_url: @badge_url, query: @query, page: @page,
+        render json: { badge_id: @badge_id, badge_url: @badge_url, page: @page,
           page_size: @page_size, sort_by: @sort_by, sort_order: @sort_order,
-          logs: @full_logs_hash, next_page: @next_page }
+          full_logs: @full_logs_hash, next_page: @next_page }
       end
     end
   end

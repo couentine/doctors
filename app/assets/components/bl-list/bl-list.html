@@ -1,0 +1,32 @@
+<dom-module id="bl-list">
+  <link rel="stylesheet" href="bl-list.css" />
+
+  <template>
+
+    <div class$="{{wrapperClass}}">
+
+      <template is="dom-if" if="{{showPlaceholder}}">
+        <content select=".placeholder"></content>
+      </template>
+
+      <template is="dom-if" if="{{!showPlaceholder}}">
+        
+        <template id="item-repeat" is="dom-repeat" items="{{items}}">
+          <bl-list-item object-mode="{{objectMode}}" item="{{item}}" class$="{{itemClass}}">
+          </bl-list-item>
+        </template>
+
+      </template>
+      
+    </div>
+
+    <div class="next-page" hidden$="{{!hasNextPage}}">
+      <bl-button id="next-page-button" class$="{{mode}}" type="raised" on-click="loadNextPage">
+        Load More
+      </bl-button>
+    </div>
+
+  </template>
+
+  <script src="bl-list.js"></script>
+</dom-module>

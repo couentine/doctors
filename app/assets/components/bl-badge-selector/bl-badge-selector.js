@@ -2,15 +2,15 @@ Polymer({
   is: "bl-badge-selector",
 
   properties: {
-    badgeSets: Array,
-    badgeSetLabels: Array,
-    selectedBadgeSetIndex: {
-      type: Number,
-      value: 0
-    },
+    badges: Array,
     selectedBadgeUrl: {
       type: String,
       observer: "_selectedBadgeUrlChanged"
+    },
+    hasBadges: {
+      type: Boolean,
+      value: false,
+      computed: "_hasBadges(badges)"
     },
     selectedBadge: Object,
     badgeUrlMap: Object,
@@ -21,27 +21,10 @@ Polymer({
   },
 
   attached: function() {
-    var badgeSetCounts = [];
-    var firstNonEmptyBadgeSetIndex = null;
+    // Build badgeUrlMap
     this.badgeUrlMap = {};
-
-    // Show the placeholder if a tab is empty and figure out which tab to default to
-    for (var i = 0; i < this.badgeSets.length; i++) {
-      badgeSetCounts[i] = this.badgeSets[i].length;
-      
-      if (badgeSetCounts[i] == 0)
-        document.querySelectorAll('.badge-grid .placeholder')[i].hidden = false;
-      if ((badgeSetCounts[i] > 0) && (firstNonEmptyBadgeSetIndex == null))
-        firstNonEmptyBadgeSetIndex = i;
-
-      // Now build the badge url map
-      for (var j = 0; j < badgeSetCounts[i]; j++)
-        this.badgeUrlMap[this.badgeSets[i][j].url] = this.badgeSets[i][j];
-    }
-
-    // Override the selected tab if it is empty and there is another non-empty tab to show
-    if ((badgeSetCounts[this.selectedBadgeSetIndex] == 0) && (firstNonEmptyBadgeSetIndex != null))
-      this.selectedBadgeSetIndex = firstNonEmptyBadgeSetIndex;
+    for (var i = 0; i < this.badges.length; i++)
+      this.badgeUrlMap[this.badges[i].url] = this.badges[i];
   },
 
   // Functions
@@ -51,6 +34,9 @@ Polymer({
     this.selectedBadgeUrl = $(e.srcElement).closest(".select-link")[0].dataBadgeUrl;
     this.close();
   },
+
+  // Computed Properties
+  _hasBadges: function(badges) { return badges && (badges.length > 0); },
 
   // Observers
   _selectedBadgeUrlChanged: function(newValue, oldValue) {

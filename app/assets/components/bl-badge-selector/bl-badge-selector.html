@@ -5,9 +5,9 @@
 
     <!-- === COLLAPSED VIEW === -->
     <div class="container" hidden="{{expanded}}">
-      <h1>Review Progress Logs</h1>
       <a href="#" on-tap="expand" id="badge-expand-link">
-        <bl-badge badge="{{selectedBadge}}" blank-badge-text="No Badge Selected"></bl-badge>
+        <bl-badge badge="{{selectedBadge}}" blank-badge-text="No Badge Selected" link="false">
+        </bl-badge>
       </a>
       <a href="#" on-tap="expand" id="label-expand-link">
         <i class="fa fa-retweet"></i>
@@ -24,30 +24,22 @@
       <content select="h2"></content>
       <content select=".subtitle"></content>
 
-      <paper-tabs selected="{{selectedBadgeSetIndex}}">
-        <template is="dom-repeat" items="{{badgeSetLabels}}">
-          <paper-tab>{{item}}</paper-tab>
-        </template>
-      </paper-tabs>
-
-      <iron-pages selected="{{selectedBadgeSetIndex}}">
-        <template is="dom-repeat" items="{{badgeSets}}">
-          <div class="badge-grid">
-            
-            <template is="dom-repeat" items="{{item}}">
-              <a href="#" on-tap="selectThisBadge" class="badge select-link"
-                  data-badge-url="{{item.url}}">
-                <bl-badge badge="{{item}}"></bl-badge>
-              </a>
-            </template>
-
-            <div class="placeholder" hidden="true">
-              There are no badges that meet this criteria.
-            </div>
+      <div class="badge-grid">
         
-          </div>
+        <template is="dom-repeat" items="{{badges}}">
+          <a href="#" on-tap="selectThisBadge" class="badge select-link"
+              data-badge-url="{{item.url}}">
+            <bl-badge badge="{{item}}" link="false"
+              options='{"showExpertCount": true, "showRequestCount": true}'></bl-badge>
+          </a>
         </template>
-      </iron-pages>
+
+        <div class="placeholder" hidden$="{{hasBadges}}">
+          There are no badges with pending feedback requests in this group. 
+          (Or at least none for which you have awarding permissions.)
+        </div>
+    
+      </div>
 
     </div>
 

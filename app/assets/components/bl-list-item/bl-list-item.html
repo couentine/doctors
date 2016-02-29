@@ -1,0 +1,16 @@
+<dom-module id="bl-list-item">
+  <link rel="stylesheet" href="bl-list-item.css" />
+  
+  <template>
+
+    <template is="dom-if" if="{{isBadgeMode}}">
+      <bl-badge badge="{{item}}"></bl-badge>
+    </template>
+    <template is="dom-if" if="{{isGroupMode}}">
+      <bl-group group="{{item}}"></bl-group>
+    </template>
+
+  </template>
+
+  <script src="bl-list-item.js"></script>
+</dom-module>
