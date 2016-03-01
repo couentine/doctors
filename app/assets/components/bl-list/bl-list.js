@@ -5,7 +5,7 @@ Polymer({
     // Required
     objectMode: String, // = ['badges', 'full_logs', 'groups']
     nextPageUrl: String,
-    nextPage: { type: Number, value: -1 },
+    nextPage: { type: Number, value: 1 },
     
     // Optional
     options: Object,

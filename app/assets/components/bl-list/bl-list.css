@@ -17,6 +17,12 @@
     border: 1px solid rgba(224,224,224, 0.7);
     border-radius: 0.4em;
   }
+  :host ::content .placeholder.color-background {
+    background-color: transparent;
+    color: white;
+    border-color: white;
+    border-width: 2px;
+  }
     :host ::content .placeholder i {
       font-size: 3em;
       display: block;
@@ -51,3 +57,12 @@
     }
     .next-page bl-button.badges { background: rgb(239,108,0); }
     .next-page bl-button.groups { background: rgb(3,169,244); }
+
+  @media (min-width: 840px) {
+    .grid-list,
+    .column-list { margin: 0 2em; }
+  }
+  @media (min-width: 1200px) {
+    .grid-list,
+    .column-list { margin: 0 4em; }
+  }
