@@ -1,4 +1,4 @@
-/* === HOST STYLES === */
+/* === LIST ITEM HOST STYLES === */
 
   :host {
     display: flex;
@@ -15,4 +15,14 @@
   @media (min-width: 1200px) {
     :host.badges { flex: 1 300px; }
     :host.groups { flex: 1 350px; }
+  }
+
+/* === CHILD ITEM STYLES === */
+
+  bl-badge {
+    width: 100%;
+    padding: 1em;
+  }
+  bl-group {
+    width: 100%;
   }

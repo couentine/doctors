@@ -6,7 +6,7 @@
     <!-- === COLLAPSED VIEW === -->
     <div class="container" hidden="{{expanded}}">
       <a href="#" on-tap="expand" id="badge-expand-link">
-        <bl-badge badge="{{selectedBadge}}" blank-badge-text="No Badge Selected" link="false">
+        <bl-badge badge="{{selectedBadge}}" blank-badge-text="No Badge Selected">
         </bl-badge>
       </a>
       <a href="#" on-tap="expand" id="label-expand-link">
@@ -29,7 +29,7 @@
         <template is="dom-repeat" items="{{badges}}">
           <a href="#" on-tap="selectThisBadge" class="badge select-link"
               data-badge-url="{{item.url}}">
-            <bl-badge badge="{{item}}" link="false"
+            <bl-badge badge="{{item}}"
               options='{"showExpertCount": true, "showRequestCount": true}'></bl-badge>
           </a>
         </template>

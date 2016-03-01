@@ -15,6 +15,11 @@ Polymer({
     isGroupMode: { type: Boolean, computed: "_isGroupMode(objectMode)" }
   },
 
+  ready: function() {
+    // The array template helper sometimes creates a blank element, so we need to filter it out.
+    this.itemChanged(this.item, null);
+  },
+
   // Computed properties
   _isBadgeMode: function(objectMode) { return objectMode == "badges"; },
   _isFullLogMode: function(objectMode) { return objectMode == "full_logs"; },
