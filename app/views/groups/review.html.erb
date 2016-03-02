@@ -34,8 +34,8 @@
 
   <div class="content">
 
-    <bl-list object-mode="full_logs" 
-        next-page-url="<%= group_full_logs_url(@group, format: :json) + '&page=' %>">
+    <bl-list object-mode="full_logs" query-options="<%= @bl_list_query_options %>"
+        next-page-url="<%= group_full_logs_url(@group, format: :json) %>">
       <div class="placeholder color-background">
         <i class="fa fa-flag-checkered"></i>
         <div class="message">

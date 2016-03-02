@@ -799,13 +799,14 @@ class GroupsController < ApplicationController
 
   # === REVIEWS === #
 
-  # GET /group-url/review?badge=badge-url
+  # GET /group-url/review?badge=badge-url&sort_by=date_requested&sort_order=asc
   # Presents UI for seeing all pending validation requests / existing experts for all badges
   # and allows bulk validation. If badge isn't set it will display a badge selection UI.
   # This method basically just queries for the badges, the actual logs come from full_logs.
+  # PARAMETER NOTE: The sort params don't do anything other than get passed to page variables so
+  #                 they can be made available to the layout.
   def review
-    @badge_set_labels = ['Pending requests', 'Other badges']
-
+    # First intialize the core parameters and variables
     badge_param = params['badge'].to_s.downcase
     @badge_url, @badge_id = nil, nil
     @badges, @full_logs_hash = [], []
@@ -837,6 +838,16 @@ class GroupsController < ApplicationController
         @badge_id = valid_badge_map[badge_param]
       end
     end
+
+    # Build the default query options parameter for the bl-list component
+    # That involves querying the extra parameters
+    sort_fields = ['date_requested', 'user_name'] # defaults to first value
+    sort_orders = ['asc', 'desc'] # defaults to first value
+    @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
+    @sort_order = \
+      (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
+    @bl_list_query_options = { \
+      badge: @badge_url, sort_by: @sort_by, sort_order: @sort_order }.to_json
 
     # Now we can respond
     render layout: 'app'

@@ -64,7 +64,7 @@
     </bl-subheader>
 
     <bl-list object-mode="badges" items='<%= @badges_hash.to_json %>' 
-        next-page="<%= @badges_next_page %>"
+        next-page="<%= @badges_next_page %>" next-page-param="bp"
         next-page-url="<%= root_url(format: :json, query: 'badges') + '&bp=' %>">
       <div class="placeholder">
         <i class="fa fa-shield"></i>
@@ -97,7 +97,7 @@
     </bl-subheader>
 
     <bl-list object-mode="groups" items='<%= @groups_hash.to_json %>' 
-        next-page="<%= @groups_next_page %>"
+        next-page="<%= @groups_next_page %>" next-page-param="gp"
         next-page-url="<%= root_url(format: :json, query: 'groups') + '&gp=' %>">
       <div class="placeholder">
         <i class="fa fa-users"></i>
