@@ -3,6 +3,7 @@ Polymer({
 
   properties: {
     badges: Array,
+    for: String, // id of the bl-list
     selectedBadgeUrl: {
       type: String,
       observer: "_selectedBadgeUrlChanged"
@@ -40,7 +41,17 @@ Polymer({
 
   // Observers
   _selectedBadgeUrlChanged: function(newValue, oldValue) {
-    if (this.badgeUrlMap)
+    var blList;
+
+    if (this.badgeUrlMap) {
       this.selectedBadge = this.badgeUrlMap[newValue];
+      if (this.for) {
+        blList = document.querySelector("#" + this.for);
+        if (blList) {
+          blList.queryOptions.badge = newValue;
+          blList.refreshQuery();
+        }
+      }
+    }
   }
 });

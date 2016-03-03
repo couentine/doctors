@@ -32,13 +32,14 @@ Polymer({
     // Options
     queryOptions: Object, // Added to next page query: "&key1=value1&key2=value2" ...
     options: Object,
-    queryOnDisplay: { // NOTE: This doesn't work yet.
+    refreshQueryOnDisplay: {
       type: Boolean,
       value: false
     },
     
     // The object items
     items: Array,
+    itemsLoaded: { type: Boolean, value: false }, // set automatically
 
     // Computed
     layoutMode: { type: String, computed: "_layoutMode(objectMode)" },
@@ -47,23 +48,24 @@ Polymer({
     hasNextPage: { 
       type: Boolean, 
       value: false,
-      computed: "_hasNextPage(nextPage, items)" 
+      computed: "_hasNextPage(nextPage, items, itemsLoaded)" 
     },
     showPlaceholder: {
       type: Boolean,
       false: false,
-      computed: "_showPlaceholder(items)"
+      computed: "_showPlaceholder(items, itemsLoaded)"
     }
   },
 
   // Methods
   queryNextPage: function () {
     // Queries for the next page and APPENDS the results to the display, then increments nextPage.
-    var nextPageButton = this.$$("#next-page-button");
     var self = this; // Hold onto the context variable
+    self.setLoadingStatus(true);
     
     if (!nextPageButton.disabled) {
       nextPageButton.disabled = true;
+      spinner.hidden = false; spinner.active = true;
 
       this.getResults(function(result) {
         if (result) {
@@ -71,23 +73,20 @@ Polymer({
           for (var i = 0; i <= result[self.objectMode].length; i++) 
             self.push('items', result[self.objectMode][i]);
           
-          // Store the new value of nextPage and re-enable the next page button
+          // Store the new value of nextPage and exit loading status
           self.nextPage = result.next_page;
-          nextPageButton.disabled = false;
+          self.setLoadingStatus(false);
         }
       }, function() {
-        console.log('An error occurred while trying to retrieve the next page of results.');
+        self.showError('An error occurred while trying to retrieve the next page of results.');
       });
     }
   },
   refreshQuery: function () {
     // Resets nextPage to 1, then queries for the next page and REPLACES the existing results.
-
-    // Queries for the next page and APPENDS the results to the display, then increments nextPage.
-    var nextPageButton = this.$$("#next-page-button");
     var self = this; // Hold onto the context variable
     
-    nextPageButton.disabled = true;
+    self.setLoadingStatus(true);
     self.nextPage = 1;
     while(self.pop('items')) {} // clear out the existing items
 
@@ -97,13 +96,27 @@ Polymer({
         for (var i = 0; i <= result[self.objectMode].length; i++) 
           self.push('items', result[self.objectMode][i]);
         
-        // Store the new value of nextPage and re-enable the next page button
+        // Store the new value of nextPage and exit loading status
         self.nextPage = result.next_page;
-        nextPageButton.disabled = false;
+        self.setLoadingStatus(false);
       }
     }, function() {
-      console.log('An error occurred while trying to retrieve results.');
+      self.showError('An error occurred while trying to retrieve results.');
     });
+  },
+
+  // Events
+  ready: function() {
+    // Set the loaded variable then initialize the items array
+    if ((this.items == undefined) || (this.items == null))
+      this.items = [];
+    else
+      this.itemsLoaded = true; // this is used by _showPlaceholder and _hasNextPage
+  },
+  attached: function() {
+    // Refresh query if needed
+    if (this.refreshQueryOnDisplay)
+      this.refreshQuery();
   },
 
   // Computed Properties
@@ -116,10 +129,12 @@ Polymer({
   },
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
   _wrapperClass: function(layoutMode, objectMode) { return layoutMode + "-list " + objectMode; },
-  _showPlaceholder: function(items) {
-    return items && (items.length == 0);
+  _showPlaceholder: function(items, itemsLoaded) { 
+    return itemsLoaded && items && (items.length == 0); 
   },
-  _hasNextPage: function(nextPage, items) { return items && (nextPage > 0); },
+  _hasNextPage: function(nextPage, items, itemsLoaded) { 
+    return itemsLoaded && items && (nextPage > 0); 
+  },
 
   // Helpers
   getFullUrl: function() {
@@ -142,6 +157,25 @@ Polymer({
     $.getJSON(this.getFullUrl(), function(result) {
       if (result) completeFunction(result);
       else errorFunction();
-    });
+    }).error(function() { errorFunction(); });
+  },
+  setLoadingStatus: function(isLoading) {
+    var nextPageButton = this.$$("#next-page-button");
+    var spinner = this.$$("#spinner");
+    var errorPanel = this.$$("#error-panel");
+
+    if (isLoading) {
+      nextPageButton.disabled = true;
+      spinner.hidden = false; spinner.active = true;
+      errorPanel.hidden = true;
+    } else {
+      nextPageButton.disabled = false;
+      spinner.active = false; spinner.hidden = true;
+    }
+  },
+  showError: function(errorMessage) {
+    console.log(errorMessage);
+    this.setLoadingStatus(false); // exit loading status if needed
+    this.$$("#error-panel").hidden = false;
   }
 });

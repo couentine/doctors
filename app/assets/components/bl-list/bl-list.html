@@ -20,9 +20,13 @@
       
     </div>
 
+    <bl-spinner id="spinner" hidden></bl-spinner>
+    <div id="error-panel" hidden>
+      <i class="fa fa-exclamation-triangle"></i>
+    </div>
+
     <div class="next-page" hidden$="{{!hasNextPage}}">
-      <bl-button id="next-page-button" class$="{{objectMode}}" type="raised" 
-          on-tap="queryNextPage">
+      <bl-button id="next-page-button" class$="{{objectMode}}" type="raised" on-tap="queryNextPage">
         Load More
       </bl-button>
     </div>

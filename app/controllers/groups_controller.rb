@@ -894,7 +894,7 @@ class GroupsController < ApplicationController
       unless @badge_id.blank?
         log_criteria = Log.where(badge_id: @badge_id, validation_status: 'requested', 
           detached_log: false, :user_id.ne => current_user.id).page(@page).per(@page_size)\
-          .sort_by("#{@sort_by} #{@sort_order}")
+          .order_by("#{@sort_by} #{@sort_order}")
         @full_logs_hash = Log.full_logs_as_json(log_criteria)
         @next_page = @page + 1 if log_criteria.count > (@page_size * @page)
       end

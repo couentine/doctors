@@ -6,6 +6,11 @@
     <template is="dom-if" if="{{isBadgeMode}}">
       <bl-badge badge="{{item}}" link></bl-badge>
     </template>
+    
+    <template is="dom-if" if="{{isFullLogMode}}">
+      <bl-full-log full-log="{{item}}" link></bl-full-log>
+    </template>
+    
     <template is="dom-if" if="{{isGroupMode}}">
       <bl-group group="{{item}}" link></bl-group>
     </template>

@@ -38,6 +38,22 @@
       margin-bottom: 0;
     }
 
+/* === SPINNER & ERROR PANEL === */
+  
+  bl-spinner {
+    display: flex;
+    justify-content: center;
+    margin: 1em 0;
+  }
+
+  #error-panel {
+    display: flex;
+    justify-content: center;
+    font-size: 2em;
+    color: rgb(229,57,53);
+    margin: 0.5em 0;
+  }
+
 /* === COMPONENT STYLES === */
 
   .grid-list {
