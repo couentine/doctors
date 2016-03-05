@@ -1,3 +1,31 @@
-:host {
-  display: block;
-}
+/* === CARD STYLES === */
+
+  paper-card { display: block; }
+
+  .card-header {
+    border-bottom: 1px solid rgb(232,232,232);
+    padding: 1em;
+    display: flex;
+    justify-content: flex-start;
+  }
+    .avatar {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+    }
+      .avatar img {
+        width: 4em; height: 4em;
+        border-radius: 500px;
+        flex: none;
+      }
+    .text {
+      padding: 0 1em;
+    }
+    .text h3 {
+      font-size: 1.2em;
+      margin: 0;
+    }
+    .text .details {
+      font-size: 0.8em;
+      color: rgb(158,158,158);
+    }

@@ -82,3 +82,71 @@
     .grid-list,
     .column-list { margin: 0 4em; }
   }
+
+/* === GRID LAYOUT === */
+  
+  .grid-list bl-list-item {
+    display: flex;
+    margin: 0.25em;
+  }
+
+/* === COLUMN LAYOUT === */
+
+  .column-list {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+  }
+    .column {
+      display: none; /* show these conditionally based on the count-columns classes */
+      flex: 1;
+      margin: 0.5em;
+    }
+      .column-item {
+        display: none; /* show these conditionally based on count-columns classes and nth-child */
+        margin: 0.5em 0;
+      }
+    
+    .one-column > .column-1 { display: block; }
+    .one-column > .column-1 > .column-item { display: block; }
+    
+    .two-columns > .column-1, .two-columns > .column-2 { display: block; }
+      .two-columns > .column-1 > .column-item:nth-child(2n+1) { display: block; }
+      .two-columns > .column-2 > .column-item:nth-child(2n+2) { display: block; }
+
+    .three-columns > .column-1, .three-columns > .column-2, .three-columns > .column-3 { 
+      display: block; 
+    }
+      .three-columns > .column-1 > .column-item:nth-child(3n+1) { display: block; }
+      .three-columns > .column-2 > .column-item:nth-child(3n+2) { display: block; }
+      .three-columns > .column-3 > .column-item:nth-child(3n+3) { display: block; }
+
+    .four-columns > .column-1, .four-columns > .column-2, .four-columns > .column-3,
+    .four-columns > .column-4 { 
+      display: block; 
+    }
+      .four-columns > .column-1 > .column-item:nth-child(4n+1) { display: block; }
+      .four-columns > .column-2 > .column-item:nth-child(4n+2) { display: block; }
+      .four-columns > .column-3 > .column-item:nth-child(4n+3) { display: block; }
+      .four-columns > .column-4 > .column-item:nth-child(4n+4) { display: block; }
+
+    .five-columns > .column-1, .five-columns > .column-2, .five-columns > .column-3,
+    .five-columns > .column-4, .five-columns > .column-5 { 
+      display: block; 
+    }
+      .five-columns > .column-1 > .column-item:nth-child(5n+1) { display: block; }
+      .five-columns > .column-2 > .column-item:nth-child(5n+2) { display: block; }
+      .five-columns > .column-3 > .column-item:nth-child(5n+3) { display: block; }
+      .five-columns > .column-4 > .column-item:nth-child(5n+4) { display: block; }
+      .five-columns > .column-5 > .column-item:nth-child(5n+5) { display: block; }
+
+    .six-columns > .column-1, .six-columns > .column-2, .six-columns > .column-3,
+    .six-columns > .column-4, .six-columns > .column-5, .six-columns > .column-6 { 
+      display: block; 
+    }
+      .six-columns > .column-1 > .column-item:nth-child(6n+1) { display: block; }
+      .six-columns > .column-2 > .column-item:nth-child(6n+2) { display: block; }
+      .six-columns > .column-3 > .column-item:nth-child(6n+3) { display: block; }
+      .six-columns > .column-4 > .column-item:nth-child(6n+4) { display: block; }
+      .six-columns > .column-5 > .column-item:nth-child(6n+5) { display: block; }
+      .six-columns > .column-6 > .column-item:nth-child(6n+6) { display: block; }

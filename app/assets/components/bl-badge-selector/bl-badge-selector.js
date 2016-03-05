@@ -26,6 +26,10 @@ Polymer({
     this.badgeUrlMap = {};
     for (var i = 0; i < this.badges.length; i++)
       this.badgeUrlMap[this.badges[i].url] = this.badges[i];
+    
+    // Set the badge if needed
+    if (this.selectedBadgeUrl)
+      this._selectedBadgeUrlChanged(this.selectedBadgeUrl, null);
   },
 
   // Functions

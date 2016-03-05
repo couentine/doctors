@@ -1,9 +1,5 @@
 /* === LIST ITEM HOST STYLES === */
 
-  :host {
-    display: flex;
-    margin: 0.25em;
-  }
   :host.badges { flex: 1 170px; }
   :host.groups { flex: 1 300px; }
   @media (min-width: 480px) {
@@ -25,4 +21,7 @@
   }
   bl-group {
     width: 100%;
+  }
+  bl-full-log {
+    display: block;
   }

@@ -4,14 +4,27 @@
   <template>
 
     <paper-material id="paper" elevation="0" animated class="wrapper">
-      
-      <div class="inner">
+
+      <paper-card id="card">
         <paper-ripple></paper-ripple>
-        
-        <div class="label">
-          <h3>{{fullLog.user_name}}</h3>
+
+        <div class="card-header">
+          <div class="avatar"><img src$="{{avatarUrl}}"></div>
+          <div class="text">
+            <h3>{{fullLog.user_name}}</h3>
+            <div class="subtitle">{{fullLog.user_username_with_caps}}</div>
+            <div class="details">{{requestDateString}}</div>
+          </div>
         </div>
-      </div>
+
+        <div class="card-content">
+          <template id="item-repeat" is="dom-repeat" items="{{fullLog.posts}}">
+            <div class="post">
+              Test this
+            </div>
+          </template>
+        </div>
+      </paper-card>
       
     </paper-material>
 

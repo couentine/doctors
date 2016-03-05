@@ -24,7 +24,7 @@
   <div class="toolbar bottom center fit">
     <h1>Feedback Requests</h1>
     <bl-badge-selector badges="<%= @badges.to_json %>" selected-badge-url="<%= @badge_url.to_s %>" 
-        expanded="<%= @badge_url.blank? %>" for="log-list">
+        for="log-list" <%= (@badge_url.blank?) ? 'expanded' : '' %>>
       <h2>Select a badge</h2>
       <div class="subtitle">
         Select a badge below to view the progress logs of badge learners and experts.

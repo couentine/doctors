@@ -11,9 +11,22 @@
 
       <template is="dom-if" if="{{!showPlaceholder}}">
         
-        <template id="item-repeat" is="dom-repeat" items="{{items}}">
-          <bl-list-item object-mode="{{objectMode}}" item="{{item}}" class$="{{itemClass}}">
-          </bl-list-item>
+        <template is="dom-if" if="{{!isColumnMode}}">
+          <template id="item-repeat" is="dom-repeat" items="{{items}}">
+            <bl-list-item object-mode="{{objectMode}}" item="{{item}}" class$="{{itemClass}}">
+            </bl-list-item>
+          </template>
+        </template>
+
+        <template is="dom-if" if="{{isColumnMode}}">
+          <template id="item-repeat" is="dom-repeat" items="{{columnClassList}}">
+            <div class$="{{item}}">
+              <template id="item-repeat" is="dom-repeat" items="{{items}}">
+                <bl-list-item object-mode="{{objectMode}}" item="{{item}}" class$="{{itemClass}}">
+                </bl-list-item>
+              </template>
+            </div>
+          </template>
         </template>
 
       </template>

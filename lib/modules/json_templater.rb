@@ -6,9 +6,10 @@ module JSONTemplater
   # methods one the model.
 
   # OPTIONS (with default value):
-  # - stringify_ids (true): This will turn any instances of BSON::ObjectId into strings.
+  # - stringify_ids (true): Turns instances of BSON::ObjectId into strings.
+  # - unixify_times (true): Turns instances of ActiveSupport::TimeWithZone into unix timestamps.
   
-  def json_from_template(key, options = { stringify_ids: true })
+  def json_from_template(key, options = { stringify_ids: true, unixify_times: true })
     if self.class::JSON_TEMPLATES[key].blank?
       throw "The '#{key}' key in  #{self.class}::JSON_TEMPLATES is blank."
     else
@@ -19,6 +20,8 @@ module JSONTemplater
         current_value = self.send(field_or_method)
         if options[:stringify_ids] && (current_value.class == BSON::ObjectId)
           current_value = current_value.to_s
+        elsif options[:unixify_times] && (current_value.class == ActiveSupport::TimeWithZone)
+          current_value = current_value.to_i
         end
 
         return_hash[field_or_method] = current_value
