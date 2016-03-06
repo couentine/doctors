@@ -50,6 +50,10 @@
         :host ::content .custom-logo img { height: 2em; } 
       }
 
+  :host ::content .content {
+    padding: 1em 0;
+  }
+
 /* === PAPER HEADER PANEL === */
 
   paper-header-panel {

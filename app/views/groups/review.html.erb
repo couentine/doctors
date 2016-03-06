@@ -48,7 +48,16 @@
       </div>
     </bl-list>
 
+    <bl-log-validator id="log-validator" for="log-list"></bl-log-validator>
+
     <bl-selection-bar id="selected-log-bar" for="log-list" noun-singular="log" noun-plural="logs">
+      <ul class="actions">
+        <li>
+          <paper-button onclick="document.querySelector('#log-validator').open()">
+            Feedback
+          </paper-button>
+        </li>
+      </ul>
     </bl-selection-bar>
 
   </div>

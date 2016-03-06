@@ -1,0 +1,26 @@
+<dom-module id="bl-log-validator">
+  <link rel="stylesheet" href="bl-log-validator.css" />
+
+  <template>
+
+    <paper-dialog id="dialog">
+      <h2>
+        Add bulk feedback to <span>{{logCount}}</span> selected logs
+      </h2>
+
+      <paper-dialog-scrollable>
+        <paper-input label="Feedback summary" value="{{summary}}" required char-counter 
+          maxlength="140"></paper-input>
+        <paper-textarea label="Feedback body" value="{{body}}"></paper-input>
+      </paper-dialog-scrollable>
+
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>Accept</paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script src="bl-log-validator.js"></script>
+</dom-module>
