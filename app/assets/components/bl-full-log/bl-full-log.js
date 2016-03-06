@@ -25,7 +25,6 @@ Polymer({
     "card.mouseover": "_cardMouseOver",
     "card.mouseout": "_cardMouseOut",
     "header.tap": "_headerTap"
-
   },
 
   // Events
@@ -34,7 +33,8 @@ Polymer({
     this.set("cardClass", this._cardClass(this.hovered, selected));
   },
   _headerTap: function(e) {
-    this.set("fullLog.selected", !this.selected);
+    if (e.target.id != "checkboxContainer")
+      this.set("fullLog.selected", !this.selected);
   },
 
   // Helpers

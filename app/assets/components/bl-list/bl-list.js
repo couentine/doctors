@@ -36,10 +36,14 @@ Polymer({
       type: Boolean,
       value: false
     },
+    selectionBar: Object, // this gets set by the bl-selection-bar when the "for" property is set
     
     // The object items
     items: Array,
     itemsLoaded: { type: Boolean, value: false }, // set automatically
+    selectedItems: { type: Array, value: function() { return []; } },
+    selectedItemCount: { type: Number, value: 0, computed: "_selectedItemCount(selectedItems)",
+      observer: "_selectedItemCountChanged" },
 
     // Computed
     layoutMode: { type: String, computed: "_layoutMode(objectMode)" },
@@ -66,6 +70,10 @@ Polymer({
       observer: "_colCountChanged"
     }
   },
+
+  observers: [
+    "_itemsChanged(items.*)"
+  ],
 
   // Methods
   queryNextPage: function () {
@@ -113,6 +121,14 @@ Polymer({
       self.showError('An error occurred while trying to retrieve results.');
     });
   },
+  selectAll: function() {
+    for (var i = 0; i < this.items.length; i++)
+      this.set("items.#" + i + ".selected", true);
+  },
+  deselectAll: function() {
+    for (var i = 0; i < this.items.length; i++)
+      this.set("items.#" + i + ".selected", false);
+  },
 
   // Events
   ready: function() {
@@ -144,6 +160,11 @@ Polymer({
       $(this).find('.column-list').removeClass(oldClass).addClass(newClass);
     }
   },
+  _itemsChanged(details) {
+    if (details.path && details.path.endsWith(".selected")) {
+      this.updateSelectedItems();
+    }
+  },
 
   // Property Computers
   _layoutMode: function(objectMode) {
@@ -173,6 +194,12 @@ Polymer({
     return itemsLoaded && items && (nextPage > 0); 
   },
   _isColumnMode: function(layoutMode) { return layoutMode == "column"; },
+  _selectedItemCount: function(selectedItems) { return selectedItems ? selectedItems.length : 0; },
+  _selectedItemCountChanged: function(newValue, oldValue) {
+    // Update the selection bar if needed
+    if (this.selectionBar)
+      this.selectionBar.count = newValue;
+  },
 
   // Helpers
   getFullUrl: function() {
@@ -224,5 +251,10 @@ Polymer({
       newColCount = Math.max(1, Math.min(this.maxColCount, newColCount));
       if (newColCount != this.colCount) this.colCount = newColCount;
     }
+  },
+  updateSelectedItems: function() {
+    this.selectedItems = $.map(this.items, function(item, index) {
+      if (item && item.selected) return item; 
+    });
   }
 });
