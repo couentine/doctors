@@ -14,8 +14,9 @@ class Entry
     :body_sections, :tags, :tags_with_caps]
 
   JSON_TEMPLATES = {
-    log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :linkified_summary, :type,
-      :format, :format_icon, :parent_tag, :body_sections, :link_url, :code_format]
+    log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :body, :linkified_summary, 
+      :type, :format, :format_icon, :parent_tag, :body_sections, :link_url, :code_format, 
+      :link_metadata, :image_url, :image_medium_url, :image_small_url]
   }
   
   # === INSTANCE VARIABLES === #
@@ -88,6 +89,17 @@ class Entry
 
   before_save :update_analytics
   
+  # === ENTRY MOCK FIELD METHODS === #
+
+  # Returns URL of the specified version of this user's avatar (uses gravatar as a backup)
+  # Valid version values are nil (defaults to full size), :preview, :thumb
+  def image_url(version = nil)
+    return_value = uploaded_image_url(version)
+  end
+  def image_medium_url; image_url(:preview); end
+  def image_small_url; image_url(:thumb); end
+
+
   # === ENTRY METHODS === #
 
   def to_param

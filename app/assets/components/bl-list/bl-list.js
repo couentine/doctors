@@ -47,7 +47,7 @@ Polymer({
     wrapperClass: { type: String, computed: "_wrapperClass(layoutMode, objectMode)" },
     minColWidth: { type: Number, computed: "_minColWidth(objectMode)" },
     maxColCount: { type: Number, computed: "_maxColCount(minColWidth)" },
-    columnClassList: { type: Number, computed: "_columnClassList(maxColCount)" },
+    colClassList: { type: Number, computed: "_colClassList(maxColCount)" },
     hasNextPage: { 
       type: Boolean, 
       value: false,
@@ -61,9 +61,9 @@ Polymer({
     isColumnMode: { type: Boolean, computed: "_isColumnMode(layoutMode)" },
 
     // Internal properties
-    columnCount: {
+    colCount: {
       type: Number,
-      observer: "_columnCountChanged"
+      observer: "_colCountChanged"
     }
   },
 
@@ -76,8 +76,10 @@ Polymer({
     self.getResults(function(result) {
       if (result) {
         // Add all of the new results to the array (this will auto update the dom-repeat)
-        for (var i = 0; i <= result[self.objectMode].length; i++) 
+        for (var i = 0; i < result[self.objectMode].length; i++) {
+          result[self.objectMode][i].selected = false; // add a selection property
           self.push('items', result[self.objectMode][i]);
+        }
         
         // Store the new value of nextPage and exit loading status
         self.nextPage = result.next_page;
@@ -98,8 +100,10 @@ Polymer({
     self.getResults(function(result) {
       if (result) {
         // Add all of the new results to the array (this will auto update the dom-repeat)
-        for (var i = 0; i <= result[self.objectMode].length; i++) 
+        for (var i = 0; i < result[self.objectMode].length; i++) {
+          result[self.objectMode][i].selected = false; // add a selection property
           self.push('items', result[self.objectMode][i]);
+        }
         
         // Store the new value of nextPage and exit loading status
         self.nextPage = result.next_page;
@@ -122,15 +126,15 @@ Polymer({
     // Register the column resize events if needed
     var self = this;
     if (this.isColumnMode) {
-      $(window).on('resize', function() { self.updateColumnCount(); });
-      self.updateColumnCount();
+      $(window).on('resize', function() { self.updateColCount(); });
+      self.updateColCount(); // update it on page load as well
     }
 
     // Refresh query if needed
     if (this.refreshQueryOnDisplay)
       this.refreshQuery();
   },
-  _columnCountChanged(newValue, oldValue) {
+  _colCountChanged(newValue, oldValue) {
     if (this.isColumnMode && (newValue != oldValue)) {
       var classMap = { 1: "one-column", 2: "two-columns", 3: "three-columns", 4: "four-columns",
         5: "five-columns", 6: "six-columns" };
@@ -150,18 +154,13 @@ Polymer({
     }
   },
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
-  _wrapperClass: function(layoutMode, objectMode) { 
-    if (layoutMode == "column")
-      return "column-list one-column " + objectMode; // start off at one column
-    else
-      return layoutMode + "-list " + objectMode; 
-  },
+  _wrapperClass: function(layoutMode, objectMode) { return layoutMode + "-list " + objectMode; },
   _minColWidth: function(objectMode) {
-    if (objectMode == "full_logs") return 450;
+    if (objectMode == "full_logs") return 600;
     else return null;
   },
   _maxColCount: function(minColWidth) { return Math.floor(2000/minColWidth); },
-  _columnClassList: function(maxColCount) {
+  _colClassList: function(maxColCount) {
     var returnValue = [];
     for (var i = 1; i <= maxColCount; i++)
       returnValue.push("column column-" + i);
@@ -217,10 +216,13 @@ Polymer({
     this.setLoadingStatus(false); // exit loading status if needed
     this.$$("#error-panel").hidden = false;
   },
-  updateColumnCount: function() {
+  updateColCount: function() {
+    // This gets run when the window is resized and will update the column count if needed
+    // If will automatically make sure column count never goes below 1 or above maxColCount.
     if (this.isColumnMode) {
-      var currentColumnCount = Math.max(1, Math.floor($(window).width() / 450));
-      if (currentColumnCount != this.columnCount) this.columnCount = currentColumnCount;
+      var newColCount = Math.floor($(this).find('.column-list').width() / this.minColWidth);
+      newColCount = Math.max(1, Math.min(this.maxColCount, newColCount));
+      if (newColCount != this.colCount) this.colCount = newColCount;
     }
   }
 });

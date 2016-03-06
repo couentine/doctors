@@ -1,0 +1,71 @@
+<dom-module id="bl-entry-content">
+  <link rel="stylesheet" href="bl-entry-content.css" />
+  
+  <template>
+
+    <div class$="{{wrapperClass}}">
+
+      <template is="dom-if" if="{{isLink}}">
+        <!-- === WEB LINK === -->
+          
+        <div class="subtitle">
+          <i class="fa fa-link"></i> Link
+          <span hidden$="{{blank(entry.link_metadata.provider_name)}}">
+            ({{entry.link_metadata.provider_name}})
+          </span>
+        </div>
+        
+        <h3><a href$="{{entry.link_url}}" target="_blank">{{linkTitle}}</a></h3>
+
+        <p hidden$="{{blank(entry.link_metadata.description)}}">
+          {{entry.link_metadata.description}}
+        </p>
+        
+        <div class="link-embed" hidden$="{{!linkHasEmbed}}">{{entry.link_metadata.html}}</div>
+        
+        <a class="link-thumbnail" target="_blank" href$="{{entry.link_url}}" 
+            hidden$="{{blank(entry.link_metadata.thumbnail_url)}}">
+          <img src$="{{entry.link_metadata.thumbnail_url}}">
+        </a>
+      </template>
+
+      <template is="dom-if" if="{{isTweet}}">
+        <!-- === TWITTER LINK === -->
+        <div class="subtitle"><i class="fa fa-twitter"></i> Tweet</div>
+        <h3><a href$="{{entry.link_url}}" target="_blank">{{entry.summary}}</a></h3>
+      </template>
+
+      <template is="dom-if" if="{{isImage}}">
+        <!-- === IMAGE === -->
+        <div class="subtitle"><i class="fa fa-camera"></i> Uploaded Image</div>
+        <h3>{{entry.summary}}</h3>
+        <a class="link-thumbnail" target="_blank" href$="{{entry.image_url}}" 
+            hidden$="{{blank(entry.image_medium_url)}}">
+          <img src$="{{entry.image_medium_url}}">
+        </a>
+      </template>
+
+      <template is="dom-if" if="{{isCode}}">
+        <!-- === CODE SNIPPET === -->
+        <div class="subtitle">
+          <i class="fa fa-file-code-o"></i> Code Snippet
+          (<span>{{entry.code_format}}</span>)
+        </div>
+        <h3>{{entry.summary}}</h3>
+        <pre class="prettyprint bl-dark">{{entry.body}}</pre>
+      </template>
+
+      <template is="dom-if" if="{{isText}}">
+        <!-- === FREE TEXT RESPONSE === -->
+        <div class="subtitle"><i class="fa fa-pencil"></i> Free Text</div>
+        <h3>{{entry.summary}}</h3>
+        <template id="item-repeat" is="dom-repeat" items="{{entry.body_sections}}">
+          <p><bl-html-echo html="{{item}}"></bl-html-echo></p>
+        </template>
+      </template>
+    </div>
+
+  </template>
+
+  <script src="bl-entry-content.js"></script>
+</dom-module>

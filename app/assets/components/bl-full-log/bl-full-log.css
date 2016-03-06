@@ -1,16 +1,27 @@
 /* === CARD STYLES === */
 
-  paper-card { display: block; }
+  paper-card { 
+    display: block; 
+    border: 3px solid transparent;
+    transition: 0.5s all;
+  }
+  paper-card.hovered { border-color: rgb(255,224,178); }
+  paper-card.selected { border-color: rgb(255,183,77); }
 
   .card-header {
     border-bottom: 1px solid rgb(232,232,232);
     padding: 1em;
     display: flex;
     justify-content: flex-start;
+    cursor: pointer;
+    transition: background-color 0.5s;
+    -webkit-transition: background-color 0.5s;
   }
+  .card-header:hover { background-color: rgb(255,243,224); }
     .avatar {
+      flex: 0 0;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       flex-direction: column;
     }
       .avatar img {
@@ -19,13 +30,44 @@
         flex: none;
       }
     .text {
+      flex: 1 1;
       padding: 0 1em;
     }
-    .text h3 {
-      font-size: 1.2em;
-      margin: 0;
+      .text h2 {
+        font-size: 1.4em;
+        margin: 0;
+      }
+      .text .details {
+        font-size: 0.8em;
+        color: rgb(158,158,158);
+      }
+    .selector {
+      flex: 0 0;
     }
-    .text .details {
-      font-size: 0.8em;
-      color: rgb(158,158,158);
+    paper-checkbox {
+      --paper-checkbox-checked-color: rgb(245,124,0);
+      --paper-checkbox-size: 1.3em;
     }
+    paper-checkbox.hovered {
+      /* This doesn't work... */
+      --paper-checkbox-unchecked-background-color: rgb(255,224,178);
+      --paper-checkbox-unchecked-color: rgb(245,124,0);
+    }
+
+  .card-content { padding: 0; }
+    .tag-section {
+      border-top: 1px solid rgb(232,232,232);
+      padding: 1em;
+    }
+    .tag-section:first-child { border-top: none; }
+      .tag-header {
+        font-size: 1.2em;
+        color: rgb(56,142,60);
+        text-transform: uppercase;
+        font-weight: bold;
+        margin: 0.5em;
+      }
+
+  bl-entry-content {
+    padding: 0.5em 1em;
+  }

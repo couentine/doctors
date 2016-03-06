@@ -19,7 +19,7 @@
         </template>
 
         <template is="dom-if" if="{{isColumnMode}}">
-          <template id="item-repeat" is="dom-repeat" items="{{columnClassList}}">
+          <template id="item-repeat" is="dom-repeat" items="{{colClassList}}">
             <div class$="{{item}}">
               <template id="item-repeat" is="dom-repeat" items="{{items}}">
                 <bl-list-item object-mode="{{objectMode}}" item="{{item}}" class$="{{itemClass}}">
