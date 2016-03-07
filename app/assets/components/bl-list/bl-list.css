@@ -3,7 +3,35 @@
   :host {
     display: block;
   }
-  
+
+  :host ::content .list-controls {
+    display: flex;
+    margin: 1em 0;
+    color: white;
+  }
+  @media (min-width: 840px) { :host ::content .list-controls { margin: 1em 2em; } }
+  @media (min-width: 1200px) { :host ::content .list-controls { margin: 1em 4em; } }
+    :host ::content .list-controls ul {
+      display: flex;
+      flex-direction: row;
+      list-style: none;
+      margin: 0 1em;
+      padding: 0;
+    }
+      :host ::content .list-controls ul li {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    :host ::content .list-controls .left {
+      flex: 1 1;
+      justify-content: flex-start;
+    }
+    :host ::content .list-controls .right {
+      flex: 1 1;
+      justify-content: flex-end;
+    }
+
   :host ::content .placeholder {
     display: flex;
     flex: 1 100%;

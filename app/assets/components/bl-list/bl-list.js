@@ -121,6 +121,15 @@ Polymer({
       self.showError('An error occurred while trying to retrieve results.');
     });
   },
+  // This method will overwrite all of the query options parameters contained in the passed object
+  // (leaving other options the same) and will then refresh the query.
+  updateQueryOptions: function(newQueryOptions) {
+    for (var key in newQueryOptions)
+      if (newQueryOptions.hasOwnProperty(key))
+        this.queryOptions[key] = newQueryOptions[key];
+
+    this.refreshQuery();
+  },
   selectAll: function() {
     for (var i = 0; i < this.items.length; i++)
       this.set("items.#" + i + ".selected", true);

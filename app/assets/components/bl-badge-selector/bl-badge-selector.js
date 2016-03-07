@@ -45,16 +45,14 @@ Polymer({
 
   // Observers
   _selectedBadgeUrlChanged: function(newValue, oldValue) {
-    var blList;
+    var targetList;
 
     if (this.badgeUrlMap) {
       this.selectedBadge = this.badgeUrlMap[newValue];
       if (this.for) {
-        blList = document.querySelector("#" + this.for);
-        if (blList) {
-          blList.queryOptions.badge = newValue;
-          blList.refreshQuery();
-        }
+        targetList = document.querySelector("#" + this.for);
+        if (targetList)
+          targetList.updateQueryOptions({ "badge": newValue });
       }
     }
   }

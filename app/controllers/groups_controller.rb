@@ -842,10 +842,11 @@ class GroupsController < ApplicationController
     # Build the default query options parameter for the bl-list component
     # That involves querying the extra parameters
     sort_fields = ['date_requested', 'user_name'] # defaults to first value
-    sort_orders = ['asc', 'desc'] # defaults to first value
+    sort_orders = ['desc', 'asc'] # defaults to first value
     @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
     @sort_order = \
       (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
+    @sort_options = { sort_by: @sort_by, sort_order: @sort_order }
     @bl_list_query_options = { \
       badge: @badge_url, sort_by: @sort_by, sort_order: @sort_order }.to_json
 
@@ -859,7 +860,7 @@ class GroupsController < ApplicationController
   # specified badge. It will first check that the user has access to the specified badge.
   def full_logs
     sort_fields = ['date_requested', 'user_name'] # defaults to first value
-    sort_orders = ['asc', 'desc'] # defaults to first value
+    sort_orders = ['desc', 'asc'] # defaults to first value
 
     badge_param = params['badge'].to_s.downcase
     @page = params['p'] || 1

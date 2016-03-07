@@ -3,20 +3,39 @@
 
   <template>
 
-    <paper-dialog id="dialog">
+    <paper-dialog id="dialog" modal>
       <h2>
         Add bulk feedback to <span>{{logCount}}</span> selected logs
       </h2>
 
       <paper-dialog-scrollable>
-        <paper-input label="Feedback summary" value="{{summary}}" required char-counter 
-          maxlength="140"></paper-input>
-        <paper-textarea label="Feedback body" value="{{body}}"></paper-input>
+        <paper-input id="summary" label="Feedback summary" value="{{summary}}" required 
+          char-counter maxlength="140"></paper-input>
+        <paper-textarea id="body" label="Feedback body" value="{{body}}"></paper-input>
       </paper-dialog-scrollable>
 
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm>Accept</paper-button>
+        <paper-button id="submit">
+          <i class="fa fa-comment"></i> Feedback Only
+        </paper-button>
+        <paper-button id="endorse">
+          <i class="fa fa-shield"></i> Endorse
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="progress" modal>
+      <h2>
+        Posting feedback...
+      </h2>
+
+      <div>
+        <bl-poller></bl-poller>
+      </div>
+
+      <div class="buttons">
+        <paper-button dialog-dismiss>Continue working</paper-button>
       </div>
     </paper-dialog>
 

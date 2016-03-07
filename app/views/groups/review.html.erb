@@ -6,15 +6,26 @@
   .no-badge-icon {
     font-size: 3em;
   }
+  
   h1 {
     font-size: 1.5em;
     margin: 0 0 0.5em 0;
   }
+
+  bl-selection-bar paper-button { width: 11em; }
+
+  .query-options-dropdown label.paper-input.style-scope,
+  .query-options-dropdown input.paper-input.style-scope,
+  .query-options-dropdown iron-icon.style-scope.paper-dropdown-menu {
+    color: white;
+  }
+  .query-options-dropdown .unfocused-line.style-scope { background: white; }
+  .query-options-dropdown .focused-line.style-scope { background: rgb(224,224,224); }
 </style>
 
 <bl-app-container color-mode="group" appbar-mode="standard" header-mode="condensable"
   toolbar-mode="badge-selector" background-mode="color" current-user="<%= current_user.json_cu %>"
-  header-height="250" condensed-header-height="80" has-custom-logo="true">
+  header-height="250" condensed-header-height="80" has-custom-logo hide-intercom>
   
   <a href="<%= "/#{@group.url}" %>" class="custom-logo back-link">
     <i class="fa fa-chevron-left"></i>
@@ -46,6 +57,36 @@
           </p>
         </div>
       </div>
+
+      <div class="list-controls">
+        <ul class="left">
+          <bl-query-options for="log-list" selected-options="<%= @sort_options.to_json %>">
+            <paper-dropdown-menu label="Sort order" class="query-options-dropdown">
+              <paper-listbox class="dropdown-content">
+                <paper-item data-options='{"sort_by":"date_requested","sort_order":"desc"}'>
+                  Newest first
+                </paper-item>
+                <paper-item data-options='{"sort_by":"date_requested","sort_order":"asc"}'>
+                  Oldest first
+                </paper-item>
+                <paper-item data-options='{"sort_by":"user_name","sort_order":"asc"}'>
+                  By name
+                </paper-item>
+                <paper-item data-options='{"sort_by":"user_name","sort_order":"desc"}'>
+                  Reverse name
+                </paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+          </bl-query-options>
+        </ul>
+        <ul class="right">
+          <li>
+            <paper-button onclick="document.querySelector('#log-list').selectAll()">
+              <i class="fa fa-check"></i> Select All
+            </paper-button>
+          </li>
+        </ul>
+      </div>
     </bl-list>
 
     <bl-log-validator id="log-validator" for="log-list"></bl-log-validator>
@@ -54,7 +95,7 @@
       <ul class="actions">
         <li>
           <paper-button onclick="document.querySelector('#log-validator').open()">
-            Feedback
+            <i class="fa fa-comment"></i> Add Feedback
           </paper-button>
         </li>
       </ul>

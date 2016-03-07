@@ -27,7 +27,10 @@ Polymer({
   attached: function() {
     if (this.for && document.querySelector("#" + this.for)) 
       this.sourceList = document.querySelector("#" + this.for);
+
+    this.listen(this.$.dialog, "iron-overlay-opened", "_dialogOpened");
   },
+  _dialogOpened: function(e) { this.$.summary.focus(); },
 
   // Property Computers
   _logCount: function(selectedLogs) { 

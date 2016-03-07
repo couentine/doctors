@@ -18,9 +18,7 @@ Polymer({
   // Events
   attached: function() {
     // Load google pretty print if this is a code element
-    if (this.entry && (this.entry.format == "code")) {
-      addEventListener('load', function (event) { PR.prettyPrint() }, false);
-    }
+    if (this.entry && (this.entry.format == "code")) { this.prettifyCode(); }
   },
 
   // Helpers
@@ -47,6 +45,22 @@ Polymer({
     return entry && entry.link_metadata && entry.link_metadata.html 
       && (entry.link_metadata.html.trim().length > 0)
       && ((entry.link_metadata.type == 'rich') || (entry.link_metadata.type == 'video'));
+  },
+
+  // Only run this if this is a code element
+  prettifyCode: function(tryCount) {
+    var self = this;
+
+    if (!tryCount) tryCount = 0;
+
+    // This will first attempt to run until the code element shows up
+    if (document.querySelectorAll(".prettyprint").length > 0) {
+      // Then it will run pretty print ONLY if it hasn't already been done 
+      // So we avoid running the pretty print code unneccessarily frequently.
+      if (document.querySelectorAll(".prettyprint:not(.prettyprinted)").length > 0)
+        PR.prettyPrint();
+    } else if (tryCount < 25)
+      setTimeout(function() { self.prettifyCode(tryCount + 1); }, 100);
   }
 
 });
