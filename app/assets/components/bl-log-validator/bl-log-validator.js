@@ -20,7 +20,10 @@ Polymer({
     this.selectedLogs = this.sourceList.selectedItems;
 
     // Then show the dialog
-    this.$.dialog.open(); 
+    this.$['input-dialog'].open(); 
+  },
+  submit: function(withEndorsement) {
+    // if ()
   },
 
   // Events
@@ -28,7 +31,7 @@ Polymer({
     if (this.for && document.querySelector("#" + this.for)) 
       this.sourceList = document.querySelector("#" + this.for);
 
-    this.listen(this.$.dialog, "iron-overlay-opened", "_dialogOpened");
+    this.listen(this.$['input-dialog'], "iron-overlay-opened", "_dialogOpened");
   },
   _dialogOpened: function(e) { this.$.summary.focus(); },
 

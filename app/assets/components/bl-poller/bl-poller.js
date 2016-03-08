@@ -11,6 +11,11 @@ Polymer({
 
     intervalDoubleRate: { type: Number, value: 2 }, // how many cycles before interval doubles?
 
+    // Computed
+    isPending: { type: Boolean, value: false, computed: "_isPending(poller, isError)" },
+    isSuccessful: { type: Boolean, value: false, computed: "_isSuccessful(poller, isError)" },
+    isFailed: { type: Boolean, value: false, computed: "_isFailed(poller, isError)" },
+
     // Managed automatically
     running: Boolean,
     poller: Object,
@@ -26,10 +31,14 @@ Polymer({
       this.tries = 0;
       this.pollerStarted = Date.now();
       this.running = true;
-      this.queryPoller;
+      this.$.progress.disabled = false;
+      this.queryPoller();
     }
   },
-  stop: function() { this.running = false; },
+  stop: function() { 
+    this.running = false; 
+    this.$.progress.disabled = true;
+  },
 
   // Events
   _pollerIdChanged: function(newValue, oldVaue) { this.start(); },
@@ -57,7 +66,8 @@ Polymer({
           else if ((Date.now() - self.pollerStarted) < self.maxDuration)
             setTimeout(function() { self.queryPoller() }, nextInterval); 
           else
-            self.goError("The maximum waiting interval has elapsed.");
+            self.goError("This job is taking a long time and the progress tracker has timed out, "
+              + "but the job will continue to run in the background.");
         }
       }).error(function(e) { 
         self.goError("An error occured. (Details: " + e + ")");
@@ -68,6 +78,17 @@ Polymer({
     this.errorMessage = errorMessage; 
     this.isError = true; 
     this.stop();
+  },
+
+  // Property Computers
+  _isPending: function(poller, isError) { 
+    return !isError && poller && (poller.status == "pending"); 
+  },
+  _isSuccessful: function(poller, isError) { 
+    return !isError && poller && (poller.status == "successful"); 
+  },
+  _isFailed: function(poller, isError) { 
+    return !isError && poller && (poller.status == "failed");
   }
 });
 

@@ -4,7 +4,7 @@ Polymer({
   properties: {
     // Required
     objectMode: String, // = ['badges', 'full_logs', 'groups']
-    item: { type: Object, observer: 'itemChanged' },
+    item: { type: Object, notify: true, observer: 'itemChanged' },
     
     // Optional
     options: Object,

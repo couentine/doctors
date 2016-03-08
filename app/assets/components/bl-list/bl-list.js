@@ -39,11 +39,14 @@ Polymer({
     selectionBar: Object, // this gets set by the bl-selection-bar when the "for" property is set
     
     // The object items
-    items: Array,
+    items: { type: Array, notify: true },
     itemsLoaded: { type: Boolean, value: false }, // set automatically
     selectedItems: { type: Array, value: function() { return []; } },
     selectedItemCount: { type: Number, value: 0, computed: "_selectedItemCount(selectedItems)",
       observer: "_selectedItemCountChanged" },
+    hasUnselectedItems: { type: Boolean, 
+      computed: "_hasUnselectedItems(items.length, selectedItemCount)",
+      observer: "_hasUnselectedItemsChanged" },
 
     // Computed
     layoutMode: { type: String, computed: "_layoutMode(objectMode)" },
@@ -60,7 +63,7 @@ Polymer({
     showPlaceholder: {
       type: Boolean,
       false: false,
-      computed: "_showPlaceholder(items, itemsLoaded)"
+      computed: "_showPlaceholder(items.length, itemsLoaded)"
     },
     isColumnMode: { type: Boolean, computed: "_isColumnMode(layoutMode)" },
 
@@ -131,12 +134,34 @@ Polymer({
     this.refreshQuery();
   },
   selectAll: function() {
-    for (var i = 0; i < this.items.length; i++)
-      this.set("items.#" + i + ".selected", true);
+    for (var i = 0; i < this.items.length; i++) {
+      this.items[i].selected = true;
+      this.notifyPath("items.#" + i + ".selected", true)
+    }
+    
+    // Manually run this since it doesn't get run sometimes when we use the notification method
+    this.updateSelectedItems();
   },
   deselectAll: function() {
-    for (var i = 0; i < this.items.length; i++)
-      this.set("items.#" + i + ".selected", false);
+    for (var i = 0; i < this.items.length; i++) {
+      this.items[i].selected = false;
+      this.notifyPath("items.#" + i + ".selected", false)
+    }
+
+    // Manually run this since it doesn't get run sometimes when we use the notification method
+    this.updateSelectedItems();
+  },
+  removeSelectedItems: function() {
+    // This method will remove all of the selected items from the items array.
+    // If that leaves the items array empty, then this method will call refreshQuery().
+
+    if (this.items && this.items.length) {
+      for (var i = this.items.length - 1; i >= 0; i--) // loop backwards so indexes won't change
+        if (this.items[i].selected)
+          this.splice('items', i, 1);
+    
+      if (this.items.length == 0) this.refreshQuery();
+    }
   },
 
   // Events
@@ -170,9 +195,18 @@ Polymer({
     }
   },
   _itemsChanged(details) {
-    if (details.path && details.path.endsWith(".selected")) {
-      this.updateSelectedItems();
+    if (details.path) {
+      if (details.path.endsWith(".selected") || details.path.endsWith(".length"))
+        this.updateSelectedItems();
     }
+  },
+  _hasUnselectedItemsChanged(newValue, oldValue) {
+    // Hide any buttons with class 'select-all-button' anywhere in the light DOM
+    // NOTE: We'll hide it by setting the scale to 0, so it can be animated if desired.
+    if (newValue)
+      $(Polymer.dom(this).querySelectorAll('.select-all-button')).css('transform', 'scale(1)');
+    else
+      $(Polymer.dom(this).querySelectorAll('.select-all-button')).css('transform', 'scale(0)');
   },
 
   // Property Computers
@@ -196,8 +230,8 @@ Polymer({
       returnValue.push("column column-" + i);
     return returnValue;
   },
-  _showPlaceholder: function(items, itemsLoaded) { 
-    return itemsLoaded && items && (items.length == 0); 
+  _showPlaceholder: function(itemsLength, itemsLoaded) { 
+    return itemsLoaded && !itemsLength; 
   },
   _hasNextPage: function(nextPage, items, itemsLoaded) { 
     return itemsLoaded && items && (nextPage > 0); 
@@ -208,6 +242,12 @@ Polymer({
     // Update the selection bar if needed
     if (this.selectionBar)
       this.selectionBar.count = newValue;
+  },
+  _hasUnselectedItems: function(itemsLength, selectedItemCount) {
+    if (itemsLength) 
+      if (selectedItemCount) return itemsLength > selectedItemCount;
+      else return true;
+    else return false;
   },
 
   // Helpers
@@ -228,9 +268,13 @@ Polymer({
   },
   // Queries next page & runs either completeFunction(results) or errorFunction()
   getResults: function(completeFunction, errorFunction) { 
+    var self = this;
+
     $.getJSON(this.getFullUrl(), function(result) {
-      if (result) completeFunction(result);
-      else errorFunction();
+      if (result) {
+        self.itemsLoaded = true;
+        completeFunction(result);
+      } else errorFunction();
     }).error(function() { errorFunction(); });
   },
   setLoadingStatus: function(isLoading) {
@@ -248,7 +292,6 @@ Polymer({
     }
   },
   showError: function(errorMessage) {
-    console.log(errorMessage);
     this.setLoadingStatus(false); // exit loading status if needed
     this.$$("#error-panel").hidden = false;
   },

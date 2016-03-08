@@ -32,6 +32,10 @@
       justify-content: flex-end;
     }
 
+  .placeholder-wrapper {
+    display: flex;
+    flex: 1 100%;
+  }
   :host ::content .placeholder {
     display: flex;
     flex: 1 100%;

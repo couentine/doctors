@@ -3,15 +3,17 @@
 
   <template>
 
-    <paper-dialog id="dialog" modal>
+    <paper-dialog id="input-dialog" modal>
       <h2>
         Add bulk feedback to <span>{{logCount}}</span> selected logs
       </h2>
 
       <paper-dialog-scrollable>
         <paper-input id="summary" label="Feedback summary" value="{{summary}}" required 
-          char-counter maxlength="140"></paper-input>
-        <paper-textarea id="body" label="Feedback body" value="{{body}}"></paper-input>
+          auto-validate char-counter maxlength="140" error-message="Summary is required">
+          </paper-input>
+        <paper-textarea id="body" label="Feedback body" value="{{body}}">
+        </paper-input>
       </paper-dialog-scrollable>
 
       <div class="buttons">
@@ -25,13 +27,13 @@
       </div>
     </paper-dialog>
 
-    <paper-dialog id="progress" modal>
+    <paper-dialog id="progress-dialog" modal>
       <h2>
-        Posting feedback...
+        Bulk feedback progress
       </h2>
 
       <div>
-        <bl-poller></bl-poller>
+        <bl-poller id="poller"></bl-poller>
       </div>
 
       <div class="buttons">

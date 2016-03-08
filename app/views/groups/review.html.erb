@@ -13,6 +13,9 @@
   }
 
   bl-selection-bar paper-button { width: 11em; }
+  paper-button.select-all-button { 
+    transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s !important;
+  }
 
   .query-options-dropdown label.paper-input.style-scope,
   .query-options-dropdown input.paper-input.style-scope,
@@ -81,7 +84,8 @@
         </ul>
         <ul class="right">
           <li>
-            <paper-button onclick="document.querySelector('#log-list').selectAll()">
+            <paper-button onclick="document.querySelector('#log-list').selectAll()" 
+                class="select-all-button">
               <i class="fa fa-check"></i> Select All
             </paper-button>
           </li>
