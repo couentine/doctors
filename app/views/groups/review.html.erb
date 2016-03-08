@@ -93,7 +93,9 @@
       </div>
     </bl-list>
 
-    <bl-log-validator id="log-validator" for="log-list"></bl-log-validator>
+    <bl-log-validator id="log-validator" for="log-list" 
+      group-validations-path="<%= group_validations_path(@group, format: :json) %>">
+    </bl-log-validator>
 
     <bl-selection-bar id="selected-log-bar" for="log-list" noun-singular="log" noun-plural="logs">
       <ul class="actions">

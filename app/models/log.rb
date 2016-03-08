@@ -17,8 +17,9 @@ class Log
   JSON_TEMPLATES = {
     list_item: [:id, :validation_status, :date_started, :date_requested, :date_withdrawn, 
       :date_issued, :date_retracted, :date_originally_issued, :validation_count, :rejection_count,
-      :user_name, :user_username_with_caps, :user_avatar_image_url, :user_avatar_image_medium_url,
-      :user_avatar_image_small_url, :created_at, :updated_at, :validating_user_ids]
+      :user_name, :user_username, :user_username_with_caps, :user_avatar_image_url, 
+      :user_avatar_image_medium_url, :user_avatar_image_small_url, :created_at, :updated_at, 
+      :validating_user_ids]
   }
   
   # === INSTANCE VARIABLES === #
@@ -202,6 +203,10 @@ class Log
 
       # Now we need to update the badge validation count
       Badge.update_validation_request_count(badge.id)
+
+      poller.status = 'successful'
+      poller.message = "Feedback has been successfully posted to #{log_count} logs."
+      poller.save
     rescue Exception => e
       if poller
         poller.status = 'failed'

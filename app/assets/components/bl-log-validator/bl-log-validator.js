@@ -3,6 +3,7 @@ Polymer({
 
   properties: {
     for: String, // set this to the id of the source bl-list
+    groupValidationsPath: String, // group_validations_path(@group) rails helper
     
     // Internally managed
     sourceList: Object, // set automatically based on this.for
@@ -11,7 +12,13 @@ Polymer({
     selectedLogs: Array,
 
     // Computed
-    logCount: { type: Number, value: 0, computed: "_logCount(selectedLogs)" }
+    logCount: { type: Number, value: 0, computed: "_logCount(selectedLogs)" },
+    logUsernames: { type: Number, value: 0, computed: "_logUsernames(selectedLogs)" }
+  },
+
+  listeners: {
+    "feedback.tap": "submitWithoutEndorsement",
+    "endorse.tap": "submitWithEndorsement"
   },
 
   // Methods
@@ -22,8 +29,48 @@ Polymer({
     // Then show the dialog
     this.$['input-dialog'].open(); 
   },
+  submitWithEndorsement: function() { this.submit(true); }, 
+  submitWithoutEndorsement: function() { this.submit(false); }, 
   submit: function(withEndorsement) {
-    // if ()
+    withEndorsement = (withEndorsement) ? true : false; // explicitly define if undefined
+
+    if (!this.$.summary.validate()) {
+      alert("The summary field is required.");
+      this.$.summary.focus();
+    } else {
+      var queryUrl; var queryParams;
+      var self = this;
+
+      // First build the query url
+      queryParams = { 
+        "badge": this.sourceList.queryOptions.badge,
+        "summary": this.summary,
+        "body": this.body,
+        "logs_validated": withEndorsement,
+        "log_usernames": self.logUsernames
+      }
+      queryUrl = self.groupValidationsPath + "?" + $.param(queryParams);
+
+      // Then do the post
+      $.post(queryUrl, function(result) {
+        if (result == null) 
+          alert("There was a problem posting your feedback, the server returned a blank result. "
+            + "Please try again later.");
+        else if (result.error_message && result.error_message.trim().length)
+          alert("There was a problem posting your feedback, the server returned an error. "
+            + "(Error Message: " + poller.error_message + ")");
+        else if (result.poller_id && result.poller_id.trim().length) {
+          // Everything looks good, clear the selected items and then switch to the progress modal
+          self.sourceList.removeSelectedItems();
+          self.$['input-dialog'].close();
+          self.$['progress-dialog'].open();
+          self.$.poller.pollerId = result.poller_id; // this will start the polling process
+        } else // This *should* be impossible.
+          alert("Your feedback may not have been posted, please check and try again.");
+      }).error(function(e) { 
+        alert("An error occured, please try again later. (Details: " + e + ")");
+      });
+    }
   },
 
   // Events
@@ -38,6 +85,12 @@ Polymer({
   // Property Computers
   _logCount: function(selectedLogs) { 
     return (selectedLogs && selectedLogs.length) ? selectedLogs.length : 0; 
+  },
+  _logUsernames: function(selectedLogs) { 
+    if (selectedLogs)
+      return $.map(selectedLogs, function(item, index) { return item.user_username }); 
+    else
+      return [];
   }
 
 });

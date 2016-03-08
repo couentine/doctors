@@ -21,5 +21,5 @@ paper-dialog {
   
   paper-button { color: rgb(97,97,97); }
   #input-dialog paper-button { margin-top: 2em; margin-bottom: 0.4em; }
-  paper-button#submit { background-color: rgb(97,97,97); color: white; }
+  paper-button#feedback { background-color: rgb(97,97,97); color: white; }
   paper-button#endorse { background-color: rgb(245,124,0); color: white; }
