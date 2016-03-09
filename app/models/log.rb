@@ -36,6 +36,8 @@ class Log
 
   field :validation_status,                   type: String, default: 'incomplete'
   field :issue_status,                        type: String, default: 'unissued'
+  field :retracted,                           type: Boolean, default: false # overrides other stati
+  field :retracted_by,                        type: BSON::ObjectId
   field :show_on_profile,                     type: Boolean, default: true
   field :detached_log,                        type: Boolean, default: false
   field :receive_validation_request_emails,   type: Boolean, default: true
@@ -81,11 +83,11 @@ class Log
   # === CALLBACKS === #
 
   before_validation :set_default_values, on: :create
+  before_validation :keep_counts_positive
   before_create :set_user_fields
   before_save :update_wiki_sections
   before_save :update_wiki_versions, on: :update # Don't store the first (default) value
   before_save :update_stati
-  after_save :back_validate_if_needed
   after_save :send_notifications
 
   after_save :update_badge_validation_request_count
@@ -312,12 +314,16 @@ class Log
 
       if entry.nil?
         # First create the entry
-        entry = Entry.new(summary: summary, body: body, log_validated: log_validated)
+        entry = Entry.new
+        entry.summary = summary
+        entry.body = body
+        entry.log_validated = log_validated
         entry.type = 'validation'
         entry.log = self
         entry.creator = creator_user
         entry.current_user = creator_user
         entry.current_username = creator_user.username
+        entry.context = 'log_add_validation' # prevent callback from updating the log
         entry.save
 
         # Then update the validations cache
@@ -487,30 +493,22 @@ protected
     self.date_started ||= Time.now
   end
 
+  def keep_counts_positive
+    self.validation_count = 0 if validation_count < 0
+    self.rejection_count = 0 if rejection_count < 0
+  end
+
   def set_user_fields
     update_user_fields_from user
   end
 
   # Updates validation & issue status values
+  # NOTE: If retracted is set then we will not issue the badge until it is cleared.
   def update_stati
-    if validation_count_changed? || rejection_count_changed? || date_requested_changed? \
-      || date_withdrawn_changed?
+    if validation_count_changed? || rejection_count_changed? || retracted_changed? \
+        || date_requested_changed? || date_withdrawn_changed? 
       
-      if currently_validated?
-        # First update the validation status if needed
-        if validation_status != 'validated'
-          self.validation_status = 'validated'
-        end
-
-        # Then update the issue status if needed
-        if issue_status != 'issued'
-          self.issue_status = 'issued'
-          self.date_issued ||= Time.now
-          self.date_retracted = nil
-
-          set_flag 'first_view_after_issued'
-        end
-      elsif rejection_count.to_i > 0 # you can be validated w/ 0 count, but not rejected w/ 0 count
+      if retracted
         # First update the validation status if needed
         if validation_status == 'validated'
           if date_requested.nil?
@@ -531,61 +529,34 @@ protected
           self.date_retracted = Time.now
           self.date_issued = nil
         end 
-      elsif date_withdrawn_changed? && !date_withdrawn.nil?
-        self.validation_status = 'withdrawn'
-      elsif date_requested_changed? && !date_requested.nil?
-        self.validation_status = 'requested'
-        self.date_withdrawn = nil # In case this is not their first request
-      end 
-    end
-  end
-
-  # Checks for validation threshold problems (due to threshold increasing w/ new experts)
-  # This method checks to see if the addition of SELF as an expert has increased the validation 
-  # threshold. If so, this method will "back-validate" all of the existing experts who are in 
-  # danger of being "de-validated".
-  def back_validate_if_needed
-    if (validation_status == 'validated') && validation_status_changed?
-      validation_threshold = badge.current_validation_threshold
-      time_string = Time.now.to_s(:full_date_time)
-      
-      if badge.expert_logs.count <= 1
-        summary = "Self-validation of badge creator"
-        body = "#{user.name} created the badge on #{time_string}" \
-          + " and was automatically awarded the badge."
-        self.add_validation(user, summary, body, true)
       else
-        if validation_threshold > 1
-          badge.logs.where(:validation_status => 'validated', \
-              :validation_count.lt => validation_threshold).each do |devalidated_log|
-            
-            if devalidated_log.user == self.user
-              summary = "Self-validation of founding expert"
-              body = "#{user.name} was added as one of the founding experts on #{time_string}."\
-                + " This 'self-validation' was added automatically."
-            else
-              summary = "Back-validation of existing expert"
-              body = "#{user.name} was added as one of the founding experts on #{time_string}."\
-                + " This 'back-validation' was added automatically."
-            end
-            
-            devalidated_log.add_validation(user, summary, body, true, false)
-
-          end
+        if issue_status == 'retracted'
+          self.issue_status = 'unissued'
+          self.date_retracted = nil
+          self.retracted_by = nil
         end
         
-        # This is an awarded badge so update analytics
-        IntercomEventWorker.perform_async({
-          'event_name' => 'badge-awarded',
-          'email' => user.email,
-          'created_at' => Time.now.to_i,
-          'metadata' => {
-            'badge_id' => badge.id.to_s,
-            'badge_name' => badge.name,
-            'badge_url' => badge.badge_url
-          }
-        })
+        if currently_validated?
+          # First update the validation status if needed
+          if validation_status != 'validated'
+            self.validation_status = 'validated'
+          end
+
+          # Then update the issue status if needed
+          if issue_status != 'issued'
+            self.issue_status = 'issued'
+            self.date_issued ||= Time.now
+
+            set_flag 'first_view_after_issued'
+          end
+        elsif date_withdrawn_changed? && !date_withdrawn.nil?
+          self.validation_status = 'withdrawn'
+        elsif date_requested_changed? && !date_requested.nil?
+          self.validation_status = 'requested'
+          self.date_withdrawn = nil # In case this is not their first request
+        end 
       end
+
     end
   end
 
@@ -615,11 +586,8 @@ protected
   # This is an internal-only function that checks if the log is
   # validated based on the current threshold & counts.
   def currently_validated?
-    if badge
-      validation_threshold = badge.current_validation_threshold
-    else
-      validation_threshold = 1 # default value (for tests and such)
-    end
+    # Set to badge value or default value (for tests and such)
+    validation_threshold = (badge) ? badge.validation_threshold : 1
     
     # Return value = 
     (validation_count - rejection_count) >= validation_threshold
@@ -627,7 +595,7 @@ protected
 
   # Updates the badge field if needed (can be called after update or destroy)
   def update_badge_validation_request_count
-    unless context.in? ['bulk_validation', 'badge_back_validation']
+    unless context.in? ['bulk_validation']
       # If it goes into or out of the requested state then we need to update the count field
       if (destroyed? || validation_status_changed? || detached_log_changed?) \
           && ((validation_status == 'requested') || (validation_status_was == 'requested'))
@@ -647,15 +615,14 @@ protected
         || (validation_status_changed? && (validation_status == 'validated')) \
         || (issue_status_changed? && (issue_status == 'retracted'))
       # NOTE: The final parameter will suppress badge updates in certain contexts.
-      Log.delay.update_user_badge_lists(id, nil, nil, 
-        context.in?(['badge_add', 'badge_back_validation']))
+      Log.delay.update_user_badge_lists(id, nil, nil, context == 'badge_add')
     end
   end
 
   def send_notifications
     # Note: The created_at condition is to filter out sample_data & migrations
     if validation_status_changed? && (updated_at > (Time.now - 2.hours))
-      if (validation_status == 'requested') && badge.send_validation_request_emails
+      if (validation_status == 'requested') && badge.send_validation_request_emails && !retracted
         Log.delay(queue: 'mailer').do_send_validation_requests(id)
       elsif validation_status == 'validated'
         unless user.email_inactive

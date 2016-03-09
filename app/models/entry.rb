@@ -411,13 +411,14 @@ protected
 
   # This method takes care of updating the log as needed.
   def update_log
-    if log_id && log
+    if (context != 'log_add_validation') && log_id && log
       # First increment the entry number counter
       log.next_entry_number += 1
       
       # Then check if all of the requirements are complete.
       # If so we will automatically request validation as long as it hasn't been done before
-      if (log.validation_status!='validated') && log.date_requested.nil? && log.date_withdrawn.nil?
+      if (log.validation_status != 'validated') && log.date_requested.nil? \
+          && log.date_withdrawn.nil? && !log.retracted
         everything_complete = true
         log.requirements_complete.each do |tag, complete|
           everything_complete = everything_complete && complete
@@ -439,7 +440,7 @@ protected
     end
   end
 
-  # Update the log if this was a validation
+  # Update the log if this was a validation (runs after destroy)
   def check_log_validation_counts
     if type == 'validation'
       # Update the log validation counts

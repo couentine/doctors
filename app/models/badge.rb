@@ -58,6 +58,7 @@ class Badge
   field :visibility,                      type: String, default: 'public'
   field :send_validation_request_emails,  type: Boolean, default: true
   field :cloned_from_badge_id,            type: String # stored as a string id, not a relationship
+  field :validation_threshold,            type: Integer, default: 1
   
   field :info,                            type: String
   field :info_sections,                   type: Array
@@ -137,7 +138,6 @@ class Badge
   before_save :update_info_versions, on: :update # Don't store the first (default) value
   before_save :update_terms
   before_update :move_badge_if_needed
-  after_create :add_creator_as_expert
   before_save :update_json_clone_badge_fields_if_needed
   after_save :update_requirement_editability
   before_destroy :remove_from_group_cache
@@ -546,20 +546,6 @@ class Badge
     the_log
   end
 
-  # Returns the ACTUAL validation threshold based on the group settings AND the badge expert count
-  def current_validation_threshold
-    # NOTE: I'm removing this for now since it requires an extra query.
-    return [expert_count, 1].min
-    
-    # validation_threshold = expert_logs.count
-
-    # if group && group.validation_threshold
-    #   validation_threshold = [validation_threshold, group.validation_threshold].min
-    # end
-
-    # validation_threshold
-  end
-
   # Refresh the topic_list_text from the requirements list
   def refresh_topic_list_text
     requirement_items = requirements
@@ -778,9 +764,6 @@ protected
   def set_default_values
     self.info ||= APP_CONFIG['default_badge_info']
     self.flags ||= []
-    if expert_user_ids.blank? && !creator_id.blank?
-      self.expert_user_ids = [creator_id]
-    end
   end
 
   def update_caps_field
@@ -808,16 +791,6 @@ protected
     end
 
     true
-  end
-
-  def add_creator_as_expert
-    log = Log.new
-    log.context = 'badge_back_validation' # This will prevent recursive callbacks
-    log.badge = self
-    log.user = creator
-    log.save! 
-    # NOTE: This log will automatically be validated (by log.update_stati) 
-    # and self-validated (by log.back_validate_if_needed)
   end
 
   def update_info_sections

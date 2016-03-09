@@ -59,7 +59,7 @@ class Group
   field :website,                         type: String
   field :type,                            type: String, default: 'open'
   field :customer_code,                   type: String
-  field :validation_threshold,            type: Integer, default: 1
+  field :validation_threshold,            type: Integer, default: 1 # RETIRED FIELD
   field :invited_admins,                  type: Array, default: []
   field :invited_members,                 type: Array, default: []
   field :bounced_email_log,               type: Array, default: []

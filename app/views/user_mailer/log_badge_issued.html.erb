@@ -14,36 +14,22 @@
           </td>
           <td style="padding: 10px; border-top: 15px solid #FF7C1C;">
             
-            <% if @to_creator %>
-            
-              <p>
-                You have created a new badge in the <%= link_to @group.name, group_url(@group) %> group. 
-                You are now the founding <%= @badge.expert %> of the <%= @badge.name %> badge.
-              </p>
-              <p>
-                You can now share your badge to social networks and add it to your 
-                Mozilla Open Badges Backpack.
-              </p>
-
-            <% else %>
-            
-              <p>
-                You have been awarded the 
-                <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
-                badge in Badge List. It has been added to your 
-                <%= link_to 'badge profile', "#{ENV['root_url']}/u/#{@to_user.username_with_caps}"%>
-                and you are now one of the <%= @badge.experts %>, congratulations!
-              </p>
-              <p>
-                Click the link below to view your newly awarded badge.
-                You'll be able to share it to social networks and add the badge to your Mozilla Open Badges Backpack.
-                <% if @badge.tracks_progress? %>
-                  Also be aware that all non-private entries in your progress log are now visible 
-                  and will be linked to the badge as public evidence of your achievment. 
-                <% end %>
-              </p>
-            
-            <% end %>
+            <p>
+              You have been awarded the 
+              <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
+              badge in Badge List. It has been added to your 
+              <%= link_to 'badge profile', "#{ENV['root_url']}/u/#{@to_user.username_with_caps}"%>
+              and you are now one of the <%= @badge.experts %>, congratulations!
+            </p>
+            <p>
+              Click the link below to view your newly awarded badge.
+              You'll be able to share it to social networks and add the badge to your Mozilla Open 
+              Badges Backpack.
+              <% if @badge.tracks_progress? %>
+                Also be aware that all non-private entries in your progress log are now visible 
+                and will be linked to the badge as public evidence of your achievment. 
+              <% end %>
+            </p>
 
           </td>
         </tr>

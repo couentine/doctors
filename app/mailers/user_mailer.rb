@@ -30,9 +30,8 @@ class UserMailer < ActionMailer::Base
   def log_badge_issued(to_user_id, group_id, badge_id, log_id)
     @to_user, @group, @badge, @log = User.find(to_user_id), Group.find(group_id), \
       Badge.find(badge_id), Log.find(log_id)
-    @to_creator = (@to_user == @badge.creator)
 
-    subject = @to_creator ? "You've created and earned a new badge" : "You've been awarded a badge"
+    subject = "You've been awarded a badge"
     mail(
       :subject  => subject,
       :to       => @to_user.email_name,

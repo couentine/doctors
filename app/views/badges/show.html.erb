@@ -668,7 +668,7 @@
         <div class="span12">
           <div class="tab-header">
             <% if @can_award_badge %>
-              <% unless @badge.current_validation_threshold > 1 %>
+              <% unless @badge.validation_threshold > 1 %>
                 <%= link_to '<i class="fa fa-shield"></i> Award the badge'.html_safe,
                     badge_issue_path(@group, @badge), class: 'btn btn-small', id: 'award-badge' %>
               <% end %>
