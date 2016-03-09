@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+footer {
+  display: flex;
+  padding: 0.5em 2em;
+  color: rgb(97,97,97);
+  border-top: 1px solid rgb(97,97,97);
+}
+footer.color { color: white; border-color: white; }
+  .left,
+  .right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: 3.5em;
+  }
+  .left { 
+    flex: 1 1; 
+  }
+  .right { 
+    flex: 0 0;
+    text-align: right; 
+  }
+    ul.links { 
+      display: flex; 
+      list-style: none; 
+      margin: 0; 
+      padding: 0; 
+    }
+    ul.links li { display: block; }
+    .left ul.links li { margin-right: 1em; }
+    .right ul.links li { margin-left: 1em; }
+      a.social,a:visited.social {
+        text-decoration: none;
+        color: inherit;
+      }
+      a.social:focus.social,a:hover.social { color: rgb(189,189,189); }
+      a.social i { font-size: 1.5em; }
+
+footer.no-intercom .right { margin-right: 0; }

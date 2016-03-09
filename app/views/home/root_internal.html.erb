@@ -63,7 +63,7 @@
       <h2>Badges in progress</h2>
     </bl-subheader>
 
-    <bl-list object-mode="badges" items='<%= @badges_hash.to_json %>' 
+    <bl-list id="badge-list" object-mode="badges" items='<%= @badges_hash.to_json %>' 
         next-page="<%= @badges_next_page %>" next-page-param="bp"
         next-page-url="<%= root_url(format: :json, query: 'badges') + '&bp=' %>">
       <div class="placeholder">
@@ -96,7 +96,7 @@
       </ul>
     </bl-subheader>
 
-    <bl-list object-mode="groups" items='<%= @groups_hash.to_json %>' 
+    <bl-list id="group-list" object-mode="groups" items='<%= @groups_hash.to_json %>' 
         next-page="<%= @groups_next_page %>" next-page-param="gp"
         next-page-url="<%= root_url(format: :json, query: 'groups') + '&gp=' %>">
       <div class="placeholder">
@@ -110,6 +110,8 @@
         </div>
       </div>
     </bl-list>
+
+    <bl-page-footer></bl-page-footer>
   </div>
 
 </bl-app-container>

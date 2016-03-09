@@ -32,10 +32,7 @@ Polymer({
     // Options
     queryOptions: Object, // Added to next page query: "&key1=value1&key2=value2" ...
     options: Object,
-    refreshQueryOnDisplay: {
-      type: Boolean,
-      value: false
-    },
+    refreshQueryOnDisplay: { type: Boolean, value: false },
     selectionBar: Object, // this gets set by the bl-selection-bar when the "for" property is set
     
     // The object items
@@ -55,23 +52,15 @@ Polymer({
     minColWidth: { type: Number, computed: "_minColWidth(objectMode)" },
     maxColCount: { type: Number, computed: "_maxColCount(minColWidth)" },
     colClassList: { type: Number, computed: "_colClassList(maxColCount)" },
-    hasNextPage: { 
-      type: Boolean, 
-      value: false,
-      computed: "_hasNextPage(nextPage, items, itemsLoaded)" 
-    },
-    showPlaceholder: {
-      type: Boolean,
-      false: false,
-      computed: "_showPlaceholder(items.length, itemsLoaded)"
-    },
     isColumnMode: { type: Boolean, computed: "_isColumnMode(layoutMode)" },
+    hasNextPage: { type: Boolean, value: false, 
+      computed: "_hasNextPage(nextPage, items, itemsLoaded, loading)" },
+    showPlaceholder: { type: Boolean, false: false, 
+      computed: "_showPlaceholder(items.length, itemsLoaded, loading)" },
 
     // Internal properties
-    colCount: {
-      type: Number,
-      observer: "_colCountChanged"
-    }
+    colCount: { type: Number, observer: "_colCountChanged" },
+    loading: { type: Boolean, value: false }
   },
 
   observers: [
@@ -221,20 +210,20 @@ Polymer({
   _wrapperClass: function(layoutMode, objectMode) { return layoutMode + "-list " + objectMode; },
   _minColWidth: function(objectMode) {
     if (objectMode == "full_logs") return 600;
-    else return null;
+    else return 2000;
   },
   _maxColCount: function(minColWidth) { return Math.floor(2000/minColWidth); },
   _colClassList: function(maxColCount) {
     var returnValue = [];
-    for (var i = 1; i <= maxColCount; i++)
+    for (var i = 1; i <= Math.min(10, maxColCount); i++)
       returnValue.push("column column-" + i);
     return returnValue;
   },
-  _showPlaceholder: function(itemsLength, itemsLoaded) { 
-    return itemsLoaded && !itemsLength; 
+  _showPlaceholder: function(itemsLength, itemsLoaded, loading) { 
+    return itemsLoaded && !loading && !itemsLength; 
   },
-  _hasNextPage: function(nextPage, items, itemsLoaded) { 
-    return itemsLoaded && items && (nextPage > 0); 
+  _hasNextPage: function(nextPage, items, itemsLoaded, loading) { 
+    return itemsLoaded && !loading && items && (nextPage > 0); 
   },
   _isColumnMode: function(layoutMode) { return layoutMode == "column"; },
   _selectedItemCount: function(selectedItems) { return selectedItems ? selectedItems.length : 0; },
@@ -286,9 +275,11 @@ Polymer({
       nextPageButton.disabled = true;
       spinner.hidden = false; spinner.active = true;
       errorPanel.hidden = true;
+      this.loading = true;
     } else {
       nextPageButton.disabled = false;
       spinner.active = false; spinner.hidden = true;
+      this.loading = false;
     }
   },
   showError: function(errorMessage) {

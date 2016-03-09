@@ -4,6 +4,7 @@ Polymer({
   properties: {
     badges: Array,
     for: String, // id of the bl-list
+    expandedParent: { type: String, value: "body" }, // query selector for the parent element
     selectedBadgeUrl: {
       type: String,
       observer: "_selectedBadgeUrlChanged"
@@ -30,6 +31,10 @@ Polymer({
     // Set the badge if needed
     if (this.selectedBadgeUrl)
       this._selectedBadgeUrlChanged(this.selectedBadgeUrl, null);
+
+    // Now re-parent the expanded container
+    if (document.querySelector(this.expandedParent))
+      $(document.querySelector(this.expandedParent)).append(this.$["expanded-container"]);
   },
 
   // Functions

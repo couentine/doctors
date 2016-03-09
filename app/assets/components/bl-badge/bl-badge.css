@@ -47,6 +47,7 @@
       line-height: 0.8em;
       border-radius: 500px;
       background-color: white;
+      margin: 0;
     }
   .label {
     flex: none;
