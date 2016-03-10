@@ -381,6 +381,7 @@ table.table {
 .badge { text-shadow: none; }
 .badge-success { background-color: $secondary-light; }
 .badge-warning { background-color: $primary-light; }
+.badge-error { background-color: $red-light; }
 .badge-info { background-color: $tertiary-light; }
 
 .label { 
@@ -585,6 +586,9 @@ table.table {
   &.red-really-light { color: $red-really-light; }
   &.red-light { color: $red-light; }
   &.red-dark { color: $red-dark; }
+}
+.text-color > a, .text-color > a:visited {
+  color: inherit !important;
 }
 
 
@@ -2361,13 +2365,13 @@ div.info-card {
     ul { margin: 0; }
     ul.left-foot {
       display: inline-block;
-      max-width: 60%;
+      max-width: 50%;
     }
     ul.right-foot {
       position: absolute;
       bottom: 7px;
       right: 5px;
-      max-width: 40%;
+      max-width: 50%;
     }
     li {
       list-style: none;

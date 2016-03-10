@@ -106,6 +106,8 @@ BadgeList::Application.routes.draw do
   # === MANUAL LOG PATHS === #
   match ':group_id/:badge_id/o/:id' => 'logs#show', via: :get, as: :open_badge_assertion,
     defaults: { f: 'ob1' }
+  match ':group_id/:badge_id/u/:id/retract' => 'logs#retract', via: :post, as: :log_retract
+  match ':group_id/:badge_id/u/:id/unretract' => 'logs#unretract', via: :post, as: :log_unretract
 
   # === MANUAL TAG PATHS === #
   match ':group_id/:badge_id/:tag_id/restore' => 'tags#restore', via: :post, as: :tag_restore

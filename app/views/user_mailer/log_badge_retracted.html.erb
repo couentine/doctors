@@ -5,23 +5,14 @@
   </head>
   <body>
     <p>
-      One or more of the <%= @badge.experts %> for the <%= @badge.name %> badge have given you a negative 
-      endorsement. (This means they offered the opinion that you have not yet mastered the badge.) 
-      Due to this change, your previously issued badge has temporarily been retracted. For now you 
-      are no longer one of the badge <%= @badge.experts %>.
-    </p>
-    <p>
-      How do you get the badge back? Not to worry! There are two ways. You can get the dissenting 
-      <%= @badge.expert %>(s) to change their negative endorsements to positive endorsements. If possible, you can 
-      also get additional <%= @badge.experts %> to weigh in. Once your endorsement balance is once again over 
-      the threshold 
-      (currently <%= pluralize @badge.validation_threshold, 'endorsement' %>) 
-      you will be re-issued the badge. The first step is to check your <%= @badge.progress_log %> and read through 
-      the feedback offered by the dissenting <%= @badge.expert %>(s).
-    </p>
+      Your badge has been retracted<%= (@retracted_by) ? " by #{@retracted_by.name}" : "" %>. 
+      How do you get the badge back? Not to worry! 
+      Any of the group admins or the badge creator are able to clear the retraction. After the 
+      retraction is cleared you can be reissued the badge.
     <p>
       <strong>Your <%= @badge.progress_log.titleize %>:</strong> 
-      <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %>
+      <%= link_to group_badge_log_url(@group, @badge, @log), 
+        group_badge_log_url(@group, @badge, @log) %>
     </p>
     <p>
       <i>

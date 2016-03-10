@@ -34,13 +34,20 @@ footer.color { color: white; border-color: white; }
       padding: 0; 
     }
     ul.links li { display: block; }
+    ul.legal { 
+      margin: 0 0 1em 0; 
+      display: none;
+    }
+    @media (min-width: 550px) { ul.legal { display: flex; } }
     .left ul.links li { margin-right: 1em; }
     .right ul.links li { margin-left: 1em; }
-      a.social,a:visited.social {
+      a.social, a:visited.social,
+      a.legal, a:visited.legal {
         text-decoration: none;
         color: inherit;
       }
-      a.social:focus.social,a:hover.social { color: rgb(189,189,189); }
+      a.social:focus, a.social:hover,
+      a.legal:focus, a.legal:hover { color: rgb(189,189,189); }
       a.social i { font-size: 1.5em; }
 
 footer.no-intercom .right { margin-right: 0; }

@@ -51,8 +51,16 @@
                 
                 <% is_creator = (log.user_id == badge.creator_id) %>
                 <% if is_creator %>
-                  <i data-toggle="tooltip" data-placement="bottom" title="Badge creator" 
-                    class="fa fa-shield fa-solid-gold"></i>
+                  <li>
+                    <i data-toggle="tooltip" data-placement="bottom" title="Badge creator" 
+                      class="fa fa-shield fa-solid-gold"></i>
+                    </li>
+                <% end %>
+                <% if log.retracted %>
+                  <li>
+                    <i class="fa fa-ban red" title="Badge retracted" data-toggle="tooltip"
+                      data-placement="bottom"></i>
+                  </li>
                 <% end %>
 
                 <% if badge.tracks_progress? %>

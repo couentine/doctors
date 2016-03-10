@@ -4,10 +4,14 @@
 
   expert_count = badge.expert_count
   learner_count = badge.learner_count
+  validation_request_count = badge.validation_request_count
   visibility_details = badge.visibility_details
 
   is_expert = current_user && current_user.expert_of?(badge)
   is_learner = current_user && current_user.learner_of?(badge)
+
+  can_award = is_admin || \
+    ((badge.awardability == 'experts') && current_user && current_user.expert_of?(badge))
 %>
 
 <div class="info-card badge-card <%= (is_expert) ? 'awarded' : '' %>" 
@@ -89,6 +93,13 @@
             <i class="fa fa-trophy"></i>
             <%= expert_count %>
           </li>
+          <% if can_award && (validation_request_count > 0) %>
+            <li class="text-color primary-medium" data-toggle="tooltip" data-placement="bottom" 
+                title="Pending Feedback Requests">
+              <i class="fa fa-flag-checkered"></i> 
+              <%= validation_request_count %>
+            </li>
+          <% end %>
         </ul>
       </td>
     </tr>

@@ -51,7 +51,7 @@
       }
   :host ::content .content {
     min-height: 100%;
-    padding-bottom: 7em;
+    padding-bottom: 9em;
     position: relative;
   }
 

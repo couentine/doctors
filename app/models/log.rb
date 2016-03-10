@@ -302,6 +302,22 @@ class Log
     !wiki_versions.blank? && !wiki.blank?
   end
 
+  # Use this method instead of setting the boolean directly
+  # Returns false if there was a problem, true if ok
+  def add_retraction(creator_user)
+    self.retracted = true
+    self.retracted_by ||= creator_user.id
+    self.save
+  end
+
+  # Use this method instead of setting the boolean directly
+  # Returns false if there was a problem, true if ok
+  def clear_retraction
+    self.retracted = false
+    self.retracted_by = nil
+    self.save
+  end
+
   # Adds or updates a validation entry to the log and returns it
   # Also updates log validations cache
   # NOTE: Doesn't work for new records.

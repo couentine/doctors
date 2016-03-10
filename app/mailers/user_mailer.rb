@@ -45,6 +45,11 @@ class UserMailer < ActionMailer::Base
     @to_user, @group, @badge, @log = User.find(to_user_id), Group.find(group_id), \
       Badge.find(badge_id), Log.find(log_id)
 
+    if @log.retracted_by
+      # Retracted by is an id field not a user field so we need to query for it
+      @retracted_by = User.find(@log.retracted_by) rescue nil 
+    end
+
     mail(
       :subject  => "Your badge has been retracted",
       :to       => @to_user.email_name,

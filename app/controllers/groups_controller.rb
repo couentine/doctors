@@ -110,10 +110,12 @@ class GroupsController < ApplicationController
     if @current_user_is_admin || @badge_list_admin
       @validation_request_count = @group.badges.where(:validation_request_count.gt => 0)\
         .sum{ |badge| badge.validation_request_count }
-    else
+    elsif current_user
       @validation_request_count = @group.badges.where(:validation_request_count.gt => 0, 
         :awardability => 'experts', :expert_user_ids.in => [current_user.id])\
         .sum{ |badge| badge.validation_request_count }
+    else
+      @validation_request_count = 0
     end
 
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS

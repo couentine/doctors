@@ -214,7 +214,15 @@
                   end
                 %>
               </h3>
-              <% if @log.validation_status == 'requested' %>
+              <% if @log.retracted %>
+                <h3><span class="text-color red-medium">
+                  <i class="fa fa-ban"></i>
+                  Badge retracted
+                  <% if @retracted_by %>
+                    by <%= link_to @retracted_by.username_with_caps, @retracted_by %>
+                  <% end %>
+                </span></h3>
+              <% elsif @log.validation_status == 'requested' %>
                 <h3><span class="text-color primary-medium">
                   <i class="fa fa-flag-checkered"></i>
                   Requested feedback on <%= @log.date_requested.to_s(:full_date) %>
@@ -342,8 +350,26 @@
               class: 'btn btn-small' %>
           <% end %>
         <% end %>
+        
+        <% if @can_retract && !@current_user_is_log_owner %>
+          <% if @log.retracted %>
+            <%= link_to "<i class='fa fa-undo'></i> Clear retraction".html_safe,
+              log_unretract_path(@group, @badge, @log), class: 'btn btn-small', method: :post %>
+          <% elsif @log.validation_status == 'validated' %> 
+            <%= link_to "<i class='fa fa-ban'></i> Retract badge".html_safe,
+              log_retract_path(@group, @badge, @log), class: 'btn btn-small', method: :post,
+              data: { confirm: 'Are you sure you want to retract the badge from this user?' } %>
+          <% end %>
+        <% end %>
 
-        <% if @log.validation_status == 'requested' %>
+        <% if @log.retracted %>
+          <span class="badge badge-error collapse-when-small">
+            Badge retracted
+            <% if @log.date_retracted %>
+              <%= @log.date_retracted.to_s(:full_date) %>
+            <% end %>
+          </span></h3>
+        <% elsif @log.validation_status == 'requested' %>
           <span class="badge badge-warning collapse-when-small">
             Feedback requested <%= @log.date_requested.to_s(:full_date) %>
           </span>
