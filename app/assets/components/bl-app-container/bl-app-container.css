@@ -33,6 +33,7 @@
   :host ::content .custom-logo {
     margin-top: 0.5em;
     display: inline-flex;
+    z-index: 10;
   }
     :host ::content .custom-logo i { 
       font-size: 1.3em;
@@ -46,7 +47,10 @@
       border-radius: 3px;
     }
       @media (min-width: 840px) { 
-        :host ::content .custom-logo i { font-size: 2em; } 
+        :host ::content .custom-logo i {
+          font-size: 1.8em;
+          margin-top: 0.15em;
+        } 
         :host ::content .custom-logo img { height: 2em; } 
       }
   :host ::content .content {
@@ -105,6 +109,43 @@
     background-color: rgb(41,182,246);
   }
 
+/* === SHARED TOOLBAR STYLES === */
+  
+  .toolbar.top a {
+    color: rgb(97,97,97);
+    text-decoration: none;
+  }
+  .toolbar.top a i.fa { margin-right: 0.1em; }
+  .toolbar.top a.logo { 
+    display: inline-block;
+    margin-top: 0.5em;
+  }
+  .toolbar.top a.logo img { height: 1.5em; }
+    @media (min-width: 840px) { .toolbar.top a.logo img { height: 2em; } }
+  
+    paper-menu {
+      z-index: 100;
+    }
+    .dropdown-trigger { 
+      display: inline-block; 
+      cursor: pointer;
+    }
+    img.current-user { 
+      height: 1.5em; 
+      border: 0.15em solid white;
+      border-radius: 500px;
+      display: inline-block;
+    }
+    .dropdown-trigger i.fa {
+      display: inline-block;
+    }
+    @media (min-width: 840px) { 
+      img.current-user.dropdown-trigger { height: 2em; } 
+    }
+    paper-item.error { background-color: rgb(239,154,154); }
+    paper-item.error a { color: white !important; }
+
+
 /* === PAPER TOOLBAR === */
 
   paper-toolbar {
@@ -120,45 +161,27 @@
     background-color: transparent;
     color: white; 
   }
-  paper-toolbar.badge-selector {
-    height: 250px;
-  }
-    .toolbar.top { width: 100%; }
-    .toolbar.top a {
-      color: rgb(97,97,97);
-      text-decoration: none;
-    }
-    .toolbar.top a.signout { float: right; }
-    .toolbar.top a i.fa { margin-right: 0.1em; }
-    .toolbar.top a.logo { 
-      display: inline-block;
-      margin-top: 0.5em;
-    }
-    .toolbar.top a.logo img { height: 1.5em; }
-      @media (min-width: 840px) { .toolbar.top a.logo img { height: 2em; } }
-  
-    paper-menu-button.current-user {
+    paper-toolbar .toolbar.top { width: 100%; }
+      paper-toolbar .toolbar.top a.signout { float: right; }
+
+    paper-toolbar paper-menu-button.current-user {
       float: right;
       display: inline-block;
     }
-      paper-menu {
-        z-index: 100;
-      }
-      .dropdown-trigger { 
-        display: inline-block; 
-        cursor: pointer;
-      }
-      img.current-user { 
-        height: 1.5em; 
-        border: 0.15em solid white;
-        border-radius: 500px;
-        display: inline-block;
-      }
-      .dropdown-trigger i.fa {
-        display: inline-block;
-      }
-      @media (min-width: 840px) { 
-        img.current-user.dropdown-trigger { height: 2em; } 
-      }
-      paper-item.error { background-color: rgb(239,154,154); }
-      paper-item.error a { color: white !important; }
+
+/* === COLLAPSIBLE TOOLBAR === */
+
+  .paper-header.standard-background {
+    background-color: transparent;
+    color: rgb(97,97,97);
+  }
+  .paper-header.color-background {
+    background-color: transparent;
+    color: white; 
+  }
+    .paper-header .toolbar {
+      display: flex;
+      padding: 0.5em 0.5em 0 0.5em;
+    }
+    .paper-header .toolbar.top { justify-content: space-between; }
+    .paper-header a.custom-logo { z-index: 10; }

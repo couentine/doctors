@@ -911,7 +911,7 @@ namespace :db do
     print "Updating #{Badge.count} badges"
 
     Badge.each do |badge|
-      badge.validation_request_count = badge.requesting_learner_logs.count
+      badge.update_validation_request_count
 
       if badge.timeless.save
         print "."

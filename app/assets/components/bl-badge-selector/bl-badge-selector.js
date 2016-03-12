@@ -38,10 +38,16 @@ Polymer({
   },
 
   // Functions
-  expand: function(e) { this.expanded = true; if (e) e.preventDefault(); },
-  close: function(e) { this.expanded = false; if (e) e.preventDefault(); },
+  expand: function(e) { 
+    this.expanded = true; if (e) e.preventDefault(); 
+    document.querySelector("paper-scroll-header-panel").measureHeaderHeight();
+  },
+  close: function(e) { 
+    this.expanded = false; if (e) e.preventDefault(); 
+    document.querySelector("paper-scroll-header-panel").measureHeaderHeight();
+  },
   selectThisBadge: function(e) { 
-    this.selectedBadgeUrl = $(e.srcElement).closest(".select-link")[0].dataBadgeUrl;
+    this.selectedBadgeUrl = $(e.target).closest(".select-link")[0].dataBadgeUrl;
     this.close();
   },
 

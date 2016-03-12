@@ -90,10 +90,8 @@ class Log
   before_save :update_stati
   after_save :send_notifications
 
-  after_save :update_badge_validation_request_count
-  after_save :update_user_if_needed
-  after_destroy :update_badge_validation_request_count
-  after_destroy :update_user_after_destroy
+  after_save :update_user_and_badge
+  after_destroy :update_user_and_badge
 
   # === LOG MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
@@ -196,19 +194,31 @@ class Log
         log.context = 'bulk_validation' # this skips the updating of the badge validation count
         log.add_validation(creator_user, summary, body, logs_validated, overwrite_existing)
         progress_count += 1
-        
+
+        # Update the badge in memory (since we're suppressing the log callback that does this)
+        if log.validation_status == 'validated'
+          badge.expert_user_ids << log.user_id unless badge.expert_user_ids.include? log.user_id
+          badge.learner_user_ids.delete log.user_id if badge.learner_user_ids.include? log.user_id
+        else
+          badge.expert_user_ids.delete log.user_id if badge.expert_user_ids.include? log.user_id
+          badge.learner_user_ids << log.user_id unless badge.learner_user_ids.include? log.user_id
+        end
+
         if poller
           poller.progress = progress_count * 100 / log_count
           poller.save if poller.changed? # don't hit the DB unless the number has changed
         end
       end
 
-      # Now we need to update the badge validation count
-      Badge.update_validation_request_count(badge.id)
+      # Now we need to update the parts of the badge that didn't get updated 
+      badge.update_validation_request_count
+      badge.timeless.save if badge.changed?
 
-      poller.status = 'successful'
-      poller.message = "Feedback has been successfully posted to #{log_count} logs."
-      poller.save
+      if poller
+        poller.status = 'successful'
+        poller.message = "Feedback has been successfully posted to #{log_count} logs."
+        poller.save
+      end
     rescue Exception => e
       if poller
         poller.status = 'failed'
@@ -222,9 +232,8 @@ class Log
   end
 
   # If log still exists then pass only the first param
-  # If log is deleted then pass only the user and badge ids
-  # Set skip_badge_update to avoid touching the badge record
-  def self.update_user_badge_lists(log_id, user_id = nil, badge_id = nil, skip_badge_update = false)
+  # If log is deleted then leave log_id blank and pass user_id AND badge_id instead
+  def self.update_user(log_id, user_id = nil, badge_id = nil)
     # First query the records
     if log_id
       log = Log.find(log_id)
@@ -239,39 +248,57 @@ class Log
     # Then update the badge list fields on the user record
     if log && !log.detached_log
       user.all_badge_ids << badge.id unless user.all_badge_ids.include? badge.id
-      badge.all_user_ids << user.id if !skip_badge_update && !badge.all_user_ids.include?(user.id)
 
       if log.validation_status == 'validated'
         user.expert_badge_ids << badge.id unless user.expert_badge_ids.include? badge.id
         user.learner_badge_ids.delete badge.id if user.learner_badge_ids.include? badge.id
-
-        unless skip_badge_update
-          badge.expert_user_ids << user.id unless badge.expert_user_ids.include? user.id
-          badge.learner_user_ids.delete user.id if badge.learner_user_ids.include? user.id
-        end
       else
         user.expert_badge_ids.delete badge.id if user.expert_badge_ids.include? badge.id
         user.learner_badge_ids << badge.id unless user.learner_badge_ids.include? badge.id
-
-        unless skip_badge_update
-          badge.expert_user_ids.delete user.id if badge.expert_user_ids.include? user.id
-          badge.learner_user_ids << user.id unless badge.learner_user_ids.include? user.id
-        end
       end
     else
       user.all_badge_ids.delete badge.id if user.all_badge_ids.include? badge.id
       user.expert_badge_ids.delete badge.id if user.expert_badge_ids.include? badge.id
       user.learner_badge_ids.delete badge.id if user.learner_badge_ids.include? badge.id
-      
-      unless skip_badge_update
-        badge.all_user_ids.delete user.id if badge.all_user_ids.include? user.id
-        badge.expert_user_ids.delete user.id if badge.expert_user_ids.include? user.id
-        badge.learner_user_ids.delete user.id if badge.learner_user_ids.include? user.id
-      end
     end
 
     user.timeless.save if user.changed?
-    badge.timeless.save if !skip_badge_update && badge.changed?
+  end
+
+  # If log still exists then pass only the first param
+  # If log is deleted then leave log_id blank and pass badge_id AND user_id
+  # NOTE: The parameter order is reversed in this method versus the one above.
+  def self.update_badge(log_id, badge_id = nil, user_id = nil)
+    # First query the records
+    if log_id
+      log = Log.find(log_id)
+      user = log.user
+      badge = log.badge
+    else
+      log = nil
+      user = User.find(user_id)
+      badge = Badge.find(badge_id)
+    end
+    
+    # Then update the badge list fields on the user record
+    if log && !log.detached_log
+      badge.all_user_ids << user.id if !badge.all_user_ids.include?(user.id)
+
+      if log.validation_status == 'validated'
+        badge.expert_user_ids << user.id unless badge.expert_user_ids.include? user.id
+        badge.learner_user_ids.delete user.id if badge.learner_user_ids.include? user.id
+      else
+        badge.expert_user_ids.delete user.id if badge.expert_user_ids.include? user.id
+        badge.learner_user_ids << user.id unless badge.learner_user_ids.include? user.id
+      end
+    else
+      badge.all_user_ids.delete user.id if badge.all_user_ids.include? user.id
+      badge.expert_user_ids.delete user.id if badge.expert_user_ids.include? user.id
+      badge.learner_user_ids.delete user.id if badge.learner_user_ids.include? user.id
+    end
+
+    badge.update_validation_request_count
+    badge.timeless.save if badge.changed?
   end
 
   # === LOG INSTANCE METHODS === #
@@ -381,11 +408,11 @@ class Log
 
         entry.current_user = creator_user
         entry.current_username = creator_user.username
-        entry.update_attributes({
-          summary: summary,
-          body: body,
-          log_validated: log_validated
-        })
+        entry.summary = summary
+        entry.body = body
+        entry.log_validated = log_validated
+        
+        entry.save if entry.changed?
       end
 
       return entry
@@ -527,15 +554,7 @@ protected
       if retracted
         # First update the validation status if needed
         if validation_status == 'validated'
-          if date_requested.nil?
-            self.validation_status = 'incomplete'
-          else
-            if date_withdrawn.nil?
-              self.validation_status = 'requested'
-            else
-              self.validation_status = 'withdrawn'
-            end
-          end
+          self.validation_status = 'incomplete'
         end
         
         # Then update the issue status if needed
@@ -606,33 +625,32 @@ protected
     validation_threshold = (badge) ? badge.validation_threshold : 1
     
     # Return value = 
-    (validation_count - rejection_count) >= validation_threshold
+    ([validation_count, 0].max - [rejection_count, 0].max) >= [validation_threshold, 1].max
   end
 
-  # Updates the badge field if needed (can be called after update or destroy)
-  def update_badge_validation_request_count
-    unless context.in? ['bulk_validation']
-      # If it goes into or out of the requested state then we need to update the count field
-      if (destroyed? || validation_status_changed? || detached_log_changed?) \
-          && ((validation_status == 'requested') || (validation_status_was == 'requested'))
-        Badge.delay(queue: 'low', retry: 'false').update_validation_request_count(badge_id)
-      end
-    end
-  end
-
-  # Call from after destroy
-  def update_user_after_destroy
-    Log.delay.update_user_badge_lists(nil, user_id, badge_id)
-  end
   
-  # Call from after save
-  def update_user_if_needed
-    if new_record? || detached_log_changed? \
-        || (validation_status_changed? && (validation_status == 'validated')) \
-        || (issue_status_changed? && (issue_status == 'retracted'))
-      # NOTE: The final parameter will suppress badge updates in certain contexts.
-      Log.delay.update_user_badge_lists(id, nil, nil, context == 'badge_add')
-    end
+  # Call this from after save and after destroy
+  # This method checks to see if we need to update the user OR badge records via sidekiq.
+  # Things that need updating: User lists of expert/learner/all badges, Badge lists of 
+  # experts/learners/members, Badge validation request count
+  # List of update cases:
+  # - If we are being created or destroyed >> Update user and badge
+  # - If we are entering or exiting valdiated validation_status >> Update user and badge
+  # - If we are entering or exiting detached state >> Update user and badge
+  # - If we are entering or exiting requested validation_status >> Update badge
+  def update_user_and_badge
+    log_id = (destroyed?) ? nil : id
+
+    user_needs_update = new_record? || destroyed? || detached_log_changed? \
+      || (validation_status_changed? \
+          && ((validation_status == 'validated') || (validation_status_was == 'validated')))
+    
+    badge_needs_update = !context.in?(['bulk_validation', 'badge_add']) &&
+      (user_needs_update || (validation_status_changed? \
+        && ((validation_status == 'requested') || (validation_status_was == 'requested'))))
+
+    Log.delay.update_user(log_id, user_id, badge_id) if user_needs_update
+    Log.delay(queue: 'low').update_badge(log_id, badge_id, user_id) if badge_needs_update
   end
 
   def send_notifications

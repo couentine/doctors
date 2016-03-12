@@ -28,14 +28,14 @@
 
 <bl-app-container color-mode="group" appbar-mode="standard" header-mode="condensable"
   toolbar-mode="badge-selector" background-mode="color" current-user="<%= current_user.json_cu %>"
-  header-height="250" condensed-header-height="80" has-custom-logo hide-intercom>
+  header-height="260" has-custom-logo hide-intercom>
   
   <a href="<%= "/#{@group.url}" %>" class="custom-logo back-link">
     <i class="fa fa-chevron-left"></i>
     <%= image_tag @group.avatar_image_small_url, class: 'logo' %>
   </a>
 
-  <div class="toolbar bottom center fit">
+  <div class="toolbar bottom center">
     <h1>Feedback Requests</h1>
     <bl-badge-selector badges="<%= @badges.to_json %>" selected-badge-url="<%= @badge_url.to_s %>" 
         for="log-list" <%= (@badge_url.blank?) ? 'expanded' : '' %>>

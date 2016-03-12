@@ -163,7 +163,8 @@
 
 <% 
   show_validations = !@validations.empty? || (@log.validation_status == 'validated') \
-        || (@log.validation_status == 'requested') || !@show_progress
+    || (@log.validation_status == 'requested') || !@show_progress \
+    || (@log.retracted && @can_retract)
 %>
 
 <div class="row add-top-margin">

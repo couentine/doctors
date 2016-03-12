@@ -32,7 +32,7 @@ Polymer({
   submitWithEndorsement: function() { this.submit(true); }, 
   submitWithoutEndorsement: function() { this.submit(false); }, 
   submit: function(withEndorsement) {
-    withEndorsement = (withEndorsement) ? true : false; // explicitly define if undefined
+    withEndorsement = (withEndorsement == true) ? true : false; // explicitly define if undefined
 
     if (!this.$.summary.validate()) {
       alert("The summary field is required.");
@@ -40,12 +40,14 @@ Polymer({
     } else {
       var queryUrl; var queryParams;
       var self = this;
+      var bodyText;
 
       // First build the query url
+      bodyText = this.body ? this.body.replace(/(?:\r\n|\r|\n)/g, "<br>") : "";
       queryParams = { 
         "badge": this.sourceList.queryOptions.badge,
         "summary": this.summary,
-        "body": this.body,
+        "body": bodyText,
         "logs_validated": withEndorsement,
         "log_usernames": self.logUsernames
       }

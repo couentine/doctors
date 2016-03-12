@@ -150,6 +150,10 @@ a.btn:visited {
     color: $light-white !important;
     &:focus,&:hover { background-color: $red-dark; }
   }
+  &.primary-color {
+    color: $primary-medium;
+    color: white;
+  }
 }
 ul.dropdown-menu {
   text-align: left;
@@ -2197,6 +2201,11 @@ form#group-add-users-form {
   .btn:not(.h3-btn),.btn-group { float: right; }
   .btn:not(.h3-btn) {
     margin: 0px 6px;
+
+    &.highlight-primary {
+      background-color: $primary-light;
+      color: white !important;
+    }
   }
   ul.dropdown-menu {
     font-size: 11px;

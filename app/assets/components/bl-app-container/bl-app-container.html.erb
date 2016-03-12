@@ -34,10 +34,9 @@
     </template>
 
     <template is="dom-if" if="{{isHeaderMode_Condensable}}">
-      <paper-scroll-header-panel condenses keep-condensed-header header-height$="{{headerHeight}}" 
-        condensed-header-height$="{{condensedHeaderHeight}}" class$="{{headerPanelClass}}">
+      <paper-scroll-header-panel header-height$="{{headerHeight}}" class$="{{headerPanelClass}}">
 
-        <paper-toolbar class$="{{toolbarClass}}">
+        <div class$="{{toolbarClass}}">
           <div class="toolbar top">
             <a class="logo" title="Badge List Home" href="/" hidden$="{{hasCustomLogo}}">
               <img src="<%= url.asset_url('badge-list-shield-white-square.png') %>">
@@ -92,7 +91,7 @@
 
           <content select=".toolbar.middle"></content>
           <content select=".toolbar.bottom"></content>
-        </paper-toolbar>
+        </div>
         
         <content select=".content"></content>
     </template>

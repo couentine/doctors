@@ -22,7 +22,8 @@ Polymer({
     // Computed
     currentUserProfile: { type: String, computed: "_currentUserProfile(currentUser)" },
     headerPanelClass: { type: String, computed: "_headerPanelClass(backgroundMode, colorMode)" },
-    toolbarClass: { type: String, computed: "_toolbarClass(backgroundMode,colorMode,toolbarMode)"},
+    toolbarClass: { type: String, 
+      computed: "_toolbarClass(backgroundMode,colorMode,toolbarMode,headerMode)"},
     isAppbarMode_Standard: { type: Boolean, computed: "_isAppbarMode_Standard(appbarMode)" },
     isAppbarMode_Home: { type: Boolean, computed: "_isAppbarMode_Home(appbarMode)" },
     isHeaderMode_Condensable: { type: Boolean, computed: "_isHeaderMode_Condensable(headerMode)" }
@@ -51,8 +52,9 @@ Polymer({
   _headerPanelClass: function(backgroundMode, colorMode) { 
     return colorMode + "-color " + backgroundMode + "-background "; 
   },
-  _toolbarClass: function(backgroundMode, colorMode, toolbarMode) { 
-    return colorMode + "-color " + backgroundMode + "-background " + toolbarMode; 
+  _toolbarClass: function(backgroundMode, colorMode, toolbarMode, headerMode) { 
+    return colorMode + "-color " + backgroundMode + "-background " + toolbarMode
+      + ((headerMode == "condensable") ? " paper-header" : "");
   },
   _isAppbarMode_Standard: function(appbarMode) { return appbarMode == "standard"; },
   _isAppbarMode_Home: function(appbarMode) { return appbarMode == "home"; },

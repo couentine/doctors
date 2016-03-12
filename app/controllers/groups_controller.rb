@@ -898,8 +898,8 @@ class GroupsController < ApplicationController
       unless @badge_id.blank?
         log_criteria = Log.where(badge_id: @badge_id, validation_status: 'requested', 
           detached_log: false, :user_id.ne => current_user.id, \
-          :validations_cache.ne => current_user.id).page(@page).per(@page_size)\
-          .order_by("#{@sort_by} #{@sort_order}")
+          :"validations_cache.#{current_user.id.to_s}".exists => false)\
+          .page(@page).per(@page_size).order_by("#{@sort_by} #{@sort_order}")
         @full_logs_hash = Log.full_logs_as_json(log_criteria)
         @next_page = @page + 1 if log_criteria.count > (@page_size * @page)
       end
@@ -924,7 +924,7 @@ class GroupsController < ApplicationController
     @log_usernames = params['log_usernames']
     @summary = params['summary']
     @body = params['body']
-    @logs_validated = params['logs_validated']
+    @logs_validated = (params['logs_validated'] == 'true') || (params['logs_validated'] == true)
     @error_message = nil
     @poller_id = nil
     

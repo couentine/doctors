@@ -73,46 +73,6 @@
 
 <% end %>
 
-<% if @can_award_badge %>
-
-  <!-- === FEEDBACK REQUESTS MODAL === -->
-
-  <div id="feedback-requests" class="modal hide fade" tabindex="-1" role="dialog" 
-   aria-labelledby="mimm-label" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label"><%= @Learners %> requesting <%= @expert %> feedback</h3>
-    </div>
-
-    <div class="modal-body">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th><%= @Learner %> Name</th>
-            <th>Requested</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @requesting_learner_logs.each do |log| %>
-            <tr>
-              <td>
-                <%= link_to log.user_name, [@group, @badge, log], title: "View progress log"  %>
-              </td>
-              <td><%= (log.date_withdrawn || log.date_requested).to_s(:full_date_time) %></td>
-              <td>
-                FIXME: <%= link_to '<i class="fa fa-plus"></i> Add your expertise'.html_safe, 
-                    [@group, @badge, log] %> 
-              </td>
-            </tr>
-          <% end %>
-      </tbody>
-      </table>
-    </div>
-  </div>
-
-<% end %>
-
 <% if @current_user_is_expert || @current_user_is_learner %>
 
   <!-- === EDIT BADGE MEMBERSHIP MODAL === -->
@@ -757,34 +717,11 @@
                 <% end %>
               <% end %>
             
-              <% if @can_award_badge && !@requesting_learner_logs.blank? %>
-                <div class="btn-group">
-                  <a href="#" class="btn btn-small btn-link dropdown-toggle time-sensitive" 
-                    data-toggle="dropdown">
-                    <%= @requesting_learner_logs.count %> feedback 
-                    <%= (@requesting_learner_logs.count == 1) ? "request" : "requests" %>
-                    <span class="caret"></span>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <% @requesting_learner_logs.take(10).each do |log| %>
-                      <li>
-                        <%= link_to "#{log.user_name}" \
-                          + " (#{log.date_withdrawn.nil? ? 'Requested' : 'Withdrawn'}"\
-                          + " #{(log.date_withdrawn || log.date_requested).to_s(:short_date)})",
-                          [@group, @badge, log], title: 'Click to add your expertise',
-                          tabindex: -1 %>
-                      </li>
-                    <% end %>
-
-                    <% if @requesting_learner_logs.count > 10 %>
-                      <li>
-                        <a tabindex="-1" href="#feedback-requests" data-toggle="modal">
-                          <%= (@requesting_learner_logs.count - 10).to_s %> more...
-                        </a>
-                      </li>
-                    <% end %>
-                  </ul>
-                </div>
+              <% if @can_award_badge && (@badge.validation_request_count > 0) %>
+                <%= link_to "<i class='fa fa-flag-checkered'></i> ".html_safe \
+                  + pluralize(@badge.validation_request_count, 'feedback request'), 
+                  group_review_path(@group, badge: @badge.url), 
+                  class: 'btn btn-small highlight-primary' %>
               <% end %>
             <% end %>
 

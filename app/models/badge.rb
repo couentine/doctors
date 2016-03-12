@@ -410,10 +410,14 @@ class Badge
     end
   end
 
-  def self.update_validation_request_count(badge_id)
+  def self.update_validation_request_count(badge_ids)
     badge = Badge.find(badge_id)
-    badge.validation_request_count = badge.requesting_learner_logs.count
+    badge.update_validation_request_count
     badge.timeless.save if badge.changed?
+  end
+
+  def update_validation_request_count
+    self.validation_request_count = requesting_learner_logs.count
   end
 
   # === INSTANCE METHODS === #
@@ -511,7 +515,7 @@ class Badge
   # date_started: Defaults to nil. If set, overrides the log.date_started fields
   # Return value = the newly created/reattached log
   def add_learner(user, date_started = nil)
-    the_log = logs.find_by(user: user) rescue nil
+    the_log = logs.find_by(user_id: user.id) rescue nil
     update_badge = false
     
     if the_log
@@ -519,6 +523,7 @@ class Badge
         the_log.detached_log = false
         the_log.context = 'badge_add' # This will suppress the badge update callback
         the_log.save
+        the_log.context = nil # CLEAR THIS OUT so it doesn't mess stuff up
         update_badge = true
       end
     else
@@ -527,6 +532,7 @@ class Badge
       the_log.user = user
       the_log.context = 'badge_add' # This will suppress the badge update callback
       the_log.save
+      the_log.context = nil # CLEAR THIS OUT so it doesn't mess stuff up
       update_badge = true
     end
 
