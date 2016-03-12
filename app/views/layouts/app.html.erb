@@ -26,8 +26,8 @@
       <%= stylesheet_link_tag 'app', media: 'all' %>
       <%= javascript_include_tag 'app' %>
       <%= html_import_tag 'application' %>
-      <%= stylesheet_link_tag 'shared/google-code-prettify/prettify.css' %>
-      <%= javascript_include_tag 'shared/google-code-prettify/prettify.js' %>
+      <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"> 
+      </script>
     
     <% #=== OPTIONAL INCLUSIONS ===# %>
     <% #=== [:no_index, :include_ob_issuer, :include_stripe, :include_metadata, :header] ===# %>

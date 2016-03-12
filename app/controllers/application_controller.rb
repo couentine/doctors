@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :log_activity
+  before_action :build_asset_paths
   after_action :store_location
 
   # unless Rails.application.config.consider_all_requests_local
@@ -86,6 +87,17 @@ private
 
   def log_activity
     current_user.log_activity if current_user
+  end
+
+  # The @asset_paths variable is passed into bl-app-container.assetPaths and is used to provide
+  # the paths of the various asset paths to the Polymer front end.
+  def build_asset_paths
+    url = ActionController::Base.helpers
+    @asset_paths = {
+      'badgeListShieldSquare' => url.asset_url('badge-list-shield-square.png'),
+      'badgeListShieldWhiteSquare' => url.asset_url('badge-list-shield-white-square')
+    }
+    @ap_json = @asset_paths.to_json
   end
 
 protected

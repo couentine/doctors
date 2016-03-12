@@ -38,3 +38,56 @@
     color: white;
     border-radius: 3px;
   }
+
+
+/* === PRE === */
+
+  pre.bl-dark {
+    background-color: #ECEFF1;
+    padding: 1em;
+    font-size: 1em;
+    line-height: 1.2em;
+    color: #dee3ec;
+  }
+  pre.bl-dark code {
+    font-family: 'Source Code Pro', Monaco, Consolas, "Lucida Console", monospace;
+  }
+  pre.bl-dark .pln {
+    color: #dee3ec;
+  }
+  pre.bl-dark .str {
+    color: #BCD42A;
+  }
+  pre.bl-dark .kwd {
+    color: #26A6A6;
+  }
+  pre.bl-dark .com {
+    color: #6e7a94;
+  }
+  pre.bl-dark .typ {
+    color: #FF5D38;
+  }
+  pre.bl-dark .lit {
+    color: #BCD42A;
+  }
+  pre.bl-dark .pun,
+  pre.bl-dark .opn,
+  pre.bl-dark .clo {
+    color: #dee3ec;
+  }
+  pre.bl-dark .tag {
+    color: #26A6A6;
+  }
+  pre.bl-dark .atn {
+    color: #FF5D38;
+  }
+  pre.bl-dark .atv {
+    color: #BCD42A;
+  }
+  pre.bl-dark .dec,
+  pre.bl-dark .var {
+    color: #BCD42A;
+  }
+  pre.bl-dark .fun {
+    color: #26A6A6;
+  }

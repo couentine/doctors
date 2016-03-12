@@ -5,6 +5,7 @@ Polymer({
     // Required
     colorMode: String, // = ['home', 'group']
     currentUser: Object,
+    assetPaths: Object,  // stores @assets_paths from application controller
     
     // Optional
     appbarMode: { type: String, value: 'standard' }, // = ['standard', 'home']

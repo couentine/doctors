@@ -1,5 +1,3 @@
-<% url = ActionController::Base.helpers %>
-
 <dom-module id="bl-app-container">
   <link rel="stylesheet" href="bl-app-container.css" />
 
@@ -11,7 +9,7 @@
         <paper-toolbar class$="{{toolbarClass}}" bottom-justify="end">
           <div class="toolbar top">
             <a class="logo" title="Badge List Home" href="/">
-              <img src="<%= url.asset_url('badge-list-shield-square.png') %>">
+              <img src$="{{assetPaths.badgeListShieldSquare}}">
             </a>
             
             <template is="dom-if" if="{{isAppbarMode_Home}}">
@@ -39,7 +37,7 @@
         <div class$="{{toolbarClass}}">
           <div class="toolbar top">
             <a class="logo" title="Badge List Home" href="/" hidden$="{{hasCustomLogo}}">
-              <img src="<%= url.asset_url('badge-list-shield-white-square.png') %>">
+              <img src$="{{assetPaths.badgeListShieldWhiteSquare}}">
             </a>
             <content select=".custom-logo"></content>
             
