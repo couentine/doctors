@@ -58,5 +58,12 @@ module BadgeList
 
     config.assets.precompile += %w( rich-text-editor.css )
 
+    # Override security defaults
+    config.action_dispatch.default_headers = {
+      'X-Frame-Options' => 'ALLOWALL',
+      'X-XSS-Protection' => '1; mode=block',
+      'X-Content-Type-Options' => 'nosniff'
+    }
+
   end
 end
