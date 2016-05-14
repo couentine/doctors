@@ -173,7 +173,7 @@ Polymer({
     if (this.refreshQueryOnDisplay)
       this.refreshQuery();
   },
-  _colCountChanged(newValue, oldValue) {
+  _colCountChanged: function(newValue, oldValue) {
     if (this.isColumnMode && (newValue != oldValue)) {
       var classMap = { 1: "one-column", 2: "two-columns", 3: "three-columns", 4: "four-columns",
         5: "five-columns", 6: "six-columns" };
@@ -183,13 +183,13 @@ Polymer({
       $(this).find('.column-list').removeClass(oldClass).addClass(newClass);
     }
   },
-  _itemsChanged(details) {
+  _itemsChanged: function(details) {
     if (details.path) {
       if (details.path.endsWith(".selected") || details.path.endsWith(".length"))
         this.updateSelectedItems();
     }
   },
-  _hasUnselectedItemsChanged(newValue, oldValue) {
+  _hasUnselectedItemsChanged: function(newValue, oldValue) {
     // Hide any buttons with class 'select-all-button' anywhere in the light DOM
     // NOTE: We'll hide it by setting the scale to 0, so it can be animated if desired.
     if (newValue)
