@@ -93,9 +93,12 @@ private
   # the paths of the various asset paths to the Polymer front end.
   def build_asset_paths
     url = ActionController::Base.helpers
+    url.request = request
     @asset_paths = {
-      'badgeListShieldSquare' => url.asset_url('badge-list-shield-square.png'),
-      'badgeListShieldWhiteSquare' => url.asset_url('badge-list-shield-white-square')
+      'badgeListShieldSquare' \
+        => url.asset_url('badge-list-shield-square.png'),
+      'badgeListShieldWhiteSquare' \
+        => url.asset_url('badge-list-shield-white-square')
     }
     @ap_json = @asset_paths.to_json
   end
