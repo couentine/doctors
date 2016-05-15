@@ -1,9 +1,8 @@
 GIT
   remote: git://github.com/badgelist/polymer-elements-rails.git
-  revision: ad8e3a2142092b9639c2b75abd7f16e6c2f8d0bf
-  branch: 2015-02-element-update
+  revision: aee4cd1aa6203c59c1b500a9c20cc190bbb642b1
   specs:
-    polymer-elements-rails (1.1.0)
+    polymer-elements-rails (1.1.1)
       polymer-rails (~> 1.0, >= 1.0.3)
 
 GEM
