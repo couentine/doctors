@@ -98,7 +98,7 @@ private
       'badgeListShieldSquare' \
         => url.asset_url('badge-list-shield-square.png'),
       'badgeListShieldWhiteSquare' \
-        => url.asset_url('badge-list-shield-white-square')
+        => url.asset_url('badge-list-shield-white-square.png')
     }
     @ap_json = @asset_paths.to_json
   end
