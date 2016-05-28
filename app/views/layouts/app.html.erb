@@ -2,7 +2,7 @@
 <html>
 
   <head>
-    <% #=== PAGE TITLE & APP ICON ===# %>
+    <% #=== PAGE TITLE, APP ICON & BASE ===# %>
       
       <% if content_for? :full_title %>
         <title><%= yield(:full_title) %></title>
@@ -10,6 +10,7 @@
         <title><%= full_title(yield(:title)).html_safe %></title>
       <% end %>
       <link rel="icon" type="image/png" href="<%= image_path('badge-list-icon-32-square.png') %>"/>
+      <base href="<%= ENV['root_url'] %>/">
     
     <% #=== ANALYTICS, FONTS, ICONS, SHIM, ETC. ===# %>
       
