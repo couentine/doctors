@@ -1,0 +1,19 @@
+:host { 
+  display: block; 
+  margin: 1em 0;
+}
+
+.status-text {
+  font-size: 1em;
+  margin: 1em 0;
+}
+  .status-text.failed,
+  .status-text.error { color: rgb(211,47,47); }
+
+paper-progress {
+  display: block;
+  width: 100%;
+
+  --paper-progress-active-color: rgb(255,152,0);
+  --paper-progress-secondary-color: rgb(255,224,178);
+}

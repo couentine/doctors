@@ -13,7 +13,7 @@ class HomeController < ApplicationController
         @groups_current_page = (params[:gp] || 1).to_i
         @groups_hash = @user.groups(false).asc(:name).page(@groups_current_page).per(@page_size)\
             .map do |group| 
-          j = group.as_json
+          j = group.json(:list_item)
           j['member_type'] = @user.member_type_of(group.id).to_s # = ['admin', 'member', 'none']
           j
         end
@@ -28,7 +28,7 @@ class HomeController < ApplicationController
       if @query.in? ['all', 'badges']
         @badges_current_page = (params[:bp] || 1).to_i
         @badges_hash = Badge.where(:id.in => @user.learner_badge_ids).asc(:name)\
-            .page(@badges_current_page).per(@page_size).map { |badge| badge.as_json }
+            .page(@badges_current_page).per(@page_size).map { |badge| badge.json(:list_item) }
         
         if Badge.where(:id.in => @user.learner_badge_ids).count > (@page_size*@badges_current_page)
           @badges_next_page = @badges_current_page + 1

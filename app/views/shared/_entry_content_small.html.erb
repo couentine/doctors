@@ -4,15 +4,50 @@
 
 <% if entry.format == 'link' %>
 
-  <!-- === WEB LINK === -->
-  <div class="panel panel-entry-content panel-entry-content-link">
-    <% if entry.body %>
-      <%= entry.body.html_safe %>
-    <% else %>
-      <%= link_to "<i class='fa fa-link'></i> #{entry.link_url}".html_safe, entry.link_url,
-        target: '_blank', class: 'linkified-url' %>
-    <% end %>
-  </div>
+  <% if !entry.link_metadata.blank?  && !entry.link_metadata['type'].blank? %>
+    
+    <!-- === WEB LINK (w/ Embedly Content) === -->
+    <div class="panel panel-entry-content panel-entry-content-link-enhanced">
+      <% unless entry.link_metadata['provider_name'].blank? %>
+        <span class="link-provider">
+          <%= entry.link_metadata['provider_name'] %>
+        </span>
+      <% end %>
+      <h3>
+        <%= link_to "#{entry.link_metadata['title'] || entry.link_url}".html_safe, entry.link_url,
+          target: '_blank'%>
+      </h3>
+      <% unless entry.link_metadata['description'].blank? %>
+        <span class="link-description">
+          <%= entry.link_metadata['description'] %>
+        </span>
+      <% end %>
+      
+      <% if !entry.link_metadata['html'].blank? \
+          && ['rich', 'video'].include?(entry.link_metadata['type']) %>
+        <div class="link-embed small">
+          <%= entry.link_metadata['html'].html_safe %>
+        </div>
+      <% elsif !entry.link_metadata['thumbnail_url'].blank? %>
+        <a class="link-thumbnail-wrapper" target="_blank" href="<%= entry.link_url %>">
+          <img src="<%= entry.link_metadata['thumbnail_url'] %>" class="link-thumbnail small">
+        </a>
+      <% end %>
+    </div>
+  
+  <% else %>
+
+    <!-- === WEB LINK (Fallback) === -->
+    <div class="panel panel-entry-content panel-entry-content-link">
+      <% if entry.body %>
+        <%= entry.body.html_safe %>
+      <% else %>
+        <%= link_to "<i class='fa fa-link'></i> #{entry.link_url}".html_safe, entry.link_url,
+          target: '_blank', class: 'linkified-url' %>
+      <% end %>
+    </div>
+
+  <% end %>
 
 <% elsif entry.format == 'tweet' %>
 

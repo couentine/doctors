@@ -1,0 +1,49 @@
+<dom-module id="bl-badge-selector">
+  <link rel="stylesheet" href="bl-badge-selector.css" />
+
+  <template>
+
+    <!-- === COLLAPSED VIEW === -->
+    <div class="container" hidden="{{expanded}}">
+      <a href="#" on-tap="expand" id="badge-expand-link">
+        <bl-badge badge="{{selectedBadge}}" blank-badge-text="No Badge Selected">
+        </bl-badge>
+      </a>
+      <a href="#" on-tap="expand" id="label-expand-link">
+        <i class="fa fa-retweet"></i>
+        Switch
+      </a>
+    </div>
+
+    <!-- === EXPANDED VIEW === -->
+    <div id="expanded-container" class="expanded-container" hidden="{{!expanded}}">
+      <a class="close-link" href="#" on-tap="close">
+        <i class="fa fa-close"></i>
+      </a>
+
+      <content select="h2"></content>
+      <content select=".subtitle"></content>
+
+      <div class="badge-grid">
+        
+        <template is="dom-repeat" items="{{badges}}">
+          <a href="#" on-tap="selectThisBadge" class="badge select-link"
+              data-badge-url="{{item.url}}">
+            <bl-badge badge="{{item}}"
+              options='{"showExpertCount": true, "showRequestCount": true}'></bl-badge>
+          </a>
+        </template>
+
+        <div class="placeholder" hidden$="{{hasBadges}}">
+          There are no badges with pending feedback requests in this group. 
+          (Or at least none for which you have awarding permissions.)
+        </div>
+    
+      </div>
+
+    </div>
+
+  </template>
+
+  <script src="bl-badge-selector.js"></script>
+</dom-module>

@@ -1,0 +1,36 @@
+<dom-module id="bl-poller">
+  <link rel="stylesheet" href="bl-poller.css" />
+
+  <template>
+
+    <!-- === PENDING MESSAGE === -->
+    <div class="status-text pending" hidden$="{{!isPending}}">
+      <i class="fa fa-refresh fa-spin"></i>
+      <span>{{poller.waiting_message}}</span>
+    </div>
+    
+    <!-- === SUCCESSFUL MESSAGE === -->
+    <div class="status-text successful" hidden$="{{!isSuccessful}}">
+      <i class="fa fa-check-circle"></i>
+      <span>{{poller.message}}</span>
+    </div>
+    
+    <!-- === FAILED MESSAGE === -->
+    <div class="status-text failed" hidden$="{{!isFailed}}">
+      <i class="fa fa-times-circle"></i>
+      <span>{{poller.message}}</span>
+    </div>
+    
+    <!-- === ERROR MESSAGE === -->
+    <div class="status-text error" hidden$="{{!isError}}">
+      <i class="fa fa-exclamation-triangle"></i>
+      <span>{{errorMessage}}</span>
+    </div>
+
+    <paper-progress id="progress" value="{{poller.progress}}" class=$="{{progressClass}}">
+    </paper-progress>
+
+  </template>
+
+  <script src="bl-poller.js"></script>
+</dom-module>

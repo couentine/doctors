@@ -76,7 +76,7 @@ BadgeList::Application.configure do
     :email => {
       :email_prefix => "[BLA] ",
       :sender_address => %{Badge List Alerts <#{ENV['from_email']}>},
-      :exception_recipients => %w{hank@kstreem.com}
+      :exception_recipients => %w{app-errors@badgelist.com}
     }
 
 end

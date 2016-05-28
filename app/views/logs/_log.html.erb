@@ -47,12 +47,27 @@
           </span>
           <span class="card-content">
             <ul class="metric-list">
-              <% if (log.validation_count + entry_count) > 0 %>
+              <% is_creator = (log.user_id == badge.creator_id) %>
+              
+              <% if ((log.validation_count + entry_count) > 0) \
+                || (log.validation_status == 'requested') || log.retracted  || is_creator %>
                 
-                <% is_creator = (log.user_id == badge.creator_id) %>
                 <% if is_creator %>
-                  <i data-toggle="tooltip" data-placement="bottom" title="Badge creator" 
-                    class="fa fa-shield fa-solid-gold"></i>
+                  <li>
+                    <i data-toggle="tooltip" data-placement="bottom" title="Badge creator" 
+                      class="fa fa-shield fa-solid-gold"></i>
+                    </li>
+                <% end %>
+                <% if log.retracted %>
+                  <li>
+                    <i class="fa fa-ban red" title="Badge retracted" data-toggle="tooltip"
+                      data-placement="bottom"></i>
+                  </li>
+                <% elsif log.validation_status == 'requested' %>
+                  <li>
+                    <i class="fa fa-flag-checkered fa-solid-gold" title="Feedback requested" 
+                      data-toggle="tooltip" data-placement="bottom"></i>
+                  </li>
                 <% end %>
 
                 <% if badge.tracks_progress? %>

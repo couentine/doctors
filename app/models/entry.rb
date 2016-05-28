@@ -2,6 +2,7 @@ class Entry
   include Mongoid::Document
   include Mongoid::Timestamps
   include JSONFilter
+  include JSONTemplater
   include StringTools
 
   # === CONSTANTS === #
@@ -11,7 +12,17 @@ class Entry
   FORMAT_VALUES = ['text', 'link', 'image', 'tweet', 'code']
   JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, 
     :body_sections, :tags, :tags_with_caps]
+
+  JSON_TEMPLATES = {
+    log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :body, :linkified_summary, 
+      :type, :format, :format_icon, :parent_tag, :body_sections, :link_url, :code_format, 
+      :link_metadata, :image_url, :image_medium_url, :image_small_url]
+  }
   
+  # === INSTANCE VARIABLES === #
+
+  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
+
   # === RELATIONSHIPS === #
 
   belongs_to :log
@@ -70,6 +81,7 @@ class Entry
   before_save :process_parent_tag_and_content_changes
   before_save :update_body_versions # DO store the first value since it comes from the user
   after_save :process_image
+  after_save :process_link
   after_save :process_tweet
   after_create :update_log
   after_create :send_notifications
@@ -77,6 +89,17 @@ class Entry
 
   before_save :update_analytics
   
+  # === ENTRY MOCK FIELD METHODS === #
+
+  # Returns URL of the specified version of this user's avatar (uses gravatar as a backup)
+  # Valid version values are nil (defaults to full size), :preview, :thumb
+  def image_url(version = nil)
+    return_value = uploaded_image_url(version)
+  end
+  def image_medium_url; image_url(:preview); end
+  def image_small_url; image_url(:thumb); end
+
+
   # === ENTRY METHODS === #
 
   def to_param
@@ -160,6 +183,71 @@ class Entry
   end
 
   # === ASYNC METHODS === #
+
+  def self.refresh_link(entry_id, timeless_save = false)
+    entry = Entry.find(entry_id)
+
+    begin
+      # Now attempt to pull down link info from the Embed.ly API
+      result = $embedly.oembed(url: entry.link_url)
+      
+      # Now that we have the result we convert it to a hash (the fields are in the 'table' key)
+      if !result.blank? && result.first && !result.first.as_json['table'].blank?
+        entry.link_metadata = result.first.as_json['table']
+      end
+
+      # Save it inside of the rescue block just in case another error creeps in
+      if timeless_save
+        entry.timeless.save!
+      else
+        entry.save!
+      end
+    rescue Exception => e
+      # Save the error in the link meta data
+      entry.link_metadata = {
+        'embedly_exception' => e.to_s
+      }
+      entry.save!
+
+      # Then throw the error so it is retried by sidekiq
+      throw e
+    end
+  end
+
+  # Call this function from a console to recursively refresh links on all entries in the DB where
+  # link_metadata['type'] is nil. This method uses sidekiq to spread itself out into batches run
+  # once per second. Each batch contains 2/3rds of EMBEDLY_RATE_LIMIT.
+  # Specify stop_after to have the process stop after a certain number of entries.
+  # To keep running until all of the links are populated set stop_after to -1.
+  # NOTE: If all of the attempts throw an error then the method will fail and throw the last error.
+  def self.refresh_blank_links(stop_after, current_count = 0)
+    # Initialize the variables
+    error_count = 0
+    last_error = nil
+    batch_size = (ENV['EMBEDLY_RATE_LIMIT'] || 15) * 2 / 3
+
+    # Build the batch query (randomly sample so we don't get stuck if there are bad ones)
+    entry_batch = Entry.where(format: 'link', 'link_metadata.type' => nil).sample(batch_size)
+    batch_count = entry_batch.count
+
+    entry_batch.each do |entry|
+      begin
+        Entry.refresh_link(entry.id, true) # timeless_save = true
+      rescue Exception => e
+        error_count += 1
+        last_error = e
+      end
+    end
+
+    # Now increment the count and schedule the next run if needed
+    current_count += batch_count
+    if (error_count > 0) && (error_count == batch_count)
+      # If everything was an error, stop the train
+      throw last_error
+    elsif (batch_count > 0) && ((stop_after < 0) || (current_count < stop_after))
+      Entry.delay_for(1.second).refresh_blank_links(stop_after, current_count)
+    end
+  end
 
   def self.refresh_tweet(entry_id)
     entry = Entry.find(entry_id)
@@ -247,12 +335,14 @@ protected
     end
     
     if (format == 'tweet') && link_url_changed? && !link_url.blank?
+      self.link_url = link_url.strip
       self.summary = 'Loading tweet, refresh to view...'
       self.link_metadata = {}
     end
 
     if (format == 'link') && link_url_changed? && !link_url.blank?
       # Transform special links into other sorts of embeds
+      self.link_url = link_url.strip
       self.body = transform_link link_url
     end
 
@@ -297,6 +387,13 @@ protected
     end
   end
 
+  def process_link
+    if (format == 'link') && link_url_changed? && !link_url.blank?
+      # Queue up the embedly API call
+      Entry.delay.refresh_link(self.id)
+    end
+  end
+
   def process_tweet
     if (format == 'tweet') && link_url_changed? && !link_url.blank?
       # Queue up the twitter API call
@@ -314,13 +411,14 @@ protected
 
   # This method takes care of updating the log as needed.
   def update_log
-    if log_id && log
+    if (context != 'log_add_validation') && log_id && log
       # First increment the entry number counter
       log.next_entry_number += 1
       
       # Then check if all of the requirements are complete.
       # If so we will automatically request validation as long as it hasn't been done before
-      if (log.validation_status!='validated') && log.date_requested.nil? && log.date_withdrawn.nil?
+      if (log.validation_status != 'validated') && log.date_requested.nil? \
+          && log.date_withdrawn.nil? && !log.retracted
         everything_complete = true
         log.requirements_complete.each do |tag, complete|
           everything_complete = everything_complete && complete
@@ -342,14 +440,18 @@ protected
     end
   end
 
-  # Update the log if this was a validation
+  # Update the log if this was a validation (runs after destroy)
   def check_log_validation_counts
     if type == 'validation'
+      # Update the log validation counts
       if log_validated
         log.validation_count -= 1
       else
         log.rejection_count -= 1
       end
+      
+      # Then remove this item from the log validations cache and save
+      log.validations_cache.delete creator_id.to_s
       log.save
     end
   end

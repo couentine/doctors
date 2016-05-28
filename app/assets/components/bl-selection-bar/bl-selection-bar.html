@@ -1,0 +1,17 @@
+<dom-module id="bl-selection-bar">
+  <link rel="stylesheet" href="bl-selection-bar.css" />
+  
+  <template>
+
+    <paper-material class$="{{barClass}}" elevation="3">
+      <div class="deselect">
+        <paper-icon-button icon="close" id="deselect"></paper-icon-button>
+      </div>
+      <div class="label">{{labelText}}</div>
+      <content select=".actions"></content>
+    </paper-material>
+
+  </template>
+
+  <script src="bl-selection-bar.js"></script>
+</dom-module>

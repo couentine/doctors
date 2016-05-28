@@ -32,7 +32,7 @@ ruby '2.1.2'
   gem 'kaminari-bootstrap', '~> 0.1.3'
   gem 'polymer-rails', '~> 1.2.4'
   # gem 'polymer-elements-rails', '~> 1.0.1'
-  gem 'polymer-elements-rails', github: 'alchapone/polymer-elements-rails'
+  gem 'polymer-elements-rails', github: 'badgelist/polymer-elements-rails'
   gem 'rack-cors', :require => 'rack/cors'
 
 #=== ERRORS & DEBUGGING ===#
@@ -44,11 +44,11 @@ ruby '2.1.2'
 #=== EXTERNAL WEB SERVICES ===#
 
   gem 'stripe', '~> 1.33'
-  gem 'newrelic_rpm'
   gem 'intercom', '~> 3.0'
   gem 'intercom-rails'
   gem 'postmark-rails', '~> 0.5'
   gem 'twitter'
+  gem 'embedly'
 
 #=== DEVELOPMENT / TEST ===#
 
@@ -69,4 +69,5 @@ ruby '2.1.2'
 
   group :production do
     gem 'rails_12factor', '~> 0.0.3'
+    gem 'newrelic_rpm'
   end

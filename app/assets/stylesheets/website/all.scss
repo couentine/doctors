@@ -236,6 +236,7 @@ body.with-flash {
 
     li {
       font-size: 16px; 
+      display: inline-block;
 
       a { 
         color: white; 
@@ -254,6 +255,10 @@ body.with-flash {
         }
         
         &:hover, &:focus { background-color: $primary-light; }
+        &.blog {
+          position: relative;
+          top: -2px;
+        }
       }
       .caret { color: $dark-text-color; }
       ul.dropdown-menu { background-color: transparentize($light-text-color, 0.5); }

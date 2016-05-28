@@ -885,4 +885,42 @@ namespace :db do
     puts " >> Done."
   end
 
+  task update_log_validation_caches: :environment do
+    print "Updating #{Log.count} logs"
+    
+    Log.each do |log|
+      log.validations.each do |entry|
+        if entry.creator_id
+          log.validations_cache[entry.creator_id.to_s] = {
+            'entry_id' => entry.id,
+            'log_validated' => entry.log_validated,
+            'summary' => entry.summary,
+            'body' => entry.body
+          }
+        end
+      end
+
+      log.timeless.save if log.changed?
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
+  task update_badge_validation_request_counts: :environment do
+    print "Updating #{Badge.count} badges"
+
+    Badge.each do |badge|
+      badge.update_validation_request_count
+
+      if badge.timeless.save
+        print "."
+      else
+        print "!"
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end

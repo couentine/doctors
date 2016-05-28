@@ -1,0 +1,27 @@
+/* === LIST ITEM HOST STYLES === */
+
+  :host.badges { flex: 1 170px; }
+  :host.groups { flex: 1 300px; }
+  @media (min-width: 480px) {
+    :host.badges { flex: 1 200px; }
+  }
+  @media (min-width: 840px) {
+    :host.badges { flex: 1 250px; }
+  }
+  @media (min-width: 1200px) {
+    :host.badges { flex: 1 300px; }
+    :host.groups { flex: 1 350px; }
+  }
+
+/* === CHILD ITEM STYLES === */
+
+  bl-badge {
+    width: 100%;
+    padding: 1em;
+  }
+  bl-group {
+    width: 100%;
+  }
+  bl-full-log {
+    display: block;
+  }

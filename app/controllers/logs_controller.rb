@@ -1,9 +1,11 @@
 class LogsController < ApplicationController
   prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy]
-  prepend_before_action :find_all_records, only: [:show, :edit, :update, :destroy]
-  before_action :authenticate_user!, only: [:create, :edit, :update, :destroy]
+  prepend_before_action :find_all_records, only: [:show, :edit, :update, :destroy, :retract, 
+    :unretract]
+  before_action :authenticate_user!, only: [:create, :edit, :update, :destroy, :retract, :unretract]
   before_action :log_owner, only: [:edit, :destroy]
   before_action :group_admin_or_log_owner, only: [:update]
+  before_action :can_retract, only: [:retract, :unretract]
 
   # === RESTFUL ACTIONS === #
 
@@ -17,6 +19,11 @@ class LogsController < ApplicationController
     @presentation_format = params[:f]
     @first_view_after_issued = @current_user_is_log_owner \
       && @log.has_flag?('first_view_after_issued')
+    
+    if @log.retracted
+      # We can't just crawl through the field because it's only an id not a relationship
+      @retracted_by = User.find(@log.retracted_by) rescue nil
+    end
 
     if @presentation_format == 'ob1'
       if @log.issue_status == 'retracted'
@@ -157,6 +164,51 @@ class LogsController < ApplicationController
     end
   end
 
+  # === NON-RESTFUL ACTIONS === #
+
+  # POST /group-url/badge-url/u/username/retract
+  # This action will set call the log retraction method.
+  def retract
+    if @log.retracted
+      @notice = "#{@log.user_name}'s badge has already been retracted."
+    else
+      @log.retracted = true
+      if @log.add_retraction current_user
+        @notice = "The badge has been retracted from #{@log.user_name}."
+      else
+        @notice = "There was a problem retracting the badge from #{@log.user_name}, please try " \
+          + "again later."
+      end
+    end
+
+    respond_to do |format|
+      format.html { redirect_to [@group, @badge, @log], notice: @notice }
+      format.json { render json: @notice }
+    end
+  end
+
+  # POST /group-url/badge-url/u/username/unretract
+  # This action will set call the log clear retraction method.
+  def unretract
+    if !@log.retracted
+      @notice = "You can't clear the #{@log.user_name}'s badge retraction, because it's not " \
+        + "retracted."
+    else
+      @log.retracted = false
+      if @log.clear_retraction
+        @notice = "The badge retraction has been cleared for #{@log.user_name}."
+      else
+        @notice = "There was a problem claering the badge for #{@log.user_name}, please try " \
+          + "again later."
+      end
+    end
+
+    respond_to do |format|
+      format.html { redirect_to [@group, @badge, @log], notice: @notice }
+      format.json { render json: @notice }
+    end
+  end
+
 private
 
   def find_parent_records
@@ -176,6 +228,8 @@ private
       || ((@badge.editability == 'experts') && @current_user_is_expert)
     @can_award_badge = @current_user_is_admin \
       || ((@badge.awardability == 'experts') && @current_user_is_expert)
+    @can_retract = @badge_list_admin || @current_user_is_admin \
+      || (current_user && (@badge.creator_id == current_user.id))
 
     # Define badge terminology shortcuts
     @expert = @badge.expert
@@ -214,6 +268,13 @@ private
   def group_admin_or_log_owner
     unless @current_user_is_admin || @current_user_is_log_owner || @badge_list_admin
       flash[:error] = "That action is restricted to group admins or the log owner."
+      redirect_to [@group, @badge, @log]
+    end
+  end
+
+  def can_retract
+    unless @can_retract
+      flash[:error] = "Only group admins and the badge creator are able to retract the badge."
       redirect_to [@group, @badge, @log]
     end
   end

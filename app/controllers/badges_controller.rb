@@ -42,7 +42,6 @@ class BadgesController < ApplicationController
         find_all_records
         @first_view_after_issued = @log && @log.has_flag?('first_view_after_issued')
         @new_expert_logs = @badge.new_expert_logs
-        @requesting_learner_logs = @badge.requesting_learner_logs
         @show_emails = (@current_user_is_admin || @badge_list_admin) && params[:show_emails]
 
         # Get paginated versions of member and expert logs
@@ -176,7 +175,7 @@ class BadgesController < ApplicationController
     @badge.destroy
 
     respond_to do |format|
-      format.html { redirect_to @group, notice: "The badge has been deleted." } # fixme: redirect to the learning group
+      format.html { redirect_to @group, notice: "The badge has been deleted." }
       format.json { head :no_content }
     end
   end

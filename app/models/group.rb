@@ -2,6 +2,7 @@ class Group
   include Mongoid::Document
   include Mongoid::Timestamps
   include JSONFilter
+  include JSONTemplater
 
   # === CONSTANTS === #
 
@@ -15,6 +16,12 @@ class Group
     'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
+
+  JSON_TEMPLATES = {
+    list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
+      :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,
+      :badge_count, :full_url, :full_path]
+  }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
   PENDING_SUBSCRIPTION_FLAG = 'pending_subscription'
@@ -52,7 +59,7 @@ class Group
   field :website,                         type: String
   field :type,                            type: String, default: 'open'
   field :customer_code,                   type: String
-  field :validation_threshold,            type: Integer, default: 1
+  field :validation_threshold,            type: Integer, default: 1 # RETIRED FIELD
   field :invited_admins,                  type: Array, default: []
   field :invited_members,                 type: Array, default: []
   field :bounced_email_log,               type: Array, default: []
@@ -155,6 +162,11 @@ class Group
 
   def group_url
     "#{ENV['root_url'] || 'http://www.badgelist.com'}/#{url_with_caps}"
+  end
+  def full_url; group_url; end
+
+  def full_path
+    "/#{url_with_caps}"
   end
 
   # Returns URL of the specified version of this group's avatar

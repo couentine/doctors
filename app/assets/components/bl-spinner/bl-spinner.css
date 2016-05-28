@@ -1,0 +1,6 @@
+paper-spinner {
+  --paper-spinner-layer-1-color: rgb(255,152,0); /* orange-500 */
+  --paper-spinner-layer-2-color: rgb(139,195,74); /* light-green-500 */
+  --paper-spinner-layer-3-color: rgb(3,169,244); /* light-blue-500 */
+  --paper-spinner-layer-4-color: rgb(156,39,176); /* purple-500 */
+}

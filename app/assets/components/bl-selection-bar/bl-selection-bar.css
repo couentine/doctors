@@ -1,0 +1,55 @@
+/*
+  NOTE: This component should be placed in the bottom of the content section of the app container.
+*/
+
+:host { display: block; }
+  
+  :host ::content ul.actions {
+    display: flex;
+    justify-content: flex-end;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+    :host ::content ul.actions li {
+      flex: 0 0;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+.bar {
+  display: flex;
+  position: fixed;
+  right: 0; bottom: -5em; left: 0;
+  transition: all 0.5s;
+  -webkit-transition: all 0.5s;
+  
+  background-color: rgb(245,124,0);
+  color: white;
+  padding: 1em;
+}
+.bar.expanded { bottom: 0; }
+  .deselect { 
+    flex: 0 0; 
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 1.4em;
+    line-height: 1.4em;
+  }
+    paper-icon-button {
+      width: 1.5em;
+      height: 1.5em;
+      padding: 0;
+    }
+  .label { 
+    flex: 1 1; 
+    margin: 0 0.5em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 1.4em;
+    line-height: 1.4em;
+  }
+  .actions { flex: 0 0; }

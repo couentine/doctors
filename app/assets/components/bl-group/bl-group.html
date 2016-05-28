@@ -1,0 +1,39 @@
+<dom-module id="bl-group">
+  <link rel="stylesheet" href="bl-group.css" />
+
+  <template>
+
+    <paper-material id="paper" elevation="0" animated class="wrapper">
+      
+      <template is="dom-if" if="{{link}}">
+        <a href$="{{group.full_path}}" class="inner">
+          <paper-ripple></paper-ripple>
+
+          <div class="image">
+            <img src$="{{translateImageUrl(group.avatar_image_url)}}">
+          </div>
+          <div class="label">
+            <h2>{{group.name}}</h2>
+          </div>
+        </a>
+      </template>
+
+      <template is="dom-if" if="{{!link}}">
+        <div class="inner">
+          <paper-ripple></paper-ripple>
+          
+          <div class="image">
+            <img src$="{{translateImageUrl(group.avatar_image_url)}}">
+          </div>
+          <div class="label">
+            <h2>{{group.name}}</h2>
+          </div>
+        </div>
+      </template>
+      
+    </paper-material>
+
+  </template>
+
+  <script src="bl-group.js"></script>
+</dom-module>

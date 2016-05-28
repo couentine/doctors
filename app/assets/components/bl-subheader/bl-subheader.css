@@ -27,6 +27,12 @@
     justify-content: center;
     padding: 1em;
   }
+  @media (min-width: 840px) {
+    .wrapper { margin: 0 2em; }
+  }
+  @media (min-width: 1200px) {
+    .wrapper { margin: 0 4em; }
+  }
     .left { flex: 1 1 auto; }
     .right { flex: none; }
   

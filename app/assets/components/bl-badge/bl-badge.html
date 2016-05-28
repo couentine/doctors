@@ -1,0 +1,71 @@
+<dom-module id="bl-badge">
+  <link rel="stylesheet" href="bl-badge.css" />
+  
+  <template>
+
+    <template is="dom-if" if="{{link}}">
+      <a href$="{{badge.full_path}}" class="wrapper">
+        <paper-ripple></paper-ripple>
+        
+        <div class="image">
+          <template is="dom-if" if="{{hasBadge}}">
+            <img src$="{{badge.image_medium_url}}">
+          </template>
+          
+          <template is="dom-if" if="{{!hasBadge}}">
+            <i class$="{{blankBadgeIconClass}}"></i>
+          </template>
+        </div>
+        <div class="label">
+          <div class="label-title">
+            <h2>{{badgeName}}</h2>
+            <ul class="metric-list" hidden$="{{!showMetricList}}">
+              <li hidden$="{{!showExpertCount}}" class="expert-count">
+                <i class="fa fa-user"></i>
+                <span class="metric">{{badge.expert_count}}</span>
+              </li>
+              <li hidden$="{{!showRequestCount}}" class="request-count">
+                <i class="fa fa-flag-checkered"></i>
+                <span class="metric">{{badge.validation_request_count}}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </a>
+    </template>
+
+    <template is="dom-if" if="{{!link}}">
+      <div class="wrapper">
+        <paper-ripple></paper-ripple>
+
+        <div class="image">
+          <template is="dom-if" if="{{hasBadge}}">
+            <img src$="{{badge.image_medium_url}}">
+          </template>
+          
+          <template is="dom-if" if="{{!hasBadge}}">
+            <i class$="{{blankBadgeIconClass}}"></i>
+          </template>
+        </div>
+        <div class="label">
+          <div class="label-title">
+            <h2>{{badgeName}}</h2>
+            <ul class="metric-list" hidden$="{{!showMetricList}}">
+              <li hidden$="{{!showExpertCount}}" class="expert-count">
+                <i class="fa fa-user"></i>
+                <span class="metric">{{badge.expert_count}}</span>
+              </li>
+              <li hidden$="{{!showRequestCount}}" class="request-count">
+                <i class="fa fa-flag-checkered"></i>
+                <span class="metric">{{badge.validation_request_count}}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </template>
+
+  </template>
+
+  <script src="bl-badge.js"></script>
+</dom-module>

@@ -1,0 +1,101 @@
+<dom-module id="bl-app-container">
+  <link rel="stylesheet" href="bl-app-container.css" />
+
+  <template>
+
+    <template is="dom-if" if="{{!isHeaderMode_Condensable}}">
+      <paper-header-panel mode="{{headerMode}}" class$="{{headerPanelClass}}">
+
+        <paper-toolbar class$="{{toolbarClass}}" bottom-justify="end">
+          <div class="toolbar top">
+            <a class="logo" title="Badge List Home" href$="{{getURL('/')}}">
+              <img src$="{{assetPaths.badgeListShieldSquare}}">
+            </a>
+            
+            <template is="dom-if" if="{{isAppbarMode_Home}}">
+              <a href$="{{getURL('/users/sign_out')}}" class="signout" data-method="delete">
+                <i class="fa fa-close"></i> Sign Out
+              </a>
+            </template>
+            <template is="dom-if" if="{{isAppbarMode_Standard}}">
+              <!-- FIXME -->
+            </template>
+          </div>
+
+          <content select=".toolbar.middle"></content>
+          <content select=".toolbar.bottom"></content>
+        </paper-toolbar>
+        
+        <content select=".content"></content>
+
+      </paper-header-panel>
+    </template>
+
+    <template is="dom-if" if="{{isHeaderMode_Condensable}}">
+      <paper-scroll-header-panel header-height$="{{headerHeight}}" class$="{{headerPanelClass}}">
+
+        <div class$="{{toolbarClass}}">
+          <div class="toolbar top">
+            <a class="logo" title="Badge List Home" href$="{{getURL('/')}}" 
+                hidden$="{{hasCustomLogo}}">
+              <img src$="{{assetPaths.badgeListShieldWhiteSquare}}">
+            </a>
+            <content select=".custom-logo"></content>
+            
+            <template is="dom-if" if="{{isAppbarMode_Home}}">
+              <!-- FIXME -->
+            </template>
+            <template is="dom-if" if="{{isAppbarMode_Standard}}">
+              <paper-menu-button class="current-user" horizontal-align="right" 
+                  vertical-offset="40">
+                <div class="dropdown-trigger">
+                  <img src$="{{currentUser.avatar_image_medium_url}}" 
+                    class="current-user">
+                </div>
+                <paper-menu class="dropdown-content">
+                  <paper-item hidden="{{!currentUser.email_inactive}}" class="error">
+                    <a href$="{{getURL('/users/edit')}}">
+                      <i class="fa fa-exclamation-triangle"></i> Email blocked
+                    </a>
+                  </paper-item>
+                  <paper-item>
+                    <a href$="{{currentUserProfile}}">
+                      <i class="fa fa-shield"></i> Badge profile
+                    </a>
+                  </paper-item>    
+                  <paper-item>
+                    <a href$="{{getURL('/users/edit')}}">
+                      <i class="fa fa-user"></i> Manage account
+                    </a>
+                  </paper-item>
+                  <paper-item>
+                    <a href$="{{getURL('/users/edit#upload-image')}}">
+                      <i class="fa fa-picture-o"></i> Change image
+                    </a>
+                  </paper-item> 
+                  <paper-item hidden="{{!currentUser.admin}}">
+                    <a href$="{{getURL('/a')}}">
+                      <i class="fa fa-cogs"></i> Admin tools
+                    </a>
+                  </paper-item>
+                  <paper-item>
+                    <a href$="{{getURL('/users/sign_out')}}" class="signout" data-method="delete">
+                      <i class="fa fa-remove"></i> Sign out
+                    </a>
+                  </paper-item>
+                </paper-menu>
+              </paper-menu-button>
+            </template>
+          </div>
+
+          <content select=".toolbar.middle"></content>
+          <content select=".toolbar.bottom"></content>
+        </div>
+        
+        <content select=".content"></content>
+    </template>
+
+  </template>
+
+  <script src="bl-app-container.js"></script>
+</dom-module>

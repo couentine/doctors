@@ -40,7 +40,8 @@
   </li>
 <% end %>
 
-<% if @current_user_is_expert || @current_user_is_learner || @badge_list_admin %>
+<% if @current_user_is_expert || @current_user_is_learner || @badge_list_admin \
+    || @current_user_is_entry_creator %>
   <% content_for :subheader_actions do %>
 
     <% if @current_user_is_expert || @current_user_is_learner %>

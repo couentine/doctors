@@ -1,0 +1,36 @@
+<dom-module id="bl-full-log">
+  <link rel="stylesheet" href="bl-full-log.css" />
+
+  <template>
+
+    <paper-card id="card" class$="{{cardClass}}">
+      <div class="card-header" id="header">
+        <div class="avatar"><img src$="{{avatarUrl}}"></div>
+        <div class="text">
+          <h2>{{fullLog.user_name}}</h2>
+          <div class="subtitle">{{fullLog.user_username_with_caps}}</div>
+          <div class="details">{{requestDateString}}</div>
+        </div>
+        <div class="selector">
+          <paper-checkbox checked="{{fullLog.selected}}" id="checkbox" class$="{{cardClass}}">
+          </paper-checkbox>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <template id="item-repeat" is="dom-repeat" items="{{postsByTag}}">
+          <div class="tag-section">
+            <div class="tag-header">{{item.parent_tag}}</div>
+
+            <template id="item-repeat" is="dom-repeat" items="{{item.posts}}">
+              <bl-entry-content entry="{{item}}"></bl-entry-content>
+            </template>
+          </div>
+        </template>
+      </div>
+    </paper-card>
+
+  </template>
+
+  <script src="bl-full-log.js"></script>
+</dom-module>

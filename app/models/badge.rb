@@ -2,6 +2,7 @@ class Badge
   include Mongoid::Document
   include Mongoid::Timestamps
   include JSONFilter
+  include JSONTemplater
   include StringTools
 
   # === CONSTANTS === #
@@ -21,6 +22,11 @@ class Badge
     'image_medium' => :image_medium_url, 'image_small' => :image_small_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps,
     'full_url' => :badge_url }
+
+  JSON_TEMPLATES = {
+    list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
+      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path]
+  }
   
   # Below are the badge-level fields included in the clone
   # NOTE: Badge image is automatically checked for changes and included
@@ -52,6 +58,7 @@ class Badge
   field :visibility,                      type: String, default: 'public'
   field :send_validation_request_emails,  type: Boolean, default: true
   field :cloned_from_badge_id,            type: String # stored as a string id, not a relationship
+  field :validation_threshold,            type: Integer, default: 1
   
   field :info,                            type: String
   field :info_sections,                   type: Array
@@ -82,6 +89,7 @@ class Badge
   field :expert_user_ids,                 type: Array, default: []
   field :learner_user_ids,                type: Array, default: []
   field :all_user_ids,                    type: Array, default: []
+  field :validation_request_count,        type: Integer, default: 0
 
   field :group_name,                      type: String # local cache of group info
   field :group_url,                       type: String # local cache of group info
@@ -130,7 +138,6 @@ class Badge
   before_save :update_info_versions, on: :update # Don't store the first (default) value
   before_save :update_terms
   before_update :move_badge_if_needed
-  after_create :add_creator_as_expert
   before_save :update_json_clone_badge_fields_if_needed
   after_save :update_requirement_editability
   before_destroy :remove_from_group_cache
@@ -155,6 +162,11 @@ class Badge
   def badge_url
     "#{ENV['root_url'] || 'http://www.badgelist.com'}" \
       + "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
+  end
+  def full_url; badge_url; end
+
+  def full_path
+    "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
   end
 
   # Returns URL of the specified version of this badge's image
@@ -296,7 +308,7 @@ class Badge
   end
   
   # Powers the create_async method above. Not intended to be run directly but could be.
-  # Example of badge creation in a console (NOTE: I'm getting an error on this for the moment.):
+  # Example of badge creation in a console:
   #   g, u = Group.first, User.first
   #   bp = ActionController::Parameters.new({ name: 'Test Badge 1', summary: 'Testing', 
   #     url_with_caps: 'test-badge-1', image_frame: 'circle', image_icon: 'pen', 
@@ -398,6 +410,16 @@ class Badge
     end
   end
 
+  def self.update_validation_request_count(badge_ids)
+    badge = Badge.find(badge_id)
+    badge.update_validation_request_count
+    badge.timeless.save if badge.changed?
+  end
+
+  def update_validation_request_count
+    self.validation_request_count = requesting_learner_logs.count
+  end
+
   # === INSTANCE METHODS === #
 
   def to_param
@@ -493,7 +515,7 @@ class Badge
   # date_started: Defaults to nil. If set, overrides the log.date_started fields
   # Return value = the newly created/reattached log
   def add_learner(user, date_started = nil)
-    the_log = logs.find_by(user: user) rescue nil
+    the_log = logs.find_by(user_id: user.id) rescue nil
     update_badge = false
     
     if the_log
@@ -501,6 +523,7 @@ class Badge
         the_log.detached_log = false
         the_log.context = 'badge_add' # This will suppress the badge update callback
         the_log.save
+        the_log.context = nil # CLEAR THIS OUT so it doesn't mess stuff up
         update_badge = true
       end
     else
@@ -509,6 +532,7 @@ class Badge
       the_log.user = user
       the_log.context = 'badge_add' # This will suppress the badge update callback
       the_log.save
+      the_log.context = nil # CLEAR THIS OUT so it doesn't mess stuff up
       update_badge = true
     end
 
@@ -526,20 +550,6 @@ class Badge
     end
 
     the_log
-  end
-
-  # Returns the ACTUAL validation threshold based on the group settings AND the badge expert count
-  def current_validation_threshold
-    # NOTE: I'm removing this for now since it requires an extra query.
-    return [expert_count, 1].min
-    
-    # validation_threshold = expert_logs.count
-
-    # if group && group.validation_threshold
-    #   validation_threshold = [validation_threshold, group.validation_threshold].min
-    # end
-
-    # validation_threshold
   end
 
   # Refresh the topic_list_text from the requirements list
@@ -732,6 +742,8 @@ class Badge
       group.update_badge_cache json_clone
       group.timeless.save
     end
+
+    true
   end
 
   # This updates or deletes the json clone copy of the specified tag located in json_clone['pages']
@@ -787,15 +799,6 @@ protected
     true
   end
 
-  def add_creator_as_expert
-    log = Log.new
-    log.badge = self
-    log.user = creator
-    log.save! 
-    # NOTE: This log will automatically be validated (by log.update_stati) 
-    # and self-validated (by log.back_validate_if_needed)
-  end
-
   def update_info_sections
     if info_changed?
       linkified_result = linkify_text(info, group, self)
@@ -803,6 +806,8 @@ protected
       self.info_tags = linkified_result[:tags]
       self.info_tags_with_caps = linkified_result[:tags_with_caps]
     end
+
+    true
   end
 
   def build_badge_image
@@ -862,6 +867,8 @@ protected
           .strip.downcase.singularize
       end
     end
+
+    true
   end
 
   def update_json_clone_badge_fields_if_needed
