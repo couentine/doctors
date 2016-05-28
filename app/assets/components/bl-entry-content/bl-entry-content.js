@@ -58,7 +58,7 @@ Polymer({
       // Then it will run pretty print ONLY if it hasn't already been done 
       // So we avoid running the pretty print code unneccessarily frequently.
       if (document.querySelectorAll(".prettyprint:not(.prettyprinted)").length > 0)
-        PR.prettyPrint();
+        prettyPrint();
     } else if (tryCount < 25)
       setTimeout(function() { self.prettifyCode(tryCount + 1); }, 100);
   }
