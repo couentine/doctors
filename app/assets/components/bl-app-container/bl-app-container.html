@@ -8,12 +8,12 @@
 
         <paper-toolbar class$="{{toolbarClass}}" bottom-justify="end">
           <div class="toolbar top">
-            <a class="logo" title="Badge List Home" href="/">
+            <a class="logo" title="Badge List Home" href$="{{getURL('/')}}">
               <img src$="{{assetPaths.badgeListShieldSquare}}">
             </a>
             
             <template is="dom-if" if="{{isAppbarMode_Home}}">
-              <a href="/users/sign_out" class="signout" data-method="delete">
+              <a href$="{{getURL('/users/sign_out')}}" class="signout" data-method="delete">
                 <i class="fa fa-close"></i> Sign Out
               </a>
             </template>
@@ -36,7 +36,8 @@
 
         <div class$="{{toolbarClass}}">
           <div class="toolbar top">
-            <a class="logo" title="Badge List Home" href="/" hidden$="{{hasCustomLogo}}">
+            <a class="logo" title="Badge List Home" href$="{{getURL('/')}}" 
+                hidden$="{{hasCustomLogo}}">
               <img src$="{{assetPaths.badgeListShieldWhiteSquare}}">
             </a>
             <content select=".custom-logo"></content>
@@ -53,7 +54,7 @@
                 </div>
                 <paper-menu class="dropdown-content">
                   <paper-item hidden="{{!currentUser.email_inactive}}" class="error">
-                    <a href="/users/edit">
+                    <a href$="{{getURL('/users/edit')}}">
                       <i class="fa fa-exclamation-triangle"></i> Email blocked
                     </a>
                   </paper-item>
@@ -63,22 +64,22 @@
                     </a>
                   </paper-item>    
                   <paper-item>
-                    <a href="/users/edit">
+                    <a href$="{{getURL('/users/edit')}}">
                       <i class="fa fa-user"></i> Manage account
                     </a>
                   </paper-item>
                   <paper-item>
-                    <a href="/users/edit#upload-image">
+                    <a href$="{{getURL('/users/edit#upload-image')}}">
                       <i class="fa fa-picture-o"></i> Change image
                     </a>
                   </paper-item> 
                   <paper-item hidden="{{!currentUser.admin}}">
-                    <a href="/a">
+                    <a href$="{{getURL('/a')}}">
                       <i class="fa fa-cogs"></i> Admin tools
                     </a>
                   </paper-item>
                   <paper-item>
-                    <a href="/users/sign_out" data-method="delete">
+                    <a href$="{{getURL('/users/sign_out')}}" class="signout" data-method="delete">
                       <i class="fa fa-remove"></i> Sign out
                     </a>
                   </paper-item>

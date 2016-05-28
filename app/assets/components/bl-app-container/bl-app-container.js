@@ -71,5 +71,6 @@ Polymer({
       document.querySelector('#intercom-container').hidden = true;
     else if (tryCount < 100)
       setTimeout(function() { self.tryToHideIntercom(tryCount + 1); }, 100);
-  }
+  },
+  getURL: function(relativeURL) { return this.assetPaths.rootURL + relativeURL; }
 });

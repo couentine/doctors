@@ -95,6 +95,7 @@ private
     url = ActionController::Base.helpers
     url.request = request
     @asset_paths = {
+      'rootURL' => ENV['root_url'],
       'badgeListShieldSquare' \
         => url.asset_url('badge-list-shield-square.png'),
       'badgeListShieldWhiteSquare' \
