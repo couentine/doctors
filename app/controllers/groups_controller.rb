@@ -744,7 +744,7 @@ class GroupsController < ApplicationController
         end
       end
     else # they have to be logged in to get here so they are at least a user
-      @badge_options = @group.badges_cache.values.select! do |badge_item| 
+      @badge_options = @group.badges_cache.values.select do |badge_item| 
         badge_item['visibility'] == 'public'
       end
     end
