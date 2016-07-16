@@ -161,7 +161,7 @@ class Group
   def issuer_website; (website.blank?) ? "#{ENV['root_url']}/#{url}" : website; end
 
   def group_url
-    "#{ENV['root_url'] || 'http://www.badgelist.com'}/#{url_with_caps}"
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}/#{url_with_caps}"
   end
   def full_url; group_url; end
 

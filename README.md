@@ -21,7 +21,7 @@ Key aspects of the app are managed with environment variables.  It's important t
 ".env" file to store these in your local development environment and to create these in Heroku
 when deploying.
 - ENV['root_domain'] = badgelist.com or localhost, etc
-- ENV['root_url'] = http://badgelist.com, etc
+- ENV['root_url'] = https://www.badgelist.com, etc
 - ENV['from_email'] = app@badgelist.com or knowledgestreem@gmail.com, etc
 - ENV['REDIS_PROVIDER'] = REDISCLOUD_URL
 

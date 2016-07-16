@@ -131,7 +131,7 @@ class User
   # === USER MOCK FIELD METHODS === #
 
   def user_url
-    "#{ENV['root_url'] || 'http://www.badgelist.com'}/u/#{username_with_caps}"
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}/u/#{username_with_caps}"
   end
 
   # Returns URL of the specified version of this user's avatar (uses gravatar as a backup)
@@ -304,7 +304,7 @@ class User
 
   # Returns full URL to this user's profile based on current root URL
   def profile_url
-    "#{ENV['root_url'] || 'http://www.badgelist.com'}/u/#{username_with_caps}"
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}/u/#{username_with_caps}"
   end
 
   # Updates last_active
