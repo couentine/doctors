@@ -16,7 +16,7 @@
       <%= render 'layouts/shared/analytics' if Rails.env.production? %>
       <%= render 'layouts/shared/fonts' %>
       <link rel="stylesheet" 
-        href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        href="//fonts.googleapis.com/icon?family=Material+Icons">
       <%= render 'layouts/shared/shim' %>
       <%= csrf_meta_tags %>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +26,7 @@
       <%= stylesheet_link_tag 'app', media: 'all' %>
       <%= javascript_include_tag 'app' %>
       <%= html_import_tag 'application' %>
-      <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"> 
+      <script src="//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"> 
       </script>
     
     <% #=== OPTIONAL INCLUSIONS ===# %>
@@ -37,7 +37,7 @@
       <% end %>
       
       <% if content_for? :include_ob_issuer %>
-        <script src="https://backpack.openbadges.org/issuer.js"></script>
+        <script src="//backpack.openbadges.org/issuer.js"></script>
         <script type="text/javascript">
           var obIssuerPresent = true;
         </script>
