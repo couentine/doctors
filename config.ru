@@ -11,6 +11,14 @@ use Rack::Cors do
       'http://www.badgelist.com', 'http://badgelist.com', 'https://localhost', '127.0.0.1', \
       'https://bl-staging-mango.herokuapp.com', 'https://www.badgelist.com', 'https://badgelist.com'
 
+    resource '*',
+      headers: :any,
+      methods: [:get, :head, :options]
+  end
+
+  allow do
+    origins '*'
+
     resource '/assets/*',
       headers: :any,
       methods: [:get, :head, :options]
