@@ -160,7 +160,7 @@ class Badge
   end
 
   def badge_url
-    "#{ENV['root_url'] || 'http://www.badgelist.com'}" \
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}" \
       + "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
   end
   def full_url; badge_url; end

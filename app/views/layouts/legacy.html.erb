@@ -13,7 +13,7 @@
     <% end %>
 
     <% if content_for? :include_ob_issuer %>
-      <script src="https://backpack.openbadges.org/issuer.js"></script>
+      <script src="//backpack.openbadges.org/issuer.js"></script>
       <script type="text/javascript">
         var obIssuerPresent = true;
       </script>
@@ -25,7 +25,7 @@
     <%= javascript_include_tag "legacy" %>
     <%= csrf_meta_tags %>
     <%= render 'layouts/shared/shim' %>
-    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <script src="//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="<%= image_path('badge-list-icon-32-square.png') %>" />
     <%= yield(:header) if content_for? :header %>
