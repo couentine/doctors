@@ -8,7 +8,8 @@ require 'rack/cors'
 use Rack::Cors do
   allow do
     origins 'http://localhost', '127.0.0.1', 'http://bl-staging-mango.herokuapp.com', \
-      'http://www.badgelist.com', 'http://badgelist.com'
+      'http://www.badgelist.com', 'http://badgelist.com', 'https://localhost', '127.0.0.1', \
+      'https://bl-staging-mango.herokuapp.com', 'https://www.badgelist.com', 'https://badgelist.com'
 
     resource '/assets/*',
       headers: :any,
