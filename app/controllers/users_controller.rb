@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   
   before_action :authenticate_user!, only: [:index, :add_card, :delete_card, :payment_history,
-    :confirm_account, :unblock_email, :update_image]
+    :confirm_account, :unblock_email, :update_image, :add_password]
   before_action :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
 
   # === CONTSTANTS === #
@@ -156,6 +156,46 @@ class UsersController < ApplicationController
         else
           @success = false
           @notice = "You can only update your own image."
+        end
+      end
+    end
+  end
+
+  # POST /u/username/add_password?password=SuperSecret123
+  def add_password
+    @user = User.find(params[:id]) || not_found
+
+    respond_to do |format|
+      format.html do
+        if @user == current_user
+          if @user.user_defined_password
+            @success = false
+            @notice = "The add password feature only works if you don't already have one. " \
+              + "Use the change password feature instead."
+          else
+            @user.password = params[:user][:password]
+            @user.password_confirmation = params[:user][:password]
+            @user.user_defined_password = true
+
+            if @user.valid? && @user.save
+              sign_in(@user, bypass: true) # we have to sign in again
+              @success = true
+              @notice = "You have successfully added a password to your account. Don't forget it!"
+            else
+              @success = false
+              @notice = "There was a problem adding a password to your account."
+              @notice += " Password #{@user.errors.first.last}." unless @user.errors.blank?
+            end
+          end
+        else
+          @success = false
+          @notice = "You can only add a password to your own account!"
+        end
+
+        if @success
+          redirect_to edit_user_registration_path, notice: @notice
+        else
+          redirect_to edit_user_registration_path, flash: { error: @notice }
         end
       end
     end

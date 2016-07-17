@@ -18,6 +18,8 @@ ruby '2.1.2'
   gem 'mini_magick', '~> 4.3.6'
   gem 'devise', '~> 3.5'
   gem 'devise-async'
+  gem 'omniauth'
+  gem 'omniauth-google-oauth2'
 
 #=== FRONT-END ===#
   

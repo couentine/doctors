@@ -50,6 +50,8 @@ MAX_THREADS=1
 disable_all_emails=false
 POSTMARK_WEBHOOK_KEY=abc123
 embedly_api_key=abc123
+oauth_google_client_id=abc123
+oauth_google_client_secret=abc123
 ```
 
 ## Running foreman ##

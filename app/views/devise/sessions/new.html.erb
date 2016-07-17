@@ -14,17 +14,26 @@
       </div>
       
       <div class="signin-form bl-form-no-labels">
-        <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
-          <%= f.input :email, :required => true, :autofocus => true, :placeholder => 'Your email', :input_html => { :class => 'signin' } %>
-          <%= f.input :password, :required => true, :placeholder => 'Your password', :input_html => { :class => 'signin' } %>
+        <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) \
+            do |f| %>
+          
+          <%= f.input :email, :required => true, :autofocus => true, :placeholder => 'Your email',
+            :input_html => { :class => 'signin' } %>
+          <%= f.input :password, :required => true, :placeholder => 'Your password', 
+            :input_html => { :class => 'signin' } %>
           <%= f.input :remember_me, :as => :hidden, :input_html => {:value => true} %>
 
           <div class="controls">
             <%= f.button :submit, "Sign in", :class => 'btn-large' %>
-            <%= link_to "Create a new account", new_user_registration_path, class: 'btn btn-link' %>
+            <%= link_to "<i class='fa fa-arrow-right'></i> Create a new account".html_safe, 
+              new_user_registration_path, class: 'btn btn-link' %>
           </div>
-
         <% end %>
+      </div>
+
+      <div class="sso-controls">
+        <%= link_to "<i class='fa fa-google'></i> Sign in with Google".html_safe,
+          user_omniauth_authorize_path(:google_oauth2), class: 'btn btn-link' %>
       </div>
       
       <div class="form-actions">
