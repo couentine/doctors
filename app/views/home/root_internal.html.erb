@@ -47,7 +47,7 @@
           Your email address needs verification
         </bl-label>
       <% else %>
-        <div class="subtitle"><%= @user.username %></div>
+        <div class="subtitle"><%= @user.username_with_caps %></div>
       <% end %>
       
       <bl-button type="raised" link="<%= edit_user_registration_path %>" class="primary">
