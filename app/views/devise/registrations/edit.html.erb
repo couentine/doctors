@@ -351,87 +351,140 @@
             </td>
           </tr>
 
-          <tr class="footer-row">
-            <td colspan="2">
+          <% if @user.user_defined_password %> 
+            <!-- === USER HAS A PASSWORD === -->
+          
+            <tr class="footer-row">
+              <td colspan="2">
 
-              <span class="label-text">
-                You've been a Badge List member since 
-                <%= @user.created_at.to_s(:full_date) %>
-              </span>
-              <ul class="action-list" id="account-edit-buttons" 
-                  style="<%= (form_error) ? 'display: none;' : '' %>">
-                <li>
-                  <a tabindex="-1" class="btn btn-small" id="edit-user-info" data-toggle="custom" 
-                      data-hide="#account-edit-buttons,#account-details-row" 
-                      data-show="#edit-user-info-form" data-focus="#user_email">
-                    <i class="fa fa-pencil"></i> Edit user info
-                  </a>
-                </li>
-                <li>
-                  <a tabindex="-1" class="btn btn-small" id="change-password" data-toggle="custom" 
-                      data-hide="#account-edit-buttons,#account-details-row" 
-                      data-focus="#user_current_password" data-show="#change-password-form">
-                    <i class="fa fa-key"></i> Change password
-                  </a>
-                </li>
-              </ul>
-
-              <!-- === CHANGE PASSWORD FORM === -->
-
-              <div class="bl-inline-form" id="change-password-form" 
-                  style="<%= (form_error == 'change-password') ? '' : 'display: none;' %>">
-                <%= simple_form_for(resource, as: resource_name, 
-                    url: registration_path(resource_name), 
-                    html: { :method => :put, :class => 'form-horizontal' }) do |f| %>
+                <span class="label-text">
+                  You've been a Badge List member since 
+                  <%= @user.created_at.to_s(:full_date) %>
+                </span>
+                <ul class="action-list" id="account-edit-buttons" 
+                    style="<%= (form_error) ? 'display: none;' : '' %>">
                   
-                  <div class="form-body">
-                    <%= f.error_notification %>
+                  <li>
+                    <a tabindex="-1" class="btn btn-small" id="edit-user-info" data-toggle="custom" 
+                        data-hide="#account-edit-buttons,#account-details-row" 
+                        data-show="#edit-user-info-form" data-focus="#user_email">
+                      <i class="fa fa-pencil"></i> Edit user info
+                    </a>
+                  </li>
+                  <li>
+                    <a tabindex="-1" class="btn btn-small" id="change-password" data-toggle="custom" 
+                        data-hide="#account-edit-buttons,#account-details-row" 
+                        data-focus="#user_current_password" data-show="#change-password-form">
+                      <i class="fa fa-key"></i> Change password
+                    </a>
+                  </li>
+                </ul>
+
+                <!-- === CHANGE PASSWORD FORM === -->
+
+                <div class="bl-inline-form" id="change-password-form" 
+                    style="<%= (form_error == 'change-password') ? '' : 'display: none;' %>">
+                  <%= simple_form_for(resource, as: resource_name, 
+                      url: registration_path(resource_name), 
+                      html: { :method => :put, :class => 'form-horizontal' }) do |f| %>
                     
-                    <%= f.input :email, :as => :hidden, :required => true %>
-                    <%= f.input :current_password, :required => true %>
-                    <%= f.input :password, :label => 'New password', :autocomplete => "off", 
-                      :required => true %>
-                    <%= f.input :password_confirmation, :label => 'Confirm new password', 
-                      :autocomplete => "off", :required => true %>
-                  </div>
+                    <div class="form-body">
+                      <%= f.error_notification %>
+                      
+                      <%= f.input :email, :as => :hidden, :required => true %>
+                      <%= f.input :current_password, :required => true %>
+                      <%= f.input :password, :label => 'New password', :autocomplete => "off", 
+                        :required => true %>
+                      <%= f.input :password_confirmation, :label => 'Confirm new password', 
+                        :autocomplete => "off", :required => true %>
+                    </div>
 
-                  <div class="form-footer">
-                    <%= f.button :submit, "Change password", :class => "btn btn-info" %>
-                    <a class="btn" data-toggle="custom"  data-hide="#change-password-form" 
-                      data-show="#account-edit-buttons,#account-details-row">Cancel</a>
-                  </div>
+                    <div class="form-footer">
+                      <%= f.button :submit, "Change password", :class => "btn btn-info" %>
+                      <a class="btn" data-toggle="custom"  data-hide="#change-password-form" 
+                        data-show="#account-edit-buttons,#account-details-row">Cancel</a>
+                    </div>
 
-                <% end %>
-              </div>
+                  <% end %>
+                </div>
 
-              <!-- === EDIT USER INFO FORM === -->
+                <!-- === EDIT USER INFO FORM === -->
 
-              <div class="bl-inline-form" id="edit-user-info-form" 
-                  style="<%= (form_error == 'edit-user-info') ? '' : 'display: none;' %>">
-                <%= simple_form_for(resource, as: resource_name, 
-                    url: registration_path(resource_name), 
-                    html: { :method => :put, :class => 'form-horizontal' }) do |f| %>
+                <div class="bl-inline-form" id="edit-user-info-form" 
+                    style="<%= (form_error == 'edit-user-info') ? '' : 'display: none;' %>">
+                  <%= simple_form_for(resource, as: resource_name, 
+                      url: registration_path(resource_name), 
+                      html: { :method => :put, :class => 'form-horizontal' }) do |f| %>
+                    
+                    <div class="form-body">
+                      <%= f.error_notification %>
+                      
+                      <%= f.input :email, label: "Your email" %>
+                      <%= f.input :name, label: "Your full name" %>
+                      <%= f.input :username_with_caps, label: "Your username" %>
+                      <%= f.input :current_password, label: "Confirm your password", required: true %>
+                    </div>
+
+                    <div class="form-footer">
+                      <%= f.button :submit, "Update info", :class => "btn btn-info" %>
+                      <a class="btn" data-toggle="custom"  data-hide="#edit-user-info-form" 
+                        data-show="#account-edit-buttons,#account-details-row">Cancel</a>
+                    </div>
+
+                  <% end %>
+                </div>
+              
+              </td>
+            </tr>
+
+          <% else %>
+            <!-- === USER DOES NOT HAVE A PASSWORD === -->
+
+            <tr class="footer-row highlight-tertiary">
+              <td colspan="2">
+
+                <span class="label-text">
+                  <i class="fa fa-info-circle"></i>
+                  Your account does not have a password yet. 
+                  You'll need to add one if you want to change your name, username or email.
+                </span>
+                <ul class="action-list" id="add-password-buttons" 
+                    style="<%= (form_error) ? 'display: none;' : '' %>">
                   
-                  <div class="form-body">
-                    <%= f.error_notification %>
+                  <li>
+                    <a tabindex="-1" class="btn btn-small" id="add-password" data-toggle="custom" 
+                        data-hide="#add-password-buttons" 
+                        data-focus="#user_password" data-show="#add-password-form">
+                      <i class="fa fa-plus"></i> <i class="fa fa-key"></i> Add a password
+                    </a>
+                  </li>
+                </ul>
+
+                <!-- === ADD PASSWORD FORM === -->
+
+                <div class="bl-inline-form" id="add-password-form" style="display: none;">
+                  <%= simple_form_for(resource, as: resource_name, 
+                      url: user_add_password_path(@user), html: { method: :post, 
+                        id: 'add-password-form', class: 'form-horizontal' }) do |f| %>
                     
-                    <%= f.input :email, label: "Your email" %>
-                    <%= f.input :name, label: "Your full name" %>
-                    <%= f.input :username_with_caps, label: "Your username" %>
-                    <%= f.input :current_password, label: "Confirm your password", required: true %>
-                  </div>
+                    <div class="form-body">
+                      <%= f.input :password, :label => 'Set password', :autocomplete => "off", 
+                        :required => true %>
+                    </div>
 
-                  <div class="form-footer">
-                    <%= f.button :submit, "Update info", :class => "btn btn-info" %>
-                    <a class="btn" data-toggle="custom"  data-hide="#edit-user-info-form" 
-                      data-show="#account-edit-buttons,#account-details-row">Cancel</a>
-                  </div>
+                    <div class="form-footer">
+                      <%= f.button :submit, "Save password", :class => "btn btn-info" %>
+                      <a class="btn" data-toggle="custom"  data-hide="#add-password-form" 
+                        data-show="#add-password-buttons">Cancel</a>
+                    </div>
 
-                <% end %>
-              </div>
-            
-            </td>
-          </tr>
+                  <% end %>
+                </div>
+              
+              </td>
+            </tr>
+
+          <% end %>
 
         </tbody>
       </table>

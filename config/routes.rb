@@ -7,7 +7,8 @@ BadgeList::Application.routes.draw do
   resources :entries
 
 
-  devise_for :users, :controllers => { registrations: 'registrations' }
+  devise_for :users, :controllers => { registrations: 'registrations', sessions: 'sessions',
+    omniauth_callbacks: "users/omniauth_callbacks" }
 
   root :to => 'home#root'
   resources :users, :only => [:show], path: "u"
@@ -51,6 +52,7 @@ BadgeList::Application.routes.draw do
   match 'u/:id/confirm_account' => 'users#confirm_account', via: :post, as: :user_confirm
   match 'u/:id/unblock_email' => 'users#unblock_email', via: :post, as: :user_unblock
   match 'u/:id/update_image' => 'users#update_image', via: :post, as: :user_update_image
+  match 'u/:id/add_password' => 'users#add_password', via: :post, as: :user_add_password
 
   # === MANUAL GROUP PATHS === #
   match ':group_id/cancel' => 'groups#cancel_subscription', via: :post, as: :cancel_subscription

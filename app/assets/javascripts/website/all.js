@@ -32,6 +32,10 @@ var termMessages = {
     + "Badge List site and in emails sent out from your group.",
   "community": "Community features include collaborative wiki pages and (COMING SOON) "
     + "group profile pages and group search.",
+  "domain-privacy": "Registering your email domain as private ensures that the profiles of all "
+    + "Badge List users registered with email addresses on your domain "
+    + "(eg: 'anyone@yourdomain.edu') are only visible to other users who are also on the "
+    + "domain (regardless of group membership).",
   "lifetime-hosting": "If you ever decide to cancel your paid subscription, all of the awarded "
     + "badges and evidence will continue to be hosted at no additional cost.",
   "membership-controls": "Closed groups can only be joined if a user is invited by an admin.",
@@ -72,7 +76,7 @@ function checkForLocationHash() {
 
     if ($('#'+hash).length > 0) {
       if ($('#'+hash).hasClass('tab-pane')) {
-        $("#tab-bar a[href=#" + hash + "]").tab('show');
+        $("#tab-bar a[href='#" + hash + "']").tab('show');
       } else {
         // Then scroll to the right part of the page (the default scroll is off due to the navbar)
         $(window).scrollTop($("#"+hash).offset().top - 60);

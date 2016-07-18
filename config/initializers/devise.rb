@@ -52,4 +52,9 @@ Devise.setup do |config|
   Devise::Async.backend = :sidekiq
   Devise::Async.queue = :mailer
 
+  # OmniAuth Settings
+  # https://github.com/plataformatec/devise/wiki/OmniAuth:-Overview
+  config.omniauth :google_oauth2, 
+    ENV['oauth_google_client_id'], ENV['oauth_google_client_secret'], { }
+
 end

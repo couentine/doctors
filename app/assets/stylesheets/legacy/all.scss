@@ -3440,6 +3440,28 @@ div.topic-list-card, div.group-list-card {
   .form-actions {
     margin-top: 0px
   }
+  .controls .btn-link {
+    color: $tertiary-medium;
+    
+    &:visited { color: $tertiary-medium; }
+  }
+  .sso-controls {
+    padding: 0px 20px 20px 20px;
+
+    .btn {
+      color: $tertiary-medium;
+      padding-left: 0;
+      padding-right: 0;
+
+      i.fa {
+        background-color: $tertiary-medium;
+        color: white;
+        padding: 7px;
+        border-radius: 2px;
+        margin-right: 12px;
+      }
+    }
+  }
 }
 
 .registration-form {

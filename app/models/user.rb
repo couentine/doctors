@@ -66,6 +66,13 @@ class User
   field :learner_badge_ids,             type: Array, default: []
   field :all_badge_ids,                 type: Array, default: []
 
+  # OmniAuth Fields
+  field :user_defined_password,         type: Boolean, default: true
+  field :auto_username_needs_review,    type: Boolean, default: false
+  field :omniauth_last_provider,        type: String
+  field :omniauth_google_oauth2_uid,    type: String
+  field :omniauth_google_oauth2_hash,   type: Hash # stores the full auth hash
+
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
     uniqueness:true, format: { with: /\A[\w-]+\Z/, 
@@ -80,7 +87,8 @@ class User
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, 
-    :validatable, :confirmable, :lockable, :async
+    :validatable, :confirmable, :lockable, :async, :omniauthable, 
+    :omniauth_providers => [:google_oauth2]
 
   # === STANDARD DEVISE FIELDS === #
 
@@ -294,6 +302,99 @@ class User
     end
 
     return user.logs.count
+  end
+
+  # === OMNIAUTH CLASS METHODS === #
+
+  # This method will either find or create a new user account from the supplied omniauth auth hash
+  # If an existing user is found it will be linked to this oauth identity and updated.
+  def self.from_omniauth(auth)
+    provider = auth.provider
+    
+    if provider == 'google_oauth2'
+      uid_field = 'omniauth_google_oauth2_uid'
+      hash_field = 'omniauth_google_oauth2_hash'
+      
+      uid = auth.uid
+      email = auth.info.email.to_s.downcase
+      name = auth.info.name
+    end
+    
+    # Try to locate an existing user account
+    user = User.where(email: email).first
+
+    if user
+      # Then update any fields that need updating and sign the user in
+      user.omniauth_last_provider = provider
+      user[uid_field] = uid
+      user[hash_field] = auth.to_hash
+      user.name ||= name
+      user.email ||= email
+      user.confirmed_at ||= Time.now # confirmation no longer needed
+
+      user.save if user.changed?
+    else
+      # Then create a new user
+      user = User.new
+      user.name = name
+      user.email = email
+      user.username_with_caps = User.generate_unique_username_from(name)
+      user.auto_username_needs_review = true # triggers a review screen on signin
+      user.omniauth_last_provider = provider
+      user[uid_field] = uid
+      user[hash_field] = auth.to_hash # NOTE: The image information is pulled from this on save
+      user.skip_confirmation!
+      user.password = Devise.friendly_token[0,20]
+      user.user_defined_password = false # Records the fact that the user doesn't know the password
+
+      user.save
+    end
+
+    user
+  end
+
+  # This method accepts any string (such as 'John Doe, Ph.D.') and returns a value suitable for
+  # saving into the 'username_with_caps' field. It ensures that the username doesn't already exist.
+  def self.generate_unique_username_from(name_string, sep = '-')
+    # First we parameterize the string (the code below is taken from the standard rails 
+    # parameterize function except without downcasing at the end)
+    username_with_caps = ActiveSupport::Inflector::transliterate(name_string)
+    username_with_caps.gsub!(/[^a-zA-Z0-9\-_]+/, sep) # Turn unwanted chars into the separator
+    unless sep.nil? || sep.empty?
+      re_sep = Regexp.escape(sep)
+      username_with_caps.gsub!(/#{re_sep}{2,}/, sep) # No more than one of the separator in a row.
+      username_with_caps.gsub!(/^#{re_sep}|#{re_sep}$/, '') # Remove leading/trailing separator.
+    end
+
+    # Now make sure that we have a unique username
+    root_username_with_caps = username_with_caps
+    remaining_tries = 20 # this is how many times we'll try to generate a sequential name
+    while (User.where(username: username_with_caps.downcase).count > 0) && (remaining_tries > 0)
+      remaining_tries -= 1
+      username_with_caps = root_username_with_caps + (20 - remaining_tries).to_s
+    end
+
+    if (remaining_tries == 0) && (User.where(username: username_with_caps.downcase).count > 0)
+      # If we ran out of tries and we still couldn't find a unique name then append a random
+      # five character alphanumeric string and assume success (1 in 60 million chance of failure).
+      username_with_caps = root_username_with_caps + "#{sep}#{rand(36**5).to_s(36)}"
+    end
+
+    username_with_caps
+  end
+
+  # === DEVISE OVERRIDE CLASS METHODS === #
+
+  # This method is called by RegistrationsController when building the blank user
+  # We're overriding it in order to extract OmniAuth info that came from a failed SSO attempt
+  def self.new_with_session(params, session)
+    super.tap do |user|
+      if data = session['devise.google_oauth2_data'] \
+          && session['devise.google_oauth2_data']['extra']['raw_info']
+        user.email = data['email'] if user.email.blank?
+        user.name = data['name'] if user.name.blank?
+      end
+    end
   end
 
   # === INSTANCE METHODS === #
@@ -750,6 +851,11 @@ protected
         user.avatar_key = nil
         user.save! # This should trigger the callback again calling a new instance of this method
       end
+    elsif user.omniauth_google_oauth2_hash && user.omniauth_google_oauth2_hash['info'] \
+        && !user.omniauth_google_oauth2_hash['info']['image'].blank?
+      # Use the image from their google profile if available
+      user.remote_avatar_url = user.omniauth_google_oauth2_hash['info']['image']
+      user.save!
     else
       # Use the default image
       user.remote_avatar_url = user.gravatar_url
