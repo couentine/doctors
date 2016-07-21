@@ -66,12 +66,9 @@
     -webkit-flex: 1;
     flex: 1;
     
-    --paper-header-panel-body: { background-color: rgb(238,238,238); };
-    --paper-header-panel: {
-      background-color: white;
-      color: rgb(97,97,97);
-      border-top: 4px solid rgb(251,140,0);
-    };
+    background-color: white;
+    color: rgb(97,97,97);
+    border-top: 4px solid rgb(251,140,0);
   }
 
 /* === PAPER SCROLL HEADER PANEL === */

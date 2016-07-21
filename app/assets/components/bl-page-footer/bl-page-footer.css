@@ -10,9 +10,10 @@ footer {
   display: flex;
   padding: 0.5em 2em;
   color: rgb(97,97,97);
-  border-top: 1px solid rgb(97,97,97);
+  background-color: rgb(238,238,238);
+  border-top: 1px solid rgb(189,189,189);
 }
-footer.color { color: white; border-color: white; }
+footer.color { color: white; background-color: transparent; border-color: white; }
   .left,
   .right {
     display: flex;
