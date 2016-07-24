@@ -4,7 +4,7 @@ class UsersController < ApplicationController
     :confirm_account, :unblock_email, :update_image, :add_password]
   before_action :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
 
-  # === CONTSTANTS === #
+  # === CONSTANTS === #
 
   PERMITTED_PARAMS = [:email, :name, :username_with_caps, :password, :password_confirmation, 
     :remember_me, :avatar_key]

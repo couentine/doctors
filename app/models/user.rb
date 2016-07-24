@@ -32,12 +32,17 @@ class User
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
   has_many :info_items, dependent: :destroy
+  belongs_to :domain, inverse_of: :users, class_name: "Domain" # don't ever set this manually,
+  has_many :owned_domains, inverse_of: :owner, class_name: "Domain"
 
   # === CUSTOM FIELDS & VALIDATIONS === #
   
   field :name,                          type: String
   field :username,                      type: String
   field :username_with_caps,            type: String
+  field :has_private_domain,            type: Boolean, default: false
+  field :is_non_private_domain_user,    type: Boolean, default: false
+  field :visible_to_domain_urls,        type: Array
   field :flags,                         type: Array, default: [], pre_processed: true
   field :admin,                         type: Boolean, default: false
   field :form_submissions,              type: Array
@@ -135,6 +140,7 @@ class User
   after_save :process_avatar
   before_update :process_email_change
   after_update :update_logs
+  after_update :check_for_domain
 
   # === USER MOCK FIELD METHODS === #
 
@@ -161,6 +167,16 @@ class User
   # JSON Template String Shortcuts
   def json_cu
     return json(:current_user).to_json
+  end
+
+  # Returns whether this user is on a private domain AND isn't added to the non-private list
+  def is_private; has_private_domain && !is_non_private_domain_user; end
+  def email_domain
+    if email.blank? || !email.include?('@')
+      nil
+    else
+      email.split('@')[1]
+    end
   end
 
   # === CLASS METHODS === #
@@ -646,6 +662,23 @@ class User
     self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
   end
 
+  # This updates domain cache related fields from domain.json(:for_user_cache)
+  def update_domain_cache_from(domain_json)
+    self.domain_id = domain_json[:id]
+    self.has_private_domain = domain_json[:is_private]
+    self.is_non_private_domain_user = \
+      domain_json[:non_private_domain_user_ids].to_a.include? self.id
+    self.visible_to_domain_urls = [domain_json[:url]]
+    self.visible_to_domain_urls += domain_json[:visible_to_domain_urls]
+  end
+  
+  def clear_domain_cache
+    self.domain = nil
+    self.has_private_domain = false
+    self.is_non_private_domain_user = false
+    self.visible_to_domain_urls = []
+  end
+
   # === STRIPE RELATED METHODS === #
 
   def has_stripe_card?
@@ -990,6 +1023,23 @@ protected
   def update_logs
     if name_changed? || username_with_caps_changed? || email_changed?
       User.delay(queue: 'low').update_log_user_fields(self.id)
+    end
+  end
+
+  # Run before insert/update to check for existince of domain and then set the link if so
+  def check_for_domain
+    if new_record? || email_changed?
+      matched_domain = Domain.where(url: email_domain).first
+
+      # If this is an update the domain is changing then start by resetting the cache field
+      if !new_record? && (matched_domain != domain)
+        clear_domain_cache
+      end
+
+      # Now set the cache values for the new domain
+      if matched_domain
+        update_domain_cache_from matched_domain.json(:for_user_cache)
+      end
     end
   end
 

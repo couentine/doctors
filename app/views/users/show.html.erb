@@ -53,7 +53,22 @@
           <% end %>
         </span>
         <span class="header-text">
-          <h1><%= @user.name %></h1>
+          <h1>
+            <%= @user.name %>
+            <% if @user.is_private %> 
+              <%
+                private_domain_tooltip = \
+                  'This profile can only be seen by users on the following domains: ' \
+                    + @user.visible_to_domain_urls.to_a.join(', ')
+              %>
+              <a href="<%= domain_path(@user.domain) %>">
+                <span class="label" title="<%= private_domain_tooltip %>" data-toggle="tooltip" 
+                    data-placement="bottom">
+                  <i class="fa fa-eye-slash"></i> Private Domain
+                </span>
+              </a>
+            <% end %>  
+          </h1>
           <h2><%= @user.username_with_caps %></h2>
           <h3>
             <% ((@user.expert_logs.count || 0) / 5).to_i.times do |i| %>

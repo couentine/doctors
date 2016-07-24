@@ -1,0 +1,56 @@
+<%= simple_form_for [@domain], html: {class: 'form-horizontal'} do |f| %>
+
+  <div class="form-body">
+
+    <%= f.input :url, label: 'Bare Domain URL', placeholder: 'Example: acmeunified.k12.edu',
+      autofocus: true, input_html: { class: 'input-xlarge' } %>
+
+    <%= f.input :is_private, label: 'Domain Privacy?', as: :radio_buttons, 
+      collection: @domain_is_private_options %>
+
+    <div class="control-group">
+      <label class="control-label">
+        Username of Domain Owner
+      </label>
+      <div class="controls">
+        <input type="text" name="owner_username" class="string" id="owner_username" 
+          value="<%= @owner_username %>" placeholder="Example: hankish" class="input-xlarge">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">
+        Visible to Domain URLs
+      </label>
+      <div class="controls">
+        <input type="text" name="visible_to_domain_urls" class="string" id="visible_to_domain_urls"
+          value="<%= @visible_to_domain_urls %>" class="input-xlarge"
+          placeholder="Example: another.edu, something.k12.edu">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">
+        Usernames of Non-Private Users
+      </label>
+      <div class="controls">
+        <input type="text" name="non_private_user_usernames" class="string" class="input-xlarge"
+          id="non_private_user_usernames" value="<%= @non_private_user_usernames %>" 
+          placeholder="Example: hankish, benroome">
+      </div>
+    </div>
+
+  </div>
+  
+  <div class="form-footer">
+    <%= f.button :submit, class: 'btn btn-primary', id: 'submit-domain-form' %>
+    <%= 
+      if @domain.new_record?
+        link_to 'Cancel', '/', class: 'btn'
+      else 
+        link_to 'Cancel', @domain, class: 'btn'
+      end
+    %>
+  </div>
+
+<% end %>

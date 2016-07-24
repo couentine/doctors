@@ -1952,7 +1952,18 @@ form#group-add-users-form {
         .btn-overlay.hidden-until-hover a.btn { opacity: 1; }
       }
     }
-    span.header-text { padding-left: 120px; }
+    span.header-text { 
+      padding-left: 120px; 
+
+      h1 span.label {
+        display: inline;
+        font-size: 0.5em;
+        font-weight: normal;
+        position: relative;
+        top: -0.4em;
+        margin-left: 0.4em;
+      }
+    }
 
     @media (max-width: 767px) { min-height: 140px; }
   }
