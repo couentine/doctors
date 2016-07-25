@@ -2018,7 +2018,7 @@ form#group-add-users-form {
         text-decoration: none;
         color: $dark-text-color;
       }
-      a:focus,a:hover {
+      a:not(.no-hover):focus,a:not(.no-hover):hover {
         text-decoration: none;
         border-bottom: 1px dashed $medium-text-color;
         color: $medium-text-color;

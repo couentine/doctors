@@ -137,10 +137,10 @@ class User
   before_create :check_for_inactive_email
   after_create :convert_group_invitations
   before_save :update_identity_hash
+  before_save :check_for_domain
   after_save :process_avatar
   before_update :process_email_change
   after_update :update_logs
-  after_update :check_for_domain
 
   # === USER MOCK FIELD METHODS === #
 
@@ -168,9 +168,7 @@ class User
   def json_cu
     return json(:current_user).to_json
   end
-
-  # Returns whether this user is on a private domain AND isn't added to the non-private list
-  def is_private; has_private_domain && !is_non_private_domain_user; end
+  
   def email_domain
     if email.blank? || !email.include?('@')
       nil
@@ -677,6 +675,40 @@ class User
     self.has_private_domain = false
     self.is_non_private_domain_user = false
     self.visible_to_domain_urls = []
+  end
+
+  # === DOMAIN-RELATED METHODS === #
+
+  # Return value is in ['none', 'public', 'private', 'private-excluded']
+  def domain_membership
+    if domain_id.blank?
+      'none'
+    elsif !has_private_domain
+      'public'
+    elsif is_non_private_domain_user
+      'private-excluded'
+    else
+      'private'
+    end 
+  end
+
+  # Returns whether this user is on a private domain AND isn't added to the non-private list
+  def is_private; domain_membership == 'private'; end
+
+  # Returns boolean indicating whether current_user can see this user's domain
+  # Returns false if there is no domain
+  def domain_visible_to(current_user)
+    !domain_id.blank? && \
+      (current_user.admin? || visible_to_domain_urls.include?(current_user.email_domain))
+  end
+
+  # Returns boolean indicating whether current_user can see this user's profile
+  def profile_visible_to(current_user)
+    if is_private
+      (self.id == current_user.id) || domain_visible_to(current_user)
+    else
+      true
+    end
   end
 
   # === STRIPE RELATED METHODS === #

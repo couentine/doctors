@@ -1,193 +1,213 @@
 <% 
-  provide(:title, @user.name)
+  if @current_user_can_see_profile
+    provide(:title, @user.name)
+  else
+    provide(:title, 'Private Profile')
+  end
 %>
 
-<!-- === ACCOUNT STATUS WARNINGS === -->
+<% #=== IF THIS IS A PRIVATE USER THEN WE WILL CONCEAL THE ENTIRE PROFILE IF NEEDED ===# %>
+<% if @current_user_can_see_profile %>
 
-<% if @this_is_current_user && @user.email_inactive %>
-  <div class="well primary add-top-margin">
-    <i class="fa fa-envelope header-icon"></i>
-    <h2>Your email address is blocked</h2>
-    <p>
-      Badge List has been unable to deliver emails to your address (<%= @user.email %>).
-      Please check with your email administrator to confirm that emails from badgelist.com are 
-      not being blocked on your domain. 
-      You may also want to check the spam filters on your email software.
-    </p>
-    <p>
-      <strong>
-        Until this problem is resolved you will not be able to receive any emails from Badge List,
-        including password reset and account confirmation links.
-      </strong>
-    </p>
-    <p>
-      Once you have fixed the problem with email delivery please contact Badge List support 
-      to have your email address reactivated.
-    </p>
-  </div>
-<% end %>
+  <!-- === ACCOUNT STATUS WARNINGS === -->
 
-<% if @this_is_current_user && (!@user.confirmed? || @user.pending_reconfirmation?) %>
-  <div class="well tertiary add-top-margin">
-    <i class="fa fa-exclamation-triangle header-icon"></i>
-    <h2>Email verification needed</h2>
-    <p>
-      You need to click the verification link to confirm your Badge List account.
-      (<%= link_to 'Click here to get a new link', new_confirmation_path(:user) %>)
-    </p>
-  </div>
-<% end %>
-
-<div class="row add-top-margin">
-  <div class="span12">
-    <div class="header-card user-header-card">
-
-      <div class="primary-header span12">
-        <span class="header-image"> 
-          <%= image_tag @user.avatar_image_url(:medium), class: 'img-circle' %>
-          <% if @this_is_current_user %>
-            <div class="btn-overlay hidden-until-hover">
-              <%= link_to "<i class='fa fa-pencil'></i> Edit image".html_safe,
-                edit_user_registration_path + '#upload-image', class: 'btn btn-small' %>  
-            </div>
-          <% end %>
-        </span>
-        <span class="header-text">
-          <h1>
-            <%= @user.name %>
-            <% if @user.is_private %> 
-              <%
-                private_domain_tooltip = \
-                  'This profile can only be seen by users on the following domains: ' \
-                    + @user.visible_to_domain_urls.to_a.join(', ')
-              %>
-              <a href="<%= domain_path(@user.domain) %>">
-                <span class="label" title="<%= private_domain_tooltip %>" data-toggle="tooltip" 
-                    data-placement="bottom">
-                  <i class="fa fa-eye-slash"></i> Private Domain
-                </span>
-              </a>
-            <% end %>  
-          </h1>
-          <h2><%= @user.username_with_caps %></h2>
-          <h3>
-            <% ((@user.expert_logs.count || 0) / 5).to_i.times do |i| %>
-              <i class="fa fa-star"></i>
-            <% end %>
-          </h3>
-        </span>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- === AWARDED BADGES === -->
-
-<% if @group_badge_log_list.blank? %>
-
-  <div class="row">
-    <div class="well span7 offset2">
-      <h3>No badges yet...</h3>
+  <% if @this_is_current_user && @user.email_inactive %>
+    <div class="well primary add-top-margin">
+      <i class="fa fa-envelope header-icon"></i>
+      <h2>Your email address is blocked</h2>
       <p>
-        <% if @this_is_current_user %>
-          All of the badges you earn will show up here. To create some badges of your own...<br><br>
-
-          <%= link_to "<i class='fa fa-plus'></i> Create a new group".html_safe,
-            new_group_path, class: 'btn btn-success' %>
-        <% else %>
-          This user hasn't earned any badges yet.
-        <% end %>
+        Badge List has been unable to deliver emails to your address (<%= @user.email %>).
+        Please check with your email administrator to confirm that emails from badgelist.com are 
+        not being blocked on your domain. 
+        You may also want to check the spam filters on your email software.
+      </p>
+      <p>
+        <strong>
+          Until this problem is resolved you will not be able to receive any emails from 
+          Badge List, including password reset and account confirmation links.
+        </strong>
+      </p>
+      <p>
+        Once you have fixed the problem with email delivery please contact Badge List support 
+        to have your email address reactivated.
       </p>
     </div>
-  </div>
+  <% end %>
 
-<% else %>
+  <% if @this_is_current_user && (!@user.confirmed? || @user.pending_reconfirmation?) %>
+    <div class="well tertiary add-top-margin">
+      <i class="fa fa-exclamation-triangle header-icon"></i>
+      <h2>Email verification needed</h2>
+      <p>
+        You need to click the verification link to confirm your Badge List account.
+        (<%= link_to 'Click here to get a new link', new_confirmation_path(:user) %>)
+      </p>
+    </div>
+  <% end %>
 
-  <div class="row">
+  <div class="row add-top-margin">
     <div class="span12">
-      <div class="container-card evidence-card">
-        <% @group_badge_log_list.each do |group_row| 
-          group = group_row[:group]
-          group_type = group_row[:type] %>
-            
-          <table class="header-table">
-            <tr>
-              <td>
-                <%= link_to image_tag(group.avatar_image_url(:medium)), group, 
-                  title: "View the group", class: "image-link" %>
-              </td>
-              <td>
-                <h2>
-                  <%= link_to group.name, group, title: "View the group" %>
-                </h2>
-                <h3><%= group_type %></h3>
-              </td>
-            </tr>
-          </table>
+      <div class="header-card user-header-card">
 
-          <div class="body-row">
-            <% group_row[:badges].each do |badge_row| 
-              badge = badge_row[:badge]
-              log = badge_row[:log] %>
-
-              <div class="inner-row <%= (log.validation_status=='validated') ? '' : 'learner' %>">
-                <%= link_to image_tag(badge.image_url(:medium)), 
-                  "/#{group.to_param}/#{badge.to_param}/u/#{@user.username}", 
-                  title: "View the badge", class: "image-link" %>
-
-                <h2>
-                  <%= link_to badge.name, 
-                    "/#{group.to_param}/#{badge.to_param}/u/#{@user.username}" %>
-                </h2>
-                <h3>
-                  <% if log.validation_status == 'validated' %>
-                    <%= badge.expert.capitalize %> since <%= log.date_issued.to_s(:short_date) %>
-                    <% if !log.show_on_profile %>
-                      (Hidden from public)
-                    <% end %>
-                  <% else %>
-                    <%= badge.learner.capitalize %> since <%= log.date_started.to_s(:short_date) %>
-                  <% end %>
-                </h3>
+        <div class="primary-header span12">
+          <span class="header-image"> 
+            <%= image_tag @user.avatar_image_url(:medium), class: 'img-circle' %>
+            <% if @this_is_current_user %>
+              <div class="btn-overlay hidden-until-hover">
+                <%= link_to "<i class='fa fa-pencil'></i> Edit image".html_safe,
+                  edit_user_registration_path + '#upload-image', class: 'btn btn-small' %>  
               </div>
             <% end %>
-          </div>
+          </span>
+          <span class="header-text">
+            <h1>
+              <%= @user.name %>
+              
+              <% if @current_user_can_see_domain %>
+                <a href="<%= domain_path(@user.domain) %>" class="no-hover">
+                  <span class="label" title="<%= @domain_tooltip %>" data-toggle="tooltip" 
+                      data-placement="bottom">
+                    <i class="fa <%= @domain_label_icon %>"></i> <%= @domain_label_text %>
+                  </span>
+                </a>
+              <% end %>
+            </h1>
+            <h2><%= @user.username_with_caps %></h2>
+            <h3>
+              <% ((@user.expert_logs.count || 0) / 5).to_i.times do |i| %>
+                <i class="fa fa-star"></i>
+              <% end %>
+            </h3>
+          </span>
+        </div>
 
-        <% end %> <!-- === # END: @group_badge_log_list.each === -->
       </div>
     </div>
   </div>
 
-<% end %>
+  <!-- === AWARDED BADGES === -->
 
-<% if !@user.groups.blank? %>
-  
-  <!-- === GROUP MEMBERSHIPS === -->
+  <% if @group_badge_log_list.blank? %>
 
-  <div class="row">
-    <div class="span12">
-      <div class="tab-header merge-with-card">
-        <h2>Group Memberships</h2>
-      </div>
-    </div>
-  </div>
+    <div class="row">
+      <div class="well span7 offset2">
+        <h3>No badges yet...</h3>
+        <p>
+          <% if @this_is_current_user %>
+            All of the badges you earn will show up here. To create some badges of your own...
+            <br><br>
 
-  <div class="row" id="topic-list-row">
-    <div class="span12">
-      <div class="info-card text-card group-list-card">
-        <ul>
-          <% @user.groups.asc(:name).each do |group| %>
-            <li>
-              <%= link_to image_tag(group.avatar_image_url(:small)) + " " + group.name, group, 
-                title: "View the group" %>
-              <span class="no-link">
-                <%= "#{@user.member_type_of(group.id).capitalize}" %>
-              </span>
-            </li>
+            <%= link_to "<i class='fa fa-plus'></i> Create a new group".html_safe,
+              new_group_path, class: 'btn btn-success' %>
+          <% else %>
+            This user hasn't earned any badges yet.
           <% end %>
-        </ul>
+        </p>
       </div>
+    </div>
+
+  <% else %>
+
+    <div class="row">
+      <div class="span12">
+        <div class="container-card evidence-card">
+          <% @group_badge_log_list.each do |group_row| 
+            group = group_row[:group]
+            group_type = group_row[:type] %>
+              
+            <table class="header-table">
+              <tr>
+                <td>
+                  <%= link_to image_tag(group.avatar_image_url(:medium)), group, 
+                    title: "View the group", class: "image-link" %>
+                </td>
+                <td>
+                  <h2>
+                    <%= link_to group.name, group, title: "View the group" %>
+                  </h2>
+                  <h3><%= group_type %></h3>
+                </td>
+              </tr>
+            </table>
+
+            <div class="body-row">
+              <% group_row[:badges].each do |badge_row| 
+                badge = badge_row[:badge]
+                log = badge_row[:log] %>
+
+                <div 
+                  class="inner-row <%= (log.validation_status=='validated') ? '' : 'learner' %>">
+                  <%= link_to image_tag(badge.image_url(:medium)), 
+                    "/#{group.to_param}/#{badge.to_param}/u/#{@user.username}", 
+                    title: "View the badge", class: "image-link" %>
+
+                  <h2>
+                    <%= link_to badge.name, 
+                      "/#{group.to_param}/#{badge.to_param}/u/#{@user.username}" %>
+                  </h2>
+                  <h3>
+                    <% if log.validation_status == 'validated' %>
+                      <%= badge.expert.capitalize %> since <%= log.date_issued.to_s(:short_date) %>
+                      <% if !log.show_on_profile %>
+                        (Hidden from public)
+                      <% end %>
+                    <% else %>
+                      <%= badge.learner.capitalize %> 
+                      since <%= log.date_started.to_s(:short_date) %>
+                    <% end %>
+                  </h3>
+                </div>
+              <% end %>
+            </div>
+
+          <% end %> <!-- === # END: @group_badge_log_list.each === -->
+        </div>
+      </div>
+    </div>
+
+  <% end %>
+
+  <% if !@user.groups.blank? %>
+    
+    <!-- === GROUP MEMBERSHIPS === -->
+
+    <div class="row">
+      <div class="span12">
+        <div class="tab-header merge-with-card">
+          <h2>Group Memberships</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" id="topic-list-row">
+      <div class="span12">
+        <div class="info-card text-card group-list-card">
+          <ul>
+            <% @user.groups.asc(:name).each do |group| %>
+              <li>
+                <%= link_to image_tag(group.avatar_image_url(:small)) + " " + group.name, group, 
+                  title: "View the group" %>
+                <span class="no-link">
+                  <%= "#{@user.member_type_of(group.id).capitalize}" %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  <% end %>
+
+<% else %>
+  
+  <div class="row add-top-margin">
+    <div class="well span7 offset2">
+      <h3>This is a private user profile</h3>
+      <p>
+        This Badge List user is part of a private domain. 
+        You must be a member of their domain in order to see their profile.
+      </p>
     </div>
   </div>
 

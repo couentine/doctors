@@ -142,7 +142,7 @@ private
     @current_user_is_member = @current_user_is_owner \
       || (current_user && (current_user.domain_id == @domain.id))
     @can_see_domain = @badge_list_admin || @current_user_is_member \
-      || (current_user && @domain.can_see_domain_urls.include?(current_user.email_domain))
+      || (current_user && @domain.visible_to_domain_urls.include?(current_user.email_domain))
   end
 
   def badge_list_admin

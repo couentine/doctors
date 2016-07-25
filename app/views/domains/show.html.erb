@@ -1,5 +1,5 @@
 <% 
-  provide(:title, "Registered Domain - #{@domain.url}")
+  provide(:title, "#{@domain.url} - Registered Domain")
   provide(:show_subheader, @badge_list_admin)
 %>
 
@@ -44,19 +44,29 @@
         <div class="section-container lead">
           <% if @domain.is_private %>
             <% if @current_user_is_member %>
-              Your Badge List account belongs to this domain. 
-              Since domain privacy is enabled, your badge profile will only be visible to
-              other users on the same domain (or users on connected domains).
+              <% if current_user.is_private %>
+                Your Badge List account belongs to this domain.
+                Domain privacy is enabled for this domain.
+                Your badge profile will only be visible to other users on the same domain
+                or connected domains.
+              <% else %>
+                Your Badge List account belongs to this domain.
+                Domain privacy is enabled for this domain but your account has been added to the
+                list of exemptions.
+                Your badge profile is visible on the public internet.
+              <% end %>
             <% else %>
-              Domain privacy is enabled for this domain.
+              Your Badge List account does not belong to this domain but you have been 
+              given access to see it. Domain privacy is enabled for this domain.
             <% end %>  
           <% else %>
             <% if @current_user_is_member %>
               Your Badge List account belongs to this domain. 
-              Domain privacy is not currently enabled, so your badge profile is visible on 
-              the public internet.
-            <% else %>
               Domain privacy is turned off for this domain.
+              Your badge profile is visible on the public internet.
+            <% else %>
+              Your Badge List account does not belong to this domain but you have been 
+              given access to see it. Domain privacy is turned off for this domain.
             <% end %>  
           <% end %>
         </div>
@@ -64,24 +74,25 @@
         <div class="section-container">
           The primary contact for this domain is <strong><%= @owner.name %></strong>.
           If you'd like to request changes to the way this domain is configured please contact
-          them direclty at 
+          them directly at 
           <strong><%= link_to @owner.email, "mailto:#{@owner.email}" %></strong>.
         </div>
 
         <% if !@visible_to_domain_urls.blank? %>
           <div class="section-container">
-            <strong>
-              Badge profiles for users on this domain are visible to users on the following domains:
-            </strong>
+            <h3>
+              Badge profiles for users on this domain are also visible to users on these 
+              connected domains:
+            </h3>
             <%= @visible_to_domain_urls %>
           </div>
         <% end %>
 
         <% if !@can_see_domain_urls.blank? %>
           <div class="section-container">
-            <strong>
-              Users on this domain can also see badge profiles on the following domains:
-            </strong>
+            <h3>
+              Users on this domain can also see badge profiles on these connected domains:
+            </h3>
             <%= @can_see_domain_urls %>
           </div>
         <% end %>
@@ -89,9 +100,9 @@
         <% if (@badge_list_admin || @current_user_is_owner ) \
             && !@non_private_user_usernames.blank? %>
           <div class="section-container">
-            <strong>
+            <h3>
               The following users have been exempted from domain privacy:
-            </strong>
+            </h3>
             <%= @non_private_user_usernames %>
           </div>
         <% end %>
