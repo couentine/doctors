@@ -30,8 +30,8 @@ class Domain
   # === CALLBACK === #
 
   before_validation :clean_url
-  after_save :update_users
-  after_destroy :do_unlink_users
+  before_save :update_users
+  before_destroy :do_unlink_users
 
   # === MOCK FIELD METHODS === #
 
@@ -43,7 +43,30 @@ class Domain
 
   # === CLASS METHODS === #
 
-  # None yet.
+  # This will update the many to many visible_to_domains relationship to match the passed array of
+  # domains. NOTE: It WILL save and queue an update of the user caches.
+  def update_visible_to_domains(new_domains)
+    # STEP 1 - Remove any which are no longer present
+    visible_to_domains.each do |existing_domain|
+      if !new_domains.include? existing_domain
+        self.visible_to_domains.delete existing_domain
+      end
+    end
+    
+    # STEP 2 - Add any missing domains
+    new_domains.each do |new_domain|
+      if !visible_to_domains.include? new_domain
+        self.visible_to_domains << new_domain
+      end
+    end
+
+    # Now save the record and update the user caches.
+    # NOTE: We'll use a longer 30 second wait in order to avoid a collision with the call below
+    #(this is messy but this functionality will only be used by admins for now)
+    self.save if self.changed?
+    Domain.delay_for(30.seconds, queue: 'low').update_user_domain_caches(self.id)
+    true
+  end
 
   # === ASYNC CLASS METHODS === #
 
@@ -88,12 +111,12 @@ class Domain
     end
   end
 
-  # Call this asynchronously to clear caches on all linked domain users
-  def self.unlink_all_users(domain_id)
-    domain = Domain.find(domain_id) rescue nil
+  # Call this asynchronously to clear caches on all passed user ids
+  def self.clear_user_caches(user_ids)
+    users = User.where(:id.in => user_ids)
 
-    if domain
-      domain.users.each do |user|
+    if !users.blank?
+      users.each do |user|
         user.clear_domain_cache
         user.save if user.changed?
       end
@@ -121,16 +144,15 @@ protected
   def update_users
     if new_record? || url_changed?
       # clear existing users only if this is an update
-      Domain.delay(queue: 'low').find_and_link_users(self.id, !new_record?)
-    elsif is_private_changed? || visible_to_domain_ids_changed? \
-        || non_private_domain_user_ids_changed?
-      Domain.delay(queue: 'low').update_user_domain_caches(self.id)
+      Domain.delay_for(5.seconds, queue: 'low').find_and_link_users(self.id, !new_record?)
+    elsif is_private_changed? || non_private_domain_user_ids_changed?
+      Domain.delay_for(5.seconds, queue: 'low').update_user_domain_caches(self.id)
     end
   end
 
   # Call from before destroy
   def do_unlink_users
-    Domain.delay(queue: 'low').unlink_all_users(self.id)
+    Domain.delay(queue: 'low').clear_user_caches(self.user_ids)
   end
 
 end

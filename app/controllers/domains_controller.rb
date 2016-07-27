@@ -80,10 +80,9 @@ class DomainsController < ApplicationController
     @domain = Domain.new(domain_params)
     @domain.owner = @owner
     @domain.non_private_domain_user_ids = @non_private_domain_user_ids
-    @domain.visible_to_domains = @visible_to_domains
 
     respond_to do |format|
-      if @domain.save
+      if @domain.save && @domain.update_visible_to_domains(@visible_to_domains)
         format.html { redirect_to @domain, notice: 'Domain was successfully created.' }
         format.json { render json: @domain, status: :created, location: @domain,
           filter_user: current_user }
@@ -106,10 +105,9 @@ class DomainsController < ApplicationController
     @domain.update_attributes(domain_params)
     @domain.owner = @owner
     @domain.non_private_domain_user_ids = @non_private_domain_user_ids
-    @domain.visible_to_domains = @visible_to_domains
 
     respond_to do |format|
-      if @domain.save
+      if @domain.save && @domain.update_visible_to_domains(@visible_to_domains)
         format.html { redirect_to @domain, notice: 'Domain was successfully updated.' }
         format.json { head :no_content }
       else
