@@ -4,7 +4,7 @@ class UsersController < ApplicationController
     :confirm_account, :unblock_email, :update_image, :add_password]
   before_action :badge_list_admin, only: [:index, :confirm_account, :unblock_email]
 
-  # === CONTSTANTS === #
+  # === CONSTANTS === #
 
   PERMITTED_PARAMS = [:email, :name, :username_with_caps, :password, :password_confirmation, 
     :remember_me, :avatar_key]
@@ -41,6 +41,27 @@ class UsersController < ApplicationController
     @user = User.find(params[:id]) || not_found
     @this_is_current_user = current_user && (@user == current_user)
     @group_badge_log_list = @user.group_badge_log_list(!@this_is_current_user)
+    @current_user_can_see_profile = @user.profile_visible_to(current_user)
+    @current_user_can_see_domain = @user.domain_visible_to(current_user)
+
+    if @current_user_can_see_domain
+      # Then set the properties of the private domain label
+      if @user.domain_membership == 'private'
+        @domain_tooltip = 'This profile can only be seen by users on the following domains: ' \
+          + @user.visible_to_domain_urls.to_a.join(', ') 
+        @domain_label_icon = 'fa-eye-slash'
+        @domain_label_text = 'Private Domain'
+      elsif @user.domain_membership == 'private-excluded'
+        @domain_tooltip = 'This user is part of a private domain but their profile has been ' \
+          + 'excluded from domain privacy.'
+        @domain_label_icon = 'fa-eye'
+        @domain_label_text = 'Private Domain'
+      elsif @user.domain_membership == 'public'
+        @domain_tooltip = 'This user is part of a registered domain that is visible to the public.'
+        @domain_label_icon = 'fa-building'
+        @domain_label_text = 'Registered Domain'
+      end
+    end
 
     respond_to do |format|
       format.html # show.html.erb

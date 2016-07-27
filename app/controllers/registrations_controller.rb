@@ -15,6 +15,25 @@ class RegistrationsController < Devise::RegistrationsController
     @uploader = User.new.direct_avatar
     @uploader.success_action_redirect = image_key_url
 
+    if !resource.domain_id.blank?
+      # Then set the properties of the private domain label
+      if resource.domain_membership == 'private'
+        @domain_tooltip = 'Your account is part of a private domain and is only visible to other ' \
+          + 'domain members.'
+        @domain_label_icon = 'fa-eye-slash'
+        @domain_label_text = 'Private Domain'
+      elsif resource.domain_membership == 'private-excluded'
+        @domain_tooltip = 'Your account is part of a private domain but it has been exempted from ' \
+          + 'privacy.'
+        @domain_label_icon = 'fa-eye'
+        @domain_label_text = 'Private Domain'
+      elsif resource.domain_membership == 'public'
+        @domain_tooltip = 'Your account is part of a registered domain that is visible to the public.'
+        @domain_label_icon = 'fa-building'
+        @domain_label_text = 'Registered Domain'
+      end
+    end
+
     super
   end
 

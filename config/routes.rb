@@ -40,6 +40,9 @@ BadgeList::Application.routes.draw do
   # === POLLER PATHS === #
   match 'p/:id' => 'pollers#show', via: :get, as: :poller
   
+  # === RESTFUL PATHS TO PRELOAD === #
+  resources :domains
+
   # === MANUAL FORM PATHS === #
   match 'f/talk-with-us' => 'forms#user_discussion', via: :post
   # match 'f/contact-us' => 'forms#contact_us', via: :post

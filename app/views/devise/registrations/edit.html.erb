@@ -339,7 +339,18 @@
               </div>
             </td>
             <td class="single-panel">
-              <h1><%= @user.name %></h1>
+              <h1>
+                <%= @user.name %>
+
+                <% if !@user.domain_id.blank? %>
+                  <a href="<%= domain_path(@user.domain) %>" class="no-hover">
+                    <span class="label" title="<%= @domain_tooltip %>" data-toggle="tooltip" 
+                        data-placement="bottom">
+                      <i class="fa <%= @domain_label_icon %>"></i> <%= @domain_label_text %>
+                    </span>
+                  </a>
+                <% end %>  
+              </h1>
               <h2>
                 <%= link_to "<i class='fa fa-shield'></i> #{@user.username_with_caps}".html_safe, 
                   user_path(@user), title: 'View your badge profile', 

@@ -347,6 +347,8 @@ defaults: &defaults
    - create
    - delete
    - destroy
+   - domain
+   - domains
    - edit
    - entry
    - entries

@@ -1,0 +1,113 @@
+<% 
+  provide(:title, "#{@domain.url} - Registered Domain")
+  provide(:show_subheader, @badge_list_admin)
+%>
+
+<% if @badge_list_admin %>
+  <% content_for :subheader_actions do %>
+
+    <li class="collapsible">
+      <%= link_to "<i class='fa fa-pencil'></i> Edit".html_safe, edit_domain_path(@domain) %>
+      <span class="divider">|</span>
+    </li>
+      
+    <li class="collapsible">
+      <%= link_to '<i class="fa fa-times"></i> Delete'.html_safe, domain_path(@domain),
+        method: :delete, data: { 
+          confirm: ('Are you sure you want to delete this registered domain?') } %>
+    </li>
+
+  <% end %>
+<% end %>
+
+<!-- === DOMAIN DETAIL === -->
+
+<div class="row add-top-margin">
+
+  <div class="span12">
+    <div class="page-card domain-page-card">
+
+      <div class="header-section">
+
+        <h1><i class="fa fa-building"></i> <%= @domain.url %></h1>
+
+        <h2>
+          <% if @domain.is_private %>
+            <i class="fa fa-eye-slash"></i> Private Domain
+          <% else %>
+            <i class="fa fa-globe"></i> Registered Public Domain
+          <% end %>
+        </h2>
+      </div>
+      
+      <div class="body-section">          
+        <div class="section-container lead">
+          <% if @domain.is_private %>
+            <% if @current_user_is_member %>
+              <% if current_user.is_private %>
+                Your Badge List account belongs to this domain.
+                Domain privacy is enabled for this domain.
+                Your badge profile will only be visible to other users on the same domain
+                or connected domains.
+              <% else %>
+                Your Badge List account belongs to this domain.
+                Domain privacy is enabled for this domain but your account has been added to the
+                list of exemptions.
+                Your badge profile is visible on the public internet.
+              <% end %>
+            <% else %>
+              Your Badge List account does not belong to this domain but you have been 
+              given access to see it. Domain privacy is enabled for this domain.
+            <% end %>  
+          <% else %>
+            <% if @current_user_is_member %>
+              Your Badge List account belongs to this domain. 
+              Domain privacy is turned off for this domain.
+              Your badge profile is visible on the public internet.
+            <% else %>
+              Your Badge List account does not belong to this domain but you have been 
+              given access to see it. Domain privacy is turned off for this domain.
+            <% end %>  
+          <% end %>
+        </div>
+
+        <div class="section-container">
+          The primary contact for this domain is <strong><%= @owner.name %></strong>.
+          If you'd like to request changes to the way this domain is configured please contact
+          them directly at 
+          <strong><%= link_to @owner.email, "mailto:#{@owner.email}" %></strong>.
+        </div>
+
+        <% if !@visible_to_domain_urls.blank? %>
+          <div class="section-container">
+            <h3>
+              Badge profiles for users on this domain are also visible to users on these 
+              connected domains:
+            </h3>
+            <%= @visible_to_domain_urls %>
+          </div>
+        <% end %>
+
+        <% if !@can_see_domain_urls.blank? %>
+          <div class="section-container">
+            <h3>
+              Users on this domain can also see badge profiles on these connected domains:
+            </h3>
+            <%= @can_see_domain_urls %>
+          </div>
+        <% end %>
+
+        <% if (@badge_list_admin || @current_user_is_owner ) \
+            && !@non_private_user_usernames.blank? %>
+          <div class="section-container">
+            <h3>
+              The following users have been exempted from domain privacy:
+            </h3>
+            <%= @non_private_user_usernames %>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+</div>
