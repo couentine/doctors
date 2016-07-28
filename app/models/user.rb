@@ -592,8 +592,9 @@ class User
     return logs.where(validation_status: 'validated')
   end
 
-  # Returns all badge logs by group. Doesn't filter out anything.
+  # Returns all badge logs by group.
   # If public_only then only gets expert logs, otherwise returns everything except detached logs.
+  # Set only_from_groups to an array of downcased group urls to only return logs from those groups.
   #
   # Return array has one entry for each group = {
   #   :type => one_of['Admin', 'Member'],
@@ -602,7 +603,7 @@ class User
   #                 :log]
   #              } }
   # >> Return array is sorted by group name
-  def group_badge_log_list(public_only = true)
+  def group_badge_log_list(public_only = true, only_from_groups = [])
     badge_map, log_map = {}, {} # group_id => badges[], #badge_id => logs
     group_ids, badge_ids = [], []
     return_rows = []
@@ -615,6 +616,13 @@ class User
         detached_log: false)
     else
       log_query = logs.where(detached_log: false)
+    end
+
+    # Now add a group filter if needed
+    if !only_from_groups.blank?
+      # log_query = log_query.where() >> LEFT OF HERE: Next step is to build it out so that 
+      #     the groups are pre-queried in this case. I need to count the queries in the page before
+      #     so that I can make sure I'm not adding a query. And I need to not incluce blank groups.
     end
 
     # Run through the log query and build the map
