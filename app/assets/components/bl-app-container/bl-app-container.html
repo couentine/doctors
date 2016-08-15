@@ -8,42 +8,19 @@
 
         <paper-toolbar class$="{{toolbarClass}}" bottom-justify="end">
           <div class="toolbar top">
-            <a class="logo" title="Badge List Home" href$="{{getURL('/')}}">
-              <img src$="{{assetPaths.badgeListShieldSquare}}">
+            <a class="logo" title="Badge List Home" href$="{{getURL('/')}}" 
+                hidden$="{{hasCustomLogo}}">
+              <img src$="{{assetPaths.badgeListShieldSquare}}"
+                hidden$="{{!isBackgroundMode_Standard}}">
+              <img src$="{{assetPaths.badgeListShieldWhiteSquare}}" 
+                hidden$="{{!isBackgroundMode_Color}}">
             </a>
+            <content select=".custom-logo"></content>
             
             <template is="dom-if" if="{{isAppbarMode_Home}}">
               <a href$="{{getURL('/users/sign_out')}}" class="signout" data-method="delete">
                 <i class="fa fa-close"></i> Sign Out
               </a>
-            </template>
-            <template is="dom-if" if="{{isAppbarMode_Standard}}">
-              <!-- FIXME -->
-            </template>
-          </div>
-
-          <content select=".toolbar.middle"></content>
-          <content select=".toolbar.bottom"></content>
-        </paper-toolbar>
-        
-        <content select=".content"></content>
-
-      </paper-header-panel>
-    </template>
-
-    <template is="dom-if" if="{{isHeaderMode_Condensable}}">
-      <paper-scroll-header-panel header-height$="{{headerHeight}}" class$="{{headerPanelClass}}">
-
-        <div class$="{{toolbarClass}}">
-          <div class="toolbar top">
-            <a class="logo" title="Badge List Home" href$="{{getURL('/')}}" 
-                hidden$="{{hasCustomLogo}}">
-              <img src$="{{assetPaths.badgeListShieldWhiteSquare}}">
-            </a>
-            <content select=".custom-logo"></content>
-            
-            <template is="dom-if" if="{{isAppbarMode_Home}}">
-              <!-- FIXME -->
             </template>
             <template is="dom-if" if="{{isAppbarMode_Standard}}">
               <paper-menu-button class="current-user" horizontal-align="right" 
@@ -90,9 +67,15 @@
 
           <content select=".toolbar.middle"></content>
           <content select=".toolbar.bottom"></content>
-        </div>
+        </paper-toolbar>
         
         <content select=".content"></content>
+
+      </paper-header-panel>
+    </template>
+
+    <template is="dom-if" if="{{isHeaderMode_Condensable}}">
+      <!-- === REMOVING THIS FOR NOW === -->
     </template>
 
   </template>

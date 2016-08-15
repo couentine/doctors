@@ -27,6 +27,9 @@ Polymer({
       computed: "_toolbarClass(backgroundMode,colorMode,toolbarMode,headerMode)"},
     isAppbarMode_Standard: { type: Boolean, computed: "_isAppbarMode_Standard(appbarMode)" },
     isAppbarMode_Home: { type: Boolean, computed: "_isAppbarMode_Home(appbarMode)" },
+    isBackgroundMode_Standard: { type: Boolean, 
+      computed: "_isBackgroundMode_Standard(backgroundMode)" },
+    isBackgroundMode_Color: { type: Boolean, computed: "_isBackgroundMode_Color(backgroundMode)" },
     isHeaderMode_Condensable: { type: Boolean, computed: "_isHeaderMode_Condensable(headerMode)" }
   },
 
@@ -59,6 +62,8 @@ Polymer({
   },
   _isAppbarMode_Standard: function(appbarMode) { return appbarMode == "standard"; },
   _isAppbarMode_Home: function(appbarMode) { return appbarMode == "home"; },
+  _isBackgroundMode_Standard: function(backgroundMode) { return backgroundMode == "standard"; },
+  _isBackgroundMode_Color: function(backgroundMode) { return backgroundMode == "color"; },
   _isHeaderMode_Condensable: function(headerMode) { return headerMode == "condensable"; },
 
   // Helpers
