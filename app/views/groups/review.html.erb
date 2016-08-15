@@ -7,10 +7,15 @@
     font-size: 3em;
   }
   
-  h1 {
-    font-size: 1.5em;
-    margin: 0 0 0.5em 0;
+  #page-header-wrapper {
+    margin-top: 1em;
+    text-align: center;
   }
+    #page-header-wrapper h1 {
+      color: white;
+      font-size: 1.5em;
+      margin: 0 0 0.5em 0;
+    }
 
   bl-selection-bar paper-button { width: 11em; }
   paper-button.select-all-button { 
@@ -26,8 +31,8 @@
   .query-options-dropdown .focused-line.style-scope { background: rgb(224,224,224); }
 </style>
 
-<bl-app-container color-mode="group" appbar-mode="standard" header-mode="condensable"
-  toolbar-mode="badge-selector" background-mode="color" current-user="<%= current_user.json_cu %>"
+<bl-app-container color-mode="group" appbar-mode="standard" header-mode="waterfall"
+  background-mode="color" current-user="<%= current_user.json_cu %>"
   header-height="260" has-custom-logo hide-intercom asset-paths="<%= @ap_json %>">
   
   <a href="<%= "/#{@group.url}" %>" class="custom-logo back-link">
@@ -35,19 +40,20 @@
     <%= image_tag @group.avatar_image_small_url, class: 'logo' %>
   </a>
 
-  <div class="toolbar bottom center">
-    <h1>Feedback Requests</h1>
-    <bl-badge-selector badges="<%= @badges.to_json %>" selected-badge-url="<%= @badge_url.to_s %>" 
-        for="log-list" <%= (@badge_url.blank?) ? 'expanded' : '' %>>
-      <h2>Select a badge</h2>
-      <div class="subtitle">
-        Select a badge below to view the progress logs of badge learners and experts.
-        After selecting a badge you'll be able to submit feedback on multiple logs at once.
-      </div>
-    </bl-badge-selector>
-  </div>
-
   <div class="content">
+
+    <div id="page-header-wrapper">
+      <h1>Feedback Requests</h1>
+
+      <bl-badge-selector badges="<%= @badges.to_json %>" selected-badge-url="<%= @badge_url.to_s %>" 
+          for="log-list" <%= (@badge_url.blank?) ? 'expanded' : '' %>>
+        <h2>Select a badge</h2>
+        <div class="subtitle">
+          Select a badge below to view the progress logs of badge learners and experts.
+          After selecting a badge you'll be able to submit feedback on multiple logs at once.
+        </div>
+      </bl-badge-selector>
+    </div>
 
     <bl-list id="log-list" object-mode="full_logs" query-options="<%= @bl_list_query_options %>"
         next-page-url="<%= group_full_logs_url(@group, format: :json) %>">

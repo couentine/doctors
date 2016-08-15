@@ -68,43 +68,20 @@
     
     background-color: white;
     color: rgb(97,97,97);
-    border-top: 4px solid rgb(251,140,0);
   }
-
-/* === PAPER SCROLL HEADER PANEL === */
-
-  paper-scroll-header-panel {
-    -ms-flex: 1;
-    -webkit-flex: 1;
-    flex: 1;
-    height: 100%;
-    border-top: 4px solid rgb(251,140,0);
-    background-color: rgb(238,238,238);
-
-    --paper-scroll-header-panel-full-header: { 
-      color: rgb(97,97,97);
-      background-color: white; 
-    };
-    --paper-scroll-header-panel-condensed-header: { 
-      color: rgb(97,97,97);
-      background-color: white; 
-    };
-
-  }
-  paper-scroll-header-panel.color-background {
-    --paper-scroll-header-panel-full-header: { 
+  paper-header-panel.color-background {
+    --paper-header-panel-full-header: { 
       background-color: transparent;
       color: white;
     };
-    --paper-scroll-header-panel-condensed-header: { 
-      background-color: rgba(0,0,0,0.25);
-      color: white;
-    };
   }
-  paper-scroll-header-panel.group-color {
-    border-top: 4px solid rgb(3,155,229);
+  paper-header-panel.group-color {
     background-color: rgb(41,182,246);
   }
+
+/* === PAPER SCROLL HEADER PANEL (REMOVED FOR NOW) === */
+
+  /* <removed> */
 
 /* === SHARED TOOLBAR STYLES === */
   
@@ -153,10 +130,14 @@
   paper-toolbar.standard-background {
     background-color: transparent;
     color: rgb(97,97,97);
+    border-top: 4px solid rgb(251,140,0);
   }
   paper-toolbar.color-background {
     background-color: transparent;
     color: white; 
+  }
+  paper-toolbar.group-color {
+    border-top: 4px solid rgb(3,155,229);
   }
     paper-toolbar .toolbar.top { width: 100%; }
       paper-toolbar .toolbar.top a.signout { float: right; }
