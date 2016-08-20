@@ -427,131 +427,114 @@
   <!-- === EVIDENCE === -->
 
   <% if !@requirements_json_clone.blank? %>
+    
+    <% if @current_user_is_log_owner %>
 
-    <!-- === TABLE OF CONTENTS === -->
+      <!-- === BADGE REQUIREMENTS === -->
 
-    <div class="row add-top-margin">
-      <div class="span12">
-        <div class="tab-header merge-with-card">
-          <% if @current_user_is_log_owner %>
-            <h2>Your Posted Evidence</h2>
-          <% else %>
-            <h2>Evidence Posted by <%= @user.name %></h2>
-          <% end %>
+      <div class="row add-top-margin">
+        <div class="span12">
+          <div class="tab-header">
+            <h2>Badge Requirements</h2>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="row" id="topic-list-row">
+      <div class="row" id="topic-list-row">
+        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="topics" 
+             data-bl-dyncol-width="12">
+
+          <% @requirements.each do |tag| %>
+
+            <%= render 'shared/badge_requirement', group: @group, badge: @badge, tag: tag, 
+              log: @log, requirements_counts: @requirements_counts %>
+
+          <% end %>
+
+        </div>
+      </div>
+
+    <% end %>
+    
+    <!-- === BADGE PORTFOLIO === -->
+
+    <div class="row merge-with-card">
       <div class="span12">
-        <div class="info-card text-card topic-list-card">
-          <ul>
-            <% requirements_complete = @log.requirements_complete(@requirements) %>
-            <% @requirements.each do |tag| %>
-              <%
-                if requirements_complete[tag.id]
-                  icon_text = "<i class='fa fa-check-square-o'></i>"
-                  button_class = "complete"
-                else
-                  icon_text = "<i class='fa fa-square-o'></i>"
-                  button_class = "incomplete"
-                end
-              %>
-              <li>
-                <a href="#t-<%= tag.name %>" class="smooth-scroll">
-                  <%= "#{icon_text} #{tag.display_name}".html_safe %>
-                </a>
-                <% if @current_user_is_log_owner %>
-                  <%= link_to "<i class='fa #{tag.format_icon}'></i> ".html_safe \
-                    + "Post #{tag.format.to_s.capitalize}", \
-                    new_group_badge_log_entry_path(@group, @badge, @log, \
-                    tag: tag.name_with_caps), class: "btn btn-mini #{button_class}" %>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
+        <div class="tab-header merge-with-card">
+          <h2>Badge Portfolio</h2>
         </div>
       </div>
     </div>
     
-    <!-- === ACTUAL EVIDENCE === -->
+    <div class="row" id="portfolio-row">
+      <div class="span12">
+        <div class="info-card text-card portfolio-card">
 
-    <% @log.posts_by_topic.each do |topic_item| %>
-      <% if @current_user_is_log_owner                        \
-        || topic_item['tag'].nil?                              \
-        || (topic_item['tag'].privacy == 'public')              \
-        || ((topic_item['tag'].privacy == 'private')             \
-          && (@current_user_is_member || @current_user_is_admin)) \
-        || ((topic_item['tag'].privacy == 'secret')                \
-          && (@current_user_is_admin                                \
-            || ((@badge.awardability == 'experts') && @current_user_is_expert)))
-      %>
+          <% @log.posts_by_topic.each do |topic_item| %>
+            <% if @current_user_is_log_owner                        \
+              || topic_item['tag'].nil?                              \
+              || (topic_item['tag'].privacy == 'public')              \
+              || ((topic_item['tag'].privacy == 'private')             \
+                && (@current_user_is_member || @current_user_is_admin)) \
+              || ((topic_item['tag'].privacy == 'secret')                \
+                && (@current_user_is_admin                                \
+                  || ((@badge.awardability == 'experts') && @current_user_is_expert)))
+            %>
 
-        <div class="row add-top-margin" 
-            id="t-<%= (topic_item['tag']) ? topic_item['tag'].name : 'etc' %>">
-          <div class="span12">
-            <div class="tab-header">
-              <% if @current_user_is_log_owner %>
-                <%
-                  if topic_item['tag']
-                    format_icon = topic_item['tag'].format_icon
-                    format_text = topic_item['tag'].format
-                  else
-                    format_icon = 'fa-pencil'
-                    format_text = 'text'
-                  end
-                %>
-                <%= link_to "<i class='fa #{format_icon}'></i> ".html_safe \
-                  + "Post #{format_text.capitalize}",
-                  new_group_badge_log_entry_path(@group, @badge, @current_user_log, 
-                    tag: (topic_item['tag']) ? topic_item['tag'].name : '' ), 
-                  class: 'btn btn-small' %>
-              <% end %>
-
-              <h2>
-                <%
-                  if topic_item['tag']
-                    topic_text = topic_item['tag'].display_name
-                    if topic_item['entries'].blank?
-                      icon_text = "<i class='fa fa-square-o'></i>"
+              <div class="section-container" 
+                  id="t-<%= (topic_item['tag']) ? topic_item['tag'].name : 'etc' %>">
+                
+                <% if @current_user_is_log_owner %>
+                  <%
+                    if topic_item['tag']
+                      format_icon = topic_item['tag'].format_icon
+                      format_text = topic_item['tag'].format
                     else
-                      icon_text = "<i class='fa fa-check-square-o'></i>"
+                      format_icon = 'fa-pencil'
+                      format_text = 'text'
                     end
-                  else
-                    topic_text = 'Etcetera'
-                    icon_text = "<i class='fa fa-simplybuilt'></i>"
-                  end
-                %>
-                <%= link_to "#{icon_text} #{topic_text}".html_safe, \
-                  [@group, @badge, topic_item['tag']] %>
-              </h2>
-            </div>
-          </div>
-        </div>
+                  %>
+                  <%= link_to "<i class='fa #{format_icon}'></i> ".html_safe \
+                    + "Post #{format_text.capitalize}",
+                    new_group_badge_log_entry_path(@group, @badge, @current_user_log, 
+                      tag: (topic_item['tag']) ? topic_item['tag'].name : '' ), 
+                    class: 'btn btn-small' %>
+                <% end %>
 
-        <div class="row">
-          
-          <% if topic_item['entries'].blank? %>
+                <h2>
+                  <%
+                    if topic_item['tag']
+                      topic_text = topic_item['tag'].display_name
+                      if topic_item['entries'].blank?
+                        icon_text = "<i class='fa fa-square-o'></i>"
+                      else
+                        icon_text = "<i class='fa fa-check-square-o'></i>"
+                      end
+                    else
+                      topic_text = 'Etcetera'
+                      icon_text = "<i class='fa fa-simplybuilt'></i>"
+                    end
+                  %>
+                  <%= link_to "#{icon_text} #{topic_text}".html_safe, \
+                    [@group, @badge, topic_item['tag']] %>
+                </h2>
 
-            <div class="well span7 offset2 gray empty">
-              <h3>No evidence submitted for this requirement.</h3>
-            </div>
+                <% if topic_item['entries'].blank? %>
+                  <h3>No evidence submitted for this requirement.</h3>
+                <% else %>
+                  <%= render topic_item['entries'], date_format: :ago, group: @group, badge: @badge,
+                    log: @log, user: @user %>
+                <% end %>
 
-          <% else %>
+              </div>
 
-            <div class="span12">
-
-              <%= render topic_item['entries'], date_format: :ago, group: @group, badge: @badge,
-                log: @log, user: @user %>
-
-            </div>
-          
+            <% end %>
           <% end %>
 
-        </div>
 
-      <% end %>
-    <% end %>
+        </div>
+      </div>
+    </div>
 
   <% else # NOTE: In this case, you can only see this section if you're the log owner. %>
 

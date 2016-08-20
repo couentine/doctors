@@ -9,7 +9,7 @@ class Tag
   MAX_NAME_LENGTH = 50
   MAX_SUMMARY_LENGTH = 300
   TYPE_VALUES = ['requirement', 'wiki']
-  FORMAT_VALUES = ['text', 'link', 'image', 'tweet', 'code']
+  FORMAT_VALUES = ['any', 'text', 'link', 'image', 'tweet', 'code']
   EDITABILITY_VALUES = ['learners', 'experts', 'admins']
   PRIVACY_VALUES = ['public', 'private', 'secret']
   JSON_FIELDS = [:badge, :name, :name_with_caps, :display_name, :type, :format, :summary, 
@@ -33,7 +33,7 @@ class Tag
   field :name_with_caps,      type: String
   field :display_name,        type: String
   field :type,                type: String, default: 'wiki'
-  field :format,              type: String, default: 'text'
+  field :format,              type: String, default: 'any'
   field :sort_order,          type: Integer
 
   field :editability,         type: String, default: 'experts'
@@ -79,6 +79,8 @@ class Tag
   # Returns the font awesome icon which represents the specified format
   def self.format_icon(format_string)
     case format_string
+    when 'any'
+      return 'fa-asterisk'
     when 'link'
       return 'fa-link'
     when 'tweet'

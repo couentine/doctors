@@ -1,0 +1,36 @@
+<%
+  # Object Variables = group, badge, tag, [log]
+  # Map Variables = [requirements_counts]
+  
+  allow_posting = !log.nil? && !requirements_counts.blank?
+%>
+
+<div class="info-card requirement-card" data-bl-dyncol="child">
+  <table>
+    <tr class="card-body-row">
+      <td class="card-image">
+        <i class="fa <%= tag.format_icon %>"></i><br>
+        <span class="format-string"><%= tag.format.to_s.capitalize %></span>
+      </td>
+      <td class="card-body">
+        <span class="card-headline">
+          <h2>
+            <%= link_to tag.display_name, group_badge_tag_path(group, badge, tag), 
+              title: "View full requirement details" %>
+          </h2>
+          <h3 class="summary"><%= tag.summary %></h3>
+        </span>
+        <span class="card-content">
+          <% if allow_posting %>
+            <span class="post-count">
+              You've posted <%= pluralize requirements_counts[tag.id], 'item' %>
+            </span>
+            <%= link_to "<i class='fa fa-plus'></i> Post new item".html_safe, \
+              new_group_badge_log_entry_path(group, badge, log, tag: tag.name_with_caps), 
+              class: "btn btn-link" %>
+          <% end %>
+        </span>
+      </td>
+    </tr>
+  </table>
+</div>

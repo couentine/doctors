@@ -1336,6 +1336,22 @@ h2.form-header {
 .control-group.entry_body,.control-group.tag_wiki {
   width: 100%;
 }
+ul.entry-format-selector {
+  display: block;
+  margin: 0 0 10px 25px;
+  list-style: none;
+
+  a.btn {
+    margin-bottom: 15px;
+    background-color: #7cccdf;
+    color: #fff;
+    border: 2px solid #4BC1DD;
+    border-radius: 500px;
+    text-shadow: none;
+    position: relative;
+    top: -4px;
+  }
+}
 
 #badge-versions {
   width: 340px;
@@ -2464,6 +2480,44 @@ div.user-card,div.log-card {
 }
 .log-card.fixed-height {
   .card-headline { min-height: 3.6em; }
+}
+
+div.requirement-card {
+  td.card-image {
+    width: 28%;
+    position: relative;
+    text-align: center;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: $tertiary-medium;
+    color: white;
+
+    i.fa {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+  }
+  td.card-body {
+    padding: 3% 3% 2% 3%;
+  }
+  span.card-headline {
+    h3.summary { color: $light-text-color !important; }
+  }
+  span.card-content {
+    display: block;
+
+    span.post-count {
+      display: block;
+      font-size: 14px;
+    }
+    a.btn, a.btn:visited {
+      color: $medium-text-color;
+      margin: 0 0 5px 0;
+    }
+  }
+}
+.requirement-card.fixed-height {
+  .card-headline { min-height: 3.9em; }
 }
 
 div.badge-card {

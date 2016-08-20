@@ -100,8 +100,9 @@
               <%= f.input :receive_validation_request_emails, as: :select, include_blank: false,
                 collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
                 value_method: :first, label: 'Receive feedback request emails?',
-                hint: "Feedback request emails are sent automatically whenever a #{@learner} " \
-                  + "completes all of the badge requirements." %>
+                hint: "Feedback request emails are sent when a #{@learner} " \
+                  + "completes all of the badge requirements and then requests " \
+                  + "feedback." %>
             <% end %>
 
             <% 
@@ -432,8 +433,7 @@
 
       <div class="row">
         <div class="span12">
-          <div 
-        class="tab-header merge-with-card <%= (@requirements_json_clone.blank?) ? 'empty' : '' %>">
+          <div class="tab-header">
             <% if @current_user_is_expert || @current_user_is_learner %>
               <%= link_to "<i class='fa fa-user'></i> View your #{@badge.progress_log}".html_safe, 
                 [@group, @badge, @log], id: 'view-your-log', class: 'btn btn-small' %>
@@ -461,50 +461,16 @@
       </div>
 
       <div class="row" id="topic-list-row">
-        <div class="span12">
-          <div class="info-card text-card topic-list-card">
-            <ul>
-              <% if @current_user_is_learner || @current_user_is_expert %>
-                
-                <% requirements_complete = @log.requirements_complete(@requirements) %>
-                <% @requirements.each do |tag| %>
-                  <%
-                    if requirements_complete[tag.id]
-                      icon_text = "<i class='fa fa-check-square-o'></i>"
-                      button_class = "complete"
-                    else
-                      icon_text = "<i class='fa fa-square-o'></i>"
-                      button_class = "incomplete"
-                    end
-                  %>
-                  <li>
-                    <%= link_to "#{icon_text} #{tag.display_name}".html_safe, \
-                      group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
-                    <%= link_to "<i class='fa #{tag.format_icon}'></i> ".html_safe \
-                      + "Post #{tag.format.to_s.capitalize}", \
-                      new_group_badge_log_entry_path(@group, @badge, @log, \
-                      tag: tag.name_with_caps), class: "btn btn-mini #{button_class}" %>
-                  </li>
-                <% end %>
-              
-              <% else %>
+        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="topics" 
+             data-bl-dyncol-width="12">
 
-                <% @requirements.each do |tag| %>
-                  <%
-                    icon_text = "<span class='fa-stack single-stack'>" \
-                      + "<i class='fa fa-square fa-stack-2x'></i>"      \
-                      + "<i class='fa #{tag.format_icon} fa-stack-1x fa-inverse'></i></span>"
-                  %>
-                  <li>
-                    <%= link_to \
-                      "#{icon_text} #{tag.display_name}".html_safe, 
-                      group_badge_path(@group, @badge) + "/" + tag.name_with_caps %>
-                  </li>
-                <% end %>
-              
-              <% end %>
-            </ul>
-          </div>
+          <% @requirements.each do |tag| %>
+
+            <%= render 'shared/badge_requirement', group: @group, badge: @badge, tag: tag, 
+              log: @log, requirements_counts: @requirements_counts %>
+
+          <% end %>
+
         </div>
       </div>
 
@@ -669,7 +635,6 @@
       <% unless @badge.expert_count == 0 %>
 
         <div class="row">
-          
           <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="experts" 
                data-bl-dyncol-width="12">
 

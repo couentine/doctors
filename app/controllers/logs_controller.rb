@@ -251,6 +251,7 @@ private
     @current_user_is_log_owner = current_user && (@user == current_user)
     if @current_user_is_log_owner
       @show_sharing = (@log.issue_status == 'issued')
+      @requirements_counts = @log.requirements_counts
     end
     if current_user
       @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil
