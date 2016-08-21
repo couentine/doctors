@@ -139,14 +139,8 @@ class EntriesController < ApplicationController
         else
           notice = "Your feedback was submitted."
         end
-      else
-        if @entry.log.validation_status == 'requested'
-          notice = "You have submitted all of the required evidence. A feedback request has " \
-            + "automatically been sent to the badge awarders and you will be notified by email " \
-            + "when feedback is posted."
-        else
-          notice = "Your evidence has been posted."
-        end
+      else  
+        notice = "Your evidence has been posted."
       end
 
       redirect_to [@group, @badge, @log], notice: notice

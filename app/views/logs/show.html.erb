@@ -476,51 +476,58 @@
           <% @log.posts_by_topic.each do |topic_item| %>
             <% 
               tag = topic_item['tag']
-              section_id = "topic-header-#{tag.name}"
+              if tag
+                section_id = "topic-header-#{tag.name}"
+              else
+                section_id = 'topic-header-etc'
+              end
+
               if @current_user_is_log_owner || tag.nil? || (tag.privacy == 'public') \
-              || ((tag.privacy == 'private')                                          \
-                  && (@current_user_is_member || @current_user_is_admin))              \
-              || ((tag.privacy == 'secret')                                             \
-                  && (@current_user_is_admin                                             \
-                    || ((@badge.awardability == 'experts') && @current_user_is_expert)))
+                || @badge_list_admin || @current_user_is_admin                        \
+                || ((tag.privacy == 'private') && @current_user_is_member)             \
+                || ((tag.privacy == 'secret')                                           \
+                  && (@badge.awardability == 'experts') && @current_user_is_expert)
             %>
 
               <div class="section-header" id="<%= section_id %>">
                 
-                <% if @current_user_is_log_owner %>
+                <% if @current_user_is_log_owner && !tag.nil? %>
                   <%= link_to "<i class='fa fa-plus'></i>".html_safe,
-                    new_group_badge_log_entry_path(@group, @badge, @current_user_log, 
-                      tag: (tag) ? tag.name : '' ), title: 'Post New Item', 
-                    class: 'btn new-entry-btn',
+                  new_group_badge_log_entry_path(@group, @badge, @current_user_log, tag: tag.name), 
+                    title: 'Post New Item', class: 'btn new-entry-btn',
                     data: { toggle: 'tooltip', placement: 'left' } %>
                 <% end %>
 
-                <h2>
-                  <%= tag.display_name %>
-                  <a class="expand-info" data-toggle="custom" 
-                    data-hide="#<%= section_id %> h2 .expand-info"
-                    data-show="#<%= section_id %> h2 .collapse-info,#<%= section_id %> .topic-info">
-                    <i class="fa fa-plus-square-o"></i>
-                  </a>
-                  <a class="collapse-info" data-toggle="custom" 
-                    data-hide="#<%= section_id %> h2 .collapse-info,#<%= section_id %> .topic-info"
-                    data-show="#<%= section_id %> h2 .expand-info">
-                    <i class="fa fa-minus-square-o"></i>
-                  </a>
-                </h2>
+                <% if tag.nil? %>
+                  <h2>Etcetera</h2>
+                <% else %>
+                  <h2>
+                    <%= tag.display_name %>
+                    <a class="expand-info" data-toggle="custom" 
+                      data-hide="#<%= section_id %> h2 .expand-info"
+                      data-show="#<%= section_id %> h2 .collapse-info,#<%= section_id %> .topic-info">
+                      <i class="fa fa-plus-square-o"></i>
+                    </a>
+                    <a class="collapse-info" data-toggle="custom" 
+                      data-hide="#<%= section_id %> h2 .collapse-info,#<%= section_id %> .topic-info"
+                      data-show="#<%= section_id %> h2 .expand-info">
+                      <i class="fa fa-minus-square-o"></i>
+                    </a>
+                  </h2>
 
-                <div class="topic-info">
-                  <div class="privacy-info">
-                    <i class="fa <%= Tag.privacy_icon(@group.type, tag.privacy) %>"></i>
-                    Evidence <%= Tag.privacy_text(@group.type, tag.privacy) %>
+                  <div class="topic-info">
+                    <div class="privacy-info">
+                      <i class="fa <%= Tag.privacy_icon(@group.type, tag.privacy) %>"></i>
+                      Evidence <%= Tag.privacy_text(@group.type, tag.privacy) %>
+                    </div>
+                    <div class="summary">
+                      <%= tag.summary %>
+                      <%= link_to "<i class='fa fa-angle-double-right'></i> More Info".html_safe, 
+                        group_badge_tag_path(@group, @badge, tag), 
+                        title: "View full requirement details" %>  
+                    </div>
                   </div>
-                  <div class="summary">
-                    <%= tag.summary %>
-                    <%= link_to "<i class='fa fa-angle-double-right'></i> More Info".html_safe, 
-                      group_badge_tag_path(@group, @badge, tag), 
-                      title: "View full requirement details" %>  
-                  </div>
-                </div>
+                <% end %>
 
               </div>
 
