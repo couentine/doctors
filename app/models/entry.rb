@@ -311,7 +311,7 @@ protected
   
   def set_default_values
     self.entry_number ||= log.next_entry_number if log
-    self.format = tag.format if format.nil? && tag && (tag.format != 'any')
+    self.format = 'text' if type == 'validation'
   end
 
   # Sets tag relationship based on parent_tag string

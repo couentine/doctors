@@ -17,7 +17,7 @@
     provide(:metadata_site_name, @group.name)
     provide(:metadata_url, group_badge_log_url(@group, @badge, @log))
   else
-    provide(:metadata_title, "Badge Progress Log for #{@user.name}")
+    provide(:metadata_title, "Badge Portfolio for #{@user.name}")
     provide(:metadata_description, "#{@user.name} joined the #{@badge.name} badge " \
       + "on #{@log.date_started.to_s(:full_date)} and has not yet earned the badge.")
     provide(:metadata_image, @group.logo_url)
@@ -89,7 +89,8 @@
 
             <%= f.input :show_on_profile, as: :radio_buttons, 
               collection: [[true, 'Visible on Badge List profile'] , \
-              [false, "Must have link <p class='text-success'><small>(Hidden from profile, but shareable via direct link)</small></p>".html_safe]],
+              [false, "Must have link <p class='text-success'><small>".html_safe \
+                + "(Hidden from profile, but shareable via direct link)</small></p>".html_safe]],
               label_method: :last, value_method: :first, 
               label: 'Should this badge be visible on your Badge List user profile?' %>
 
@@ -124,11 +125,12 @@
                 Delete <%= @badge.progress_log %> and resign badge membership
               </label>
               <div class="controls">
-                <%= link_to "Delete your #{@badge.progress_log}", [@group, @badge, @log], title: "Careful!",
+                <%= link_to "Delete your #{@badge.progress_log}", [@group, @badge, @log], 
+                  title: "Careful!",
                   method: :delete, id: "delete-log", class: 'btn btn-danger brn-large', 
-                  data: { confirm: "Warning: This can't be undone. Are you absolutely sure you want to"\
-                  + " permanently delete your #{@badge.progress_log}?", toggle: 'tooltip', 
-                  placement: 'bottom' } %>
+                  data: { confirm: "Warning: This can't be undone. Are you absolutely sure you " \
+                    + "want to permanently delete your #{@badge.progress_log}?", 
+                    toggle: 'tooltip', placement: 'bottom' } %>
                 
               </div>
             </div>
@@ -291,27 +293,6 @@
                         Edit badge membership
                       </a>
                     </li>
-                    <% if @log.validation_status == 'requested' %>
-                      <li>
-                        <%= link_to "<i class='fa fa-flag'></i> ".html_safe \
-                          + "Withdraw feedback request".html_safe,
-                          group_badge_log_path(@group, @badge, @log, 
-                          log: { date_withdrawn: Time.now }), method: :put, class: 'btn btn-small',
-                          data: { confirm: "Are you sure you want to withdraw your request "\
-                          + "for feedback on your progress log? \n\nTIP: After withdrawing your "\
-                          + "request, #{@experts} will still be able to add "\
-                          + "feedback but you will no longer be highlighted as a requester." } %>
-                      </li>
-                    <% elsif @log.validation_status != 'validated' %>
-                      <li>
-                        <%= link_to "<i class='fa fa-flag-checkered'></i> ".html_safe \
-                          + "Request feedback".html_safe, group_badge_log_path(@group, @badge, 
-                          @log, log: { date_requested: Time.now }), method: :put, 
-                          class: 'btn btn-small', data: 
-                          { confirm: "Are you sure you want to send a request to all "\
-                          + "of the #{@experts} asking for them to validate your progress log?" } %>
-                      </li>
-                    <% end %>
                   <% end %>
 
 
@@ -394,15 +375,15 @@
         <p>
           <% if @can_award_badge %>
             This <%= @learner %> needs feedback! To add your feedback, click the button
-            below and let the <%= @learner %> know whether or not your believe they have mastered
+            below and let the <%= @learner %> know whether or not your believe they have earned
             the badge.<br><br>
             <%= link_to "<i class='fa fa-check-square-o'></i> Add feedback".html_safe,
               new_group_badge_log_entry_path(@group, @badge, @log, type: 'validation'), 
               class: 'btn btn-success' %>
           <% elsif @current_user_is_log_owner %>
-            Once <%= @experts %> weigh in on your progress log, their feedback will appear here!
+            Once <%= @experts %> weigh in on your badge portfolio, their feedback will appear here!
           <% else %>
-            This progress log hasn't yet been validated by any <%= @experts %>.
+            This badge portfolio doesn't have any feedback yet.
           <% end %>
         </p>
       </div>
@@ -424,33 +405,28 @@
 
 <% if @show_progress && (!@requirements_json_clone.blank? || @current_user_is_log_owner) %>
 
-  <!-- === EVIDENCE === -->
-
   <% if !@requirements_json_clone.blank? %>
-    
-    <% if @current_user_is_log_owner %>
 
-      <!-- === BADGE REQUIREMENTS === -->
+    <% if @current_user_is_log_owner && @all_requirements_complete \
+        && (@log.validation_status != 'requested') && (@log.validation_status != 'validated') %>
 
-      <div class="row add-top-margin">
-        <div class="span12">
-          <div class="tab-header">
-            <h2>Badge Requirements</h2>
-          </div>
-        </div>
-      </div>
+      <!-- === FEEDBACK REQUEST REMINDER === -->
 
-      <div class="row" id="topic-list-row">
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="topics" 
-             data-bl-dyncol-width="12">
-
-          <% @requirements.each do |tag| %>
-
-            <%= render 'shared/badge_requirement', group: @group, badge: @badge, tag: tag, 
-              log: @log, requirements_counts: @requirements_counts %>
-
-          <% end %>
-
+      <div class="row">
+        <div class="well span7 offset2 primary">
+          <h3>Have you finished building your badge portfolio?</h3>
+          <p>
+            Once you think that the evidence you've submitted is sufficient to meet all of the 
+            badge requirements, click the button below to request feedback from the badge awarders.
+          </p>
+          <p>
+            <%= link_to "<i class='fa fa-flag-checkered'></i> ".html_safe \
+              + "Request feedback".html_safe, group_badge_log_path(@group, @badge, 
+              @log, log: { date_requested: Time.now }), method: :put, 
+              class: 'btn btn-large btn-warning', data: 
+              { confirm: "Are you sure you want to send a request to all "\
+              + "of the badge awarders asking for them to endorse your badge portfolio?" } %>
+          </p>
         </div>
       </div>
 
@@ -461,6 +437,33 @@
     <div class="row merge-with-card">
       <div class="span12">
         <div class="tab-header merge-with-card">
+          <% if @current_user_is_log_owner || @badge_list_admin %>
+            <% if @log.validation_status == 'requested' %>
+              <%= link_to "<i class='fa fa-flag'></i> ".html_safe \
+                + "Withdraw feedback request".html_safe,
+                group_badge_log_path(@group, @badge, @log, 
+                log: { date_withdrawn: Time.now }), method: :put, 
+                class: 'btn btn-small highlight-primary',
+                data: { confirm: "Are you sure you want to withdraw your request "\
+                + "for feedback on your badge portfolio? \n\nTIP: After withdrawing your "\
+                + "request, badge awarders will still be able to add "\
+                + "feedback but you will no longer be highlighted as a requester." } %>
+            <% elsif @log.validation_status != 'validated' %>
+              <%= link_to "<i class='fa fa-flag-checkered'></i> ".html_safe \
+                + "Request feedback".html_safe, group_badge_log_path(@group, @badge, 
+                @log, log: { date_requested: Time.now }), method: :put, 
+                class: 'btn btn-small highlight-primary', data: 
+                { confirm: "Are you sure you want to send a request to all "\
+                + "of the badge awarders asking for them to endorse your badge portfolio?" } %>
+
+              <% if @all_requirements_complete %>
+                <span class="label">
+                  Done building your portfolio? Click here <i class="fa fa-arrow-right"></i>
+                </span>
+              <% end %>
+            <% end %>
+          <% end %>
+
           <h2>Badge Portfolio</h2>
         </div>
       </div>
@@ -471,66 +474,96 @@
         <div class="info-card text-card portfolio-card">
 
           <% @log.posts_by_topic.each do |topic_item| %>
-            <% if @current_user_is_log_owner                        \
-              || topic_item['tag'].nil?                              \
-              || (topic_item['tag'].privacy == 'public')              \
-              || ((topic_item['tag'].privacy == 'private')             \
-                && (@current_user_is_member || @current_user_is_admin)) \
-              || ((topic_item['tag'].privacy == 'secret')                \
-                && (@current_user_is_admin                                \
-                  || ((@badge.awardability == 'experts') && @current_user_is_expert)))
+            <% 
+              tag = topic_item['tag']
+              section_id = "topic-header-#{tag.name}"
+              if @current_user_is_log_owner || tag.nil? || (tag.privacy == 'public') \
+              || ((tag.privacy == 'private')                                          \
+                  && (@current_user_is_member || @current_user_is_admin))              \
+              || ((tag.privacy == 'secret')                                             \
+                  && (@current_user_is_admin                                             \
+                    || ((@badge.awardability == 'experts') && @current_user_is_expert)))
             %>
 
-              <div class="section-container" 
-                  id="t-<%= (topic_item['tag']) ? topic_item['tag'].name : 'etc' %>">
+              <div class="section-header" id="<%= section_id %>">
                 
                 <% if @current_user_is_log_owner %>
-                  <%
-                    if topic_item['tag']
-                      format_icon = topic_item['tag'].format_icon
-                      format_text = topic_item['tag'].format
-                    else
-                      format_icon = 'fa-pencil'
-                      format_text = 'text'
-                    end
-                  %>
-                  <%= link_to "<i class='fa #{format_icon}'></i> ".html_safe \
-                    + "Post #{format_text.capitalize}",
+                  <%= link_to "<i class='fa fa-plus'></i>".html_safe,
                     new_group_badge_log_entry_path(@group, @badge, @current_user_log, 
-                      tag: (topic_item['tag']) ? topic_item['tag'].name : '' ), 
-                    class: 'btn btn-small' %>
+                      tag: (tag) ? tag.name : '' ), title: 'Post New Item', 
+                    class: 'btn new-entry-btn',
+                    data: { toggle: 'tooltip', placement: 'left' } %>
                 <% end %>
 
                 <h2>
-                  <%
-                    if topic_item['tag']
-                      topic_text = topic_item['tag'].display_name
-                      if topic_item['entries'].blank?
-                        icon_text = "<i class='fa fa-square-o'></i>"
-                      else
-                        icon_text = "<i class='fa fa-check-square-o'></i>"
-                      end
-                    else
-                      topic_text = 'Etcetera'
-                      icon_text = "<i class='fa fa-simplybuilt'></i>"
-                    end
-                  %>
-                  <%= link_to "#{icon_text} #{topic_text}".html_safe, \
-                    [@group, @badge, topic_item['tag']] %>
+                  <%= tag.display_name %>
+                  <a class="expand-info" data-toggle="custom" 
+                    data-hide="#<%= section_id %> h2 .expand-info"
+                    data-show="#<%= section_id %> h2 .collapse-info,#<%= section_id %> .topic-info">
+                    <i class="fa fa-plus-square-o"></i>
+                  </a>
+                  <a class="collapse-info" data-toggle="custom" 
+                    data-hide="#<%= section_id %> h2 .collapse-info,#<%= section_id %> .topic-info"
+                    data-show="#<%= section_id %> h2 .expand-info">
+                    <i class="fa fa-minus-square-o"></i>
+                  </a>
                 </h2>
 
-                <% if topic_item['entries'].blank? %>
-                  <h3>No evidence submitted for this requirement.</h3>
-                <% else %>
-                  <%= render topic_item['entries'], date_format: :ago, group: @group, badge: @badge,
-                    log: @log, user: @user %>
-                <% end %>
+                <div class="topic-info">
+                  <div class="privacy-info">
+                    <i class="fa <%= Tag.privacy_icon(@group.type, tag.privacy) %>"></i>
+                    Evidence <%= Tag.privacy_text(@group.type, tag.privacy) %>
+                  </div>
+                  <div class="summary">
+                    <%= tag.summary %>
+                    <%= link_to "<i class='fa fa-angle-double-right'></i> More Info".html_safe, 
+                      group_badge_tag_path(@group, @badge, tag), 
+                      title: "View full requirement details" %>  
+                  </div>
+                </div>
 
               </div>
 
+              <% if topic_item['entries'].blank? %>
+
+                <div class="section-container">
+                  <h3 class="summary-header empty">No evidence submitted for this requirement</h3>
+                </div>
+
+              <% else %>
+
+                <% topic_item['entries'].each do |entry| %>
+
+                  <div class="section-container">
+
+                    <h3 class="summary-header">
+                      <%= link_to entry.summary, [@group, @badge, @log, entry] %>
+                    </h3>
+                    
+                    <%= link_to "<i class='fa fa-arrow-right'></i>".html_safe,
+                      [@group, @badge, @log, entry], title: 'View Entry', 
+                      class: 'btn view-entry-btn',
+                      data: { toggle: 'tooltip', placement: 'left' } %>
+
+                    <% if @current_user_is_log_owner %>
+                      <%= link_to "<i class='fa fa-times'></i>".html_safe,
+                        [@group, @badge, @log, entry], method: :delete, 
+                        title: 'Delete This Item', class: 'btn delete-entry-btn',
+                        data: { toggle: 'tooltip', placement: 'left',
+                          confirm: 'Are you sure you want to permanently delete this item?' } %>
+                    <% end %>
+
+                    <%= render "shared/entry_content_full", entry: entry, log: @log, 
+                      badge: @badge, user: @user, group: @group %>
+
+                  </div>                  
+
+                <% end %>
+
+              <% end %>
+
             <% end %>
           <% end %>
-
 
         </div>
       </div>

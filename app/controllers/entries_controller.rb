@@ -61,6 +61,8 @@ class EntriesController < ApplicationController
           else
             @entry.format = @parent_tag.format
           end
+        elsif Entry::FORMAT_VALUES.include?(@manual_format)
+          @entry.format = @manual_format
         end
       end
 

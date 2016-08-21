@@ -15,7 +15,7 @@
         <td class="card-image" 
         style="background-image: url('<%= log.user_avatar_image_medium_url %>')">
           <%= link_to '&nbsp;'.html_safe, group_badge_log_path(group, badge, log), 
-            title: "View progress log", class: 'image-link' %>
+            title: "View badge portfolio", class: 'image-link' %>
         </td>
         <td class="card-body">
           <span class="card-headline">
@@ -29,7 +29,7 @@
                     method: :put, class: "log-card-delete", title: 'Remove from badge', 
                     data: { toggle: "tooltip", placement: "bottom", 
                     confirm: "Are you absolutely sure you want to revoke this user's badge " \
-                    + "membership?\n\nNote: The user's progress log will NOT be deleted, only " \
+                    + "membership?\n\nNote: The user's badge portfolio will NOT be deleted, only "\
                     + "their membership in the badge." }
                 end 
               %>
@@ -37,7 +37,7 @@
 
             <h2>
               <%= link_to log.user_name, group_badge_log_path(group, badge, log), 
-                title: "View progress log" %>
+                title: "View badge portfolio" %>
             </h2>
             <% if show_email %>
               <h3 class="email"><%= log.user_email %></h3>

@@ -3,32 +3,44 @@
   # Map Variables = [requirements_counts]
   
   allow_posting = !log.nil? && !requirements_counts.blank?
+  has_posted_items = allow_posting && (requirements_counts[tag.id].to_i > 0)
 %>
 
 <div class="info-card requirement-card" data-bl-dyncol="child">
   <table>
     <tr class="card-body-row">
-      <td class="card-image">
-        <i class="fa <%= tag.format_icon %>"></i><br>
-        <span class="format-string"><%= tag.format.to_s.capitalize %></span>
-      </td>
+      <% if allow_posting %>
+        <td class="card-image <%= (has_posted_items) ? '' : 'highlighted' %>">
+          <% if has_posted_items %>
+            <i class="fa fa-check-circle status-icon"></i>
+          <% end %>
+          <% if allow_posting %>
+            <%= link_to "<i class='fa fa-plus'></i>".html_safe, \
+              new_group_badge_log_entry_path(group, badge, log, tag: tag.name_with_caps), 
+              class: "btn post-btn", title: 'Post New Item', 
+                data: { toggle: 'tooltip', placement: 'right' } %>
+          <% end %>
+
+          <span class="post-count"><%= requirements_counts[tag.id] %></span>
+          <span class="post-count-label">posts</span>
+        </td>
+      <% end %>
       <td class="card-body">
         <span class="card-headline">
           <h2>
-            <%= link_to tag.display_name, group_badge_tag_path(group, badge, tag), 
-              title: "View full requirement details" %>
+            <% if allow_posting %>
+              <%= link_to tag.display_name, 
+                group_badge_tag_path(group, badge, tag), title: "View full requirement details" %>
+            <% else %>
+              <%= link_to "<i class='fa #{tag.format_icon}'></i> #{tag.display_name}".html_safe, 
+                group_badge_tag_path(group, badge, tag), title: "View full requirement details" %>
+            <% end %>
           </h2>
-          <h3 class="summary"><%= tag.summary %></h3>
-        </span>
-        <span class="card-content">
-          <% if allow_posting %>
-            <span class="post-count">
-              You've posted <%= pluralize requirements_counts[tag.id], 'item' %>
-            </span>
-            <%= link_to "<i class='fa fa-plus'></i> Post new item".html_safe, \
-              new_group_badge_log_entry_path(group, badge, log, tag: tag.name_with_caps), 
-              class: "btn btn-link" %>
-          <% end %>
+          <h3 class="summary">
+            <%= tag.summary %>
+            <%= link_to "<i class='fa fa-angle-double-right'></i> More Info".html_safe, 
+              group_badge_tag_path(group, badge, tag), title: "View full requirement details" %>  
+          </h3>
         </span>
       </td>
     </tr>

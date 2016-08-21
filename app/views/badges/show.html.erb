@@ -332,10 +332,12 @@
                   You're a badge <%= @expert %> and the badge is 
                   <% if @log.show_on_profile %>
                     visible on your 
-                    <%= link_to 'badge profile', current_user, title: 'View your badge profile' %>.
+                    <%= link_to 'badge portfolio', current_user, 
+                      title: 'View your badge portfolio' %>.
                   <% else %>
                     hidden from your 
-                    <%= link_to 'badge profile', current_user, title: 'View your badge profile' %>.
+                    <%= link_to 'badge portfolio', current_user, 
+                      title: 'View your badge portfolio' %>.
                   <% end %>
                 <% elsif @current_user_is_learner %>
                   You're a badge <%= @learner %>.
@@ -436,7 +438,7 @@
           <div class="tab-header">
             <% if @current_user_is_expert || @current_user_is_learner %>
               <%= link_to "<i class='fa fa-user'></i> View your #{@badge.progress_log}".html_safe, 
-                [@group, @badge, @log], id: 'view-your-log', class: 'btn btn-small' %>
+                [@group, @badge, @log], id: 'view-your-log', class: 'btn btn-small btn-primary' %>
             <% end %>
 
             <h2>Required Evidence</h2>
