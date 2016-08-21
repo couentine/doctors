@@ -22,7 +22,9 @@
           <% end %>
 
           <span class="post-count"><%= requirements_counts[tag.id] %></span>
-          <span class="post-count-label">posts</span>
+          <span class="post-count-label">
+            <%= (requirements_counts[tag.id] == 1) ? 'item' : 'items' %>
+          </span>
         </td>
       <% end %>
       <td class="card-body">

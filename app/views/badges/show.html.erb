@@ -53,26 +53,6 @@
 
 <% end %>
 
-<% if @current_user_is_learner || @current_user_is_expert %>
-
-  <script type="text/javascript">
-
-    $(document).ready(function() {
-
-      if ($(".topic-list-card li a.btn.complete").length == 0) {
-        $(".topic-list-card li a.btn.incomplete").first().tooltip({
-          title: "Click here to get started",
-          placement: "bottom",
-          trigger: "manual"
-        }).tooltip('show');
-      }
-
-    });
-
-  </script>
-
-<% end %>
-
 <% if @current_user_is_expert || @current_user_is_learner %>
 
   <!-- === EDIT BADGE MEMBERSHIP MODAL === -->

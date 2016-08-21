@@ -26,50 +26,6 @@
   end
 %>
 
-<!-- === LOG SPECIFIC SCRIPTS === -->
-
-<script type="text/javascript">
-
-  var $root;
-
-  $(document).ready(function() {
-
-    // Register smooth scroll links
-    $root = $('html, body');
-    $('a.smooth-scroll').click(function() {
-        var element = $.attr(this, 'href');
-        $root.animate({
-            scrollTop: $(element).offset().top - $("header.navbar").height() - 30
-        }, 700, function () {
-            window.location.hash = element;
-        });
-        return false;
-    });
-
-  });
-
-</script>
-
-<% if @current_user_is_log_owner %>
-
-  <script type="text/javascript">
-
-    $(document).ready(function() {
-
-      if ($(".topic-list-card li a.btn.complete").length == 0) {
-        $(".topic-list-card li a.btn.incomplete").first().tooltip({
-          title: "Click here to get started",
-          placement: "bottom",
-          trigger: "manual"
-        }).tooltip('show');
-      }
-
-    });
-
-  </script>
-
-<% end %>
-
 <% if @current_user_is_log_owner || @badge_list_admin %>
 
   <!-- === EDIT BADGE MEMBERSHIP MODAL === -->
