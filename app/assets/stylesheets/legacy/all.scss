@@ -2559,6 +2559,12 @@ div.portfolio-card {
       a.view-entry-btn, a.delete-entry-btn { opacity: 1; }
     }
   }
+  .panel-entry-content-image {
+    img {
+      max-width: 100%;
+      max-height: 500px;
+    }
+  }
 }
 
 div.user-card,div.log-card {
