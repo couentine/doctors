@@ -26,11 +26,13 @@ class EntriesController < ApplicationController
   # To specify a validation, include "type" parameter set to "validation"
   # NOTE: Will redirect to EDIT for validations that already exist
   # GET /group-url/badge-url/u/username/entries/new => NEW POST
+  # GET /group-url/badge-url/u/username/entries/new?f=tweet => NEW POST w/ format = tweet
   # GET /group-url/badge-url/u/username/entries/new?type=validation => NEW VALIDATION
   # GET /group-url/badge-url/u/username/entries/new.json
   # Accepts "tag" parameter
   def new
     @type = params[:type] || 'post'
+    @manual_format = params[:f]
 
     if @type == 'validation'
       @entry = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
@@ -54,7 +56,13 @@ class EntriesController < ApplicationController
         matched_tags = @badge.tags.where(name: @parent_tag_name.downcase)
         if matched_tags.count > 0
           @parent_tag = matched_tags.first
-          @entry.format = @parent_tag.format
+          if (@parent_tag.format == 'any') && Entry::FORMAT_VALUES.include?(@manual_format)
+            @entry.format = @manual_format
+          else
+            @entry.format = @parent_tag.format
+          end
+        elsif Entry::FORMAT_VALUES.include?(@manual_format)
+          @entry.format = @manual_format
         end
       end
 
@@ -131,14 +139,8 @@ class EntriesController < ApplicationController
         else
           notice = "Your feedback was submitted."
         end
-      else
-        if @entry.log.validation_status == 'requested'
-          notice = "You have submitted all of the required evidence. A feedback request has " \
-            + "automatically been sent to the badge awarders and you will be notified by email " \
-            + "when feedback is posted."
-        else
-          notice = "Your evidence has been posted."
-        end
+      else  
+        notice = "Your evidence has been posted."
       end
 
       redirect_to [@group, @badge, @log], notice: notice

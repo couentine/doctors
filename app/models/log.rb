@@ -458,6 +458,46 @@ class Log
     topic_list
   end
 
+  # Returns true if at least one entry has been posted for each badge requirement
+  # Pass badge_requirements in if desired to save a query
+  def all_requirements_complete(badge_requirements = nil)
+    counts_map = requirements_counts(badge_requirements)
+
+    is_complete = true
+    counts_map.each do |tag_id, entry_count|
+      is_complete = is_complete && (entry_count.to_i > 0)
+    end
+
+    is_complete
+  end
+
+  # Returns a map with keys = each of the badge requirement tag ids
+  # and values = the number of items posted to that requirement
+  # Pass badge_requirements in if desired to save a query
+  def requirements_counts(badge_requirements = nil)
+    requirement_map = {}
+    requirement_id_list = []
+
+    if badge_id
+      # First initialize the topic map with everything set to false
+      if badge_requirements.nil?
+        badge_requirements = Tag.where(badge_id: badge_id, type: 'requirement').asc(:sort_order)
+      end
+      badge_requirements.each do |tag| 
+        requirement_map[tag.id] = 0
+        requirement_id_list << tag.id
+      end
+
+      # Then run through and log any entries which've been posted to the requirements
+      entries.where(type: 'post', :tag_id.in => requirement_id_list).each do |entry|
+        requirement_map[entry.tag_id] += 1
+      end
+    end
+
+    # return value = 
+    requirement_map
+  end
+
   # Returns a map with keys = each of the badge requirement tag ids
   # and values = true / false indicating whether that requirement is complete
   # Pass badge_requirements in if desired to save a query

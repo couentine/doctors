@@ -36,7 +36,7 @@ class Entry
   field :linkified_summary,               type: String
   field :private,                         type: Boolean, default: false
   field :type,                            type: String
-  field :format,                          type: String, default: 'text'
+  field :format,                          type: String, default: 'any'
   field :log_validated,                   type: Boolean
   field :parent_tag,                      type: String
 
@@ -131,6 +131,10 @@ class Entry
   # Returns the font awesome icon code for this tag's format (ex: "fa-camera")
   def format_icon
     case format
+    when 'any'
+      # NOTE: This is not a valid format for entries, but it is used to display the format
+      # selector so it needs to be able to display an icon in some cases.
+      icon_text = 'fa-asterisk'
     when 'link'
       icon_text = 'fa-link'
     when 'tweet'
@@ -307,7 +311,7 @@ protected
   
   def set_default_values
     self.entry_number ||= log.next_entry_number if log
-    self.format = tag.format if format.nil? && tag
+    self.format = 'text' if type == 'validation'
   end
 
   # Sets tag relationship based on parent_tag string
@@ -318,7 +322,7 @@ protected
       matched_tags = Tag.where(badge: log.badge_id, name: parent_tag.downcase)
       if matched_tags.count > 0
         self.tag = matched_tags.first
-        self.format = tag.format
+        self.format = tag.format if tag.format != 'any'
       else
         t = Tag.new
         t.badge = log.badge_id
@@ -414,17 +418,6 @@ protected
     if (context != 'log_add_validation') && log_id && log
       # First increment the entry number counter
       log.next_entry_number += 1
-      
-      # Then check if all of the requirements are complete.
-      # If so we will automatically request validation as long as it hasn't been done before
-      if (log.validation_status != 'validated') && log.date_requested.nil? \
-          && log.date_withdrawn.nil? && !log.retracted
-        everything_complete = true
-        log.requirements_complete.each do |tag, complete|
-          everything_complete = everything_complete && complete
-        end
-        log.date_requested = Time.now if everything_complete
-      end
       
       log.save
     end

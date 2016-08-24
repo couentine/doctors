@@ -1336,6 +1336,22 @@ h2.form-header {
 .control-group.entry_body,.control-group.tag_wiki {
   width: 100%;
 }
+ul.entry-format-selector {
+  display: block;
+  margin: 0 0 10px 25px;
+  list-style: none;
+
+  a.btn {
+    margin-bottom: 15px;
+    background-color: #7cccdf;
+    color: #fff;
+    border: 2px solid #4BC1DD;
+    border-radius: 500px;
+    text-shadow: none;
+    position: relative;
+    top: -4px;
+  }
+}
 
 #badge-versions {
   width: 340px;
@@ -1739,6 +1755,8 @@ form#group-add-users-form {
       }
     }
     td.separator {
+      position: relative;
+
       span {
         position: absolute;
         top: 15px;
@@ -1746,8 +1764,6 @@ form#group-add-users-form {
         width: 6px;
         background-color: $light-text-color;
       }
-
-      &.with-footer span { bottom: 60px; }
     }
     td.right-panel {
       vertical-align: top;
@@ -2217,6 +2233,11 @@ form#group-add-users-form {
       background-color: $primary-light;
       color: white !important;
     }
+    &.btn-primary {
+      background-color: $tertiary-light;
+      color: white !important;
+      box-shadow: none;
+    }
   }
   ul.dropdown-menu {
     font-size: 11px;
@@ -2437,6 +2458,109 @@ div.info-card {
   }
 }
 
+div.portfolio-card {
+  padding: 0;
+
+  .section-header {
+    padding: 30px;
+    position: relative;
+    background-color: $secondary-really-light;
+    border-top: 1px solid $light-gray;
+    border-bottom: none;
+
+    h2 {
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: $secondary-dark;
+      margin: 0;
+      border: none;
+    }
+    a.new-entry-btn {
+      position: absolute;
+      top: 22px;
+      right: -19px;
+      border-radius: 500px;
+      background-color: $secondary-light;
+      color: $secondary-really-light;
+      border-color: $secondary-really-light;
+      text-shadow: none;
+      padding: 8px 10px;
+      font-size: 22px;
+      transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+    a.new-entry-btn:focus, a.new-entry-btn:hover {
+      box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    }
+    a.expand-info, a.collapse-info { 
+      margin-left: 7px; 
+      cursor: pointer;
+    }
+    a.collapse-info { display: none; }
+    .topic-info {
+      display: none;
+      overflow: hidden;
+
+      .privacy-info {
+        font-style: italic;
+        color: $secondary-dark;
+      }
+      .summary {
+        a, a:hover, a:focus, a:visited {
+          display: inline-block;
+          color: inherit;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+  & > .section-container {
+    position: relative;
+    padding: 30px;
+    margin: 0;
+    border-top: 1px solid $light-gray;
+    border-bottom: none;
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+
+    h3.summary-header {
+      border: none;
+      font-style: italic;
+      color: $primary-dark;
+
+      &.empty { 
+        color: $light-text-color; 
+        font-weight: normal;
+      }
+    }
+    a.view-entry-btn, a.delete-entry-btn {
+      position: absolute;
+      right: -19px;
+      border-radius: 500px;
+      background-color: $primary-light;
+      color: $primary-really-light;
+      border-color: $primary-really-light;
+      text-shadow: none;
+      padding: 8px 10px;
+      font-size: 22px;
+      transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      opacity: 0;
+    }
+    a.view-entry-btn { top: 23px; }
+    a.delete-entry-btn { 
+      top: 76px; 
+      background-color: $red-light;
+    }
+
+    &:hover {
+      background-color: $primary-really-light;
+
+      a.view-entry-btn, a.delete-entry-btn { opacity: 1; }
+    }
+  }
+}
+
 div.user-card,div.log-card {
   .card-headline {
     /*width: 93% !important;*/
@@ -2446,8 +2570,8 @@ div.user-card,div.log-card {
     position: relative;
     background-size: cover;
     background-position: center center;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
   }
   td.card-body {
     padding: 3% 3% 2% 3%;
@@ -2464,6 +2588,81 @@ div.user-card,div.log-card {
 }
 .log-card.fixed-height {
   .card-headline { min-height: 3.6em; }
+}
+
+div.requirement-card {
+  td.card-image {
+    width: 28%;
+    position: relative;
+    text-align: center;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    background-color: $medium-gray;
+    color: white;
+    padding: 10px 0;
+
+    .post-count {
+      display: block;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .post-count-label {
+      font-size: 0.8em;
+    }
+    .status-icon {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      color: $light-gray;
+    }
+    .post-btn {
+      position: absolute;
+      top: 50%; right: -13px;
+      padding: 2px 6px;
+      margin-top: -14px;
+      font-size: 16px;
+      border-radius: 500px;
+      border-color: $medium-gray;
+      color: $medium-gray;
+      background-color: $really-light-gray;
+      transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+      box-shadow: 0 0px 0px rgba(0,0,0,0.01), 0 0px 1px rgba(0,0,0,0.01);
+      text-shadow: none;
+    }
+    a.post-btn:hover, a.post-btn:focus {
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+
+    &.highlighted {
+      background-color: $tertiary-light;
+
+      .post-btn {
+        border-color: $tertiary-light;
+        color: $tertiary-light;
+        background-color: $tertiary-really-light;
+      }
+    }
+  }
+  td.card-body {
+    padding: 3% 5% 2% 6%;
+  }
+  span.card-headline {
+    h2 a i.fa { margin-right: 2px; }
+    h3.summary { 
+      color: $light-text-color !important; 
+
+      a, a:hover, a:focus, a:visited {
+        color: inherit;
+        display: inline-block;
+        text-decoration: none;
+        font-weight: bold;
+        border-bottom: 1px dotted;
+      }
+    }
+  }
+}
+.requirement-card.fixed-height {
+  .card-headline { min-height: 3.9em; }
 }
 
 div.badge-card {

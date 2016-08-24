@@ -25,51 +25,88 @@
 
 <% if !@parent_tag_name.blank? %>
   <!-- === PARENT TAG INFO === -->
+  
+  <div class="row">
+    <div class="span10 offset1">
+      <h4>Badge Requirement</h4>
 
-  <div class="well secondary span9 offset1">
-    <% if @parent_tag %>
-      <h4>Posting evidence to</h4>
-      <h3><%= "##{@parent_tag.name_with_caps}" %></h3>
-      <p>
-        <%= @parent_tag.summary %>
-      </p>
-    <% else %>
-      <h4>Posting evidence to:</h4>
-      <h3><%= "##{@parent_tag_name}" %></h3>
-      <p>
-        This is a new requirement that doesn't have a page yet. It will be created when you post
-        this evidence.
-      </p>
-    <% end %>
+      <% if @parent_tag %>
+        <%= render 'shared/badge_requirement', group: @group, badge: @badge, tag: @parent_tag, 
+          log: @log, requirements_counts: nil %>
+      <% else %>
+        <h3><%= "##{@parent_tag_name}" %></h3>
+        <p>
+          This is a new requirement that doesn't have a page yet. It will be created when you post
+          this evidence.
+        </p>
+      <% end %>
+    </div>
   </div>
 <% end %>
 
-<!-- === ENTRY FORM === -->
+<% if (@entry.format == 'any') && (@entry.type != 'validation') %>
+  
+  <!-- === ENTRY FORMAT SELECTOR === -->
+  
+  <div class="row">
+    <div class="bl-form bl-form-entry span10 offset1">
 
-<div class="row">
-  <div class="bl-form bl-form-entry span10 offset1">
-    
-    <div class="form-header">
+      <div class="form-header">
+        <h1>What type of evidence would you like to post?</h1>
 
-      <% if @entry.type == 'validation' %>
-        <% if @current_user_is_log_owner %>
-          <h1>Add a self endorsement to your <%= @badge.progress_log %></h1>
-        <% else %>
-          <h1>Provide feedback on <%= @user.name %>'s <%= @badge.progress_log %></h1>
-        <% end %>
-      <% else %>
-        <% if @current_user_is_log_owner %>
-          <h1>Post evidence</h1>
-        <% else %>
-          <h1>Post evidence to <%= @user.name %>'s progress log</h1>
-        <% end %>
-      <% end %>
-      <div class="form-image">
-        <i class="fa <%= @entry.format_icon %>"></i>
+        <div class="form-image">
+          <i class="fa <%= @entry.format_icon %>"></i>
+        </div>
       </div>
+      
+      <div class="form-body">
+        <ul class="entry-format-selector">
+          <% Entry::FORMAT_VALUES.each do |format_string| %>
+            <li>
+              <a class="btn btn-large" 
+                  href="<%= new_group_badge_log_entry_path(@group, @badge, @log, 
+                    tag: @parent_tag_name, f: format_string) %>">
+                <i class="fa <%= Tag.format_icon(format_string) %>"></i>
+                <span class="format-string"><%= format_string.capitalize %></span>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+
     </div>
+  </div>  
 
-    <%= render 'form' %>
+<% else %>
 
+  <!-- === ENTRY FORM === -->
+
+  <div class="row">
+    <div class="bl-form bl-form-entry span10 offset1">
+      
+      <div class="form-header">
+
+        <% if @entry.type == 'validation' %>
+          <% if @current_user_is_log_owner %>
+            <h1>Add a self endorsement to your <%= @badge.progress_log %></h1>
+          <% else %>
+            <h1>Provide feedback on <%= @user.name %>'s <%= @badge.progress_log %></h1>
+          <% end %>
+        <% else %>
+          <% if @current_user_is_log_owner %>
+            <h1>Post evidence</h1>
+          <% else %>
+            <h1>Post evidence to <%= @user.name %>'s badge portfolio</h1>
+          <% end %>
+        <% end %>
+        <div class="form-image">
+          <i class="fa <%= @entry.format_icon %>"></i>
+        </div>
+      </div>
+
+      <%= render 'form' %>
+
+    </div>
   </div>
-</div>
+
+<% end %>

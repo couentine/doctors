@@ -194,8 +194,9 @@ class Badge
   def Learner; learner.titleize; end
   def Learners; learners.titleize; end
 
-  def log; (tracks_progress?) ? 'log' : 'profile'; end
-  def progress_log; (tracks_progress?) ? 'progress log' : 'badge profile'; end
+  # NOTE: The current language no longer makes a linguistic distinction based on progress tracking.
+  def log; (tracks_progress?) ? 'portfolio' : 'portfolio'; end
+  def progress_log; (tracks_progress?) ? 'badge portfolio' : 'badge portfolio'; end
 
   def awarders;  (awardability == 'experts') ? experts : 'admins'; end
   def badge_awarders;  (awardability == 'experts') ? "badge #{experts}" : 'group admins'; end

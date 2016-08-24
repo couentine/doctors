@@ -413,6 +413,7 @@ private
       || ((@badge.awardability == 'experts') && @current_user_is_expert)
     if @current_user_is_learner || @current_user_is_expert
       @log = @badge.logs.find_by(user: current_user)
+      @requirements_counts = @log.requirements_counts
     end
 
     @can_see_badge = @current_user_is_admin || @badge_list_admin || @current_user_is_expert \
@@ -482,8 +483,15 @@ private
         icon: Tag.format_icon(format_string),
         text: format_string.capitalize,
       }
+      
+      if format_string == 'any'
+        human_readable_format_string = 'Any Format'
+      else
+        human_readable_format_string = format_string.capitalize
+      end
+
       @tag_format_options_string += \
-        "<option value='#{format_string}'>#{format_string.capitalize}</option>"
+        "<option value='#{format_string}'>#{human_readable_format_string}</option>"
     end
     @tag_privacy_map = {}
     @tag_privacy_options_string = ''

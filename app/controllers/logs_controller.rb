@@ -49,6 +49,10 @@ class LogsController < ApplicationController
         format.html do
           @requirements = @badge.requirements
           @requirements_json_clone = @badge.requirements_json_clone
+
+          # Now calculate whether at least one item has been submitted for each requirement
+          # NOTE: We save a query by passing in the existing @requirements variable.
+          @all_requirements_complete = @log.all_requirements_complete(@requirements)
         end
         format.embed { render layout: 'embed' }
         format.json { render json: @log, filter_user: current_user }
@@ -106,7 +110,7 @@ class LogsController < ApplicationController
         @log = @badge.add_learner(current_user) # retreive their existing badge OR create new one
         is_error = @log.new_record?
         if is_error
-          message = 'An error occured while trying to create a progress log for you.' 
+          message = 'An error occured while trying to create a badge portfolio for you.' 
         elsif !current_user.email_inactive
           UserMailer.delay.log_new(current_user.id, current_user.id, @group.id, @badge.id, @log.id)
         end
@@ -249,7 +253,7 @@ private
     @user = User.find(params[:id].to_s.downcase) || not_found # find user by username
     @log = @user.logs.find_by(badge: @badge) || not_found
     @current_user_is_log_owner = current_user && (@user == current_user)
-    if @current_user_is_log_owner
+    if @current_user_is_log_owner || @badge_list_admin
       @show_sharing = (@log.issue_status == 'issued')
     end
     if current_user

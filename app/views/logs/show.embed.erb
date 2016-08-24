@@ -28,7 +28,7 @@
         received this badge on <br><%= @log.date_issued.to_s(:full_date) %>
       </div>
       <div class="body-action">
-        <%= link_to "<i class='fa fa-list-alt'></i> View Evidence Log".html_safe,  
+        <%= link_to "<i class='fa fa-list-alt'></i> View Badge Portfolio".html_safe,  
           group_badge_log_path(@group, @badge, @log), class: 'btn', target: '_blank'  %>
       </div>
     </div>
@@ -45,7 +45,7 @@
         A badge may only be embedded publicly after it has been awarded.
       </div>
       <div class="body-action">
-        <%= link_to "<i class='fa fa-list-alt'></i> View Evidence Log".html_safe,  
+        <%= link_to "<i class='fa fa-list-alt'></i> View Badge Portfolio".html_safe,  
           group_badge_log_path(@group, @badge, @log), class: 'btn', target: '_blank'  %>
       </div>
     </div>
