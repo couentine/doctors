@@ -50,14 +50,20 @@ class HomeController < ApplicationController
         end
       end
     else
-      render template: 'home/root_external', layout: 'website'
+      render template: 'home/root_external', layout: 'web'
     end
   end
   
   # GET /w
   # This allows internal users to access the external homepage.
   def root_external
-    render layout: 'website'
+    if (current_user)
+      @current_user_json = current_user.json_cu
+    else
+      @current_user_json = null
+    end
+
+    render layout: 'web'
   end
 
   # GET /pricing

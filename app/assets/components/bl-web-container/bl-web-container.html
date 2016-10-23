@@ -1,0 +1,71 @@
+<dom-module id="bl-web-container">
+  <link rel="stylesheet" href="bl-web-container.css" />
+
+  <template>
+
+    <paper-header-panel mode="waterfall" class$="[[headerPanelClass]]">
+
+      <paper-toolbar class$="[[toolbarClass]]" bottom-justify="end">
+        <div class="toolbar">
+          <a class="logo" title="Badge List Home" href$="[[urlHome]]">
+            <img src$="[[assetPaths.badgeListShieldWhiteSquare]]">
+          </a>
+          
+          <template is="dom-if" if="[[!isLoggedIn]]">
+            <a href$="[[urlSignOut]]" class="signin" data-method="delete">
+              <i class="fa fa-sign-in"></i> Sign in or register
+            </a>
+          </template>
+
+          <template is="dom-if" if="[[isLoggedIn]]">
+            <paper-menu-button class="current-user" horizontal-align="right" 
+                vertical-offset="40">
+              <div class="dropdown-trigger">
+                <img src$="[[currentUser.avatar_image_medium_url]]" 
+                  class="current-user">
+              </div>
+              <paper-menu class="dropdown-content">
+                <paper-item hidden="[[!currentUser.email_inactive]]" class="error">
+                  <a href$="[[urlManageAccount]]">
+                    <i class="fa fa-exclamation-triangle"></i> Email blocked
+                  </a>
+                </paper-item>
+                <paper-item>
+                  <a href$="[[urlProfile]]">
+                    <i class="fa fa-shield"></i> Badge profile
+                  </a>
+                </paper-item>    
+                <paper-item>
+                  <a href$="[[urlManageAccount]]">
+                    <i class="fa fa-user"></i> Manage account
+                  </a>
+                </paper-item>
+                <paper-item>
+                  <a href$="[[urlChangeImage]]">
+                    <i class="fa fa-picture-o"></i> Change image
+                  </a>
+                </paper-item> 
+                <paper-item hidden="[[!currentUser.admin]]">
+                  <a href$="[[urlAdmin]]">
+                    <i class="fa fa-cogs"></i> Admin tools
+                  </a>
+                </paper-item>
+                <paper-item>
+                  <a href$="[[urlSignOut]]" class="signout" data-method="delete">
+                    <i class="fa fa-remove"></i> Sign out
+                  </a>
+                </paper-item>
+              </paper-menu>
+            </paper-menu-button>
+          </template>
+        </div>
+      </paper-toolbar>
+      
+      <content select=".content"></content>
+
+    </paper-header-panel>
+
+  </template>
+
+  <script src="bl-web-container.js"></script>
+</dom-module>

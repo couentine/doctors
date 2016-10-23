@@ -1,148 +1,237 @@
 <% 
-  provide(:full_title, "Badge List - Digital credentials for organizations")
-  provide(:hide_header, true)
+  provide(:full_title, 
+    "Badge List - Digital credentials for educators, companies and professional development orgs")
 %>
 
-<div class="row-fluid banner-row">
-  <div class="span8 offset2">
-    <h1>
-      <%= image_tag 'badge-list-shield-white.png', class: 'icon' %>
-      <%= image_tag 'badge-list-text-inv.png', class: 'text', alt: 'Badge List' %>
-    </h1>
-    <span class="tag-line">Helping organizations turn achievements into web-based credentials.</span>
-    <div class="vertical-line">&nbsp;</div>
-  </div>
-</div>
+<style>
 
-<div class="row-fluid sub-banner-row">
-  <div class="span6 offset3">
-    <ul class="details">
-      <li>
-        <i class="fa fa-trophy"></i>
-        Badges represent <strong>skills and achievements</strong>
-      </li>
-      <li class="separator"><span>&nbsp;</span></li>
-      <li>
-        <i class="fa fa-list-alt"></i>
-        <strong>Evidence</strong> and expert <strong>endorsement</strong> 
-        are at the core of each badge.
-      </li>
-      <li class="separator"><span>&nbsp;</span></li>
-      <li>
-        <i class="fa fa-share-alt"></i>
-        Badges are <strong>easy to share</strong> on social networks and blogs
-      </li>
-      <li class="separator"><span>&nbsp;</span></li>
-      <li>
-        <i class="fa fa-group"></i>
-        Badges are building blocks for <strong>thriving online communities</strong>
-      </li>
-    </ul>
-    <div class="vertical-line">&nbsp;</div>
-  </div>
-</div>
+  .row {
+    display: flex;
+    flex-direction: column;
+    padding: 2em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  }
+  .row:last-child { box-shadow: none; }
 
-<div class="row-fluid steps-header-row">
-  <div class="span8 offset2">
-    <h2>How does it work?</h2>
-  </div>
-  <div class="vertical-line">&nbsp;</div>
-</div>
+  /* === SPECIFIC ROWS === */
 
-<div class="row-fluid steps-row">
-
-  <div class="span4 row-inner first">
-    <h3>Build a badge</h3>
-
-    <span class="detail-image">
-      <%= image_tag 'screenshot-build-a-badge.png', title: 'Build a badge' %>
-    </span>
+  .banner-row {
+    color: white;
+    padding-bottom: 5em;
     
-    <span class="details">
-      <span class="inner">
-        Use Badge List's built-in badge designer or upload your own design.
-      </span></ul>
-    </span>
+    background: #FB8C00;
+    background: -webkit-linear-gradient(#FB8C00, #F57C00);
+    background: -o-linear-gradient(#FB8C00, #F57C00);
+    background: -moz-linear-gradient(#FB8C00, #F57C00);
+    background: linear-gradient(#FB8C00, #F57C00);
+  }
+    .banner-row .logo {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      margin: 0;
+    }
+      .banner-row .logo img.logo-icon { 
+        position: relative;
+        height: 1em;
+        top: -0.1em; 
+        margin-right: 0.3em;
+      }
+      .banner-row .logo img.logo-text { height: 1em; }
+    .banner-row .divider {
+      width: 6em;
+      height: 0px;
+      border-top: 1px solid #FFE0B2;
+      margin: 1.5em auto;
+    }
+    .banner-row .tag-line {
+      font-size: 1.2rem;
+      font-weight: 300;
+      text-align: center;
+    }
 
-  </div>
+</style>
 
-  <div class="span4 row-inner">
-    <h3>Collect evidence</h3>
+<bl-web-container page-name="home" current-user="<%= @current_user_json %>"
+  asset-paths="<%= @ap_json %>">
 
-    <span class="detail-image">
-      <%= image_tag 'screenshot-collect-evidence.png', title: 'Collect evidence' %>
-    </span>
+  <div class="content">
     
-    <span class="details">
-      <span class="inner">
-        Badge seekers submit evidence in one of five supported formats.
-      </span>
-    </span>
+    <!-- === BANNER ROW === -->
+    <div class="row banner-row">
+      <h1 class="logo">
+        <%= image_tag 'badge-list-shield-white.png', class: 'logo-icon' %>
+        <%= image_tag 'badge-list-text-inv.png', class: 'logo-text', alt: 'Badge List' %>
+      </h1>
 
-  </div>
+      <div class="divider">&nbsp;</div>
 
-  <div class="span4 row-inner last">
-    <h3>Award &amp; display</h3>
-
-    <span class="detail-image">
-      <%= image_tag 'screenshot-badge-profile.png', title: 'Award and collect badges' %>
-    </span>
-    
-    <span class="details">
-      <span class="inner">
-        Awarded badges appear on your Badge List profile and are easy to share online.
-      </span>
-    </span>
-
-  </div>
-
-  <div class="line-box part-1">&nbsp;</div>
-  <div class="line-box part-2">&nbsp;</div>
-  <div class="vertical-line top">&nbsp;</div>
-  <div class="vertical-line bottom">&nbsp;</div>
-
-</div>
-
-<div class="row-fluid get-started-row">
-  <div class="span6 offset3">
-    
-    <div class="row-inner">
-      <h2>Creating a badge group is free, fast and fun.</h2>
-      <% if current_user %>
-        <%= link_to 'Start right now', new_group_path, class: 'btn btn-large' %>
-      <% else %>
-        <%= link_to 'Start right now', new_user_registration_path, class: 'btn btn-large' %>
-      <% end %>
+      <div class="tag-line">
+        Helping educators, companies and professionals build a common language of learning.
+      </div>
     </div>
-    
-    <div class="vertical-line top">&nbsp;</div>
-    <div class="arrow-down">&nbsp;</div>
+
+    <!-- === WHAT ROW === -->
+    <div class="row what-row">
+      <h2>What are Open Badges?</h2>
+
+      <ul>
+        <li>
+          <div class="title">Micro-Credentials</div>
+          <div class="description">
+            Open Badges are visual, shareable representations of important skills and achievements.
+          </div>
+        </li>
+        <li>
+          <div class="title">Topic-Focused Resumes</div>
+          <div class="description">
+            Open Badges are earned by building a portfolio of evidence that is verified by trusted 
+            badge awarders.
+          </div>
+        </li>
+        <li>
+          <div class="title">A Common Language of Learning</div>
+          <div class="description">
+            Open Badges communicate expertise and learning progress to all of the stakeholders in a 
+            learning ecosystem.
+          </div>
+        </li>
+        <li>
+          <div class="title">Learning Pathways</div>
+          <div class="description">
+            Open Badges can be linked together to provide step-by-step guidance towards academic and 
+            professional goals.
+          </div>
+        </li>
+      </ul>
+
+      <paper-button>Find out more about how Badge List works</paper-button>
+    </div>
+
+    <!-- === HOW ROW === -->
+    <div class="row how-row">
+      <h2>How are people using Badge List today?</h2>
+      <div class="sub-header">
+        Hundreds of organizations around the world are using Badge List every day to track and 
+        recognize learning achievements. The Badge List platform can be used in a multitude of 
+        different scenarios. Here are some of the most common.
+      </div>
+
+      <ul>
+        <li>
+          <div class="title">Tracking Professional Development</div>
+          <div class="description">
+            Professional development organizations create badges to track specific course work and 
+            represent professional credentials. Digital badges are easier to share and track than 
+            traditional paper certifications. Each badge is backed by a portfolio of evidence that 
+            makes it easier for employers to verify.
+          </div>
+        </li>
+        <li>
+          <div class="title">Guiding and Recognizing K12 Student Achievement</div>
+          <div class="description">
+            Teachers create badges linked to specific class work and related to skills and 
+            competencies. Earning badges is fun for students and provides valuable insight for 
+            parents. Class-level badges can be linked to school-level badges to establish learning 
+            pathways between grades.
+          </div>
+        </li>
+        <li>
+          <div class="title">Leading University and College Students to Success</div>
+          <div class="description">
+            Professors create badges that are linked to course and project work. Administrators 
+            create badges representing department and employer-focused achievements. Badges can be 
+            linked together into learning pathways, providing a clear roadmap to success.
+          </div>
+        </li>
+        <li>
+          <div class="title">Optimizing the Hiring Process</div>
+          <div class="description">
+            Groups of companies create professional badge networks focused on professional skill 
+            areas. Students and professionals earn badges by creating portfolios of relevant work. 
+            Badges provide detailed insight to employers and unlock professional opportunities for 
+            job seekers.
+          </div>
+        </li>
+        <li>
+          <div class="title">Engaging Conference Attendees</div>
+          <div class="description">
+            Presenters and conference organizers create badges to recognize skills and achievements 
+            at the conference. Digital badges give the attendees a way to share their achievements 
+            in online profiles like LinkedIn and to get credit with their employers. Conference 
+            organizers gain useful metrics and a new channel for continuing engagement between 
+            conferences.
+          </div>
+        </li>
+      </ul>
+
+      <div class="footer-text">
+        Have questions about how badges can help your organization?
+        Email <a href="mailto:team@badgelist.com">team@badgelist.com</a>.
+      </div>
+    </div>
+
+    <!-- === WHO ROW === -->
+    <div class="row who-row">
+      <h2>What our customers are saying</h2>
+
+      <ul>
+        <li>
+          <paper-material elevation="2">
+            <div class="content">
+              <span class="quote quote-left">&#8220;</span>
+              Badge List makes it easy to celebrate students' and teachers' skill-based 
+              accomplishments! Others can learn from experts already awarded the badge, building 
+              a strong learning community.
+              <span class="quote quote-right">&#8221;</span>
+            </div>
+            <div class="name">
+              <a href="http://www.mariventurino.com" target="_blank">Mari Venturino</a>
+            </div>
+            <div class="title">Blended Learning Specialist</div>
+            <div class="organization">
+              <%= image_tag 'customers/logo-mar-vista-academy.png', class: 'logo' %>
+              <a href="http://mva.sweetwaterschools.org" target="_blank" class="name">
+                Mar Vista Academy
+              </a>
+            </div>
+          </paper-material>
+        </li>
+      </ul>
+
+      <div class="footer-text">
+        To see more Badge List stories, 
+        <a href="https://twitter.com/BadgeList" target="_blank">
+          follow us on Twitter
+        </a>.
+      </div>
+    </div>
+
+    <!-- === PRICING ROW === -->
+    <div class="row pricing-row">
+      <h2>Badge List Pricing</h2>
+
+      <ul>
+        <li>
+          Badge List is completely free to use for <strong>Open Groups</strong>. 
+          Anyone can join and everything is public.
+        </li>
+        <li>
+          <strong>Closed Groups</strong> offer advanced privacy and group management features. 
+          Plans start at $5 per month. Special discounts are available for K12 educators.
+        </li>
+        <li>
+          <strong>Student Privacy Protection</strong> is available to help K12 educators 
+          comply with privacy regulations.
+        </li>
+      </ul>
+
+      <paper-button>View full pricing details</paper-button>
+    </div>
+
+    <!-- === FOOTER === -->
+    <bl-web-footer></bl-web-footer>
 
   </div>
-</div>
 
-<div class="row-fluid pricing-row">
-  <div class="span8 offset2">
-    <ul class="details">
-      <li>
-        <h2>Pricing</h2>
-      </li>
-      <li class="separator"><span>&nbsp;</span></li>
-      <li>
-        <i class="fa fa-globe"></i>
-        <strong>Open groups</strong> are free forever.<br>
-        Anyone can join and everything is public.
-      </li>
-      <li>
-        <i class="fa fa-building"></i>
-        <strong>Closed groups</strong> include privacy and membership controls.<br>
-        Plans start at $5 per month.
-      </li>
-      <li class="separator"><span>&nbsp;</span></li>
-      <li>
-        <%= link_to 'View pricing details', pricing_path, class: 'btn btn-large' %>
-      </li>
-    </ul>
-  </div>
-</div>
-
+</bl-web-container>
