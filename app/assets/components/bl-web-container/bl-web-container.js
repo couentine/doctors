@@ -25,16 +25,13 @@ Polymer({
   },
 
   // Events
-  ready: function() {
-    // Update user computed properties
-    this.notifyPath('currentUser');
-  },
-  attached: function() { 
-    // Nothing to do here yet.
-  },
+  ready: function() {},
+  attached: function() {},
 
   // Computed Properties
-  _isLoggedIn: function(currentUser) { return currentUser != null; },
+  _isLoggedIn: function(currentUser, forceUserUpdate) { 
+    return (currentUser != null) &&  (currentUser.id != null); 
+  },
   _headerPanelClass: function(pageName) { return pageName + '-page'; },
   _toolbarClass: function(pageName) { return pageName + '-page'; },
 

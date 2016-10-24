@@ -8,11 +8,12 @@
       <paper-toolbar class$="[[toolbarClass]]" bottom-justify="end">
         <div class="toolbar">
           <a class="logo" title="Badge List Home" href$="[[urlHome]]">
-            <img src$="[[assetPaths.badgeListShieldWhiteSquare]]">
+            <img src$="[[assetPaths.badgeListShieldWhiteSquare]]" hidden="[[isLoggedIn]]">
+            <i class="fa fa-home" hidden="[[!isLoggedIn]]"></i>
           </a>
           
           <template is="dom-if" if="[[!isLoggedIn]]">
-            <a href$="[[urlSignOut]]" class="signin" data-method="delete">
+            <a href$="[[urlSignIn]]" class="signin">
               <i class="fa fa-sign-in"></i> Sign in or register
             </a>
           </template>

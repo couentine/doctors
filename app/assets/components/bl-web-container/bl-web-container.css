@@ -43,8 +43,8 @@
     -webkit-flex: 1;
     flex: 1;
     
-    background: white;
     color: rgb(97,97,97);
+    background: rgb(97,97,97);
   }
 
 /* === PAPER TOOLBAR === */
@@ -62,8 +62,11 @@
         color: white;
         font-size: 1em;
         line-height: 1em;
-        padding: 0.5em 0;
+        padding: 0.2em 0 0 0;
         margin: 0.5em 0.6em 0 0;
+      }
+      @media (min-width: 840px) {
+        paper-toolbar .toolbar a.signin { padding-top: 0.3em; }
       }
 
     paper-toolbar paper-menu-button.current-user {
@@ -86,8 +89,15 @@
     display: inline-block;
     margin-top: 0.5em;
   }
-  .toolbar a.logo img { height: 1.5em; }
-    @media (min-width: 840px) { .toolbar a.logo img { height: 2em; } }
+    .toolbar a.logo img { height: 1.5em; }
+    .toolbar a.logo i { 
+      font-size: 1.5em;
+      color: white;
+    }
+    @media (min-width: 840px) { 
+      .toolbar a.logo img { height: 2em; } 
+      .toolbar a.logo i { font-size: 2em; } 
+    }
   
     paper-menu {
       z-index: 100;
@@ -106,7 +116,7 @@
       display: inline-block;
     }
     @media (min-width: 840px) { 
-      img.current-user.dropdown-trigger { height: 2em; } 
+      img.current-user { height: 2em; } 
     }
     paper-item.error { background-color: rgb(239,154,154); }
     paper-item.error a { color: white !important; }

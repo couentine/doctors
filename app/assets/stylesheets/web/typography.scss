@@ -6,11 +6,11 @@
 
 html {
   color: $text-color-primary;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5em;
 
   @media (min-width: $grid-tablet-breakpoint) {
-    font-size: 16px;
+    font-size: 17px;
   }
   @media (min-width: $grid-desktop-breakpoint) {
     font-size: 18px;

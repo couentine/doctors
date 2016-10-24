@@ -5,6 +5,7 @@ class HomeController < ApplicationController
   def root
     if current_user
       @user = current_user
+      @current_user_json = current_user.json_cu
       @page_size = APP_CONFIG['page_size_small']
       @query = params[:query] || 'all'
       @badge_count = @user.expert_badge_ids.count # doesn't result in a query
@@ -50,6 +51,7 @@ class HomeController < ApplicationController
         end
       end
     else
+      @current_user_json = '{}'
       render template: 'home/root_external', layout: 'web'
     end
   end
@@ -60,7 +62,7 @@ class HomeController < ApplicationController
     if (current_user)
       @current_user_json = current_user.json_cu
     else
-      @current_user_json = null
+      @current_user_json = '{}'
     end
 
     render layout: 'web'

@@ -5,21 +5,41 @@
 
 <style>
 
+  /* === TYPOGRAPHY === */
+
+  h2 {
+    font-size: 1.4em;
+    margin: 1em 0;
+  }
+  h3 {
+    font-size: 1.2em;
+    margin: 1em 0;
+  }
+
+  /* === SHARED ROW STYLES === */
+
   .row {
     display: flex;
     flex-direction: column;
     padding: 2em;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
   .row:last-child { box-shadow: none; }
+    .row ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+      .row ul li {
+        display: block;
+      }
 
-  /* === SPECIFIC ROWS === */
+  /* === BANNER ROW === */
 
   .banner-row {
     color: white;
     padding-bottom: 5em;
     
-    background: #FB8C00;
+    background: #F57C00;
     background: -webkit-linear-gradient(#FB8C00, #F57C00);
     background: -o-linear-gradient(#FB8C00, #F57C00);
     background: -moz-linear-gradient(#FB8C00, #F57C00);
@@ -50,6 +70,266 @@
       text-align: center;
     }
 
+  /* === WHAT ROW === */
+
+  .what-row { background: white; }
+    .what-row paper-button {
+      background: #FB8C00;
+      width: 320px;
+      margin: 2em auto 1em auto;
+    }
+      .what-row paper-button a, .what-row paper-button a:visited {
+        color: white;
+        text-decoration: none;
+      }
+    .what-row ul {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+      .what-row ul li {
+        flex-grow: 1;
+        width: 300px;
+        flex-basis: auto;
+        margin: 1.8em;
+        
+        display: flex;
+        flex-direction: row;
+      }
+        .what-row li .icon {
+          flex-grow: 0;
+          margin-right: 1em;
+        }
+          .what-row li .icon img {
+            display: block;
+            width: 4em;
+          }
+        .what-row li .text { flex-grow: 1; }
+          .what-row li .text .title { font-weight: bold; }
+          .what-row li .text .org-name { font-style: italic; }
+
+  /* === HOW ROW === */
+
+  .how-row { 
+    background: #039BE5;
+    color: white;
+    padding: 2em 0;
+  }
+    .how-row h2, .how-row .sub-header { margin: 0 2rem 1rem 2rem; }
+    .how-row .footer-text {
+      margin: 1.5rem 2rem 1rem 2rem;
+      text-align: center;
+    }
+      .how-row .footer-text a, .how-row .footer-text a:visited {
+        color: white;
+      }
+    .how-row ul {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      margin: 1em 0.5em;
+    }
+      .how-row ul li {
+        flex-grow: 1;
+        width: 300px;
+        flex-basis: auto;
+        margin: 0.5em;
+        border: 1px solid #81D4FA;
+        border-radius: 1px;
+        
+        display: flex;
+      }
+        .how-row li .inner {
+          padding: 2.5em;
+          background: rgba(255, 255, 255, 0.8);
+          color: #212121;
+        }
+        .how-row li .inner .title {
+          font-size: 1.2em;
+          margin-bottom: 1em;
+          font-weight: bold;
+        }
+      .how-row li.example-pd {
+        background-image: url('<%= image_url('backgrounds/professional-training.jpg') %>');
+      }
+      .how-row li.example-k12 {
+        background-image: url('<%= image_url('backgrounds/k12-classroom.jpg') %>');
+      }
+      .how-row li.example-university {
+        background-image: url('<%= image_url('backgrounds/university-classroom.jpg') %>');
+      }
+      .how-row li.example-hiring {
+        background-image: url('<%= image_url('backgrounds/conference-room.jpg') %>');
+      }
+      .how-row li.example-conference {
+        background-image: url('<%= image_url('backgrounds/conference.jpg') %>');
+      }
+
+  /* === WHO ROW === */
+
+  .who-row { 
+    background: #FB8C00;
+    color: white;
+  }
+    .who-row h2 { margin-top: 0; }
+    .who-row paper-material {
+      padding: 2em;
+      border-radius: 3px;
+      background: white;
+      color: rgb(97,97,97);
+    }
+    .who-row .footer-text {
+      margin: 1.5rem 2rem 1rem 2rem;
+      text-align: center;
+    }
+      .who-row .footer-text a, .who-row .footer-text a:visited {
+        color: white;
+      }
+    .who-row ul {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      margin: 1em 0;
+    }
+      .who-row ul li {
+        flex-grow: 1;
+        width: 300px;
+        flex-basis: auto;
+        margin: 1em;
+      }
+        .who-row li .quote { margin-bottom: 1em; }
+        .who-row li .quote-symbol { font-weight: bold; }
+        .who-row li .logo {
+          width: 4em;
+          float: right;
+        }
+        .who-row li .name { font-weight: bold; }
+        .who-row li .title { font-style: italic; }
+
+  /* === PRICING DIVIDERS === */
+
+  .pricing-row { 
+    background: #4CAF50;
+    color: white;
+  }
+    .pricing-row paper-button {
+      background: #C8E6C9;
+      width: 320px;
+      margin: 1em auto;
+    }
+      .pricing-row paper-button a, .pricing-row paper-button a:visited {
+        color: #212121;
+        text-decoration: none;
+      }
+    .pricing-row ul {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+      .pricing-row ul li {
+        flex-grow: 1;
+        width: 200px;
+        max-width: 250px;
+        flex-basis: auto;
+        margin: 2em;
+
+        display: flex;
+        flex-direction: column;
+      }
+        .pricing-row li .icon {
+          width: 4em;
+          height: 4em;
+          padding: 1.8em;
+          border-radius: 500px;
+          margin: 0 auto;
+          background: #A5D6A7;
+          text-align: center;
+        }
+          .pricing-row li .icon img {
+            width: 4em;
+          }
+        .pricing-row li .body { 
+          text-align: center;
+          margin-top: 1em;
+        }
+          .pricing-row li .body strong {
+            padding: 0 0.3em;
+            background: #A5D6A7;
+            color: #2E7D32;
+          }
+  
+  /* === ROW DIVIDERS === */
+
+  .row-divider {
+    position: relative;
+    height: 2em;
+    overflow: hidden;
+  }
+    .row-divider.bottom-white { background: white; }
+    .row-divider.bottom-orange { background: #FB8C00; }
+    .row-divider.bottom-blue { background: #039BE5; }
+    .row-divider.bottom-green { background: #4CAF50; }
+    .row-divider.bottom-grey { background: rgb(97,97,97); }
+      .row-divider .top {
+        position: absolute;
+        top: -0.4em; right: 0; left: -1em;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        -ms-transform: rotate(-0.6deg); /* IE 9 */
+        -webkit-transform: rotate(-0.6deg); /* Chrome, Safari, Opera */
+        transform: rotate(-0.6deg);
+        height: 1em;
+      }
+      .row-divider.top-white .top { background: white; }
+      .row-divider.top-orange .top { background: #FB8C00; }
+      .row-divider.top-blue .top { background: #039BE5; }
+      .row-divider.top-green .top { background: #4CAF50; }
+      .row-divider.top-grey .top { background: rgb(97,97,97); }
+
+  .rainbow {
+    position: relative;
+    height: 2em;
+    overflow: hidden;
+    background: white;
+  }
+    .rainbow .bar0 {
+      position: absolute;
+      top: 0; right: 0; left: 0;
+      height: 0.1em;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      z-index: 5;
+    }
+      .rainbow.orange-blue-green .bar0 { background: #F57C00; }
+      .rainbow.green-orange-blue .bar0 { background: #4CAF50; }
+    .rainbow .bar1, .rainbow .bar2 {
+      position: absolute;
+      top: -0.4em; right: 0; left: -1em;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+    .rainbow .bar1 {
+      -ms-transform: rotate(-0.6deg); /* IE 9 */
+      -webkit-transform: rotate(-0.6deg); /* Chrome, Safari, Opera */
+      transform: rotate(-0.6deg);
+      height: 1em;
+      z-index: 4;
+    }
+      .rainbow.orange-blue-green .bar1 { background: #039BE5; }
+      .rainbow.green-orange-blue .bar1 { background: #FB8C00; }
+    .rainbow .bar2 {
+      -ms-transform: rotate(-1.2deg); /* IE 9 */
+      -webkit-transform: rotate(-1.2deg); /* Chrome, Safari, Opera */
+      transform: rotate(-1.2deg);
+      height: 1.5em;
+      z-index: 3;
+    }
+      .rainbow.orange-blue-green .bar2 { background: #4CAF50; }
+      .rainbow.green-orange-blue .bar2 { background: #039BE5; }
+
+
+
 </style>
 
 <bl-web-container page-name="home" current-user="<%= @current_user_json %>"
@@ -71,41 +351,76 @@
       </div>
     </div>
 
+    <!-- === RAINBOW DIVIDER === -->
+    <div class="rainbow orange-blue-green">
+      <div class="bar0">&nbsp;</div>
+      <div class="bar1">&nbsp;</div>
+      <div class="bar2">&nbsp;</div>
+    </div>
+
     <!-- === WHAT ROW === -->
     <div class="row what-row">
       <h2>What are Open Badges?</h2>
 
       <ul>
         <li>
-          <div class="title">Micro-Credentials</div>
-          <div class="description">
-            Open Badges are visual, shareable representations of important skills and achievements.
+          <div class="icon">
+            <%= image_tag 'icons/certificate.png' %>
+          </div>
+          <div class="text">
+            <div class="title">Micro-Credentials</div>
+            <div class="description">
+              Open Badges are visual, shareable representations of important skills and 
+              achievements.
+            </div>
           </div>
         </li>
         <li>
-          <div class="title">Topic-Focused Resumes</div>
-          <div class="description">
-            Open Badges are earned by building a portfolio of evidence that is verified by trusted 
-            badge awarders.
+          <div class="icon">
+            <%= image_tag 'icons/search-file.png' %>
+          </div>
+          <div class="text">
+            <div class="title">Topic-Focused Resumes</div>
+            <div class="description">
+              Open Badges are earned by building a portfolio of evidence that is verified by 
+              trusted badge awarders.
+            </div>
           </div>
         </li>
         <li>
-          <div class="title">A Common Language of Learning</div>
-          <div class="description">
-            Open Badges communicate expertise and learning progress to all of the stakeholders in a 
-            learning ecosystem.
+          <div class="icon">
+            <%= image_tag 'icons/light-bulb.png' %>
+          </div>
+          <div class="text">
+            <div class="title">A Common Language of Learning</div>
+            <div class="description">
+              Open Badges communicate expertise and learning progress to all of the stakeholders 
+              in a learning ecosystem.
+            </div>
           </div>
         </li>
         <li>
-          <div class="title">Learning Pathways</div>
-          <div class="description">
-            Open Badges can be linked together to provide step-by-step guidance towards academic and 
-            professional goals.
+          <div class="icon">
+            <%= image_tag 'icons/pathway.png' %>
+          </div>
+          <div class="text">
+            <div class="title">Learning Pathways</div>
+            <div class="description">
+              Open Badges can be linked together to provide step-by-step guidance towards 
+              academic and professional goals.
+            </div>
           </div>
         </li>
       </ul>
 
-      <paper-button>Find out more about how Badge List works</paper-button>
+      <paper-button raised>
+        <a href="#">See how Badge List works</a>
+      </paper-button>
+    </div>
+
+    <!-- === ROW DIVIDER === -->
+    <div class="row-divider top-white bottom-blue">
+      <div class="top">&nbsp;</div>
     </div>
 
     <!-- === HOW ROW === -->
@@ -118,49 +433,59 @@
       </div>
 
       <ul>
-        <li>
-          <div class="title">Tracking Professional Development</div>
-          <div class="description">
-            Professional development organizations create badges to track specific course work and 
-            represent professional credentials. Digital badges are easier to share and track than 
-            traditional paper certifications. Each badge is backed by a portfolio of evidence that 
-            makes it easier for employers to verify.
+        <li class="example-pd">
+          <div class="inner">
+            <div class="title">Tracking Professional Development</div>
+            <div class="description">
+              Professional development organizations create badges to track specific course work 
+              and represent professional credentials. Digital badges are easier to share and 
+              track than traditional paper certifications. Each badge is backed by a portfolio 
+              of evidence that makes it easier for employers to verify.
+            </div>
           </div>
         </li>
-        <li>
-          <div class="title">Guiding and Recognizing K12 Student Achievement</div>
-          <div class="description">
-            Teachers create badges linked to specific class work and related to skills and 
-            competencies. Earning badges is fun for students and provides valuable insight for 
-            parents. Class-level badges can be linked to school-level badges to establish learning 
-            pathways between grades.
+        <li class="example-k12">
+          <div class="inner">
+            <div class="title">Guiding and Recognizing K12 Student Achievement</div>
+            <div class="description">
+              Teachers create badges linked to specific class work and related to skills and 
+              competencies. Earning badges is fun for students and provides valuable insight for 
+              parents. Class-level badges can be linked to school-level badges to establish 
+              learning pathways between grades.
+            </div>
           </div>
         </li>
-        <li>
-          <div class="title">Leading University and College Students to Success</div>
-          <div class="description">
-            Professors create badges that are linked to course and project work. Administrators 
-            create badges representing department and employer-focused achievements. Badges can be 
-            linked together into learning pathways, providing a clear roadmap to success.
+        <li class="example-university">
+          <div class="inner">
+            <div class="title">Leading University and College Students to Success</div>
+            <div class="description">
+              Professors create badges that are linked to course and project work. Administrators 
+              create badges representing department and employer-focused achievements. Badges 
+              can be linked together into learning pathways, providing a clear roadmap to success.
+            </div>
           </div>
         </li>
-        <li>
-          <div class="title">Optimizing the Hiring Process</div>
-          <div class="description">
-            Groups of companies create professional badge networks focused on professional skill 
-            areas. Students and professionals earn badges by creating portfolios of relevant work. 
-            Badges provide detailed insight to employers and unlock professional opportunities for 
-            job seekers.
+        <li class="example-hiring">
+          <div class="inner">
+            <div class="title">Optimizing the Hiring Process</div>
+            <div class="description">
+              Groups of companies create professional badge networks focused on professional skill 
+              areas. Students and professionals earn badges by creating portfolios of relevant work. 
+              Badges provide detailed insight to employers and unlock professional opportunities 
+              for job seekers.
+            </div>
           </div>
         </li>
-        <li>
-          <div class="title">Engaging Conference Attendees</div>
-          <div class="description">
-            Presenters and conference organizers create badges to recognize skills and achievements 
-            at the conference. Digital badges give the attendees a way to share their achievements 
-            in online profiles like LinkedIn and to get credit with their employers. Conference 
-            organizers gain useful metrics and a new channel for continuing engagement between 
-            conferences.
+        <li class="example-conference">
+          <div class="inner">
+            <div class="title">Engaging Conference Attendees</div>
+            <div class="description">
+              Presenters and conference organizers create badges to recognize skills and 
+              achievements at the conference. Digital badges give the attendees a way to share 
+              their achievements in online profiles like LinkedIn and to get credit with their 
+              employers. Conference organizers gain useful metrics and a new channel for 
+              continuing engagement between conferences.
+            </div>
           </div>
         </li>
       </ul>
@@ -171,6 +496,11 @@
       </div>
     </div>
 
+    <!-- === ROW DIVIDER === -->
+    <div class="row-divider top-blue bottom-orange">
+      <div class="top">&nbsp;</div>
+    </div>
+
     <!-- === WHO ROW === -->
     <div class="row who-row">
       <h2>What our customers are saying</h2>
@@ -178,20 +508,75 @@
       <ul>
         <li>
           <paper-material elevation="2">
-            <div class="content">
-              <span class="quote quote-left">&#8220;</span>
+            <div class="quote">
+              <span class="quote-symbol quote-left">&#8220;</span>
               Badge List makes it easy to celebrate students' and teachers' skill-based 
               accomplishments! Others can learn from experts already awarded the badge, building 
               a strong learning community.
-              <span class="quote quote-right">&#8221;</span>
+              <span class="quote-symbol quote-right">&#8221;</span>
             </div>
-            <div class="name">
-              <a href="http://www.mariventurino.com" target="_blank">Mari Venturino</a>
-            </div>
-            <div class="title">Blended Learning Specialist</div>
-            <div class="organization">
+            <div class="footer">
               <%= image_tag 'customers/logo-mar-vista-academy.png', class: 'logo' %>
-              <a href="http://mva.sweetwaterschools.org" target="_blank" class="name">
+              <div class="name">Mari Venturino</div>
+              <div class="title">Blended Learning Specialist</div>
+              <a href="http://mva.sweetwaterschools.org" target="_blank" class="org-name">
+                Mar Vista Academy
+              </a>
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="quote">
+              <span class="quote-symbol quote-left">&#8220;</span>
+              Badge List makes it easy to celebrate students' and teachers' skill-based 
+              accomplishments! Others can learn from experts already awarded the badge, building 
+              a strong learning community.
+              <span class="quote-symbol quote-right">&#8221;</span>
+            </div>
+            <div class="footer">
+              <%= image_tag 'customers/logo-mar-vista-academy.png', class: 'logo' %>
+              <div class="name">Mari Venturino</div>
+              <div class="title">Blended Learning Specialist</div>
+              <a href="http://mva.sweetwaterschools.org" target="_blank" class="org-name">
+                Mar Vista Academy
+              </a>
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="quote">
+              <span class="quote-symbol quote-left">&#8220;</span>
+              Badge List makes it easy to celebrate students' and teachers' skill-based 
+              accomplishments! Others can learn from experts already awarded the badge, building 
+              a strong learning community.
+              <span class="quote-symbol quote-right">&#8221;</span>
+            </div>
+            <div class="footer">
+              <%= image_tag 'customers/logo-mar-vista-academy.png', class: 'logo' %>
+              <div class="name">Mari Venturino</div>
+              <div class="title">Blended Learning Specialist</div>
+              <a href="http://mva.sweetwaterschools.org" target="_blank" class="org-name">
+                Mar Vista Academy
+              </a>
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="quote">
+              <span class="quote-symbol quote-left">&#8220;</span>
+              Badge List makes it easy to celebrate students' and teachers' skill-based 
+              accomplishments! Others can learn from experts already awarded the badge, building 
+              a strong learning community.
+              <span class="quote-symbol quote-right">&#8221;</span>
+            </div>
+            <div class="footer">
+              <%= image_tag 'customers/logo-mar-vista-academy.png', class: 'logo' %>
+              <div class="name">Mari Venturino</div>
+              <div class="title">Blended Learning Specialist</div>
+              <a href="http://mva.sweetwaterschools.org" target="_blank" class="org-name">
                 Mar Vista Academy
               </a>
             </div>
@@ -207,26 +592,53 @@
       </div>
     </div>
 
+    <!-- === ROW DIVIDER === -->
+    <div class="row-divider top-orange bottom-green">
+      <div class="top">&nbsp;</div>
+    </div>
+
     <!-- === PRICING ROW === -->
     <div class="row pricing-row">
       <h2>Badge List Pricing</h2>
 
       <ul>
         <li>
-          Badge List is completely free to use for <strong>Open Groups</strong>. 
-          Anyone can join and everything is public.
+          <div class="icon">
+            <%= image_tag 'icons/globe.png' %>
+          </div>
+          <div class="body">
+            <strong>Open Groups</strong> are completely free.
+            Anyone can join and everything is public.
+          </div>
         </li>
         <li>
-          <strong>Closed Groups</strong> offer advanced privacy and group management features. 
-          Plans start at $5 per month. Special discounts are available for K12 educators.
+          <div class="icon">
+            <%= image_tag 'icons/office-building.png' %>
+          </div>
+          <div class="body">
+            <strong>Closed Groups</strong> offer advanced privacy and group management features. 
+            Plans start at $5 per month.
+          </div>
         </li>
         <li>
-          <strong>Student Privacy Protection</strong> is available to help K12 educators 
-          comply with privacy regulations.
+          <div class="icon">
+            <%= image_tag 'icons/school.png' %>
+          </div>
+          <div class="body">
+            <strong>K12 educators</strong> receive special discounts. 
+            Student privacy protection is available.
+          </div>
         </li>
       </ul>
 
-      <paper-button>View full pricing details</paper-button>
+      <paper-button raised>
+        <%= link_to 'View full pricing details', pricing_path %>
+      </paper-button>
+    </div>
+
+    <!-- === ROW DIVIDER === -->
+    <div class="row-divider top-green bottom-grey">
+      <div class="top">&nbsp;</div>
     </div>
 
     <!-- === FOOTER === -->
