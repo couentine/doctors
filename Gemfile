@@ -34,7 +34,8 @@ ruby '2.1.2'
   gem 'kaminari-bootstrap', '~> 0.1.3'
   gem 'polymer-rails', '~> 1.2.4'
   # gem 'polymer-elements-rails', '~> 1.0.1'
-  gem 'polymer-elements-rails', github: 'badgelist/polymer-elements-rails'
+  # gem 'polymer-elements-rails', github: 'badgelist/polymer-elements-rails'
+  gem 'polymer-elements-rails', github: 'badgelist/polymer-elements-rails', branch: 'test'
   gem 'rack-cors', :require => 'rack/cors'
 
 #=== ERRORS & DEBUGGING ===#
