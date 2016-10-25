@@ -25,7 +25,7 @@
 
       <%= stylesheet_link_tag 'web', media: 'all' %>
       <%= javascript_include_tag 'web' %>
-      <%= html_import_tag 'website' %>
+      <link rel="import" href="<%= asset_path('website', {type: :html, extname: '.html'}) %>">
     
     <% #=== OPTIONAL INCLUSIONS ===# %>
     <% #=== [:no_index, :include_ob_issuer, :include_stripe, :include_metadata, :header] ===# %>
