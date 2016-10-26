@@ -23,7 +23,6 @@
     flex-direction: column;
     padding: 2em;
   }
-  .row:last-child { box-shadow: none; }
     .row ul {
       list-style: none;
       margin: 0;
@@ -430,7 +429,7 @@
       </ul>
 
       <paper-button raised>
-        <a href="#">See how Badge List works</a>
+        <%= link_to 'See how Badge List works', how_it_works_path %>
       </paper-button>
     </div>
 

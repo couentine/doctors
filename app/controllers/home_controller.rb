@@ -59,7 +59,7 @@ class HomeController < ApplicationController
   # GET /w
   # This allows internal users to access the external homepage.
   def root_external
-    if (current_user)
+    if current_user
       @current_user_json = current_user.json_cu
     else
       @current_user_json = '{}'
@@ -85,6 +85,17 @@ class HomeController < ApplicationController
   # GET /pricing_k12
   def pricing_k12
     redirect_to '/pricing#k12'
+  end
+
+  # GET /how-it-works
+  def how_it_works
+    if current_user
+      @current_user_json = current_user.json_cu
+    else
+      @current_user_json = '{}'
+    end
+
+    render layout: 'web'
   end
 
   # GET /privacy-policy
