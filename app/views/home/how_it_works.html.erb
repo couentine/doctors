@@ -16,6 +16,14 @@
     margin: 1em 0;
   }
 
+  /* === SHARED PAPER-BUTTON === */
+
+  paper-button {
+    padding-left: 1.2em;
+    padding-right: 1.2em;
+    text-transform: none;
+  }
+
   /* === SHARED ROW STYLES === */
 
   .row {
@@ -37,24 +45,21 @@
   }
     .banner-row h1 { margin: 0 0 0.7em 0; }
     .banner-row .tag-line { max-width: 36em; }
-    .banner-row .button { margin: 2em 0 0 -0.2em; }
-      .banner-row paper-button { 
-        background: #FF9800; 
+    .banner-row .button-wrapper { margin: 2em 0 0 -0.2em; }
+      .banner-row paper-button {
+        background: #FF9800;
+        color: white;
         font-size: 0.9em;
       }
-        .banner-row paper-button a, .banner-row paper-button a:visited {
-          text-decoration: none;
-          color: #FFF3E0;
-          padding: 0 0.6em;
-        }
   
   /* === DIAGRAM ROW === */
 
   .diagram-row {
     background: #FFCC80;
-    padding: 4em 2em;
+    padding: 2em;
   }
     .diagram-row h2 {
+      font-size: 1.2em;
       width: 10em;
       margin: 0 auto 1em auto;
       background: #FFE0B2;
@@ -68,7 +73,13 @@
     }
       .diagram-row .diagram img {
         width: 100%;
-        margin: 1em 0;
+        margin: 1em auto;
+      }
+      .diagram-row .diagram img.tall { max-width: 450px; }
+      .diagram-row .diagram img.wide { display: none; }
+      @media (min-width: 760px) {
+        .diagram-row .diagram img.tall { display: none; }
+        .diagram-row .diagram img.wide { display: block; }
       }
 
   /* === INFO ROW === */
@@ -129,12 +140,10 @@
         display: block;
         margin: 1em 2em;
       }
-        .info-row paper-button { background: #FF9800; }
-          .info-row paper-button a, .info-row paper-button a:visited {
-            text-decoration: none;
-            color: white;
-            padding: 0 0.6em;
-          }
+        .info-row paper-button {
+          background: #FF9800;
+          color: white;
+        }
 
   /* === ROW DIVIDERS === */
 
@@ -178,14 +187,10 @@
         Each badge is backed by a portfolio of evidence and the endorsements of experts.
       </div>
 
-      <div class="button">
-        <paper-button raised class="create-group">
-          <% if current_user %>
-            <%= link_to 'Create a free group', new_group_path %>
-          <% else %>
-            <%= link_to 'Create a free group', new_user_registration_path %>
-          <% end %>
-        </paper-button>
+      <div class="button-wrapper">
+        <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>">
+          <paper-button raised class="create-group">Create a free group</paper-button>
+        </a>
       </div>
     </div>
 
@@ -199,7 +204,8 @@
       <h2>The Badge List Flow</h1>
 
       <div class="diagram">
-        <%= image_tag 'graphics/badge-list-flow.png' %>
+        <%= image_tag 'graphics/badge-list-flow-tall.svg', class: 'tall' %>
+        <%= image_tag 'graphics/badge-list-flow-wide.svg', class: 'wide' %>
       </div>
     </div>
 
@@ -274,18 +280,14 @@
 
       <ul class="buttons">
         <li>
-          <paper-button raised class="create-group">
-            <% if current_user %>
-              <%= link_to 'Create a free group', new_group_path %>
-            <% else %>
-              <%= link_to 'Create a free group', new_user_registration_path %>
-            <% end %>
-          </paper-button>
+          <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>">
+            <paper-button raised class="create-group">Create a free group</paper-button>
+          </a>
         </li>
         <li>
-          <paper-button raised class="community">
-            <a href="/community">Join Badge List Community</a>
-          </paper-button>
+          <a href="/community">
+            <paper-button raised class="community">Join Badge List Community</paper-button>
+          </a>
         </li>
       </ul>
     </div>

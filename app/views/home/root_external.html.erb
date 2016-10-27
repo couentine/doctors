@@ -16,6 +16,14 @@
     margin: 1em 0;
   }
 
+  /* === SHARED PAPER-BUTTON === */
+
+  paper-button {
+    padding-left: 1.2em;
+    padding-right: 1.2em;
+    text-transform: none;
+  }
+
   /* === SHARED ROW STYLES === */
 
   .row {
@@ -69,17 +77,43 @@
       text-align: center;
     }
 
+  /* === ACTION ROW === */
+
+  .action-row { 
+    background: #FFF3E0; 
+    padding: 0 2em;
+  }
+    .action-row ul.buttons {
+      list-style: none;
+      margin: 1em 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+      .action-row ul.buttons li {
+        display: block;
+        margin: 1em 2em;
+      }
+        .action-row paper-button {
+          color: white;
+          background: #F57C00;
+        }
+
+
   /* === WHAT ROW === */
 
-  .what-row { background: white; }
-    .what-row paper-button {
-      background: #FB8C00;
-      width: 320px;
-      margin: 2em auto 1em auto;
+  .what-row { 
+    background: white; 
+    padding-top: 1em;
+  }
+    .what-row a.button { 
+      margin: 2em auto 1em auto; 
     }
-      .what-row paper-button a, .what-row paper-button a:visited {
+      .what-row paper-button {
+        background: #FB8C00;
         color: white;
-        text-decoration: none;
       }
     .what-row ul {
       display: flex;
@@ -230,14 +264,12 @@
     background: #4CAF50;
     color: white;
   }
-    .pricing-row paper-button {
-      background: #C8E6C9;
-      width: 320px;
+    .pricing-row a.button { 
       margin: 1em auto;
     }
-      .pricing-row paper-button a, .pricing-row paper-button a:visited {
+      .pricing-row paper-button {
+        background: #C8E6C9;
         color: #212121;
-        text-decoration: none;
       }
     .pricing-row ul {
       display: flex;
@@ -285,7 +317,9 @@
     overflow: hidden;
   }
     .row-divider.bottom-white { background: white; }
-    .row-divider.bottom-orange { background: #FB8C00; }
+    .row-divider.bottom-orange-700 { background: #FB8C00; }
+    .row-divider.bottom-orange-200 { background: #FFCC80; }
+    .row-divider.bottom-orange-50 { background: #FFF3E0; }
     .row-divider.bottom-blue { background: #039BE5; }
     .row-divider.bottom-green { background: #4CAF50; }
     .row-divider.bottom-grey { background: rgb(97,97,97); }
@@ -299,7 +333,9 @@
         height: 1em;
       }
       .row-divider.top-white .top { background: white; }
-      .row-divider.top-orange .top { background: #FB8C00; }
+      .row-divider.top-orange-700 .top { background: #FB8C00; }
+      .row-divider.top-orange-200 .top { background: #FFCC80; }
+      .row-divider.top-orange-50 .top { background: #FFF3E0; }
       .row-divider.top-blue .top { background: #039BE5; }
       .row-divider.top-green .top { background: #4CAF50; }
       .row-divider.top-grey .top { background: rgb(97,97,97); }
@@ -308,7 +344,7 @@
     position: relative;
     height: 2em;
     overflow: hidden;
-    background: white;
+    background: #FFF3E0;
   }
     .rainbow .bar0 {
       position: absolute;
@@ -373,6 +409,27 @@
       <div class="bar2">&nbsp;</div>
     </div>
 
+    <!-- === ACTION ROW === -->
+    <div class="row action-row">
+      <ul class="buttons">
+        <li>
+          <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>">
+            <paper-button raised class="create-group">Create a free group</paper-button>
+          </a>
+        </li>
+        <li>
+          <a href="/community">
+            <paper-button raised class="community">Join Badge List Community</paper-button>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- === ROW DIVIDER === -->
+    <div class="row-divider top-orange-50 bottom-white">
+      <div class="top">&nbsp;</div>
+    </div>
+
     <!-- === WHAT ROW === -->
     <div class="row what-row">
       <h2>What are Open Badges?</h2>
@@ -428,9 +485,9 @@
         </li>
       </ul>
 
-      <paper-button raised>
-        <%= link_to 'See how Badge List works', how_it_works_path %>
-      </paper-button>
+      <a href="<%= how_it_works_path %>" class="button">
+        <paper-button raised>See how Badge List works</paper-button>
+      </a>
     </div>
 
     <!-- === ROW DIVIDER === -->
@@ -512,7 +569,7 @@
     </div>
 
     <!-- === ROW DIVIDER === -->
-    <div class="row-divider top-blue bottom-orange">
+    <div class="row-divider top-blue bottom-orange-700">
       <div class="top">&nbsp;</div>
     </div>
 
@@ -525,17 +582,60 @@
           <paper-material elevation="2">
             <div class="quote">
               <span class="quote-symbol quote-left">&#8220;</span>
-              Badge List makes it easy to celebrate students' and teachers' skill-based 
-              accomplishments! Others can learn from experts already awarded the badge, building 
-              a strong learning community.
+              We joined Badge List in 2014 after researching and interviewing every other badge 
+              platform we could locate. We chose Badge List because they were willing to partner 
+              in development with us and tailor a system to meet our needs and the needs of 
+              our professional development community.
               <span class="quote-symbol quote-right">&#8221;</span>
             </div>
             <div class="footer">
-              <%= image_tag 'customers/logo-mar-vista-academy.png', class: 'logo' %>
-              <div class="name">Mari Venturino</div>
-              <div class="title">Blended Learning Specialist</div>
-              <a href="http://mva.sweetwaterschools.org" target="_blank" class="org-name">
-                Mar Vista Academy
+              <%= image_tag 'customers/logo-ku.jpg', class: 'logo' %>
+              <div class="name">Patty Graner</div>
+              <div class="title">Director of Professional Development</div>
+              <a href="http://kucrl.org" target="_blank" class="org-name">
+                KU Center for Research on Learning
+              </a>
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="quote">
+              <span class="quote-symbol quote-left">&#8220;</span>
+              We like that Badge List is finding ways to unite ePortfolios and digital badging. 
+              These two assessment practices complement each other well to support thriving 
+              communities of practice for learners. The portfolio framework for curating the 
+              evidence to earn a badge matched our vision for what Competency X should provide 
+              our scholars.
+              <span class="quote-symbol quote-right">&#8221;</span>
+            </div>
+            <div class="footer">
+              <%= image_tag 'customers/logo-del-lago-academy.png', class: 'logo' %>
+              <div class="name">Alec Barron</div>
+              <div class="title">Principal Investigator</div>
+              <a href="http://www.competencyx.com" target="_blank" class="org-name">
+                Competency X
+              </a>
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="quote">
+              <span class="quote-symbol quote-left">&#8220;</span>
+              The team at Badge List are wonderfully helpful. Their platform interface is 
+              intuitive and we are particularly appreciative of their support for maintaining 
+              and managing many different forms of submitted evidence. The ease by which 
+              members of the community may display their earned badges on blogs and social 
+              media via the Badge List platform is also worthy of note.
+              <span class="quote-symbol quote-right">&#8221;</span>
+            </div>
+            <div class="footer">
+              <%= image_tag 'customers/logo-open-worm.jpg', class: 'logo' %>
+              <div class="name">Chee Wai Lee</div>
+              <div class="title">OpenWorm Contributor</div>
+              <a href="http://www.openworm.org" target="_blank" class="org-name">
+                OpenWorm Project
               </a>
             </div>
           </paper-material>
@@ -575,26 +675,6 @@
               <div class="title">Blended Learning Specialist</div>
               <a href="http://mva.sweetwaterschools.org" target="_blank" class="org-name">
                 Mar Vista Academy
-              </a>
-            </div>
-          </paper-material>
-        </li>
-        <li>
-          <paper-material elevation="2">
-            <div class="quote">
-              <span class="quote-symbol quote-left">&#8220;</span>
-              My favorite thing about Badge List is their commitment to bringing digital badges to 
-              the K-12 community. They are willing to learn alongside their customers and have 
-              made some amazing revisions that make the platform super attractive to both 
-              classroom and professional learners.
-              <span class="quote-symbol quote-right">&#8221;</span>
-            </div>
-            <div class="footer">
-              <%= image_tag 'customers/logo-sccoe.png', class: 'logo' %>
-              <div class="name">Cate Tolnai</div>
-              <div class="title">Academic Technology Specialist</div>
-              <a href="http://www.sccoe.org/" target="_blank" class="org-name">
-                Santa Clara County Office of Education
               </a>
             </div>
           </paper-material>
@@ -603,14 +683,12 @@
 
       <div class="footer-text">
         To see more Badge List stories, 
-        <a href="https://twitter.com/BadgeList" target="_blank">
-          follow us on Twitter
-        </a>.
+        <a href="https://twitter.com/BadgeList" target="_blank">follow us on Twitter</a>.
       </div>
     </div>
 
     <!-- === ROW DIVIDER === -->
-    <div class="row-divider top-orange bottom-green">
+    <div class="row-divider top-orange-700 bottom-green">
       <div class="top">&nbsp;</div>
     </div>
 
@@ -648,9 +726,9 @@
         </li>
       </ul>
 
-      <paper-button raised>
-        <%= link_to 'View full pricing details', pricing_path %>
-      </paper-button>
+      <a href="<%= pricing_path %>" class="button">
+        <paper-button raised>View full pricing details</paper-button>
+      </a>
     </div>
 
     <!-- === ROW DIVIDER === -->
