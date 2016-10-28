@@ -2,6 +2,15 @@
   provide(:title, "#{@badge.name} - #{@group.name}")
   provide(:include_rich_text, true)
 
+  provide(:include_metadata, true)
+  provide(:metadata_title, "#{@badge.name} - #{@group.name}")
+  provide(:metadata_description, @badge.summary)
+  provide(:metadata_image, @badge.image_url)
+  provide(:metadata_image_width, '500')
+  provide(:metadata_image_height, '500')
+  provide(:metadata_site_name, 'Badge List')
+  provide(:metadata_url, request.original_url)
+
   is_group_member = @current_user_is_member || @current_user_is_admin
   is_badge_member = @current_user_is_learner || @current_user_is_expert
   can_join_badge = !is_badge_member && @show_progress && \

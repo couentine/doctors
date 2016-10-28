@@ -1,6 +1,16 @@
 <% 
   provide(:full_title, 
     "Badge List - Digital credentials for educators, companies and professional development orgs")
+
+  provide(:include_metadata, true)
+  provide(:metadata_title, 'Overview of the Badge List Platform')
+  provide(:metadata_description, 'Badge List helps educators, companies and professional ' \
+    + 'development orgs create Open Badges to guide learning and recognize achievement.')
+  provide(:metadata_image, image_url('badge-list-icon.png'))
+  provide(:metadata_image_width, '500')
+  provide(:metadata_image_height, '500')
+  provide(:metadata_site_name, 'Badge List')
+  provide(:metadata_url, request.original_url)
 %>
 
 <style>

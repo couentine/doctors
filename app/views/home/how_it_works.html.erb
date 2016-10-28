@@ -1,6 +1,17 @@
 <% 
   provide(:full_title, "How Badge List Works - " \
     + "Expert validated ePortfolios for recognizing digital learning and professional development")
+
+  provide(:include_metadata, true)
+  provide(:metadata_title, 'How Badge List Works')
+  provide(:metadata_description, 'Badge List is built around a robust evidence and feedback ' \
+    + 'collection workflow. Each badge is backed by a portfolio of evidence and the ' \
+    + 'endorsements of experts.')
+  provide(:metadata_image, image_url('graphics/badge-list-flow-diagram.png'))
+  provide(:metadata_image_width, '2000')
+  provide(:metadata_image_height, '699')
+  provide(:metadata_site_name, 'Badge List')
+  provide(:metadata_url, request.original_url)
 %>
 
 <style>
