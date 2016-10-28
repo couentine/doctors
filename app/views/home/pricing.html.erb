@@ -2,6 +2,17 @@
   provide(:title, "Pricing")
   provide(:body_classes, "pricing-page")
 
+  provide(:include_metadata, true)
+  provide(:metadata_title, 'Badge List Pricing')
+  provide(:metadata_description, 'Open Groups are completely free. Closed Group plans start at ' \
+    + '$5 per month and offer advanced privacy and group management features. K12 educators ' \
+    + 'receive special discounts.')
+  provide(:metadata_image, image_url('badge-list-icon.png'))
+  provide(:metadata_image_width, '500')
+  provide(:metadata_image_height, '500')
+  provide(:metadata_site_name, 'Badge List')
+  provide(:metadata_url, request.original_url)
+
   if current_user
     link_path = "#{new_group_path}?plan="
   else

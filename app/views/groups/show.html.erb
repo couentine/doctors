@@ -4,6 +4,13 @@
   can_join_group_with_code = @group.private? && !@current_user_is_admin \
     && !@current_user_is_member && !@group.join_code.blank?
 
+  provide(:include_metadata, true)
+  provide(:metadata_title, @group.name)
+  provide(:metadata_description, @group.description)
+  provide(:metadata_image, @group.avatar_image_url)
+  provide(:metadata_site_name, 'Badge List')
+  provide(:metadata_url, request.original_url)
+
   status_details = @group.status_details_for_admins
   member_details = @group.member_limit_details
   admin_details = @group.admin_limit_details

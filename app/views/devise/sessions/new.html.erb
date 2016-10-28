@@ -2,6 +2,16 @@
   provide(:title, "Sign in")
   provide(:body_class, "signin")
   provide(:hide_footer, true)
+
+  provide(:include_metadata, true)
+  provide(:metadata_title, 'Sign in to Badge List')
+  provide(:metadata_description, 'Badge List helps educators, companies and professional ' \
+    + 'development orgs create Open Badges to guide learning and recognize achievement.')
+  provide(:metadata_image, image_url('badge-list-icon.png'))
+  provide(:metadata_image_width, '500')
+  provide(:metadata_image_height, '500')
+  provide(:metadata_site_name, 'Badge List')
+  provide(:metadata_url, request.original_url)
 %>
 
 <div class="row">
