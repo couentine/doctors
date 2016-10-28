@@ -18,6 +18,7 @@ BadgeList::Application.routes.draw do
   match 'w' => 'home#root_external', via: :get, as: :root_external
   match 'pricing' => 'home#pricing', via: :get, as: :pricing
   match 'pricing-k12' => 'home#pricing_k12', via: :get, as: :pricing_k12
+  match 'how-it-works' => 'home#how_it_works', via: :get, as: :how_it_works
   match 'privacy-policy' => 'home#privacy_policy', via: :get, as: :privacy_policy
   match 'terms-of-service' => 'home#terms_of_service', via: :get, as: :terms_of_service
   match 'help-staging' => 'home#help', via: :get, as: :help

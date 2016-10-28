@@ -23,11 +23,9 @@
 
     <% #=== APP STYLES & SCRIPTS ===# %>
 
-      <%= stylesheet_link_tag 'app', media: 'all' %>
-      <%= javascript_include_tag 'app' %>
-      <link rel="import" href="<%= asset_path('application', {type: :html, extname: '.html'}) %>">
-      <script src="//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"> 
-      </script>
+      <%= stylesheet_link_tag 'web', media: 'all' %>
+      <%= javascript_include_tag 'web' %>
+      <link rel="import" href="<%= asset_path('website', {type: :html, extname: '.html'}) %>">
     
     <% #=== OPTIONAL INCLUSIONS ===# %>
     <% #=== [:no_index, :include_ob_issuer, :include_stripe, :include_metadata, :header] ===# %>
@@ -35,15 +33,6 @@
       <% if content_for? :no_index %>
         <meta name="robots" content="noindex">
       <% end %>
-      
-      <% if content_for? :include_ob_issuer %>
-        <script src="//backpack.openbadges.org/issuer.js"></script>
-        <script type="text/javascript">
-          var obIssuerPresent = true;
-        </script>
-      <% end %>
-
-      <%= render 'shared/stripe' if content_for? :include_stripe %>
 
       <% if content_for? :include_metadata %>
         <!-- === OPEN GRAPH METADATA === -->

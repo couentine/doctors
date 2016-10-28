@@ -5,6 +5,7 @@ class HomeController < ApplicationController
   def root
     if current_user
       @user = current_user
+      @current_user_json = current_user.json_cu
       @page_size = APP_CONFIG['page_size_small']
       @query = params[:query] || 'all'
       @badge_count = @user.expert_badge_ids.count # doesn't result in a query
@@ -50,14 +51,21 @@ class HomeController < ApplicationController
         end
       end
     else
-      render template: 'home/root_external', layout: 'website'
+      @current_user_json = '{}'
+      render template: 'home/root_external', layout: 'web'
     end
   end
   
   # GET /w
   # This allows internal users to access the external homepage.
   def root_external
-    render layout: 'website'
+    if current_user
+      @current_user_json = current_user.json_cu
+    else
+      @current_user_json = '{}'
+    end
+
+    render layout: 'web'
   end
 
   # GET /pricing
@@ -77,6 +85,17 @@ class HomeController < ApplicationController
   # GET /pricing_k12
   def pricing_k12
     redirect_to '/pricing#k12'
+  end
+
+  # GET /how-it-works
+  def how_it_works
+    if current_user
+      @current_user_json = current_user.json_cu
+    else
+      @current_user_json = '{}'
+    end
+
+    render layout: 'web'
   end
 
   # GET /privacy-policy

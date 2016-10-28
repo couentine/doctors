@@ -1,0 +1,316 @@
+<% 
+  provide(:full_title, "How Badge List Works - " \
+    + "Expert validated ePortfolios for recognizing digital learning and professional development")
+%>
+
+<style>
+
+  /* === TYPOGRAPHY === */
+
+  h2 {
+    font-size: 1.4em;
+    margin: 1em 0;
+  }
+  h3 {
+    font-size: 1.2em;
+    margin: 1em 0;
+  }
+
+  /* === SHARED PAPER-BUTTON === */
+
+  a.button, a.button:visited, a.button:hover, a.button:focus {
+    text-decoration: none;
+    color: initial;
+    text-align: center;
+    font-weight: normal;
+  }
+    paper-button {
+      padding-left: 1.2em;
+      padding-right: 1.2em;
+      text-transform: none;
+      text-align: center;
+    }
+
+  /* === SHARED ROW STYLES === */
+
+  .row {
+    display: flex;
+    flex-direction: column;
+    padding: 2em;
+  }
+
+  /* === BANNER ROW === */
+
+  .banner-row {
+    color: white;
+    
+    background: #F57C00;
+    background: -webkit-linear-gradient(#FB8C00, #F57C00);
+    background: -o-linear-gradient(#FB8C00, #F57C00);
+    background: -moz-linear-gradient(#FB8C00, #F57C00);
+    background: linear-gradient(#FB8C00, #F57C00);
+  }
+    .banner-row h1 { margin: 0 0 0.7em 0; }
+    .banner-row .tag-line { max-width: 36em; }
+    .banner-row .button-wrapper { margin: 2em 0 0 -0.2em; }
+      .banner-row paper-button {
+        background: #FF9800;
+        color: white;
+        font-size: 0.9em;
+      }
+  
+  /* === DIAGRAM ROW === */
+
+  .diagram-row {
+    background: #FFB74D;
+    padding: 2em;
+  }
+    .diagram-row h2 {
+      font-size: 1.2em;
+      width: 10em;
+      margin: 0 auto 1em auto;
+      background: #FFE0B2;
+      text-align: center;
+      padding: 0.5em;
+      border-radius: 3px;
+    }
+    .diagram-row .diagram {
+      display: flex;
+      flex-direction: column;
+    }
+      .diagram-row .diagram img {
+        width: 100%;
+        margin: 1em auto;
+      }
+      .diagram-row .diagram img.tall { max-width: 450px; }
+      .diagram-row .diagram img.wide { display: none; }
+      @media (min-width: 760px) {
+        .diagram-row .diagram img.tall { display: none; }
+        .diagram-row .diagram img.wide { display: block; }
+      }
+
+  /* === INFO ROW === */
+
+  .info-row {
+    background: #FFF3E0;
+  }
+    .info-row ul.info-list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 2em -1em 1em -1em;
+      padding: 0;
+    }
+    @media (min-width: 760px) { .info-row ul.info-list { margin: 2em -1.5em 1em -1.5em; } }
+      .info-row ul.info-list li {
+        flex-grow: 0;
+        width: 100%;
+        flex-basis: auto;
+        margin: 1em;
+        
+        display: flex;
+        flex-direction: row;
+      }
+      @media (min-width: 760px) { .info-row ul.info-list li {  width: 45%; } }
+      @media (min-width: 1400px) { .info-row ul.info-list li {  width: 30%; } }
+        .info-row ul.info-list li paper-material {
+          padding: 1.7em;
+          border-radius: 5px;
+          background: white;
+          color: rgb(97,97,97);
+          display: flex;
+          flex-direction: column;
+        }
+          .info-row ul.info-list li .title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 0 3em 1em 0;
+          }
+          .info-row ul.info-list li .icon {
+            position: absolute;
+            right: 1.2rem;
+            top: 1.2rem;
+            color: #4CAF50;
+            font-size: 2em;
+          }
+    .info-row ul.buttons {
+      list-style: none;
+      margin: 0.5em 0 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+      .info-row ul.buttons li {
+        display: block;
+        margin: 1em 2em;
+      }
+        .info-row paper-button {
+          background: #FF9800;
+          color: white;
+        }
+
+  /* === ROW DIVIDERS === */
+
+  .row-divider {
+    position: relative;
+    height: 2em;
+    overflow: hidden;
+  }
+    .row-divider.bottom-white { background: white; }
+    .row-divider.bottom-orange-700 { background: #F57C00; }
+    .row-divider.bottom-orange-300 { background: #FFB74D; }
+    .row-divider.bottom-orange-200 { background: #FFCC80; }
+    .row-divider.bottom-orange-50 { background: #FFF3E0; }
+    .row-divider.bottom-grey { background: rgb(97,97,97); }
+      .row-divider .top {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 1em;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      }
+      .row-divider.top-white .top { background: white; }
+      .row-divider.top-orange-700 .top { background: #F57C00; }
+      .row-divider.top-orange-300 .top { background: #FFB74D; }
+      .row-divider.top-orange-200 .top { background: #FFCC80; }
+      .row-divider.top-orange-50 .top { background: #FFF3E0; }
+      .row-divider.top-grey .top { background: rgb(97,97,97); }
+
+</style>
+
+<bl-web-container page-name="how-it-works" current-user="<%= @current_user_json %>"
+  asset-paths="<%= @ap_json %>">
+
+  <div class="content">
+    
+    <!-- === BANNER ROW === -->
+    <div class="row banner-row">
+      <h1>How Badge List Works</h1>
+
+      <div class="tag-line">
+        Badge List is built around a robust evidence and feedback collection workflow. 
+        Each badge is backed by a portfolio of evidence and the endorsements of experts.
+      </div>
+
+      <div class="button-wrapper">
+        <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>"
+            class="button">
+          <paper-button raised class="create-group">Create a free group</paper-button>
+        </a>
+      </div>
+    </div>
+
+    <!-- === ROW DIVIDER === -->
+    <div class="row-divider top-orange-700 bottom-orange-300">
+      <div class="top">&nbsp;</div>
+    </div>
+
+    <!-- === DIAGRAM ROW === -->
+    <div class="row diagram-row">
+      <h2>The Badge List Flow</h1>
+
+      <div class="diagram">
+        <%= image_tag 'graphics/badge-list-flow-tall.svg', class: 'tall' %>
+        <%= image_tag 'graphics/badge-list-flow-wide.svg', class: 'wide' %>
+      </div>
+    </div>
+
+    <!-- === ROW DIVIDER === -->
+    <div class="row-divider top-orange-300 bottom-orange-50">
+      <div class="top">&nbsp;</div>
+    </div>
+
+    <!-- === INFO ROW === -->
+    <div class="row info-row">
+      <h2>The Badge List difference</h1>
+      <div class="sub-header">
+        There’s no other badge platform with the power and simplicity of Badge List.
+      </div>
+
+      <ul class="info-list">
+        <li>
+          <paper-material elevation="2">
+            <div class="icon"><i class="fa fa-check-circle"></i></div>
+            <div class="title">Easy to use</div>
+            <div class="body">
+              Badge List has a simple interface that is fully optimized for mobile. 
+              Creating badges and submitting evidence is fast and requires no training. 
+              Everything is web-based so there are no servers to manage or software to configure.
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="icon"><i class="fa fa-check-circle"></i></div>
+            <div class="title">Best-in-class evidence collection workflow</div>
+            <div class="body">
+              Collecting evidence and providing feedback is at the core of the learning process. 
+              We’ve thought it all through to make it as straightforward as possible. 
+              From privacy controls to bulk feedback tools, everything just works.
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="icon"><i class="fa fa-check-circle"></i></div>
+            <div class="title">Integrated e-portfolios</div>
+            <div class="body">
+              Badge List is a complete solution. Every user has a sharable badge profile and every 
+              badge is backed by a portfolio of evidence.
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="icon"><i class="fa fa-check-circle"></i></div>
+            <div class="title">Google single-sign on</div>
+            <div class="body">
+              If your organization uses Google accounts or Google Apps for Education (GAFE), 
+              signing up is a 1-click process.
+            </div>
+          </paper-material>
+        </li>
+        <li>
+          <paper-material elevation="2">
+            <div class="icon"><i class="fa fa-check-circle"></i></div>
+            <div class="title">Open Badge compliant</div>
+            <div class="body">
+              Badge List is fully compliant with the Open Badges standard. 
+              That means that each badge is backed by rich metadata allowing your credentials to be 
+              recognized by any Open Badge compatible system. Exporting to the Mozilla Backpack and 
+              social media profiles such as Linkedin is easy.
+            </div>
+          </paper-material>
+        </li>
+      </ul>
+
+      <ul class="buttons">
+        <li>
+          <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>"
+              class="button">
+            <paper-button raised class="create-group">Create a free group</paper-button>
+          </a>
+        </li>
+        <li>
+          <a href="/community" class="button">
+            <paper-button raised class="community">Join Badge List Community</paper-button>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- === ROW DIVIDER === -->
+    <div class="row-divider top-orange-50 bottom-grey">
+      <div class="top">&nbsp;</div>
+    </div>
+
+    <!-- === FOOTER === -->
+    <bl-web-footer></bl-web-footer>
+
+  </div>
+
+</bl-web-container>

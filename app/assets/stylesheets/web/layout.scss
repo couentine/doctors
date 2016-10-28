@@ -1,0 +1,41 @@
+/* ================================================== */
+/* ===================>> LAYOUT <<=================== */
+/* ================================================== */
+
+/* === BASE STYLES === */
+
+html {
+}
+
+body {
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+
+  -ms-flex-direction: column;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+
+  margin: 0;
+  height: 100vh;
+}
+
+
+/* === APP FOOTER === */
+
+// footer.mdl-mini-footer {
+//   .mdl-mini-footer__middle-section {
+//     margin: 0 auto;
+//   }
+// }
+
+/* === PAGE CONTENT === */
+
+// .page-content {
+//   @media (min-width: $grid-tablet-breakpoint) {
+//     padding-top: 15px;
+//   }
+//   @media (min-width: $grid-desktop-breakpoint) {
+//     padding-top: 30px;
+//   }
+// }
