@@ -18,11 +18,18 @@
 
   /* === SHARED PAPER-BUTTON === */
 
-  paper-button {
-    padding-left: 1.2em;
-    padding-right: 1.2em;
-    text-transform: none;
+  a.button, a.button:visited, a.button:hover, a.button:focus {
+    text-decoration: none;
+    color: initial;
+    text-align: center;
+    font-weight: normal;
   }
+    paper-button {
+      padding-left: 1.2em;
+      padding-right: 1.2em;
+      text-transform: none;
+      text-align: center;
+    }
 
   /* === SHARED ROW STYLES === */
 
@@ -250,13 +257,19 @@
             margin-bottom: 1em;
             flex-grow: 1;
           }
-          .who-row li .quote-symbol { font-weight: bold; }
-          .who-row li .logo {
-            width: 4em;
-            float: right;
+            .who-row li .quote-symbol { font-weight: bold; }
+          .who-row li .footer {
+            position: relative;
+            padding-right: 5em;
           }
-          .who-row li .name { font-weight: bold; }
-          .who-row li .title { font-style: italic; }
+            .who-row li .logo {
+              position: absolute;
+              right: 0;
+              bottom: 0;
+            }
+              .who-row li .logo img { width: 4em; }
+            .who-row li .name { font-weight: bold; }
+            .who-row li .title { font-style: italic; }
 
   /* === PRICING DIVIDERS === */
 
@@ -413,12 +426,13 @@
     <div class="row action-row">
       <ul class="buttons">
         <li>
-          <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>">
+          <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>"
+              class="button">
             <paper-button raised class="create-group">Create a free group</paper-button>
           </a>
         </li>
         <li>
-          <a href="/community">
+          <a href="/community" class="button">
             <paper-button raised class="community">Join Badge List Community</paper-button>
           </a>
         </li>
@@ -589,7 +603,9 @@
               <span class="quote-symbol quote-right">&#8221;</span>
             </div>
             <div class="footer">
-              <%= image_tag 'customers/logo-ku.jpg', class: 'logo' %>
+              <a href="http://kucrl.org" target="_blank" class="logo">
+                <%= image_tag 'customers/logo-ku.jpg' %>
+              </a>
               <div class="name">Patty Graner</div>
               <div class="title">Director of Professional Development</div>
               <a href="http://kucrl.org" target="_blank" class="org-name">
@@ -610,7 +626,9 @@
               <span class="quote-symbol quote-right">&#8221;</span>
             </div>
             <div class="footer">
-              <%= image_tag 'customers/logo-del-lago-academy.png', class: 'logo' %>
+              <a href="http://www.competencyx.com" target="_blank" class="logo">
+                <%= image_tag 'customers/logo-del-lago-academy.png' %>
+              </a>
               <div class="name">Alec Barron</div>
               <div class="title">Principal Investigator</div>
               <a href="http://www.competencyx.com" target="_blank" class="org-name">
@@ -631,7 +649,9 @@
               <span class="quote-symbol quote-right">&#8221;</span>
             </div>
             <div class="footer">
-              <%= image_tag 'customers/logo-open-worm.jpg', class: 'logo' %>
+              <a href="http://www.openworm.org" target="_blank" class="logo">
+                <%= image_tag 'customers/logo-open-worm.jpg' %>
+              </a>
               <div class="name">Chee Wai Lee</div>
               <div class="title">OpenWorm Contributor</div>
               <a href="http://www.openworm.org" target="_blank" class="org-name">
@@ -651,7 +671,9 @@
               <span class="quote-symbol quote-right">&#8221;</span>
             </div>
             <div class="footer">
-              <%= image_tag 'customers/logo-sccoe.png', class: 'logo' %>
+              <a href="http://www.sccoe.org/" target="_blank" class="logo">
+                <%= image_tag 'customers/logo-sccoe.png' %>
+              </a>
               <div class="name">Cate Tolnai</div>
               <div class="title">Academic Technology Specialist</div>
               <a href="http://www.sccoe.org/" target="_blank" class="org-name">
@@ -670,7 +692,9 @@
               <span class="quote-symbol quote-right">&#8221;</span>
             </div>
             <div class="footer">
-              <%= image_tag 'customers/logo-mar-vista-academy.png', class: 'logo' %>
+              <a href="http://mva.sweetwaterschools.org" target="_blank" class="logo">
+                <%= image_tag 'customers/logo-mar-vista-academy.png' %>
+              </a>
               <div class="name">Mari Venturino</div>
               <div class="title">Blended Learning Specialist</div>
               <a href="http://mva.sweetwaterschools.org" target="_blank" class="org-name">

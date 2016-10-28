@@ -18,11 +18,18 @@
 
   /* === SHARED PAPER-BUTTON === */
 
-  paper-button {
-    padding-left: 1.2em;
-    padding-right: 1.2em;
-    text-transform: none;
+  a.button, a.button:visited, a.button:hover, a.button:focus {
+    text-decoration: none;
+    color: initial;
+    text-align: center;
+    font-weight: normal;
   }
+    paper-button {
+      padding-left: 1.2em;
+      padding-right: 1.2em;
+      text-transform: none;
+      text-align: center;
+    }
 
   /* === SHARED ROW STYLES === */
 
@@ -188,7 +195,8 @@
       </div>
 
       <div class="button-wrapper">
-        <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>">
+        <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>"
+            class="button">
           <paper-button raised class="create-group">Create a free group</paper-button>
         </a>
       </div>
@@ -280,12 +288,13 @@
 
       <ul class="buttons">
         <li>
-          <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>">
+          <a href="<%= (current_user) ? new_group_path : new_user_registration_path %>"
+              class="button">
             <paper-button raised class="create-group">Create a free group</paper-button>
           </a>
         </li>
         <li>
-          <a href="/community">
+          <a href="/community" class="button">
             <paper-button raised class="community">Join Badge List Community</paper-button>
           </a>
         </li>
