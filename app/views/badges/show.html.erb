@@ -238,9 +238,9 @@
 
             <%= f.input :visibility, as: :radio_buttons, 
               label: 'Who can see the badge and its contents?', 
-              hint: 'This setting controls the visibility of the badge itself as well as ' \
-                + 'all requirement and wiki pages. The visibility of posted evidence is set ' \
-                + 'on each individual requirement.', include_blank: false, 
+              hint: 'This setting controls the visibility of the badge itself, the lists of ' \
+                + 'experts and learners, and all requirement and wiki pages. The visibility of ' \
+                + 'posted evidence is set on each individual requirement.', include_blank: false, 
               collection: @badge_visibility_options %>
 
             <%= f.input :editability, as: :radio_buttons, label: 'Who can edit the badge?', 

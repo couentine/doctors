@@ -27,9 +27,10 @@ class BadgesController < ApplicationController
   EXPERT_WORDS = %w(expert master guide guru jedi)
   LEARNER_WORDS = %w(learner trainee student novice padawan)
   BADGE_VISIBILITY_OPTIONS = [
-    ['<i class="fa fa-globe"></i> Everyone'.html_safe, 'public'],
-    ['<i class="fa fa-users"></i> Only Group Members'.html_safe, 'private'],
-    ['<i class="fa fa-eye-slash"></i> Only Badge Members &amp; Group Admins'.html_safe, 'hidden']
+    ['<i class="fa fa-globe"></i> <strong>Public -</strong> Everyone'.html_safe, 'public'],
+    ['<i class="fa fa-users"></i> <strong>Private -</strong> Only Group Members'.html_safe, 'private'],
+    ['<i class="fa fa-eye-slash"></i> <strong>Hidden -</strong> Only Badge Members '.html_safe \
+      + '&amp; Group Admins'.html_safe, 'hidden']
   ]
 
   # === RESTFUL ACTIONS === #
