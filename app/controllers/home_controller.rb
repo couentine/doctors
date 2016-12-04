@@ -52,7 +52,14 @@ class HomeController < ApplicationController
       end
     else
       @current_user_json = '{}'
-      render template: 'home/root_external', layout: 'web'
+      respond_to do |format|
+        format.html { render template: 'home/root_external', layout: 'web' }
+        format.any do
+          # This prevents an exception from occuring when random search engines try querying
+          # for other home page formats
+          not_found
+        end
+      end
     end
   end
   
@@ -61,11 +68,11 @@ class HomeController < ApplicationController
   def root_external
     if current_user
       @current_user_json = current_user.json_cu
+      render layout: 'web'
     else
-      @current_user_json = '{}'
+      # This prevents the '/w' URL from being bookmarked or used when people aren't logged in
+      redirect_to '/'
     end
-
-    render layout: 'web'
   end
 
   # GET /pricing
