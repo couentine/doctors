@@ -19,7 +19,7 @@
   }
   .card-header:hover { background-color: rgb(255,243,224); }
     .avatar {
-      flex: 0 0;
+      flex: 0 0 auto;
       display: flex;
       justify-content: flex-start;
       flex-direction: column;
@@ -30,7 +30,7 @@
         flex: none;
       }
     .text {
-      flex: 1 1;
+      flex: 1 1 auto;
       padding: 0 1em;
     }
       .text h2 {
@@ -42,7 +42,7 @@
         color: rgb(158,158,158);
       }
     .selector {
-      flex: 0 0;
+      flex: 0 0 auto;
     }
     paper-checkbox {
       --paper-checkbox-checked-color: #f57c00;
