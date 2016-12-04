@@ -45,8 +45,11 @@
       flex: 0 0 auto;
     }
     paper-checkbox {
-      --paper-checkbox-checked-color: #f57c00;
       --paper-checkbox-size: 1.3em;
+
+      /* NOTE: The line below isn't working, so I'm doing a workaround to make the check visible */
+      /*--paper-checkbox-checked-color: #F57C00;*/
+      --paper-checkbox-checkmark-color: #F57C00; /* Remove this line when bug is fixed. */
     }
 
   .card-content { padding: 0; }
