@@ -30,6 +30,14 @@
   }
 
   a.link-thumbnail { display: block; }
+  p.link-summary { font-style: italic; }
+  div.link-content {
+    background-color: #F5F5F5;
+    border-left: 6px solid #BDBDBD;
+    border-radius: 5px;
+    padding: 0.1em 1em;
+    margin-top: 1em;
+  }
 
   pre {
     overflow-y: scroll;

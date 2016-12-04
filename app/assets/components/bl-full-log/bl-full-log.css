@@ -19,7 +19,7 @@
   }
   .card-header:hover { background-color: rgb(255,243,224); }
     .avatar {
-      flex: 0 0;
+      flex: 0 0 auto;
       display: flex;
       justify-content: flex-start;
       flex-direction: column;
@@ -30,7 +30,7 @@
         flex: none;
       }
     .text {
-      flex: 1 1;
+      flex: 1 1 auto;
       padding: 0 1em;
     }
       .text h2 {
@@ -42,16 +42,14 @@
         color: rgb(158,158,158);
       }
     .selector {
-      flex: 0 0;
+      flex: 0 0 auto;
     }
     paper-checkbox {
-      --paper-checkbox-checked-color: rgb(245,124,0);
       --paper-checkbox-size: 1.3em;
-    }
-    paper-checkbox.hovered {
-      /* This doesn't work... */
-      --paper-checkbox-unchecked-background-color: rgb(255,224,178);
-      --paper-checkbox-unchecked-color: rgb(245,124,0);
+
+      /* NOTE: The line below isn't working, so I'm doing a workaround to make the check visible */
+      /*--paper-checkbox-checked-color: #F57C00;*/
+      --paper-checkbox-checkmark-color: #F57C00; /* Remove this line when bug is fixed. */
     }
 
   .card-content { padding: 0; }

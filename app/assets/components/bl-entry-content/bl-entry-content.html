@@ -15,18 +15,22 @@
           </span>
         </div>
         
+        <p class="link-summary">{{entry.summary}}</p>
+
         <h3><a href$="{{entry.link_url}}" target="_blank">{{linkTitle}}</a></h3>
 
-        <p hidden$="{{blank(entry.link_metadata.description)}}">
-          {{entry.link_metadata.description}}
-        </p>
-        
-        <div class="link-embed" hidden$="{{!linkHasEmbed}}">{{entry.link_metadata.html}}</div>
-        
-        <a class="link-thumbnail" target="_blank" href$="{{entry.link_url}}" 
-            hidden$="{{blank(entry.link_metadata.thumbnail_url)}}">
-          <img src$="{{entry.link_metadata.thumbnail_url}}">
-        </a>
+        <div class="link-content">
+          <p hidden$="{{blank(entry.link_metadata.description)}}">
+            {{entry.link_metadata.description}}
+          </p>
+          
+          <div class="link-embed" hidden$="{{!linkHasEmbed}}">{{entry.link_metadata.html}}</div>
+          
+          <a class="link-thumbnail" target="_blank" href$="{{entry.link_url}}" 
+              hidden$="{{blank(entry.link_metadata.thumbnail_url)}}">
+            <img src$="{{entry.link_metadata.thumbnail_url}}">
+          </a>
+        </div>
       </template>
 
       <template is="dom-if" if="{{isTweet}}">
