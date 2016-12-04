@@ -45,13 +45,8 @@
       flex: 0 0;
     }
     paper-checkbox {
-      --paper-checkbox-checked-color: rgb(245,124,0);
+      --paper-checkbox-checked-color: #f57c00;
       --paper-checkbox-size: 1.3em;
-    }
-    paper-checkbox.hovered {
-      /* This doesn't work... */
-      --paper-checkbox-unchecked-background-color: rgb(255,224,178);
-      --paper-checkbox-unchecked-color: rgb(245,124,0);
     }
 
   .card-content { padding: 0; }
