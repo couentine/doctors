@@ -14,7 +14,9 @@ class User
 
   JSON_TEMPLATES = {
     current_user: [:id, :name, :username, :username_with_caps, :admin, :avatar_image_url, 
-      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive]
+      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive],
+    group_list_item: [:id, :name, :username, :username_with_caps, :group_validation_request_counts,
+      :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url] 
   }
 
   INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'
@@ -37,46 +39,48 @@ class User
 
   # === CUSTOM FIELDS & VALIDATIONS === #
   
-  field :name,                          type: String
-  field :username,                      type: String
-  field :username_with_caps,            type: String
-  field :has_private_domain,            type: Boolean, default: false
-  field :is_non_private_domain_user,    type: Boolean, default: false
-  field :visible_to_domain_urls,        type: Array
-  field :flags,                         type: Array, default: [], pre_processed: true
-  field :admin,                         type: Boolean, default: false
-  field :form_submissions,              type: Array
-  field :last_active,                   type: Date
-  field :last_active_at,                type: Time # RETIRED
-  field :active_months,                 type: Array # RETIRED
-  field :page_views,                    type: Hash # RETIRED
-  field :email_inactive,                type: Boolean, default: false
-  field :email_bounces,                 type: Integer, default: 0
-  field :last_email_bounce_at,          type: Time
-  field :inactive_email_bounce_id,      type: Integer
+  field :name,                              type: String
+  field :username,                          type: String
+  field :username_with_caps,                type: String
+  field :has_private_domain,                type: Boolean, default: false
+  field :is_non_private_domain_user,        type: Boolean, default: false
+  field :visible_to_domain_urls,            type: Array
+  field :flags,                             type: Array, default: [], pre_processed: true
+  field :admin,                             type: Boolean, default: false
+  field :form_submissions,                  type: Array
+  field :last_active,                       type: Date
+  field :last_active_at,                    type: Time # RETIRED
+  field :active_months,                     type: Array # RETIRED
+  field :page_views,                        type: Hash # RETIRED
+  field :email_inactive,                    type: Boolean, default: false
+  field :email_bounces,                     type: Integer, default: 0
+  field :last_email_bounce_at,              type: Time
+  field :inactive_email_bounce_id,          type: Integer
 
-  mount_uploader :direct_avatar,        S3DirectUploader
-  mount_uploader :avatar,               S3AvatarUploader
-  field :avatar_key,                    type: String
-  field :processing_avatar,             type: Boolean
+  mount_uploader :direct_avatar,            S3DirectUploader
+  mount_uploader :avatar,                   S3AvatarUploader
+  field :avatar_key,                        type: String
+  field :processing_avatar,                 type: Boolean
 
-  field :identity_hash,                 type: String
-  field :identity_salt,                 type: String
+  field :identity_hash,                     type: String
+  field :identity_salt,                     type: String
 
-  field :stripe_customer_id,            type: String
-  field :stripe_default_source,         type: String
-  field :stripe_cards,                  type: Array, default: []
+  field :stripe_customer_id,                type: String
+  field :stripe_default_source,             type: String
+  field :stripe_cards,                      type: Array, default: []
 
-  field :expert_badge_ids,              type: Array, default: []
-  field :learner_badge_ids,             type: Array, default: []
-  field :all_badge_ids,                 type: Array, default: []
+  field :all_badge_ids,                     type: Array, default: []
+  field :learner_badge_ids,                 type: Array, default: []
+  field :requested_badge_ids,              type: Array, default: []
+  field :expert_badge_ids,                  type: Array, default: []
+  field :group_validation_request_counts,   type: Hash, default: {} # key=group_id, value=count
 
   # OmniAuth Fields
-  field :user_defined_password,         type: Boolean, default: true
-  field :auto_username_needs_review,    type: Boolean, default: false
-  field :omniauth_last_provider,        type: String
-  field :omniauth_google_oauth2_uid,    type: String
-  field :omniauth_google_oauth2_hash,   type: Hash # stores the full auth hash
+  field :user_defined_password,             type: Boolean, default: true
+  field :auto_username_needs_review,        type: Boolean, default: false
+  field :omniauth_last_provider,            type: String
+  field :omniauth_google_oauth2_uid,        type: String
+  field :omniauth_google_oauth2_hash,       type: Hash # stores the full auth hash
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
@@ -661,6 +665,12 @@ class User
     end
 
     return_rows
+  end
+
+  # This updates the appropriate key of group_validation_request_counts
+  def update_validation_request_count_for(group)
+    self.group_validation_request_counts[group.id.to_s] \
+      = logs.where(:badge_id.in => group.badges_cache.keys, validation_status: 'requested').count
   end
 
   def manually_update_identity_hash

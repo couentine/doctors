@@ -923,4 +923,25 @@ namespace :db do
     puts " >> Done."
   end
 
+  task backpopulate_user_validation_request_fields: :environment do
+    print "Updating #{User.count} users"
+    
+    # Run through them backwards
+    User.desc(:updated_at).each do |user|
+      # First buid the group validation count hash
+      Group.where(:id.in => (user.admin_of_ids + user.member_of_ids).uniq).each do |group|
+        user.update_validation_request_count_for group
+      end
+
+      # Then update the requested badge ids
+      user.requested_badge_ids = user.logs.where(detached_log: false, 
+        validation_status: 'requested').map{ |log| log.badge_id }
+
+      user.timeless.save
+      print "."
+    end
+
+    puts " >> Done."
+  end
+
 end
