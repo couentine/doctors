@@ -818,11 +818,11 @@ class GroupsController < ApplicationController
     valid_badge_map = {} # badge_url => badge_id
     valid_user_map = {} # username => user_id
 
-    # Determine the type of log query we'll be doing
-    if badge_param.blank? && !user_param.blank?
-      @query_mode = 'user'
-    else
+    # Determine the mode
+    if !badge_param.blank?
       @query_mode = 'badge'
+    elsif !user_param.blank?
+      @query_mode = 'user'
     end
 
     # No  need to hit the DB again unless there are badges

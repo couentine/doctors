@@ -1,0 +1,85 @@
+/* === BASE STYLES === */
+
+  :host {
+    display: inline-block;
+    min-width: 17em;
+  }
+  :host ::content h2 { margin: 0 0 0.7em 0; }
+  :host ::content .subtitle { margin: 0 0 1em 0; }
+
+/* === NON-EXPANDED === */
+
+  .container {
+    display: block;
+    position: relative;
+  }
+  .container bl-user {
+    margin-bottom: 1em;
+
+    --bl-user-title: {
+      background-color: rgb(179,229,252);
+      color: rgb(97,97,97);
+      border-color: rgb(3,155,229);
+    };
+  }
+    #label-expand-link {
+      background-color: white;
+      color: rgb(158,158,158);
+      filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
+      -webkit-filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
+      display: inline-block;
+      text-align: left;
+      padding: 0.7em 1em 0.7em 4.6em;
+      border-radius: 3px 500px 500px 3px;
+      position: absolute;
+      left: 50%;
+      top: 3.4em;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-size: 0.7em;
+      font-weight: bold;
+      line-height: 1.4em;
+    }
+
+/* === EXPANDED === */
+
+  .expanded-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 2em;
+    background-color: white;
+    color: rgb(245,124,0);
+    border-top: 4px solid rgb(245,124,0);
+    text-align: left;
+    z-index: 11;
+  }
+    .close-link {
+      display: inline-block;
+      color: rgb(97,97,97);
+      font-size: 2em;
+      position: absolute;
+      top: 1em;
+      right: 1em;
+    }
+
+  .user-grid {
+    display: flex;
+    flex-direction: row;
+  }
+    a.user {
+      margin: 1em;
+      flex: 1;
+    }
+    .placeholder {
+      flex: 1;
+      margin: 3em 1em;
+      padding: 1em;
+      color: rgb(97,97,97);
+      font-weight: bold;
+      text-align: center;
+      border: 2px solid rgb(97,97,97);
+      border-radius: 2px;
+    }
