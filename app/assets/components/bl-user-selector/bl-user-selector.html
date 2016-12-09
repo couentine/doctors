@@ -6,7 +6,7 @@
     <!-- === COLLAPSED VIEW === -->
     <div class="container" hidden="[[hideCollapsedView]]">
       <a href="#" on-tap="expand" id="user-expand-link">
-        <bl-user user="{{selectedUser}}" blank-user-text="No User Selected">
+        <bl-user user="[[selectedUser]]" blank-user-text="No User Selected">
         </bl-user>
       </a>
       <a href="#" on-tap="expand" id="label-expand-link">
@@ -26,14 +26,14 @@
 
       <div class="user-grid">
         
-        <template is="dom-repeat" items="{{users}}">
+        <template is="dom-repeat" items="[[users]]">
           <a href="#" on-tap="selectThisUser" class="user select-link"
-              data-user-url="{{item.url}}">
-            <bl-user user="{{item}}"></bl-user>
+              data-user-username="[[item.username]]">
+            <bl-user user="[[item]]" group-id="[[groupId]]" show-request-count></bl-user>
           </a>
         </template>
 
-        <div class="placeholder" hidden$="{{hasUsers}}">
+        <div class="placeholder" hidden="[[hasUsers]]">
           There are no users with pending feedback requests in this group. 
           (Or at least no feedback requests which you have permission to see.)
         </div>

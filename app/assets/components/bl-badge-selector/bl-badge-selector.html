@@ -6,7 +6,7 @@
     <!-- === COLLAPSED VIEW === -->
     <div class="container" hidden="[[hideCollapsedView]]">
       <a href="#" on-tap="expand" id="badge-expand-link">
-        <bl-badge badge="{{selectedBadge}}" blank-badge-text="No Badge Selected">
+        <bl-badge badge="[[selectedBadge]]" blank-badge-text="No Badge Selected">
         </bl-badge>
       </a>
       <a href="#" on-tap="expand" id="label-expand-link">
@@ -26,15 +26,14 @@
 
       <div class="badge-grid">
         
-        <template is="dom-repeat" items="{{badges}}">
+        <template is="dom-repeat" items="[[badges]]">
           <a href="#" on-tap="selectThisBadge" class="badge select-link"
-              data-badge-url="{{item.url}}">
-            <bl-badge badge="{{item}}"
-              options='{"showExpertCount": true, "showRequestCount": true}'></bl-badge>
+              data-badge-url="[[item.url]]">
+            <bl-badge badge="[[item]]" show-expert-count show-request-count></bl-badge>
           </a>
         </template>
 
-        <div class="placeholder" hidden$="{{hasBadges}}">
+        <div class="placeholder" hidden="[[hasBadges]]">
           There are no badges with pending feedback requests in this group. 
           (Or at least none for which you have awarding permissions.)
         </div>

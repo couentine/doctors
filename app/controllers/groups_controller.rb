@@ -844,8 +844,8 @@ class GroupsController < ApplicationController
       end
       
       # Now do the user query
-      User.where(:id.in => (@group.member_ids + @group.admin_ids).uniq, 
-          :"group_validation_request_counts.#{@group.id.to_s}".gt => 0).each do |user|
+      User.where(:id.in => (@group.member_ids + @group.admin_ids).uniq, :id.ne => current_user.id,
+          :"group_validation_request_counts.#{@group.id.to_s}".gt => 0).asc(:name).each do |user|
         @users << user.json(:group_list_item)
         valid_user_map[user.username] = user.id
       end

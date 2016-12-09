@@ -15,12 +15,6 @@
   }
   .container bl-user {
     margin-bottom: 1em;
-
-    --bl-user-title: {
-      background-color: rgb(179,229,252);
-      color: rgb(97,97,97);
-      border-color: rgb(3,155,229);
-    };
   }
     #label-expand-link {
       background-color: white;
@@ -68,10 +62,14 @@
   .user-grid {
     display: flex;
     flex-direction: row;
+    padding: 1.5em 0;
+    flex-wrap: wrap;
   }
     a.user {
-      margin: 1em;
-      flex: 1;
+      margin: 1em 2em 1em 0;
+      flex: 0 1 auto;
+      text-decoration: none;
+      width: 19em;
     }
     .placeholder {
       flex: 1;

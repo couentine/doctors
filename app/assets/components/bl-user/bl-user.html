@@ -1,71 +1,80 @@
-<dom-module id="bl-badge">
-  <link rel="stylesheet" href="bl-badge.css" />
+<dom-module id="bl-user">
+  <link rel="stylesheet" href="bl-user.css" />
   
   <template>
 
-    <template is="dom-if" if="{{link}}">
-      <a href$="{{badge.full_path}}" class="wrapper">
-        <paper-ripple></paper-ripple>
-        
-        <div class="image">
-          <template is="dom-if" if="{{hasBadge}}">
-            <img src$="{{badge.image_medium_url}}">
-          </template>
+    <paper-material id="paper" elevation="0" animated>
+
+      <template is="dom-if" if="[[link]]">
+        <a href$="[[user.full_path]]" class="wrapper">
+          <paper-ripple></paper-ripple>
           
-          <template is="dom-if" if="{{!hasBadge}}">
-            <i class$="{{blankBadgeIconClass}}"></i>
-          </template>
-        </div>
-        <div class="label">
-          <div class="label-title">
-            <h2>{{badgeName}}</h2>
-            <ul class="metric-list" hidden$="{{!showMetricList}}">
-              <li hidden$="{{!showExpertCount}}" class="expert-count">
-                <i class="fa fa-user"></i>
-                <span class="metric">{{badge.expert_count}}</span>
-              </li>
-              <li hidden$="{{!showRequestCount}}" class="request-count">
+          <div class="image">
+            <template is="dom-if" if="[[hasUser]]">
+              <img src$="[[user.avatar_image_medium_url]]">
+            </template>
+            <template is="dom-if" if="[[!hasUser]]">
+              <i class$="[[blankUserIconClass]]"></i>
+            </template>
+          </div>
+          <div class="divider">&nbsp;</div>
+          <div class="label">
+            <div class="label-title">
+              <template is="dom-if" if="[[hasUser]]">
+                <h2>[[user.name]]</h2>
+              </template>
+              <template is="dom-if" if="[[!hasUser]]">
+                <h2>[[blankUserText]]</h2>
+              </template>
+            </div>
+            <div class="label-subtitle">[[user.username_with_caps]]</div>
+            <ul class="metric-list" hidden$="[[!showMetricList]]">
+              <li hidden="[[!showRequestCount]]" class="request-count">
                 <i class="fa fa-flag-checkered"></i>
-                <span class="metric">{{badge.validation_request_count}}</span>
+                <span class="metric">[[requestCount]]</span>
+              </li>
+            </ul>
+          </div>
+        </a>
+      </template>
+
+      <template is="dom-if" if="[[!link]]">
+        <div class="wrapper">
+          <!-- === THIS SECTION IS EXACTLY THE SAME AS ABOVE BUT WITH <div> INSTEAD OF <a> === -->
+          <paper-ripple></paper-ripple>
+          
+          <div class="image">
+            <template is="dom-if" if="[[hasUser]]">
+              <img src$="[[user.avatar_image_medium_url]]">
+            </template>
+            <template is="dom-if" if="[[!hasUser]]">
+              <i class$="[[blankUserIconClass]]"></i>
+            </template>
+          </div>
+          <div class="divider">&nbsp;</div>
+          <div class="label">
+            <div class="label-title">
+              <template is="dom-if" if="[[hasUser]]">
+                <h2>[[user.name]]</h2>
+              </template>
+              <template is="dom-if" if="[[!hasUser]]">
+                <h2>[[blankUserText]]</h2>
+              </template>
+            </div>
+            <div class="label-subtitle">[[user.username_with_caps]]</div>
+            <ul class="metric-list" hidden$="[[!showMetricList]]">
+              <li hidden="[[!showRequestCount]]" class="request-count">
+                <i class="fa fa-flag-checkered"></i>
+                <span class="metric">[[requestCount]]</span>
               </li>
             </ul>
           </div>
         </div>
-      </a>
-    </template>
+      </template>
 
-    <template is="dom-if" if="{{!link}}">
-      <div class="wrapper">
-        <paper-ripple></paper-ripple>
-
-        <div class="image">
-          <template is="dom-if" if="{{hasBadge}}">
-            <img src$="{{badge.image_medium_url}}">
-          </template>
-          
-          <template is="dom-if" if="{{!hasBadge}}">
-            <i class$="{{blankBadgeIconClass}}"></i>
-          </template>
-        </div>
-        <div class="label">
-          <div class="label-title">
-            <h2>{{badgeName}}</h2>
-            <ul class="metric-list" hidden$="{{!showMetricList}}">
-              <li hidden$="{{!showExpertCount}}" class="expert-count">
-                <i class="fa fa-user"></i>
-                <span class="metric">{{badge.expert_count}}</span>
-              </li>
-              <li hidden$="{{!showRequestCount}}" class="request-count">
-                <i class="fa fa-flag-checkered"></i>
-                <span class="metric">{{badge.validation_request_count}}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </template>
+    </paper-material>
 
   </template>
 
-  <script src="bl-badge.js"></script>
+  <script src="bl-user.js"></script>
 </dom-module>

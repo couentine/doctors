@@ -3,25 +3,26 @@ Polymer({
 
   properties: {
     users: Array,
+    groupId: String, // used to pass to bl-user
     for: String, // id of the bl-list
     expandedParent: { type: String, value: 'body' }, // query selector for the parent element
     selectedUserUsername: { type: String, observer: '_selectedUserUsernameChanged' },
     selectedUser: Object,
     userUsernameMap: Object,
-    expanded: { type: Boolean, value: false },
-    hidden: { type: Boolean, value: false },
-
+    disabled: { type: Boolean, value: false, notify: true },
+    expanded: { type: Boolean, value: false, notify: true },
+    
     // Computed Properties
     hasUsers: { type: Boolean, value: false, computed: '_hasUsers(users)' },
-    hideCollapsedView: { type: Boolean, computed: '_hideCollapsedView(expanded, hidden)' },
-    hideExpandedView: { type: Boolean, computed: '_hideExpandedView(expanded, hidden)' }
+    hideCollapsedView: { type: Boolean, computed: '_hideCollapsedView(disabled, expanded)' },
+    hideExpandedView: { type: Boolean, computed: '_hideExpandedView(disabled, expanded)' }
   },
 
   attached: function() {
     // Build userUsernameMap
     this.userUsernameMap = {};
     for (var i = 0; i < this.users.length; i++)
-      this.userUsernameMap[this.users[i].url] = this.users[i];
+      this.userUsernameMap[this.users[i].username] = this.users[i];
     
     // Set the user if needed
     if (this.selectedUserUsername)
@@ -35,8 +36,6 @@ Polymer({
   // Functions
   expand: function(e) { this.expanded = true; if (e) e.preventDefault(); },
   close: function(e) { this.expanded = false; if (e) e.preventDefault(); },
-  show: function(e) { this.hidden = false; this.expand(); if (e) e.preventDefault(); },
-  hide: function(e) { this.close(); this.hidden = true; if (e) e.preventDefault(); },
   selectThisUser: function(e) { 
     this.selectedUserUsername = $(e.target).closest('.select-link')[0].dataUserUsername;
     this.close();
@@ -44,8 +43,8 @@ Polymer({
 
   // Computed Properties
   _hasUsers: function(users) { return users && (users.length > 0); },
-  _hideCollapsedView: function(expanded, hidden) { return expanded || hidden; },
-  _hideExpandedView: function(expanded, hidden) { return !expanded || hidden; },
+  _hideCollapsedView: function(disabled, expanded) { return disabled || expanded; },
+  _hideExpandedView: function(disabled, expanded) { return disabled || !expanded; },
 
   // Observers
   _selectedUserUsernameChanged: function(newValue, oldValue) {
@@ -55,8 +54,9 @@ Polymer({
       this.selectedUser = this.userUsernameMap[newValue];
       if (this.for) {
         targetList = document.querySelector('#' + this.for);
-        if (targetList)
-          targetList.updateQueryOptions({ 'user': newValue });
+        // NOTE: We need to clear out the badge option because of the way this is being used
+        // in the review screen. This may need to change once the element is used in other contexts
+        if (targetList) targetList.updateQueryOptions({ user: newValue, badge: null });
       }
     }
   }

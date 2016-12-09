@@ -8,13 +8,13 @@ Polymer({
     selectedBadgeUrl: { type: String, observer: '_selectedBadgeUrlChanged' },
     selectedBadge: Object,
     badgeUrlMap: Object,
-    expanded: { type: Boolean, value: false },
-    hidden: { type: Boolean, value: false },
+    disabled: { type: Boolean, value: false, notify: true },
+    expanded: { type: Boolean, value: false, notify: true },
     
     // Computed Properties
     hasBadges: { type: Boolean, value: false, computed: '_hasBadges(badges)' },
-    hideCollapsedView: { type: Boolean, computed: '_hideCollapsedView(expanded, hidden)' },
-    hideExpandedView: { type: Boolean, computed: '_hideExpandedView(expanded, hidden)' }
+    hideCollapsedView: { type: Boolean, computed: '_hideCollapsedView(disabled, expanded)' },
+    hideExpandedView: { type: Boolean, computed: '_hideExpandedView(disabled, expanded)' }
   },
 
   attached: function() {
@@ -35,8 +35,6 @@ Polymer({
   // Functions
   expand: function(e) { this.expanded = true; if (e) e.preventDefault(); },
   close: function(e) { this.expanded = false; if (e) e.preventDefault(); },
-  show: function(e) { this.hidden = false; this.expand(); if (e) e.preventDefault(); },
-  hide: function(e) { this.close(); this.hidden = true; if (e) e.preventDefault(); },
   selectThisBadge: function(e) { 
     this.selectedBadgeUrl = $(e.target).closest('.select-link')[0].dataBadgeUrl;
     this.close();
@@ -44,8 +42,8 @@ Polymer({
 
   // Computed Properties
   _hasBadges: function(badges) { return badges && (badges.length > 0); },
-  _hideCollapsedView: function(expanded, hidden) { return expanded || hidden; },
-  _hideExpandedView: function(expanded, hidden) { return !expanded || hidden; },
+  _hideCollapsedView: function(disabled, expanded) { return disabled || expanded; },
+  _hideExpandedView: function(disabled, expanded) { return disabled || !expanded; },
 
   // Observers
   _selectedBadgeUrlChanged: function(newValue, oldValue) {
@@ -55,8 +53,9 @@ Polymer({
       this.selectedBadge = this.badgeUrlMap[newValue];
       if (this.for) {
         targetList = document.querySelector('#' + this.for);
-        if (targetList)
-          targetList.updateQueryOptions({ 'badge': newValue });
+        // NOTE: We need to clear out the user option because of the way this is being used
+        // in the review screen. This may need to change once the element is used in other contexts
+        if (targetList) targetList.updateQueryOptions({ badge: newValue, user: null });
       }
     }
   }

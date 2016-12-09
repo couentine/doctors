@@ -7,11 +7,12 @@ Polymer({
     blankBadgeIconClass: { type: String, value: "fa fa-ban" },
     link: { type: Boolean, value: false },
     options: Object, // valid keys = showExpertCount, showRequestCount
+    showExpertCount: { type: Boolean, value: false },
+    showRequestCount: { type: Boolean, value: false },
 
     // Computed
-    showMetricList: { type: Boolean, value: false, computed: "_showMetricList(options)" },
-    showExpertCount: { type: Boolean, value: false, computed: "_showExpertCount(options)" },
-    showRequestCount: { type: Boolean, value: false, computed: "_showRequestCount(options)" },
+    showMetricList: { type: Boolean, value: false, 
+      computed: "_showMetricList(showExpertCount, showRequestCount)" },
 
     // Auto set
     badgeName: String,
@@ -23,11 +24,9 @@ Polymer({
   },
 
   // Computed Properties
-  _showMetricList: function(options) {
-    return options && (options.showExpertCount || options.showRequestCount)
+  _showMetricList: function(showExpertCount, showRequestCount) {
+    return showExpertCount || showRequestCount;
   },
-  _showExpertCount: function(options) { return options && options.showExpertCount; },
-  _showRequestCount: function(options) { return options && options.showRequestCount; },
 
   // Observers
   _badgeObserver: function() {

@@ -14,9 +14,9 @@ class User
 
   JSON_TEMPLATES = {
     current_user: [:id, :name, :username, :username_with_caps, :admin, :avatar_image_url, 
-      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive],
+      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive, :full_path],
     group_list_item: [:id, :name, :username, :username_with_caps, :group_validation_request_counts,
-      :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url] 
+      :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :full_path] 
   }
 
   INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'
@@ -150,6 +150,10 @@ class User
 
   def user_url
     "#{ENV['root_url'] || 'https://www.badgelist.com'}/u/#{username_with_caps}"
+  end
+
+  def full_path
+    "/u/#{username_with_caps}"
   end
 
   # Returns URL of the specified version of this user's avatar (uses gravatar as a backup)

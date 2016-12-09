@@ -18,7 +18,7 @@
     }
 
   bl-selection-bar paper-button { width: 11em; }
-  paper-button.select-all-button { 
+  paper-button.select-all-button, bl-query-options.query-filter-option { 
     transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s !important;
   }
 
@@ -56,26 +56,23 @@
         </paper-dropdown-menu>
 
         <bl-badge-selector badges="<%= @badges.to_json %>" 
-            selected-badge-url="<%= @badge_url.to_s %>" 
-            for="log-list" hidden="<%= (@query_mode != 'badge').to_s %>"
+            selected-badge-url="<%= @badge_url.to_s %>" for="log-list" 
+            <%= (@query_mode != 'badge') ? 'disabled' : '' %>
             <%= (@badge_url.blank?) ? 'expanded' : '' %>>
           <h2>Select a badge</h2>
           <div class="subtitle">
-            Select a badge below to view the portfolios of badge members who have requested
-            feedback. After selecting a badge you'll be able to submit feedback on multiple 
-            portfolios at once.
+            Select a badge below to view all feedback requests for that badge.
           </div>
         </bl-badge-selector>
 
-        <bl-user-selector users="<%= @users.to_json %>" 
-            selected-user-username="<%= @user_username.to_s %>" hidden="true"
-            for="log-list" hidden="<%= (@query_mode != 'user').to_s %>"
-            <%= (@user_name.blank?) ? 'expanded' : '' %>>
+        <bl-user-selector users="<%= @users.to_json %>" for="log-list" 
+            selected-user-username="<%= @user_username.to_s %>" group-id="<%= @group.id.to_s %>"
+            <%= (@query_mode != 'user') ? 'disabled' : '' %>
+            <%= (@user_username.blank?) ? 'expanded' : '' %> >
           <h2>Select a person</h2>
           <div class="subtitle">
-            Select a person below to view all of that member's portfolios which are pending 
-            feedback across all badges in the group. After selecting a user you'll be able to 
-            submit feedback on multiple portfolios at once.
+            Select a group member below to view their feedback requests across all badges 
+            in the group.
           </div>
         </bl-user-selector>
       </div>
@@ -94,7 +91,8 @@
 
         <div class="list-controls">
           <ul class="left">
-            <bl-query-options for="log-list" selected-options="<%= @sort_options.to_json %>">
+            <bl-query-options for="log-list" selected-options="<%= @sort_options.to_json %>"
+                class="query-filter-option">
               <paper-dropdown-menu label="Sort order" class="query-options-dropdown">
                 <paper-listbox class="dropdown-content">
                   <paper-item data-options='{"sort_by":"date_requested","sort_order":"desc"}'>
@@ -152,11 +150,11 @@
 
   function queryModeChanged() {
     if (review.queryMode == 'badge') {
-      document.querySelector('bl-user-selector').hide();
-      document.querySelector('bl-badge-selector').show();
+      document.querySelector('bl-badge-selector').disabled = false;
+      document.querySelector('bl-user-selector').disabled = true;
     } else if (review.queryMode == 'user') {
-      document.querySelector('bl-badge-selector').hide();
-      document.querySelector('bl-user-selector').show();
+      document.querySelector('bl-user-selector').disabled = false;
+      document.querySelector('bl-badge-selector').disabled = true;
     }
   }
 

@@ -41,6 +41,7 @@ Polymer({
     selectedItems: { type: Array, value: function() { return []; } },
     selectedItemCount: { type: Number, value: 0, computed: "_selectedItemCount(selectedItems)",
       observer: "_selectedItemCountChanged" },
+    hasItems: { type: Boolean, computed: "_hasItems(items.length)", observer: "_hasItemsChanged" },
     hasUnselectedItems: { type: Boolean, 
       computed: "_hasUnselectedItems(items.length, selectedItemCount)",
       observer: "_hasUnselectedItemsChanged" },
@@ -189,6 +190,15 @@ Polymer({
         this.updateSelectedItems();
     }
   },
+  _hasItemsChanged: function(newValue, oldValue) {
+    // Hide query options
+    // NOTE: We'll hide it by setting the scale to 0, so it can be animated if desired.
+    if (newValue) {
+      $(Polymer.dom(this).querySelectorAll('.query-filter-option')).css('transform', 'scale(1)');
+    } else {
+      $(Polymer.dom(this).querySelectorAll('.query-filter-option')).css('transform', 'scale(0)');
+    }
+  },
   _hasUnselectedItemsChanged: function(newValue, oldValue) {
     // Hide any buttons with class 'select-all-button' anywhere in the light DOM
     // NOTE: We'll hide it by setting the scale to 0, so it can be animated if desired.
@@ -232,6 +242,7 @@ Polymer({
     if (this.selectionBar)
       this.selectionBar.count = newValue;
   },
+  _hasItems: function(itemsLength) { return itemsLength > 0; },
   _hasUnselectedItems: function(itemsLength, selectedItemCount) {
     if (itemsLength) 
       if (selectedItemCount) return itemsLength > selectedItemCount;
@@ -250,7 +261,8 @@ Polymer({
 
     if (queryOptions)
       Object.keys(queryOptions).forEach(function(key, index) {
-        fullUrl += "&" + key + "=" + queryOptions[key];
+        if (queryOptions[key] != null)
+          fullUrl += "&" + key + "=" + queryOptions[key];
       });
 
     return fullUrl;
