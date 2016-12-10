@@ -1070,8 +1070,9 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
         <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="members" 
              data-bl-dyncol-width="12">
             <%= render @members, group: @group, show_email: @show_emails,
-              bl_admin_mode: @bl_admin_mode, 
-              is_admin: (@current_user_is_admin || @badge_list_admin) %>
+              bl_admin_mode: @bl_admin_mode, is_admin: (@current_user_is_admin ||@badge_list_admin),
+              show_request_count: (@current_user_is_admin || @current_user_is_member \
+                || @badge_list_admin) %>
         </div>
       </div>
 
@@ -1188,7 +1189,9 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
            data-bl-dyncol-width="12">
 
         <%= render @group.admins.asc(:name), group: @group, show_email: @show_emails,
-          bl_admin_mode: @bl_admin_mode, is_admin: (@current_user_is_admin || @badge_list_admin) %>
+          bl_admin_mode: @bl_admin_mode, is_admin: (@current_user_is_admin || @badge_list_admin), 
+          show_request_count: (@current_user_is_admin || @current_user_is_member \
+            || @badge_list_admin) %>
       
       </div>
     </div>

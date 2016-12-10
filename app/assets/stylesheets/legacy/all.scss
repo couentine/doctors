@@ -2454,6 +2454,14 @@ div.info-card {
         background-position: left center;
         background-repeat: no-repeat;
       }
+
+      a.request-count {
+        color: $primary-medium;
+        text-decoration: none;
+      }
+      a.request-count:focus, a.request-count:hover {
+        color: $primary-dark;
+      }
     }
   }
 }
