@@ -40,6 +40,16 @@ Polymer({
     this.selectedUserUsername = $(e.target).closest('.select-link')[0].dataUserUsername;
     this.close();
   },
+  refreshTargetListQuery: function() {
+    // This will update the query options on the target list
+    if (this.for) {
+      targetList = document.querySelector('#' + this.for);
+      // NOTE: We need to clear out the badge option because of the way this is being used
+      // in the review screen. This may need to change once the element is used in other contexts
+      if (targetList) 
+        targetList.updateQueryOptions({ user: this.selectedUserUsername, badge: null });
+    }
+  },
 
   // Computed Properties
   _hasUsers: function(users) { return users && (users.length > 0); },
@@ -52,12 +62,7 @@ Polymer({
 
     if (this.userUsernameMap) {
       this.selectedUser = this.userUsernameMap[newValue];
-      if (this.for) {
-        targetList = document.querySelector('#' + this.for);
-        // NOTE: We need to clear out the badge option because of the way this is being used
-        // in the review screen. This may need to change once the element is used in other contexts
-        if (targetList) targetList.updateQueryOptions({ user: newValue, badge: null });
-      }
+      this.refreshTargetListQuery();
     }
   }
 });

@@ -3,7 +3,7 @@
   
   <template>
 
-    <paper-material id="paper" elevation="0" animated>
+    <paper-material id="paper" elevation="[[currentElevation]]" animated>
 
       <template is="dom-if" if="[[link]]">
         <a href$="[[user.full_path]]" class="wrapper">

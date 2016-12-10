@@ -5,13 +5,13 @@
 
     <!-- === COLLAPSED VIEW === -->
     <div class="container" hidden="[[hideCollapsedView]]">
-      <a href="#" on-tap="expand" id="user-expand-link">
-        <bl-user user="[[selectedUser]]" blank-user-text="No User Selected">
-        </bl-user>
-      </a>
       <a href="#" on-tap="expand" id="label-expand-link">
         <i class="fa fa-retweet"></i>
         Switch
+      </a>
+      <a href="#" on-tap="expand" id="user-expand-link">
+        <bl-user user="[[selectedUser]]" blank-user-text="No User Selected" group-id="[[groupId]]"
+          show-request-count></bl-user>
       </a>
     </div>
 

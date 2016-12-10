@@ -16,6 +16,9 @@
       font-size: 1.5em;
       margin: 0 0 0.5em 0;
     }
+    #query-mode-toggle {
+      margin: 1.2em 0 0.8em 0;
+    }
 
   bl-selection-bar paper-button { width: 11em; }
   paper-button.select-all-button, bl-query-options.query-filter-option { 
@@ -47,13 +50,9 @@
       <div id="page-header-wrapper">
         <h1>Feedback Requests</h1>
 
-        <paper-dropdown-menu label="View requests by" class="query-mode-dropdown">
-          <paper-listbox class="dropdown-content" attr-for-selected="value" id="query-mode-listbox" 
-              selected="{{queryMode}}">
-            <paper-item value="badge">Badge</paper-item>
-            <paper-item value="user">Person</paper-item>
-          </paper-listbox>
-        </paper-dropdown-menu>
+        <bl-toggle-bar selected-value="<%= @query_mode %>" id="query-mode-toggle"
+          items='[{"label":"By Badge","value":"badge"}, {"label":"By Person","value":"user"}]'>
+        </bl-toggle-bar>
 
         <bl-badge-selector badges="<%= @badges.to_json %>" 
             selected-badge-url="<%= @badge_url.to_s %>" for="log-list" 
@@ -63,7 +62,7 @@
           <div class="subtitle">
             Select a badge below to view all feedback requests for that badge.
           </div>
-        </bl-badge-selector>
+        </bl-badge-selector><br>
 
         <bl-user-selector users="<%= @users.to_json %>" for="log-list" 
             selected-user-username="<%= @user_username.to_s %>" group-id="<%= @group.id.to_s %>"
@@ -146,32 +145,34 @@
 </template>
 
 <script>
-  var review = document.querySelector('#review');
-
   function queryModeChanged() {
-    if (review.queryMode == 'badge') {
+    var toggleBar = document.querySelector('#query-mode-toggle');
+
+    if (toggleBar.selectedValue == 'badge') {
+      document.querySelector('bl-badge-selector').refreshTargetListQuery();
       document.querySelector('bl-badge-selector').disabled = false;
       document.querySelector('bl-user-selector').disabled = true;
-    } else if (review.queryMode == 'user') {
+    } else if (toggleBar.selectedValue == 'user') {
+      document.querySelector('bl-user-selector').refreshTargetListQuery();
       document.querySelector('bl-user-selector').disabled = false;
       document.querySelector('bl-badge-selector').disabled = true;
     }
   }
 
-  function attachListboxListener() {
-    // NOTE: This is a bit of a hack. It runs recursively until the listbox exists.
+  function attachQueryModeListener() {
+    // NOTE: This is a bit of a hack. It runs recursively until the toggle bar exists.
     // I can't find any events to use to hook onto this normally.
-    var listboxElement = document.querySelector('#query-mode-listbox');
+    var toggleBar = document.querySelector('#query-mode-toggle');
     
-    if (listboxElement)
-      listboxElement.addEventListener('iron-select', function(e) { queryModeChanged(e) });
+    if (toggleBar)
+      toggleBar.addEventListener('selected-value-changed', function(e) { queryModeChanged(e) });
     else
-      setTimeout(function() { attachListboxListener() }, 100);
+      setTimeout(function() { attachQueryModeListener() }, 100);
   }
 
   // Trigger the recursive process once the template is ready
-  review.addEventListener('dom-change', function() {
-    setTimeout(function() { attachListboxListener() }, 100);
+  document.querySelector('#review').addEventListener('dom-change', function() {
+    setTimeout(function() { attachQueryModeListener() }, 100);
   });
 
 </script>

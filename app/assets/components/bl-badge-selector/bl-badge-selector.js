@@ -39,6 +39,15 @@ Polymer({
     this.selectedBadgeUrl = $(e.target).closest('.select-link')[0].dataBadgeUrl;
     this.close();
   },
+  refreshTargetListQuery: function() {
+    // This will update the query options on the target list
+    if (this.for) {
+      targetList = document.querySelector('#' + this.for);
+      // NOTE: We need to clear out the user option because of the way this is being used
+      // in the review screen. This may need to change once the element is used in other contexts
+      if (targetList) targetList.updateQueryOptions({ badge: this.selectedBadgeUrl, user: null });
+    }
+  },
 
   // Computed Properties
   _hasBadges: function(badges) { return badges && (badges.length > 0); },
@@ -51,12 +60,7 @@ Polymer({
 
     if (this.badgeUrlMap) {
       this.selectedBadge = this.badgeUrlMap[newValue];
-      if (this.for) {
-        targetList = document.querySelector('#' + this.for);
-        // NOTE: We need to clear out the user option because of the way this is being used
-        // in the review screen. This may need to change once the element is used in other contexts
-        if (targetList) targetList.updateQueryOptions({ badge: newValue, user: null });
-      }
+      this.refreshTargetListQuery();
     }
   }
 });

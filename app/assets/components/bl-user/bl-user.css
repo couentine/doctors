@@ -12,7 +12,7 @@
 
   #paper {
     flex: 1 1 auto;
-    background-color: #F5F5F5;
+    background-color: var(--background-color, #F5F5F5);
     border-radius: 5px;
   }
     .wrapper {
@@ -38,17 +38,18 @@
         border-radius: 5px;
       }
       .image i {
-        font-size: 5em;
+        font-size: 4.2em;
         color: rgb(97,97,97);
-        line-height: 0.8em;
-        background-color: white;
+        line-height: 1.2em;
         margin: 0;
+        position: relative;
+        left: -0.06em;
       }
     .divider {
       position: absolute;
       border-radius: 500em;
       background: transparent;
-      border: 1em solid #E0E0E0;
+      border: 1em solid var(--divider-color, #E0E0E0);
       left: -17.1em;
       top: -9em;
       width: 21em;
@@ -61,6 +62,7 @@
       justify-content: flex-start;
       height: 4em;
       padding: 0.5em;
+      text-align: left;
       z-index: 1;
     }
       .label-title {
