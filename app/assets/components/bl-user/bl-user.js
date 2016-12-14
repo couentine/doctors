@@ -16,6 +16,7 @@ Polymer({
     hasUser: { type: Boolean, readOnly: true, value: false },
     
     // Computed
+    avatarUrl: { type: String, computed: '_avatarUrl(user)' },
     requestCount: { type: Number, computed: '_requestCount(user, groupId)' },
     showMetricList: { type: Boolean, computed: '_showMetricList(hasUser, showRequestCount)' }
   },
@@ -36,6 +37,10 @@ Polymer({
   },
 
   // Computed Properties
+  _avatarUrl: function(user) {
+    if (user && user.avatar_image_medium_url) return user.avatar_image_medium_url;
+    else return "https://secure.gravatar.com/avatar/0?s=200&d=mm";
+  },
   _requestCount: function(user, groupId) {
     if (user && user.group_validation_request_counts && groupId)
       return user.group_validation_request_counts[groupId];

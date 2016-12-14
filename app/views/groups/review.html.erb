@@ -77,7 +77,9 @@
       </div>
 
       <bl-list id="log-list" object-mode="full_logs" query-options="<%= @bl_list_query_options %>"
-          next-page-url="<%= group_full_logs_url(@group, format: :json) %>">
+          next-page-url="<%= group_full_logs_url(@group, format: :json) %>"
+          inject-items="<%= @list_inject_items.to_json %>" 
+          item-display-mode="<%= @item_display_mode %>">
         <div class="placeholder color-background">
           <i class="fa fa-flag-checkered"></i>
           <div class="message">
@@ -149,10 +151,12 @@
     var toggleBar = document.querySelector('#query-mode-toggle');
 
     if (toggleBar.selectedValue == 'badge') {
+      document.querySelector('bl-list').itemDisplayMode = 'user'; // Display the OTHER object
       document.querySelector('bl-badge-selector').refreshTargetListQuery();
       document.querySelector('bl-badge-selector').disabled = false;
       document.querySelector('bl-user-selector').disabled = true;
     } else if (toggleBar.selectedValue == 'user') {
+      document.querySelector('bl-list').itemDisplayMode = 'badge'; // Display the OTHER object
       document.querySelector('bl-user-selector').refreshTargetListQuery();
       document.querySelector('bl-user-selector').disabled = false;
       document.querySelector('bl-badge-selector').disabled = true;

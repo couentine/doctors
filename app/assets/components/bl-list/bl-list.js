@@ -14,6 +14,14 @@
   value is then pulled form the "next_page" key of the returned result.
 
   The URL for next page queries is: "{nextPageUrl}&{nextPageParam}={nextPage}&{queryOptions...}"
+
+  How to use injectItems:
+    This object can be used to have the list "inject" json into the item values which are returned 
+    from the server. To do this, add a key to injectItems equal to object name (ex: 'badge').
+    In that example, the 'badge' key should have an object value with keys equal to badge ids.
+    Each badge id key would then have a value equal to the badge json. In this example, bl-list
+    will look for a 'badge_id' key in the item json and, if a match is found with injectItems, 
+    the matched item is injected into a new 'badge' key (any existing value will be overwritten).
 */
 
 Polymer({
@@ -34,6 +42,7 @@ Polymer({
     options: Object,
     refreshQueryOnDisplay: { type: Boolean, value: false },
     selectionBar: Object, // this gets set by the bl-selection-bar when the "for" property is set
+    itemDisplayMode: String, // OPTIONAL: Passed all the way to the individual items (if supported)
     
     // The object items
     items: { type: Array, notify: true },
@@ -45,6 +54,7 @@ Polymer({
     hasUnselectedItems: { type: Boolean, 
       computed: "_hasUnselectedItems(items.length, selectedItemCount)",
       observer: "_hasUnselectedItemsChanged" },
+    injectItems: { type: Object }, // refer to header comments for specifics
 
     // Computed
     layoutMode: { type: String, computed: "_layoutMode(objectMode)" },
@@ -273,6 +283,26 @@ Polymer({
 
     $.getJSON(this.getFullUrl(), function(result) {
       if (result) {
+        // First we need to inject the extra items if specified
+        var sourceObjects; var objectIdField; var resultItems;
+        if (result[self.objectMode] && result[self.objectMode].length && self.injectItems)
+          for (var objectName in self.injectItems)
+            if (self.injectItems.hasOwnProperty(objectName) && self.injectItems[objectName]) {
+              // Create shortcuts to make code more readable
+              sourceObjects = self.injectItems[objectName]; // keys = object ids, values = objects
+              objectIdField = objectName + '_id';
+              resultItems = result[self.objectMode]; // array of result items
+
+              // Now loop through resultItems. For each item with an 'object_id' field value 
+              // that matches a key in sourceObjects we will inject the matching object
+              // directly into a NEW result item key called 'object'.
+              for (var i = 0; i < resultItems.length; i++)
+                if (resultItems[i][objectIdField] && sourceObjects[resultItems[i][objectIdField]])
+                  resultItems[i][objectName] = sourceObjects[resultItems[i][objectIdField]];
+            }
+              
+
+        // Then we can call the complete function
         self.itemsLoaded = true;
         completeFunction(result);
       } else errorFunction();

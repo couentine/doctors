@@ -815,14 +815,18 @@ class GroupsController < ApplicationController
     @badges, @users = [], []
     @badge_url, @badge_id = nil, nil
     @user_username, @user_id = nil, nil
+    @list_inject_items = { badge: {} } # used by bl-list component to inject badges into full logs
     valid_badge_map = {} # badge_url => badge_id
     valid_user_map = {} # username => user_id
+    current_badge_json = {}
 
     # Determine the mode
     if !badge_param.blank?
       @query_mode = 'badge'
+      @item_display_mode = 'user'
     elsif !user_param.blank?
       @query_mode = 'user'
+      @item_display_mode = 'badge'
     end
 
     # No  need to hit the DB again unless there are badges
@@ -839,7 +843,9 @@ class GroupsController < ApplicationController
 
       # Now do the badge query
       badge_criteria.asc(:name).each do |badge| 
-        @badges << badge.json(:list_item)
+        current_badge_json = badge.json(:list_item)
+        @badges << current_badge_json
+        @list_inject_items[:badge][badge.id.to_s] = current_badge_json
         valid_badge_map[badge.url] = badge.id
       end
       
