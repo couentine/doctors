@@ -13,27 +13,27 @@
     display: block;
     position: relative;
   }
-  .container bl-badge {
+  .container bl-user {
     margin-bottom: 1em;
-
-    --bl-badge-title: {
-      background-color: rgb(179,229,252);
-      color: rgb(97,97,97);
-      border-color: rgb(3,155,229);
-    };
+    --background-color: #E1F5FE;
+    --divider-color: #B3E5FC;
   }
+    #user-expand-link { 
+      display: block;
+      text-decoration: none; 
+    }
     #label-expand-link {
       background-color: white;
       color: rgb(158,158,158);
       filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
       -webkit-filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
-      display: inline-block;
+      display: block;
       text-align: left;
       padding: 0.7em 1em 0.7em 4.6em;
       border-radius: 3px 500px 500px 3px;
       position: absolute;
-      left: 50%;
-      top: 3.4em;
+      top: 2.1em;
+      right: -6.7em;
       text-transform: uppercase;
       text-decoration: none;
       font-size: 0.7em;
@@ -65,15 +65,17 @@
       right: 1em;
     }
 
-  .badge-grid {
+  .user-grid {
     display: flex;
     flex-direction: row;
     padding: 1.5em 0;
     flex-wrap: wrap;
   }
-    a.badge {
-      margin: 1em;
-      flex: 1;
+    a.user {
+      margin: 1em 2em 1em 0;
+      flex: 0 1 auto;
+      text-decoration: none;
+      width: 19em;
     }
     .placeholder {
       flex: 1;

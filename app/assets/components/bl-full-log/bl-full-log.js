@@ -6,13 +6,17 @@ Polymer({
     selectable: { type: Boolean, value: false }, // enables the select box
     hovered: { type: Boolean, notify: true },
     selected: { type: Boolean, notify: true },
+    displayMode: { type: String, value: 'user' }, // = 'user', 'badge'
     
     // Managed automatically
     cardClass: { type: String },
 
     // Computed
     postsByTag: { type: Array, computed: "_postsByTag(fullLog)" },
-    avatarUrl: { type: String, computed: "_avatarUrl(fullLog)" },
+    headerImageUrl: { type: String, computed: "_headerImageUrl(displayMode, fullLog)" },
+    headerTitle: { type: String, computed: "_headerTitle(displayMode, fullLog)" },
+    headerSubtitle: { type: String, computed: "_headerSubtitle(displayMode, fullLog)" },
+    displayBadge: { type: String, computed: "_displayBadge(displayMode)" },
     requestDateString: { type: String, computed: "_requestDateString(fullLog)" }
   },
 
@@ -30,7 +34,7 @@ Polymer({
   // Events
   _fullLogSelectedChanged: function(selected) { 
     this.set("selected", selected);
-    this.set("cardClass", this._cardClass(this.hovered, selected));
+    this.set("cardClass", this.getCardClass(this.hovered, selected));
   },
   _headerTap: function(e) {
     if (e.target.id != "checkboxContainer")
@@ -40,11 +44,11 @@ Polymer({
   // Helpers
   _cardMouseOver: function() {
     this.set("hovered", true);
-    this.set("cardClass", this._cardClass(this.hovered, this.selected));
+    this.set("cardClass", this.getCardClass(this.hovered, this.selected));
   },
   _cardMouseOut: function() {
     this.set("hovered", false);
-    this.set("cardClass", this._cardClass(this.hovered, this.selected));
+    this.set("cardClass", this.getCardClass(this.hovered, this.selected));
   },
 
   // Property Computers
@@ -71,19 +75,36 @@ Polymer({
 
     return returnList;
   },
-  _avatarUrl: function(fullLog) {
-    if (fullLog && fullLog.user_avatar_image_medium_url) 
+  _headerImageUrl: function(displayMode, fullLog) {
+    if ((displayMode == 'badge') && fullLog.badge && fullLog.badge.image_medium_url) {
+      return fullLog.badge.image_medium_url;
+    } else if (fullLog && fullLog.user_avatar_image_medium_url) 
       return fullLog.user_avatar_image_medium_url;
     else 
       return "https://secure.gravatar.com/avatar/0?s=200&d=mm";
   },
+  _headerTitle: function(displayMode, fullLog) {
+    if ((displayMode == 'badge') && fullLog.badge && fullLog.badge.name) 
+      return fullLog.badge.name;
+    else
+      return fullLog.user_name;
+  },
+  _headerSubtitle: function(displayMode, fullLog) {
+    if ((displayMode == 'badge') && fullLog.badge && fullLog.badge.url_with_caps) 
+      return fullLog.badge.url_with_caps;
+    else
+      return fullLog.user_username_with_caps;
+  },
+  _displayBadge: function(displayMode) { return (displayMode == 'badge'); },
   _requestDateString: function(fullLog) {
     if (fullLog && fullLog.date_requested) {
       var d = new Date(fullLog.date_requested*1000);
       return "Requested " + d.toLocaleString();
     } else return "";
   },
-  _cardClass: function(hovered, selected) { 
-    return (selected ? "selected " : " ") + (hovered ? "hovered" : ""); 
+
+  // Helpers
+  getCardClass: function(hovered, selected) { 
+    return this.displayMode + (selected ? " selected " : " ") + (hovered ? "hovered" : ""); 
   }
 });

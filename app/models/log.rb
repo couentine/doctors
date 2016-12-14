@@ -15,7 +15,7 @@ class Log
     'issuedOn' => :date_issued_stamp, 'evidence' => :evidence_url }
 
   JSON_TEMPLATES = {
-    list_item: [:id, :validation_status, :date_started, :date_requested, :date_withdrawn, 
+    list_item: [:id, :badge_id, :validation_status, :date_started, :date_requested, :date_withdrawn,
       :date_issued, :date_retracted, :date_originally_issued, :validation_count, :rejection_count,
       :user_name, :user_username, :user_username_with_caps, :user_avatar_image_url, 
       :user_avatar_image_medium_url, :user_avatar_image_small_url, :created_at, :updated_at, 
@@ -241,10 +241,12 @@ class Log
       log = Log.find(log_id)
       user = log.user
       badge = log.badge
+      group = badge.group
     else
       log = nil
       user = User.find(user_id)
       badge = Badge.find(badge_id)
+      group = badge.group
     end
     
     # Then update the badge list fields on the user record
@@ -258,11 +260,21 @@ class Log
         user.expert_badge_ids.delete badge.id if user.expert_badge_ids.include? badge.id
         user.learner_badge_ids << badge.id unless user.learner_badge_ids.include? badge.id
       end
+
+      if log.validation_status == 'requested'
+        user.requested_badge_ids << badge.id unless user.requested_badge_ids.include? badge.id
+      else
+        user.requested_badge_ids.delete badge.id if user.requested_badge_ids.include? badge.id
+      end
     else
       user.all_badge_ids.delete badge.id if user.all_badge_ids.include? badge.id
-      user.expert_badge_ids.delete badge.id if user.expert_badge_ids.include? badge.id
       user.learner_badge_ids.delete badge.id if user.learner_badge_ids.include? badge.id
+      user.requested_badge_ids.delete badge.id if user.requested_badge_ids.include? badge.id
+      user.expert_badge_ids.delete badge.id if user.expert_badge_ids.include? badge.id
     end
+
+    # Finally update the group_validation_request_counts key for the current group
+    user.update_validation_request_count_for group
 
     user.timeless.save if user.changed?
   end
@@ -675,21 +687,20 @@ protected
   # This method checks to see if we need to update the user OR badge records via sidekiq.
   # Things that need updating: User lists of expert/learner/all badges, Badge lists of 
   # experts/learners/members, Badge validation request count
-  # List of update cases:
+  # List of update cases (User and badge have same update cases for now):
   # - If we are being created or destroyed >> Update user and badge
-  # - If we are entering or exiting valdiated validation_status >> Update user and badge
+  # - If we are entering or exiting 'validated' validation_status >> Update user and badge
+  # - If we are entering or exiting 'requested' validation_status >> Update user and badge
   # - If we are entering or exiting detached state >> Update user and badge
-  # - If we are entering or exiting requested validation_status >> Update badge
   def update_user_and_badge
     log_id = (destroyed?) ? nil : id
 
     user_needs_update = new_record? || destroyed? || detached_log_changed? \
       || (validation_status_changed? \
-          && ((validation_status == 'validated') || (validation_status_was == 'validated')))
+          && ((validation_status == 'validated') || (validation_status_was == 'validated')) \
+          && ((validation_status == 'requested') || (validation_status_was == 'requested')))
     
-    badge_needs_update = !context.in?(['bulk_validation', 'badge_add']) &&
-      (user_needs_update || (validation_status_changed? \
-        && ((validation_status == 'requested') || (validation_status_was == 'requested'))))
+    badge_needs_update = !context.in?(['bulk_validation', 'badge_add']) && user_needs_update
 
     Log.delay.update_user(log_id, user_id, badge_id) if user_needs_update
     Log.delay(queue: 'low').update_badge(log_id, badge_id, user_id) if badge_needs_update

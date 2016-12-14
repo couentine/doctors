@@ -1,0 +1,26 @@
+<dom-module id="bl-toggle-bar">
+  <link rel="stylesheet" href="bl-toggle-bar.css" />
+  
+  <template>
+
+    <div class="container">
+
+      <ul class="bar">
+        <template is="dom-repeat" items="[[items]]">
+          <li on-tap="selectItem" class$="[[item.class]]">
+            [[item.label]]
+          </li>
+        </template>
+      </ul>
+
+      <div class="no-selection" hidden="[[hasSelectedItem]]">
+        <i class="fa fa-arrow-up"></i><br>
+        <span>Select an item</span>
+      </div>
+
+    </div>
+
+  </template>
+
+  <script src="bl-toggle-bar.js"></script>
+</dom-module>

@@ -1,31 +1,32 @@
 Polymer({
-  is: 'bl-badge-selector',
+  is: 'bl-user-selector',
 
   properties: {
-    badges: Array,
+    users: Array,
+    groupId: String, // used to pass to bl-user
     for: String, // id of the bl-list
     expandedParent: { type: String, value: 'body' }, // query selector for the parent element
-    selectedBadgeUrl: { type: String, observer: '_selectedBadgeUrlChanged' },
-    selectedBadge: Object,
-    badgeUrlMap: Object,
+    selectedUserUsername: { type: String, observer: '_selectedUserUsernameChanged' },
+    selectedUser: Object,
+    userUsernameMap: Object,
     disabled: { type: Boolean, value: false, notify: true },
     expanded: { type: Boolean, value: false, notify: true },
     
     // Computed Properties
-    hasBadges: { type: Boolean, value: false, computed: '_hasBadges(badges)' },
+    hasUsers: { type: Boolean, value: false, computed: '_hasUsers(users)' },
     hideCollapsedView: { type: Boolean, computed: '_hideCollapsedView(disabled, expanded)' },
     hideExpandedView: { type: Boolean, computed: '_hideExpandedView(disabled, expanded)' }
   },
 
   attached: function() {
-    // Build badgeUrlMap
-    this.badgeUrlMap = {};
-    for (var i = 0; i < this.badges.length; i++)
-      this.badgeUrlMap[this.badges[i].url] = this.badges[i];
+    // Build userUsernameMap
+    this.userUsernameMap = {};
+    for (var i = 0; i < this.users.length; i++)
+      this.userUsernameMap[this.users[i].username] = this.users[i];
     
-    // Set the badge if needed
-    if (this.selectedBadgeUrl)
-      this._selectedBadgeUrlChanged(this.selectedBadgeUrl, null);
+    // Set the user if needed
+    if (this.selectedUserUsername)
+      this._selectedUserUsernameChanged(this.selectedUserUsername, null);
 
     // Now re-parent the expanded container
     if (document.querySelector(this.expandedParent))
@@ -35,31 +36,32 @@ Polymer({
   // Functions
   expand: function(e) { this.expanded = true; if (e) e.preventDefault(); },
   close: function(e) { this.expanded = false; if (e) e.preventDefault(); },
-  selectThisBadge: function(e) { 
-    this.selectedBadgeUrl = $(e.target).closest('.select-link')[0].dataBadgeUrl;
+  selectThisUser: function(e) { 
+    this.selectedUserUsername = $(e.target).closest('.select-link')[0].dataUserUsername;
     this.close();
   },
   refreshTargetListQuery: function() {
     // This will update the query options on the target list
     if (this.for) {
       targetList = document.querySelector('#' + this.for);
-      // NOTE: We need to clear out the user option because of the way this is being used
+      // NOTE: We need to clear out the badge option because of the way this is being used
       // in the review screen. This may need to change once the element is used in other contexts
-      if (targetList) targetList.updateQueryOptions({ badge: this.selectedBadgeUrl, user: null });
+      if (targetList) 
+        targetList.updateQueryOptions({ user: this.selectedUserUsername, badge: null });
     }
   },
 
   // Computed Properties
-  _hasBadges: function(badges) { return badges && (badges.length > 0); },
+  _hasUsers: function(users) { return users && (users.length > 0); },
   _hideCollapsedView: function(disabled, expanded) { return disabled || expanded; },
   _hideExpandedView: function(disabled, expanded) { return disabled || !expanded; },
 
   // Observers
-  _selectedBadgeUrlChanged: function(newValue, oldValue) {
+  _selectedUserUsernameChanged: function(newValue, oldValue) {
     var targetList;
 
-    if (this.badgeUrlMap) {
-      this.selectedBadge = this.badgeUrlMap[newValue];
+    if (this.userUsernameMap) {
+      this.selectedUser = this.userUsernameMap[newValue];
       this.refreshTargetListQuery();
     }
   }

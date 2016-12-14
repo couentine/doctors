@@ -14,6 +14,14 @@
   value is then pulled form the "next_page" key of the returned result.
 
   The URL for next page queries is: "{nextPageUrl}&{nextPageParam}={nextPage}&{queryOptions...}"
+
+  How to use injectItems:
+    This object can be used to have the list "inject" json into the item values which are returned 
+    from the server. To do this, add a key to injectItems equal to object name (ex: 'badge').
+    In that example, the 'badge' key should have an object value with keys equal to badge ids.
+    Each badge id key would then have a value equal to the badge json. In this example, bl-list
+    will look for a 'badge_id' key in the item json and, if a match is found with injectItems, 
+    the matched item is injected into a new 'badge' key (any existing value will be overwritten).
 */
 
 Polymer({
@@ -34,6 +42,7 @@ Polymer({
     options: Object,
     refreshQueryOnDisplay: { type: Boolean, value: false },
     selectionBar: Object, // this gets set by the bl-selection-bar when the "for" property is set
+    itemDisplayMode: String, // OPTIONAL: Passed all the way to the individual items (if supported)
     
     // The object items
     items: { type: Array, notify: true },
@@ -41,9 +50,11 @@ Polymer({
     selectedItems: { type: Array, value: function() { return []; } },
     selectedItemCount: { type: Number, value: 0, computed: "_selectedItemCount(selectedItems)",
       observer: "_selectedItemCountChanged" },
+    hasItems: { type: Boolean, computed: "_hasItems(items.length)", observer: "_hasItemsChanged" },
     hasUnselectedItems: { type: Boolean, 
       computed: "_hasUnselectedItems(items.length, selectedItemCount)",
       observer: "_hasUnselectedItemsChanged" },
+    injectItems: { type: Object }, // refer to header comments for specifics
 
     // Computed
     layoutMode: { type: String, computed: "_layoutMode(objectMode)" },
@@ -189,6 +200,15 @@ Polymer({
         this.updateSelectedItems();
     }
   },
+  _hasItemsChanged: function(newValue, oldValue) {
+    // Hide query options
+    // NOTE: We'll hide it by setting the scale to 0, so it can be animated if desired.
+    if (newValue) {
+      $(Polymer.dom(this).querySelectorAll('.query-filter-option')).css('transform', 'scale(1)');
+    } else {
+      $(Polymer.dom(this).querySelectorAll('.query-filter-option')).css('transform', 'scale(0)');
+    }
+  },
   _hasUnselectedItemsChanged: function(newValue, oldValue) {
     // Hide any buttons with class 'select-all-button' anywhere in the light DOM
     // NOTE: We'll hide it by setting the scale to 0, so it can be animated if desired.
@@ -232,6 +252,7 @@ Polymer({
     if (this.selectionBar)
       this.selectionBar.count = newValue;
   },
+  _hasItems: function(itemsLength) { return itemsLength > 0; },
   _hasUnselectedItems: function(itemsLength, selectedItemCount) {
     if (itemsLength) 
       if (selectedItemCount) return itemsLength > selectedItemCount;
@@ -250,7 +271,8 @@ Polymer({
 
     if (queryOptions)
       Object.keys(queryOptions).forEach(function(key, index) {
-        fullUrl += "&" + key + "=" + queryOptions[key];
+        if (queryOptions[key] != null)
+          fullUrl += "&" + key + "=" + queryOptions[key];
       });
 
     return fullUrl;
@@ -261,6 +283,26 @@ Polymer({
 
     $.getJSON(this.getFullUrl(), function(result) {
       if (result) {
+        // First we need to inject the extra items if specified
+        var sourceObjects; var objectIdField; var resultItems;
+        if (result[self.objectMode] && result[self.objectMode].length && self.injectItems)
+          for (var objectName in self.injectItems)
+            if (self.injectItems.hasOwnProperty(objectName) && self.injectItems[objectName]) {
+              // Create shortcuts to make code more readable
+              sourceObjects = self.injectItems[objectName]; // keys = object ids, values = objects
+              objectIdField = objectName + '_id';
+              resultItems = result[self.objectMode]; // array of result items
+
+              // Now loop through resultItems. For each item with an 'object_id' field value 
+              // that matches a key in sourceObjects we will inject the matching object
+              // directly into a NEW result item key called 'object'.
+              for (var i = 0; i < resultItems.length; i++)
+                if (resultItems[i][objectIdField] && sourceObjects[resultItems[i][objectIdField]])
+                  resultItems[i][objectName] = sourceObjects[resultItems[i][objectIdField]];
+            }
+              
+
+        // Then we can call the complete function
         self.itemsLoaded = true;
         completeFunction(result);
       } else errorFunction();

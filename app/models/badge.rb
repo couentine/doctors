@@ -140,7 +140,7 @@ class Badge
   before_update :move_badge_if_needed
   before_save :update_json_clone_badge_fields_if_needed
   after_save :update_requirement_editability
-  before_destroy :remove_from_group_cache
+  before_destroy :remove_from_group_and_user_cache
 
   before_save :update_analytics
 
@@ -419,6 +419,25 @@ class Badge
 
   def update_validation_request_count
     self.validation_request_count = requesting_learner_logs.count
+  end
+
+  # Removes badge from various user cache fields
+  # NOTE: We have to pass the log_ids and group_id since the badge itself will have been deleted
+  def self.clear_user_badge_caches(log_ids, badge_id, group_id)
+    group = Group.find(group_id)
+    user_ids = Log.where(:id.in => log_ids).map{ |log| log.user_id }
+    users = User.where(:id.in => user_ids)
+
+    users.each do |user|
+      user.all_badge_ids.delete badge_id if user.all_badge_ids.include? badge_id
+      user.learner_badge_ids.delete badge_id if user.learner_badge_ids.include? badge_id
+      user.requested_badge_ids.delete badge_id if user.requested_badge_ids.include? badge_id
+      user.expert_badge_ids.delete badge_id if user.expert_badge_ids.include? badge_id
+
+      user.update_validation_request_count_for group
+      
+      user.timeless.save
+    end
   end
 
   # === INSTANCE METHODS === #
@@ -893,11 +912,16 @@ protected
     end
   end
 
-  def remove_from_group_cache
+  def remove_from_group_and_user_cache
+    # Only remove from group cache if we're not running from with an aync group operation context
+    # NOTE: It currently isn't possible to delete badges in a group async operation
     if context != 'group_async'
       group.update_badge_cache json_clone, true
       group.timeless.save
     end
+
+    # Now clear this badges presence from the user caches
+    Badge.delay_for(5.seconds, queue: 'low').clear_user_badge_caches(log_ids, id, group_id)
   end
 
   # Validates that the destination group id points to a real group that is owned by the same user

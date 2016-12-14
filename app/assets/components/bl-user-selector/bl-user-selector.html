@@ -1,0 +1,48 @@
+<dom-module id="bl-user-selector">
+  <link rel="stylesheet" href="bl-user-selector.css" />
+
+  <template>
+
+    <!-- === COLLAPSED VIEW === -->
+    <div class="container" hidden="[[hideCollapsedView]]">
+      <a href="#" on-tap="expand" id="label-expand-link">
+        <i class="fa fa-retweet"></i>
+        Switch
+      </a>
+      <a href="#" on-tap="expand" id="user-expand-link">
+        <bl-user user="[[selectedUser]]" blank-user-text="No User Selected" group-id="[[groupId]]"
+          show-request-count></bl-user>
+      </a>
+    </div>
+
+    <!-- === EXPANDED VIEW === -->
+    <div id="expanded-container" class="expanded-container" hidden="[[hideExpandedView]]">
+      <a class="close-link" href="#" on-tap="close">
+        <i class="fa fa-close"></i>
+      </a>
+
+      <content select="h2"></content>
+      <content select=".subtitle"></content>
+
+      <div class="user-grid">
+        
+        <template is="dom-repeat" items="[[users]]">
+          <a href="#" on-tap="selectThisUser" class="user select-link"
+              data-user-username="[[item.username]]">
+            <bl-user user="[[item]]" group-id="[[groupId]]" show-request-count></bl-user>
+          </a>
+        </template>
+
+        <div class="placeholder" hidden="[[hasUsers]]">
+          There are no users with pending feedback requests in this group. 
+          (Or at least no feedback requests which you have permission to see.)
+        </div>
+    
+      </div>
+
+    </div>
+
+  </template>
+
+  <script src="bl-user-selector.js"></script>
+</dom-module>

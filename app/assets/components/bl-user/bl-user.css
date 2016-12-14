@@ -1,0 +1,100 @@
+/* === BASE LAYOUT === */
+
+  :host {
+    display: flex;
+    justify-content: center;
+    font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+  }
+
+/* === USER STYLES === */
+
+  paper-ripple { z-index: 50; }
+
+  #paper {
+    flex: 1 1 auto;
+    background-color: var(--background-color, #F5F5F5);
+    border-radius: 5px;
+  }
+    .wrapper {
+      display: flex;
+      flex-direction: row;
+      border-radius: 5px;
+      height: 5em;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+    }
+    .image {
+      text-align: center;
+      flex: 0 0 auto;
+      height: 5em;
+      border-radius: 5px;
+      margin-right: 1em;
+      background: #BDBDBD;
+    }
+      img {
+        display: inline-block;
+        width: 5em; height: 5em;
+        border-radius: 5px;
+      }
+      .image i {
+        font-size: 4.2em;
+        color: rgb(97,97,97);
+        line-height: 1.2em;
+        margin: 0;
+        position: relative;
+        left: -0.06em;
+      }
+    .divider {
+      position: absolute;
+      border-radius: 500em;
+      background: transparent;
+      border: 1em solid var(--divider-color, #E0E0E0);
+      left: -17.1em;
+      top: -9em;
+      width: 21em;
+      height: 21em;
+    }
+    .label {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      height: 4em;
+      padding: 0.5em;
+      text-align: left;
+      z-index: 1;
+    }
+      .label-title {
+        flex: 0 0 auto;
+
+        @apply(--bl-user-title);
+      }
+        h2 {
+          display: block;
+          margin: 0;
+          font-size: 1em;
+          font-weight: 600;
+          color: rgb(97,97,97);
+        }
+      .label-subtitle {
+        font-size: 0.9em;
+        flex: 0 0 auto;
+
+        @apply(--bl-user-subtitle);
+      }
+      ul.metric-list {
+        list-style: none;
+        padding: 0; margin: 0;
+        color: rgb(97,97,97);
+        font-size: 0.8em;
+        display: block;
+      } 
+        ul.metric-list li {
+          display: inline-block;
+          margin: 0 0.5em 0 0;
+        }
+        ul.metric-list i {
+          color: rgb(249,168,37);
+          margin: 0 0.15em 0 0;
+        }

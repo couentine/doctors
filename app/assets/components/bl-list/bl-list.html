@@ -5,25 +5,26 @@
 
     <content select=".list-controls"></content>
     
-    <div class$="{{wrapperClass}}">
+    <div class$="[[wrapperClass]]">
 
-      <div class="placeholder-wrapper" hidden$="{{!showPlaceholder}}">
+      <div class="placeholder-wrapper" hidden$="[[!showPlaceholder]]">
         <content select=".placeholder"></content>
       </div>
         
-      <template is="dom-if" if="{{!isColumnMode}}">
+      <template is="dom-if" if="[[!isColumnMode]]">
         <template id="item-repeat" is="dom-repeat" items="{{items}}">
-          <bl-list-item object-mode="{{objectMode}}" item="{{item}}" class$="{{itemClass}}"
-            hidden$="{{showPlaceholder}}">
+          <bl-list-item object-mode="[[objectMode]]" item="{{item}}" class$="[[itemClass]]"
+            hidden$="[[showPlaceholder]]">
           </bl-list-item>
         </template>
       </template>
 
-      <template is="dom-if" if="{{isColumnMode}}">
+      <template is="dom-if" if="[[isColumnMode]]">
         <template id="item-repeat" is="dom-repeat" items="{{colClassList}}">
-          <div class$="{{item}}" hidden$="{{showPlaceholder}}">
+          <div class$="{{item}}" hidden$="[[showPlaceholder]]">
             <template id="item-repeat" is="dom-repeat" items="{{items}}">
-              <bl-list-item object-mode="{{objectMode}}" item="{{item}}" class$="{{itemClass}}">
+              <bl-list-item object-mode="[[objectMode]]" item="{{item}}" class$="[[itemClass]]"
+                item-display-mode="[[itemDisplayMode]]">
               </bl-list-item>
             </template>
           </div>
@@ -39,8 +40,8 @@
       <i class="fa fa-exclamation-triangle"></i>
     </div>
 
-    <div class="next-page" hidden$="{{!hasNextPage}}">
-      <bl-button id="next-page-button" class$="{{objectMode}}" type="raised" on-tap="queryNextPage">
+    <div class="next-page" hidden$="[[!hasNextPage]]">
+      <bl-button id="next-page-button" class$="[[objectMode]]" type="raised" on-tap="queryNextPage">
         Load More
       </bl-button>
     </div>

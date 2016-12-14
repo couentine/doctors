@@ -6,7 +6,7 @@ GIT
       polymer-rails (~> 1.0, >= 1.0.3)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     CFPropertyList (2.3.4)
     actionmailer (4.2.5)

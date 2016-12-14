@@ -1,6 +1,14 @@
 <%
   # Object Variables = group
-  # Boolan Variables = is_admin, show_email, bl_admin_mode
+  # Boolan Variables = is_admin, show_email, show_request_count, bl_admin_mode
+
+  if show_request_count && user.group_validation_request_counts      \
+      && user.group_validation_request_counts[group.id.to_s]          \
+      && (user.group_validation_request_counts[group.id.to_s] > 0)
+    request_count = user.group_validation_request_counts[group.id.to_s]
+  else
+    request_count = nil
+  end
 %>
 
 <div class="info-card user-card fixed-height" data-bl-dyncol="child" 
@@ -97,6 +105,14 @@
           %>
           <span class="card-content">
             <ul class="metric-list">
+              <% if request_count %>
+                <li>
+                  <%= link_to "<i class='fa fa-flag-checkered'></i> #{request_count}".html_safe,
+                    group_review_path(group, user: user.username), class: 'request-count',
+                    title: 'Review Feedback Requests', data: { toggle: 'tooltip' } %>
+                </li>
+              <% end %>
+
               <% if user.email_inactive %>
                 <li data-toggle="tooltip" title="<%= tt %>">
                   <i class="fa fa-envelope red"></i>
@@ -111,9 +127,19 @@
                 <li data-toggle="tooltip" title="<%= tt %>">
                   <i class="fa fa-exclamation orange"></i>
                 </li>
-              <% else %>
+              <% elsif !request_count %>
                 <li> &nbsp; </li> <!-- Ensures that the card is the right height when empty. -->
               <% end %>
+            </ul>
+          </span>
+        <% elsif request_count %>
+          <span class="card-content">
+            <ul class="metric-list">
+              <li>
+                <%= link_to "<i class='fa fa-flag-checkered'></i> #{request_count}".html_safe,
+                  group_review_path(group, user: user.username), class: 'request-count',
+                  title: 'Review Feedback Requests', data: { toggle: 'tooltip' } %>
+              </li>
             </ul>
           </span>
         <% end %>

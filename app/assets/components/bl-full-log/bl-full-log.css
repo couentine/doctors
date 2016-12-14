@@ -26,9 +26,9 @@
     }
       .avatar img {
         width: 4em; height: 4em;
-        border-radius: 500px;
         flex: none;
       }
+        paper-card.user .avatar img { border-radius: 500px; }
     .text {
       flex: 1 1 auto;
       padding: 0 1em;

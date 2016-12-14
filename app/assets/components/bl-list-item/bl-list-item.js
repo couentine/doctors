@@ -7,6 +7,7 @@ Polymer({
     item: { type: Object, notify: true, observer: 'itemChanged' },
     
     // Optional
+    itemDisplayMode: String, // OPTIONAL: Passed all the way to the individual items (if supported)
     options: Object,
 
     // Computed properties
