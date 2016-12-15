@@ -134,6 +134,8 @@ Polymer({
     this.refreshQuery();
   },
   selectAll: function() {
+    var childrenToNotify = this.querySelectorAll('bl-list-item');
+
     for (var i = 0; i < this.items.length; i++) {
       this.items[i].selected = true;
       this.notifyPath("items.#" + i + ".selected", true)
@@ -141,8 +143,14 @@ Polymer({
     
     // Manually run this since it doesn't get run sometimes when we use the notification method
     this.updateSelectedItems();
+
+    // Now update child elements as needed
+    for (var i=0; i < childrenToNotify.length; i++)
+      childrenToNotify[i].notifySelectionChanged();
   },
   deselectAll: function() {
+    var childrenToNotify = this.querySelectorAll('bl-list-item');
+
     for (var i = 0; i < this.items.length; i++) {
       this.items[i].selected = false;
       this.notifyPath("items.#" + i + ".selected", false)
@@ -150,6 +158,10 @@ Polymer({
 
     // Manually run this since it doesn't get run sometimes when we use the notification method
     this.updateSelectedItems();
+
+    // Now update child elements as needed
+    for (var i=0; i < childrenToNotify.length; i++)
+      childrenToNotify[i].notifySelectionChanged();
   },
   removeSelectedItems: function() {
     // This method will remove all of the selected items from the items array.
