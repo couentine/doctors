@@ -21,6 +21,13 @@ Polymer({
     this.itemChanged(this.item, null);
   },
 
+  // Methods
+  notifySelectionChanged: function() {
+    if (this.isFullLogMode) {
+      this.querySelector('bl-full-log').notifySelectionChanged();
+    }
+  },
+
   // Computed properties
   _isBadgeMode: function(objectMode) { return objectMode == "badges"; },
   _isFullLogMode: function(objectMode) { return objectMode == "full_logs"; },
