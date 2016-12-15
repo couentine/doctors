@@ -241,7 +241,7 @@ Polymer({
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
   _wrapperClass: function(layoutMode, objectMode) { return layoutMode + "-list " + objectMode; },
   _minColWidth: function(objectMode) {
-    if (objectMode == "full_logs") return 600;
+    if (objectMode == "full_logs") return 500;
     else return 2000;
   },
   _maxColCount: function(minColWidth) { return Math.floor(2000/minColWidth); },
