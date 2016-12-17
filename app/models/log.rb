@@ -235,6 +235,7 @@ class Log
 
   # If log still exists then pass only the first param
   # If log is deleted then leave log_id blank and pass user_id AND badge_id instead
+  # NOTE: This method is only called asynchronously so it should not spin up more asyn calls.
   def self.update_user(log_id, user_id = nil, badge_id = nil)
     # First query the records
     if log_id

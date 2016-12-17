@@ -36,6 +36,7 @@ class User
   has_many :info_items, dependent: :destroy
   belongs_to :domain, inverse_of: :users, class_name: "Domain" # don't ever set this manually,
   has_many :owned_domains, inverse_of: :owner, class_name: "Domain"
+  has_and_belongs_to_many :group_tags # DO NOT EDIT DIRECTLY: Use group_tag.add_users/remove_users
 
   # === CUSTOM FIELDS & VALIDATIONS === #
   
@@ -671,10 +672,24 @@ class User
     return_rows
   end
 
-  # This updates the appropriate key of group_validation_request_counts
+  # This recalculates the appropriate key of group_validation_request_counts
+  # Then if needed it will update all related group tags
+  # NOTE: This is resource intensive and only designed to be called from other asynch methods
   def update_validation_request_count_for(group)
-    self.group_validation_request_counts[group.id.to_s] \
-      = logs.where(:badge_id.in => group.badges_cache.keys, validation_status: 'requested').count
+    new_count = \
+      logs.where(:badge_id.in => group.badges_cache.keys, validation_status: 'requested').count
+    
+    if !self.group_validation_request_counts.has_key?(group.id.to_s) \
+        || (self.group_validation_request_counts[group.id.to_s] != new_count)
+      self.group_validation_request_counts[group.id.to_s] = new_count
+      
+      # Now update all of the group tags
+      related_group_tags = group_tags.where(group: group_id)
+      related_group_tags.each do |group_tag|
+        group_tag.update_validation_request_count_for(self)
+        group_tag.timeless.save
+      end
+    end
   end
 
   def manually_update_identity_hash

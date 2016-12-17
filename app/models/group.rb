@@ -16,6 +16,9 @@ class Group
     'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
+  TAG_ASSIGNABILITY_VALUES = ['members', 'admins']
+  TAG_CREATABILITY_VALUES = ['members', 'admins']
+  TAG_VISIBILITY_VALUES = ['public', 'members', 'admins']
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
@@ -42,12 +45,13 @@ class Group
 
   # === RELATIONSHIPS === #
 
-  belongs_to :creator, inverse_of: :created_groups, class_name: "User"
-  belongs_to :owner, inverse_of: :owned_groups, class_name: "User"
-  has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: "User"
-  has_and_belongs_to_many :members, inverse_of: :member_of, class_name: "User"
+  belongs_to :creator, inverse_of: :created_groups, class_name: 'User'
+  belongs_to :owner, inverse_of: :owned_groups, class_name: 'User'
+  has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: 'User'
+  has_and_belongs_to_many :members, inverse_of: :member_of, class_name: 'User'
   has_many :badges, dependent: :restrict # You have to delete all the badges FIRST
   has_many :info_items, dependent: :destroy
+  has_many :tags, dependent: :destroy, class_name: 'GroupTag'
 
   # === FIELDS & VALIDATIONS === #
 
@@ -77,6 +81,9 @@ class Group
   field :admin_visibility,                type: String, default: 'public'
   field :badge_copyability,               type: String, default: 'public'
   field :join_code,                       type: String
+  field :tag_assignability,                type: String, default: 'members'
+  field :tag_creatability,                type: String, default: 'members'
+  field :tag_visibility,                  type: String, default: 'public'
   
   field :user_limit,                      type: Integer, default: 5
   field :admin_limit,                     type: Integer, default: 1
@@ -104,6 +111,9 @@ class Group
 
   field :badges_cache,                    type: Hash, default: {} # key=badge_id, value=key_fields
 
+  field :tags_cache,                      type: Hash, default: {} # key=gtag_id, value=key_fields
+  field :top_user_tags_cache,             type: Array, default: [] # key=gtag_id, value=key_fields
+
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, 
     uniqueness: { message: "The '%{value}' url is already taken."}, 
@@ -127,6 +137,12 @@ class Group
     message: "%{value} is not a valid type of visibility" }
   validates :badge_copyability, inclusion: { in: COPYABILITY_VALUES, 
     message: "%{value} is not a valid type of copyability" }
+  validates :tag_assignability, inclusion: { in: TAG_ASSIGNABILITY_VALUES, 
+    message: "%{value} is not a valid type of assignability" }
+  validates :tag_creatability, inclusion: { in: TAG_CREATABILITY_VALUES, 
+    message: "%{value} is not a valid type of creatability" }
+  validates :tag_visibility, inclusion: { in: TAG_VISIBILITY_VALUES, 
+    message: "%{value} is not a valid type of visibility" }
   validates :creator, presence: true
   
   validate :new_owner_username_exists
@@ -149,6 +165,7 @@ class Group
   after_save :process_avatar
   before_update :create_another_subscription
   after_update :update_child_badges
+  before_save :process_tags_cache_changes
   after_update :update_stripe_if_needed
   before_destroy :cancel_subscription_on_destroy
   
@@ -524,6 +541,42 @@ class Group
         'image_medium_url' => badge_json_clone['image_medium_url'],
         'image_small_url' => badge_json_clone['image_small_url']
       }
+    end
+  end
+
+  # Adds or updates the specified tag in tags_cache w/o querying the tag
+  def update_tags_cache(tag_json)
+    self.tags_cache[tag_json['_id'].to_s] = tag_json
+  end
+  
+  # Same as above but for async calls
+  def self.update_tags_cache(group_id, tag_json)
+    group = Group.find(group_id)
+    group.update_tags_cache tag_json
+    group.timeless.save
+  end
+
+  # Removes the specified tag_id from tags_cache w/o querying the tag
+  def remove_tag_from_cache(tag_id)
+    self.tags_cache.delete tag_id.to_s
+  end
+
+  # Same as above but for async calls
+  def self.remove_tag_from_cache(group_id, tag_id)
+    group = Group.find(group_id)
+    group.remove_tag_from_cache tag_id
+    group.timeless.save
+  end
+
+  # Queries for all group_tags related to any of the specified user_ids and then removes the users
+  # from each tag, one at a time.
+  # NOTE: This should be run asynch because it is potentially resource intensive
+  def self.remove_users_from_all_tags(group_id, user_ids, current_user_id)
+    group = Group.find(group_id)
+    related_group_tags = group.tags.where(:user_ids.in => user_ids)
+
+    related_group_tags.each do |group_tag|
+      group_tag.remove_users(user_ids, current_user_id) # runs synchronously
     end
   end
 
@@ -1044,6 +1097,16 @@ protected
   def update_child_badges
     if name_changed? || url_with_caps_changed?
       Group.delay(queue: 'low').update_child_badge_fields(self.id)
+    end
+  end
+
+  # Any changes toe tags_cache cause a complete rebuild of top_user_tags_cache
+  def process_tags_cache_changes
+    if tags_cache_changed?
+      self.top_user_tags_cache = tags_cache.values.sort_by do |tag_item| 
+        # Sort first by the magnitude descending, then by name ascending
+        [tag_item['user_magnitude']*-1, tag_item['name']]
+      end
     end
   end
 

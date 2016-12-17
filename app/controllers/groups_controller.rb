@@ -340,6 +340,10 @@ class GroupsController < ApplicationController
       log_to_detach.detached_log = true
       log_to_detach.save!
     end
+    
+    # Then remove them from any related tags (asynchronously)
+    Group.delay(queue: 'low')\
+      .remove_users_from_all_tags(@group.id, [current_user.id], current_user.id)
 
     redirect_to @group, :notice => notice
   end
@@ -381,6 +385,11 @@ class GroupsController < ApplicationController
         log_to_detach.save!
         detached_log_count += 1
       end
+
+      # Then remove them from any related tags (asynchronously)
+      Group.delay(queue: 'low')\
+        .remove_users_from_all_tags(@group.id, [@user.id], current_user.id)
+
       @notice = "#{@user.name} has been removed from the group members"
       @notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
       @notice += "."
@@ -1032,6 +1041,17 @@ private
     @can_copy_badges = @badge_list_admin || @current_user_is_admin \
       || ((@group.badge_copyability == 'public') && current_user)   \
       || ((@group.badge_copyability == 'members') && @current_user_is_member)
+
+    # Set group tag variables
+    @can_assign_group_tags = @current_user_is_admin || @badge_list_admin \
+      || (@current_user_is_member && (@group.tag_assignability == 'members'))
+    @can_create_group_tags = @current_user_is_admin || @badge_list_admin \
+      || (@current_user_is_member && (@group.tag_creatability == 'members'))
+    @can_view_group_tags = (@group.tag_visibility == 'public') \
+      || @current_user_is_admin || @badge_list_admin \
+      || (@current_user_is_member && (@group.tag_visibility == 'members'))
+    # This one is hard-coded for now...
+    @can_edit_group_tags = @current_user_is_admin || @badge_list_admin
       
     # Set current group (for analytics) only if user is logged in and an admin
     @current_user_group = @group if @current_user_is_admin
