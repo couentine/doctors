@@ -146,6 +146,7 @@ class User
   after_save :process_avatar
   before_update :process_email_change
   after_update :update_logs
+  after_destroy :clear_from_group_tags
 
   # === USER MOCK FIELD METHODS === #
 
@@ -1093,6 +1094,11 @@ protected
     if name_changed? || username_with_caps_changed? || email_changed?
       User.delay(queue: 'low').update_log_user_fields(self.id)
     end
+  end
+
+  # Makes async to group tag clearing method
+  def clear_from_group_tags
+    GroupTag.delay(queue: 'low').clear_deleted_user_from_all(self.id)
   end
 
   # Run before insert/update to check for existince of domain and then set the link if so

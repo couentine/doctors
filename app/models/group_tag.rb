@@ -35,7 +35,7 @@ class GroupTag
 
   field :user_validation_request_counts,  type: Hash, value: {} # key=user_id, value=req_count
   field :user_history,                    type: Hash, value: {} #key=user_id,val=hash w/ audit info
-  
+  field :validation_request_count,        type: Integer, value: 0 # the total from all users
 
   validates :group, presence: true
   validates :name, presence: true, length: { within: 2..MAX_NAME_LENGTH }, 
@@ -48,6 +48,7 @@ class GroupTag
 
   before_validation :update_validated_fields
   after_validation :copy_name_field_errors
+  before_save :update_validation_request_count_if_needed
   after_save :update_group_cache_if_needed
   before_destroy :remove_from_group_cache_before_destroy
 
@@ -223,7 +224,22 @@ class GroupTag
     end
   end
 
-  # === GROUP TAG METHODS === #
+  # Call this after a user is deleted to remove them from all group tags which contain them.
+  # NOTE: This only removes the user from user_validation_request_counts and user_history.
+  #       It doesn't remove them from the users list. (That should happen automatically.)
+  def self.clear_deleted_user_from_all(user_id)
+    user_id_string = user_id.to_s
+    group_tags = GroupTag.where(('user_history.'+user_id_string) => {:$exists => true})
+    group_tags.each do |group_tag|
+      group_tag.user_validation_request_counts.delete user_id_string
+      group_tag.user_history.delete user_id_string
+      group_tag.timeless.save if group_tag.changed?
+    end
+
+    true
+  end
+
+  # === GROUP TAG INSTANCE METHODS === #
 
   # Updates the validation request count has for the specified user
   def update_validation_request_count_for(user)
@@ -267,6 +283,12 @@ protected
   # Takes any errors from name to name_with_caps (for form display purposes, user can't edit name)
   def copy_name_field_errors
     self.errors[:name_with_caps] = self.errors[:name] if self.errors[:name_with_caps].blank?
+  end
+
+  def update_validation_request_count_if_needed
+    if user_validation_request_counts.changed?
+      self.validation_request_count = (user_validation_request_counts || {}).values.reduce(0, :+)
+    end
   end
 
   # If the tag name changes we want to update the parent_tag field on all of the child entries.
