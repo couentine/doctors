@@ -1,5 +1,4 @@
 module AuditHistory
-  
   # Add this to a model to keep a field audit history in a standardized format.
   
   # Adds two methods:
@@ -26,12 +25,12 @@ module AuditHistory
 
   # === INJECTED FIELD DEFINITIONS === #
 
-  include extend ActiveSupport::Concern
-    included do
-     field :created_by,       type: BSON::ObjectId # Audit field, not a relationship
-     field :updated_by,       type: BSON::ObjectId # Audit field, not a relationship
-     field :audit_history,    type: Array, value: [] # Sequential list of changes
-    end
+  extend ActiveSupport::Concern
+  
+  included do
+   field :created_by,       type: BSON::ObjectId # Audit field, not a relationship
+   field :updated_by,       type: BSON::ObjectId # Audit field, not a relationship
+   field :audit_history,    type: Array, default: [] # Sequential list of changes
   end
   
   # === CORE METHODS === #

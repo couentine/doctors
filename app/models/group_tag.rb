@@ -12,7 +12,11 @@ class GroupTag
   GROUP_CACHE_FIELDS = [:_id, :name, :name_with_caps, :summary, :user_magnitude]
   AUDIT_HISTORY_FIELDS = { 
     name_with_caps: { display_name: 'Name', include_values: true },
-    summary: { display_name: 'Summary', include_values: true },
+    summary: { display_name: 'Summary', include_values: true }
+  }
+  JSON_TEMPLATES = {
+    list_item: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
+      :validation_request_count]
   }
 
   # === INSTANCE VARIABLES === #
@@ -26,16 +30,17 @@ class GroupTag
 
   # === FIELDS & VALIDATIONS === #
   
-  field :name_with_caps,                  type: String # Users should only update this one
-  field :name,                            type: String # This one is set automatically
-  field :summary,                         type: String
+  field :name_with_caps,              type: String # Users should only update this one
+  field :name,                        type: String # This one is set automatically
+  field :summary,                     type: String
   
-  field :user_count,                      type: Integer, value: 0
-  field :user_magnitude,                  type: Integer, value: 0 # = log(user_count, 3).floor
+  field :user_count,                  type: Integer, default: 0
+  field :user_magnitude,              type: Integer, default: 0 # = log(user_count, 3).floor
 
-  field :user_validation_request_counts,  type: Hash, value: {} # key=user_id, value=req_count
-  field :user_history,                    type: Hash, value: {} #key=user_id,val=hash w/ audit info
-  field :validation_request_count,        type: Integer, value: 0 # the total from all users
+  field :user_validation_request_counts,  
+                                      type: Hash, default: {} # key=user_id, value=req_count
+  field :user_history,                type: Hash, default: {} #key=user_id,val=hash w/ audit info
+  field :validation_request_count,    type: Integer, default: 0 # the total from all users
 
   validates :group, presence: true
   validates :name, presence: true, length: { within: 2..MAX_NAME_LENGTH }, 
