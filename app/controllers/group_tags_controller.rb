@@ -25,7 +25,7 @@ class GroupTagsController < ApplicationController
     
     respond_to do |format|
       format.html do
-        @group_tags_hash = JsonTemplater.array_json(
+        @group_tags_hash = GroupTag.array_json(
           @group.tags.order_by('user_magnitude desc, name asc').page(1).per(@page_size),
             :list_item)
       end
@@ -35,7 +35,7 @@ class GroupTagsController < ApplicationController
 
         group_tag_criteria = @group.tags.order_by('user_magnitude desc, name asc')\
           .page(@page).per(@page_size)
-        @group_tags_hash = JsonTemplater.array_json(group_tag_criteria, :list_item)
+        @group_tags_hash = GroupTag.array_json(group_tag_criteria, :list_item)
         @next_page = @page + 1 if group_tag_criteria.count > (@page_size * @page)
 
         render json: { page: @page, page_size: @page_size, group_tags: @group_tags_hash, 

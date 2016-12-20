@@ -1,58 +1,58 @@
 <script>
 
   var MAX_TERM_LENGTH = <%= Badge::MAX_TERM_LENGTH %>;
+  var MAX_URL_LENGTH = <%= Badge::MAX_URL_LENGTH %>;
 
   $(document).ready(function() {
     <% if @allow_url_editing %>
       // Auto set the URL as they type the name
       $('#badge_name').keyup(function() {
-        $('#badge_url_with_caps').val(parameterizeText($(this).val()));
-        $('#url-preview-label').text(parameterizeText($(this).val()));
+        $('#badge_url_with_caps').val(parameterizeText($(this).val(), MAX_URL_LENGTH));
+        $('#url-preview-label').text($('#badge_url_with_caps').val());
         if (($('#badge_url_with_caps').val().length > 0) && !$("#url-panel").is(":visible"))
           $("#url-panel").fadeIn();
         else if (($('#badge_url_with_caps').val().length == 0) && $("#url-panel").is(":visible"))
           $("#url-panel").fadeOut();
       });
 
-      // Only allow url characters in the manual url box and update the label as they type
-      $('#badge_url_with_caps').keyup(function() {
-        $(this).val(parameterizeText($(this).val()));
-        $('#url-preview-label').text($(this).val());
+      // Pressing enter in the url editor clicks url save
+      $('#badge_url_with_caps').keypress(function(e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          $('#url-save').click();
+        }
       });
 
       $("#url-edit").click(function() {
-        $("#url-preview").hide();
-        $("#url-editor").show();
-        $('#badge_url_with_caps').focus();
+        // Save the current value then show the input box
+        $('#badge_url_with_caps').data('oldValue', $('#badge_url_with_caps').val());
+        $("#url-preview").fadeOut(function() {
+          $("#url-editor").show();
+          $('#badge_url_with_caps').focus();
+        });
       });
       $("#url-save").click(function() {
-        $("#url-editor").hide();
-        $("#url-preview").show();
-        $('#badge_summary').focus();
+        // Parameterize the value then update the label and hide the text box
+        $('#badge_url_with_caps').val(parameterizeText($('#badge_url_with_caps').val(), 
+          MAX_URL_LENGTH));
+        $('#url-preview-label').text($('#badge_url_with_caps').val());
+        $("#url-editor").fadeOut(function() {
+          $("#url-preview").show();
+          $('#badge_name').focus();
+        });
       });
       $("#url-cancel").click(function() {
-        $('#badge_url_with_caps').val(parameterizeText($("#badge_name").val()));
-        $('#url-preview-label').text(parameterizeText($("#badge_name").val()));
-        $("#url-editor").hide();
-        $("#url-preview").show();
+        // Restore the old value
+        $('#badge_url_with_caps').val($('#badge_url_with_caps').data('oldValue'));
+        $('#url-preview-label').text($('#badge_url_with_caps').val());
+        $("#url-editor").fadeOut(function() {
+          $("#url-preview").show();
+          $('#badge_name').focus();
+        });
       });
     <% end %>
 
   });
-
-  // Converts "Test text like  this" > "Text-text-like-this"
-  function parameterizeText(s) {
-    var returnValue = '';
-
-    if (s != null) 
-      returnValue = s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').trim()
-        .replace(/ +/g, ' ').replace(/ /g, '-');
-    if (returnValue.substr(0, 1) == "-") returnValue = returnValue.substr(1)
-    if (returnValue.substr(returnValue.length - 1) == "-") 
-      returnValue = returnValue.substr(0, returnValue.length - 1)
-
-    return returnValue
-  }
 
 </script>
 

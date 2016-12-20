@@ -117,7 +117,14 @@ class GroupsController < ApplicationController
     else
       @validation_request_count = 0
     end
+    
+    # Set group tag variables
+    @has_tags = !@group.tags_cache.blank?
+    @top_user_tags = @group.top_user_tags_cache\
+      .select{ |tag_item| tag_item['user_magnitude']>0 }.first(10)
+    @has_top_user_tags = !@top_user_tags.blank?
 
+    # Set options vars
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
     @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
 

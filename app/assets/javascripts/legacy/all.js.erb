@@ -546,3 +546,47 @@ function unixTimeToString(unix_timestamp){
   var time = month + '/' + date + '/' + year;
   return time;
 }
+
+// Converts " Text_like12  this--" > "Text_like12-this" and optionally truncates to maxLength.
+function parameterizeText(text, maxLength) {
+  if (text == null) return '';
+  if (maxLength == null) maxLength = 32767;
+  else return text.replace(/['.]/g, '').replace(/[^ _A-Za-z0-9]/g, ' ').replace(/ +/g, ' ').trim()
+    .replace(/ /g, '-').trunc(maxLength);
+}
+
+// Returns the caret (cursor) position of the specified text field.
+function getTextCursorPosition(inputElement) {
+  // Initialize
+  var position = 0;
+
+  if (document.selection) { // IE Version
+    inputElement.focus();
+
+    var oSel = document.selection.createRange(); // Get empty selection range
+    oSel.moveStart('character', -inputElement.value.length); // Move selection start to 0 position
+    position = oSel.text.length; // The caret position is selection length
+  } else if (inputElement.selectionStart || inputElement.selectionStart == '0')
+    position = inputElement.selectionStart;
+
+  // Return results
+  return position;
+}
+
+function setTextSelectionRange(inputElement, selectionStart, selectionEnd) {
+  if (inputElement.setSelectionRange) {
+    inputElement.focus();
+    inputElement.setSelectionRange(selectionStart, selectionEnd);
+  }
+  else if (inputElement.createTextRange) {
+    var range = inputElement.createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', selectionEnd);
+    range.moveStart('character', selectionStart);
+    range.select();
+  }
+}
+
+function setTextCursorPosition(inputElement, position) {
+  setTextSelectionRange(inputElement, position, position);
+}
