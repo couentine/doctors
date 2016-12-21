@@ -28,6 +28,7 @@ class GroupTagsController < ApplicationController
         @group_tags_hash = GroupTag.array_json(
           @group.tags.order_by('user_magnitude desc, name asc').page(1).per(@page_size),
             :list_item)
+        render layout: 'app'
       end
       format.json do
         @page = params['page'] || 1
@@ -54,7 +55,7 @@ class GroupTagsController < ApplicationController
 
     respond_to do |format|
       format.html do
-        # render show.html.erb
+        render layout: 'app'
       end
       format.json do
         render json: { success: true, group_tag: @group_tag.json(:list_item) }

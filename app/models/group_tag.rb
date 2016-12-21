@@ -291,7 +291,7 @@ protected
   end
 
   def update_validation_request_count_if_needed
-    if user_validation_request_counts.changed?
+    if user_validation_request_counts_changed?
       self.validation_request_count = (user_validation_request_counts || {}).values.reduce(0, :+)
     end
   end
