@@ -284,8 +284,9 @@ private
   end
 
   def log_params
-    params.require(:log).permit(:show_on_profile, :detached_log, :date_started, :date_requested, 
-      :date_withdrawn, :date_sent_to_backpack, :wiki, :receive_validation_request_emails)
+    params.require(:log).permit(:show_on_profile, :show_on_badge, :detached_log, :date_started, 
+      :date_requested, :date_withdrawn, :date_sent_to_backpack, :wiki, 
+      :receive_validation_request_emails)
   end
 
 end

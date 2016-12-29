@@ -944,4 +944,19 @@ namespace :db do
     puts " >> Done."
   end
 
+  task set_log_show_on_badge: :environment do
+    print "Updating show on badge setting for #{Log.count} logs"
+    
+    Log.each do |log|
+      log.show_on_badge = true
+      if log.timeless.save
+        print "."
+      else
+        print "!"
+      end
+    end
+
+    puts " >> Done."
+  end
+
 end

@@ -39,6 +39,7 @@ class Log
   field :retracted,                           type: Boolean, default: false # overrides other stati
   field :retracted_by,                        type: BSON::ObjectId
   field :show_on_profile,                     type: Boolean, default: true
+  field :show_on_badge,                       type: Boolean, default: true
   field :detached_log,                        type: Boolean, default: false
   field :receive_validation_request_emails,   type: Boolean, default: true
 
