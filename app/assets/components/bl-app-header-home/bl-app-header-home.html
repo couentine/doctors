@@ -1,0 +1,34 @@
+<dom-module id="bl-app-header-home">
+  <link rel="stylesheet" href="bl-app-header-home.css" />
+
+  <template>
+    
+    <div id="topLine">&nbsp;</div>
+
+    <ul class="nav-links">
+      <li>
+        <a class="nav-link" href$="[[getUrl('/community')]]">
+          <i class="fa fa-users hide-small"></i> 
+          <span class="nav-link-text">Community</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href$="[[getUrl('/help/docs')]]">
+          <i class="fa fa-question-circle hide-small"></i>
+          <span class="nav-link-text">
+            Help <span class="hide-small">Docs</span>
+          </span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href$="[[getUrl('/w')]]">
+          <i class="fa fa-globe hide-small"></i>
+          <span class="nav-link-text">Website</span>
+        </a>
+      </li>
+    </ul>
+
+  </template>
+
+  <script src="bl-app-header-home.js"></script>
+</dom-module>

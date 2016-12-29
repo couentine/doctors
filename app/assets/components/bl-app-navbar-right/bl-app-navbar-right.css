@@ -1,0 +1,43 @@
+/* === LAYOUT & BASE STYLES === */
+  
+  :host {
+    display: block;
+    justify-content: space-between;
+    font-size: 1rem;
+    text-align: right;
+    position: absolute;
+    top: 4px;
+    right: 0;
+    width: 2em;
+    padding: 0.5em 0.8em;
+    line-height: 1em;
+  }
+
+/* === NAVBAR STYLES === */
+  
+  a { text-decoration: none; }
+    a i.fa { margin-right: 0.5em; }
+
+  paper-menu-button {
+    padding: 0;
+    text-align: left;
+  }
+    .dropdown-trigger { 
+      display: inline-block; 
+      cursor: pointer;
+    }
+      .dropdown-trigger > img { 
+        height: 1.8em; /* total of height + (2 * border) = 2em */
+        border: 0.1em solid #BDBDBD;
+        border-radius: 500px;
+        display: inline-block;
+      }
+      .dropdown-trigger > img.true { border-color: white; }
+  
+    paper-menu-button .dropdown-content {
+      z-index: 100;
+      width: 14em;
+    }
+      paper-item { color: #616161; }
+      paper-item.error { background-color: rgb(239,154,154); }
+      paper-item.error a { color: white !important; }

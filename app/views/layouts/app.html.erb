@@ -67,8 +67,6 @@
         <meta name="twitter:image" content="<%= yield(:metadata_image) %>" />
         <meta name="twitter:url" content="<%= yield(:metadata_url) %>" />
       <% end %>
-
-      <%= yield(:header) if content_for? :header %>
   
   </head>
 
@@ -87,9 +85,42 @@
         </bl-toast-container>
       <% end %>
 
-    <% #=== PAGE CONTENT (HEADER & FOOTER IS HANDLED IN APP CONTAINER COMPONENT) ===# %>
+    <% #=== APP CONTAINER COMPONENT (Uses paper-scroll-header-panel) ===# %>
 
-      <%= yield %>
+      <bl-app-container page-background-color="<%= yield(:page_background_color) %>"
+        <%= (content_for?(:white_text)) ? 'white-text' : '' %>
+        <%= (content_for?(:hide_condensed_header)) ? 'hide-condensed-header' : '' %>
+        <%= (content_for?(:hide_left_nav)) ? 'hide-left-nav' : '' %>
+        <%= (content_for?(:hide_right_nav)) ? 'hide-right-nav' : '' %>
+        <%= (content_for?(:hide_intercom)) ? 'hide-intercom' : '' %>
+        current-user="<%= current_user.json_cu %>" asset-paths="<%= @ap_json %>">
+
+        <% #=== APP HEADER ===# %>
+
+          <% if content_for?(:app_header_content) %>
+            <div class="app-header-content">
+              <%= yield(:app_header_content) %>
+            </div>
+          <% end %>
+
+          <% if content_for?(:app_header_background) %>
+            <div class="app-header-background">
+              <%= yield(:app_header_background) %>
+            </div>
+          <% end %>
+
+        <% #=== PAGE CONTENT ===# %>
+          
+          <div class="content">
+            
+            <%= yield %>
+
+            <bl-app-footer <%= (content_for?(:white_text)) ? 'white-text' : '' %>>
+            </bl-app-footer>
+
+          </div>
+
+      </bl-app-container>
 
   </body>
 

@@ -1,0 +1,14 @@
+<dom-module id="bl-app-navbar-left">
+  <link rel="stylesheet" href="bl-app-navbar-left.css" />
+
+  <template>
+
+    <a class="logo" title="Badge List Home" href$="[[getUrl('/')]]">
+      <img src$="[[assetPaths.badgeListShieldSquare]]" hidden$="[[whiteText]]">
+      <img src$="[[assetPaths.badgeListShieldWhiteSquare]]" hidden$="[[!whiteText]]">
+    </a>
+
+  </template>
+
+  <script src="bl-app-navbar-left.js"></script>
+</dom-module>

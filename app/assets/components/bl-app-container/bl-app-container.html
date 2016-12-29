@@ -3,80 +3,27 @@
 
   <template>
 
-    <template is="dom-if" if="{{!isHeaderMode_Condensable}}">
-      <paper-header-panel mode="{{headerMode}}" class$="{{headerPanelClass}}">
+    <paper-scroll-header-panel id="headerPanel" condenses class$="[[whiteText]]"
+      keep-condensed-header="[[!hideCondensedHeader]]"
+      condensed-header-height="[[condensedHeaderHeightPx]]">
 
-        <paper-toolbar class$="{{toolbarClass}}" bottom-justify="end">
-          <div class="toolbar top">
-            <a class="logo" title="Badge List Home" href$="{{getURL('/')}}" 
-                hidden$="{{hasCustomLogo}}">
-              <img src$="{{assetPaths.badgeListShieldSquare}}"
-                hidden$="{{!isBackgroundMode_Standard}}">
-              <img src$="{{assetPaths.badgeListShieldWhiteSquare}}" 
-                hidden$="{{!isBackgroundMode_Color}}">
-            </a>
-            <content select=".custom-logo"></content>
-            
-            <template is="dom-if" if="{{isAppbarMode_Home}}">
-              <a href$="{{getURL('/users/sign_out')}}" class="signout" data-method="delete">
-                <i class="fa fa-close"></i> Sign Out
-              </a>
-            </template>
-            <template is="dom-if" if="{{isAppbarMode_Standard}}">
-              <paper-menu-button class="current-user" horizontal-align="right" 
-                  vertical-offset="40">
-                <div class="dropdown-trigger">
-                  <img src$="{{currentUser.avatar_image_medium_url}}" 
-                    class="current-user">
-                </div>
-                <paper-menu class="dropdown-content">
-                  <paper-item hidden="{{!currentUser.email_inactive}}" class="error">
-                    <a href$="{{getURL('/users/edit')}}">
-                      <i class="fa fa-exclamation-triangle"></i> Email blocked
-                    </a>
-                  </paper-item>
-                  <paper-item>
-                    <a href$="{{currentUserProfile}}">
-                      <i class="fa fa-shield"></i> Badge profile
-                    </a>
-                  </paper-item>    
-                  <paper-item>
-                    <a href$="{{getURL('/users/edit')}}">
-                      <i class="fa fa-user"></i> Manage account
-                    </a>
-                  </paper-item>
-                  <paper-item>
-                    <a href$="{{getURL('/users/edit#upload-image')}}">
-                      <i class="fa fa-picture-o"></i> Change image
-                    </a>
-                  </paper-item> 
-                  <paper-item hidden="{{!currentUser.admin}}">
-                    <a href$="{{getURL('/a')}}">
-                      <i class="fa fa-cogs"></i> Admin tools
-                    </a>
-                  </paper-item>
-                  <paper-item>
-                    <a href$="{{getURL('/users/sign_out')}}" class="signout" data-method="delete">
-                      <i class="fa fa-remove"></i> Sign out
-                    </a>
-                  </paper-item>
-                </paper-menu>
-              </paper-menu-button>
-            </template>
-          </div>
+      <!-- #=== APP HEADER ===# -->
+      <div id="appHeader" class="paper-header">
 
-          <content select=".toolbar.middle"></content>
-          <content select=".toolbar.bottom"></content>
-        </paper-toolbar>
-        
-        <content select=".content"></content>
+        <content select=".app-header-content"></content>
 
-      </paper-header-panel>
-    </template>
+        <bl-app-navbar-left id="leftNav" white-text="[[whiteText]]" asset-paths="[[assetPaths]]">
+        </bl-app-navbar-left>
+        <bl-app-navbar-right id="rightNav" white-text="[[whiteText]]" 
+          current-user="[[currentUser]]" asset-paths="[[assetPaths]]">
+        </bl-app-navbar-right>
 
-    <template is="dom-if" if="{{isHeaderMode_Condensable}}">
-      <!-- === REMOVING THIS FOR NOW === -->
-    </template>
+      </div>
+
+      <!-- #=== PAGE CONTENT ===# -->
+      <content select=".content"></content>
+
+    </paper-scroll-header-panel>
 
   </template>
 

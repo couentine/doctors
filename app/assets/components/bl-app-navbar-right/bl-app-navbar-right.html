@@ -1,0 +1,59 @@
+<dom-module id="bl-app-navbar-right">
+  <link rel="stylesheet" href="bl-app-navbar-right.css" />
+
+  <template>
+      
+    <!-- #=== LOGGED IN NAV ===# -->
+
+    <template is="dom-if" if="[[isLoggedIn]]">
+      <paper-menu-button class="current-user" horizontal-align="right" no-overlap>
+        <div class="dropdown-trigger">
+          <img src$="[[currentUser.avatar_image_medium_url]]" class$="[[whiteText]]">
+        </div>
+        <paper-menu class="dropdown-content">
+          <paper-item hidden="[[!currentUser.email_inactive]]" class="error">
+            <a href$="[[getUrl('/users/edit')]]">
+              <i class="fa fa-fw fa-exclamation-triangle"></i> Email blocked
+            </a>
+          </paper-item>
+          <paper-item>
+            <a href$="[[currentUserProfile]]">
+              <i class="fa fa-fw fa-shield"></i> Badge profile
+            </a>
+          </paper-item>    
+          <paper-item>
+            <a href$="[[getUrl('/users/edit')]]">
+              <i class="fa fa-fw fa-user"></i> Manage account
+            </a>
+          </paper-item>
+          <paper-item>
+            <a href$="[[getUrl('/users/edit#upload-image')]]">
+              <i class="fa fa-fw fa-picture-o"></i> Change image
+            </a>
+          </paper-item> 
+          <paper-item hidden="[[!currentUser.admin]]">
+            <a href$="[[getUrl('/a')]]">
+              <i class="fa fa-fw fa-cogs"></i> Admin tools
+            </a>
+          </paper-item>
+          <paper-item>
+            <a href$="[[getUrl('/users/sign_out')]]" class="signout" data-method="delete">
+              <i class="fa fa-fw fa-remove"></i> Sign out
+            </a>
+          </paper-item>
+        </paper-menu>
+      </paper-menu-button>
+    </template>
+
+    <!-- #=== LOGGED OUT NAV ===# -->
+
+    <template is="dom-if" if="[[!isLoggedIn]]">
+      <a href$="[[getUrl('/users/sign_in')]]" id="signin-link" class$="[[whiteText]]">
+        <i class="fa fa-sign=in"></i> Sign in or register
+      </a>
+    </template>
+
+  </template>
+
+  <script src="bl-app-navbar-right.js"></script>
+</dom-module>

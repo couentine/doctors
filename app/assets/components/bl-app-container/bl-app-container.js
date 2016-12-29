@@ -3,40 +3,63 @@ Polymer({
 
   properties: {
     // Required
-    colorMode: String, // = ['home', 'group']
-    currentUser: Object,
-    assetPaths: Object,  // stores @assets_paths from application controller
+    assetPaths: { type: Object },
+    currentUser: { type: Object },
     
     // Optional
-    appbarMode: { type: String, value: 'standard' }, // = ['standard', 'home']
-    backgroundMode: { type: String, value: 'standard' }, // = ['standard', 'color']
-    hasCustomLogo: Boolean,
-    headerMode: { type: String, value: 'standard' },
-      //= paper-header-panel modes OR 'condensable' for paper-scroll-header-panel
-    toolbarMode: { type: String, value: '' }, // = paper-toolbar class values
+    pageBackgroundColor: { type: String, value:'#FFFFFF', observer:'_pageBackgroundColorChanged' },
+    whiteText: { type: Boolean, value: false },
+    hideCondensedHeader: { type: Boolean, value: false }, // Scroll away header after condensing
+    hideLeftNav: { type: Boolean, value: false },
+    hideRightNav: { type: Boolean, value: false },
     hideIntercom: { type: Boolean, value: false },
     
-    // Mode-Specific
-    condensedHeaderHeight: { type: Number, value: 140 },
-    headerHeight: { type: Number, value: 256 },
+    // Automatically Set
+    condensedHeaderHeightEm: { type: Number, value: 3 }, // set from child app header element
+    screenWidth: { type: Number, readOnly: true },
 
     // Computed
-    currentUserProfile: { type: String, computed: "_currentUserProfile(currentUser)" },
-    headerPanelClass: { type: String, computed: "_headerPanelClass(backgroundMode, colorMode)" },
-    toolbarClass: { type: String, 
-      computed: "_toolbarClass(backgroundMode,colorMode,toolbarMode,headerMode)"},
-    isAppbarMode_Standard: { type: Boolean, computed: "_isAppbarMode_Standard(appbarMode)" },
-    isAppbarMode_Home: { type: Boolean, computed: "_isAppbarMode_Home(appbarMode)" },
-    isBackgroundMode_Standard: { type: Boolean, 
-      computed: "_isBackgroundMode_Standard(backgroundMode)" },
-    isBackgroundMode_Color: { type: Boolean, computed: "_isBackgroundMode_Color(backgroundMode)" },
-    isHeaderMode_Condensable: { type: Boolean, computed: "_isHeaderMode_Condensable(headerMode)" }
+    condensedHeaderHeightPx: { type: Number, 
+      computed: '_condensedHeaderHeightPx(condensedHeaderHeightEm, screenWidth)' },
+
+    // Font Size Contant (Maps from screenWidth to fontSize)
+    fontSizeBreakpoints: { type: Array, value: function() { return [
+      { minWidth: 0, fontSize: 14 },
+      { minWidth: 480, fontSize: 16 },
+      { minWidth: 840, fontSize: 18 }
+    ]; } }
+  },
+
+  // Listeners
+  listeners: {
+    'headerPanel.paper-header-transform': '_headerPanelTransform',
+    'bl-app-header-content-ready': '_appHeaderContentReady'
+  },
+  _headerPanelTransform: function(e) {
+    var detail = e.detail; // detail keys = [condensedHeight, height, y]
+    var y = detail.y;
+
+    // Move the navbars down to accomodate the condensed space
+    var newY = (y === null) ? null : Math.min(y, detail.height - detail.condensedHeight);
+    this.transform((newY === null) ? '' : 'translate3d(0, ' + newY + 'px, 0)', this.$.leftNav);
+    this.transform((newY === null) ? '' : 'translate3d(0, ' + newY + 'px, 0)', this.$.rightNav);
+
+    // If header is condensed then add the shadow, otherwise remove it
+    if (this.$.headerPanel.headerState == Polymer.PaperScrollHeaderPanel.HEADER_STATE_CONDENSED)
+      $(this.$.appHeader).addClass('elevated');
+    else
+      $(this.$.appHeader).removeClass('elevated');
+  },
+  _appHeaderContentReady: function(e) {
+    // Pull the condensed header from the bl-app-header-* element
+    this.condensedHeaderHeightEm = e.detail.condensedHeightEm;
   },
 
   // Events
   ready: function() {
     // We need to manually fix any paper drowndown menus if present
     // Details here: https://github.com/PolymerElements/paper-dropdown-menu/issues/10
+    // NOTE: This doesn't seem to work in a normal listener
     document.addEventListener('WebComponentsReady', function() {
       var paper_dropdowns = document.querySelectorAll('paper-dropdown-menu');
       for(var a = 0; a < paper_dropdowns.length; a++) {
@@ -48,25 +71,42 @@ Polymer({
     });
   },
   attached: function() { 
+    // Update the screenWidth property anytime the window is resized
+    var self = this;
+    $(window).on('resize', function() { 
+      self._setScreenWidth($(window).width()); 
+    });
+    self._setScreenWidth($(window).width()); // set it on page load as well
+
     if (this.hideIntercom) this.tryToHideIntercom();
   },
 
+  // Observers
+  _pageBackgroundColorChanged: function(newValue, oldValue) {
+    // Update the css variable that controls background any time the value changes
+    this.customStyle['--page-background-color'] = newValue;
+    this.updateStyles();
+  },
+
   // Computed Properties
-  _currentUserProfile: function(currentUser) { return "/u/" + currentUser.username_with_caps; },
-  _headerPanelClass: function(backgroundMode, colorMode) { 
-    return colorMode + "-color " + backgroundMode + "-background "; 
+  _condensedHeaderHeightPx: function(condensedHeaderHeightEm, screenWidth) {
+    return this.fontSizeForScreenWidth(screenWidth) * condensedHeaderHeightEm;
   },
-  _toolbarClass: function(backgroundMode, colorMode, toolbarMode, headerMode) { 
-    return colorMode + "-color " + backgroundMode + "-background " + toolbarMode
-      + ((headerMode == "condensable") ? " paper-header" : "");
-  },
-  _isAppbarMode_Standard: function(appbarMode) { return appbarMode == "standard"; },
-  _isAppbarMode_Home: function(appbarMode) { return appbarMode == "home"; },
-  _isBackgroundMode_Standard: function(backgroundMode) { return backgroundMode == "standard"; },
-  _isBackgroundMode_Color: function(backgroundMode) { return backgroundMode == "color"; },
-  _isHeaderMode_Condensable: function(headerMode) { return headerMode == "condensable"; },
 
   // Helpers
+  fontSizeForScreenWidth: function(screenWidth) {
+    // Returns integer value of font size in pixels for the specified screen width
+    // Refers to fontSizeBreakpoints
+
+    var returnValue = 14; // default value is 14 if breakpoints haven't been loaded yet
+    var breakpoints = this.fontSizeBreakpoints; // shortcut for code brevity
+
+    if (breakpoints && breakpoints.length)
+      for (var i=0; (i < breakpoints.length) && (screenWidth >= breakpoints[i].minWidth); i++)
+        returnValue = breakpoints[i].fontSize;
+    
+    return returnValue;
+  },
   tryToHideIntercom: function(tryCount) {
     var self = this;
 
@@ -76,6 +116,5 @@ Polymer({
       document.querySelector('#intercom-container').hidden = true;
     else if (tryCount < 100)
       setTimeout(function() { self.tryToHideIntercom(tryCount + 1); }, 100);
-  },
-  getURL: function(relativeURL) { return this.assetPaths.rootURL + relativeURL; }
+  }
 });
