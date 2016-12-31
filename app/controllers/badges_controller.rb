@@ -28,7 +28,8 @@ class BadgesController < ApplicationController
   LEARNER_WORDS = %w(learner trainee student novice padawan)
   BADGE_VISIBILITY_OPTIONS = [
     ['<i class="fa fa-globe"></i> <strong>Public -</strong> Everyone'.html_safe, 'public'],
-    ['<i class="fa fa-users"></i> <strong>Private -</strong> Only Group Members'.html_safe, 'private'],
+    ['<i class="fa fa-users"></i> <strong>Private -</strong> Only Group Members'.html_safe, 
+      'private'],
     ['<i class="fa fa-eye-slash"></i> <strong>Hidden -</strong> Only Badge Members '.html_safe \
       + '&amp; Group Admins'.html_safe, 'hidden']
   ]
@@ -54,6 +55,15 @@ class BadgesController < ApplicationController
         @requirements = @badge.requirements
         @requirements_json_clone = @badge.requirements_json_clone
 
+        # Add a filter the expert and learner logs if this user isn't an admin or awarder
+        # NOTE: This won't show the current user their own name, which is potentially confusing,
+        #       but the only truly non-confusing thing would be to modify the log partial with a 
+        #       special message which is too time-consuming for now, so I'm leaving it.
+        if !@current_user_is_admin && !@badge_list_admin && !@can_award_badge
+          @learner_logs = @learner_logs.where(show_on_badge: true)
+          @expert_logs = @expert_logs.where(show_on_badge: true)
+        end
+
         # Configure the badge settings if needed
         @badge_visibility_options = BADGE_VISIBILITY_OPTIONS
         if @current_user_is_admin || @badge_list_admin
@@ -67,6 +77,12 @@ class BadgesController < ApplicationController
             ['Let each awarder opt-out (recommended)', true],
             ['Send no emails to anyone', false]
           ]
+        end
+
+        # Get current values of group membership settings
+        if @current_user_is_admin || @current_user_is_member
+          @group_show_on_badges = current_user.get_group_settings_for(@group)['show_on_badges']
+          @group_show_on_profile = current_user.get_group_settings_for(@group)['show_on_profile']
         end
       end
       format.json do 
@@ -281,7 +297,7 @@ class BadgesController < ApplicationController
       flash[:error] = "You must enter a validation summary."
       render 'issue_form'
     elsif @summary.length > Entry::MAX_SUMMARY_LENGTH
-      flash[:error] = "The summary can't be longer than #{Entry::MAX_SUMMARY_LENGTH} characters. " \
+      flash[:error] = "The summary can't be longer than #{Entry::MAX_SUMMARY_LENGTH} characters. "\
         + "If you need more space you can use the body text."
       render 'issue_form'
     else
@@ -292,17 +308,20 @@ class BadgesController < ApplicationController
         if @group.has_invited_member? @email
           found_user = @group.invited_members.detect { |u| u["email"] == @email}
           found_user[:validations] = [] unless found_user.include? :validations
-          found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, user: current_user._id }
+          found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, 
+            user: current_user._id }
         elsif @group.has_invited_admin? @email
           found_user = @group.invited_admins.detect { |u| u["email"] == @email}
           found_user[:validations] = [] unless found_user.include? :validations
-          found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, user: current_user._id }
+          found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, 
+            user: current_user._id }
         elsif !@group.can_add_members?
           flash[:error] = "This group is full and cannot accept new members."
           render 'issue_form'
         else
           @group.invited_members << { email: @email, invite_date: Time.now, 
-            validations: [{ badge: @badge.url, summary: @summary, body: @body, user: current_user._id }] }
+            validations: [{ badge: @badge.url, summary: @summary, body: @body, 
+              user: current_user._id }] }
         end
 
         # Save the changes to the group and send the email (if not blocked)
@@ -321,7 +340,8 @@ class BadgesController < ApplicationController
             + "be able to accept the badge."
         end
       elsif user.expert_of? @badge
-        flash[:error] = "#{user.name} is already a badge expert! You can't issue them the badge twice."
+        flash[:error] = "#{user.name} is already a badge expert! " \
+          + "You can't issue them the badge twice."
         render 'issue_form'
       elsif user.learner_of? @badge
         # add a validation
@@ -370,7 +390,7 @@ class BadgesController < ApplicationController
   end
 
   # PUT /group/badge/move?badge[move_to_group_id]=abc123
-  # Basically this is the same as the update function but focused on setting the move to group field
+  # Basically this is the same as the update function but focused on setting move to group field
   def move
     @badge.move_to_group_id = params[:badge][:move_to_group_id]
     
@@ -390,7 +410,8 @@ private
 
   def find_parent_records
     @group = Group.find(params[:group_id]) || not_found
-    @current_user_is_owner = current_user && @group.owner_id && (current_user.id == @group.owner_id)
+    @current_user_is_owner = current_user && @group.owner_id \
+      && (current_user.id == @group.owner_id)
     @current_user_is_admin = current_user && current_user.admin_of?(@group)
     @current_user_is_member = current_user && current_user.member_of?(@group)
     @badge_list_admin = current_user && current_user.admin?

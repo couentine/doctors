@@ -30,6 +30,27 @@
 
   <!-- === EDIT BADGE MEMBERSHIP MODAL === -->
 
+  <script type="text/javascript">
+    
+    $(document).ready(function() {
+      
+      // The show_on_badge setting overrides and disables the show_on_profiles setting when false
+      $('#log_show_on_badge_false').click(function() {
+        $('#log_show_on_profile_false').prop('checked', true);
+        $('#log_show_on_profile_true').prop('disabled', true);
+      });
+      $('#log_show_on_badge_true').click(function() {
+        $('#log_show_on_profile_true').prop('disabled', false);
+      });
+      
+      // Also we want to set the disabled status on startup
+      if ($('#log_show_on_badge_false').prop('checked'))
+        $('#log_show_on_profile_true').prop('disabled', true);
+
+    });
+
+  </script>
+
   <div id="log-visibility" class="modal hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
@@ -43,19 +64,54 @@
           <%= simple_form_for [@group, @badge, @log], method: :put,
             html: {id: 'log-visibility-form', class: 'form-horizontal'} do |f| %>
 
-            <%= f.input :show_on_profile, as: :radio_buttons, 
-              collection: [[true, 'Visible on Badge List profile'] , \
-              [false, "Must have link <p class='text-success'><small>".html_safe \
-                + "(Hidden from profile, but shareable via direct link)</small></p>".html_safe]],
-              label_method: :last, value_method: :first, 
-              label: 'Should this badge be visible on your Badge List user profile?' %>
+            <% if @group_show_on_profile %>
+              <%= f.input :show_on_profile, as: :radio_buttons, 
+                collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
+                value_method: :first, label: 'Show this badge on your badge profile?' %>
+            <% else %>
+              <div class="control-group">
+                <label class="control-label">Show this badge on your badge profile?</label>
+                <div class="controls">
+                  <strong>No</strong>
+                  <p class="help-block">
+                    Change your
+                    <%= link_to 'group membership settings', 
+                      group_path(@group) + '#membership-settings' %>
+                    to enable editing of this setting at the badge level.
+                  </p>
+                </div>
+              </div>
+            <% end %>
+
+            <% member_role_name = (@log.validation_status == 'validated') ? @experts : @learners %>
+            <% if @group_show_on_badges %>
+              <%= f.input :show_on_badge, as: :radio_buttons, 
+                collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
+                value_method: :first, 
+                label: "Show your name on the list of badge #{member_role_name}?" %>
+            <% else %>
+              <div class="control-group">
+                <label class="control-label">
+                  Show your name on the list of badge <%= member_role_name %>?
+                </label>
+                <div class="controls">
+                  <strong>No</strong>
+                  <p class="help-block">
+                    Change your
+                    <%= link_to 'group membership settings', 
+                      group_path(@group) + '#membership-settings' %>
+                    to enable editing of this setting at the badge level.
+                  </p>
+                </div>
+              </div>
+            <% end %>
 
             <% if @can_award_badge %>
               <%= f.input :receive_validation_request_emails, as: :select, include_blank: false,
                 collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
                 value_method: :first, label: 'Receive feedback request emails?',
-                hint: "Feedback request emails are sent automatically whenever a #{@learner} " \
-                  + "completes all of the badge requirements." %>
+                hint: "Feedback request emails are sent when a #{@learner} " \
+                  + "completes all of the badge requirements and then requests feedback." %>
             <% end %>
 
             <% 
@@ -83,7 +139,7 @@
               <div class="controls">
                 <%= link_to "Delete your #{@badge.progress_log}", [@group, @badge, @log], 
                   title: "Careful!",
-                  method: :delete, id: "delete-log", class: 'btn btn-danger brn-large', 
+                  method: :delete, id: "delete-log", class: 'btn btn-danger btn-large', 
                   data: { confirm: "Warning: This can't be undone. Are you absolutely sure you " \
                     + "want to permanently delete your #{@badge.progress_log}?", 
                     toggle: 'tooltip', placement: 'bottom' } %>
@@ -202,17 +258,24 @@
             <tr class="footer-row <%= (@show_sharing) ? 'highlight-tertiary' : '' %>">
               <td colspan="5">
                 <span class="label-text">
-                  <% if @show_sharing %>
-                    You've been awarded this badge and 
-                    <% if @log.show_on_profile %>
-                      it's visible on your 
-                      <%= link_to 'badge profile', @user, title: 'View your badge profile' %>.
+                  <% if @current_user_is_log_owner %>
+                    <% if (@log.issue_status == 'issued') %>
+                      You've been awarded this badge 
+                      <% if @log.show_on_profile %>
+                        and it's visible on your 
+                        <%= link_to 'badge profile', @user, title: 'View your badge profile' %>.
+                      <% elsif @log.show_on_badge %>
+                        but it's hidden from your 
+                        <%= link_to 'badge profile', @user, title: 'View your badge profile' %>.
+                      <% else %>
+                        but your name is hidden from the list of <%= @experts %>.
+                      <% end %>
                     <% else %>
-                      it's hidden from your 
-                      <%= link_to 'badge profile', @user, title: 'View your badge profile' %>.
+                      This is your <%= @badge.progress_log %>.
+                      <% if !@log.show_on_badge %>
+                        Your name is hidden from the list of <%= @learners %>.
+                      <% end %>
                     <% end %>
-                  <% elsif @current_user_is_log_owner %>
-                    This is your <%= @badge.progress_log %>.
                   <% elsif @can_award_badge %>
                     You're a badge awarder.
                   <% end %>
@@ -245,7 +308,7 @@
                     <li>
                       <a href="#log-visibility" tabindex="-1" data-toggle="modal" 
                           class="btn btn-small">
-                        <i class="fa fa-pencil"></i> 
+                        <i class="fa fa-sliders"></i> 
                         Edit badge membership
                       </a>
                     </li>

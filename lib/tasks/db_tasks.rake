@@ -944,4 +944,37 @@ namespace :db do
     puts " >> Done."
   end
 
+  task set_log_show_on_badge: :environment do
+    print "Updating show on badge setting for #{Log.count} logs"
+    
+    Log.each do |log|
+      log.show_on_badge = true
+      if log.timeless.save
+        print "."
+      else
+        print "!"
+      end
+    end
+
+    puts " >> Done."
+  end
+
+  task initialize_all_group_settings: :environment do
+    print "Resetting all group settings to defaults for #{User.count} users"
+    
+    User.each do |user|
+      (user.admin_of_ids + user.member_of_ids).each do |group_id|
+        user.initialize_group_settings_for group_id
+      end
+
+      if user.timeless.save
+        print "."
+      else
+        print "!"
+      end
+    end
+
+    puts " >> Done."
+  end
+
 end

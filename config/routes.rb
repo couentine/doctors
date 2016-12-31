@@ -63,6 +63,7 @@ BadgeList::Application.routes.draw do
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group
   match ':group_id/join' => 'groups#join', via: :get
   match ':group_id/leave' => 'groups#leave', via: :delete, as: :leave_group
+  match ':group_id/settings' => 'groups#update_group_settings', via: :put, as: :group_settings
   match ':group_id/clear_bounce_log' => 'groups#clear_bounce_log',via: :post,as: :clear_bounce_log
   match ':group_id/review' => 'groups#review', via: :get, as: :group_review
   match ':group_id/full_logs' => 'groups#full_logs', via: :get, as: :group_full_logs
