@@ -507,12 +507,12 @@ class Badge
     expert_user_ids.count
   end
 
-  # Returns all non-validated logs, sorted by entry counts (user name would require queries)
+  # Returns all non-validated logs, sorted by user name
   def learner_logs
     logs.where(:validation_status.ne => 'validated', detached_log: false).asc(:user_name)
   end
 
-  # Returns all validated logs, sorted by entry counts (user name would require queries)
+  # Returns all validated logs, sorted by user name
   def expert_logs
     logs.where(validation_status: 'validated', detached_log: false).asc(:user_name)
   end
@@ -541,6 +541,8 @@ class Badge
     if the_log
       if the_log.detached_log
         the_log.detached_log = false
+        the_log.show_on_badge = user.get_group_settings_for(group_id)['show_on_badges']
+        the_log.show_on_profile = user.get_group_settings_for(group_id)['show_on_profile']
         the_log.context = 'badge_add' # This will suppress the badge update callback
         the_log.save
         the_log.context = nil # CLEAR THIS OUT so it doesn't mess stuff up
@@ -550,6 +552,8 @@ class Badge
       the_log = Log.new(date_started: date_started)
       the_log.badge = self
       the_log.user = user
+      the_log.show_on_badge = user.get_group_settings_for(group_id)['show_on_badges']
+      the_log.show_on_profile = user.get_group_settings_for(group_id)['show_on_profile']
       the_log.context = 'badge_add' # This will suppress the badge update callback
       the_log.save
       the_log.context = nil # CLEAR THIS OUT so it doesn't mess stuff up

@@ -71,9 +71,10 @@ class User
 
   field :all_badge_ids,                     type: Array, default: []
   field :learner_badge_ids,                 type: Array, default: []
-  field :requested_badge_ids,              type: Array, default: []
+  field :requested_badge_ids,               type: Array, default: []
   field :expert_badge_ids,                  type: Array, default: []
   field :group_validation_request_counts,   type: Hash, default: {} # key=group_id, value=count
+  field :group_settings,                    type: Hash, default: {} # key=group_id, val=setting hash
 
   # OmniAuth Fields
   field :user_defined_password,             type: Boolean, default: true
@@ -602,11 +603,13 @@ class User
 
   # Returns all badge logs by group.
   # If public_only then only gets expert logs, otherwise returns everything except detached logs.
+  # If public_only then this will filter out groups with show_on_profile setting = false.
   # Set only_from_groups to an array of downcased group urls to only return logs from those groups.
   #
   # Return array has one entry for each group = {
   #   :type => one_of['Admin', 'Member'],
   #   :group => the_group,
+  #   :show_on_profile => show_on_profile_value_from_group_settings,
   #   :badges => { [:badge,
   #                 :log]
   #              } }
@@ -615,6 +618,7 @@ class User
     badge_map, log_map = {}, {} # group_id => badges[], #badge_id => logs
     group_ids, badge_ids = [], []
     return_rows = []
+    show_on_profile = nil
 
     # First build the query
 
@@ -650,22 +654,27 @@ class User
     end
 
     Group.where(:id.in => group_ids).asc(:name).each do |group|
-      group_row = {
-        type: member_type_of(group.id).to_s.capitalize,
-        group: group,
-        badges: []
-      }
+      show_on_profile = get_group_settings_for(group)['show_on_profile']
 
-      badge_map[group.id].each do |badge|
-        badge_row = {
-          badge: badge,
-          log: log_map[badge.id]
+      if show_on_profile || !public_only
+        group_row = {
+          type: member_type_of(group.id).to_s.capitalize,
+          group: group,
+          show_on_profile: show_on_profile,
+          badges: []
         }
 
-        group_row[:badges] << badge_row
-      end
+        badge_map[group.id].each do |badge|
+          badge_row = {
+            badge: badge,
+            log: log_map[badge.id]
+          }
 
-      return_rows << group_row
+          group_row[:badges] << badge_row
+        end
+
+        return_rows << group_row
+      end
     end
 
     return_rows
@@ -675,6 +684,75 @@ class User
   def update_validation_request_count_for(group)
     self.group_validation_request_counts[group.id.to_s] \
       = logs.where(:badge_id.in => group.badges_cache.keys, validation_status: 'requested').count
+  end
+
+  # Returns the group settings hash for this group (or returns defaults if no hash is found)
+  # Pass the group id in order to save a potential query
+  def get_group_settings_for(group_or_group_id)
+    if (group_or_group_id.class == Group)
+      group_id_string = group_or_group_id.id.to_s
+    else # is either Id or String (or the consumer of the function is confused)
+      group_id_string = group_or_group_id.to_s
+    end
+
+    group_settings[group_id_string] || { 'show_on_badges' => true, 'show_on_profile' => true }
+  end
+
+  # Sets appropriate key of group_settings to defaults or does nothing if values are already set.
+  # Pass the group id in order to save a potential query
+  def initialize_group_settings_for(group_or_group_id)
+    if (group_or_group_id.class == Group)
+      group_id_string = group_or_group_id.id.to_s
+    else # is either Id or String (or the consumer of the function is confused)
+      group_id_string = group_or_group_id.to_s
+    end
+
+    if group_settings[group_id_string].nil?
+      self.group_settings[group_id_string] = { 'show_on_badges' => true, 'show_on_profile' => true }
+    end
+  end
+
+  # This creates or updates the appropriate key of group_settings with the setting values provided
+  # This method will also trigger the update of child logs as needed
+  # NOTE: This method does not commit the save
+  def update_group_settings_for(group, show_on_badges, show_on_profile)
+    # First determine if this update represents a change
+    show_on_badges_changed = show_on_badges != get_group_settings_for(group)['show_on_badges']
+    show_on_profile_changed = show_on_profile != get_group_settings_for(group)['show_on_profile']
+    settings_changed = show_on_badges_changed || show_on_profile_changed
+
+    # Then update the settings
+    self.group_settings[group.id.to_s] = {
+      show_on_badges: show_on_badges,
+      show_on_profile: show_on_profile,
+    }
+
+    # Then queue the log update if needed
+    if settings_changed
+      # Prioritize this high since users are likey to immediately navigate to their profile and
+      # make sure that the group and badges have disappeared.
+      User.delay(queue: 'high', retry: false)\
+        .overwrite_log_visibility_settings(id, group.id, group_settings[group.id.to_s])
+    end
+  end
+
+  # Overwrites the show_on_badge and show_on_profile fields for all this user's logs in this group.
+  # Call this asynchronously, it can involve a lot of queries
+  # NOTE: This will use the settings hash passed to the function NOT the settings hash in the 
+  #       database. That is so that you can trigger this before the initial commit is complete.
+  def self.overwrite_log_visibility_settings(user_id, group_id, group_settings)
+    show_on_badge = group_settings['show_on_badges']
+    show_on_profile = group_settings['show_on_profile']
+    group = Group.find(group_id)
+    logs = Log.where(user_id: user_id, :badge_id.in => group.badge_ids, detached_log: false)
+
+    logs.each do |log|
+      log.show_on_badge = show_on_badge
+      log.show_on_profile = show_on_profile
+      log.timeless.save if log.changed?
+    end
+
+    true
   end
 
   def manually_update_identity_hash
@@ -988,6 +1066,8 @@ protected
   # Finds any references to this user's email in the invited_admins/users arrays on groups.
   # When found it upgrades the invitation to an actual relationship.
   def convert_group_invitations
+    joined_groups, joined_group_ids = [], []
+
     # First query for groups where we have been invited as an admin
     Group.where(:invited_admins.elem_match => { :email => email }).entries.each do |group|
       # First add group membership
@@ -996,7 +1076,11 @@ protected
       self.reload
       invited_item = group.invited_admins.detect { |u| u["email"] == (email || unconfirmed_email)}
       group.invited_admins.delete(invited_item) if invited_item
-      group.save
+      group.timeless.save
+      
+      # Add this group to the joined group list for later
+      joined_groups << group
+      joined_group_ids << group.id
 
       # Then add to any badges (as learner)
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|
@@ -1023,7 +1107,13 @@ protected
       self.reload
       invited_item = group.invited_members.detect { |u| u["email"] == (email || unconfirmed_email)}
       group.invited_members.delete(invited_item) if invited_item
-      group.save
+      group.timeless.save
+
+      # Add this group to the joined group list for later (only if it's not a dupe)
+      if !joined_group_ids.include?(group.id)
+        joined_groups << group
+        joined_group_ids << group.id
+      end
 
       # Then update analytics
       IntercomEventWorker.perform_async({
@@ -1055,6 +1145,14 @@ protected
         end
       end unless invited_item["validations"].blank?
     end
+
+    # Now we initialize the group settings for all the joined groups
+    joined_groups.each do |group|
+      initialize_group_settings_for(group)
+    end
+    self.timeless.save if self.changed?
+
+    true
   end
 
   def update_identity_hash

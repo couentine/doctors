@@ -4,15 +4,16 @@ class GroupsController < ApplicationController
   # === FILTERS === #
 
   # RESTful Actions >> :index, :show, :new, :edit, :create, :update, :destroy
-  # Non-RESTful Actions >> :leave, :destroy_user, :destroy_invited_user, 
-  #                        :add_users, :create_users
+  # Non-RESTful Actions >> :join, :leave, :update_group_settings, :destroy_user, 
+  #                        :destroy_invited_user, :add_users, :create_users
 
   prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
-    :join, :leave, :destroy_user, :send_invitation, :destroy_invited_user, :add_users, 
-    :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, :review, :full_logs, 
-    :create_validations]
+    :join, :leave, :update_group_settings, :destroy_user, :send_invitation, :destroy_invited_user, 
+    :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, :review, 
+    :full_logs, :create_validations]
   before_action :authenticate_user!, except: [:show]
-  before_action :group_member_or_admin, only: [:leave, :review, :full_logs, :create_validations]
+  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :review, :full_logs,
+    :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
@@ -120,6 +121,12 @@ class GroupsController < ApplicationController
 
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
     @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
+
+    # Get current values of group membership settings
+    if @current_user_is_admin || @current_user_is_member
+      @show_on_badges = current_user.get_group_settings_for(@group)['show_on_badges']
+      @show_on_profile = current_user.get_group_settings_for(@group)['show_on_profile']
+    end
 
     respond_to do |format|
       format.any(:html, :js) do 
@@ -279,6 +286,10 @@ class GroupsController < ApplicationController
     else
       @group.members << current_user
       if @group.save
+        # Create / restore the user's group settings (use default values)
+        current_user.initialize_group_settings_for(@group)
+        current_user.timeless.save
+
         if join_code.blank?
           notice = "Welcome to the group!"
         else
@@ -342,6 +353,27 @@ class GroupsController < ApplicationController
     end
 
     redirect_to @group, :notice => notice
+  end
+
+  # PUT /group-url/settings?show_on_badges=true&show_on_profile=true
+  # Updates group settings for current user
+  def update_group_settings
+    # Get the params (convert from string and default to true if missing)
+    show_on_badges = params['show_on_badges'].to_s.downcase != 'false'
+    if !show_on_badges
+      show_on_profile = false
+    else
+      show_on_profile = params['show_on_profile'].to_s.downcase != 'false'
+    end
+
+    # Do the actual update
+    current_user.update_group_settings_for(@group, show_on_badges, show_on_profile)
+    if current_user.save
+      redirect_to @group, notice: 'Your group membership settings have been successfully updated.'
+    else
+      redirect_to @group, 
+        alert: 'There was a problem updating your group membership settings, please try again.'
+    end
   end
 
   # DELETE /group-url/members/2, :id = 1, :user_id = 2, :type = member
@@ -617,6 +649,10 @@ class GroupsController < ApplicationController
                     @upgraded_member_emails << user.email
                   else
                     @new_admin_emails << user.email
+
+                    # Create / restore the user's group settings (use default values)
+                    user.initialize_group_settings_for(@group)
+                    user.timeless.save
                   end
                 end
               end
@@ -641,6 +677,10 @@ class GroupsController < ApplicationController
                     end
                   end
                   @new_member_emails << user.email
+
+                  # Create / restore the user's group settings (use default values)
+                  user.initialize_group_settings_for(@group)
+                  user.timeless.save
 
                   # Then update analytics
                   IntercomEventWorker.perform_async({

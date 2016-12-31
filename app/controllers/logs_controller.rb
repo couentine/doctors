@@ -53,6 +53,12 @@ class LogsController < ApplicationController
           # Now calculate whether at least one item has been submitted for each requirement
           # NOTE: We save a query by passing in the existing @requirements variable.
           @all_requirements_complete = @log.all_requirements_complete(@requirements)
+
+          # Get current values of group membership settings
+          if @current_user_is_admin || @current_user_is_member
+            @group_show_on_badges = current_user.get_group_settings_for(@group)['show_on_badges']
+            @group_show_on_profile = current_user.get_group_settings_for(@group)['show_on_profile']
+          end
         end
         format.embed { render layout: 'embed' }
         format.json { render json: @log, filter_user: current_user }
@@ -284,8 +290,9 @@ private
   end
 
   def log_params
-    params.require(:log).permit(:show_on_profile, :detached_log, :date_started, :date_requested, 
-      :date_withdrawn, :date_sent_to_backpack, :wiki, :receive_validation_request_emails)
+    params.require(:log).permit(:show_on_profile, :show_on_badge, :detached_log, :date_started, 
+      :date_requested, :date_withdrawn, :date_sent_to_backpack, :wiki, 
+      :receive_validation_request_emails)
   end
 
 end

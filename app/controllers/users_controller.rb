@@ -40,7 +40,7 @@ class UsersController < ApplicationController
   def show
     @user = User.find(params[:id]) || not_found
     @this_is_current_user = current_user && (@user == current_user)
-    @group_badge_log_list = @user.group_badge_log_list(!@this_is_current_user)
+    @group_badge_log_list = @user.group_badge_log_list(!@this_is_current_user && !@badge_list_admin)
     @current_user_can_see_profile = @user.profile_visible_to(current_user)
     @current_user_can_see_domain = @user.domain_visible_to(current_user)
 
