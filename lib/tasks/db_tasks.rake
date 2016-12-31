@@ -947,7 +947,7 @@ namespace :db do
   task set_log_show_on_badge: :environment do
     print "Updating show on badge setting for #{Log.count} logs"
     
-    Log.desc(:updated_at).each do |log|
+    Log.each do |log|
       log.show_on_badge = true
       if log.timeless.save
         print "."
@@ -962,7 +962,7 @@ namespace :db do
   task initialize_all_group_settings: :environment do
     print "Resetting all group settings to defaults for #{User.count} users"
     
-    User.desc(:updated_at).each do |user|
+    User.each do |user|
       (user.admin_of_ids + user.member_of_ids).each do |group_id|
         user.initialize_group_settings_for group_id
       end
