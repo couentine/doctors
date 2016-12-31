@@ -100,15 +100,47 @@
           <%= simple_form_for [@group, @badge, @log], method: :put,
             html: {id: 'log-visibility-form', class: 'form-horizontal'} do |f| %>
 
-            <%= f.input :show_on_profile, as: :radio_buttons, 
-              collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
-              value_method: :first, label: 'Show this badge on your badge profile?' %>
+            <% if @group_show_on_profile %>
+              <%= f.input :show_on_profile, as: :radio_buttons, 
+                collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
+                value_method: :first, label: 'Show this badge on your badge profile?' %>
+            <% else %>
+              <div class="control-group">
+                <label class="control-label">Show this badge on your badge profile?</label>
+                <div class="controls">
+                  <strong>No</strong>
+                  <p class="help-block">
+                    Change your
+                    <%= link_to 'group membership settings', 
+                      group_path(@group) + '#membership-settings' %>
+                    to enable editing of this setting at the badge level.
+                  </p>
+                </div>
+              </div>
+            <% end %>
 
             <% member_role_name = (@log.validation_status == 'validated') ? @experts : @learners %>
-            <%= f.input :show_on_badge, as: :radio_buttons, 
-              collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
-              value_method: :first, 
-              label: "Show your name on the list of badge #{member_role_name}?" %>
+            <% if @group_show_on_badges %>
+              <%= f.input :show_on_badge, as: :radio_buttons, 
+                collection: [[true, 'Yes'], [false, 'No']], label_method: :last, 
+                value_method: :first, 
+                label: "Show your name on the list of badge #{member_role_name}?" %>
+            <% else %>
+              <div class="control-group">
+                <label class="control-label">
+                  Show your name on the list of badge <%= member_role_name %>?
+                </label>
+                <div class="controls">
+                  <strong>No</strong>
+                  <p class="help-block">
+                    Change your
+                    <%= link_to 'group membership settings', 
+                      group_path(@group) + '#membership-settings' %>
+                    to enable editing of this setting at the badge level.
+                  </p>
+                </div>
+              </div>
+            <% end %>
 
             <% if @can_award_badge %>
               <%= f.input :receive_validation_request_emails, as: :select, include_blank: false,
@@ -142,7 +174,7 @@
               </label>
               <div class="controls">
                 <%= link_to "Delete your #{@badge.progress_log}", [@group, @badge, @log], title: "Careful!",
-                  method: :delete, id: "delete-log", class: 'btn btn-danger brn-large', 
+                  method: :delete, id: "delete-log", class: 'btn btn-danger btn-large', 
                   data: { confirm: "Warning: This can't be undone. Are you absolutely sure you want to"\
                   + " permanently delete your #{@badge.progress_log}?", toggle: 'tooltip', 
                   placement: 'bottom' } %>
@@ -380,7 +412,7 @@
                 <% if @current_user_is_expert || @current_user_is_learner %>
                   <li>
                     <%= link_to \
-                      '<i class="fa fa-shield"></i> Edit your membership'.html_safe,
+                      '<i class="fa fa-sliders"></i> Edit badge membership'.html_safe,
                       '#log-visibility', class: 'btn btn-small', data: { toggle: 'modal' } %>
                   </li>
                 <% elsif can_join_badge %>

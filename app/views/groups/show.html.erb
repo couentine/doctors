@@ -285,6 +285,132 @@
 
 <% end %>
 
+<% if @current_user_is_admin || @current_user_is_member %>
+
+  <!-- === EDIT GROUP MEMBERSHIP SETTINGS MODAL === -->
+
+  <script type="text/javascript">
+    
+    $(document).ready(function() {
+      
+      // The show_on_badges setting overrides and disables the show_on_profiles setting when false
+      $('#show_on_badges_false').click(function() {
+        $('#show_on_profile_false').prop('checked', true);
+        $('#show_on_profile_true').prop('disabled', true);
+      });
+      $('#show_on_badges_true').click(function() {
+        $('#show_on_profile_true').prop('disabled', false);
+      });
+      
+      // Also we want to set the disabled status on startup
+      if ($('#show_on_badges_false').prop('checked'))
+        $('#show_on_profile_true').prop('disabled', true);
+
+    });
+
+  </script>
+
+  <div id="membership-settings" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Edit your group membership</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <%= form_tag(group_settings_path(@group), method: 'put', id: 'membership-settings-form', 
+            class: 'form-horizontal') do %>
+
+            <p>
+              Updating these settings will overwrite the visibility of all of your badge 
+              portfolios.
+            </p>
+
+            <div class="control-group radio_buttons optional">
+              <label class="radio_buttons optional control-label">
+                Show this group on your badge profile?
+              </label>
+              <div class="controls">
+                <span class="radio">
+                  <label for="show_on_profile_true">
+                    <input class="radio_buttons optional" type="radio" value="true" 
+                      name="show_on_profile" id="show_on_profile_true"
+                      <%= (@show_on_profile) ? 'checked="checked"' : '' %>>
+                    Yes
+                  </label>
+                </span>
+                <span class="radio">
+                  <label for="show_on_profile_false">
+                    <input class="radio_buttons optional" type="radio" value="false" 
+                      name="show_on_profile" id="show_on_profile_false"
+                      <%= (!@show_on_profile) ? 'checked="checked"' : '' %>>
+                    No
+                  </label>
+                </span>
+              </div>
+            </div>
+
+            <div class="control-group radio_buttons optional">
+              <label class="radio_buttons optional control-label">
+                Show your name on badge member lists?
+              </label>
+              <div class="controls">
+                <span class="radio">
+                  <label for="show_on_badges_true">
+                    <input class="radio_buttons optional" type="radio" value="true" 
+                      name="show_on_badges" id="show_on_badges_true"
+                      <%= (@show_on_badges) ? 'checked="checked"' : '' %>>
+                    Yes
+                  </label>
+                </span>
+                <span class="radio">
+                  <label for="show_on_badges_false">
+                    <input class="radio_buttons optional" type="radio" value="false" 
+                      name="show_on_badges" id="show_on_badges_false"
+                      <%= (!@show_on_badges) ? 'checked="checked"' : '' %>>
+                    No
+                  </label>
+                </span>
+              </div>
+            </div>
+
+            <% #=== LEAVE THE GROUP (Doesn't show up for owner) ===# %>
+
+            <% if @current_user_is_member || @current_user_is_admin \
+                && !@current_user_is_owner %>
+              <h4>Leave the group</h4>
+
+              <div class="control-group">
+                <label class="control-label" for="delete-log">
+                  Resign your group membership
+                </label>
+                <div class="controls">
+                  <%= link_to '<i class="fa fa-ban"></i> Leave the group'.html_safe, 
+                    leave_group_path(@group), method: :delete, class: 'btn btn-danger btn-large',
+                      data: { confirm: 'Are you sure you want to leave this group?' } %>
+                </div>
+              </div>
+            <% end %>
+
+          <% end %>
+         
+         </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" aria-hidden="true" 
+       onclick="$('#membership-settings-form').submit();">
+        Save
+      </button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+<% end %> <!-- end is admin or learner -->
+
 <% if @current_user_is_admin || @badge_list_admin %>
 
   <!-- === MANAGE MEMBERS MODAL === -->
@@ -694,12 +820,22 @@
 class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-secondary' : '' %>">
             <td colspan="4">
               <span class="label-text">
-                <% if @current_user_is_owner %>
-                  You're the group owner.
-                <% elsif @current_user_is_admin %>
-                  You're a group admin.
-                <% elsif @current_user_is_member %>
-                  You're a group member.
+                <% if @current_user_is_admin || @current_user_is_member %>
+                  <% if @current_user_is_owner %>
+                    You're the group owner
+                  <% elsif @current_user_is_admin %>
+                    You're a group admin
+                  <% elsif @current_user_is_member %>
+                    You're a group member
+                  <% end %>
+
+                  <% if @show_on_profile %>
+                    and this group is visible on your 
+                    <%= link_to 'badge profile', current_user, title: 'View your badge profile' %>.
+                  <% else %>
+                    and this group is hidden from your 
+                    <%= link_to 'badge profile', current_user, title: 'View your badge profile' %>.
+                  <% end %>
                 <% elsif can_join_group %>
                   This is an open group.
                 <% elsif can_join_group_with_code %>
@@ -709,13 +845,10 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                 <% end %>
               </span>
               <ul class="action-list">
-                <% if @current_user_is_member || @current_user_is_admin \
-                    && !@current_user_is_owner %>
+                <% if @current_user_is_member || @current_user_is_admin %>
                   <li>
-                    <%= link_to '<i class="fa fa-ban"></i> Leave the group'.html_safe, \
-                      leave_group_path(@group), method: :delete, class: 'btn btn-small', data: \
-                        { confirm: \
-                          'Are you absolutely sure you want to leave this group?' } %>
+                    <%= link_to '<i class="fa fa-sliders"></i> Edit group membership'.html_safe, \
+                      '#membership-settings', class: 'btn btn-small', data: { toggle: 'modal' } %>
                   </li>
                 <% elsif can_join_group %>
                   <li>

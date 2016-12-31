@@ -78,6 +78,12 @@ class BadgesController < ApplicationController
             ['Send no emails to anyone', false]
           ]
         end
+
+        # Get current values of group membership settings
+        if @current_user_is_admin || @current_user_is_member
+          @group_show_on_badges = current_user.get_group_settings_for(@group)['show_on_badges']
+          @group_show_on_profile = current_user.get_group_settings_for(@group)['show_on_profile']
+        end
       end
       format.json do 
         @group = Group.find(params[:group_id]) || not_found

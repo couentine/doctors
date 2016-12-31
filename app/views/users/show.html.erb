@@ -113,7 +113,8 @@
         <div class="container-card evidence-card">
           <% @group_badge_log_list.each do |group_row| 
             group = group_row[:group]
-            group_type = group_row[:type] %>
+            group_type = group_row[:type]
+            group_show_on_profile = group_row[:show_on_profile] %>
               
             <table class="header-table">
               <tr>
@@ -122,10 +123,11 @@
                     title: "View the group", class: "image-link" %>
                 </td>
                 <td>
-                  <h2>
-                    <%= link_to group.name, group, title: "View the group" %>
-                  </h2>
+                  <h2><%= link_to group.name, group, title: "View the group" %></h2>
                   <h3><%= group_type %></h3>
+                  <% if !group_show_on_profile %> 
+                    <h4><i>(Group hidden from public profile)</i></h4>
+                  <% end %>
                 </td>
               </tr>
             </table>
@@ -149,7 +151,7 @@
                     <% if log.validation_status == 'validated' %>
                       <%= badge.expert.capitalize %> since <%= log.date_issued.to_s(:short_date) %>
                       <% if !log.show_on_profile %>
-                        (Hidden from public)
+                        <br>(Badge hidden from public profile)
                       <% end %>
                     <% else %>
                       <%= badge.learner.capitalize %> 
@@ -184,13 +186,19 @@
         <div class="info-card text-card group-list-card">
           <ul>
             <% @user.groups.asc(:name).each do |group| %>
-              <li>
-                <%= link_to image_tag(group.avatar_image_url(:small)) + " " + group.name, group, 
-                  title: "View the group" %>
-                <span class="no-link">
-                  <%= "#{@user.member_type_of(group.id).capitalize}" %>
-                </span>
-              </li>
+              <% group_show_on_profile = @user.get_group_settings_for(group)['show_on_profile'] %>
+              <% if @this_is_current_user || @badge_list_admin || group_show_on_profile %>
+                <li>
+                  <%= link_to image_tag(group.avatar_image_url(:small)) + " " + group.name, group, 
+                    title: "View the group" %>
+                  <span class="no-link">
+                    <%= "#{@user.member_type_of(group.id).capitalize}" %>
+                    <% if !group_show_on_profile %> 
+                      (Group hidden from public profile)
+                    <% end %>
+                  </span>
+                </li>
+              <% end %>
             <% end %>
           </ul>
         </div>
