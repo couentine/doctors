@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html>
 
+<%
+  
+  #=== BADGE LIST APP LAYOUT ===#
+  #------------------------------
+  # This is used for internal pages (not the website).
+  #
+  # Parameters (w/ Default Value):
+  # - title (Optional): Partial title of window >> "#{title} - Badge List"
+  # - full_title (Optional): Full title of window
+  # - app_header_content (Required): Should include polymer component for this page's header content
+  # - page_background (Optional, '#FFFFFF'): Enter CSS color or other valid background value.
+  # - white_text (Optional, false): Should the default text color be white?
+  #
+  # Boolean Exlusion Parameters:
+  # - hide_condensed_header (Optional, false): Hide the app header while scrolling down the page.
+  # - hide_left_nav (Optional, false): Hide app header left nav (with BL logo).
+  # - hide_right_nav (Optional, false): Hide app header right nav (with current user / sign in).
+  # - hide_intercom (Optional, false): Hide intercom chat widget
+  #
+  # Boolean Inclusion Parameters:
+  # - no_index, include_ob_issuer, include_stripe, include_metadata
+  #
+  # If including metadata for social media, also set these parameters:
+  # - Required: metadata_description, metadata_site_name, metadata_title, metadata_url,
+  #             metadata_image
+  # - Optional (but always set both or none): metadata_image_height, metadata_image_width
+
+%>
+
   <head>
     <% #=== PAGE TITLE, APP ICON & BASE ===# %>
       
@@ -72,8 +101,7 @@
 
   <% #=== PAGE BODY ===# %>
 
-  <body class="<%= yield(:body_class) if content_for?(:body_class) %>" 
-    unresolved>
+  <body unresolved>
       
     <% #=== PAGE ALERTS ===# %>
 
@@ -87,7 +115,7 @@
 
     <% #=== APP CONTAINER COMPONENT (Uses paper-scroll-header-panel) ===# %>
 
-      <bl-app-container page-background-color="<%= yield(:page_background_color) %>"
+      <bl-app-container page-background="<%= yield(:page_background) %>"
         <%= (content_for?(:white_text)) ? 'white-text' : '' %>
         <%= (content_for?(:hide_condensed_header)) ? 'hide-condensed-header' : '' %>
         <%= (content_for?(:hide_left_nav)) ? 'hide-left-nav' : '' %>
@@ -100,12 +128,6 @@
           <% if content_for?(:app_header_content) %>
             <div class="app-header-content">
               <%= yield(:app_header_content) %>
-            </div>
-          <% end %>
-
-          <% if content_for?(:app_header_background) %>
-            <div class="app-header-background">
-              <%= yield(:app_header_background) %>
             </div>
           <% end %>
 

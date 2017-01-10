@@ -54,7 +54,7 @@
     color: rgb(245,124,0);
     border-top: 4px solid rgb(245,124,0);
     text-align: left;
-    z-index: 11;
+    z-index: 200;
     overflow-y: auto;
   }
     .close-link {

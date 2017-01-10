@@ -35,7 +35,7 @@
       .dropdown-trigger > img.true { border-color: white; }
   
     paper-menu-button .dropdown-content {
-      z-index: 100;
+      z-index: 110;
       width: 14em;
     }
       paper-item { color: #616161; }

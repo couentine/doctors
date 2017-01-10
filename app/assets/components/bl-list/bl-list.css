@@ -8,6 +8,7 @@
     display: flex;
     margin: 1em 0;
     color: white;
+    z-index: 90;
   }
   @media (min-width: 840px) { :host ::content .list-controls { margin: 1em 2em; } }
   @media (min-width: 1200px) { :host ::content .list-controls { margin: 1em 4em; } }
@@ -32,43 +33,46 @@
       justify-content: flex-end;
     }
 
-  .placeholder-wrapper {
-    display: flex;
-    flex: 1 100%;
+  #listWrapper {
+    z-index: 10;
   }
-  :host ::content .placeholder {
-    display: flex;
-    flex: 1 100%;
-    flex-wrap: wrap;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0.25em 0.75em; padding: 1.5em;
-    text-align: center;
-    background-color: rgb(250,250,250);
-    color: rgb(158,158,158);
-    border: 1px solid rgba(224,224,224, 0.7);
-    border-radius: 0.4em;
-  }
-  :host ::content .placeholder.color-background {
-    background-color: transparent;
-    color: white;
-    border-color: white;
-    border-width: 2px;
-  }
-    :host ::content .placeholder i {
-      font-size: 3em;
-      display: block;
+    .placeholder-wrapper {
+      display: flex;
+      flex: 1 100%;
     }
-    :host ::content .placeholder a,
-    :host ::content .placeholder a:visited { color: rgb(158,158,158); }
-    :host ::content .placeholder a:focus,
-    :host ::content .placeholder a:hover { color: rgb(66,66,66); }
-    :host ::content .placeholder .message {
-      display: block;
+    :host ::content .placeholder {
+      display: flex;
+      flex: 1 100%;
+      flex-wrap: wrap;
+      flex-direction: column;
+      justify-content: center;
+      margin: 0.25em 0.75em; padding: 1.5em;
+      text-align: center;
+      background-color: rgb(250,250,250);
+      color: rgb(158,158,158);
+      border: 1px solid rgba(224,224,224, 0.7);
+      border-radius: 0.4em;
     }
-    :host ::content .placeholder .message p:last-child {
-      margin-bottom: 0;
+    :host ::content .placeholder.color-background {
+      background-color: transparent;
+      color: white;
+      border-color: white;
+      border-width: 2px;
     }
+      :host ::content .placeholder i {
+        font-size: 3em;
+        display: block;
+      }
+      :host ::content .placeholder a,
+      :host ::content .placeholder a:visited { color: rgb(158,158,158); }
+      :host ::content .placeholder a:focus,
+      :host ::content .placeholder a:hover { color: rgb(66,66,66); }
+      :host ::content .placeholder .message {
+        display: block;
+      }
+      :host ::content .placeholder .message p:last-child {
+        margin-bottom: 0;
+      }
 
 /* === SPINNER & ERROR PANEL === */
   

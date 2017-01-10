@@ -7,7 +7,7 @@ Polymer({
     currentUser: { type: Object },
     
     // Optional
-    pageBackgroundColor: { type: String, value:'#FFFFFF', observer:'_pageBackgroundColorChanged' },
+    pageBackground: { type: String, value:'#FFFFFF', observer:'_pageBackgroundChanged' },
     whiteText: { type: Boolean, value: false },
     hideCondensedHeader: { type: Boolean, value: false }, // Scroll away header after condensing
     hideLeftNav: { type: Boolean, value: false },
@@ -82,9 +82,9 @@ Polymer({
   },
 
   // Observers
-  _pageBackgroundColorChanged: function(newValue, oldValue) {
+  _pageBackgroundChanged: function(newValue, oldValue) {
     // Update the css variable that controls background any time the value changes
-    this.customStyle['--page-background-color'] = newValue;
+    this.customStyle['--page-background'] = newValue;
     this.updateStyles();
   },
 

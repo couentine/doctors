@@ -12,11 +12,10 @@
 
         <content select=".app-header-content"></content>
 
-        <bl-app-navbar-left id="leftNav" white-text="[[whiteText]]" asset-paths="[[assetPaths]]">
-        </bl-app-navbar-left>
-        <bl-app-navbar-right id="rightNav" white-text="[[whiteText]]" 
-          current-user="[[currentUser]]" asset-paths="[[assetPaths]]">
-        </bl-app-navbar-right>
+        <bl-app-navbar-left id="leftNav" white-text="[[whiteText]]" asset-paths="[[assetPaths]]"
+          hidden="[[hideLeftNav]]"></bl-app-navbar-left>
+        <bl-app-navbar-right id="rightNav" white-text="[[whiteText]]" hidden="[[hideRightNav]]"
+          current-user="[[currentUser]]" asset-paths="[[assetPaths]]"></bl-app-navbar-right>
 
       </div>
 

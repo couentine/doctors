@@ -25,7 +25,7 @@
     -webkit-flex: 1;
     flex: 1;
     
-    background: var(--page-background-color, white);
+    background: var(--page-background, white);
     color: #616161;
 
     --paper-scroll-header-panel-header-container: {

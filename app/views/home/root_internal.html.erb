@@ -1,6 +1,6 @@
 <% 
   provide(:title, 'Home')
-  provide(:page_background_color, '#FFFFFF')
+  provide(:page_background, '#FFFFFF')
 %>
 
 <% #=== APP HEADER CONTENT ===# %>
@@ -11,7 +11,7 @@
 
 <% #=== PAGE BODY CONTENT ===# %>
 
-  <!-- === PAGE HEADER === -->
+  <!-- #=== PAGE HEADER ===# -->
 
   <bl-page-header-home>
     <%= image_tag @user.avatar_image_url(:medium), class: 'primary' %>
@@ -21,7 +21,7 @@
     <h1><%= @user.name %></h1>
     
     <% if !@user.confirmed? || @user.pending_reconfirmation? %>
-      <!-- === ACCOUNT STATUS WARNING === -->
+      <!-- #=== ACCOUNT STATUS WARNING ===# -->
       
       <bl-label class="primary warning">
         <i class="fa fa-exclamation-triangle"></i>
@@ -39,7 +39,7 @@
       link="<%= user_path(current_user) %>"></bl-widget-badge-count>
   </bl-page-header-home>
 
-  <!-- === BADGES === -->
+  <!-- #=== BADGES ===# -->
 
   <bl-subheader>
     <h2>Badges in progress</h2>
@@ -59,7 +59,7 @@
     </div>
   </bl-list>
 
-  <!-- === GROUPS === -->
+  <!-- #=== GROUPS ===# -->
 
   <bl-subheader>
     <h2>Your groups</h2>
