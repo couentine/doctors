@@ -39,17 +39,17 @@
       transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s !important;
     }
 
-    paper-dropdown-menu {
-      color: white;
-    }
-
     .query-options-dropdown label.paper-input.style-scope,
     .query-options-dropdown input.paper-input.style-scope,
+    .query-options-dropdown .floated-label-placeholder.style-scope,
     .query-options-dropdown iron-icon.style-scope.paper-dropdown-menu {
-      color: white;
+      color: white !important;
     }
-    .query-options-dropdown .unfocused-line.style-scope { background: white; }
-    .query-options-dropdown .focused-line.style-scope { background: rgb(224,224,224); }
+    .query-options-dropdown .unfocused-line.style-scope,
+    .query-options-dropdown .focused-line.style-scope { 
+      background: white;
+      border-color: white;
+    }
   </style>
 
   <template is="dom-bind" id="review">

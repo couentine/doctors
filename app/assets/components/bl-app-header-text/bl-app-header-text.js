@@ -43,7 +43,9 @@ Polymer({
     this.$.subtitle.style.opacity = subtitleFontSize;
   },
   _leftNavLinkTap: function(e) {
+    console.log('In here');
     window.history.back();
+    e.preventDefault();
   },
 
   // Events

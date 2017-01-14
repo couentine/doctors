@@ -39,7 +39,10 @@ class HomeController < ApplicationController
       end
 
       respond_to do |format|
-        format.html { render template: 'home/root_internal', layout: 'app' }
+        format.html do
+          flash[:notice] = 'Testing the flash thingy with toast.'
+          render template: 'home/root_internal', layout: 'app' 
+        end
         format.json do
           if @query == 'groups'
             render json: { next_page: @groups_next_page, groups: @groups_hash }
