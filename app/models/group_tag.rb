@@ -16,7 +16,7 @@ class GroupTag
   }
   JSON_TEMPLATES = {
     list_item: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
-      :validation_request_count]
+      :validation_request_count, :full_path]
   }
 
   # === INSTANCE VARIABLES === #
@@ -57,6 +57,16 @@ class GroupTag
   after_save :update_group_cache_if_needed
   before_destroy :remove_from_group_cache_before_destroy
 
+  # === INSTANCE METHODS === #
+
+  def full_path
+    "/#{group.url_with_caps}/tags/#{name_with_caps}"
+  end
+
+  def full_url
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}/#{full_path}"
+  end
+
   # === ADDING AND REMOVING USERS === #
 
   # Updates user_count and user_magnitude
@@ -70,6 +80,8 @@ class GroupTag
   def add_users(user_ids, current_user_id, async = false)
     if async
       poller = Poller.new
+      poller.waiting_message = 'Adding users to group tag...'
+      poller.progress = 1
       poller.save
       GroupTag.delay(queue: 'default', retry: false).add_users(user_ids, current_user_id,
         group_tag_id: self.id, poller_id: poller.id)
@@ -88,6 +100,8 @@ class GroupTag
   def self.add_users(user_ids, current_user_id, options = {})
     begin
       poller = Poller.find(options[:poller_id]) rescue nil
+      poller.progress = 0 if poller.progress.nil?
+
       group_tag = options[:group_tag] || GroupTag.find(options[:group_tag_id]) # error if missing
       group = group_tag.group
       current_user_id = current_user_id.to_s # stringify if needed
@@ -95,11 +109,12 @@ class GroupTag
       existing_user_ids = group_tag.user_ids.map{ |id| id.to_s } # stringify
       user_ids = user_ids.map{ |id| id.to_s } # stringify (if needed)
       new_user_ids = existing_user_ids - user_ids
-      added_user_count = 0
+      added_user_count, completed_user_count, completed_progress = 0, 0, 0
       
       # Don't hit the database anymore unless there are users to add
       if !new_user_ids.blank?
         new_users = User.where(:id.in => new_user_ids)
+        new_user_count = new_users.count
         new_users.each do |user|
           # Only add them if they are an admin or member of the group
           if user.member_or_admin_of? group
@@ -124,9 +139,17 @@ class GroupTag
                 'added_by' => current_user_id
               }
             end
+
+            added_user_count += 1
           end
 
-          added_user_count += 1
+          # Now recalculate progress and update the poller if needed
+          completed_user_count += 1
+          completed_progress = ((completed_user_count.to_d/new_user_count)*100).round
+          if completed_progress > poller.progress
+            poller.progress = completed_progress
+            poller.save
+          end
         end
 
         # WHY TIMELESS? We're saving the standard timestamp fields for changes to name or summary

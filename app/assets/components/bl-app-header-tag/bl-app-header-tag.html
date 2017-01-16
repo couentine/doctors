@@ -1,0 +1,31 @@
+<dom-module id="bl-app-header-tag">
+  <link rel="stylesheet" href="bl-app-header-tag.css" />
+
+  <template>
+    
+    <div id="backgroundPanel">&nbsp;</div>
+    <div id="condensedBackgroundPanel">&nbsp;</div>
+    
+    <div id="leftNav">
+      <a id="leftNavLink" href="#" on-tap="_leftNavLinkTap" title="Back">
+        <i class="fa fa-arrow-left"></i>
+      </a>
+    </div>
+
+    <div id="topLine">&nbsp;</div>
+
+    <div id="tagWrapper">
+      <div id="tag">
+        <div id="background">&nbsp;</div>
+        <div id="divider">&nbsp;</div>
+        <h1 id="title">
+          <span id="symbol"><i class="fa fa-fw fa-hashtag"></i></span>
+          <span id="name">[[name]]</span>
+        </h1>
+      </div>
+    </div>
+
+  </template>
+
+  <script src="bl-app-header-tag.js"></script>
+</dom-module>

@@ -7,14 +7,10 @@
 
   a {
     display: inline-block;
-    border-radius: 3px;
-    text-decoration: none;
-
-    background: var(--background, transparent);
     color: var(--color, inherit);
+    text-decoration: none;
   }
 
-  paper-button {
-    display: inline-block;
-    margin: 0;
+  paper-fab {
+    --paper-fab-background: var(--background, #FF9800);
   }

@@ -1,0 +1,46 @@
+<dom-module id="bl-group-tag">
+  <link rel="stylesheet" href="bl-group-tag.css" />
+  
+  <template>
+
+    <paper-material id="paper" elevation="[[currentElevation]]" animated>
+
+      <template is="dom-if" if="[[link]]">
+        <a href$="[[groupTag.full_path]]" class="wrapper">
+          <paper-ripple></paper-ripple>
+          
+          <div class="background" hidden="[[!hasGroupTag]]">&nbsp;</div>
+          <div class="divider" hidden="[[!hasGroupTag]]">&nbsp;</div>
+          
+          <div class="symbol">
+            <i class="fa fa-fw fa-hashtag"></i>
+          </div>
+          <div class="label" hidden="[[!hasGroupTag]]">
+            [[groupTag.name_with_caps]]
+          </div>
+        </a>
+      </template>
+
+      <template is="dom-if" if="[[!link]]">
+        <div class="wrapper">
+          <!-- === THIS SECTION IS EXACTLY THE SAME AS ABOVE BUT WITH <div> INSTEAD OF <a> === -->
+          <paper-ripple></paper-ripple>
+          
+          <div class="background" hidden="[[!hasGroupTag]]">&nbsp;</div>
+          <div class="divider" hidden="[[!hasGroupTag]]">&nbsp;</div>
+          
+          <div class="symbol">
+            <i class="fa fa-fw fa-hashtag"></i>
+          </div>
+          <div class="label" hidden="[[!hasGroupTag]]">
+            [[groupTag.name_with_caps]]
+          </div>
+        </div>
+      </template>
+
+    </paper-material>
+
+  </template>
+
+  <script src="bl-group-tag.js"></script>
+</dom-module>

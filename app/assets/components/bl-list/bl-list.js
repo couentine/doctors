@@ -29,18 +29,15 @@ Polymer({
 
   properties: {
     // Required
-    objectMode: String, // = ['badges', 'full_logs', 'groups']
+    objectMode: String, // = ['badges', 'full_logs', 'groups', 'group_tags', 'users']
     nextPageUrl: String, // and ampersand + next page and query options are appended to this
     nextPage: { type: Number, value: 1 },
-    nextPageParam: {
-      type: String,
-      value: "page"
-    },
+    nextPageParam: { type: String, value: 'page' },
     
     // Options
     queryOptions: Object, // Added to next page query: "&key1=value1&key2=value2" ...
     options: Object,
-    refreshQueryOnDisplay: { type: Boolean, value: false },
+    refreshQueryOnLoad: { type: Boolean, value: false }, // refreshes when component is attached
     selectionBar: Object, // this gets set by the bl-selection-bar when the "for" property is set
     itemDisplayMode: String, // OPTIONAL: Passed all the way to the individual items (if supported)
     
@@ -193,7 +190,7 @@ Polymer({
     }
 
     // Refresh query if needed
-    if (this.refreshQueryOnDisplay)
+    if (this.refreshQueryOnLoad)
       this.refreshQuery();
   },
   _colCountChanged: function(newValue, oldValue) {
@@ -232,11 +229,8 @@ Polymer({
 
   // Property Computers
   _layoutMode: function(objectMode) {
-    switch (objectMode) {
-      case "badges": return "grid"; break;
-      case "full_logs": return "column"; break;
-      case "groups": return "grid"; break;
-    }
+    if (objectMode == 'full_logs') return 'column';
+    else return 'grid';
   },
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
   _wrapperClass: function(layoutMode, objectMode) { return layoutMode + "-list " + objectMode; },

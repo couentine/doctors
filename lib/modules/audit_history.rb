@@ -31,21 +31,23 @@ module AuditHistory
    field :created_by,       type: BSON::ObjectId # Audit field, not a relationship
    field :updated_by,       type: BSON::ObjectId # Audit field, not a relationship
    field :audit_history,    type: Array, default: [] # Sequential list of changes
-  end
   
-  # === CORE METHODS === #
+    # === CREATING A NEW ITEM === #
 
-  def self.new_with_audit(object_params, current_user_id)
-    # First we call the standard Object.new method
-    return_object = self.class.new(object_params)
+    def self.new_with_audit(object_params, current_user_id)
+      # First we call the standard Object.new method
+      return_object = self.new(object_params)
 
-    # Then we add our audit values
-    return_object.created_by = current_user_id
-    return_object.audit_history = return_object.build_audit_rows(current_user_id)
+      # Then we add our audit values
+      return_object.created_by = current_user_id
+      return_object.audit_history = return_object.build_audit_rows(current_user_id)
 
-    # Then we return the object
-    return_object
+      # Then we return the object
+      return_object
+    end
   end
+
+  # === UPDATING AN EXISTING ITEM === #
 
   def update_attributes_with_audit(object_params, current_user_id)
     # First we call the standard assign attributes method
@@ -70,7 +72,7 @@ module AuditHistory
     audit_time = Time.now # We want to use the same timestamp for the entire set of rows
 
     field_name, display_name, include_values, audit_row = nil, nil, false, {}
-    AUDIT_HISTORY_FIELDS.each do |field_symbol, settings|
+    self.class::AUDIT_HISTORY_FIELDS.each do |field_symbol, settings|
       field_name = field_symbol.to_s
       display_name = (settings.class == Hash) ? settings[:display_name] : settings
       include_values = (settings.class == Hash) && (settings[:include_values] == true)
@@ -88,7 +90,7 @@ module AuditHistory
       end
     end
 
-    return_value
+    return_list
   end
 
 end

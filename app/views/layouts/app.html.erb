@@ -12,7 +12,8 @@
   # - full_title (Optional): Full title of window
   # - app_header_content (Required): Should include polymer component for this page's header content
   # - page_background (Optional, '#FFFFFF'): Enter CSS color or other valid background value.
-  # - white_text (Optional, false): Should the default text color be white?
+  # - white_header_text (Optional, false): Should the default text color be white?
+  # - white_body_text (Optional, false): Should the default text color be white?
   #
   # Boolean Exlusion Parameters:
   # - hide_condensed_header (Optional, false): Hide the app header while scrolling down the page.
@@ -116,7 +117,8 @@
     <% #=== APP CONTAINER COMPONENT (Uses paper-scroll-header-panel) ===# %>
 
       <bl-app-container page-background="<%= yield(:page_background) %>"
-        <%= (content_for?(:white_text)) ? 'white-text' : '' %>
+        <%= (content_for?(:white_header_text)) ? 'white-header-text' : '' %>
+        <%= (content_for?(:white_body_text)) ? 'white-body-text' : '' %>
         <%= (content_for?(:hide_condensed_header)) ? 'hide-condensed-header' : '' %>
         <%= (content_for?(:hide_left_nav)) ? 'hide-left-nav' : '' %>
         <%= (content_for?(:hide_right_nav)) ? 'hide-right-nav' : '' %>
@@ -137,7 +139,7 @@
             
             <%= yield %>
 
-            <bl-app-footer <%= (content_for?(:white_text)) ? 'white-text' : '' %>>
+            <bl-app-footer <%= (content_for?(:white_body_text)) ? 'white-text' : '' %>>
             </bl-app-footer>
 
           </div>

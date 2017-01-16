@@ -8,6 +8,7 @@ Polymer({
     condensedBackground: { type: String, value:'#FB8C00', observer:'_condensedBackgroundChanged' },
     topLineColor: { type: String, value:'#FB8C00', observer:'_topLineColorChanged' },
     whiteText: { type: Boolean, value: false },
+    extraSpace: { type: Boolean, value: false }, // include extra whitespace at bottom of header
 
     // Left Nav Options (Leave blank for no custom left nav)
     leftNavSymbol: { type: String }, // set to a FULL font awesome code (ex: 'fa fa-arrow-left')
@@ -15,7 +16,7 @@ Polymer({
     // Computed Properties
     hasCustomLeftNav: { type: Boolean, computed: '_hasCustomLeftNav(leftNavSymbol)' },
     hasSubtitle: { type: Boolean, computed: '_hasSubtitle(subtitle)' },
-
+    
     condensedHeightEm: { type: Number, value: 3.3, readOnly: true } // used by bl-app-container
   },
 
@@ -33,14 +34,20 @@ Polymer({
     var condensedPercentage = newY / (detail.height - detail.condensedHeight);
     this.$.condensedBackgroundPanel.style.opacity = condensedPercentage;
 
-    // Update the size of the title and subtitle of the condensed background if needed
-    var titleScale = 0.75 + (0.25*(1 - condensedPercentage));
+    // Update the size of the title and subtitle if needed
+    var titleScale = 0.65 + (0.35*(1 - condensedPercentage));
     var subtitleFontSize = (1 - condensedPercentage);
     var subtitleHeight = subtitleFontSize * 1.5;
     this.transform('scale(' + titleScale + ') translateZ(0)', this.$.title);
     this.$.subtitle.style.fontSize = subtitleFontSize + 'em';
     this.$.subtitle.style.height = subtitleHeight + 'em';
     this.$.subtitle.style.opacity = subtitleFontSize;
+    
+    // Move the title wrapper down if extra space mode is on
+    if (this.extraSpace) {
+      var titleWrapperBottom = 3 * (1 - condensedPercentage);
+      this.$.titleWrapper.style.bottom = titleWrapperBottom + 'em';
+    }
   },
   _leftNavLinkTap: function(e) {
     console.log('In here');

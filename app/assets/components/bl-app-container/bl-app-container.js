@@ -8,7 +8,8 @@ Polymer({
     
     // Optional
     pageBackground: { type: String, value:'#FFFFFF', observer:'_pageBackgroundChanged' },
-    whiteText: { type: Boolean, value: false },
+    whiteHeaderText: { type: Boolean, value: false },
+    whiteBodyText: { type: Boolean, value: false },
     hideCondensedHeader: { type: Boolean, value: false }, // Scroll away header after condensing
     hideLeftNav: { type: Boolean, value: false },
     hideRightNav: { type: Boolean, value: false },

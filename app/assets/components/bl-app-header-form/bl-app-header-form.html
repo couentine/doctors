@@ -1,0 +1,25 @@
+<dom-module id="bl-app-header-form">
+  <link rel="stylesheet" href="bl-app-header-form.css" />
+
+  <template>
+    
+    <div id="backgroundPanel">&nbsp;</div>
+    <div id="condensedBackgroundPanel">&nbsp;</div>
+
+    <div id="titleWrapper">
+      <h1 id="title">[[title]]</h1>
+    </div>
+    
+    <ul id="buttons">
+      <li id="save">
+        <content select=".save-button"></content>
+      </li>
+      <li id="cancel">
+        <content select=".cancel-button"></content>
+      </li>
+    </ul>
+
+  </template>
+
+  <script src="bl-app-header-form.js"></script>
+</dom-module>

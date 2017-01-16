@@ -1,0 +1,101 @@
+/* === LAYOUT & BASE STYLES === */
+  
+  :host {
+    display: block;
+    font-size: 1rem;
+    position: relative;
+    height: 7.5em; /* 3em (navbar) + 2em (empty space) + 2.5em (title) */ 
+
+    color: white;
+  }
+
+/* === HEADER CONTENT STYLES === */
+
+  #topLine {
+    position: absolute;
+    top: 0; right: 0; left: 0;
+    height: 4px;
+    background: var(--top-line-color, #388E3C);
+  }
+
+  #backgroundPanel, #condensedBackgroundPanel {
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+  }
+  #backgroundPanel { background: var(--background, #81C784); }
+  #condensedBackgroundPanel { 
+    background: var(--condensed-background, #43A047);
+    opacity: 0;
+  }
+
+  #tagWrapper {
+    display: flex;
+    justify-content: center;
+
+    position: absolute;
+    right: 1.5em;
+    bottom: -1.25em;
+    left: 1.5em;
+    overflow: hidden;
+  }
+    #tag {
+      display: flex;
+      flex-direction: row;
+
+      background: var(--condensed-background, #43A047);
+      border-radius: 500px;
+      color: white;
+      
+      font-size: 1.5em; /* this should be 0.6 of the target height of the final block */
+      height: 1em;
+      line-height: 1em;
+      padding: 0.33333em 0.6em 0.33333em 0.4em; /* the goal is for the total height to be 1em */
+
+      position: relative;
+      overflow: hidden;
+    }
+      h1 {
+        font-size: 1em;
+        line-height: 1em;
+        margin: 0;
+        z-index: 10;
+      }
+        #symbol { margin-right: 0.4em; }
+      #background {
+        background: var(--symbol-background, #4CAF50);
+        position: absolute;
+        top: 0; bottom: 0; left: 0;
+        width: 1.6em;
+        
+        border-top-left-radius: 500px;
+        border-bottom-left-radius: 500px;
+      }
+      #divider {
+        background: var(--symbol-background, #4CAF50);
+        position: absolute;
+        top: -0.2em; bottom: -0.2em; left: 1.45em;
+        width: 0.4em;
+        transform: rotate(11deg);
+      }
+
+/* === CUSTOM LEFT NAV === */
+
+  #leftNav {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    font-size: 1rem;
+    text-align: left;
+    width: 2em;
+    padding: 0.5em 0.8em;
+    line-height: 1em;
+  }
+    #leftNavLink { 
+      display: inline-block;
+      text-decoration: none;
+    }
+      #leftNavLink i.fa { 
+        font-size: 2em; 
+        color: white; 
+      }
+      #leftNavLink img { height: 2em; }

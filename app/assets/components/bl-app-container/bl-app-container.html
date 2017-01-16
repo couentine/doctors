@@ -3,7 +3,7 @@
 
   <template>
 
-    <paper-scroll-header-panel id="headerPanel" condenses class$="[[whiteText]]"
+    <paper-scroll-header-panel id="headerPanel" condenses class$="[[whiteBodyText]]"
       keep-condensed-header="[[!hideCondensedHeader]]"
       condensed-header-height="[[condensedHeaderHeightPx]]">
 
@@ -12,10 +12,11 @@
 
         <content select=".app-header-content"></content>
 
-        <bl-app-navbar-left id="leftNav" white-text="[[whiteText]]" asset-paths="[[assetPaths]]"
-          hidden="[[hideLeftNav]]"></bl-app-navbar-left>
-        <bl-app-navbar-right id="rightNav" white-text="[[whiteText]]" hidden="[[hideRightNav]]"
-          current-user="[[currentUser]]" asset-paths="[[assetPaths]]"></bl-app-navbar-right>
+        <bl-app-navbar-left id="leftNav" white-text="[[whiteHeaderText]]" 
+          asset-paths="[[assetPaths]]" hidden="[[hideLeftNav]]"></bl-app-navbar-left>
+        <bl-app-navbar-right id="rightNav" white-text="[[whiteHeaderText]]" 
+          hidden="[[hideRightNav]]" current-user="[[currentUser]]" 
+          asset-paths="[[assetPaths]]"></bl-app-navbar-right>
 
       </div>
 

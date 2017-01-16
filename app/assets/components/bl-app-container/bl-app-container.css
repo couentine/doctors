@@ -32,8 +32,10 @@
       z-index: 100;
     };
   }
-  paper-scroll-header-panel.true {
-    color: white;
+  paper-scroll-header-panel.true { /* true = this.whiteBodyText */
+    --paper-scroll-header-panel-container: {
+      color: white;
+    }
   }
     #appHeader { /* aka ".paper-header" */
       position: relative;

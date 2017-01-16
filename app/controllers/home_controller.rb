@@ -40,7 +40,6 @@ class HomeController < ApplicationController
 
       respond_to do |format|
         format.html do
-          flash[:notice] = 'Testing the flash thingy with toast.'
           render template: 'home/root_internal', layout: 'app' 
         end
         format.json do

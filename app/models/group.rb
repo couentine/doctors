@@ -509,6 +509,26 @@ class Group
     found_user != nil
   end
 
+  # Returns user criteria for all members and admins
+  # OPTIONS: 
+  # Include without_tag to filter out anyone with that tag (pass the queried tag)
+  # Or include without_tag_name to filter out anyone that tag (pass the tag name)
+  def users(options = {})
+    users_criteria = User.where(:id.in => (member_ids + admin_ids).uniq)
+    
+    # Add the without tag filter as needed
+    if !options[:without_tag_name].blank?
+      without_tag = GroupTag.find_by(name: options[:without_tag_name]) rescue nil
+    else
+      without_tag = options[:without_tag]
+    end
+    if without_tag
+      users_criteria = users_criteria.where(:id.nin => without_tag.user_ids)
+    end
+
+    users_criteria
+  end
+
   # Returns URL of the group's logo (either from the image_url property or the Badge List default)
   def logo_url
     if image_url

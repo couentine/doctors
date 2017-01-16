@@ -1,3 +1,69 @@
 <% 
-  provide(:title, "All Group Tags - #{@group.name}")
+  provide(:title, "All Group Tags - #{@group.name}")  
+  provide(:white_header_text, 'true')
+  provide(:hide_left_nav, 'true')
 %>
+
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-text title="All Group Tags" subtitle="<%= "for #{@group.name}" %>" 
+        top-line-color="#388E3C" background="#4CAF50" white-text extra-space
+        condensed-background="#4CAF50" left-nav-symbol="fa fa-arrow-left">
+    </bl-app-header-text>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+  
+  <style type="text/css">
+    
+    .page-header {
+      position: relative;
+      padding: 2.5em;
+      margin-bottom: 3.5em;
+      text-align: center;
+      background-color: #F5F5F5;
+      border-top: 1px solid #E0E0E0;
+      border-bottom: 1px solid #E0E0E0;
+    }
+      .page-header bl-fab {
+        position: absolute;
+        right: 2em;
+        bottom: -28px;
+      }
+
+    bl-list {
+      min-height: 20em;
+    }
+
+  </style>
+
+  <!-- #=== PAGE HEADER ===# -->
+
+  <div class="page-header">
+    <div class="description">
+      Tags can be applied to group members and admins in order to make it easier to navigate the 
+      group and manage feedback requests.
+    </div>
+    <% if @can_create_group_tags %>
+      <bl-fab icon="add" link="<%= group_path(@group) + '#new-group-tag' %>" 
+        background="#03A9F4" color="white" tooltip="Create new tag"></bl-fab>
+    <% end %>
+  </div>
+
+  <!-- #=== GROUP TAGS ===# -->
+
+  <bl-list id="group-tag-list" object-mode="group_tags" items='<%= @group_tags_hash.to_json %>' 
+      next-page="<%= @next_page %>" next-page-param="page"
+      next-page-url="<%= group_tags_url(@group, format: :json) %>">
+    <div class="placeholder">
+      <i class="fa fa-hashtag"></i>
+      <div class="message">
+        <p><b>No group tags have been created yet.</b></p> 
+        <% if @can_create_group_tags %>
+          <p>Click the '+' button above to create one now.</p>
+        <% end %>
+      </div>
+    </div>
+  </bl-list>
+

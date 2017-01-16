@@ -2,7 +2,7 @@ class GroupTagUsersController < ApplicationController
   
   prepend_before_action :find_parent_records
   before_action :authenticate_user!, except: [:index]
-  before_action :can_assign, only: [:add, :remove]
+  before_action :can_assign, only: [:add, :bulk_create, :remove]
 
   # === STANDARD RESTFUL ACTIONS === #
 
@@ -16,7 +16,7 @@ class GroupTagUsersController < ApplicationController
         sort_orders = ['asc', 'desc'] # defaults to first value
         @page_size = params['page_size'] || APP_CONFIG['page_size_normal'] # default to normal
         @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
-        @page = params['page']
+        @page = (params['page'] || 1).to_i
         @next_page = nil
         @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
         @sort_order = \
@@ -24,10 +24,10 @@ class GroupTagUsersController < ApplicationController
 
         user_criteria = @group_tag.users.order_by("#{@sort_by} #{@sort_order}")\
           .page(@page).per(@page_size)
-        @users_hash = JsonTemplater.array_json(user_criteria, :group_list_item)
+        @users_hash = User.array_json(user_criteria, :group_list_item)
         @next_page = @page + 1 if user_criteria.count > (@page_size * @page)
 
-        render json: { page: @page, page_size: @page_size, group_tags: @users_hash, 
+        render json: { page: @page, page_size: @page_size, users: @users_hash, 
           next_page: @next_page }
       end
     end
@@ -35,14 +35,24 @@ class GroupTagUsersController < ApplicationController
 
   # === CUSTOM RESTFUL ACTIONS === #
 
-  # JSON only. Returns 2 keys: success and poller_id.
-  # POST /group-url/tags/tag-name/users/add.json?user_ids[]=abc123
+  # GET /group-url/tags/tag-name/users/add
   def add
-    respond_to do |format|
-      format.json do
-        user_ids = params['user_ids'] || []
-        poller_id = @group_tag.add_users(user_ids, current_user.id, true)
+    render layout: 'app'
+  end
 
+  # If HTML: Redirects to poller
+  # If JSON: Returns 2 keys: success and poller_id.
+  # POST /group-url/tags/tag-name/users/bulk_create.json?user_ids[]=abc123
+  def bulk_create
+    user_ids = params['user_ids'] || []
+    poller_id = @group_tag.add_users(user_ids, current_user.id, true)
+    
+    respond_to do |format|
+      format.html do
+        @poller = Poller.find(poller_id)
+        redirect_to @poller
+      end
+      format.json do
         render json: { success: true, poller_id: poller_id }
       end
     end
@@ -84,7 +94,7 @@ private
     # Set current group (for analytics) only if user is logged in and an admin
     @current_user_group = @group if @current_user_is_admin
     
-    @group_tag = @group.tags.find_by(name: params[:group_tag_id].to_s.downcase) || not_found
+    @group_tag = @group.tags.find_by(name: params[:tag_id].to_s.downcase) || not_found
   end
 
   def can_assign

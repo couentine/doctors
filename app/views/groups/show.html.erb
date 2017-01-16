@@ -729,8 +729,8 @@
       <div class="bl-modal-form">
         <div class="form-body">
 
-          <form class="form-horizontal" id="create-group-tag-form" method="post"
-              action="<%= group_tags_path(@group) %>">
+          <%= form_tag(group_tags_path(@group), method: :post, id: 'create-group-tag-form',
+            class: 'form-horizontal') do %>
 
             <div class="control-group">
               <label class="control-label" for="tag-name">Tag Name</label>
@@ -760,7 +760,7 @@
               </div>
             </div>
 
-          </form>
+          <% end %>
 
         </div>
       </div>
@@ -1298,12 +1298,6 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
           <% end %>
         </div>
 
-        <% if @group.member_ids.empty? %>
-          <div class="well span7 offset2 gray empty">
-            <h3>No members yet</h3>
-          </div>
-        <% end %>
-
       </div>
     </div>
 
@@ -1348,6 +1342,14 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
               <% end %>
             </ul>
           </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @group.member_ids.empty? %>
+      <div class="row">
+        <div class="well span7 offset2 gray empty">
+          <h3>No members yet</h3>
         </div>
       </div>
     <% end %>

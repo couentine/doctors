@@ -90,6 +90,7 @@ BadgeList::Application.routes.draw do
         via: :delete, as: :destroy_group_invited_admin,
         defaults: { type: 'admin' },
         constraints: { :email => /[^\/]+/ }
+  match ':group_id/users' => 'groups#add_users', via: :get, as: :group_users
   match ':group_id/members/add' => 'groups#add_users', via: :get,
         as: :add_group_members, defaults: { type: 'member' }
   match ':group_id/admins/add' => 'groups#add_users', via: :get,
@@ -128,7 +129,8 @@ BadgeList::Application.routes.draw do
     resources :group_tags, except: [:new, :edit], path: 'tags', as: 'tags' do
       resources :group_tag_users, path: 'users', as: 'users', only: [:index] do
         collection do
-          post 'add'
+          get 'add'
+          post 'bulk_create'
           post 'remove'
         end
       end

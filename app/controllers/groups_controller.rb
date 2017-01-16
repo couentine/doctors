@@ -9,11 +9,11 @@ class GroupsController < ApplicationController
 
   prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :update_group_settings, :destroy_user, :send_invitation, :destroy_invited_user, 
-    :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, :review, 
-    :full_logs, :create_validations]
+    :users, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, 
+    :review, :full_logs, :create_validations]
   before_action :authenticate_user!, except: [:show]
-  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :review, :full_logs,
-    :create_validations]
+  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :review, 
+    :full_logs, :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
@@ -537,6 +537,36 @@ class GroupsController < ApplicationController
     end
 
     redirect_to @group, :notice => @notice
+  end
+
+  # GET /group-url/users?without_tag=group-tag-name
+  # Also accepts pagination params: page, page_size (default 200, max 200), sort_order, sort_by
+  # JSON only
+  # Returns json array of members with keys from User group_list_item json template
+  def users
+    sort_fields = ['name', 'username'] # defaults to first value
+    sort_orders = ['asc', 'desc'] # defaults to first value
+
+    without_tag_param = params['without_tag']
+    
+    @page = (params['page'] || 1).to_i
+    @page_size = [(params['page_size'] || 200).abs, 200].min # no more than 200, default to 200
+    @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
+    @sort_order = \
+      (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
+
+    # Build out the users list
+    @users = []
+    @group.users(without_tag_name: without_tag_param)\
+        .page(@page).per(@page_size).order_by("#{@sort_by} #{@sort_order}").each do |user|
+      @users << user.json(:group_list_item)
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: @users
+      end
+    end
   end
 
   # GET /group-url/members/add?type=member

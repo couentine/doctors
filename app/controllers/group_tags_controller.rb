@@ -58,7 +58,11 @@ class GroupTagsController < ApplicationController
         render layout: 'app'
       end
       format.json do
-        render json: { success: true, group_tag: @group_tag.json(:list_item) }
+        if @badge_list_admin
+          render json: @group_tag.as_json
+        else
+          render json: @group_tag.json(:list_item)
+        end
       end
     end
   end
@@ -69,11 +73,13 @@ class GroupTagsController < ApplicationController
   def create
     # Create using the AuditHistory method
     @group_tag = GroupTag.new_with_audit(group_tag_params, current_user.id)
+    @group_tag.group = @group
+
     if @group_tag.save
-      redirect_to [@group, @group_tag], notice: 'Group tag was successfully created.'
+      redirect_to group_tag_path(@group, @group_tag), notice: 'Group tag was successfully created.'
     else
       redirect_to @group, 
-        error: "There was a problem creating a tag called #{@group.name_with_caps}. " \
+        alert: "There was a problem creating a tag called #{@group_tag.name_with_caps}. " \
           + 'Try creating a tag with a different name.'
     end
   end

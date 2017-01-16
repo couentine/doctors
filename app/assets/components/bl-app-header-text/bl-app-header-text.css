@@ -4,10 +4,19 @@
     display: block;
     font-size: 1rem;
     position: relative;
-    height: 6em; /* 3em (navbar) + 3em (title text) */ 
+    height: 6.5em; /* 3em (navbar) + 3.5em (title text) */ 
+  }
+  :host[white-text] {
+    color: white;
   }
   :host[subtitle] {
-    height: 7.5em; /* 3em (navbar) + 3em (title text) + 1.5em (subtitle text) */ 
+    height: 8em; /* 3em (navbar) + 3.5em (title text) + 1.5em (subtitle text) */ 
+  }
+  :host[extra-space] {
+    height: 9.5em; /* 3em (navbar) + 3.5em (title text) + 3em (extra) */ 
+  }
+  :host[subtitle][extra-space] {
+    height: 11em; /* 3em (navbar) + 3.5em (title text) + 1.5em (subtitle text) + 3em (extra) */ 
   }
 
 /* === HEADER CONTENT STYLES === */
@@ -39,9 +48,12 @@
     left: 3em;
     overflow: hidden;
   }
+  #titleWrapper.true { /* true = this.extraSpace */
+    bottom: 3em;
+  }
     h1 {
-      font-size: 1.5em;
-      line-height: 1.4em;
+      font-size: 1.8em;
+      line-height: 1.2em;
       margin: 0;
     }
     #subtitle {
@@ -67,5 +79,7 @@
       text-decoration: none;
     }
       #leftNavLink i.fa { font-size: 2em; }
-      #leftNavLink.true i.fa { color: white; }
+      #leftNavLink.true i.fa { /* true = this.whiteText */
+        color: white; 
+      }
       #leftNavLink img { height: 2em; }

@@ -1,0 +1,107 @@
+<% 
+  provide(:title, "\##{@group_tag.name_with_caps} - #{@group.name}")  
+  provide(:page_background, '#EEEEEE')
+  provide(:white_header_text, 'true')
+  provide(:hide_left_nav, 'true')
+%>
+
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-tag name="<%= @group_tag.name_with_caps %>"></bl-app-header-tag>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+  
+  <style type="text/css">
+    
+    #page-header {
+      padding: 3.75em 2em 2.5em 2em;
+      position: relative;
+    }
+      #summary {
+        text-align: center;
+        max-width: 30em;
+        margin: 0 auto;
+      }
+    
+    #group-tags-panel {
+      margin: 0 1em;
+      background: white;
+      border: 1px solid #E0E0E0;
+      border-radius: 1.25rem;
+    }
+    @media (min-width: 840px) { #group-tags-panel { margin: 0 2em; } }
+    @media (min-width: 1200px) { #group-tags-panel { margin: 0 4em; } }
+      #user-list {
+        min-height: 22em;
+      }
+        #add-users {
+          background: #03A9F4;
+        }
+
+  </style>
+
+  <!-- #=== PAGE HEADER ===# -->
+
+  <div id="page-header">
+    <div id="summary">
+      <%= @group_tag.summary %>
+    </div>
+  </div>
+
+  <!-- #=== GROUP TAG USERS ===# -->
+
+  <div id="group-tags-panel">
+  
+    <bl-list id="user-list" object-mode="users" refresh-query-on-load
+        next-page-url="<%= group_tag_users_url(@group, @group_tag, format: :json) %>">
+
+      <!-- #=== LIST CONTROLS ===# -->
+      <div class="list-controls">
+        <ul class="left">
+          <bl-query-options for="user-list" class="query-filter-option">
+            <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
+                horizontal-align="left" veritcal-align="bottom">
+              <paper-listbox class="dropdown-content">
+                <paper-item data-options='{"sort_by":"name","sort_order":"asc"}'>
+                  By name
+                </paper-item>
+                <paper-item data-options='{"sort_by":"name","sort_order":"desc"}'>
+                  Reverse name
+                </paper-item>
+                <paper-item data-options='{"sort_by":"username","sort_order":"asc"}'>
+                  By username
+                </paper-item>
+                <paper-item data-options='{"sort_by":"username","sort_order":"desc"}'>
+                  Reverse username
+                </paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+          </bl-query-options>
+        </ul>
+        <ul class="right">
+          <li>
+            <bl-button id="add-users" type="flat"
+                link="<%= add_group_tag_users_path(@group, @group_tag) %>">
+              <i class="fa fa-plus"></i> &nbsp; Add Users
+            </bl-button>
+          </li>
+        </ul>
+      </div>
+
+
+      <!-- #=== PLACEHOLDER ===# -->
+      <div class="placeholder transparent">
+        <i class="fa fa-user"></i>
+        <div class="message">
+          <p><b>No users have been added to this tag yet.</b></p> 
+          <% if @can_assign_group_tags %>
+            <p>Click the 'Add Users' button above to add some.</p>
+          <% end %>
+        </div>
+      </div>
+
+    </bl-list>
+
+  </div>

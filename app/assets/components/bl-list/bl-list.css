@@ -59,6 +59,10 @@
       border-color: white;
       border-width: 2px;
     }
+    :host ::content .placeholder.transparent {
+      background: transparent;
+      border: none;
+    }
       :host ::content .placeholder i {
         font-size: 3em;
         display: block;
@@ -124,6 +128,13 @@
   .grid-list bl-list-item {
     display: flex;
     margin: 0.25em;
+  }
+  .grid-list.group_tags bl-list-item {
+    margin: 0.5em;
+  }
+
+  .grid-list.group_tags {
+    justify-content: center;
   }
 
 /* === COLUMN LAYOUT === */
