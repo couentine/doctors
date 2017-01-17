@@ -557,14 +557,17 @@ class GroupsController < ApplicationController
 
     # Build out the users list
     @users = []
-    @group.users(without_tag_name: without_tag_param)\
-        .page(@page).per(@page_size).order_by("#{@sort_by} #{@sort_order}").each do |user|
+    user_criteria = @group.users(without_tag_name: without_tag_param)\
+      .page(@page).per(@page_size).order_by("#{@sort_by} #{@sort_order}")
+    user_criteria.each do |user|
       @users << user.json(:group_list_item)
     end
+    @next_page = @page + 1 if user_criteria.count > (@page_size * @page)
 
     respond_to do |format|
       format.json do
-        render json: @users
+        render json: { page: @page, page_size: @page_size, sort_by: @sort_by, 
+          sort_order: @sort_order, users: @users, next_page: @next_page }
       end
     end
   end

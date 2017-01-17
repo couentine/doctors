@@ -518,7 +518,7 @@ class Group
     
     # Add the without tag filter as needed
     if !options[:without_tag_name].blank?
-      without_tag = GroupTag.find_by(name: options[:without_tag_name]) rescue nil
+      without_tag = GroupTag.find_by(name: options[:without_tag_name].downcase) rescue nil
     else
       without_tag = options[:without_tag]
     end

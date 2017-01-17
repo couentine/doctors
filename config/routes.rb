@@ -90,7 +90,7 @@ BadgeList::Application.routes.draw do
         via: :delete, as: :destroy_group_invited_admin,
         defaults: { type: 'admin' },
         constraints: { :email => /[^\/]+/ }
-  match ':group_id/users' => 'groups#add_users', via: :get, as: :group_users
+  match ':group_id/users' => 'groups#users', via: :get, as: :group_users
   match ':group_id/members/add' => 'groups#add_users', via: :get,
         as: :add_group_members, defaults: { type: 'member' }
   match ':group_id/admins/add' => 'groups#add_users', via: :get,
