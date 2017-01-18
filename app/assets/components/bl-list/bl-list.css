@@ -96,12 +96,6 @@
 
 /* === COMPONENT STYLES === */
 
-  .grid-list {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 0 0.25em;
-  }
-
   .next-page {
     display: flex;
     justify-content: center;
@@ -113,29 +107,56 @@
     }
     .next-page bl-button.badges { background: rgb(239,108,0); }
     .next-page bl-button.groups { background: rgb(3,169,244); }
+    .next-page bl-button.users { background: #757575; }
 
-  @media (min-width: 840px) {
-    .grid-list,
-    .column-list { margin: 0 2em; }
+/* === SIMPLE LAYOUT === */
+
+  .simple-list {
+    margin: 0 0.5em;
+    
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
-  @media (min-width: 1200px) {
-    .grid-list,
-    .column-list { margin: 0 4em; }
+  .simple-list.users {
+    max-width: 25em;
+    margin: 1em auto;
   }
+  @media (min-width: 480px) { .grid-list { margin: 0 2em; } }
+  @media (min-width: 840px) { .grid-list { margin: 0 4em; } }
+  @media (min-width: 1200px) { .grid-list { margin: 0 8em; } }
+    .simple-item {
+      padding: 0.5em 1em;
+      border-bottom: 1px solid #EEEEEE;
+      transition: 0.2s all;
+      background: transparent;
+      cursor: pointer;
+    }
+      .simple-item:last-of-type { border: none; }
+      .simple-item.selected.users { background-color: #C8E6C9; border-color: #A5D6A7; }
+      .simple-item img.true { /* true = this.roundRowImage */
+        border-radius: 500px;
+      }
 
 /* === GRID LAYOUT === */
   
-  .grid-list bl-list-item {
+  .grid-list {
     display: flex;
-    margin: 0.25em;
+    flex-wrap: wrap;
+    padding: 0 0.25em;
+    margin: 0;
   }
-  .grid-list.group_tags bl-list-item {
-    margin: 0.5em;
-  }
+  @media (min-width: 840px) { .grid-list { margin: 0 2em; } }
+  @media (min-width: 1200px) { .grid-list { margin: 0 4em; } }
+    .grid-list bl-list-item {
+      display: flex;
+      margin: 0.25em;
+    }
+    .grid-list.group_tags bl-list-item {
+      margin: 0.5em;
+    }
 
-  .grid-list.group_tags {
-    justify-content: center;
-  }
+    .grid-list.group_tags {
+      justify-content: center;
+    }
 
 /* === COLUMN LAYOUT === */
 
@@ -143,7 +164,10 @@
     display: flex;
     flex-wrap: nowrap;
     flex-direction: row;
+    margin: 0;
   }
+  @media (min-width: 840px) { .column-list { margin: 0 2em; } }
+  @media (min-width: 1200px) { .column-list { margin: 0 4em; } }
     .column {
       display: block;
       transition: 0.5s all;

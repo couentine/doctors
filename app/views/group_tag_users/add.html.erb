@@ -7,7 +7,8 @@
 <% #=== APP HEADER CONTENT ===# %>
 
   <% content_for :app_header_content do %>
-    <bl-app-header-form title="Add users to tag" condensed-background="#388E3C">
+    <bl-app-header-form title="Add users to tag" condensed-background="#388E3C" 
+        selection-bar-for="user-list" count-noun-singular="user">
       <bl-button link="#" class="save-button" 
           background="#43A047" color="white">
         Save
@@ -37,7 +38,7 @@
 
   <div id="page-header">
     <div id="summary">
-      Select users below in order to add them to #<%= @group_tag.name_with_caps %>
+      Select users below to add them to #<%= @group_tag.name_with_caps %>
     </div>
   </div>
 

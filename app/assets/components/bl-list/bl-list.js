@@ -85,14 +85,15 @@ Polymer({
 
     // Internal properties
     colCount: { type: Number, observer: '_colCountChanged' },
-    loading: { type: Boolean, value: false }
+    loading: { type: Boolean, value: false },
+    indexLastSelected: Number
   },
 
   observers: [
     '_itemsChanged(items.*)'
   ],
 
-  // Methods
+  // Actions
   queryNextPage: function () {
     // Queries for the next page and APPENDS the results to the display, then increments nextPage.
     var self = this; // Hold onto the context variable
@@ -146,6 +147,41 @@ Polymer({
         this.queryOptions[key] = newQueryOptions[key];
 
     this.refreshQuery();
+  },
+  toggleItem: function(e) {
+    // Called from simple item row to toggle that item's selection
+    var index = e.model.index;
+
+    // First we toggle the selection
+    this.set('items.' + index + '.selected', !this.items[index].selected);
+
+    // Then we handle shift click events. This occurs when two selection events occur in a row
+    // and the shift key is held down during the second selection event.
+    var isSelected = this.items[index].selected;
+    if (isSelected && e.detail.sourceEvent.shiftKey && (this.indexLastSelected != null)) {
+      // Then this is the second click in a shift-click, so we select all those in between
+      var startIndex = Math.min(this.indexLastSelected, index);
+      var stopIndex = Math.max(this.indexLastSelected, index);
+      for (var i = startIndex; i < stopIndex; i++)
+        this.set('items.' + i + '.selected', true);
+
+      this.indexLastSelected = null;
+    } else {
+      this.indexLastSelected = (isSelected) ? index : null;
+    }
+
+    // Finally, if the shift key is held down we might need to clear the selected text
+    if (e.detail.sourceEvent.shiftKey) {
+      if (window.getSelection) {
+        if (window.getSelection().empty) {  // Chrome
+          window.getSelection().empty();
+        } else if (window.getSelection().removeAllRanges) {  // Firefox
+          window.getSelection().removeAllRanges();
+        }
+      } else if (document.selection) {  // IE?
+        document.selection.empty();
+      }
+    }
   },
   selectAll: function() {
     var childrenToNotify = this.querySelectorAll('bl-list-item');
@@ -380,5 +416,9 @@ Polymer({
     this.selectedItems = $.map(this.items, function(item, index) {
       if (item && item.selected) return item; 
     });
+  },
+  rowClass: function(itemSelected) {
+    // Called in simple mode to calculate the class of he paper items
+    return this.layoutMode + '-item ' + this.objectMode + (itemSelected ? ' selected' : '');
   }
 });

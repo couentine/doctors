@@ -36,9 +36,9 @@
       <!-- #=== SIMPLE MODE ===# -->
       <template is="dom-if" if="[[simpleMode]]">
         <template id="item-repeat" is="dom-repeat" items="{{items}}">
-          <paper-icon-item class$="[[itemClass]]" toggles active="{{item.selected}}">
+          <paper-icon-item class$="[[rowClass(item.selected)]]" on-tap="toggleItem">
             <template is="dom-if" if="[[hasRowImage]]">
-              <img src$="[[item.row.image]]" class="[[roundRowImage]]" item-icon>
+              <img src$="[[item.row.image]]" class$="[[roundRowImage]]" item-icon>
             </template>
             <template is="dom-if" if="[[!hasRowImage]]">
               <iron-icon icon="[[rowIcon]]" hidden="[[!hasRowImage]]" item-icon></iron-icon>
