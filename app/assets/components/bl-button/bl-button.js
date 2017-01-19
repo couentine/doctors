@@ -8,6 +8,7 @@ Polymer({
     // Optional
     disabled: { type: Boolean, reflectToAttribute: true, notify: true },
     link: String,
+    onClick: String,
     target: String,
     background: { type: String, observer:'_backgroundChanged' },
     color: { type: String, observer:'_colorChanged' },

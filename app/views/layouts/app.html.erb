@@ -116,7 +116,7 @@
 
     <% #=== APP CONTAINER COMPONENT (Uses paper-scroll-header-panel) ===# %>
 
-      <bl-app-container page-background="<%= yield(:page_background) %>"
+      <bl-app-container id="appContainer" page-background="<%= yield(:page_background) %>"
         <%= (content_for?(:white_header_text)) ? 'white-header-text' : '' %>
         <%= (content_for?(:white_body_text)) ? 'white-body-text' : '' %>
         <%= (content_for?(:hide_condensed_header)) ? 'hide-condensed-header' : '' %>

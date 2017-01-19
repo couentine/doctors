@@ -46,3 +46,16 @@
       box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
     }
 
+/* === STANDARD DIALOGS === */
+
+  paper-dialog.standard {
+    border-radius: 6px;
+  }
+
+  paper-dialog.loading {
+    border: 1px solid var(--dialog-300-color, #FFB74D);
+    border-top: 5px solid var(--dialog-600-color, #FB8C00);
+    background: var(--dialog-50-color, #FFF3E0);
+  }
+      paper-dialog.loading p { text-align: center; }
+

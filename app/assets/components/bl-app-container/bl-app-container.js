@@ -1,3 +1,13 @@
+/* ================================================== */
+/* ==============>> BL APP CONTAINER <<============== */
+/* ================================================== */
+
+/*
+  
+  NOTE: There are standard dialogs built into the container. Refer to the actions below.
+
+*/
+
 Polymer({
   is: "bl-app-container",
 
@@ -87,6 +97,32 @@ Polymer({
     // Update the css variable that controls background any time the value changes
     this.customStyle['--page-background'] = newValue;
     this.updateStyles();
+  },
+
+  // Actions
+  openLoadingDialog: function(options) {
+    // Shows a standard loading dialog. The following options should be included:
+    // - color = ['orange', 'green']
+    // - title = The title of the dialog
+
+    // First set the colors if needed (orange is the default mode)
+    if (options.color == 'green') {
+      this.customStyle['--dialog-50-color'] = '#F1F8E9';
+      this.customStyle['--dialog-300-color'] = '#AED581';
+      this.customStyle['--dialog-600-color'] = '#7CB342';
+    } else {
+      this.customStyle['--dialog-50-color'] = '#FFF3E0';
+      this.customStyle['--dialog-300-color'] = '#FFB74D';
+      this.customStyle['--dialog-600-color'] = '#FB8C00';
+    }
+    this.updateStyles();
+
+    // Then set the title and show the dialog
+    this.$.loadingDialogTitle.innerHTML = (options.title) ? options.title : 'Loading...';
+    this.$.loadingDialog.open();
+  },
+  closeLoadingDialog: function() {
+    this.$.loadingDialog.close();
   },
 
   // Computed Properties

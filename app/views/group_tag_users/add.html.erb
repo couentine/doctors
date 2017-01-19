@@ -9,7 +9,7 @@
   <% content_for :app_header_content do %>
     <bl-app-header-form title="Add users to tag" condensed-background="#388E3C" 
         selection-bar-for="user-list" count-noun-singular="user">
-      <bl-button link="#" class="save-button" 
+      <bl-button link="#" on-click="return addUsersToTag();" class="save-button" 
           background="#43A047" color="white">
         Save
       </bl-button>
@@ -42,11 +42,17 @@
     </div>
   </div>
 
+  <!-- #=== AJAX CALL TO ADD USERS ===# -->
+
+  <iron-ajax id="add-users-ajax" on-response="handleResponse" on-error="handleError"
+    url="<%= add_group_tag_users_url(@group, @group_tag, format: :json) %>"></iron-ajax>
+
   <!-- #=== USER LIST ===# -->
 
   <bl-list id="user-list" object-mode="users" refresh-query-on-load simple-mode 
       row-title="name" row-image="avatar_image_small_url" round-row-image
-      next-page-url="<%= group_users_url(@group, format: :json, without_tag: @group_tag.name) %>">
+      next-page-url="<%= group_users_url(@group, format: :json, without_tag: @group_tag.name) %>"
+      for-ajax="add-users-ajax">
 
     <!-- #=== PLACEHOLDER ===# -->
     <div class="placeholder transparent">
@@ -58,5 +64,32 @@
     </div>
 
   </bl-list>
+
+  <script type="text/javascript">
+    
+    function addUsersToTag() {
+      // First show the waiting dialog to prevent double-clicking the save button
+      document.getElementById('appContainer').openLoadingDialog({
+        action: 'open',
+        type: 'loading',
+        color: 'green',
+        title: 'Submitting request...'
+      });
+      
+      // Prevent the anchor element from adding '#' to the url
+      return false;
+    }
+
+    function handleResponse(e) {
+      console.log('handleResponse');
+      console.log(e);
+    }
+
+    function handleError(e) {
+      console.log('handleError');
+      console.log(e);
+    }
+
+  </script>
 
   
