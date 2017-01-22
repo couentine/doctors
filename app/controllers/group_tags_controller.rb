@@ -53,6 +53,11 @@ class GroupTagsController < ApplicationController
     @page_size = params['page_size'] || APP_CONFIG['page_size_normal']
     @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
 
+    # Set the default sort options for display in the bl-query-options
+    # NOTE: This is a hard-coded version of the logic in GroupTagUsersController#index
+    @sort_options = { sort_by: 'name', sort_order: 'asc' }.to_json
+    @query_options = @sort_options # they are the same for now
+
     respond_to do |format|
       format.html do
         render layout: 'app'

@@ -40,8 +40,9 @@ class ApplicationController < ActionController::Base
   def store_location
     if ((request.format == "text/html") || (request.content_type == "text/html"))
       # Store the last url as long as it isn't a /users path
+      # This is used by the signin controller to return to same page after signin
       if !(request.fullpath =~ /\/users/) && !(request.fullpath =~ /\/j\/image_key/)
-        session[:previous_url] = request.fullpath
+        session[:previous_path] = request.fullpath
       end
 
       if !params[:join].blank?
@@ -79,7 +80,7 @@ class ApplicationController < ActionController::Base
     elsif session[:new_group_plan]
       "/groups/new?plan=#{session[:new_group_plan]}"
     else
-      session[:previous_url] || root_path
+      session[:previous_path] || root_path
     end
   end
 

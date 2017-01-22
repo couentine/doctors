@@ -38,6 +38,14 @@
       z-index: 110;
       width: 14em;
     }
-      paper-item { color: #616161; }
+      paper-item { 
+        color: #616161; 
+        padding: 0;
+      }
       paper-item.error { background-color: rgb(239,154,154); }
-      paper-item.error a { color: white !important; }
+        paper-item a {
+          padding: 0 16px;
+          flex: 1 1 auto;
+          line-height: 3em;
+        }
+        paper-item.error a { color: white !important; }

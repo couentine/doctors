@@ -12,6 +12,7 @@ Polymer({
 
     // Left Nav Options (Leave blank for no custom left nav)
     leftNavSymbol: { type: String }, // set to a FULL font awesome code (ex: 'fa fa-arrow-left')
+    backUrl: { type: String }, // Required if leftNavSymbol: The href for the back arrow
     
     // Computed Properties
     hasCustomLeftNav: { type: Boolean, computed: '_hasCustomLeftNav(leftNavSymbol)' },
@@ -48,11 +49,6 @@ Polymer({
       var titleWrapperBottom = 3 * (1 - condensedPercentage);
       this.$.titleWrapper.style.bottom = titleWrapperBottom + 'em';
     }
-  },
-  _leftNavLinkTap: function(e) {
-    console.log('In here');
-    window.history.back();
-    e.preventDefault();
   },
 
   // Events

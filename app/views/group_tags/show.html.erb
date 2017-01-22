@@ -8,7 +8,8 @@
 <% #=== APP HEADER CONTENT ===# %>
 
   <% content_for :app_header_content do %>
-    <bl-app-header-tag name="<%= @group_tag.name_with_caps %>"></bl-app-header-tag>
+    <bl-app-header-tag name="<%= @group_tag.name_with_caps %>" 
+      back-url="<%= group_tags_url(@group) %>"></bl-app-header-tag>
   <% end %>
 
 <% #=== PAGE BODY CONTENT ===# %>
@@ -27,13 +28,14 @@
     
     #group-tags-panel {
       margin: 0 1em;
+      padding-bottom: 0.5em;
       background: white;
       border: 1px solid #E0E0E0;
       border-radius: 1.25rem;
     }
-    @media (min-width: 840px) { #group-tags-panel { margin: 0 2em; } }
-    @media (min-width: 1200px) { #group-tags-panel { margin: 0 4em; } }
-      #user-list {
+    @media (min-width: 840px) { #group-tags-panel { margin: 0 2em; padding-bottom: 2em; } }
+    @media (min-width: 1200px) { #group-tags-panel { margin: 0 4em; padding-bottom: 4em; } }
+      #userList {
         min-height: 22em;
       }
         #add-users {
@@ -54,13 +56,15 @@
 
   <div id="group-tags-panel">
   
-    <bl-list id="user-list" object-mode="users" refresh-query-on-load
+    <bl-list id="userList" object-mode="users" refresh-query-on-load
+        query-options="<%= @query_options %>"
         next-page-url="<%= group_tag_users_url(@group, @group_tag, format: :json) %>">
 
       <!-- #=== LIST CONTROLS ===# -->
       <div class="list-controls">
         <ul class="left">
-          <bl-query-options for="user-list" class="query-filter-option">
+          <bl-query-options for="userList" selected-options="<%= @sort_options %>" 
+              class="query-filter-option">
             <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
                 horizontal-align="left" veritcal-align="bottom">
               <paper-listbox class="dropdown-content">

@@ -23,6 +23,7 @@
       position: relative;
       overflow: hidden;
       font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+      text-decoration: none;
     }
     .image {
       text-align: center;
@@ -74,12 +75,20 @@
           display: block;
           margin: 0;
           font-size: 1em;
+          line-height: 1.3em;
           font-weight: 600;
           color: rgb(97,97,97);
+
+          height: 1.3em;
+          overflow: hidden;
         }
       .label-subtitle {
         font-size: 0.9em;
         flex: 0 0 auto;
+
+        line-height: 1.6em;
+        height: 1.6em;
+        overflow: hidden;
 
         @apply(--bl-user-subtitle);
       }

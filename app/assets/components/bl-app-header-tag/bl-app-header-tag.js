@@ -3,6 +3,7 @@ Polymer({
 
   properties: {
     name: { type: String }, // Required: The tag name
+    backUrl: { type: String }, // Required: The href for the back arrow
     
     condensedHeightEm: { type: Number, value: 3.3, readOnly: true } // used by bl-app-container
   },
@@ -35,11 +36,6 @@ Polymer({
     // Slide the hashtag closer to the the name
     var symbolMarginRight = 0.4*(1 - condensedPercentage);
     this.$.symbol.style.marginRight = symbolMarginRight + 'em';
-  },
-  _leftNavLinkTap: function(e) {
-    console.log('In here');
-    window.history.back();
-    e.preventDefault();
   },
 
   // Events

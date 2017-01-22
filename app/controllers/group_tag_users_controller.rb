@@ -12,8 +12,9 @@ class GroupTagUsersController < ApplicationController
     respond_to do |format|
       format.json do
         # Get pagination variables
-        sort_fields = ['name', 'username'] # defaults to first value
-        sort_orders = ['asc', 'desc'] # defaults to first value
+        sort_fields = ['name', 'username'] # defaults to first value >> SEE NOTE
+        sort_orders = ['asc', 'desc'] # defaults to first value >> SEE NOTE
+        #  >> NOTE: If you change the defaults here, also update GroupTagsController#show
         @page_size = params['page_size'] || APP_CONFIG['page_size_normal'] # default to normal
         @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
         @page = (params['page'] || 1).to_i

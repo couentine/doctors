@@ -11,7 +11,7 @@
 
   <% content_for :app_header_content do %>
     <bl-app-header-text title="Feedback Requests" subtitle="<%= "for #{@group.name}" %>" 
-      top-line-color="#0288D1" background="#29B6F6" white-text
+      top-line-color="#0288D1" background="#29B6F6" white-text back-url="<%= @back_url %>"
       condensed-background="#039BE5" left-nav-symbol="fa fa-arrow-left"></bl-app-header-text>
   <% end %>
 
@@ -81,7 +81,7 @@
     </bl-user-selector>
   </div>
 
-  <bl-list id="log-list" object-mode="full_logs" query-options="<%= @bl_list_query_options %>"
+  <bl-list id="log-list" object-mode="full_logs" query-options="<%= @query_options %>"
       next-page-url="<%= group_full_logs_url(@group, format: :json) %>"
       inject-items="<%= @list_inject_items.to_json %>" 
       item-display-mode="<%= @item_display_mode %>">
@@ -97,7 +97,7 @@
 
     <div class="list-controls">
       <ul class="left">
-        <bl-query-options for="log-list" selected-options="<%= @sort_options.to_json %>"
+        <bl-query-options for="log-list" selected-options="<%= @sort_options %>"
             class="query-filter-option">
           <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
               horizontal-align="left" veritcal-align="bottom">
@@ -163,20 +163,10 @@
       }
     }
 
-    function attachQueryModeListener() {
-      // NOTE: This is a bit of a hack. It runs recursively until the toggle bar exists.
-      // I can't find any events to use to hook onto this normally.
-      var toggleBar = document.querySelector('#query-mode-toggle');
-      
-      if (toggleBar)
-        toggleBar.addEventListener('selected-value-changed', function(e) { queryModeChanged(e) });
-      else
-        setTimeout(function() { attachQueryModeListener() }, 100);
-    }
-
     // Trigger the recursive process once the template is ready
-    document.querySelector('#appLayout').addEventListener('dom-change', function() {
-      setTimeout(function() { attachQueryModeListener() }, 100);
+    appLayout.addEventListener('dom-change', function() {
+      document.querySelector('#query-mode-toggle')
+        .addEventListener('selected-value-changed', function(e) { queryModeChanged(e) });
     });
 
   </script>

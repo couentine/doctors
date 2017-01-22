@@ -1315,7 +1315,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
               <ul class="tag-items">
                 <% @top_user_tags.each do |tag_item| %>
                   <li>
-                    <a href="<%= group_tag_path(@group, tag_item['id']) %>">
+                    <a href="<%= group_tag_path(@group, tag_item['name_with_caps']) %>">
                       <span class="symbol">#</span>
                       <%= tag_item['name_with_caps'] %>
                     </a>

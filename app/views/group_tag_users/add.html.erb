@@ -91,7 +91,8 @@
       });
     }
 
-    $(document).ready(function() {
+    // Add listeners once the layout is ready
+    appLayout.addEventListener('dom-change', function() {
       document.addEventListener('iron-ajax-response', handleResponse);
       document.addEventListener('iron-ajax-error', handleError);
     });

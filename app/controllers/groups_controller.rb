@@ -913,9 +913,13 @@ class GroupsController < ApplicationController
     if !badge_param.blank?
       @query_mode = 'badge'
       @item_display_mode = 'user'
+      @back_url = group_badge_url(@group, badge_param)
     elsif !user_param.blank?
       @query_mode = 'user'
       @item_display_mode = 'badge'
+      @back_url = group_url(@group)
+    else # no params, default = go back to group
+      @back_url = group_url(@group)
     end
 
     # No  need to hit the DB again unless there are badges
@@ -964,13 +968,13 @@ class GroupsController < ApplicationController
     @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
     @sort_order = \
       (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
-    @sort_options = { sort_by: @sort_by, sort_order: @sort_order }
+    @sort_options = { sort_by: @sort_by, sort_order: @sort_order }.to_json
 
     if (@query_mode == 'user')
-      @bl_list_query_options = { \
+      @query_options = { \
         user: @user_username, sort_by: @sort_by, sort_order: @sort_order }.to_json
     else 
-      @bl_list_query_options = { \
+      @query_options = { \
         badge: @badge_url, sort_by: @sort_by, sort_order: @sort_order }.to_json
     end
 

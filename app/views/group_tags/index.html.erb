@@ -8,9 +8,9 @@
 
   <% content_for :app_header_content do %>
     <bl-app-header-text title="All Group Tags" subtitle="<%= "for #{@group.name}" %>" 
-        top-line-color="#388E3C" background="#81C784" white-text extra-space
-        condensed-background="#4CAF50" left-nav-symbol="fa fa-arrow-left">
-    </bl-app-header-text>
+      back-url="<%= group_url(@group) %>" top-line-color="#388E3C" background="#81C784" 
+      white-text extra-space condensed-background="#4CAF50" 
+      left-nav-symbol="fa fa-arrow-left"></bl-app-header-text>
   <% end %>
 
 <% #=== PAGE BODY CONTENT ===# %>
