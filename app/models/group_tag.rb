@@ -72,7 +72,7 @@ class GroupTag
   # Updates user_count and user_magnitude
   def update_counts
     self.user_count = user_ids.count
-    self.user_magnitude = log(user_count, 3).floor
+    self.user_magnitude = Math.log(user_count, 3).floor
   end
   
   # Adds a list of users and uses the specified user id to set the user history entries
@@ -108,7 +108,7 @@ class GroupTag
       
       existing_user_ids = group_tag.user_ids.map{ |id| id.to_s } # stringify
       user_ids = user_ids.map{ |id| id.to_s } # stringify (if needed)
-      new_user_ids = existing_user_ids - user_ids
+      new_user_ids = user_ids - existing_user_ids
       added_user_count, completed_user_count, completed_progress = 0, 0, 0
       
       # Don't hit the database anymore unless there are users to add
@@ -160,12 +160,13 @@ class GroupTag
       if poller
         poller.status = 'successful'
         poller.message = "Successfully added #{added_user_count} users to this tag."
-        poller.data = subscription.to_hash
+        poller.data = { user_ids: user_ids }
         poller.save
       end
     rescue Exception => e
       if poller
         poller.status = 'failed'
+        poller.data = { user_ids: user_ids }
         poller.message = 'An error occurred while trying to add users to this tag, ' \
           + "please try again. (Error message: #{e})"
         poller.save

@@ -25,11 +25,44 @@
 
     </paper-scroll-header-panel>
     
-    <!-- #=== STANDARD LOADING DIALOG ===# -->
-    <paper-dialog id="loadingDialog" class="standard loading" modal>
-      <h2 id="loadingDialogTitle">Loading...</h2>
+    <!-- #=== TOAST CONTAINER ===# -->
+    <content id="toastContainer" select="bl-toast-container"></content>
+
+    <!-- #=== STANDARD ALERT DIALOG ===# -->
+    <paper-dialog id="alertDialog" class="standard alert" modal>
+      <h2 id="alertDialogTitle"></h2>
+      <p id="alertDialogBody"></p>
+      <div class="buttons">
+        <paper-button id="alertDialogDismiss" dialog-dismiss on-tap="dialogDismiss">
+          <span id="alertDialogDismissText"></span>
+        </paper-button>
+        <paper-button id="alertDialogConfirm" dialog-confirm autofocus on-tap="dialogConfirm">
+          <span id="alertDialogConfirmText"></span>
+        </paper-button>
+      </div>
+    </paper-dialog>
+    
+    <!-- #=== STANDARD POLLER DIALOG ===# -->
+    <paper-dialog id="pollerDialog" class="standard poller" modal>
+      <h2 id="pollerDialogTitle"></h2>
       <p>
-        <bl-spinner id="loadingDialogSpinner" active></bl-spinner>
+        <bl-poller id="pollerDialogPoller"></bl-poller>
+      </p>
+      <div id="pollerDialogButtons" class="buttons collapsed">
+        <paper-button id="pollerDialogDismiss" dialog-dismiss on-tap="dialogDismiss">
+          <span id="pollerDialogDismissText"></span>
+        </paper-button>
+        <paper-button id="pollerDialogConfirm" dialog-confirm autofocus on-tap="dialogConfirm">
+          <span id="pollerDialogConfirmText"></span>
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- #=== STANDARD WAITING DIALOG ===# -->
+    <paper-dialog id="waitingDialog" class="standard waiting" modal>
+      <h2 id="waitingDialogTitle"></h2>
+      <p>
+        <bl-spinner id="waitingDialogSpinner" active></bl-spinner>
       </p>
     </paper-dialog>
 

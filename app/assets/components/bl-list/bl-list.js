@@ -29,6 +29,16 @@
     simpler, generating a collection of paper icon list items mashed together. To use
     simple mode: set simpleMode=true, set rowTitle and set either rowImage OR rowIcon.
     Simple mode includes selection functionality.
+
+  How to use ajax targetting:
+    When bl-list is used as a multi-select tool, it is typically for the purposes of generating 
+    a list of unique identifiers to pass to an ajax call. So bl-list includes the ability to target
+    an iron-ajax element and build a list of unique identifiers for all of the currently selected
+    items. To do this, set forAjax to the iron-ajax's id. Then set ajaxItemKey to the key on 
+    the bl-list items which represents the unique identifiers (ex: 'id' or 'username').
+    Then set the ajaxBodyKey to the name of the array parameter expected by the rails controller
+    (ex: 'user_ids' or 'users').
+
 */
 
 Polymer({
@@ -53,6 +63,11 @@ Polymer({
     rowTitle: String, // field name of title in items (required)
     rowImage: String, // field name of image in items (optional)
     roundRowImage: Boolean, // set this to round the row image
+
+    // Ajax Targetting Options (Explained in top comments)
+    forAjax: String, // Set this to the id of an iron-ajax
+    ajaxItemKey: String, // The source item key to copy to array in iron-ajax body
+    ajaxBodyKey: String, // The destination key in iron-ajax body used to store the array
     
     // The object items
     items: { type: Array, notify: true },
@@ -413,9 +428,22 @@ Polymer({
     }
   },
   updateSelectedItems: function() {
+    // Update the main selected items array
     this.selectedItems = $.map(this.items, function(item, index) {
       if (item && item.selected) return item; 
     });
+
+    // Then potentially update the ajax
+    if (this.forAjax) {
+      var ajaxBody = {};
+      ajaxBody[this.ajaxBodyKey] = [];
+      
+      // Extract ajaxItemKey from each item and store it in the ajaxBodyKey array on ajaxBody
+      for (var i = 0; i < this.selectedItems.length; i++)
+        ajaxBody[this.ajaxBodyKey].push(this.selectedItems[i][this.ajaxItemKey]);
+
+      document.getElementById(this.forAjax).body = ajaxBody;
+    }
   },
   rowClass: function(itemSelected) {
     // Called in simple mode to calculate the class of he paper items

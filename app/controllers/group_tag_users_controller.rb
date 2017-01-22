@@ -53,7 +53,7 @@ class GroupTagUsersController < ApplicationController
         redirect_to @poller
       end
       format.json do
-        render json: { success: true, poller_id: poller_id }
+        render json: { success: true, poller_id: poller_id.to_s }
       end
     end
   end
@@ -66,7 +66,7 @@ class GroupTagUsersController < ApplicationController
         user_ids = params['user_ids'] || []
         poller_id = @group_tag.remove_users(user_ids, current_user.id, true)
 
-        render json: { success: true, poller_id: poller_id }
+        render json: { success: true, poller_id: poller_id.to_s }
       end
     end
   end

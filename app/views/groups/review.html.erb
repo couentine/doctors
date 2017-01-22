@@ -53,102 +53,98 @@
     }
   </style>
 
-  <template is="dom-bind" id="review">
+  <div id="page-header-wrapper">
 
-    <div id="page-header-wrapper">
+    <bl-toggle-bar selected-value="<%= @query_mode %>" id="query-mode-toggle"
+      items='[{"label":"By Badge","value":"badge"}, {"label":"By Person","value":"user"}]'>
+    </bl-toggle-bar>
 
-      <bl-toggle-bar selected-value="<%= @query_mode %>" id="query-mode-toggle"
-        items='[{"label":"By Badge","value":"badge"}, {"label":"By Person","value":"user"}]'>
-      </bl-toggle-bar>
+    <bl-badge-selector badges="<%= @badges.to_json %>" 
+        selected-badge-url="<%= @badge_url.to_s %>" for="log-list" 
+        <%= (@query_mode != 'badge') ? 'disabled' : '' %>
+        <%= (@badge_url.blank?) ? 'expanded' : '' %>>
+      <h2>Select a badge</h2>
+      <div class="subtitle">
+        Select a badge below to view all feedback requests for that badge.
+      </div>
+    </bl-badge-selector><br>
 
-      <bl-badge-selector badges="<%= @badges.to_json %>" 
-          selected-badge-url="<%= @badge_url.to_s %>" for="log-list" 
-          <%= (@query_mode != 'badge') ? 'disabled' : '' %>
-          <%= (@badge_url.blank?) ? 'expanded' : '' %>>
-        <h2>Select a badge</h2>
-        <div class="subtitle">
-          Select a badge below to view all feedback requests for that badge.
-        </div>
-      </bl-badge-selector><br>
+    <bl-user-selector users="<%= @users.to_json %>" for="log-list" 
+        selected-user-username="<%= @user_username.to_s %>" group-id="<%= @group.id.to_s %>"
+        <%= (@query_mode != 'user') ? 'disabled' : '' %>
+        <%= (@user_username.blank?) ? 'expanded' : '' %> >
+      <h2>Select a person</h2>
+      <div class="subtitle">
+        Select a group member below to view their feedback requests across all badges 
+        in the group.
+      </div>
+    </bl-user-selector>
+  </div>
 
-      <bl-user-selector users="<%= @users.to_json %>" for="log-list" 
-          selected-user-username="<%= @user_username.to_s %>" group-id="<%= @group.id.to_s %>"
-          <%= (@query_mode != 'user') ? 'disabled' : '' %>
-          <%= (@user_username.blank?) ? 'expanded' : '' %> >
-        <h2>Select a person</h2>
-        <div class="subtitle">
-          Select a group member below to view their feedback requests across all badges 
-          in the group.
-        </div>
-      </bl-user-selector>
+  <bl-list id="log-list" object-mode="full_logs" query-options="<%= @bl_list_query_options %>"
+      next-page-url="<%= group_full_logs_url(@group, format: :json) %>"
+      inject-items="<%= @list_inject_items.to_json %>" 
+      item-display-mode="<%= @item_display_mode %>">
+    <div class="placeholder color-background">
+      <i class="fa fa-flag-checkered"></i>
+      <div class="message">
+        <p><b>All done for now!</b></p> 
+        <p>
+          There are no pending feedback requests for this view.
+        </p>
+      </div>
     </div>
 
-    <bl-list id="log-list" object-mode="full_logs" query-options="<%= @bl_list_query_options %>"
-        next-page-url="<%= group_full_logs_url(@group, format: :json) %>"
-        inject-items="<%= @list_inject_items.to_json %>" 
-        item-display-mode="<%= @item_display_mode %>">
-      <div class="placeholder color-background">
-        <i class="fa fa-flag-checkered"></i>
-        <div class="message">
-          <p><b>All done for now!</b></p> 
-          <p>
-            There are no pending feedback requests for this view.
-          </p>
-        </div>
-      </div>
-
-      <div class="list-controls">
-        <ul class="left">
-          <bl-query-options for="log-list" selected-options="<%= @sort_options.to_json %>"
-              class="query-filter-option">
-            <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
-                horizontal-align="left" veritcal-align="bottom">
-              <paper-listbox class="dropdown-content">
-                <paper-item data-options='{"sort_by":"date_requested","sort_order":"desc"}'>
-                  Newest first
-                </paper-item>
-                <paper-item data-options='{"sort_by":"date_requested","sort_order":"asc"}'>
-                  Oldest first
-                </paper-item>
-                <paper-item data-options='{"sort_by":"user_name","sort_order":"asc"}'>
-                  By name
-                </paper-item>
-                <paper-item data-options='{"sort_by":"user_name","sort_order":"desc"}'>
-                  Reverse name
-                </paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-          </bl-query-options>
-        </ul>
-        <ul class="right">
-          <li>
-            <paper-button onclick="document.querySelector('#log-list').selectAll()" 
-                class="select-all-button">
-              <i class="fa fa-check"></i> Select All
-            </paper-button>
-          </li>
-        </ul>
-      </div>
-    </bl-list>
-
-    <bl-log-validator id="log-validator" for="log-list" 
-      group-validations-path="<%= group_validations_path(@group, format: :json) %>">
-    </bl-log-validator>
-
-    <bl-page-footer mode="color no-intercom"></bl-page-footer>
-
-    <bl-selection-bar id="selected-log-bar" for="log-list" noun-singular="log" 
-        noun-plural="logs">
-      <ul class="actions">
+    <div class="list-controls">
+      <ul class="left">
+        <bl-query-options for="log-list" selected-options="<%= @sort_options.to_json %>"
+            class="query-filter-option">
+          <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
+              horizontal-align="left" veritcal-align="bottom">
+            <paper-listbox class="dropdown-content">
+              <paper-item data-options='{"sort_by":"date_requested","sort_order":"desc"}'>
+                Newest first
+              </paper-item>
+              <paper-item data-options='{"sort_by":"date_requested","sort_order":"asc"}'>
+                Oldest first
+              </paper-item>
+              <paper-item data-options='{"sort_by":"user_name","sort_order":"asc"}'>
+                By name
+              </paper-item>
+              <paper-item data-options='{"sort_by":"user_name","sort_order":"desc"}'>
+                Reverse name
+              </paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </bl-query-options>
+      </ul>
+      <ul class="right">
         <li>
-          <paper-button onclick="document.querySelector('#log-validator').open()">
-            <i class="fa fa-comment"></i> Add Feedback
+          <paper-button onclick="document.querySelector('#log-list').selectAll()" 
+              class="select-all-button">
+            <i class="fa fa-check"></i> Select All
           </paper-button>
         </li>
       </ul>
-    </bl-selection-bar>
+    </div>
+  </bl-list>
 
-  </template>
+  <bl-log-validator id="log-validator" for="log-list" 
+    group-validations-path="<%= group_validations_path(@group, format: :json) %>">
+  </bl-log-validator>
+
+  <bl-page-footer mode="color no-intercom"></bl-page-footer>
+
+  <bl-selection-bar id="selected-log-bar" for="log-list" noun-singular="log" 
+      noun-plural="logs">
+    <ul class="actions">
+      <li>
+        <paper-button onclick="document.querySelector('#log-validator').open()">
+          <i class="fa fa-comment"></i> Add Feedback
+        </paper-button>
+      </li>
+    </ul>
+  </bl-selection-bar>
 
   <script>
     function queryModeChanged() {
@@ -179,7 +175,7 @@
     }
 
     // Trigger the recursive process once the template is ready
-    document.querySelector('#review').addEventListener('dom-change', function() {
+    document.querySelector('#appLayout').addEventListener('dom-change', function() {
       setTimeout(function() { attachQueryModeListener() }, 100);
     });
 

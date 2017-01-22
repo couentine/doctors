@@ -103,48 +103,50 @@
   <% #=== PAGE BODY ===# %>
 
   <body unresolved>
-      
-    <% #=== PAGE ALERTS ===# %>
 
-      <% unless false && flash.blank? %>
-        <bl-toast-container>
-          <% flash.each do |key, value| %>
-            <bl-toast text="<%= value %>" class="<%= key %>"></bl-toast>
-          <% end %>
-        </bl-toast-container>
-      <% end %>
+    <template is="dom-bind" id="appLayout">
 
-    <% #=== APP CONTAINER COMPONENT (Uses paper-scroll-header-panel) ===# %>
+      <% #=== APP CONTAINER COMPONENT (Uses paper-scroll-header-panel) ===# %>
 
-      <bl-app-container id="appContainer" page-background="<%= yield(:page_background) %>"
-        <%= (content_for?(:white_header_text)) ? 'white-header-text' : '' %>
-        <%= (content_for?(:white_body_text)) ? 'white-body-text' : '' %>
-        <%= (content_for?(:hide_condensed_header)) ? 'hide-condensed-header' : '' %>
-        <%= (content_for?(:hide_left_nav)) ? 'hide-left-nav' : '' %>
-        <%= (content_for?(:hide_right_nav)) ? 'hide-right-nav' : '' %>
-        <%= (content_for?(:hide_intercom)) ? 'hide-intercom' : '' %>
-        current-user="<%= current_user.json_cu %>" asset-paths="<%= @ap_json %>">
+        <bl-app-container id="appContainer" page-background="<%= yield(:page_background) %>"
+          <%= (content_for?(:white_header_text)) ? 'white-header-text' : '' %>
+          <%= (content_for?(:white_body_text)) ? 'white-body-text' : '' %>
+          <%= (content_for?(:hide_condensed_header)) ? 'hide-condensed-header' : '' %>
+          <%= (content_for?(:hide_left_nav)) ? 'hide-left-nav' : '' %>
+          <%= (content_for?(:hide_right_nav)) ? 'hide-right-nav' : '' %>
+          <%= (content_for?(:hide_intercom)) ? 'hide-intercom' : '' %>
+          current-user="<%= current_user.json_cu %>" asset-paths="<%= @ap_json %>">
 
-        <% #=== APP HEADER ===# %>
+          <% #=== PAGE ALERTS ===# %>
 
-          <% if content_for?(:app_header_content) %>
-            <div class="app-header-content">
-              <%= yield(:app_header_content) %>
-            </div>
-          <% end %>
+            <bl-toast-container id="toastContainer">
+              <% flash.each do |key, value| %>
+                <bl-toast text="<%= value %>" type="<%= key %>"></bl-toast>
+              <% end unless flash.blank? %>
+            </bl-toast-container>
 
-        <% #=== PAGE CONTENT ===# %>
-          
-          <div class="content">
+          <% #=== APP HEADER ===# %>
+
+            <% if content_for?(:app_header_content) %>
+              <div class="app-header-content">
+                <%= yield(:app_header_content) %>
+              </div>
+            <% end %>
+
+          <% #=== PAGE CONTENT ===# %>
             
-            <%= yield %>
+            <div class="content">
+              
+              <%= yield %>
 
-            <bl-app-footer <%= (content_for?(:white_body_text)) ? 'white-text' : '' %>>
-            </bl-app-footer>
+              <bl-app-footer <%= (content_for?(:white_body_text)) ? 'white-text' : '' %>>
+              </bl-app-footer>
 
-          </div>
+            </div>
 
-      </bl-app-container>
+        </bl-app-container>
+
+    </template>
 
   </body>
 

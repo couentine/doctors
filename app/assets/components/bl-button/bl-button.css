@@ -5,7 +5,7 @@
 
 /* === COMPONENT STYLES === */
 
-  a {
+  .wrapper {
     display: inline-block;
     border-radius: 3px;
     text-decoration: none;
@@ -14,7 +14,7 @@
     color: var(--color, inherit);
   }
 
-  paper-button {
-    display: inline-block;
-    margin: 0;
-  }
+    paper-button {
+      display: inline-block;
+      margin: 0;
+    }

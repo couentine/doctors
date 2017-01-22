@@ -40,7 +40,7 @@ class HomeController < ApplicationController
 
       respond_to do |format|
         format.html do
-          render template: 'home/root_internal', layout: 'app' 
+          render template: 'home/root_internal', layout: 'app'
         end
         format.json do
           if @query == 'groups'
