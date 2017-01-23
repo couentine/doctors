@@ -92,6 +92,16 @@
 
         @apply(--bl-user-subtitle);
       }
+      paper-icon-button {
+        --paper-icon-button: {
+          width: 2.4em;
+          color: #616161;
+          transition: color 0.3s;
+        };
+        --paper-icon-button-hover: {
+          color: #D32F2F;
+        };
+      }
       ul.metric-list {
         list-style: none;
         padding: 0; margin: 0;

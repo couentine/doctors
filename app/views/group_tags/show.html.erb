@@ -52,12 +52,18 @@
     </div>
   </div>
 
+  <!-- #=== AJAX CALL TO REMOVE A USER ===# -->
+
+  <iron-ajax id="removeUserAjax" bubbles method="DELETE" content-type="application/json"
+    headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'></iron-ajax>
+  <bl-ajax-status for="removeUserAjax">Removing user...</bl-ajax-status>
+
   <!-- #=== GROUP TAG USERS ===# -->
 
   <div id="group-tags-panel">
   
     <bl-list id="userList" object-mode="users" refresh-query-on-load
-        query-options="<%= @query_options %>"
+        query-options="<%= @query_options %>" item-display-mode="<%= @item_display_mode %>"
         next-page-url="<%= group_tag_users_url(@group, @group_tag, format: :json) %>">
 
       <!-- #=== LIST CONTROLS ===# -->
@@ -107,5 +113,64 @@
       </div>
 
     </bl-list>
+
+
+    <!-- #=== PAGE-SPECIFIC JAVASCRIPT ===# -->
+
+    <script type="text/javascript">
+
+      var removeUserBaseUrl = '<%= "#{group_tag_users_url(@group, @group_tag)}/" %>';
+
+      // Add listeners once the layout is ready
+      appLayout.addEventListener('dom-change', function() {
+        document.addEventListener('bl-user-remove', handleUserRemove);
+        document.addEventListener('iron-ajax-response', handleResponse);
+        document.addEventListener('iron-ajax-error', handleError);
+      });
+
+      function handleUserRemove(e) {
+        var user = e.detail.user;
+
+        appContainer.openAlertDialog({
+          color: 'green',
+          title: 'Remove ' + user.name + ' from tag?',
+          body: 'The user will only be removed from the tag, not from the group itself. '
+            + 'They can be added back to the tag at any time.',
+          confirm: {
+            text: 'Remove them',
+            action: function() {
+              var removeUserAjax = document.getElementById('removeUserAjax');
+              removeUserAjax.url = removeUserBaseUrl + user.id + '.json'
+              removeUserAjax.generateRequest();
+              
+              // Hide the bl-list-item for this user
+              document.querySelector('[item-id="' + user.id + '"]').hidden = true;
+            }
+          },
+          dismiss: { text: 'Nevermind' }
+        });
+      }
+
+      function handleResponse(e) {
+        var response = e.detail.response;
+        var user = response.user;
+
+        if (response.success) {
+          appContainer.addToast(user.name + ' was removed from the tag', 'success');
+        } else {
+          appContainer.addToast('There was a problem removing ' + user.name + ' from the tag '
+            + '(Error Message: ' + response.error_message + ')', 'error', 30000);
+
+          // Unhide the bl-list-item for this user
+          document.querySelector('[item-id="' + user.id + '"]').hidden = false;
+        }
+      }
+
+      function handleError(e) {
+        appContainer.addToast('There was a problem removing the user from the tag, '
+          + 'please refresh the page and try again', 'error', 30000);
+      }
+
+    </script>
 
   </div>

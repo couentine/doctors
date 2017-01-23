@@ -2,7 +2,7 @@ class GroupTagUsersController < ApplicationController
   
   prepend_before_action :find_parent_records
   before_action :authenticate_user!, except: [:index]
-  before_action :can_assign, only: [:add, :bulk_create, :remove]
+  before_action :can_assign, only: [:add, :bulk_create, :destroy]
 
   # === STANDARD RESTFUL ACTIONS === #
 
@@ -34,6 +34,28 @@ class GroupTagUsersController < ApplicationController
     end
   end
 
+  # JSON only. Returns 3 keys: success, user, error_message
+  # DELETE /group-url/tags/tag-name/users/abc123.json
+  def destroy
+    respond_to do |format|
+      format.json do
+        @user = User.find(params['id']) || not_found
+        
+        begin
+          @group_tag.remove_users([@user.id], current_user.id)
+          @success = true
+          @error_message = nil
+        rescue Exception => e
+          @success = false
+          @error_message = 'An error occurred while trying to remove the user from this tag, ' \
+          + "please try again. (Error message: #{e})"
+        end
+
+        render json: { success: @success, user: @user, error_message: @error_message }
+      end
+    end
+  end
+
   # === CUSTOM RESTFUL ACTIONS === #
 
   # GET /group-url/tags/tag-name/users/add
@@ -54,19 +76,6 @@ class GroupTagUsersController < ApplicationController
         redirect_to @poller
       end
       format.json do
-        render json: { success: true, poller_id: poller_id.to_s }
-      end
-    end
-  end
-
-  # JSON only. Returns 2 keys: success and poller_id.
-  # POST /group-url/tags/tag-name/users/remove.json?user_ids[]=abc123
-  def remove
-    respond_to do |format|
-      format.json do
-        user_ids = params['user_ids'] || []
-        poller_id = @group_tag.remove_users(user_ids, current_user.id, true)
-
         render json: { success: true, poller_id: poller_id.to_s }
       end
     end

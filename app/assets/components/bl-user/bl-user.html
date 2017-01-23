@@ -35,6 +35,9 @@
               </li>
             </ul>
           </div>
+          <template is="dom-if" if="[[showRemove]]">
+            <paper-icon-button icon="cancel" on-tap="removeUser"></paper-icon-button>
+          </template>
         </a>
       </template>
 
@@ -69,6 +72,9 @@
               </li>
             </ul>
           </div>
+          <template is="dom-if" if="[[showRemove]]">
+            <paper-icon-button icon="cancel" on-tap="removeUser"></paper-icon-button>
+          </template>
         </div>
       </template>
 

@@ -127,11 +127,10 @@ BadgeList::Application.routes.draw do
   resources :groups, path: '', except: [:index] do
     resources :badges, only: [:new, :create]
     resources :group_tags, except: [:new, :edit], path: 'tags', as: 'tags' do
-      resources :group_tag_users, path: 'users', as: 'users', only: [:index] do
+      resources :group_tag_users, path: 'users', as: 'users', only: [:index, :destroy] do
         collection do
           get 'add'
           post 'bulk_create'
-          post 'remove'
         end
       end
     end

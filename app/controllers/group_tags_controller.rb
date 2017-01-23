@@ -8,6 +8,7 @@ class GroupTagsController < ApplicationController
   before_action :group_admin, only: [:destroy]
   before_action :can_view, only: [:index, :show]
   before_action :can_create, only: [:create]
+  before_action :can_edit, only: [:update]
 
   # === CONSTANTS === #
 
@@ -57,6 +58,8 @@ class GroupTagsController < ApplicationController
     # NOTE: This is a hard-coded version of the logic in GroupTagUsersController#index
     @sort_options = { sort_by: 'name', sort_order: 'asc' }.to_json
     @query_options = @sort_options # they are the same for now
+
+    @item_display_mode = (@current_user_is_admin || @badge_list_admin) ? 'admin' : ''
 
     respond_to do |format|
       format.html do
@@ -154,7 +157,7 @@ private
   end
 
   def can_view
-    unless @can_edit_group_tags
+    unless @can_view_group_tags
       respond_to do |format|
         format.json do
           render json: { success: false, error_message: 'You do not have permission to view ' \
@@ -172,6 +175,21 @@ private
     unless @can_create_group_tags
       flash[:error] = 'You do not have permission to create tags for this group.'
       redirect_to @group
+    end 
+  end
+
+  def can_edit
+    unless @can_edit_group_tags
+      respond_to do |format|
+        format.json do
+          render json: { success: false, error_message: 'You do not have permission to edit ' \
+            + 'tags for this group.' }
+        end
+        respond_to do |html|
+          flash[:error] = 'You do not have permission to edit tags for this group.'
+          redirect_to @group
+        end
+      end
     end 
   end
 

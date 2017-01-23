@@ -9,6 +9,9 @@ Polymer({
     // Optional
     itemDisplayMode: String, // OPTIONAL: Passed all the way to the individual items (if supported)
     options: Object,
+    
+    // Auto Calculated
+    itemId: { type: String, reflectToAttribute: true },
 
     // Computed properties
     isBadgeMode: { type: Boolean, computed: "_isBadgeMode(objectMode)" },
@@ -39,7 +42,9 @@ Polymer({
 
   // Events
   itemChanged: function(newValue, oldValue) {
-    if (newValue) this.hidden = false;
-    else this.hidden = true;
+    if (newValue) {
+      this.hidden = false;
+      if (newValue.id) this.itemId = newValue.id;
+    } else this.hidden = true;
   }
 });
