@@ -47,11 +47,11 @@ class GroupTagUsersController < ApplicationController
           @error_message = nil
         rescue Exception => e
           @success = false
-          @error_message = 'An error occurred while trying to remove the user from this tag, ' \
-          + "please try again. (Error message: #{e})"
+          @error_message = e.to_s
         end
 
-        render json: { success: @success, user: @user, error_message: @error_message }
+        render json: { success: @success, user: @user.json(:group_list_item), 
+          error_message: @error_message }
       end
     end
   end

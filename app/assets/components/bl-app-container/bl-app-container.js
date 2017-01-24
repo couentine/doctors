@@ -129,7 +129,7 @@ Polymer({
   },
   openAlertDialog: function(options) {
     // Shows the standard alert dialog. The following options should be included:
-    // - color = ['orange', 'green', 'blue', 'grey']
+    // - color = ['orange', 'green', 'blue', 'grey', 'red']
     // - title = The title of the dialog
     // - body = (Optional) The body text
     // - confirm = { text: 'Accept', action: function(){} } >> leave out property to hide button
@@ -170,7 +170,7 @@ Polymer({
   },
   openPollerDialog: function(pollerId, options) {
     // Shows the standard poller dialog. The following options should be included:
-    // - color = ['orange', 'green', 'blue', 'grey']
+    // - color = ['orange', 'green', 'blue', 'grey', 'red']
     // - title = The title of the dialog
     // - confirm = { text: 'Accept', action: function(){} } >> leave out property to hide button
     // - dismiss = { text: 'Cancel', action: function(){} } >> leave out property to hide button
@@ -208,7 +208,7 @@ Polymer({
   },
   openWaitingDialog: function(options) {
     // Shows the standard waiting dialog. The following options should be included:
-    // - color = ['orange', 'green', 'blue', 'grey']
+    // - color = ['orange', 'green', 'blue', 'grey', 'red']
     // - title = The title of the dialog
 
     this.setDialogColor(options.color);
@@ -252,21 +252,26 @@ Polymer({
     // This is primarily called by the standard dialog functions
     // It sets all of the appropriate css variables to match the specified color
     // Defaults to orange
-    if (color == 'green') {
-      this.customStyle['--dialog-50-color'] = '#F1F8E9';
-      this.customStyle['--dialog-100-color'] = '#C8E6C9';
-      this.customStyle['--dialog-300-color'] = '#AED581';
-      this.customStyle['--dialog-600-color'] = '#7CB342';
-    } else if (color == 'blue') { // material light blue
+    if (color == 'blue') { // material light blue
       this.customStyle['--dialog-50-color'] = '#E1F5FE';
       this.customStyle['--dialog-100-color'] = '#B3E5FC';
       this.customStyle['--dialog-300-color'] = '#4FC3F7';
       this.customStyle['--dialog-600-color'] = '#039BE5';
+    } else if (color == 'green') {
+      this.customStyle['--dialog-50-color'] = '#F1F8E9';
+      this.customStyle['--dialog-100-color'] = '#C8E6C9';
+      this.customStyle['--dialog-300-color'] = '#AED581';
+      this.customStyle['--dialog-600-color'] = '#7CB342';
     } else if (color == 'grey') {
       this.customStyle['--dialog-50-color'] = '#FAFAFA';
       this.customStyle['--dialog-100-color'] = '#F5F5F5';
       this.customStyle['--dialog-300-color'] = '#E0E0E0';
       this.customStyle['--dialog-600-color'] = '#757575';
+    } else if (color == 'red') {
+      this.customStyle['--dialog-50-color'] = '#FFEBEE';
+      this.customStyle['--dialog-100-color'] = '#FFCDD2';
+      this.customStyle['--dialog-300-color'] = '#E57373';
+      this.customStyle['--dialog-600-color'] = '#E53935';
     } else { // default = orange
       this.customStyle['--dialog-50-color'] = '#FFF3E0';
       this.customStyle['--dialog-100-color'] = '#FFE0B2';

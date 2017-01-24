@@ -22,9 +22,23 @@ Polymer({
     ironAjax: Object // managed automatically, do not set
   },
 
+  // Actions
+  refreshStatus: function() {
+    // Refreshes current status from ironAjax and fades loadingStatus in or out
+    if (this.ironAjax.loading) $(this.$.loadingStatus).fadeIn();
+    else $(this.$.loadingStatus).fadeOut();
+  },
+
   // Events
   attached: function() {
-    if (this.for) this.ironAjax = document.getElementById(this.for);
+    // Store a link to the iron ajax and add listeners as needed
+    if (this.for) {
+      this.ironAjax = document.getElementById(this.for);
+      this.listen(this.ironAjax, 'iron-ajax-request', 'refreshStatus');
+      this.listen(this.ironAjax, 'iron-ajax-response', 'refreshStatus');
+      this.listen(this.ironAjax, 'iron-ajax-error', 'refreshStatus');
+    }
   }
+
 });
 

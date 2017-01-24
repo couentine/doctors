@@ -75,6 +75,7 @@ class GroupTagsController < ApplicationController
     end
   end
 
+  # HTML only function.
   # Creates a new tag and redirects to it. If it already exists it just redirects to it.
   # If there is a problem it redirects back to the group with a flash error message.
   # POST /group-url/tags?name_with_caps=Awesome-Tag&summary=text
@@ -100,10 +101,10 @@ class GroupTagsController < ApplicationController
       format.json do
         # Update using the AuditHistory method
         if @group_tag.update_attributes_with_audit(group_tag_params, current_user.id)
-          render json: { success: true, errors: nil, group_tag: @group_tag.json(:list_item) }
+          render json: { success: true, errors: nil, group_tag: @group_tag.json(:detail) }
         else
-          render json: { success: false, errors: @group_tag.errors, 
-            group_tag: @group_tag.json(:list_item) }
+          render json: { success: false, field_error_messages: @group_tag.errors.messages, 
+            group_tag: @group_tag.json(:detail) }
         end
       end
     end
@@ -111,11 +112,24 @@ class GroupTagsController < ApplicationController
 
   # DELETE /group-url/tags/tag-name
   def destroy
-    if @group_tag.destroy
-      redirect_to @group, notice: "The #{@group_tag.name_with_caps} tag was successfully deleted."
-    else
-      redirect_to [@group, @group_tag], 
-        error: "There was a problem deleting the #{@group.name_with_caps} tag."
+    respond_to do |format|
+      format.html do
+        if @group_tag.destroy
+          redirect_to @group, 
+            notice: "The #{@group_tag.name_with_caps} tag was successfully deleted."
+        else
+          redirect_to [@group, @group_tag], 
+            error: "There was a problem deleting the #{@group.name_with_caps} tag."
+        end
+      end
+      format.json do
+        if @group_tag.destroy
+          render json: { success: true, group_tag: @group_tag.json(:detail) }
+        else
+          render json: { success: false, group_tag: @group_tag.json(:detail),
+            error_message: "There was a problem deleting the #{@group.name_with_caps} tag." }
+        end
+      end
     end
   end
 

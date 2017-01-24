@@ -16,6 +16,8 @@ class GroupTag
   }
   JSON_TEMPLATES = {
     list_item: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
+      :validation_request_count, :full_path],
+    detail: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
       :validation_request_count, :full_path]
   }
 
