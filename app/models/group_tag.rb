@@ -335,7 +335,7 @@ protected
   end
 
   def remove_from_group_cache_before_destroy
-    Group.delay(queue: 'low').remove_tag_from_cache_and_save(group_id, id)
+    Group.delay(queue: 'low').remove_tag_from_cache(group_id, id)
   end
 
 end

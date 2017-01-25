@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :log_activity
-  before_action :build_asset_paths
+  before_action :set_app_variables
   after_action :store_location
 
   # unless Rails.application.config.consider_all_requests_local
@@ -90,9 +90,12 @@ private
     current_user.log_activity if current_user
   end
 
-  # The @asset_paths variable is passed into bl-app-container.assetPaths and is used to provide
-  # the paths of the various asset paths to the Polymer front end.
-  def build_asset_paths
+  def set_app_variables
+    # First set the current user json var
+    @current_user_json = (current_user) ? current_user.json(:current_user).to_json : '{}'
+
+    # The @asset_paths variable is passed into bl-app-container.assetPaths and is used to provide
+    # the paths of the various asset paths to the Polymer front end.
     url = ActionController::Base.helpers
     url.request = request
     @asset_paths = {

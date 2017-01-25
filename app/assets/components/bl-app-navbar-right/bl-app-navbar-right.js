@@ -1,3 +1,17 @@
+/* ================================================== */
+/* ============>> BL APP NAVBAR RIGHT <<============= */
+/* ================================================== */
+
+/*
+  
+  This is the right part of the app navbar which show either a sign in link or the user's avatar
+  dropdown menu.
+
+  NOTE: It is necessary to use the getUrl() method to generate urls because normal relative
+  paths will break in production (because the javascript files are served from the CDN).
+
+*/
+
 Polymer({
   is: "bl-app-navbar-right",
 

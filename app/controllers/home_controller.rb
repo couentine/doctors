@@ -5,7 +5,6 @@ class HomeController < ApplicationController
   def root
     if current_user
       @user = current_user
-      @current_user_json = current_user.json_cu
       @page_size = APP_CONFIG['page_size_small']
       @query = params[:query] || 'all'
       @badge_count = @user.expert_badge_ids.count # doesn't result in a query
@@ -53,7 +52,6 @@ class HomeController < ApplicationController
         end
       end
     else
-      @current_user_json = '{}'
       respond_to do |format|
         format.html { render template: 'home/root_external', layout: 'web' }
         format.any do
@@ -69,7 +67,6 @@ class HomeController < ApplicationController
   # This allows internal users to access the external homepage.
   def root_external
     if current_user
-      @current_user_json = current_user.json_cu
       render layout: 'web'
     else
       # This prevents the '/w' URL from being bookmarked or used when people aren't logged in
@@ -98,12 +95,6 @@ class HomeController < ApplicationController
 
   # GET /how-it-works
   def how_it_works
-    if current_user
-      @current_user_json = current_user.json_cu
-    else
-      @current_user_json = '{}'
-    end
-
     render layout: 'web'
   end
 

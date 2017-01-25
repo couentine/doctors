@@ -18,6 +18,11 @@
   a { text-decoration: none; }
     a i.fa { margin-right: 0.5em; }
 
+  a#sign-in-link.true { /* true = this.whiteText */
+    color: white;
+  }
+    a#sign-in-link i.fa { font-size: 2em; }
+
   paper-menu-button {
     padding: 0;
     text-align: left;
@@ -32,7 +37,9 @@
         border-radius: 500px;
         display: inline-block;
       }
-      .dropdown-trigger > img.true { border-color: white; }
+      .dropdown-trigger > img.true {  /* true = this.whiteText */
+        border-color: white; 
+      }
   
     paper-menu-button .dropdown-content {
       z-index: 110;

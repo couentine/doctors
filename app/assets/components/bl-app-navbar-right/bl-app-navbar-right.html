@@ -3,6 +3,18 @@
 
   <template>
       
+    <!-- #=== LOGGED OUT NAV ===# -->
+
+    <template is="dom-if" if="[[!isLoggedIn]]">
+      <a href$="[[getUrl('/users/sign_in')]]" id="sign-in-link" class$="[[whiteText]]"
+          title="Sign in or register">
+        <i class="fa fa-sign-in"></i>
+      </a>
+      <paper-tooltip for="sign-in-link" animation-delay="50" fit-to-visible-bounds offset="5">
+        Sign in or register
+      </paper-tooltip>
+    </template>
+
     <!-- #=== LOGGED IN NAV ===# -->
 
     <template is="dom-if" if="[[isLoggedIn]]">
@@ -43,14 +55,6 @@
           </paper-item>
         </paper-menu>
       </paper-menu-button>
-    </template>
-
-    <!-- #=== LOGGED OUT NAV ===# -->
-
-    <template is="dom-if" if="[[!isLoggedIn]]">
-      <a href$="[[getUrl('/users/sign_in')]]" id="signin-link" class$="[[whiteText]]">
-        <i class="fa fa-sign=in"></i> Sign in or register
-      </a>
     </template>
 
   </template>
