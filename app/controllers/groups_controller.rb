@@ -26,7 +26,8 @@ class GroupsController < ApplicationController
     :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
     :stripe_subscription_card, :new_subscription, :member_visibility, :admin_visibility, 
-    :badge_copyability, :join_code, :avatar_key]
+    :badge_copyability, :join_code, :avatar_key, :tag_assignability, :tag_creatability,
+    :tag_visibility]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   GROUP_TYPE_OPTIONS = [
@@ -48,6 +49,12 @@ class GroupsController < ApplicationController
     ['<i class="fa fa-users"></i> Only Members'.html_safe, 'members'],
     ['<i class="fa fa-lock"></i> Only Admins'.html_safe, 'admins']
   ]
+  TAG_ASSIGNABILITY_OPTIONS = [
+    ['<i class="fa fa-users"></i> All Members'.html_safe, 'members'], 
+    ['<i class="fa fa-lock"></i> Only Admins'.html_safe, 'admins']
+  ]
+  TAG_CREATABILITY_OPTIONS = TAG_ASSIGNABILITY_OPTIONS
+  TAG_VISIBILITY_OPTIONS = BADGE_COPYABILITY_OPTIONS
 
   # === RESTFUL ACTIONS === #
 
@@ -128,6 +135,9 @@ class GroupsController < ApplicationController
     # Set options vars
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
     @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
+    @tag_assignability_options = TAG_ASSIGNABILITY_OPTIONS
+    @tag_creatability_options = TAG_CREATABILITY_OPTIONS
+    @tag_visibility_options = TAG_VISIBILITY_OPTIONS
 
     # Get current values of group membership settings
     if @current_user_is_admin || @current_user_is_member

@@ -592,8 +592,21 @@
             <%= simple_form_for @group, html: { id: 'settings-form', 
                 class: 'form-horizontal' } do |f| %>
 
-              <%= f.input :badge_copyability, as: :radio_buttons, label: 'Ability to Copy Badges', 
+              <%= f.input :badge_copyability, as: :radio_buttons, 
+                label: 'Who can copy badges from the group?', 
                 include_blank: false, collection: @badge_copyability_options %>
+
+              <%= f.input :tag_visibility, as: :radio_buttons, 
+                label: 'Who can see group tags?', 
+                include_blank: false, collection: @tag_visibility_options %>
+
+              <%= f.input :tag_assignability, as: :radio_buttons, 
+                label: 'Who can assign group tags?', 
+                include_blank: false, collection: @tag_assignability_options %>
+
+              <%= f.input :tag_creatability, as: :radio_buttons, 
+                label: 'Who can create new group tags?', 
+                include_blank: false, collection: @tag_creatability_options %>
 
               <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
                 include_blank: false, collection: @group_visibility_options %>
@@ -1307,40 +1320,45 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
       <div class="row">
         <div class="span12">
           <div class="group-tag-list">
-            <span class="tag-label">
+
+            <div class="tag-label">
               <i class="fa fa-tag"></i>
               Tags:
-            </span>
-            <% if @has_top_user_tags %>
-              <ul class="tag-items">
+            </div>
+
+            <ul class="tag-items <%= (@has_top_user_tags) ? '' : 'no-tags' %>">
+              <% if @has_top_user_tags %>
                 <% @top_user_tags.each do |tag_item| %>
                   <li>
                     <a href="<%= group_tag_path(@group, tag_item['name_with_caps']) %>">
-                      <span class="symbol">#</span>
-                      <%= tag_item['name_with_caps'] %>
+                      #<%= tag_item['name_with_caps'] %>
                     </a>
                   </li>
                 <% end %>
-              </ul>
-            <% elsif @has_tags %>
-              <span class="no-tags">None have been added to users yet</span>
-            <% else %>
-              <span class="no-tags">None yet</span>
-            <% end %>
+              <% elsif @has_tags %>
+                <li class="no-tags">No group tags have been attached to users yet.</li>
+              <% else %>
+                <li class="no-tags">No group tags have been created yet.</li>
+              <% end %>
 
-            <ul class="tag-links">
-              <li>
-                <%= link_to "<i class='fa fa-search'></i> Browse all tags".html_safe,
-                  group_tags_path(@group) %>
-              </li>
-              <% if @can_create_group_tags %>
-                <li>
-                  <a href="#new-group-tag" class="btn btn-small new-tag-button" data-toggle="modal">
-                    <i class='fa fa-plus'></i> Create new tag
-                  </a>
+              <% if @has_tags %>
+                <li class="browse-tags">
+                  <%= link_to "<i class='fa fa-search'></i> Browse all tags".html_safe,
+                    group_tags_path(@group), class: 'browse-tags-link' %>
                 </li>
               <% end %>
             </ul>
+
+            <% if @can_create_group_tags %>
+              <div class="tag-button">
+                <a href="#new-group-tag" class="btn btn-small btn-success" data-toggle="modal">
+                  <i class='fa fa-plus'></i> 
+                  <span class="hide-when-small">Create new tag</span>
+                  <span class="show-when-small">New</span>
+                </a>
+              </div>
+            <% end %>
+
           </div>
         </div>
       </div>
