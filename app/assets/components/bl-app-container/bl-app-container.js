@@ -136,6 +136,7 @@ Polymer({
     // - dismiss = { text: 'Cancel', action: function(){} } >> leave out property to hide button
 
     // First set the basic properties
+    this.$.alertDialog.noCancelOnEscKey = false; // restore this (overridden from modal default)
     this.setDialogColor(options.color);
     this.$.alertDialogTitle.innerHTML = options.title;
     if (options.body) {

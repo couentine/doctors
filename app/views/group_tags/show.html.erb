@@ -71,13 +71,13 @@
   <!-- #=== PAGE HEADER ===# -->
 
   <div id="page-header">
-    <template is="dom-if" if="<%= @can_edit_group_tags %>">
+    <% if @can_edit_group_tags %>
       <div id="editButtons">
         <a href="#" onClick="deleteGroupTag(); return false;">
           <i class="fa fa-trash"></i> Delete Group Tag
         </a>
       </div>
-    </template>
+    <% end %>
     <div id="summary">
       <%= @group_tag.summary %>
     </div>
@@ -115,14 +115,16 @@
             </paper-dropdown-menu>
           </bl-query-options>
         </ul>
-        <ul class="right">
-          <li>
-            <bl-button id="add-users" type="flat"
-                link="<%= add_group_tag_users_path(@group, @group_tag) %>">
-              <i class="fa fa-plus"></i> &nbsp; Add Users
-            </bl-button>
-          </li>
-        </ul>
+        <% if @can_assign_group_tags %>
+          <ul class="right">
+            <li>
+              <bl-button id="add-users" type="flat"
+                  link="<%= add_group_tag_users_path(@group, @group_tag) %>">
+                <i class="fa fa-plus"></i> &nbsp; Add Users
+              </bl-button>
+            </li>
+          </ul>
+        <% end %>
       </div>
 
 
