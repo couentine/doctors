@@ -694,7 +694,7 @@ class User
       self.group_validation_request_counts[group.id.to_s] = new_count
       
       # Now update all of the group tags
-      related_group_tags = group_tags.where(group: group_id)
+      related_group_tags = group_tags.where(group: group.id)
       related_group_tags.each do |group_tag|
         group_tag.update_validation_request_count_for(self)
         group_tag.timeless.save
@@ -1081,6 +1081,12 @@ protected
 
   # Finds any references to this user's email in the invited_admins/users arrays on groups.
   # When found it upgrades the invitation to an actual relationship.
+  # PERFORMANCE NOTE: The add_leaner calls should be refactored a bit because as written
+  #   they end up firing the log.update_user method once for each badge invitation. Since that
+  #   method then calls user.update_validation_request_count_for, it's all very inefficient.
+  #   But it's only a huge performance hit if there are tons of invitations so skipping for now.
+  #   Note that it is important that this all happen synchronously (or via poller) so the user
+  #   is immediately presented with their correct memberships.
   def convert_group_invitations
     joined_groups, joined_group_ids = [], []
 
@@ -1100,7 +1106,7 @@ protected
 
       # Then add to any badges (as learner)
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|
-        badge.add_learner self
+        badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE above)
       end unless invited_item["badges"].blank?
       
       # Then add any validations
@@ -1110,7 +1116,7 @@ protected
         summary, body = v["summary"], v["body"]
 
         unless badge.nil? || validating_user.nil? || summary.blank?
-          log = badge.add_learner self # does nothing but return the log if already added as learner
+          log = badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE)
           log.add_validation validating_user, summary, body, true
         end
       end unless invited_item["validations"].blank?
@@ -1146,7 +1152,7 @@ protected
 
       # Then add to any badges (as learner)
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|
-        badge.add_learner self
+        badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE above)
       end unless invited_item["badges"].blank?
 
       # Then add any validations
@@ -1156,7 +1162,7 @@ protected
         summary, body = v["summary"], v["body"]
 
         unless badge.nil? || validating_user.nil? || summary.blank?
-          log = badge.add_learner self # does nothing but return the log if already added as learner
+          log = badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE)
           log.add_validation validating_user, summary, body, true
         end
       end unless invited_item["validations"].blank?

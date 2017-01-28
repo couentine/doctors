@@ -129,7 +129,7 @@ class GroupsController < ApplicationController
     # Set group tag variables
     @has_tags = !@group.tags_cache.blank?
     @top_user_tags = @group.top_user_tags_cache\
-      .select{ |tag_item| tag_item['user_magnitude']>0 }.first(10)
+      .select{ |tag_item| tag_item['user_magnitude'] >= 0 }.first(10)
     @has_top_user_tags = !@top_user_tags.blank?
 
     # Set options vars
@@ -690,10 +690,10 @@ class GroupsController < ApplicationController
               users_to_add.each do |user|
                 if @group.has_admin?(user)
                   @skipped_admin_emails << user.email
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                 else
                   @group.admins << user
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                   if @notify_by_email
                     if user.email_inactive
                       # Mock a bounce so that the group admins can see that the email wasn't sent
@@ -719,13 +719,13 @@ class GroupsController < ApplicationController
               users_to_add.each do |user|
                 if @group.has_member?(user)
                   @skipped_member_emails << user.email
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                 elsif @group.has_admin?(user)
                   @skipped_admin_emails << user.email
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                 else
                   @group.members << user
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                   if @notify_by_email
                     if user.email_inactive
                       # Mock a bounce so that the group admins can see that the email wasn't sent

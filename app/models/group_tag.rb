@@ -37,7 +37,7 @@ class GroupTag
   field :summary,                     type: String
   
   field :user_count,                  type: Integer, default: 0
-  field :user_magnitude,              type: Integer, default: 0 # = log(user_count, 3).floor
+  field :user_magnitude,              type: Integer, default: 0 # = logarithmic of count
 
   field :user_validation_request_counts,  
                                       type: Hash, default: {} # key=user_id, value=req_count
@@ -72,9 +72,21 @@ class GroupTag
   # === ADDING AND REMOVING USERS === #
 
   # Updates user_count and user_magnitude
+  # THE PURPOSE OF USER MAGNITUDE is to keep from having to update the group tag cache every single
+  # time that a user is added or removed. But since the group needs to know which are the most 
+  # popular tags, we do need to occasionally update the group. So instead of directly updating the
+  # group cache when the user count changes, we base it off of the 3rd log. So it will 
+  # exponentially back off as the tag gets larger.
   def update_counts
     self.user_count = user_ids.count
-    self.user_magnitude = Math.log(user_count, 3).floor
+    
+    if user_count == 0
+      self.user_magnitude = 0
+    elsif user_count == 1
+      self.user_magnitude = 1
+    else
+      self.user_magnitude = Math.log(user_count, 3).ceil
+    end
   end
   
   # Adds a list of users and uses the specified user id to set the user history entries

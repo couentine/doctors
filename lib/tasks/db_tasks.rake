@@ -907,6 +907,7 @@ namespace :db do
     puts " >> Done."
   end
 
+  # OK to run in production if things get messed up in the database
   task update_badge_validation_request_counts: :environment do
     print "Updating #{Badge.count} badges"
 
@@ -916,18 +917,19 @@ namespace :db do
       if badge.timeless.save
         print "."
       else
-        print "!"
+        print "!#{badge.id}"
       end
     end
     
     puts " >> Done."
   end
 
-  task backpopulate_user_validation_request_fields: :environment do
+  # OK to run in production if things get messed up in the database
+  task update_user_validation_request_fields: :environment do
     print "Updating #{User.count} users"
     
     # Run through them backwards
-    User.desc(:updated_at).each do |user|
+    User.each do |user|
       # First buid the group validation count hash
       Group.where(:id.in => (user.admin_of_ids + user.member_of_ids).uniq).each do |group|
         user.update_validation_request_count_for group
@@ -937,8 +939,11 @@ namespace :db do
       user.requested_badge_ids = user.logs.where(detached_log: false, 
         validation_status: 'requested').map{ |log| log.badge_id }
 
-      user.timeless.save
-      print "."
+      if user.timeless.save
+        print "."
+      else
+        print "!#{user.username_with_caps}"
+      end
     end
 
     puts " >> Done."

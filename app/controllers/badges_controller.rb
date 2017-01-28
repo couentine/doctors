@@ -248,7 +248,7 @@ class BadgesController < ApplicationController
     params[:usernames].each do |username|
       user = User.find(username.to_s.downcase) rescue nil
       if user && !user.learner_of?(@badge) && !user.expert_of?(@badge)
-        new_learner_log = @badge.add_learner(user)
+        new_learner_log = @badge.add_learner(user, update_user_async: true)
         new_learner_count += 1
         
         if @notify_by_email && !user.email_inactive
@@ -429,14 +429,19 @@ private
       || not_found
     @current_user_is_expert = current_user && current_user.expert_of?(@badge)
     @current_user_is_learner = current_user && current_user.learner_of?(@badge)
+    if @current_user_is_learner || @current_user_is_expert
+      # Confirm that we can really query their log (edge cases can happen sometimes)
+      @log = @badge.logs.find_by(user: current_user) rescue nil
+      if @log
+        @requirements_counts = @log.requirements_counts
+      else
+        @current_user_is_expert, @current_user_is_learner = false, false
+      end
+    end
     @can_edit_badge = @can_edit_badge \
       || ((@badge.editability == 'experts') && @current_user_is_expert)
     @can_award_badge = @can_award_badge \
       || ((@badge.awardability == 'experts') && @current_user_is_expert)
-    if @current_user_is_learner || @current_user_is_expert
-      @log = @badge.logs.find_by(user: current_user)
-      @requirements_counts = @log.requirements_counts
-    end
 
     @can_see_badge = @current_user_is_admin || @badge_list_admin || @current_user_is_expert \
       || @current_user_is_learner || (@badge.visibility == 'public') \

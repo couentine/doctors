@@ -532,29 +532,34 @@ class Badge
 
   # Adds a learner to the badge by creating or reattaching a log for them
   # NOTE: If there is already a detached log this function will reattach it
-  # date_started: Defaults to nil. If set, overrides the log.date_started fields
   # Return value = the newly created/reattached log
-  def add_learner(user, date_started = nil)
+  # OPTIONS:
+  # - date_started: Defaults to nil. If set, overrides the log.date_started fields
+  # - update_user_async: Defaults to false. Set this to update the user record asyncronously.
+  #                      Search to the log model for 'badge_add_async' for specifics.
+  def add_learner(user, options = {})
     the_log = logs.find_by(user_id: user.id) rescue nil
     update_badge = false
+
+    log_context = (options[:update_user_async]) ? 'badge_add_async' : 'badge_add'
     
     if the_log
       if the_log.detached_log
         the_log.detached_log = false
         the_log.show_on_badge = user.get_group_settings_for(group_id)['show_on_badges']
         the_log.show_on_profile = user.get_group_settings_for(group_id)['show_on_profile']
-        the_log.context = 'badge_add' # This will suppress the badge update callback
+        the_log.context = log_context # This will suppress the badge update callback
         the_log.save
         the_log.context = nil # CLEAR THIS OUT so it doesn't mess stuff up
         update_badge = true
       end
     else
-      the_log = Log.new(date_started: date_started)
+      the_log = Log.new(date_started: options[:date_started])
       the_log.badge = self
       the_log.user = user
       the_log.show_on_badge = user.get_group_settings_for(group_id)['show_on_badges']
       the_log.show_on_profile = user.get_group_settings_for(group_id)['show_on_profile']
-      the_log.context = 'badge_add' # This will suppress the badge update callback
+      the_log.context = log_context # This will suppress the badge update callback
       the_log.save
       the_log.context = nil # CLEAR THIS OUT so it doesn't mess stuff up
       update_badge = true
