@@ -982,4 +982,28 @@ namespace :db do
     puts " >> Done."
   end
 
+  # OK to run in production if things get messed up in the database
+  # Refreshes the values of expert_user_ids, learner_user_ids, all_user_ids
+  task fix_badge_user_caches: :environment do
+    print "Updating #{Badge.count} badges"
+
+    Badge.each do |badge|
+      badge.expert_user_ids = badge.expert_logs.map{ |log| log.user_id }
+      badge.learner_user_ids = badge.learner_logs.map{ |log| log.user_id }
+      badge.all_user_ids = badge.logs(detached_log: false).map{ |log| log.user_id }
+
+      if badge.changed?
+        if badge.timeless.save
+          print "."
+        else
+          print "!#{badge.id}"
+        end
+      else
+        print '-'
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end
