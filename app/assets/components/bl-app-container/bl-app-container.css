@@ -27,7 +27,7 @@
     
     background: var(--page-background, white);
     color: #616161;
-
+    
     --paper-scroll-header-panel-header-container: {
       z-index: 100;
     };
