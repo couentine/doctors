@@ -12,6 +12,7 @@
   .container {
     display: block;
     position: relative;
+    z-index: 0;
   }
   .container bl-badge {
     margin-bottom: 1em;
