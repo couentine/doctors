@@ -36,6 +36,7 @@ class User
   has_many :info_items, dependent: :destroy
   belongs_to :domain, inverse_of: :users, class_name: "Domain" # don't ever set this manually,
   has_many :owned_domains, inverse_of: :owner, class_name: "Domain"
+  has_and_belongs_to_many :group_tags # DO NOT EDIT DIRECTLY: Use group_tag.add_users/remove_users
 
   # === CUSTOM FIELDS & VALIDATIONS === #
   
@@ -146,6 +147,7 @@ class User
   after_save :process_avatar
   before_update :process_email_change
   after_update :update_logs
+  after_destroy :clear_from_group_tags
 
   # === USER MOCK FIELD METHODS === #
 
@@ -680,10 +682,24 @@ class User
     return_rows
   end
 
-  # This updates the appropriate key of group_validation_request_counts
+  # This recalculates the appropriate key of group_validation_request_counts
+  # Then if needed it will update all related group tags
+  # NOTE: This is resource intensive and only designed to be called from other asynch methods
   def update_validation_request_count_for(group)
-    self.group_validation_request_counts[group.id.to_s] \
-      = logs.where(:badge_id.in => group.badges_cache.keys, validation_status: 'requested').count
+    new_count = \
+      logs.where(:badge_id.in => group.badges_cache.keys, validation_status: 'requested').count
+    
+    if !self.group_validation_request_counts.has_key?(group.id.to_s) \
+        || (self.group_validation_request_counts[group.id.to_s] != new_count)
+      self.group_validation_request_counts[group.id.to_s] = new_count
+      
+      # Now update all of the group tags
+      related_group_tags = group_tags.where(group: group.id)
+      related_group_tags.each do |group_tag|
+        group_tag.update_validation_request_count_for(self)
+        group_tag.timeless.save
+      end
+    end
   end
 
   # Returns the group settings hash for this group (or returns defaults if no hash is found)
@@ -1065,6 +1081,12 @@ protected
 
   # Finds any references to this user's email in the invited_admins/users arrays on groups.
   # When found it upgrades the invitation to an actual relationship.
+  # PERFORMANCE NOTE: The add_leaner calls should be refactored a bit because as written
+  #   they end up firing the log.update_user method once for each badge invitation. Since that
+  #   method then calls user.update_validation_request_count_for, it's all very inefficient.
+  #   But it's only a huge performance hit if there are tons of invitations so skipping for now.
+  #   Note that it is important that this all happen synchronously (or via poller) so the user
+  #   is immediately presented with their correct memberships.
   def convert_group_invitations
     joined_groups, joined_group_ids = [], []
 
@@ -1084,7 +1106,7 @@ protected
 
       # Then add to any badges (as learner)
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|
-        badge.add_learner self
+        badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE above)
       end unless invited_item["badges"].blank?
       
       # Then add any validations
@@ -1094,7 +1116,7 @@ protected
         summary, body = v["summary"], v["body"]
 
         unless badge.nil? || validating_user.nil? || summary.blank?
-          log = badge.add_learner self # does nothing but return the log if already added as learner
+          log = badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE)
           log.add_validation validating_user, summary, body, true
         end
       end unless invited_item["validations"].blank?
@@ -1130,7 +1152,7 @@ protected
 
       # Then add to any badges (as learner)
       group.badges.where(:url.in => invited_item["badges"]).each do |badge|
-        badge.add_learner self
+        badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE above)
       end unless invited_item["badges"].blank?
 
       # Then add any validations
@@ -1140,7 +1162,7 @@ protected
         summary, body = v["summary"], v["body"]
 
         unless badge.nil? || validating_user.nil? || summary.blank?
-          log = badge.add_learner self # does nothing but return the log if already added as learner
+          log = badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE)
           log.add_validation validating_user, summary, body, true
         end
       end unless invited_item["validations"].blank?
@@ -1176,6 +1198,11 @@ protected
     if name_changed? || username_with_caps_changed? || email_changed?
       User.delay(queue: 'low').update_log_user_fields(self.id)
     end
+  end
+
+  # Makes async to group tag clearing method
+  def clear_from_group_tags
+    GroupTag.delay(queue: 'low').clear_deleted_user_from_all(self.id)
   end
 
   # Run before insert/update to check for existince of domain and then set the link if so

@@ -1,0 +1,16 @@
+<dom-module id="bl-fab">
+  <link rel="stylesheet" href="bl-fab.css" />
+
+  <template>
+
+    <a href$="[[link]]" class$="[[class]]" target$="[[target]]">
+      <paper-fab id="fab" icon="[[icon]]"></paper-fab>
+    </a>
+    <template is="dom-if" if="[[hasTooltip]]">
+      <paper-tooltip for="fab" animation-delay="0" offset="5">[[tooltip]]</paper-tooltip>
+    </template>
+
+  </template>
+
+  <script src="bl-fab.js"></script>
+</dom-module>

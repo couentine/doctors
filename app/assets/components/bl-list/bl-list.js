@@ -22,6 +22,23 @@
     Each badge id key would then have a value equal to the badge json. In this example, bl-list
     will look for a 'badge_id' key in the item json and, if a match is found with injectItems, 
     the matched item is injected into a new 'badge' key (any existing value will be overwritten).
+
+  How to use simpleMode:
+    Normally bl-list works by generating bl-list-item children for each item. Then the format
+    is set to grid or column based on what looks best for that object type. But simple mode is 
+    simpler, generating a collection of paper icon list items mashed together. To use
+    simple mode: set simpleMode=true, set rowTitle and set either rowImage OR rowIcon.
+    Simple mode includes selection functionality.
+
+  How to use ajax targetting:
+    When bl-list is used as a multi-select tool, it is typically for the purposes of generating 
+    a list of unique identifiers to pass to an ajax call. So bl-list includes the ability to target
+    an iron-ajax element and build a list of unique identifiers for all of the currently selected
+    items. To do this, set forAjax to the iron-ajax's id. Then set ajaxItemKey to the key on 
+    the bl-list items which represents the unique identifiers (ex: 'id' or 'username').
+    Then set the ajaxBodyKey to the name of the array parameter expected by the rails controller
+    (ex: 'user_ids' or 'users').
+
 */
 
 Polymer({
@@ -29,56 +46,69 @@ Polymer({
 
   properties: {
     // Required
-    objectMode: String, // = ['badges', 'full_logs', 'groups']
+    objectMode: String, // = ['badges', 'full_logs', 'groups', 'group_tags', 'users']
     nextPageUrl: String, // and ampersand + next page and query options are appended to this
     nextPage: { type: Number, value: 1 },
-    nextPageParam: {
-      type: String,
-      value: "page"
-    },
+    nextPageParam: { type: String, value: 'page' },
     
     // Options
     queryOptions: Object, // Added to next page query: "&key1=value1&key2=value2" ...
     options: Object,
-    refreshQueryOnDisplay: { type: Boolean, value: false },
+    refreshQueryOnLoad: { type: Boolean, value: false }, // refreshes when component is attached
     selectionBar: Object, // this gets set by the bl-selection-bar when the "for" property is set
     itemDisplayMode: String, // OPTIONAL: Passed all the way to the individual items (if supported)
+    
+    // Simple Mode Options
+    simpleMode: { type: Boolean, value: false }, // explained in comments at top of file
+    rowTitle: String, // field name of title in items (required)
+    rowImage: String, // field name of image in items (optional)
+    roundRowImage: Boolean, // set this to round the row image
+
+    // Ajax Targetting Options (Explained in top comments)
+    forAjax: String, // Set this to the id of an iron-ajax
+    ajaxItemKey: String, // The source item key to copy to array in iron-ajax body
+    ajaxBodyKey: String, // The destination key in iron-ajax body used to store the array
     
     // The object items
     items: { type: Array, notify: true },
     itemsLoaded: { type: Boolean, value: false }, // set automatically
     selectedItems: { type: Array, value: function() { return []; } },
-    selectedItemCount: { type: Number, value: 0, computed: "_selectedItemCount(selectedItems)",
-      observer: "_selectedItemCountChanged" },
-    hasItems: { type: Boolean, computed: "_hasItems(items.length)", observer: "_hasItemsChanged" },
+    selectedItemCount: { type: Number, value: 0, computed: '_selectedItemCount(selectedItems)',
+      observer: '_selectedItemCountChanged' },
+    hasItems: { type: Boolean, computed: '_hasItems(items.length)', observer: '_hasItemsChanged' },
     hasUnselectedItems: { type: Boolean, 
-      computed: "_hasUnselectedItems(items.length, selectedItemCount)",
-      observer: "_hasUnselectedItemsChanged" },
+      computed: '_hasUnselectedItems(items.length, selectedItemCount)',
+      observer: '_hasUnselectedItemsChanged' },
     injectItems: { type: Object }, // refer to header comments for specifics
 
     // Computed
-    layoutMode: { type: String, computed: "_layoutMode(objectMode)" },
-    itemClass: { type: String, computed: "_itemClass(layoutMode, objectMode)" },
-    wrapperClass: { type: String, computed: "_wrapperClass(layoutMode, objectMode)" },
-    minColWidth: { type: Number, computed: "_minColWidth(objectMode)" },
-    maxColCount: { type: Number, computed: "_maxColCount(minColWidth)" },
-    colClassList: { type: Number, computed: "_colClassList(maxColCount)" },
-    isColumnMode: { type: Boolean, computed: "_isColumnMode(layoutMode)" },
+    layoutMode: { type: String, computed: '_layoutMode(objectMode, simpleMode)' },
+    itemClass: { type: String, computed: '_itemClass(layoutMode, objectMode)' },
+    wrapperClass: { type: String, computed: '_wrapperClass(layoutMode, objectMode)' },
+    minColWidth: { type: Number, computed: '_minColWidth(objectMode)' },
+    maxColCount: { type: Number, computed: '_maxColCount(minColWidth)' },
+    colClassList: { type: Number, computed: '_colClassList(maxColCount)' },
+    isColumnMode: { type: Boolean, computed: '_isColumnMode(layoutMode)' },
+    isColumnMode: { type: Boolean, computed: '_isColumnMode(layoutMode)' },
+    isGridMode: { type: Boolean, computed: '_isGridMode(layoutMode)' },
     hasNextPage: { type: Boolean, value: false, 
-      computed: "_hasNextPage(nextPage, items, itemsLoaded, loading)" },
+      computed: '_hasNextPage(nextPage, items, itemsLoaded, loading)' },
     showPlaceholder: { type: Boolean, false: false, 
-      computed: "_showPlaceholder(items.length, itemsLoaded, loading)" },
+      computed: '_showPlaceholder(items.length, itemsLoaded, loading)' },
+
+    hasRowImage: { type: Boolean, computed: '_hasRowImage(rowImage)' },
 
     // Internal properties
-    colCount: { type: Number, observer: "_colCountChanged" },
-    loading: { type: Boolean, value: false }
+    colCount: { type: Number, observer: '_colCountChanged' },
+    loading: { type: Boolean, value: false },
+    indexLastSelected: Number
   },
 
   observers: [
-    "_itemsChanged(items.*)"
+    '_itemsChanged(items.*)'
   ],
 
-  // Methods
+  // Actions
   queryNextPage: function () {
     // Queries for the next page and APPENDS the results to the display, then increments nextPage.
     var self = this; // Hold onto the context variable
@@ -132,6 +162,41 @@ Polymer({
         this.queryOptions[key] = newQueryOptions[key];
 
     this.refreshQuery();
+  },
+  toggleItem: function(e) {
+    // Called from simple item row to toggle that item's selection
+    var index = e.model.index;
+
+    // First we toggle the selection
+    this.set('items.' + index + '.selected', !this.items[index].selected);
+
+    // Then we handle shift click events. This occurs when two selection events occur in a row
+    // and the shift key is held down during the second selection event.
+    var isSelected = this.items[index].selected;
+    if (isSelected && e.detail.sourceEvent.shiftKey && (this.indexLastSelected != null)) {
+      // Then this is the second click in a shift-click, so we select all those in between
+      var startIndex = Math.min(this.indexLastSelected, index);
+      var stopIndex = Math.max(this.indexLastSelected, index);
+      for (var i = startIndex; i < stopIndex; i++)
+        this.set('items.' + i + '.selected', true);
+
+      this.indexLastSelected = null;
+    } else {
+      this.indexLastSelected = (isSelected) ? index : null;
+    }
+
+    // Finally, if the shift key is held down we might need to clear the selected text
+    if (e.detail.sourceEvent.shiftKey) {
+      if (window.getSelection) {
+        if (window.getSelection().empty) {  // Chrome
+          window.getSelection().empty();
+        } else if (window.getSelection().removeAllRanges) {  // Firefox
+          window.getSelection().removeAllRanges();
+        }
+      } else if (document.selection) {  // IE?
+        document.selection.empty();
+      }
+    }
   },
   selectAll: function() {
     var childrenToNotify = this.querySelectorAll('bl-list-item');
@@ -193,7 +258,7 @@ Polymer({
     }
 
     // Refresh query if needed
-    if (this.refreshQueryOnDisplay)
+    if (this.refreshQueryOnLoad)
       this.refreshQuery();
   },
   _colCountChanged: function(newValue, oldValue) {
@@ -231,12 +296,10 @@ Polymer({
   },
 
   // Property Computers
-  _layoutMode: function(objectMode) {
-    switch (objectMode) {
-      case "badges": return "grid"; break;
-      case "full_logs": return "column"; break;
-      case "groups": return "grid"; break;
-    }
+  _layoutMode: function(objectMode, simpleMode) {
+    if (simpleMode) return 'simple';
+    else if (objectMode == 'full_logs') return 'column';
+    else return 'grid';
   },
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
   _wrapperClass: function(layoutMode, objectMode) { return layoutMode + "-list " + objectMode; },
@@ -254,10 +317,14 @@ Polymer({
   _showPlaceholder: function(itemsLength, itemsLoaded, loading) { 
     return itemsLoaded && !loading && !itemsLength; 
   },
+  _hasRowImage: function(rowImage) {
+    return (rowImage != null) && (rowImage != undefined);
+  },
   _hasNextPage: function(nextPage, items, itemsLoaded, loading) { 
     return itemsLoaded && !loading && items && (nextPage > 0); 
   },
   _isColumnMode: function(layoutMode) { return layoutMode == "column"; },
+  _isGridMode: function(layoutMode) { return layoutMode == "grid"; },
   _selectedItemCount: function(selectedItems) { return selectedItems ? selectedItems.length : 0; },
   _selectedItemCountChanged: function(newValue, oldValue) {
     // Update the selection bar if needed
@@ -295,24 +362,35 @@ Polymer({
 
     $.getJSON(this.getFullUrl(), function(result) {
       if (result) {
-        // First we need to inject the extra items if specified
-        var sourceObjects; var objectIdField; var resultItems;
-        if (result[self.objectMode] && result[self.objectMode].length && self.injectItems)
-          for (var objectName in self.injectItems)
-            if (self.injectItems.hasOwnProperty(objectName) && self.injectItems[objectName]) {
-              // Create shortcuts to make code more readable
-              sourceObjects = self.injectItems[objectName]; // keys = object ids, values = objects
-              objectIdField = objectName + '_id';
-              resultItems = result[self.objectMode]; // array of result items
+        var sourceObjects; var objectIdField;
+        var resultItems = result[self.objectMode]; // array of result items
+        
+        if (resultItems && resultItems.length) {
+          // First we need to inject the extra items if specified
+          if (self.injectItems)
+            for (var objectName in self.injectItems)
+              if (self.injectItems.hasOwnProperty(objectName) && self.injectItems[objectName]) {
+                // Create shortcuts to make code more readable
+                sourceObjects = self.injectItems[objectName]; // keys = object ids, values = objects
+                objectIdField = objectName + '_id';
 
-              // Now loop through resultItems. For each item with an 'object_id' field value 
-              // that matches a key in sourceObjects we will inject the matching object
-              // directly into a NEW result item key called 'object'.
-              for (var i = 0; i < resultItems.length; i++)
-                if (resultItems[i][objectIdField] && sourceObjects[resultItems[i][objectIdField]])
-                  resultItems[i][objectName] = sourceObjects[resultItems[i][objectIdField]];
+                // Now loop through resultItems. For each item with an 'object_id' field value 
+                // that matches a key in sourceObjects we will inject the matching object
+                // directly into a NEW result item key called 'object'.
+                for (var i = 0; i < resultItems.length; i++)
+                  if (resultItems[i][objectIdField] && sourceObjects[resultItems[i][objectIdField]])
+                    resultItems[i][objectName] = sourceObjects[resultItems[i][objectIdField]];
+              }
+                
+          // Next we inject the row properties if this is simple mode
+          if (self.simpleMode)
+            for (var i = 0; i < resultItems.length; i++) {
+              resultItems[i].row = {};
+              resultItems[i].row.title = resultItems[i][self.rowTitle];
+              if (self.hasRowImage)
+                resultItems[i].row.image = resultItems[i][self.rowImage];
             }
-              
+        }
 
         // Then we can call the complete function
         self.itemsLoaded = true;
@@ -350,8 +428,25 @@ Polymer({
     }
   },
   updateSelectedItems: function() {
+    // Update the main selected items array
     this.selectedItems = $.map(this.items, function(item, index) {
       if (item && item.selected) return item; 
     });
+
+    // Then potentially update the ajax
+    if (this.forAjax) {
+      var ajaxBody = {};
+      ajaxBody[this.ajaxBodyKey] = [];
+      
+      // Extract ajaxItemKey from each item and store it in the ajaxBodyKey array on ajaxBody
+      for (var i = 0; i < this.selectedItems.length; i++)
+        ajaxBody[this.ajaxBodyKey].push(this.selectedItems[i][this.ajaxItemKey]);
+
+      document.getElementById(this.forAjax).body = ajaxBody;
+    }
+  },
+  rowClass: function(itemSelected) {
+    // Called in simple mode to calculate the class of he paper items
+    return this.layoutMode + '-item ' + this.objectMode + (itemSelected ? ' selected' : '');
   }
 });

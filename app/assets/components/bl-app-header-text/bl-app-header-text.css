@@ -1,0 +1,85 @@
+/* === LAYOUT & BASE STYLES === */
+  
+  :host {
+    display: block;
+    font-size: 1rem;
+    position: relative;
+    height: 6.5em; /* 3em (navbar) + 3.5em (title text) */ 
+  }
+  :host[white-text] {
+    color: white;
+  }
+  :host[subtitle] {
+    height: 8em; /* 3em (navbar) + 3.5em (title text) + 1.5em (subtitle text) */ 
+  }
+  :host[extra-space] {
+    height: 9.5em; /* 3em (navbar) + 3.5em (title text) + 3em (extra) */ 
+  }
+  :host[subtitle][extra-space] {
+    height: 11em; /* 3em (navbar) + 3.5em (title text) + 1.5em (subtitle text) + 3em (extra) */ 
+  }
+
+/* === HEADER CONTENT STYLES === */
+
+  #topLine {
+    position: absolute;
+    top: 0; right: 0; left: 0;
+    height: 4px;
+    background: var(--top-line-color, #FB8C00);
+  }
+
+  #backgroundPanel, #condensedBackgroundPanel {
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+  }
+  #backgroundPanel { background: var(--background, white); }
+  #condensedBackgroundPanel { 
+    background: var(--condensed-background, white);
+    opacity: 0;
+  }
+
+  #titleWrapper {
+    display: block;
+    margin: 0.5em 0;
+    text-align: center;
+    position: absolute;
+    right: 3em;
+    bottom: 0;
+    left: 3em;
+    overflow: hidden;
+  }
+  #titleWrapper.true { /* true = this.extraSpace */
+    bottom: 3em;
+  }
+    h1 {
+      font-size: 1.8em;
+      line-height: 1.2em;
+      margin: 0;
+    }
+    #subtitle {
+      display: block;
+      font-size: 1em;
+      line-height: 1.5em;
+    }
+
+/* === CUSTOM LEFT NAV === */
+
+  #leftNav {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    font-size: 1rem;
+    text-align: left;
+    width: 2em;
+    padding: 0.5em 0.8em;
+    line-height: 1em;
+  }
+    #leftNavLink { 
+      display: inline-block;
+      text-decoration: none;
+    }
+      #leftNavLink i.fa { font-size: 2em; }
+      #leftNavLink.true i.fa { /* true = this.whiteText */
+        color: white; 
+      }
+      #leftNavLink img { height: 2em; }

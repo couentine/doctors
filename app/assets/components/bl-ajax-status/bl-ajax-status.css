@@ -1,0 +1,27 @@
+:host { 
+  display: block; 
+  font-size: 1rem;
+}
+
+#loadingStatus {
+  background: rgba(66, 66, 66, 0.9);
+  color: white;
+  display: flex;
+  padding: 0.7em 1em;
+  border-radius: 3px;
+  position: fixed;
+  font-size: 1.2em;
+  bottom: 1.2em;
+  left: 1em;
+  z-index: 210;
+}
+  #loadingStatus i { 
+    display: block; 
+    font-size: 1em;
+    line-height: 1.3em;
+    margin-right: 0.5em;
+  }
+  #loadingStatus #content {
+    font-size: 1em;
+    line-height: 1.3em;
+  }

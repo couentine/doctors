@@ -1,0 +1,62 @@
+/* === BASE LAYOUT === */
+
+  :host {
+    flex: 0 0 auto;
+    display: flex;
+  }
+
+/* === USER STYLES === */
+
+  paper-ripple { z-index: 50; }
+
+  #paper {
+    flex: 1 1 auto;
+    border-radius: 500px;
+  }
+    .wrapper {
+      display: flex;
+      flex-direction: row;
+
+      background: var(--background, #43A047);
+      border: 1px solid var(--border-color, #A5D6A7);
+      border-radius: 500px;
+      color: white;
+      
+      font-size: 0.6em;
+      height: 1em;
+      line-height: 1em;
+      padding: 0.33333em 0.6em 0.33333em 0.4em; /* the goal is for the total height to be 1em */
+
+      position: relative;
+      overflow: hidden;
+
+      text-decoration: none;
+    }
+    .symbol {
+      text-align: center;
+      flex: 0 0 auto;
+      height: 1em;
+      line-height: 1em;
+      border-radius: 500px;
+      z-index: 10;
+    }
+    .label {
+      flex: 1 1 auto;
+      margin-left: 0.5em;
+    }
+    .background {
+      background: var(--symbol-background, #4CAF50);
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 1.6em;
+      
+      border-top-left-radius: 500px;
+      border-bottom-left-radius: 500px;
+    }
+    .divider {
+      background: var(--symbol-background, #4CAF50);
+      position: absolute;
+      top: -0.2em; bottom: -0.2em; left: 1.45em;
+      width: 0.4em;
+      transform: rotate(11deg);
+    }

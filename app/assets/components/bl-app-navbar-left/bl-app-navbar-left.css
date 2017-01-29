@@ -1,0 +1,23 @@
+/* === LAYOUT & BASE STYLES === */
+  
+  :host {
+    display: block;
+    justify-content: space-between;
+    font-size: 1rem;
+    text-align: left;
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 2em;
+    padding: 0.5em 0.8em;
+    line-height: 1em;
+  }
+
+/* === NAVBAR STYLES === */
+
+  a.logo { 
+    display: inline-block;
+    text-decoration: none;
+  }
+    a.logo i.fa { margin-right: 0.1em; }
+    a.logo img { height: 2em; }

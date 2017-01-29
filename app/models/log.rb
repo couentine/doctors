@@ -238,19 +238,31 @@ class Log
     end
   end
 
-  # If log still exists then pass only the first param
-  # If log is deleted then leave log_id blank and pass user_id AND badge_id instead
-  def self.update_user(log_id, user_id = nil, badge_id = nil)
+  # This is the syncronous version of the update user function. It is called
+  # when users join a badge and need to have their membership show up right away.
+  def update_user
+    Log.update_user(log: self)
+  end
+
+  # This is the async verson of the function, called when bulk badge invites are done
+  # or when logs are deleted.
+  #
+  # OPTIONS
+  # - If log still exists: Pass either :log OR :log_id
+  # - If log has been deleted: Pass :user_id and :badge_id
+  #
+  # NOTE: This method is often called asynchronously so it should not spin up more asyn calls.
+  def self.update_user(options = {})
     # First query the records
-    if log_id
-      log = Log.find(log_id)
+    if options[:log] || options[:log_id]
+      log = options[:log] || Log.find(options[:log_id])
       user = log.user
       badge = log.badge
       group = badge.group
     else
       log = nil
-      user = User.find(user_id)
-      badge = Badge.find(badge_id)
+      user = User.find(options[:user_id])
+      badge = Badge.find(options[:badge_id])
       group = badge.group
     end
     
@@ -280,7 +292,7 @@ class Log
 
     # Finally update the group_validation_request_counts key for the current group
     user.update_validation_request_count_for group
-
+    
     user.timeless.save if user.changed?
   end
 
@@ -698,16 +710,33 @@ protected
   # - If we are entering or exiting 'requested' validation_status >> Update user and badge
   # - If we are entering or exiting detached state >> Update user and badge
   def update_user_and_badge
-    log_id = (destroyed?) ? nil : id
-
     user_needs_update = new_record? || destroyed? || detached_log_changed? \
-      || (validation_status_changed? \
-          && ((validation_status == 'validated') || (validation_status_was == 'validated')) \
-          && ((validation_status == 'requested') || (validation_status_was == 'requested')))
+      || (validation_status_changed? && \
+          ((validation_status == 'validated') || (validation_status_was == 'validated') \
+            || (validation_status == 'requested') || (validation_status_was == 'requested')))
     
-    badge_needs_update = !context.in?(['bulk_validation', 'badge_add']) && user_needs_update
+    badge_needs_update = !context.in?(['bulk_validation', 'badge_add', 'badge_add_async']) \
+      && user_needs_update
 
-    Log.delay.update_user(log_id, user_id, badge_id) if user_needs_update
+    if destroyed?
+      log_id = nil
+      badge_id = badge.id
+      user_id = user.id
+    else
+      log_id = self.id
+      badge_id = nil
+      user_id = nil
+    end
+
+    if user_needs_update
+      if context == 'badge_add_async'
+        Log.delay.update_user(log_id: log_id, user_id: user_id, badge_id: badge_id)
+      elsif destroyed?
+        Log.update_user(user_id: user_id, badge_id: badge_id)
+      else
+        update_user
+      end
+    end
     Log.delay(queue: 'low').update_badge(log_id, badge_id, user_id) if badge_needs_update
   end
 

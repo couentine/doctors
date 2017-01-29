@@ -1,0 +1,16 @@
+:host {
+  display: inline-block;
+  border-radius: 3px;
+}
+
+/* === COMPONENT STYLES === */
+
+  a {
+    display: inline-block;
+    color: var(--color, inherit);
+    text-decoration: none;
+  }
+
+  paper-fab {
+    --paper-fab-background: var(--background, #FF9800);
+  }

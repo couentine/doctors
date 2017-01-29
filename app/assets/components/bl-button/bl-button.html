@@ -3,11 +3,21 @@
 
   <template>
 
-    <a href$="{{link}}" class$="{{class}}" target$="{{target}}">
-      <paper-button raised="{{raised}}" disabled$="{{disabled}}">
-        <content></content>
-      </paper-button>
-    </a>
+    <template is="dom-if" if="[[hasLink]]">
+      <a href$="[[link]]" class="wrapper" target$="[[target]]">
+        <paper-button raised="[[isRaised]]" disabled$="[[disabled]]">
+          <content></content>
+        </paper-button>
+      </a>
+    </template>
+
+    <template is="dom-if" if="[[!hasLink]]">
+      <div class="wrapper">
+        <paper-button raised="[[isRaised]]" disabled$="[[disabled]]" on-tap="buttonTap">
+          <content></content>
+        </paper-button>
+      </div>
+    </template>
 
   </template>
 

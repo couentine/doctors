@@ -5,14 +5,16 @@
 
 /* === COMPONENT STYLES === */
 
-  a {
+  .wrapper {
     display: inline-block;
-    color: inherit;
     border-radius: 3px;
     text-decoration: none;
+
+    background: var(--background, transparent);
+    color: var(--color, inherit);
   }
 
-  paper-button {
-    display: inline-block;
-    margin: 0;
-  }
+    paper-button {
+      display: inline-block;
+      margin: 0;
+    }

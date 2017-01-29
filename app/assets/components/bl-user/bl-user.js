@@ -1,8 +1,23 @@
+/* ================================================== */
+/* ===================>> BL USER <<================== */
+/* ================================================== */
+
+/*
+  
+  This component displays a user card. It is typically used in conjuction with bl-list.
+
+  ADMIN DISPLAY MODE
+    If you set displayMode to 'admin' a remove button is included in the upper right corner of the
+    card. Clicking that button will fire a 'bl-user-remove' event with e.detail.user = the user.
+
+*/
+
 Polymer({
   is: 'bl-user',
 
   properties: {
     user: { type: Object, observer: '_userObserver' },
+    displayMode: String, // optional = ['admin']
     groupId: String, // used to extract appropriate request count from user
     blankUserText: { type: String, value: 'Nobody' },
     blankUserIconClass: { type: String, value: 'fa fa-fw fa-user' },
@@ -18,7 +33,8 @@ Polymer({
     // Computed
     avatarUrl: { type: String, computed: '_avatarUrl(user)' },
     requestCount: { type: Number, computed: '_requestCount(user, groupId)' },
-    showMetricList: { type: Boolean, computed: '_showMetricList(hasUser, showRequestCount)' }
+    showMetricList: { type: Boolean, computed: '_showMetricList(hasUser, showRequestCount)' },
+    showRemove: { type: Boolean, computed: '_showRemove(displayMode)' }
   },
 
   listeners: {
@@ -26,14 +42,18 @@ Polymer({
     'paper.mouseout': 'paperMouseOut'
   },
 
+  // Observers
+  _userObserver: function(newValue, oldValue) {
+    this._setHasUser(newValue && newValue.username_with_caps);
+  },
+
   // Events
   ready: function() { this._setCurrentElevation(this.elevation); },
   paperMouseOver: function() { this._setCurrentElevation(this.hoverElevation); },
   paperMouseOut: function() { this._setCurrentElevation(this.elevation); },
-  
-  // Events
-  _userObserver: function(newValue, oldValue) {
-    this._setHasUser(newValue && newValue.username_with_caps);
+  removeUser: function(e) {
+    e.preventDefault(); // This prevents the anchor tag from being followed
+    this.fire('bl-user-remove', { user: this.user });
   },
 
   // Computed Properties
@@ -50,6 +70,7 @@ Polymer({
   _showMetricList: function(hasUser, showRequestCount) { 
     // This is in case in the future there are multiple metrics
     return hasUser && showRequestCount; 
-  }
+  },
+  _showRemove: function(displayMode) { return displayMode == 'admin';}
   
 });

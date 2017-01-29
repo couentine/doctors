@@ -1,0 +1,135 @@
+<% 
+  provide(:title, "Add users to \##{@group_tag.name_with_caps} - #{@group.name}")  
+  provide(:hide_left_nav, 'true')
+  provide(:hide_right_nav, 'true')
+%>
+
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-form title="Add users to tag" condensed-background="#388E3C" 
+        selection-bar-for="userList" count-noun-singular="user">
+      <bl-button js="addUsersToTag()" class="save-button" background="#43A047" color="white">
+        Save
+      </bl-button>
+      <bl-button link="<%= group_tag_path(@group, @group_tag) %>" class="cancel-button" 
+          background="#43A047" color="white">
+        Cancel
+      </bl-button>
+    </bl-app-header-form>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+  
+  <style type="text/css">
+
+    #page-header {
+      padding: 1em 1.4em 2em 1.4em;
+    }
+      #summary {
+        font-size: 1.3em;
+        line-height: 1.4em;
+      }
+        #desktop-instructions { display: none; }
+        @media (min-width: 840px) { #desktop-instructions { display: initial; } }
+
+    bl-list { min-height: 20em; }
+
+  </style>
+
+  <!-- #=== PAGE HEADER ===# -->
+
+  <div id="page-header">
+    <div id="summary">
+      Select users below to add them to #<%= @group_tag.name_with_caps %>.
+      <span id="desktop-instructions">
+        You can hold down the shift key to select a range of users.
+      </span>
+    </div>
+  </div>
+
+  <!-- #=== AJAX CALL TO ADD USERS ===# -->
+
+  <iron-ajax id="addUsersAjax" bubbles method="POST" content-type="application/json"
+    headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'
+    url="<%= bulk_create_group_tag_users_url(@group, @group_tag, format: :json) %>"></iron-ajax>
+
+  <!-- #=== USER LIST ===# -->
+
+  <bl-list id="userList" object-mode="users" refresh-query-on-load simple-mode 
+      row-title="name" row-image="avatar_image_small_url" round-row-image
+      next-page-url="<%= group_users_url(@group, format: :json, without_tag: @group_tag.name) %>"
+      for-ajax="addUsersAjax" ajax-item-key="id" ajax-body-key="user_ids">
+
+    <!-- #=== PLACEHOLDER ===# -->
+    <div class="placeholder transparent">
+      <i class="fa fa-user"></i>
+      <div class="message">
+        <p><b>There are no users left to add to your group.</b></p> 
+        <p>(That means everyone has already been added to the tag.)</p>
+      </div>
+    </div>
+
+  </bl-list>
+
+  <!-- #=== PAGE-SPECIFIC JAVASCRIPT ===# -->
+
+  <script type="text/javascript">
+    
+    function addUsersToTag() {
+      if (document.getElementById('userList').selectedItemCount > 0) {
+        // First show the waiting dialog to prevent double-clicking the save button
+        appContainer.openWaitingDialog({ color: 'green', title: 'Submitting request...' });
+
+        // Then trigger the request (this will return a poller id)
+        // Execution continues in handleResponse() or handleError()
+        document.getElementById('addUsersAjax').generateRequest();
+      } else appContainer.openAlertDialog({
+        color: 'green', 
+        title: 'No users selected',
+        body: 'You must select at least one user to add to the tag. To select users, '
+          + 'click on the rows in the list below.',
+        confirm: { text: 'Continue' }
+      });
+    }
+
+    // Add listeners once the layout is ready
+    appLayout.addEventListener('dom-change', function() {
+      document.addEventListener('iron-ajax-response', handleResponse);
+      document.addEventListener('iron-ajax-error', handleError);
+    });
+
+    function handleResponse(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.openPollerDialog(e.detail.response.poller_id, {
+        color: 'green', 
+        title: 'Tag update status',
+        confirm: { 
+          text: 'Continue to tag', 
+          action: function() { 
+            document.location.href = '<%= group_tag_path(@group, @group_tag) %>'
+          }
+        },
+        dismiss: { 
+          text: 'Add more users',
+          action: function() {
+            // We need to remove the users who have already been added
+            document.getElementById('userList').removeSelectedItems();
+          }
+        }
+      });
+    }
+
+    function handleError(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.openAlertDialog({
+        color: 'green', 
+        title: 'Error submitting request',
+        body: 'There was a problem adding users to this tag, please try again.',
+        confirm: { text: 'Continue' }
+      });
+    }
+
+  </script>
+
+  

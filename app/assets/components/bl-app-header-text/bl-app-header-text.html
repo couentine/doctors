@@ -1,0 +1,25 @@
+<dom-module id="bl-app-header-text">
+  <link rel="stylesheet" href="bl-app-header-text.css" />
+
+  <template>
+    
+    <div id="backgroundPanel">&nbsp;</div>
+    <div id="condensedBackgroundPanel">&nbsp;</div>
+    
+    <div id="leftNav" hidden="[[!hasCustomLeftNav]]">
+      <a id="leftNavLink" href$="[[backUrl]]" class$="[[whiteText]]" title="Back">
+        <i class$="[[leftNavSymbol]]"></i>
+      </a>
+    </div>
+
+    <div id="topLine">&nbsp;</div>
+
+    <div id="titleWrapper" class$="[[extraSpace]]">
+      <h1 id="title">[[title]]</h1>
+      <div id="subtitle" hidden="[[!hasSubtitle]]">[[subtitle]]</div>
+    </div>
+
+  </template>
+
+  <script src="bl-app-header-text.js"></script>
+</dom-module>

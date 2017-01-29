@@ -39,6 +39,7 @@ Polymer({
   selectThisUser: function(e) { 
     this.selectedUserUsername = $(e.target).closest('.select-link')[0].dataUserUsername;
     this.close();
+    e.preventDefault();
   },
   refreshTargetListQuery: function() {
     // This will update the query options on the target list

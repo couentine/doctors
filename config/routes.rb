@@ -8,10 +8,10 @@ BadgeList::Application.routes.draw do
 
 
   devise_for :users, :controllers => { registrations: 'registrations', sessions: 'sessions',
-    omniauth_callbacks: "users/omniauth_callbacks" }
+    omniauth_callbacks: 'users/omniauth_callbacks' }
 
   root :to => 'home#root'
-  resources :users, :only => [:show], path: "u"
+  resources :users, :only => [:show], path: 'u'
   match 'i' => 'badge_maker#show', via: :get, as: :badge_image
   match 'c' => 'static_pages#colors', via: :get
   match 'j/image_key' => 'static_pages#image_key', via: :get, as: :image_key
@@ -90,6 +90,7 @@ BadgeList::Application.routes.draw do
         via: :delete, as: :destroy_group_invited_admin,
         defaults: { type: 'admin' },
         constraints: { :email => /[^\/]+/ }
+  match ':group_id/users' => 'groups#users', via: :get, as: :group_users
   match ':group_id/members/add' => 'groups#add_users', via: :get,
         as: :add_group_members, defaults: { type: 'member' }
   match ':group_id/admins/add' => 'groups#add_users', via: :get,
@@ -123,17 +124,25 @@ BadgeList::Application.routes.draw do
   match ':id/edit' => 'groups#edit', via: :get
   match ':group_id/:id/edit' => 'badges#edit', via: :get
   resources :groups, only: [:new, :create]
-  resources :groups, path: "", except: [:index] do
+  resources :groups, path: '', except: [:index] do
     resources :badges, only: [:new, :create]
-    resources :badges, path: "", except: [:index, :new, :create] do
+    resources :group_tags, except: [:new, :edit], path: 'tags', as: 'tags' do
+      resources :group_tag_users, path: 'users', as: 'users', only: [:index, :destroy] do
+        collection do
+          get 'add'
+          post 'bulk_create'
+        end
+      end
+    end
+    resources :badges, path: '', except: [:index, :new, :create] do
       match 'join' => 'logs#create', via: :get
       resources :logs, only: [:create]
-      resources :logs, path: "u", except: [:index, :new, :create] do
+      resources :logs, path: 'u', except: [:index, :new, :create] do
         resources :entries, only: [:new, :create]
-        resources :entries, path: "", except: [:index, :new, :create]
+        resources :entries, path: '', except: [:index, :new, :create]
       end
 
-      resources :tags, path: "", except: [:index, :new, :create]
+      resources :tags, path: '', except: [:index, :new, :create]
     end
   end
   

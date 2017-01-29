@@ -1,0 +1,29 @@
+<dom-module id="bl-ajax-dialog">
+  <link rel="stylesheet" href="bl-ajax-dialog.css" />
+
+  <template>
+
+    <!-- #=== THE DIALOG ===# -->
+    <paper-dialog id="dialog" modal>
+      <h2>[[title]]</h2>
+
+      <paper-dialog-scrollable>
+        <form is="iron-form" id="form" method="[[method]]" action="[[url]]">
+          <content></content>
+        </form>
+      </paper-dialog-scrollable>
+      
+      <div class="buttons">
+        <paper-button id="cancelButton" dialog-dismiss on-tap="cancelButtonTab">
+          [[cancelButtonText]]
+        </paper-button>
+        <paper-button id="saveButton" dialog-confirm on-tap="saveButtonTab">
+          [[saveButtonText]]
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script src="bl-ajax-dialog.js"></script>
+</dom-module>

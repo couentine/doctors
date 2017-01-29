@@ -592,8 +592,21 @@
             <%= simple_form_for @group, html: { id: 'settings-form', 
                 class: 'form-horizontal' } do |f| %>
 
-              <%= f.input :badge_copyability, as: :radio_buttons, label: 'Ability to Copy Badges', 
+              <%= f.input :badge_copyability, as: :radio_buttons, 
+                label: 'Who can copy badges from the group?', 
                 include_blank: false, collection: @badge_copyability_options %>
+
+              <%= f.input :tag_visibility, as: :radio_buttons, 
+                label: 'Who can see group tags?', 
+                include_blank: false, collection: @tag_visibility_options %>
+
+              <%= f.input :tag_assignability, as: :radio_buttons, 
+                label: 'Who can assign group tags?', 
+                include_blank: false, collection: @tag_assignability_options %>
+
+              <%= f.input :tag_creatability, as: :radio_buttons, 
+                label: 'Who can create new group tags?', 
+                include_blank: false, collection: @tag_creatability_options %>
 
               <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
                 include_blank: false, collection: @group_visibility_options %>
@@ -664,6 +677,115 @@
   </div>
 
 <% end %> <!-- end if group or bl admin -->
+
+<% if @can_create_group_tags %>
+  
+  <!-- === NEW GROUP TAG MODAL === -->
+
+  <script type="text/javascript">
+
+    var MAX_TAG_NAME_LENGTH = <%= GroupTag::MAX_NAME_LENGTH %>;
+
+    $(document).ready(function() {
+
+      $('#new-group-tag').on('shown', function() {
+        $('#tag-name').focus();
+      });
+      
+      $('#tag-name').keypress(function(e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          $('#create-group-tag').click();
+        }
+      }).keyup(function() {
+        // Conditionally show the yes / no spans based on whether the name is blank.
+        $('#tag-name-label').text(parameterizeText($('#tag-name').val(), MAX_TAG_NAME_LENGTH));
+        if ($('#tag-name-label').text().length > 0) {
+          $('#no-tag-name').hide();
+          $('#yes-tag-name').show();
+        } else {
+          $('#yes-tag-name').hide();
+          $('#no-tag-name').show();
+        }
+      }).blur(function() {
+        // Whenever the text box loses focus parameterize the text and go back to non-preview mode
+        $(this).val(parameterizeText($(this).val(), MAX_TAG_NAME_LENGTH));
+        $('#yes-tag-name').hide();
+        $('#no-tag-name').show();
+      });
+
+      $('#create-group-tag').click(function(e) {
+        e.preventDefault();
+
+        // First parameterize the text just in case
+        $('#tag-name').val(parameterizeText($('#tag-name').val(), MAX_TAG_NAME_LENGTH));
+
+        if ($('#tag-name').val().length > 1)
+          $('#create-group-tag-form').submit();
+        else
+          alert('The tag name must be at least 2 characters.');
+      });
+
+
+    });
+
+  </script>
+
+  <div id="new-group-tag" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Create new group tag<h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+
+          <%= form_tag(group_tags_path(@group), method: :post, id: 'create-group-tag-form',
+            class: 'form-horizontal') do %>
+
+            <div class="control-group">
+              <label class="control-label" for="tag-name">Tag Name</label>
+              <div class="controls">
+                <input type="text" class="text optional" id="tag-name" 
+                  name="group_tag[name_with_caps]" maxlength="<%= GroupTag::MAX_NAME_LENGTH %>">
+                <p class="help-block">
+                  <span id="no-tag-name">
+                    The tag name can only contain letters, numbers, dashes and underscores.
+                  </span>
+                  <span id="yes-tag-name" style="display:none">
+                    <strong>Tag Preview:</strong>
+                    <span id="tag-name-label"></span>
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="tag-summary">Tag Description (Optional)</label>
+              <div class="controls">
+                <div class="character-count-wrap">
+                  <textarea data-character-count="true" class="text optional"
+                    data-max-length="<%= GroupTag::MAX_SUMMARY_LENGTH %>"
+                    name="group_tag[summary]" id="tag-summary"></textarea>
+                </div>
+              </div>
+            </div>
+
+          <% end %>
+
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <a href="#" id="create-group-tag" class="btn btn-success">Create tag</a>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+  </div>
+
+<% end %> <!-- end if can create group tags -->
 
 <% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
 
@@ -1189,14 +1311,66 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
           <% end %>
         </div>
 
-        <% if @group.member_ids.empty? %>
-          <div class="well span7 offset2 gray empty">
-            <h3>No members yet</h3>
-          </div>
-        <% end %>
-
       </div>
     </div>
+
+    <% if @can_view_group_tags %>
+      <!-- === USER TAGS === -->
+
+      <div class="row">
+        <div class="span12">
+          <div class="group-tag-list">
+
+            <div class="tag-label">
+              <i class="fa fa-tag"></i>
+              Tags:
+            </div>
+
+            <ul class="tag-items <%= (@has_top_user_tags) ? '' : 'no-tags' %>">
+              <% if @has_top_user_tags %>
+                <% @top_user_tags.each do |tag_item| %>
+                  <li>
+                    <a href="<%= group_tag_path(@group, tag_item['name_with_caps']) %>">
+                      #<%= tag_item['name_with_caps'] %>
+                    </a>
+                  </li>
+                <% end %>
+              <% elsif @has_tags %>
+                <li class="no-tags">No group tags have been attached to users yet.</li>
+              <% else %>
+                <li class="no-tags">No group tags have been created yet.</li>
+              <% end %>
+
+              <% if @has_tags %>
+                <li class="browse-tags">
+                  <%= link_to "<i class='fa fa-search'></i> Browse all tags".html_safe,
+                    group_tags_path(@group), class: 'browse-tags-link' %>
+                </li>
+              <% end %>
+            </ul>
+
+            <% if @can_create_group_tags %>
+              <div class="tag-button">
+                <a href="#new-group-tag" class="btn btn-small btn-success" data-toggle="modal">
+                  <i class='fa fa-plus'></i> 
+                  <span class="hide-when-small">Create new tag</span>
+                  <span class="show-when-small">New</span>
+                </a>
+              </div>
+            <% end %>
+
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @group.member_ids.empty? %>
+      <div class="row">
+        <div class="well span7 offset2 gray empty">
+          <h3>No members yet</h3>
+        </div>
+      </div>
+    <% end %>
 
     <% if !@group.member_ids.empty? %>
       <div class="row">

@@ -8,7 +8,11 @@ paper-dialog {
   top: 1em;
   right: 1em;
   left: 1em;
-  border-top: 4px solid rgb(245,124,0);
+
+  border-radius: 6px;
+  border: 1px solid #FFB74D;
+  border-top: 5px solid #FB8C00;
+  background: #FFF3E0 !important;
 }
   h2 {
     color: rgb(245,124,0);
@@ -19,7 +23,12 @@ paper-dialog {
     --paper-input-container-invalid-color: rgb(211,47,47);
   }
   
-  paper-button { color: rgb(97,97,97); }
-  #input-dialog paper-button { margin-top: 2em; margin-bottom: 0.4em; }
-  paper-button#feedback { background-color: rgb(97,97,97); color: white; }
-  paper-button#endorse { background-color: rgb(245,124,0); color: white; }
+  paper-dialog .buttons {
+    margin-top: 2em;
+    background: #FFE0B2;
+    color: #424242;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+    paper-button#endorse { font-weight: bold; }
+      paper-button i { margin-right: 0.5em; }

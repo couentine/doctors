@@ -16,6 +16,7 @@
 
   var MAX_IMAGE_UPLOAD_SIZE = 7000000;
   var MAX_IMAGE_UPLOAD_DESCRIPTION = "6 megabytes";
+  var MAX_URL_LENGTH = <%= Group::MAX_URL_LENGTH %>;
 
   $(document).ready(function() {
 
@@ -172,37 +173,48 @@
 
       // Auto set the URL as they type the name
       $('#group_name').keyup(function() {
-        $('#group_url_with_caps').val(parameterizeText($(this).val()));
-        $('#url-preview-label').text(parameterizeText($(this).val()));
+        $('#group_url_with_caps').val(parameterizeText($(this).val(), MAX_URL_LENGTH));
+        $('#url-preview-label').text($('#group_url_with_caps').val());
         if (($('#group_url_with_caps').val().length > 0) && !$("#url-panel").is(":visible"))
           $("#url-panel").fadeIn();
         else if (($('#group_url_with_caps').val().length == 0) && $("#url-panel").is(":visible"))
           $("#url-panel").fadeOut();
       });
 
-      // Only allow url characters in the manual url box and update the label as they type
-      $('#group_url_with_caps').keyup(function() {
-        $(this).val(parameterizeText($(this).val()));
-        $('#url-preview-label').text($(this).val());
+      // Pressing enter in the url editor clicks url save
+      $('#group_url_with_caps').keypress(function(e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          $('#url-save').click();
+        }
       });
 
       $("#url-edit").click(function() {
+        // Save the current value then show the input box
+        $('#group_url_with_caps').data('oldValue', $('#group_url_with_caps').val());
         $("#url-preview").fadeOut(function() {
           $("#url-editor").show();
+          $('#group_url_with_caps').focus();
         });
-        $('#group_url_with_caps').focus();
       });
       $("#url-save").click(function() {
+        // Parameterize the value then update the label and hide the text box
+        $('#group_url_with_caps').val(parameterizeText($('#group_url_with_caps').val(), 
+          MAX_URL_LENGTH));
+        $('#url-preview-label').text($('#group_url_with_caps').val());
         $("#url-editor").fadeOut(function() {
           $("#url-preview").show();
+          $('#group_name').focus();
         });
-        $('#group_name').focus();
       });
       $("#url-cancel").click(function() {
-        $('#badge_url_with_caps').val(parameterizeText($("#group_name").val()));
-        $('#url-preview-label').text(parameterizeText($("#group_name").val()));
-        $("#url-editor").hide();
-        $("#url-preview").show();
+        // Restore the old value
+        $('#group_url_with_caps').val($('#group_url_with_caps').data('oldValue'));
+        $('#url-preview-label').text($('#group_url_with_caps').val());
+        $("#url-editor").fadeOut(function() {
+          $("#url-preview").show();
+          $('#group_name').focus();
+        });
       });
 
     <% end %>
@@ -219,14 +231,6 @@
     });
     
     $("form input[type=submit]").attr("disabled", false); // re-enable the submit button
-  }
-
-  // Converts "Test text like  this" > "Text-text-like-this"
-  var MAX_URL_LENGTH = <%= Group::MAX_URL_LENGTH %>;
-  function parameterizeText(s) {
-    if (s == null) return '';
-    else return s.replace(/['.]/g, '').replace(/[^ A-Za-z0-9]/g, ' ').replace(/ +/g, ' ').trim()
-      .replace(/ /g, '-').trunc(MAX_URL_LENGTH);
   }
 
   /* === Stripe polling functionality === */

@@ -4,6 +4,7 @@
     display: block; 
     border: 3px solid transparent;
     transition: 0.5s all;
+    color: #616161;
   }
   paper-card.hovered { border-color: rgb(255,224,178); }
   paper-card.selected { border-color: rgb(255,183,77); }

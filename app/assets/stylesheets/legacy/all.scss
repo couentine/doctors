@@ -92,7 +92,7 @@ img.thumbnail {
   }
 }
 @media (max-width: 767px) {
-  .collapse-when-small  {
+  .collapse-when-small, .hide-when-small {
     display: none !important;
   }
 }
@@ -2312,6 +2312,58 @@ form#group-add-users-form {
 }
 .pagination-header,.pagination-footer {
   text-align: center;
+}
+
+.group-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -1.5em 0 1em 0;
+  color: #757575;
+
+  div.tag-label {
+    flex: 0 0 auto;
+    font-weight: bold;
+    margin: 0.5em;
+  }
+  ul {
+    list-style: none;
+    margin: 0.9em 0.5em;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.85em;
+
+    li {
+      margin: 0 0.4em;
+      line-height: 1.5em;
+
+      a {
+        line-height: 1.5em;
+
+        &.browse-tags-link, &.browse-tags-link:visited {
+          color: $secondary-dark;
+        }
+        &.browse-tags-link:hover, &.browse-tags-link:focus {
+          color: $secondary-medium;
+        }
+      }
+      
+      &.no-tags { font-style: italic; margin-top: -0.2em; }
+    }
+
+    &.no-tags {
+      font-size: 1em;
+      a.browse-tags-link { font-size: 0.85em; }
+      li.browse-tags { margin-top: -0.2em; }
+    }
+  }
+  div.tag-button {
+    flex: 0 0 auto;
+    margin: 0.5em;
+  }
+
+  @media (min-width: 768px) {
+    flex-wrap: nowrap;
+  }
 }
 
 ul.nav-tabs {

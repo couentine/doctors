@@ -36,4 +36,21 @@ module JSONTemplater
     return json_from_template(key, options)
   end
 
+  # Extend the attached class with a class level method
+  
+  extend ActiveSupport::Concern
+  
+  included do
+    # This converts an array of items (with JSONTemplater setup on their classes) into json
+    def self.array_json(array_of_templated_items, key, options = { stringify_ids: true })
+      return_list = []
+
+      array_of_templated_items.each do |item|
+        return_list << item.json_from_template(key, options)
+      end
+
+      return_list
+    end
+  end
+
 end

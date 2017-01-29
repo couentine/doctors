@@ -9,11 +9,11 @@ class GroupsController < ApplicationController
 
   prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :update_group_settings, :destroy_user, :send_invitation, :destroy_invited_user, 
-    :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, :review, 
-    :full_logs, :create_validations]
+    :users, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, 
+    :review, :full_logs, :create_validations]
   before_action :authenticate_user!, except: [:show]
-  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :review, :full_logs,
-    :create_validations]
+  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :review, 
+    :full_logs, :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
@@ -26,7 +26,8 @@ class GroupsController < ApplicationController
     :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
     :stripe_subscription_card, :new_subscription, :member_visibility, :admin_visibility, 
-    :badge_copyability, :join_code, :avatar_key]
+    :badge_copyability, :join_code, :avatar_key, :tag_assignability, :tag_creatability,
+    :tag_visibility]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   GROUP_TYPE_OPTIONS = [
@@ -48,6 +49,12 @@ class GroupsController < ApplicationController
     ['<i class="fa fa-users"></i> Only Members'.html_safe, 'members'],
     ['<i class="fa fa-lock"></i> Only Admins'.html_safe, 'admins']
   ]
+  TAG_ASSIGNABILITY_OPTIONS = [
+    ['<i class="fa fa-users"></i> All Members'.html_safe, 'members'], 
+    ['<i class="fa fa-lock"></i> Only Admins'.html_safe, 'admins']
+  ]
+  TAG_CREATABILITY_OPTIONS = TAG_ASSIGNABILITY_OPTIONS
+  TAG_VISIBILITY_OPTIONS = BADGE_COPYABILITY_OPTIONS
 
   # === RESTFUL ACTIONS === #
 
@@ -118,9 +125,19 @@ class GroupsController < ApplicationController
     else
       @validation_request_count = 0
     end
+    
+    # Set group tag variables
+    @has_tags = !@group.tags_cache.blank?
+    @top_user_tags = @group.top_user_tags_cache\
+      .select{ |tag_item| tag_item['user_magnitude'] >= 0 }.first(10)
+    @has_top_user_tags = !@top_user_tags.blank?
 
+    # Set options vars
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
     @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
+    @tag_assignability_options = TAG_ASSIGNABILITY_OPTIONS
+    @tag_creatability_options = TAG_CREATABILITY_OPTIONS
+    @tag_visibility_options = TAG_VISIBILITY_OPTIONS
 
     # Get current values of group membership settings
     if @current_user_is_admin || @current_user_is_member
@@ -351,6 +368,10 @@ class GroupsController < ApplicationController
       log_to_detach.detached_log = true
       log_to_detach.save!
     end
+    
+    # Then remove them from any related tags (asynchronously)
+    Group.delay(queue: 'low')\
+      .remove_users_from_all_tags(@group.id, [current_user.id], current_user.id)
 
     redirect_to @group, :notice => notice
   end
@@ -413,6 +434,11 @@ class GroupsController < ApplicationController
         log_to_detach.save!
         detached_log_count += 1
       end
+
+      # Then remove them from any related tags (asynchronously)
+      Group.delay(queue: 'low')\
+        .remove_users_from_all_tags(@group.id, [@user.id], current_user.id)
+
       @notice = "#{@user.name} has been removed from the group members"
       @notice += " and dropped from #{detached_log_count} badges" if detached_log_count > 0
       @notice += "."
@@ -523,6 +549,39 @@ class GroupsController < ApplicationController
     redirect_to @group, :notice => @notice
   end
 
+  # GET /group-url/users?without_tag=group-tag-name
+  # Also accepts pagination params: page, page_size (default 200, max 200), sort_order, sort_by
+  # JSON only
+  # Returns json array of members with keys from User group_list_item json template
+  def users
+    sort_fields = ['name', 'username'] # defaults to first value
+    sort_orders = ['asc', 'desc'] # defaults to first value
+
+    without_tag_param = params['without_tag']
+    
+    @page = (params['page'] || 1).to_i
+    @page_size = [(params['page_size'] || 200).abs, 200].min # no more than 200, default to 200
+    @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
+    @sort_order = \
+      (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
+
+    # Build out the users list
+    @users = []
+    user_criteria = @group.users(without_tag_name: without_tag_param)\
+      .page(@page).per(@page_size).order_by("#{@sort_by} #{@sort_order}")
+    user_criteria.each do |user|
+      @users << user.json(:group_list_item)
+    end
+    @next_page = @page + 1 if user_criteria.count > (@page_size * @page)
+
+    respond_to do |format|
+      format.json do
+        render json: { page: @page, page_size: @page_size, sort_by: @sort_by, 
+          sort_order: @sort_order, users: @users, next_page: @next_page }
+      end
+    end
+  end
+
   # GET /group-url/members/add?type=member
   # GET /group-url/admins/add?type=admin
   # :badges[] => ["badge-url1","badge-url2"] >> Sets which badges should be checked by default
@@ -631,10 +690,10 @@ class GroupsController < ApplicationController
               users_to_add.each do |user|
                 if @group.has_admin?(user)
                   @skipped_admin_emails << user.email
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                 else
                   @group.admins << user
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                   if @notify_by_email
                     if user.email_inactive
                       # Mock a bounce so that the group admins can see that the email wasn't sent
@@ -660,13 +719,13 @@ class GroupsController < ApplicationController
               users_to_add.each do |user|
                 if @group.has_member?(user)
                   @skipped_member_emails << user.email
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                 elsif @group.has_admin?(user)
                   @skipped_admin_emails << user.email
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                 else
                   @group.members << user
-                  @badges.each { |badge| badge.add_learner user }
+                  @badges.each { |badge| badge.add_learner(user, update_user_async: true) }
                   if @notify_by_email
                     if user.email_inactive
                       # Mock a bounce so that the group admins can see that the email wasn't sent
@@ -864,9 +923,13 @@ class GroupsController < ApplicationController
     if !badge_param.blank?
       @query_mode = 'badge'
       @item_display_mode = 'user'
+      @back_url = group_badge_url(@group, badge_param)
     elsif !user_param.blank?
       @query_mode = 'user'
       @item_display_mode = 'badge'
+      @back_url = group_url(@group)
+    else # no params, default = go back to group
+      @back_url = group_url(@group)
     end
 
     # No  need to hit the DB again unless there are badges
@@ -915,13 +978,13 @@ class GroupsController < ApplicationController
     @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
     @sort_order = \
       (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
-    @sort_options = { sort_by: @sort_by, sort_order: @sort_order }
+    @sort_options = { sort_by: @sort_by, sort_order: @sort_order }.to_json
 
     if (@query_mode == 'user')
-      @bl_list_query_options = { \
+      @query_options = { \
         user: @user_username, sort_by: @sort_by, sort_order: @sort_order }.to_json
     else 
-      @bl_list_query_options = { \
+      @query_options = { \
         badge: @badge_url, sort_by: @sort_by, sort_order: @sort_order }.to_json
     end
 
@@ -1072,6 +1135,17 @@ private
     @can_copy_badges = @badge_list_admin || @current_user_is_admin \
       || ((@group.badge_copyability == 'public') && current_user)   \
       || ((@group.badge_copyability == 'members') && @current_user_is_member)
+
+    # Set group tag variables
+    @can_assign_group_tags = @current_user_is_admin || @badge_list_admin \
+      || (@current_user_is_member && (@group.tag_assignability == 'members'))
+    @can_create_group_tags = @current_user_is_admin || @badge_list_admin \
+      || (@current_user_is_member && (@group.tag_creatability == 'members'))
+    @can_view_group_tags = (@group.tag_visibility == 'public') \
+      || @current_user_is_admin || @badge_list_admin \
+      || (@current_user_is_member && (@group.tag_visibility == 'members'))
+    # This one is hard-coded for now...
+    @can_edit_group_tags = @current_user_is_admin || @badge_list_admin
       
     # Set current group (for analytics) only if user is logged in and an admin
     @current_user_group = @group if @current_user_is_admin

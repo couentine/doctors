@@ -5,20 +5,22 @@
 
     <content select=".list-controls"></content>
     
-    <div class$="[[wrapperClass]]">
+    <div id="listWrapper" class$="[[wrapperClass]]">
 
       <div class="placeholder-wrapper" hidden$="[[!showPlaceholder]]">
         <content select=".placeholder"></content>
       </div>
-        
-      <template is="dom-if" if="[[!isColumnMode]]">
+      
+      <!-- #=== GRID MODE ===# -->
+      <template is="dom-if" if="[[isGridMode]]">
         <template id="item-repeat" is="dom-repeat" items="{{items}}">
           <bl-list-item object-mode="[[objectMode]]" item="{{item}}" class$="[[itemClass]]"
-            hidden$="[[showPlaceholder]]">
+            item-display-mode="[[itemDisplayMode]]" hidden$="[[showPlaceholder]]">
           </bl-list-item>
         </template>
       </template>
 
+      <!-- #=== COLUMN MODE ===# -->
       <template is="dom-if" if="[[isColumnMode]]">
         <template id="item-repeat" is="dom-repeat" items="{{colClassList}}">
           <div class$="{{item}}" hidden$="[[showPlaceholder]]">
@@ -30,7 +32,22 @@
           </div>
         </template>
       </template>
+      
+      <!-- #=== SIMPLE MODE ===# -->
+      <template is="dom-if" if="[[simpleMode]]">
+        <template id="item-repeat" is="dom-repeat" items="{{items}}">
+          <paper-icon-item class$="[[rowClass(item.selected)]]" on-tap="toggleItem">
+            <template is="dom-if" if="[[hasRowImage]]">
+              <img src$="[[item.row.image]]" class$="[[roundRowImage]]" item-icon>
+            </template>
+            <template is="dom-if" if="[[!hasRowImage]]">
+              <iron-icon icon="[[rowIcon]]" hidden="[[!hasRowImage]]" item-icon></iron-icon>
+            </template>
 
+            [[item.row.title]]
+          </paper-icon-item>
+        </template>
+      </template>
       
     </div>
 

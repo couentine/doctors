@@ -38,6 +38,7 @@ Polymer({
   selectThisBadge: function(e) { 
     this.selectedBadgeUrl = $(e.target).closest('.select-link')[0].dataBadgeUrl;
     this.close();
+    e.preventDefault();
   },
   refreshTargetListQuery: function() {
     // This will update the query options on the target list

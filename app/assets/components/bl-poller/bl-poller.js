@@ -1,8 +1,27 @@
+/* ================================================== */
+/* ==================>> BL POLLER <<================= */
+/* ================================================== */
+
+/*
+  
+  Provide this component with the id of a poller and it displays a progress bar with the waiting
+  message from the poller. It will continuously poll the poller starting at initialInterval and 
+  backing off to maxInterval. After maxDuration it will stop polling and present a timeout 
+  message to the user. If the poller completes, the success / failure and the poller message is 
+  displayed to the user.
+
+  Setting the pollerId property will start the poller immediately.
+
+  This component will fire a 'bl-poller-completed' event when the poller completes, whether it is
+  an error, a success or a timeout.
+
+*/
+
 Polymer({
-  is: "bl-poller",
+  is: 'bl-poller',
 
   properties: {
-    pollerId: { type: String, observer: "_pollerIdChanged" },
+    pollerId: { type: String, observer: '_pollerIdChanged' },
     
     // Time Settings (in milliseconds)
     initialInterval: { type: Number, value: 150 }, 
@@ -12,12 +31,14 @@ Polymer({
     intervalDoubleRate: { type: Number, value: 2 }, // how many cycles before interval doubles?
 
     // Computed
-    isPending: { type: Boolean, value: false, computed: "_isPending(poller, isError)" },
-    isSuccessful: { type: Boolean, value: false, computed: "_isSuccessful(poller, isError)" },
-    isFailed: { type: Boolean, value: false, computed: "_isFailed(poller, isError)" },
+    isPending: { type: Boolean, value: false, computed: '_isPending(poller, isError)' },
+    isSuccessful: { type: Boolean, value: false, computed: '_isSuccessful(poller, isError)' },
+    isFailed: { type: Boolean, value: false, computed: '_isFailed(poller, isError)' },
+    isCompleted: { type: Boolean, value: false, computed: '_isCompleted(poller)' },
 
     // Managed automatically
-    running: Boolean,
+    running: { type: Boolean, value: false },
+    timeout: { type: Boolean, value: false },
     poller: Object,
     pollerStarted: Date,
     errorMessage: String,
@@ -54,23 +75,27 @@ Polymer({
         self.initialInterval * Math.pow(2, Math.floor(self.tries/self.intervalDoubleRate)));
 
       // Do the query
-      $.getJSON("/p/" + self.pollerId + ".json", function(result) {
+      $.getJSON('/p/' + self.pollerId + '.json', function(result) {
         if (result == null) 
-          self.goError("The specified poller could not be found.");
+          self.goError('The specified poller could not be found.');
         else {
           self.poller = result;
           self.tries++;
           
-          if (result.completed) 
+          if (result.completed) {
             self.stop();
-          else if ((Date.now() - self.pollerStarted) < self.maxDuration)
+            self.fireCompleteEvent();
+          } else if ((Date.now() - self.pollerStarted) < self.maxDuration)
             setTimeout(function() { self.queryPoller() }, nextInterval); 
-          else
-            self.goError("This job is taking a long time and the progress tracker has timed out, "
-              + "but the job will continue to run in the background.");
+          else {
+            self.timeout = true;
+            self.goError('This job is taking a long time and the progress tracker has timed out, '
+              + 'but the job will continue to run in the background.');
+            self.fireCompleteEvent();
+          }
         }
       }).error(function(e) { 
-        self.goError("An error occured. (Details: " + e + ")");
+        self.goError('An error occured. (Details: ' + e + ')');
       });
     }
   },
@@ -79,16 +104,22 @@ Polymer({
     this.isError = true; 
     this.stop();
   },
+  fireCompleteEvent: function() {
+    this.fire('bl-poller-completed', { poller: this.poller, timeout: this.timeout });
+  },
 
   // Property Computers
   _isPending: function(poller, isError) { 
-    return !isError && poller && (poller.status == "pending"); 
+    return !isError && poller && (poller.status == 'pending'); 
   },
   _isSuccessful: function(poller, isError) { 
-    return !isError && poller && (poller.status == "successful"); 
+    return !isError && poller && (poller.status == 'successful'); 
   },
   _isFailed: function(poller, isError) { 
-    return !isError && poller && (poller.status == "failed");
+    return !isError && poller && (poller.status == 'failed');
+  },
+  _isCompleted: function(poller) { 
+    return poller && poller.completed;
   }
 });
 

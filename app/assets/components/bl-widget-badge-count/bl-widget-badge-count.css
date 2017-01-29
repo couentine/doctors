@@ -1,12 +1,15 @@
 /* === LAYOUT & BASE STYLES === */
 
-  :host { display: block; }
+  :host { 
+    display: block; 
+  }
   .outer {
     display: block;
     font-size: 4rem;
     height: 1.3em;
     position: relative;
     text-decoration: none;
+    z-index: 0;
     color: rgb(255,224,178);
   }
   @media (min-width: 480px) {

@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :log_activity
-  before_action :build_asset_paths
+  before_action :set_app_variables
   after_action :store_location
 
   # unless Rails.application.config.consider_all_requests_local
@@ -40,8 +40,9 @@ class ApplicationController < ActionController::Base
   def store_location
     if ((request.format == "text/html") || (request.content_type == "text/html"))
       # Store the last url as long as it isn't a /users path
+      # This is used by the signin controller to return to same page after signin
       if !(request.fullpath =~ /\/users/) && !(request.fullpath =~ /\/j\/image_key/)
-        session[:previous_url] = request.fullpath
+        session[:previous_path] = request.fullpath
       end
 
       if !params[:join].blank?
@@ -79,7 +80,7 @@ class ApplicationController < ActionController::Base
     elsif session[:new_group_plan]
       "/groups/new?plan=#{session[:new_group_plan]}"
     else
-      session[:previous_url] || root_path
+      session[:previous_path] || root_path
     end
   end
 
@@ -89,9 +90,12 @@ private
     current_user.log_activity if current_user
   end
 
-  # The @asset_paths variable is passed into bl-app-container.assetPaths and is used to provide
-  # the paths of the various asset paths to the Polymer front end.
-  def build_asset_paths
+  def set_app_variables
+    # First set the current user json var
+    @current_user_json = (current_user) ? current_user.json(:current_user).to_json : '{}'
+
+    # The @asset_paths variable is passed into bl-app-container.assetPaths and is used to provide
+    # the paths of the various asset paths to the Polymer front end.
     url = ActionController::Base.helpers
     url.request = request
     @asset_paths = {

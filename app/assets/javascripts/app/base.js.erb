@@ -2,11 +2,15 @@
 /* ==============>> BASE APP JAVASCRIPT <<=========== */
 /* ================================================== */
 
+var appContainer = undefined;
+var appLayout = undefined;
 
-$(document).ready(function() {
-    // === ALERTS ===
-    $("a.flash-alert__button").click(function(e) {
-        $(this).parent(".flash-alert").fadeOut();
-        e.preventDefault();
-    });
+document.addEventListener('DOMContentLoaded', function() { 
+  
+  // Setup the shortcut variables for in page javascript (both Polymer and non-Polymer)
+  appLayout = document.getElementById('appLayout');
+  appLayout.addEventListener('dom-change', function() {
+    appContainer = document.getElementById('appContainer');
+  });
+
 });

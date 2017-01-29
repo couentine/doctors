@@ -1,182 +1,172 @@
 <% 
   provide(:title, "Feedback Requests - #{@group.name}")
+  provide(:page_background, '#29B6F6')
+  provide(:white_header_text, 'true')
+  provide(:white_body_text, 'true')
+  provide(:hide_left_nav, 'true')
+  provide(:hide_intercom, 'true')
 %>
 
-<style type="text/css">
-  .no-badge-icon {
-    font-size: 3em;
-  }
-  
-  #page-header-wrapper {
-    margin-top: 1em;
-    text-align: center;
-  }
-    #page-header-wrapper h1 {
-      color: white;
-      font-size: 1.5em;
-      margin: 0 0 0.5em 0;
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-text title="Feedback Requests" subtitle="<%= "for #{@group.name}" %>" 
+      top-line-color="#0288D1" background="#29B6F6" white-text back-url="<%= @back_url %>"
+      condensed-background="#039BE5" left-nav-symbol="fa fa-arrow-left"></bl-app-header-text>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+
+
+  <style type="text/css">
+    .no-badge-icon {
+      font-size: 3em;
     }
-    #query-mode-toggle {
-      margin: 1.2em 0 0.8em 0;
-    }
-
-  bl-selection-bar paper-button { width: 11em; }
-  paper-button.select-all-button, bl-query-options.query-filter-option { 
-    transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s !important;
-  }
-
-  .query-options-dropdown label.paper-input.style-scope,
-  .query-options-dropdown input.paper-input.style-scope,
-  .query-options-dropdown iron-icon.style-scope.paper-dropdown-menu {
-    color: white;
-  }
-  .query-options-dropdown .unfocused-line.style-scope { background: white; }
-  .query-options-dropdown .focused-line.style-scope { background: rgb(224,224,224); }
-</style>
-
-<template is="dom-bind" id="review">
-
-  <bl-app-container color-mode="group" appbar-mode="standard" header-mode="waterfall"
-    background-mode="color" current-user="<%= current_user.json_cu %>"
-    header-height="260" has-custom-logo hide-intercom asset-paths="<%= @ap_json %>">
     
-    <a href="<%= "/#{@group.url}" %>" class="custom-logo back-link">
-      <i class="fa fa-chevron-left"></i>
-      <%= image_tag @group.avatar_image_small_url, class: 'logo' %>
-    </a>
+    #page-header-wrapper {
+      margin-top: 1em;
+      text-align: center;
+    }
+      #query-mode-toggle {
+        margin: 1.2em 0 0.8em 0;
+      }
 
-    <div class="content">
+    bl-toggle-bar {
+      color: #616161;
+    }
 
-      <div id="page-header-wrapper">
-        <h1>Feedback Requests</h1>
+    bl-selection-bar paper-button { width: 11em; }
+    paper-button.select-all-button, bl-query-options.query-filter-option { 
+      transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s !important;
+    }
 
-        <bl-toggle-bar selected-value="<%= @query_mode %>" id="query-mode-toggle"
-          items='[{"label":"By Badge","value":"badge"}, {"label":"By Person","value":"user"}]'>
-        </bl-toggle-bar>
+    .query-options-dropdown label.paper-input.style-scope,
+    .query-options-dropdown input.paper-input.style-scope,
+    .query-options-dropdown .floated-label-placeholder.style-scope,
+    .query-options-dropdown iron-icon.style-scope.paper-dropdown-menu {
+      color: white !important;
+    }
+    .query-options-dropdown .unfocused-line.style-scope,
+    .query-options-dropdown .focused-line.style-scope { 
+      background: white;
+      border-color: white;
+    }
+  </style>
 
-        <bl-badge-selector badges="<%= @badges.to_json %>" 
-            selected-badge-url="<%= @badge_url.to_s %>" for="log-list" 
-            <%= (@query_mode != 'badge') ? 'disabled' : '' %>
-            <%= (@badge_url.blank?) ? 'expanded' : '' %>>
-          <h2>Select a badge</h2>
-          <div class="subtitle">
-            Select a badge below to view all feedback requests for that badge.
-          </div>
-        </bl-badge-selector><br>
+  <div id="page-header-wrapper">
 
-        <bl-user-selector users="<%= @users.to_json %>" for="log-list" 
-            selected-user-username="<%= @user_username.to_s %>" group-id="<%= @group.id.to_s %>"
-            <%= (@query_mode != 'user') ? 'disabled' : '' %>
-            <%= (@user_username.blank?) ? 'expanded' : '' %> >
-          <h2>Select a person</h2>
-          <div class="subtitle">
-            Select a group member below to view their feedback requests across all badges 
-            in the group.
-          </div>
-        </bl-user-selector>
+    <bl-toggle-bar selected-value="<%= @query_mode %>" id="query-mode-toggle"
+      items='[{"label":"By Badge","value":"badge"}, {"label":"By Person","value":"user"}]'>
+    </bl-toggle-bar>
+
+    <bl-badge-selector badges="<%= @badges.to_json %>" 
+        selected-badge-url="<%= @badge_url.to_s %>" for="log-list" 
+        <%= (@query_mode != 'badge') ? 'disabled' : '' %>
+        <%= (@badge_url.blank?) ? 'expanded' : '' %>>
+      <h2>Select a badge</h2>
+      <div class="subtitle">
+        Select a badge below to view all feedback requests for that badge.
       </div>
+    </bl-badge-selector><br>
 
-      <bl-list id="log-list" object-mode="full_logs" query-options="<%= @bl_list_query_options %>"
-          next-page-url="<%= group_full_logs_url(@group, format: :json) %>"
-          inject-items="<%= @list_inject_items.to_json %>" 
-          item-display-mode="<%= @item_display_mode %>">
-        <div class="placeholder color-background">
-          <i class="fa fa-flag-checkered"></i>
-          <div class="message">
-            <p><b>All done for now!</b></p> 
-            <p>
-              There are no pending feedback requests for this view.
-            </p>
-          </div>
-        </div>
+    <bl-user-selector users="<%= @users.to_json %>" for="log-list" 
+        selected-user-username="<%= @user_username.to_s %>" group-id="<%= @group.id.to_s %>"
+        <%= (@query_mode != 'user') ? 'disabled' : '' %>
+        <%= (@user_username.blank?) ? 'expanded' : '' %> >
+      <h2>Select a person</h2>
+      <div class="subtitle">
+        Select a group member below to view their feedback requests across all badges 
+        in the group.
+      </div>
+    </bl-user-selector>
+  </div>
 
-        <div class="list-controls">
-          <ul class="left">
-            <bl-query-options for="log-list" selected-options="<%= @sort_options.to_json %>"
-                class="query-filter-option">
-              <paper-dropdown-menu label="Sort order" class="query-options-dropdown">
-                <paper-listbox class="dropdown-content">
-                  <paper-item data-options='{"sort_by":"date_requested","sort_order":"desc"}'>
-                    Newest first
-                  </paper-item>
-                  <paper-item data-options='{"sort_by":"date_requested","sort_order":"asc"}'>
-                    Oldest first
-                  </paper-item>
-                  <paper-item data-options='{"sort_by":"user_name","sort_order":"asc"}'>
-                    By name
-                  </paper-item>
-                  <paper-item data-options='{"sort_by":"user_name","sort_order":"desc"}'>
-                    Reverse name
-                  </paper-item>
-                </paper-listbox>
-              </paper-dropdown-menu>
-            </bl-query-options>
-          </ul>
-          <ul class="right">
-            <li>
-              <paper-button onclick="document.querySelector('#log-list').selectAll()" 
-                  class="select-all-button">
-                <i class="fa fa-check"></i> Select All
-              </paper-button>
-            </li>
-          </ul>
-        </div>
-      </bl-list>
-
-      <bl-log-validator id="log-validator" for="log-list" 
-        group-validations-path="<%= group_validations_path(@group, format: :json) %>">
-      </bl-log-validator>
-
-      <bl-page-footer mode="color no-intercom"></bl-page-footer>
-
-      <bl-selection-bar id="selected-log-bar" for="log-list" noun-singular="log" 
-          noun-plural="logs">
-        <ul class="actions">
-          <li>
-            <paper-button onclick="document.querySelector('#log-validator').open()">
-              <i class="fa fa-comment"></i> Add Feedback
-            </paper-button>
-          </li>
-        </ul>
-      </bl-selection-bar>
-
+  <bl-list id="log-list" object-mode="full_logs" query-options="<%= @query_options %>"
+      next-page-url="<%= group_full_logs_url(@group, format: :json) %>"
+      inject-items="<%= @list_inject_items.to_json %>" 
+      item-display-mode="<%= @item_display_mode %>">
+    <div class="placeholder color-background">
+      <i class="fa fa-flag-checkered"></i>
+      <div class="message">
+        <p><b>All done for now!</b></p> 
+        <p>
+          There are no pending feedback requests for this view.
+        </p>
+      </div>
     </div>
 
-  </bl-app-container>
+    <div class="list-controls">
+      <ul class="left">
+        <bl-query-options for="log-list" selected-options="<%= @sort_options %>"
+            class="query-filter-option">
+          <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
+              horizontal-align="left" veritcal-align="bottom">
+            <paper-listbox class="dropdown-content">
+              <paper-item data-options='{"sort_by":"date_requested","sort_order":"desc"}'>
+                Newest first
+              </paper-item>
+              <paper-item data-options='{"sort_by":"date_requested","sort_order":"asc"}'>
+                Oldest first
+              </paper-item>
+              <paper-item data-options='{"sort_by":"user_name","sort_order":"asc"}'>
+                By name
+              </paper-item>
+              <paper-item data-options='{"sort_by":"user_name","sort_order":"desc"}'>
+                Reverse name
+              </paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </bl-query-options>
+      </ul>
+      <ul class="right">
+        <li>
+          <paper-button onclick="document.querySelector('#log-list').selectAll()" 
+              class="select-all-button">
+            <i class="fa fa-check"></i> Select All
+          </paper-button>
+        </li>
+      </ul>
+    </div>
+  </bl-list>
 
-</template>
+  <bl-log-validator id="log-validator" for="log-list" 
+    group-validations-path="<%= group_validations_path(@group, format: :json) %>">
+  </bl-log-validator>
 
-<script>
-  function queryModeChanged() {
-    var toggleBar = document.querySelector('#query-mode-toggle');
+  <bl-page-footer mode="color no-intercom"></bl-page-footer>
 
-    if (toggleBar.selectedValue == 'badge') {
-      document.querySelector('bl-list').itemDisplayMode = 'user'; // Display the OTHER object
-      document.querySelector('bl-badge-selector').refreshTargetListQuery();
-      document.querySelector('bl-badge-selector').disabled = false;
-      document.querySelector('bl-user-selector').disabled = true;
-    } else if (toggleBar.selectedValue == 'user') {
-      document.querySelector('bl-list').itemDisplayMode = 'badge'; // Display the OTHER object
-      document.querySelector('bl-user-selector').refreshTargetListQuery();
-      document.querySelector('bl-user-selector').disabled = false;
-      document.querySelector('bl-badge-selector').disabled = true;
+  <bl-selection-bar id="selected-log-bar" for="log-list" noun-singular="log" 
+      noun-plural="logs">
+    <ul class="actions">
+      <li>
+        <paper-button onclick="document.querySelector('#log-validator').open()">
+          <i class="fa fa-comment"></i> Add Feedback
+        </paper-button>
+      </li>
+    </ul>
+  </bl-selection-bar>
+
+  <script>
+    function queryModeChanged() {
+      var toggleBar = document.querySelector('#query-mode-toggle');
+
+      if (toggleBar.selectedValue == 'badge') {
+        document.querySelector('bl-list').itemDisplayMode = 'user'; // Display the OTHER object
+        document.querySelector('bl-badge-selector').refreshTargetListQuery();
+        document.querySelector('bl-badge-selector').disabled = false;
+        document.querySelector('bl-user-selector').disabled = true;
+      } else if (toggleBar.selectedValue == 'user') {
+        document.querySelector('bl-list').itemDisplayMode = 'badge'; // Display the OTHER object
+        document.querySelector('bl-user-selector').refreshTargetListQuery();
+        document.querySelector('bl-user-selector').disabled = false;
+        document.querySelector('bl-badge-selector').disabled = true;
+      }
     }
-  }
 
-  function attachQueryModeListener() {
-    // NOTE: This is a bit of a hack. It runs recursively until the toggle bar exists.
-    // I can't find any events to use to hook onto this normally.
-    var toggleBar = document.querySelector('#query-mode-toggle');
-    
-    if (toggleBar)
-      toggleBar.addEventListener('selected-value-changed', function(e) { queryModeChanged(e) });
-    else
-      setTimeout(function() { attachQueryModeListener() }, 100);
-  }
+    // Trigger the recursive process once the template is ready
+    appLayout.addEventListener('dom-change', function() {
+      document.querySelector('#query-mode-toggle')
+        .addEventListener('selected-value-changed', function(e) { queryModeChanged(e) });
+    });
 
-  // Trigger the recursive process once the template is ready
-  document.querySelector('#review').addEventListener('dom-change', function() {
-    setTimeout(function() { attachQueryModeListener() }, 100);
-  });
-
-</script>
+  </script>
