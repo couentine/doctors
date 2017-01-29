@@ -249,7 +249,7 @@ Polymer({
     else if (tryCount < 100)
       setTimeout(function() { self.tryToHideIntercom(tryCount + 1); }, 100);
   },
-  setDialogColor(color) {
+  setDialogColor: function(color) {
     // This is primarily called by the standard dialog functions
     // It sets all of the appropriate css variables to match the specified color
     // Defaults to orange
