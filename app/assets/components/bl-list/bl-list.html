@@ -15,7 +15,8 @@
       <template is="dom-if" if="[[isGridMode]]">
         <template id="item-repeat" is="dom-repeat" items="{{items}}">
           <bl-list-item object-mode="[[objectMode]]" item="{{item}}" class$="[[itemClass]]"
-            item-display-mode="[[itemDisplayMode]]" hidden$="[[showPlaceholder]]">
+            item-display-mode="[[itemDisplayMode]]" item-parent-path="[[itemParentPath]]" 
+            hidden$="[[showPlaceholder]]">
           </bl-list-item>
         </template>
       </template>
@@ -26,7 +27,7 @@
           <div class$="{{item}}" hidden$="[[showPlaceholder]]">
             <template id="item-repeat" is="dom-repeat" items="{{items}}">
               <bl-list-item object-mode="[[objectMode]]" item="{{item}}" class$="[[itemClass]]"
-                item-display-mode="[[itemDisplayMode]]">
+                item-display-mode="[[itemDisplayMode]]" item-parent-path="[[itemParentPath]]">
               </bl-list-item>
             </template>
           </div>

@@ -16,9 +16,11 @@ class GroupTag
   }
   JSON_TEMPLATES = {
     list_item: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
-      :validation_request_count, :full_path],
+      :validation_request_count],
+    list_with_children: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, 
+      :user_magnitude, :validation_request_count, :user_id_strings],
     detail: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
-      :validation_request_count, :full_path]
+      :validation_request_count]
   }
 
   # === INSTANCE VARIABLES === #
@@ -61,12 +63,19 @@ class GroupTag
 
   # === INSTANCE METHODS === #
 
+  # WARNING: This will result in a database query
   def full_path
     "/#{group.url_with_caps}/tags/#{name_with_caps}"
   end
 
+  # WARNING: This will result in a database query
   def full_url
     "#{ENV['root_url'] || 'https://www.badgelist.com'}/#{full_path}"
+  end
+
+  # Returns stringified version of user_ids
+  def user_id_strings
+    (user_ids || []).map{ |id| id.to_s }
   end
 
   # === ADDING AND REMOVING USERS === #

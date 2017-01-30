@@ -6,7 +6,7 @@
     <paper-material id="paper" elevation="[[currentElevation]]" animated>
 
       <template is="dom-if" if="[[link]]">
-        <a href$="[[groupTag.full_path]]" class="wrapper">
+        <a href$="[[linkPath]]" class="wrapper">
           <paper-ripple></paper-ripple>
           
           <div class="background" hidden="[[!hasGroupTag]]">&nbsp;</div>

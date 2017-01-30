@@ -52,8 +52,18 @@
       #userList {
         min-height: 22em;
       }
+        paper-listbox.dropdown-content {
+          min-width: 12em;
+          margin-bottom: -6em;
+        }
+        @media (min-width: 480px) { paper-listbox.dropdown-content { margin-bottom: -4em; } }
+        @media (min-width: 840px) { paper-listbox.dropdown-content { margin-bottom: -2em; } }
         #add-users {
           background: #03A9F4;
+        }
+        #feedback-requests {
+          color: #F57C00;
+          text-decoration: none;
         }
 
   </style>
@@ -97,7 +107,7 @@
           <bl-query-options for="userList" selected-options="<%= @sort_options %>" 
               class="query-filter-option">
             <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
-                horizontal-align="left" veritcal-align="bottom">
+                horizontal-align="left" vertical-align="bottom">
               <paper-listbox class="dropdown-content">
                 <paper-item data-options='{"sort_by":"name","sort_order":"asc"}'>
                   By name
@@ -115,16 +125,25 @@
             </paper-dropdown-menu>
           </bl-query-options>
         </ul>
-        <% if @can_assign_group_tags %>
-          <ul class="right">
+        <ul class="right">
+          <% if @group_tag.validation_request_count > 0 %>
+            <li class="margin-right">
+              <a id="feedback-requests"
+                  href="<%= group_review_url(@group, user_tag: @group_tag.name_with_caps) %>">
+                <i class="fa fa-flag-checkered"></i> &nbsp;
+                <%= pluralize @group_tag.validation_request_count, 'feedback request' %>
+              </a>
+            </li>
+          <% end %>
+          <% if @can_assign_group_tags %>
             <li>
               <bl-button id="add-users" type="flat"
                   link="<%= add_group_tag_users_path(@group, @group_tag) %>">
-                <i class="fa fa-plus"></i> &nbsp; Add Users
+                Add Users
               </bl-button>
             </li>
-          </ul>
-        <% end %>
+          <% end %>
+        </ul>
       </div>
 
 

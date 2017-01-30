@@ -8,6 +8,7 @@ Polymer({
     
     // Optional
     itemDisplayMode: String, // OPTIONAL: Passed all the way to the individual items (if supported)
+    itemParentPath: String, // REQUIRED for items which don't know their parent's path (bl-group-tag)
     options: Object,
     
     // Auto Calculated
