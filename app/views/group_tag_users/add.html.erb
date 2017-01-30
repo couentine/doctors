@@ -8,7 +8,7 @@
 
   <% content_for :app_header_content do %>
     <bl-app-header-form title="Add users to tag" condensed-background="#388E3C" 
-        selection-bar-for="userList" count-noun-singular="user">
+        header-color="#43A047" selection-bar-for="userList" count-noun-singular="user">
       <bl-button js="addUsersToTag()" class="save-button" background="#43A047" color="white">
         Save
       </bl-button>
@@ -27,8 +27,9 @@
       padding: 1em 1.4em 2em 1.4em;
     }
       #summary {
-        font-size: 1.3em;
+        font-size: 1em;
         line-height: 1.4em;
+        color: #43A047;
       }
         #desktop-instructions { display: none; }
         @media (min-width: 840px) { #desktop-instructions { display: initial; } }

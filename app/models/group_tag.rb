@@ -20,7 +20,7 @@ class GroupTag
     list_with_children: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, 
       :user_magnitude, :validation_request_count, :user_id_strings],
     detail: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
-      :validation_request_count]
+      :validation_request_count, :permissions_text]
   }
 
   # === INSTANCE VARIABLES === #
@@ -76,6 +76,26 @@ class GroupTag
   # Returns stringified version of user_ids
   def user_id_strings
     (user_ids || []).map{ |id| id.to_s }
+  end
+
+  # Returns user-facing explanation of this group tag's privacy settings
+  # NOTE: This returns info from the group record (and thus queries the group)
+  def permissions_text
+    if group.tag_visibility == 'admins'
+      return_text = 'only visible to admins' # assignability is obvious
+    elsif group.tag_visibility == 'members'
+      if group.tag_assignability == 'admins'
+        return_text = 'visible to members but only assignable by admins'
+      else
+        return_text = 'visible to and assignable by all members'
+      end
+    else
+      if group.tag_assignability == 'admins'
+        return_text = 'visible to public but only assignable by admins'
+      else
+        return_text = 'visible to public and assignable by all members'
+      end
+    end
   end
 
   # === ADDING AND REMOVING USERS === #
