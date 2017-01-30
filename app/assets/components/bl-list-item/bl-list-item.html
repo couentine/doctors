@@ -16,7 +16,7 @@
     </template>
     
     <template is="dom-if" if="[[isGroupTagMode]]">
-      <bl-group-tag group-tag="{{item}}" link></bl-group-tag>
+      <bl-group-tag group-tag="{{item}}" group-path="[[itemParentPath]]" link></bl-group-tag>
     </template>
     
     <template is="dom-if" if="[[isUserMode]]">

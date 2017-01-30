@@ -8,7 +8,6 @@
     display: flex;
     margin: 1em 0;
     color: white;
-    z-index: 90;
   }
   @media (min-width: 840px) { :host ::content .list-controls { margin: 1em 2em; } }
   @media (min-width: 1200px) { :host ::content .list-controls { margin: 1em 4em; } }
@@ -23,6 +22,10 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+        text-align: center;
+      }
+      :host ::content .list-controls ul li.margin-right {
+        margin-right: 1em;
       }
     :host ::content .list-controls .left {
       flex: 1 1;

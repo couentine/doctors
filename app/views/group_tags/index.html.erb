@@ -54,6 +54,7 @@
   <!-- #=== GROUP TAGS ===# -->
 
   <bl-list id="group-tag-list" object-mode="group_tags" items='<%= @group_tags_hash.to_json %>' 
+      item-parent-path="<%= group_path(@group) %>" 
       next-page="<%= @next_page %>" next-page-param="page"
       next-page-url="<%= group_tags_url(@group, format: :json) %>">
     <div class="placeholder">

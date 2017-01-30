@@ -59,7 +59,10 @@ class GroupTagsController < ApplicationController
     @sort_options = { sort_by: 'name', sort_order: 'asc' }.to_json
     @query_options = @sort_options # they are the same for now
 
-    @item_display_mode = (@current_user_is_admin || @badge_list_admin) ? 'admin' : ''
+    @item_display_mode = (@can_assign_group_tags) ? 'admin' : ''
+    @show_validation_requests = \
+      (@group_tag.validation_request_count > 0) \
+      & (@current_user_is_admin || @current_user_is_member || @badge_list_admin)
 
     respond_to do |format|
       format.html do
@@ -69,7 +72,7 @@ class GroupTagsController < ApplicationController
         if @badge_list_admin
           render json: @group_tag.as_json
         else
-          render json: @group_tag.json(:list_item)
+          render json: @group_tag.json(:detail)
         end
       end
     end
@@ -177,7 +180,7 @@ private
           render json: { success: false, error_message: 'You do not have permission to view ' \
             + 'tags for this group.' }
         end
-        respond_to do |html|
+        format.html do
           flash[:error] = 'You do not have permission to view tags for this group.'
           redirect_to @group
         end
@@ -199,7 +202,7 @@ private
           render json: { success: false, error_message: 'You do not have permission to edit ' \
             + 'tags for this group.' }
         end
-        respond_to do |html|
+        format.html do
           flash[:error] = 'You do not have permission to edit tags for this group.'
           redirect_to @group
         end

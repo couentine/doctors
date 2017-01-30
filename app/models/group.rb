@@ -509,6 +509,17 @@ class Group
     found_user != nil
   end
 
+  # Returns URL of the group's logo (either from the image_url property or the Badge List default)
+  def logo_url
+    if image_url
+      image_url
+    elsif ENV['cdn_asset_host']
+      "http://#{ENV['cdn_asset_host']}/assets/group-image-default.png"
+    else
+      "#{ENV['root_url']}/assets/group-image-default.png"
+    end
+  end
+
   # Returns user criteria for all members and admins
   # OPTIONS: 
   # Include without_tag to filter out anyone with that tag (pass the queried tag)
@@ -529,16 +540,33 @@ class Group
     users_criteria
   end
 
-  # Returns URL of the group's logo (either from the image_url property or the Badge List default)
-  def logo_url
-    if image_url
-      image_url
-    elsif ENV['cdn_asset_host']
-      "http://#{ENV['cdn_asset_host']}/assets/group-image-default.png"
-    else
-      "#{ENV['root_url']}/assets/group-image-default.png"
+  # === GROUP TAGS === #
+
+  # This does not use a query. It returns items from the top_user_tags_cache.
+  # Specifically it returns only the tags which have been attached to at least one user.
+  # Returns an empty array if there are no tags or if none have been attached to users.
+  # Set [first] to an integer get the top [first] items
+  def top_user_tags(first = nil)
+    return_list = top_user_tags_cache.select{ |tag_item| tag_item['user_magnitude'] >= 0 }
+    if !first.blank?
+      return_list = return_list.first(first)
     end
+    return_list
   end
+
+  # Returns a group tag criteria selecting only tags which have been attached to users.
+  # Default sort is by descending magnitude then by ascending name.
+  # OPTIONS:
+  # - unsorted: Set this to true to leave off the sort parameters
+  def user_tags(options = {})
+    return_criteria = tags.where(:user_count.gt => 0)
+    unless options[:unsorted]
+      return_criteria = return_criteria.order_by('user_magnitude desc, name asc')
+    end
+    return_criteria
+  end
+
+  # === GROUP ACTIONS === #
 
   # This updates or deletes the cached copy of the specified badge in the badges_cache
   # If the specified badge does not exist in the cache already then it will be added

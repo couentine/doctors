@@ -29,7 +29,8 @@
     color: #616161;
     
     --paper-scroll-header-panel-header-container: {
-      z-index: 100;
+      /* NOTE: The line below works in dev but not production so I'm commenting it out. */
+      /* z-index: 100; */
     };
   }
   paper-scroll-header-panel.true { /* true = this.whiteBodyText */

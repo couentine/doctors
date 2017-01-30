@@ -70,7 +70,9 @@
     </bl-badge-selector><br>
 
     <bl-user-selector users="<%= @users.to_json %>" for="log-list" 
+        selected-tag-name="<%= @user_tag %>"
         selected-user-username="<%= @user_username.to_s %>" group-id="<%= @group.id.to_s %>"
+        group-tags="<%= @user_tags.to_json %>" group-tags-link="<%= group_tags_url(@group) %>"
         <%= (@query_mode != 'user') ? 'disabled' : '' %>
         <%= (@user_username.blank?) ? 'expanded' : '' %> >
       <h2>Select a person</h2>
@@ -100,7 +102,7 @@
         <bl-query-options for="log-list" selected-options="<%= @sort_options %>"
             class="query-filter-option">
           <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
-              horizontal-align="left" veritcal-align="bottom">
+              horizontal-align="left" vertical-align="bottom">
             <paper-listbox class="dropdown-content">
               <paper-item data-options='{"sort_by":"date_requested","sort_order":"desc"}'>
                 Newest first

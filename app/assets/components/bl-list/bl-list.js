@@ -57,6 +57,7 @@ Polymer({
     refreshQueryOnLoad: { type: Boolean, value: false }, // refreshes when component is attached
     selectionBar: Object, // this gets set by the bl-selection-bar when the "for" property is set
     itemDisplayMode: String, // OPTIONAL: Passed all the way to the individual items (if supported)
+    itemParentPath: String, // REQUIRED for items that don't know parent path, ex val: '/Group-Name'
     
     // Simple Mode Options
     simpleMode: { type: Boolean, value: false }, // explained in comments at top of file
