@@ -1,0 +1,84 @@
+<% 
+  provide(:title, "Monthly Metrics - Admin Tools")
+  provide(:show_subheader, false)
+%>
+
+<style type="text/css">
+  
+  ul.date-list {
+    padding: 0; margin: 0 0 2em 0;
+    list-style: none;
+    display: block;
+  }
+    ul.date-list li { display: inline-block; margin-right: 1em; }
+    ul.date-list li.filter-label { font-weight: bold; }
+    ul.date-list li.selected { color: #999; }
+      ul.date-list li a { text-decoration: underline; }
+
+    span.metric-label { font-weight: bold; }
+    span.metric-description { 
+      display: block;
+      color: #999;
+      font-style: italic;
+      font-size: 0.8em;
+    }
+
+
+</style>
+
+
+<div id="admin-tools">
+  
+  <div class="page-header">
+    <h1>Badge List Monthly Metrics</h1>
+  </div>
+
+  <ul class="date-list">
+    <li class="filter-label">Month:</li>
+    <% @date_links.each do |item| %>
+      <% if item[:selected] %>
+        <li class="selected">
+            <%= item[:label] %> (Selected)
+        </li>
+      <% else %>
+        <li>
+            [<%= link_to item[:label], admin_metrics_path(date: item[:date]) %>]
+        </li>
+      <% end %>
+    <% end %>
+  </ul>
+  
+  <h2>User Metrics</h2>
+  <ul class="admin-metric-list">
+    <% @user_metrics.each do |metric| %>
+      <li>
+        <span class="metric-label"><%= metric[:label] %></span>:
+        <span class="metric-value"><%= metric[:value] %></span>
+        <span class="metric-description"><%= metric[:description] %></span>
+      </li>
+    <% end %>
+  </ul>
+  
+  <h2>Group Metrics</h2>
+  <ul class="admin-metric-list">
+    <% @group_metrics.each do |metric| %>
+      <li>
+        <span class="metric-label"><%= metric[:label] %></span>:
+        <span class="metric-value"><%= metric[:value] %></span>
+        <span class="metric-description"><%= metric[:description] %></span>
+      </li>
+    <% end %>
+  </ul>
+  
+  <h2>Badge Metrics</h2>
+  <ul class="admin-metric-list">
+    <% @badge_metrics.each do |metric| %>
+      <li>
+        <span class="metric-label"><%= metric[:label] %></span>:
+        <span class="metric-value"><%= metric[:value] %></span>
+        <span class="metric-description"><%= metric[:description] %></span>
+      </li>
+    <% end %>
+  </ul>
+
+</div>
