@@ -148,6 +148,7 @@ class User
   before_update :process_email_change
   after_update :update_logs
   after_destroy :clear_from_group_tags
+  after_destroy :delete_from_intercom
 
   # === USER MOCK FIELD METHODS === #
 
@@ -186,6 +187,11 @@ class User
     else
       email.split('@')[1]
     end
+  end
+
+  # This is used in intercom.rb to exclude certain users from intercom
+  def show_in_intercom?
+    !admin_of_ids.blank? || !created_group_ids.blank? || !owned_group_ids.blank?
   end
 
   # === CLASS METHODS === #
@@ -327,6 +333,12 @@ class User
     end
 
     return user.logs.count
+  end
+
+  def self.delete_from_intercom(email)
+    intercom = Intercom::Client.new
+    intercom_user = intercom.users.find(email: email)
+    intercom_user.delete if intercom_user
   end
 
   # === OMNIAUTH CLASS METHODS === #
@@ -1220,6 +1232,10 @@ protected
         update_domain_cache_from matched_domain.json(:for_user_cache)
       end
     end
+  end
+
+  def delete_from_intercom
+    User.delay(queue: 'low').delete_from_intercom(email)
   end
 
 end
