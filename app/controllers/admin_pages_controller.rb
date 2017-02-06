@@ -101,21 +101,19 @@ class AdminPagesController < ApplicationController
         :created_at.lte => this_month_end
       ).map{ |entry| entry.log_id }.uniq
     
-    log_badge_ids = Log.or(
-        { :id.in => entry_log_ids },
-        {
-          :created_at.gte => this_month_start, 
-          :created_at.lte => this_month_end
-        }
-      ).map{ |log| log.badge_id }.uniq
+    log_badge_ids = Log.where(:id.in => entry_log_ids).map{ |log| log.badge_id }
+    log_badge_ids += Log.where(
+        :created_at.gte => this_month_start, 
+        :created_at.lte => this_month_end
+      ).map{ |log| log.badge_id }
+    log_badge_ids = log_badge_ids.uniq
 
-    badge_group_ids = Badge.or(
-        { :id.in => log_badge_ids },
-        {
-          :created_at.gte => this_month_start, 
-          :created_at.lte => this_month_end
-        }
-      ).map{ |badge| badge.group_id }.uniq
+    badge_group_ids = Badge.where(:id.in => log_badge_ids).map{ |badge| badge.group_id }
+    badge_group_ids += Badge.where(
+        :created_at.gte => this_month_start, 
+        :created_at.lte => this_month_end
+      ).map{ |badge| badge.group_id }
+    badge_group_ids = badge_group_ids.uniq
 
     monthly_active_group_count = badge_group_ids.count
     
