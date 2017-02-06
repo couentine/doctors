@@ -107,6 +107,10 @@
             <%= link_to '<i class="fa fa-sliders"></i> Edit Permissions'.html_safe, 
               group_url(@group) + '#settings' %>
           </li>
+          <li>
+            <%= link_to '<i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit tag'.html_safe,
+              group_url(@group) + '#edit' %>
+          </li>
         <% end %>
         <li>
           <a href="#" onClick="deleteGroupTag(); return false;">

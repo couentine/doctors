@@ -37,7 +37,12 @@ Polymer({
   close: function() { this.$.dialog.close(); },
 
   // Events
-  cancelButtonTap: function(e) {},
-  saveButtonTap: function(e) {}
+  cancelButtonTap: function(e) {
+    this.close();
+  },
+  saveButtonTap: function(e) {
+    document.getElementById('form').submit();
+    this.close();
+  }
 });
 
