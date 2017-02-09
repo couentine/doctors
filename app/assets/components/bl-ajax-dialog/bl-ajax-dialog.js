@@ -26,23 +26,44 @@ Polymer({
 
   properties: {
     title: String,
-    url: String,
+    url: {
+      type: String,
+      notify: true,
+      reflectToAttribute: true
+    }, 
     method: { type: String, value: 'post' }, // = ['get', 'post']
     saveButtonText: { type: String, value: 'Save' },
-    cancelButtonText: { type: String, value: 'Cancel' }
+    cancelButtonText: { type: String, value: 'Cancel' },
+    loading: Boolean
+  },
+  observers: [
+        // Note that this function  will not fire until *all* parameters
+        // given have been set to something other than `undefined`
+        'attributesReady(url)'
+    ],
+
+  attributesReady: function(url) {
+      this.$.form.action = url;
   },
 
   // Methods
   open: function() { this.$.dialog.open(); },
   close: function() { this.$.dialog.close(); },
 
+  // Handles the json returned by rails
+  handleSubmit: function(data) {
+    console.log(data)
+  }, 
+
   // Events
   cancelButtonTap: function(e) {
     this.close();
   },
   saveButtonTap: function(e) {
-    document.getElementById('form').submit();
-    this.close();
+    this.$.form.submit();
+
+    this.listen(this.$.form, 'iron-form-response', this.handleSubmit())
+    //this.close();
   }
 });
 

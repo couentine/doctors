@@ -97,6 +97,20 @@
     headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'
     url="<%= group_tag_url(@group, @group_tag) %>"></iron-ajax>
 
+  <!-- #=== AJAX CALL TO EDIT TAG ===# -->
+  <bl-ajax-dialog id="editGroupTagDialog" title="Edit group tag" url="<%= group_tag_url(@group, @group_tag) %>" 
+      method="PUT">
+    <paper-input label="Tag Name" name="group_tag[name_with_caps]" 
+      value="<%= @group_tag.name_with_caps %>" 
+      maxlength="<%= GroupTag::MAX_NAME_LENGTH %>">
+    </paper-input>
+    <paper-textarea label="Tag Description" 
+      name="group_tag[summary]" 
+      value="<%= @group_tag.summary %>"
+      maxlength="<%= GroupTag::MAX_SUMMARY_LENGTH %>">
+    </paper-textarea>
+  </bl-ajax-dialog>
+
   <!-- #=== PAGE HEADER ===# -->
 
   <div id="page-header">
@@ -108,8 +122,9 @@
               group_url(@group) + '#settings' %>
           </li>
           <li>
-            <%= link_to '<i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit tag'.html_safe,
-              group_url(@group) + '#edit' %>
+           <a href="#" onClick="editGroupTag(); return false;">
+            <i class="fa fa-pencil"></i> Edit Group Tag
+           </a>
           </li>
         <% end %>
         <li>
@@ -307,6 +322,12 @@
         appContainer.closeWaitingDialog();
         appContainer.addToast('There was a problem deleting this tag. Please try again.', 
           'error', 30000);
+      }
+
+      // #=== TAG EDIT HANDLING ===# 
+
+      function editGroupTag() {
+        document.getElementById('editGroupTagDialog').open();
       }
 
     </script>
