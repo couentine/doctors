@@ -51,7 +51,7 @@ module AuditHistory
 
   def update_attributes_with_audit(object_params, current_user_id)
     # First we call the standard assign attributes method
-    self.set_attributes(object_params)
+    self.update(object_params)
 
     # Then we add our audit values
     self.updated_by = current_user_id

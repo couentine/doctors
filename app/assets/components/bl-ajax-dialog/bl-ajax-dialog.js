@@ -32,6 +32,7 @@ Polymer({
       reflectToAttribute: true
     }, 
     method: { type: String, value: 'post' }, // = ['get', 'post']
+    headers: String,
     saveButtonText: { type: String, value: 'Save' },
     cancelButtonText: { type: String, value: 'Cancel' },
     loading: Boolean
@@ -51,7 +52,7 @@ Polymer({
   close: function() { this.$.dialog.close(); },
 
   // Handles the json returned by rails
-  handleSubmit: function(data) {
+  handleSubmit: function(data) {    
     console.log(data)
   }, 
 
@@ -60,6 +61,8 @@ Polymer({
     this.close();
   },
   saveButtonTap: function(e) {
+
+    this.$.form.headers = JSON.parse(this.headers);
     this.$.form.submit();
 
     this.listen(this.$.form, 'iron-form-response', this.handleSubmit())
