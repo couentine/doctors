@@ -324,6 +324,17 @@
           'error', 30000);
       }
 
+      document.getElementById('editGroupTagDialog').addEventListener('tagUpdate', function(data) {
+        // console.log(data.detail.name);
+        document.getElementById('summaryText').innerHTML = data.detail.summary;
+        if(document.querySelector('bl-app-header-tag').name !== data.detail.name) {
+          document.querySelector('bl-app-header-tag').name = data.detail.name;
+          var location = window.location.href;
+          var newLocation = location.substring(0, location.lastIndexOf('/')) + '/' + data.detail.name;
+          window.location.replace(newLocation);
+        }
+      });
+
       // #=== TAG EDIT HANDLING ===# 
 
       function editGroupTag() {
