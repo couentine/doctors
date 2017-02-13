@@ -2051,6 +2051,7 @@ form#group-add-users-form {
     }
     h3 {
       font-size: 14px;
+      line-height: 1.4em;
       font-weight: normal;
       color: $medium-text-color;
     }
@@ -3755,7 +3756,8 @@ div.topic-list-card, div.group-list-card {
         abbr { display: none; }
       }
 
-      input[type="email"].signin,input[type="password"].signin,input[type="text"].signin {
+      input[type="email"].signin,input[type="password"].signin,input[type="text"].signin,
+          textarea.signin {
         border-radius: 0 !important;
         border-top: none !important;
         border-right: none !important;
@@ -3767,8 +3769,32 @@ div.topic-list-card, div.group-list-card {
         width: 90%;
       }
       input[type="email"].signin:focus,input[type="password"].signin:focus,
-          input[type="text"].signin:focus {
+          input[type="text"].signin:focus, textarea.signin:focus {
         background-color: $really-light-gray !important;
+      }
+      textarea.signin {
+        font-size: 1em;
+        line-height: 1.3em;
+        height: 3em;
+      }
+
+      .character-count-wrap { 
+        position: relative; 
+      }
+      .character-count {
+        position: absolute;
+        right: 21px;
+        bottom: 5px;
+        font-size: 11px;
+        font-style: italic;
+        color: $light-text-color;
+        padding: 1px 3px;
+        border-radius: 5px;
+      }
+      .character-count.negative {
+        color: $primary-dark;
+        font-weight: bold;
+        background-color: $medium-white;
       }
       
       &.error {
@@ -3780,6 +3806,10 @@ div.topic-list-card, div.group-list-card {
   }
   .form-footer {
     text-align: center;
+
+    #show-optional-fields {
+      margin-bottom: 2em;
+    }
   }
 }
 

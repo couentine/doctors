@@ -9,6 +9,10 @@ class User
   MIN_PASSWORD_LENGTH = 6 # Note: This is just for use in tests & not actually tied to anything
   MAX_NAME_LENGTH = 200
   MAX_USERNAME_LENGTH = 15
+  MAX_JOB_TITLE_LENGTH = 50
+  MAX_ORGANIZATION_NAME_LENGTH = 100
+  MAX_WEBSITE_LENGTH = 100
+  MAX_BIO_LENGTH = 300
   JSON_FIELDS = [:name, :username, :username_with_caps]
   JSON_MOCK_FIELDS = { :avatar_image_url => :avatar_image_url }
 
@@ -43,6 +47,11 @@ class User
   field :name,                              type: String
   field :username,                          type: String
   field :username_with_caps,                type: String
+  field :job_title,                         type: String
+  field :organization_name,                 type: String
+  field :website,                           type: String
+  field :bio,                               type: String
+
   field :has_private_domain,                type: Boolean, default: false
   field :is_non_private_domain_user,        type: Boolean, default: false
   field :visible_to_domain_urls,            type: Array
@@ -91,6 +100,10 @@ class User
   validates :username, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
     format: { with: /\A[\w-]+\Z/, 
       message: "can only contain letters, numbers, dashes and underscores." }
+  validates :job_title, length: { maximum: MAX_JOB_TITLE_LENGTH }
+  validates :organization_name, length: { maximum: MAX_ORGANIZATION_NAME_LENGTH }
+  validates :bio, length: { maximum: MAX_BIO_LENGTH }
+  validates :website, url: true, length: { maximum: MAX_WEBSITE_LENGTH }
 
   
   # === DEVISE SETTINGS === #
