@@ -2,24 +2,32 @@
   <link rel="stylesheet" href="bl-ajax-dialog.css" />
 
   <template>
-
     <!-- #=== THE DIALOG ===# -->
     <paper-dialog id="dialog" modal>
+          
       <h2>[[title]]</h2>
 
       <paper-dialog-scrollable>
-        <form is="iron-form" id="form" method="[[method]]" action="[[url]]" content-type="application/json">
+        <div id="errorPanel" hidden="[[!isError]]">
+          [[errorText]]
+        </div>
+        <form is="iron-form" id="form" method="[[method]]" action$="[[action]]"
+          headers="[[headers]]" content-type="application/json">
           <content></content>
         </form>
       </paper-dialog-scrollable>
+
+      
       
       <div class="buttons">
-        <paper-button id="cancelButton" dialog-dismiss on-tap="cancelButtonTap">
+        <paper-button id="cancelButton" dialog-dismiss on-tap="cancelButtonTap" 
+          hidden="[[loading]]">
           [[cancelButtonText]]
         </paper-button>
-        <paper-button id="saveButton" dialog-confirm on-tap="saveButtonTap">
+        <paper-button id="saveButton" on-tap="saveButtonTap" hidden="[[loading]]">
           [[saveButtonText]]
         </paper-button>
+        <paper-spinner id="spinner" active hidden="[[!loading]]"></paper-spinner>
       </div>
     </paper-dialog>
 

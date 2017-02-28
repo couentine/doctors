@@ -46,5 +46,12 @@
 
 
 /* === FORM CONTENT === */
+#errorPanel {
+  color: #DE3C12;
+  margin: 0;
+}
 
+#spinner {
+  margin: 0 auto;
+}
   

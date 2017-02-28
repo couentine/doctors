@@ -4,8 +4,6 @@
 
 /*
 
-!!!  NOTE: THIS COMPONENT IS UNFINISHED. !!!
-
 This component displays a scrollable paper dialog filled with input items passed into it as 
 content. It places them in a form and adds save and cancel buttons to the dialog. Clicking 
 save will submit a query to via ajax to the specified url. Errors are presented in the form
@@ -14,8 +12,6 @@ success will close the dialog.
 Styling: Set the class to one of ['orange', 'green', 'blue', 'grey']
 
 Events:
-- bl-ajax-dialog-cancel
-- bl-ajax-dialog-save
 - bl-ajax-dialog-success
 - bl-ajax-dialog-error
 
@@ -26,25 +22,20 @@ Polymer({
   
   properties: {
     title: String,
-    url: {
+    action: {
       type: String,
-      notify: true,
-      reflectToAttribute: true
     }, 
     method: { type: String, value: 'post' }, // = ['get', 'post']
-    headers: String,
+    headers: Object,
     saveButtonText: { type: String, value: 'Save' },
     cancelButtonText: { type: String, value: 'Cancel' },
-    loading: Boolean
+    loading: { type: Boolean, value: false },
+    isError: { type: Boolean, value: false },
+    errorText: String
   },
-  observers: [
-  // Note that this function  will not fire until *all* parameters
-  // given have been set to something other than `undefined`
-  'attributesReady(url)'
-  ],
-  
-  attributesReady: function(url) {
-    this.$.form.action = url;
+  listeners: { 
+    'form.iron-form-response': 'handleResponse',
+    'form.iron-form-error': 'handleError'          
   },
   
   // Methods
@@ -52,22 +43,60 @@ Polymer({
   close: function() { this.$.dialog.close(); },
   
   // Handles the json returned by rails
-  handleSubmit: function(data) {
-    this.fire('tagUpdate', data.detail.response.group_tag);
-    console.log(data.detail.response.group_tag);
+  handleResponse: function(e) {
+    //check if submission was successfull
+    var response = e.detail.response;
+    if (response.success) {
+      this.fire('bl-ajax-dialog-success', response.group_tag); 
+      this.close();
+    } else {
+      var errors = response.field_error_messages;
+      this.getContentChildren().forEach(function(inputElement) {
+        var fieldName;
+        //Regex to extract input name between square brackets.
+        if (inputElement.name.match(/\[(.*?)\]/)) {
+          fieldName = inputElement.name.match(/\[(.*?)\]/)[1];
+        } else {
+          fieldName = inputElement.name;
+        }
+        if (errors[fieldName]) {
+          inputElement.errorMessage = errors[fieldName][0].join('. ');
+          inputElement.invalid = true;
+        }
+      });
+      this.goError('There was a problem saving the record. ' 
+        + 'Please review the errors below and try again.');
+      this.fire('bl-ajax-dialog-error', response.group_tag);
+    }
+    this.loading = false;
   }, 
+  handleError: function(e) {
+    this.loading = false;
+    this.goError('There was a problem with the request, please try again.');
+  },
   
   // Events
   cancelButtonTap: function(e) {
+    this.clearError();
     this.close();
   },
   saveButtonTap: function(e) {
-    
-    this.$.form.headers = JSON.parse(this.headers);
+    this.clearError();
+    this.loading = true;
     this.$.form.submit();
-    
-    this.listen(this.$.form, 'iron-form-response', 'handleSubmit')
-    //this.close();
+  },
+
+
+  //Helpers
+  goError: function (errorText) {
+    this.isError = true;
+    this.errorText = errorText;
+  },
+  clearError: function () {
+    this.getContentChildren().forEach(function(inputElement) {
+      inputElement.invalid = false;
+    });
+    this.isError = false;
+    this.errorText = '';
   }
 });
-
