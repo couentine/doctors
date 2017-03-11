@@ -77,7 +77,13 @@
             </h2>
             <h3>
               <%= (@user.job_title.blank?) ? '' : "#{@user.job_title}, " %> 
-              <%= (@user.organization_name.blank?) ? '' : @user.organization_name %>
+              <% if !@user.organization_name.blank?  %>
+                <% if !@user.website.blank?  %>
+                  <%= link_to @user.organization_name, @user.website, target: '_blank' %>
+                <% else %>
+                  <%= @user.organization_name %>
+                <% end %>
+              <% end %>
               
               <% if (!@user.job_title.blank? || !@user.organization_name.blank?) \
                   && !@user.bio.blank? %>
