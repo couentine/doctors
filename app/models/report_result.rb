@@ -21,19 +21,21 @@ class ReportResult
 
   # === FIELDS & VALIDATIONS === #
 
-  field :type,                type: String
-  field :format,              type: String
-  field :status,              type: String, default: 'pending'
-  field :error_message,       type: String # set if status = 'failed'
+  field :type,                    type: String
+  field :format,                  type: String
+  field :status,                  type: String, default: 'pending'
+  field :error_message,           type: String # set if status = 'failed'
   
-  field :parameters,          type: Hash, default: {}, pre_processed: true
-  field :cleaned_parameters,  type: Hash, default: {}, pre_processed: true
-  field :sort_field,          type: String # json only, should be REPORT_TYPE_VALUES key
-  field :sort_order,          type: String # json only, should be 'asc' or 'desc'
-  field :page,                type: Integer # json only, defaults to 1
-  field :results,             type: Array, default: [], pre_processed: true
-  field :total_result_count,  type: Integer # automatically set to total row count
-  field :poller_id,           type: BSON::ObjectId # keep poller model lean = no relationships
+  field :parameters,              type: Hash, default: {}, pre_processed: true
+  field :cleaned_parameters,      type: Hash, default: {}, pre_processed: true
+  field :sort_field,              type: String # json only, should be REPORT_TYPE_VALUES key
+  field :sort_order,              type: String # json only, should be 'asc' or 'desc'
+  field :page,                    type: Integer # json only, defaults to 1
+  field :results,                 type: Array, default: [], pre_processed: true
+  field :total_result_count,      type: Integer # automatically set to total row count
+  field :poller_id,               type: BSON::ObjectId # keep poller model lean = no relationships
+
+  mount_uploader :results_file,   OutputFileUploader # used to upload csv format to S3
 
   validates :user, presence: true
   validates :type, presence: true,
@@ -47,7 +49,8 @@ class ReportResult
   # === CALLBACK === #
 
   after_create :generate_results
-  after_save :queue_delete_if_complete
+  before_update :upload_results_file
+  after_save :queue_delete
 
   # === REPORT TYPE CONFIGUATION === #
 
@@ -467,7 +470,26 @@ protected
     rows
   end
 
-  def queue_delete_if_complete
+  # Call from after update, checks if results have changed and the format is csv
+  # If so it will upload the csv to S3
+  def upload_results_file
+    # NOTE that even a "blank" report will have one row in results
+    if results_changed? && !results.blank? && (format == 'csv')
+      # Create a temp file and then use it to build the csv
+      output_file_path = "#{Rails.root}/tmp/report_result_#{id.to_s}.csv"
+      output_file = CSV.open(output_file_path, 'wb') do |csv|
+        results.each do |row|
+          csv << row
+        end
+      end
+      
+      # Now store the file in S3
+      self.results_file = Pathname.new(output_file_path).open
+    end
+  end
+
+  # Call from after save, it queues the automatic deletion of the record when completed
+  def queue_delete
     ReportResult.delay_for(DELETE_AFTER).delete_report_result(id.to_s) if completed
   end
 
