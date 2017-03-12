@@ -51,6 +51,7 @@ class ReportResult
   after_create :generate_results
   before_update :upload_results_file
   after_save :queue_delete
+  before_destroy :remove_results_file
 
   # === REPORT TYPE CONFIGUATION === #
 
@@ -343,7 +344,7 @@ protected
 
       # Now initialize the user criteria
       sort_field_item = REPORT_TYPE_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
-        .find{ |field| field[:key] }
+        .find{ |field| field[:key] == sort_field }
       user_criteria = (group_tag) ? group_tag.users : group.users
       user_criteria = user_criteria.order_by("#{sort_field_item[:value]} #{sort_order}")
       
@@ -396,7 +397,7 @@ protected
 
       # Now initialize the log criteria
       sort_field_item = REPORT_TYPE_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
-        .find{ |field| field[:key] }
+        .find{ |field| field[:key] == sort_field }
       if group_tag
         all_user_ids = group_tag.user_ids
       else
@@ -485,6 +486,13 @@ protected
       
       # Now store the file in S3
       self.results_file = Pathname.new(output_file_path).open
+    end
+  end
+
+  # This should be called before destroy, it deletes the uploaded results file from S3
+  def remove_results_file
+    if results_file && results_file.url.blank?
+      self.remove_results_file!
     end
   end
 
