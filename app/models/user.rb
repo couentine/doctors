@@ -37,6 +37,7 @@ class User
   has_many :created_entries, inverse_of: :creator, class_name: "Entry"
   has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
   has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
+  has_many :report_results, dependent: :destroy
   has_many :info_items, dependent: :destroy
   belongs_to :domain, inverse_of: :users, class_name: "Domain" # don't ever set this manually,
   has_many :owned_domains, inverse_of: :owner, class_name: "Domain"
