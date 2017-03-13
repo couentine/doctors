@@ -792,6 +792,22 @@ class Group
   end
 
   # === STRIPE RELATED METHODS === #
+
+  # This method will refresh the limits fields from the ALL_SUBSCRIPTION_PLANS configuration 
+  def refresh_subscription_limits
+    if !subscription_plan.blank? && ALL_SUBSCRIPTION_PLANS.has_key?(subscription_plan)
+      self.user_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['users']
+      self.admin_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['admins']
+      self.sub_group_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['sub_groups']
+    end
+  end
+
+  # This method will refresh the features field from the ALL_SUBSCRIPTION_PLANS configuration 
+  def refresh_subscription_features
+    if !subscription_plan.blank? && ALL_SUBSCRIPTION_PLANS.has_key?(subscription_plan)
+      self.features = ALL_SUBSCRIPTION_PLANS[subscription_plan]['features']
+    end
+  end
   
   # Calls out to stripe to create new subscription for the group
   # Set async to true to do the call asynchronously

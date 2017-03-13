@@ -28,10 +28,6 @@ $(document).ready(function() {
 var termMessages = {
   "admin": "Only group admins are able to create new badges, manage group membership and change "
     + "group settings.",
-  "branding": "Branding features (COMING SOON) include custom colors and logo options on your "
-    + "Badge List site and in emails sent out from your group.",
-  "community": "Community features include collaborative wiki pages and (COMING SOON) "
-    + "group profile pages and group search.",
   "domain-privacy": "Registering your email domain as private ensures that the profiles of all "
     + "Badge List users registered with email addresses on your domain "
     + "(eg: 'anyone@yourdomain.edu') are only visible to other users who are also on the "
@@ -44,9 +40,8 @@ var termMessages = {
     + "are public and indexed by search engines.",
   "privacy-controls": "Closed groups let admins decide between three levels of privacy for "
     + "each badge and piece of required evidence: public, private and secret.",
-  "sub-groups": "(COMING SOON) Sub-groups allow you to link multiple groups underneath your "
-    + "primary group. This allows you to create separate collections of badges with "
-    + "a single unified membership structure.",
+  "reporting": "Reporting enables group admins to generate reports on membership and badge "
+    + "activity. Reports can be exported to CSV.",
   "teacher": "The Teacher plan only supports the creation and awarding of badges by a single "
     + "teacher.",
   "unlimited-badge-awarders": "Unlimited badge awarder plans support 3 different types of badge "
