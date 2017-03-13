@@ -1,6 +1,7 @@
 class ReportResult
   include Mongoid::Document
   include Mongoid::Timestamps
+  include JSONTemplater
 
   # ============================================================================================= #
   # NOTE: Do not create report results manually. Only use ReportResult.build()
@@ -14,6 +15,11 @@ class ReportResult
   SORT_ORDER_VALUES = ['asc', 'desc'] # NOTE: This isn't enforced in a validator
   DELETE_AFTER = 2.hours # old report results are automatically deleted
   PAGE_SIZE = 200
+
+  JSON_TEMPLATES = {
+    detail: [:id, :user_id, :type, :format, :status, :error_message, :parameters, :sort_field,
+      :sort_order, :page, :results, :total_result_count]
+  }
 
   # === RELATIONSHIPS === #
 
