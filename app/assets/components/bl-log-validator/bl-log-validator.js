@@ -13,7 +13,7 @@ Polymer({
 
     // Computed
     logCount: { type: Number, value: 0, computed: "_logCount(selectedLogs)" },
-    logUsernames: { type: Number, value: 0, computed: "_logUsernames(selectedLogs)" }
+    logIds: { type: Number, value: 0, computed: "_logIds(selectedLogs)" }
   },
 
   listeners: {
@@ -45,11 +45,10 @@ Polymer({
       // First build the query url
       bodyText = this.body ? this.body.replace(/(?:\r\n|\r|\n)/g, "<br>") : "";
       queryParams = { 
-        "badge": this.sourceList.queryOptions.badge,
         "summary": this.summary,
         "body": bodyText,
         "logs_validated": withEndorsement,
-        "log_usernames": self.logUsernames
+        "log_ids": self.logIds
       }
       queryUrl = self.groupValidationsPath + "?" + $.param(queryParams);
 
@@ -60,7 +59,7 @@ Polymer({
             + "Please try again later.");
         else if (result.error_message && result.error_message.trim().length)
           alert("There was a problem posting your feedback, the server returned an error. "
-            + "(Error Message: " + poller.error_message + ")");
+            + "(Error Message: " + result.error_message + ")");
         else if (result.poller_id && result.poller_id.trim().length) {
           // Everything looks good, clear the selected items and then switch to the progress modal
           self.sourceList.removeSelectedItems();
@@ -88,9 +87,9 @@ Polymer({
   _logCount: function(selectedLogs) { 
     return (selectedLogs && selectedLogs.length) ? selectedLogs.length : 0; 
   },
-  _logUsernames: function(selectedLogs) { 
+  _logIds: function(selectedLogs) { 
     if (selectedLogs)
-      return $.map(selectedLogs, function(item, index) { return item.user_username }); 
+      return $.map(selectedLogs, function(item, index) { return item.id }); 
     else
       return [];
   }

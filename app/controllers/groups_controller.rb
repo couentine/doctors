@@ -1076,39 +1076,24 @@ class GroupsController < ApplicationController
     end
   end
 
-  # POST /group-url/validations?badge=badge-url&log_usernames[]=user123&summary=text&body=text
-  #     &logs_validated=true
+  # POST /group-url/validations?log_ids[]=abc123&summary=text&body=text&logs_validated=true
   # Initializes a bulk validation call and returns (JSON only) a poller id.
   # If there's a problem, :poller_id will be blank and :error_message will be set.
   def create_validations
-    badge_param = params['badge'].to_s.downcase
-    @log_usernames = params['log_usernames']
+    @log_ids = params['log_ids']
     @summary = params['summary']
     @body = params['body']
     @logs_validated = (params['logs_validated'] == 'true') || (params['logs_validated'] == true)
     @error_message = nil
     @poller_id = nil
-    
-    # Get the badge id while also verifying that it exists in this group
-    @badge = @group.badges.where(url: badge_param).first
 
-    if @badge
-      if @current_user_is_admin || @badge_list_admin \
-          || ((@badge.awardability == 'experts') \
-            && @badge.expert_user_ids.include?(current_user.id))
-        if @log_usernames.blank?
-          @error_message = "Log usernames parameter is missing."
-        elsif @summary.blank?
-          @error_message = "Summary parameter is missing."
-        else
-          @poller_id = Log.add_validations(@badge.id, @log_usernames, current_user.id, @summary,
-            @body, @logs_validated, true, true)
-        end
-      else
-        @error_message = "You do not have access to award this badge."
-      end
+    if @log_ids.blank?
+      @error_message = "Log ids parameter is missing."
+    elsif @summary.blank?
+      @error_message = "Summary parameter is missing."
     else
-      @error_message = "There is no badge in this group with url '#{badge_param}."
+      @poller_id = Log.add_validations(@log_ids, current_user.id, @summary, @body, 
+        @logs_validated, true, true)
     end
 
     # Now we can respond
