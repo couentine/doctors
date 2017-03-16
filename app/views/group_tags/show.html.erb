@@ -100,12 +100,16 @@
   <!-- #=== AJAX CALL TO EDIT TAG ===# -->
   <bl-ajax-dialog id="editGroupTagDialog" title="Edit group tag" 
       action="<%= group_tag_url(@group, @group_tag, format: :json) %>" 
-      class="green"
+      class="green" 
       method="PUT" headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}' 
       content-type="application/json">
     <paper-input
       id="tagname" label="Tag Name" name="group_tag[name_with_caps]" 
-      value="<%= @group_tag.name_with_caps %>" 
+      prevent-invalid-input auto-validate required
+      minlength="2"
+      allowed-pattern="[a-zA-Z0-9-_]"
+      pattern="[a-z0-9][-_a-z0-9]*[a-z0-9]"
+      value="<%= @group_tag.name_with_caps %>"
       maxlength="<%= GroupTag::MAX_NAME_LENGTH %>">
     </paper-input>
     <paper-textarea
@@ -127,12 +131,12 @@
             <%= link_to '<i class="fa fa-sliders"></i> Edit Permissions'.html_safe, 
               group_url(@group) + '#settings' %>
           </li>
-          <li>
-           <a href="#" onClick="editGroupTag(); return false;">
-            <i class="fa fa-pencil"></i> Edit Group Tag
-           </a>
-          </li>
         <% end %>
+        <li>
+          <a href="#" onClick="editGroupTag(); return false;">
+            <i class="fa fa-pencil"></i> Edit Group Tag
+          </a>
+        </li>
         <li>
           <a href="#" onClick="deleteGroupTag(); return false;">
             <i class="fa fa-trash"></i> Delete Group Tag
@@ -243,6 +247,11 @@
           .addEventListener('iron-ajax-response', handleDeleteGroupTagResponse);
         document.getElementById('deleteGroupTagAjax')
           .addEventListener('iron-ajax-error', handleDeleteGroupTagError);
+
+        document.getElementById('editGroupTagDialog')
+          .addEventListener('bl-ajax-dialog-success', handleEditGroupTagSuccess);
+
+        document.getElementById('tagname').addEventListener('keyup', handleFormValidation);
       });
 
       // #=== USER REMOVE HANDLING ===# 
@@ -336,8 +345,7 @@
         document.getElementById('editGroupTagDialog').open();
       }
 
-      document.getElementById('editGroupTagDialog').addEventListener('bl-ajax-dialog-success', 
-      function(data) {
+      function handleEditGroupTagSuccess(data) {
         if (document.getElementById('summaryText')
          && document.getElementById('summaryText').innerHTML) {
           document.getElementById('summaryText').innerHTML = data.detail.summary;
@@ -348,12 +356,11 @@
           var newLocation = location.substring(0, location.lastIndexOf('/')) + '/' + data.detail.name;
           window.location.replace(newLocation);
         }
-      });
+      }
 
-      document.getElementById('editGroupTagDialog').addEventListener('bl-ajax-dialog-error', 
-        function(errorArr) {
-        
-      });
+      function handleFormValidation(e) {
+        document.getElementById('editGroupTagDialog').valid = !document.getElementById('tagname').invalid;
+      }
 
     </script>
 

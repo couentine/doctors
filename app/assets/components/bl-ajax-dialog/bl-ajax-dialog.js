@@ -31,13 +31,13 @@ Polymer({
     cancelButtonText: { type: String, value: 'Cancel' },
     loading: { type: Boolean, value: false },
     isError: { type: Boolean, value: false },
+    valid: { type: Boolean, value: true },
     errorText: String
   },
   listeners: { 
     'form.iron-form-response': 'handleResponse',
-    'form.iron-form-error': 'handleError'          
+    'form.iron-form-error': 'handleError',
   },
-  
   // Methods
   open: function() { this.$.dialog.open(); },
   close: function() { this.$.dialog.close(); },
@@ -65,7 +65,7 @@ Polymer({
         }
       });
       this.goError('There was a problem saving the record. ' 
-        + 'Please review the errors below and try again.');
+      + 'Please review the errors below and try again.');
       this.fire('bl-ajax-dialog-error', response.group_tag);
     }
     this.loading = false;
@@ -85,8 +85,8 @@ Polymer({
     this.loading = true;
     this.$.form.submit();
   },
-
-
+  
+  
   //Helpers
   goError: function (errorText) {
     this.isError = true;
