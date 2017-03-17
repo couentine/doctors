@@ -353,13 +353,15 @@
         if(document.querySelector('bl-app-header-tag').name !== data.detail.name) {
           document.querySelector('bl-app-header-tag').name = data.detail.name;
           var location = window.location.href;
-          var newLocation = location.substring(0, location.lastIndexOf('/')) + '/' + data.detail.name;
+          var newLocation = location
+            .substring(0, location.lastIndexOf('/')) + '/' + data.detail.name;
           window.location.replace(newLocation);
         }
       }
 
       function handleFormValidation(e) {
-        document.getElementById('editGroupTagDialog').valid = !document.getElementById('tagname').invalid;
+        document
+          .getElementById('editGroupTagDialog').valid = !document.getElementById('tagname').invalid;
       }
 
     </script>
