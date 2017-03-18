@@ -469,6 +469,13 @@ class Badge
     !wikis_json_clone.blank?
   end
 
+  # Returns boolean indicating whether the specified user has permission to award this badge
+  # Does NOT query any additional records, only references badge and user fields
+  def can_be_awarded_by?(user)
+    user.admin || user.admin_of_ids.include?(group_id) \
+      || ((awardability == 'experts') && expert_user_ids.include?(user.id))
+  end
+
   # Return tags with type = 'requirement' sorted by sort_order
   def requirements
     tags.where(type: 'requirement').order_by(:sort_order.asc)
