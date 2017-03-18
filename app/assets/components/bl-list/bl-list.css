@@ -111,6 +111,7 @@
     .next-page bl-button.badges { background: rgb(239,108,0); }
     .next-page bl-button.groups { background: rgb(3,169,244); }
     .next-page bl-button.users { background: #757575; }
+    .next-page bl-button.group_tags { background: #2E7D32; }
 
 /* === SIMPLE LAYOUT === */
 

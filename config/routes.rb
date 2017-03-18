@@ -44,6 +44,7 @@ BadgeList::Application.routes.draw do
   
   # === RESTFUL PATHS TO PRELOAD === #
   resources :domains
+  resources :report_results, :only => [:index, :show, :new, :create]
 
   # === MANUAL FORM PATHS === #
   match 'f/talk-with-us' => 'forms#user_discussion', via: :post

@@ -7,10 +7,42 @@ class ReportResultsController < ApplicationController
   before_action :authenticate_user!
   before_action :is_creator_or_bl_admin, only: [:show]
 
+  # === CONSTANTS === #
+
+  PERMITTED_PARAMS = [:type, :format, :parameters]
+
+  # Normal usage is HTML version returns 1st page of results, JSON used to query additional pages
+  # GET /report_results?page=2&page_size=12
+  # GET /report_results.json?page=2&page_size=12
+  def index
+    # Get pagination variables
+    @page_size = (params['page_size'] || APP_CONFIG['page_size_large']).to_i
+    @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
+    @page = (params['page'] || 1).to_i
+
+    # Admins can see all results, non-admins only see the ones they've created
+    @report_results = (@badge_list_admin ? ReportResult : current_user.report_results)\
+      .order_by('created_at desc').page(@page).per(@page_size)
+    @report_results_hash = ReportResult.array_json(@report_results, :list_item)
+    
+    respond_to do |format|
+      format.html do
+        render layout: 'app'
+      end
+      format.json do
+        render json: { page: @page, page_size: @page_size, report_results: @report_results_hash, 
+          next_page: @next_page, success: true }
+      end
+    end
+  end
+
   # GET /report_results/1
   # GET /report_results/1.json
   def show
     respond_to do |format|
+      format.html do
+        render layout: 'app'
+      end
       format.json do
         if @badge_list_admin
           render json: @report_result.as_json
@@ -18,7 +50,6 @@ class ReportResultsController < ApplicationController
           render json: @report_result.json(:detail)
         end
       end
-      format.html # render show.html.erb
     end
   end
 
@@ -35,19 +66,27 @@ class ReportResultsController < ApplicationController
     end      
   end
 
-  # JSON only, returns poller / poller id if report results is successfully created.
-  # POST /report_results?report_result[]=...
+  # JSON only, returns hash with keys = [success, poller_id, field_error_messages]
+  # If success, then poller_id will be set and field_error_messages will be null
+  # If !success, then poller_id will be null and field_error_messages will be a hash of errors
+  # POST /report_results.json
   def create
-    rr_params = params['report_result']
-    @report_result = ReportResult.build(current_user.id, rr_params['type'], 'json', 
-      rr_params['parameters'], async: true)
+    respond_to do |format|
+      format.json do
+        rr_params = report_result_params
+        rr_params['user'] = current_user
+        
+        # First we verify the attributes synchronously (avoid starting a poller if params are bad)
+        @report_result = ReportResult.new(rr_params)
 
-    if @report_result.valid? # ==> Left off here. 
-      redirect_to report_result_path(@group, @report_result), notice: 'Report result was successfully created.'
-    else
-      redirect_to @group, 
-        alert: "There was a problem creating a tag called #{@report_result.name_with_caps}. " \
-          + 'Try creating a tag with a different name.'
+        if @report_result.valid?
+          @poller_id = ReportResult.create_async(rr_params)
+          render json: { success: true, poller_id: @poller_id, field_error_messages: nil }
+        else
+          render json: { success: false, poller_id: nil, 
+            field_error_messages: @report_result.errors.messages }
+        end
+      end
     end
   end
 
@@ -69,6 +108,10 @@ private
     if !@is_creator && !@badge_list_admin 
       redirect_to '/'
     end
+  end
+
+  def report_result_params
+    params.require(:group_tag).permit(PERMITTED_PARAMS)
   end
 
 end

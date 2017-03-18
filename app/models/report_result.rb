@@ -4,7 +4,8 @@ class ReportResult
   include JSONTemplater
 
   # ============================================================================================= #
-  # NOTE: Do not create report results manually. Only use ReportResult.build()
+  # NOTE: The results are generated via an after_create callback, so generally you will want to
+  #       use ReportResult.create_async() to make a new result item. 
   # ============================================================================================= #
   
   # === CONSTANTS === #
@@ -18,7 +19,9 @@ class ReportResult
 
   JSON_TEMPLATES = {
     detail: [:id, :user_id, :type, :format, :status, :error_message, :parameters, :sort_field,
-      :sort_order, :page, :results, :total_result_count]
+      :sort_order, :page, :results, :total_result_count],
+    list_item: [:id, :user_id, :type, :format, :status, :error_message, :sort_field, :sort_order, 
+      :page, :total_result_count]
   }
 
   # === RELATIONSHIPS === #
@@ -139,26 +142,16 @@ class ReportResult
 
   # === CLASS METHODS === #
 
-  # This is the primary way to create a report result
-  # Accepted options = :async, :poller_id
-  # If you set async to true the method will save the record in a background thread and return
-  # a poller id. Otherwise it will return the saved report result record.
-  # NOTE: Leave the poller id blank if you're running async (it will be created for you)
-  #       and it is optional if you're non-async (it just sets the poller_id field).
-  def self.build(user_id, type, format, parameters, options = {})
-    if options[:async]
-      poller = Poller.new
-      poller.waiting_message = 'Building report results'
-      poller.save
-      ReportResult.delay(queue: 'default', retry: false).build(user_id, type, format, parameters,
-        poller_id: poller.id)
-      poller.id
-    else
-      report_result = ReportResult.new(user_id: user_id, type: type, format: format, 
-        parameters: parameters, poller_id: options[:poller_id])
-      report_result.save
-      report_result
-    end
+  # This calls the standard create method in a background thread and returns a poller id. 
+  def self.create_async(attributes = nil)
+    poller = Poller.new
+    poller.waiting_message = 'Building report results'
+    poller.save
+
+    attributes[:poller_id] = poller.id
+    ReportResult.delay(queue: 'default', retry: false).create(attributes)
+
+    poller.id
   end
 
   def self.delete_report_result(report_result_id)

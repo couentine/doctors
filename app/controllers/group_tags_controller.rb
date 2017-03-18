@@ -21,25 +21,19 @@ class GroupTagsController < ApplicationController
   # GET /group-url/tags.json?page=2
   def index
     # Get pagination variables
-    @page_size = params['page_size'] || APP_CONFIG['page_size_large']
+    @page_size = (params['page_size'] || APP_CONFIG['page_size_large']).to_i
     @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
+    @page = (params['page'] || 1).to_i
     
+    @group_tags = @group.tags.order_by('user_magnitude desc, name asc').page(@page).per(@page_size)
+    @group_tags_hash = GroupTag.array_json(@group_tags, :list_item)
+    @next_page = @page + 1 if @group_tags.count > (@page_size * @page)
+      
     respond_to do |format|
       format.html do
-        @group_tags_hash = GroupTag.array_json(
-          @group.tags.order_by('user_magnitude desc, name asc').page(1).per(@page_size),
-            :list_item)
         render layout: 'app'
       end
       format.json do
-        @page = params['page'] || 1
-        @next_page = nil
-
-        group_tag_criteria = @group.tags.order_by('user_magnitude desc, name asc')\
-          .page(@page).per(@page_size)
-        @group_tags_hash = GroupTag.array_json(group_tag_criteria, :list_item)
-        @next_page = @page + 1 if group_tag_criteria.count > (@page_size * @page)
-
         render json: { page: @page, page_size: @page_size, group_tags: @group_tags_hash, 
           next_page: @next_page, success: true }
       end
