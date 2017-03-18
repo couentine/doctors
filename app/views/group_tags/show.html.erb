@@ -108,7 +108,7 @@
       prevent-invalid-input auto-validate required
       minlength="2"
       allowed-pattern="[a-zA-Z0-9-_]"
-      pattern="[a-z0-9][-_a-z0-9]*[a-z0-9]"
+      pattern="[a-zA-Z0-9][-_a-zA-Z0-9]*[a-zA-Z0-9]"
       value="<%= @group_tag.name_with_caps %>"
       maxlength="<%= GroupTag::MAX_NAME_LENGTH %>">
     </paper-input>
@@ -350,11 +350,11 @@
          && document.getElementById('summaryText').innerHTML) {
           document.getElementById('summaryText').innerHTML = data.detail.summary;
         }
-        if(document.querySelector('bl-app-header-tag').name !== data.detail.name) {
-          document.querySelector('bl-app-header-tag').name = data.detail.name;
+        if(document.querySelector('bl-app-header-tag').name !== data.detail.name_with_caps) {
+          document.querySelector('bl-app-header-tag').name = data.detail.name_with_caps;
           var location = window.location.href;
           var newLocation = location
-            .substring(0, location.lastIndexOf('/')) + '/' + data.detail.name;
+            .substring(0, location.lastIndexOf('/')) + '/' + data.detail.name_with_caps;
           window.location.replace(newLocation);
         }
       }
