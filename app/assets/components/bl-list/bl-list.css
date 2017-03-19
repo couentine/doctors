@@ -108,10 +108,11 @@
       margin: auto;
       color: white;
     }
-    .next-page bl-button.badges { background: rgb(239,108,0); }
-    .next-page bl-button.groups { background: rgb(3,169,244); }
-    .next-page bl-button.users { background: #757575; }
-    .next-page bl-button.group_tags { background: #2E7D32; }
+    .next-page bl-button.badges { background: #EF6C00; } /* orange-800 */
+    .next-page bl-button.groups { background: #03A9F4; } /* light-blue-500 */
+    .next-page bl-button.users { background: #757575; } /* grey-600 */
+    .next-page bl-button.group_tags { background: #2E7D32; } /* green-800 */
+    .next-page bl-button.report_results { background: #FF9800; } /* orange-500 */
 
 /* === SIMPLE LAYOUT === */
 
@@ -121,6 +122,10 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
   .simple-list.users {
+    max-width: 25em;
+    margin: 1em auto;
+  }
+  .simple-list.report_results {
     max-width: 25em;
     margin: 1em auto;
   }

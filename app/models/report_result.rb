@@ -19,9 +19,11 @@ class ReportResult
 
   JSON_TEMPLATES = {
     detail: [:id, :user_id, :type, :format, :status, :error_message, :parameters, :sort_field,
-      :sort_order, :page, :results, :total_result_count],
+      :sort_order, :page, :results, :total_result_count, :report_type_label, :report_type_icon, 
+      :display_name],
     list_item: [:id, :user_id, :type, :format, :status, :error_message, :sort_field, :sort_order, 
-      :page, :total_result_count]
+      :page, :total_result_count, :report_type_label, :report_type_icon, :display_name, :full_path,
+      :full_url]
   }
 
   # === RELATIONSHIPS === #
@@ -64,6 +66,13 @@ class ReportResult
 
   # === REPORT TYPE CONFIGUATION === #
 
+  # This is used to display the different types of reports to the user
+  # The icon value should be a material design iron-icon. List here: http://bit.ly/2nE9YrJ
+  REPORT_TYPES = {
+    'group_users' => { label: 'Group Members', icon: 'social:people' },
+    'group_badge_logs' => { label: 'Badge Portfolios', icon: 'icons:assignment-ind' }
+  }
+  
   # This constant defines all of the parameters which are accepted for each report type
   # The spec for each parameter is used to validate it in the clean_parameters method
   REPORT_TYPE_PARAMETERS = {
@@ -160,6 +169,26 @@ class ReportResult
   end
   
   # === INSTANCE METHODS === #
+
+  def full_path
+    "/report_results/#{id.to_s}"
+  end
+
+  def full_url
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}#{full_path}"
+  end
+
+  def report_type_label
+    (REPORT_TYPES.has_key? type) ? REPORT_TYPES[type][:label] : ''
+  end
+  
+  def report_type_icon
+    (REPORT_TYPES.has_key? type) ? REPORT_TYPES[type][:icon] : ''
+  end
+
+  def display_name
+    "#{report_type_label} - #{created_at.to_s(:full_date_time)}"
+  end
 
   def completed
     (status == 'successful') || (status == 'failed')

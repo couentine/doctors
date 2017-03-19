@@ -47,10 +47,10 @@
     bottom: 0;
     left: 3em;
     overflow: hidden;
+    transition: color .2s ease-in;
   }
-  #titleWrapper.true { /* true = this.extraSpace */
-    bottom: 3em;
-  }
+  #titleWrapper.extraSpace { bottom: 3em; }
+  #titleWrapper.isFullyCondensed { color: white; }
     h1 {
       font-size: 1.8em;
       line-height: 1.2em;

@@ -1,0 +1,65 @@
+<% 
+  provide(:title, "Report Results")  
+%>
+
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-text title="Report Results" extra-space></bl-app-header-text>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+  
+  <style type="text/css">
+    
+    .page-header {
+      position: relative;
+      padding: 2.5em;
+      margin-bottom: 3.5em;
+      text-align: center;
+      background-color: #F5F5F5;
+      border-top: 1px solid #E0E0E0;
+      border-bottom: 1px solid #E0E0E0;
+    }
+      .page-header bl-fab {
+        position: absolute;
+        right: 2em;
+        bottom: -28px;
+      }
+
+    bl-list {
+      min-height: 20em;
+    }
+
+  </style>
+
+  <!-- #=== PAGE HEADER ===# -->
+
+  <div class="page-header">
+    <div class="description">
+      The results from your recently run reports are displayed below.
+      Report results are automatically deleted after 
+      <%= pluralize (ReportResult::DELETE_AFTER.to_i / 3600), 'hours' %>.
+    </div>
+    <bl-fab icon="add" link="<%= new_report_result_path %>" 
+      background="#FF9800" color="white" tooltip="Run a report"></bl-fab>
+  </div>
+
+  <!-- #=== REPORT RESULTS ===# -->
+
+  <bl-list id="report-result-list" object-mode="report_results" next-page-param="page"
+      items='<%= @report_results_hash.to_json %>' next-page="<%= @next_page %>" 
+      next-page-url="<%= report_results_url(page_size: @page_size, format: :json) %>"
+      simple-mode row-title-key="display_name" row-icon-key="report_type_icon" 
+      row-link-key="full_url">
+    <div class="placeholder">
+      <i class="fa fa-table"></i>
+      <div class="message">
+        <p><b>You don't have any recent report results.</b></p> 
+        <% if @can_create_report_results %>
+          <p>Click the '+' button above to run a report.</p>
+        <% end %>
+      </div>
+    </div>
+  </bl-list>
+

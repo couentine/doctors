@@ -70,7 +70,7 @@ class GroupTag
 
   # WARNING: This will result in a database query
   def full_url
-    "#{ENV['root_url'] || 'https://www.badgelist.com'}/#{full_path}"
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}#{full_path}"
   end
 
   # Returns stringified version of user_ids

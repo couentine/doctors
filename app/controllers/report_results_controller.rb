@@ -24,6 +24,7 @@ class ReportResultsController < ApplicationController
     @report_results = (@badge_list_admin ? ReportResult : current_user.report_results)\
       .order_by('created_at desc').page(@page).per(@page_size)
     @report_results_hash = ReportResult.array_json(@report_results, :list_item)
+    @next_page = @page + 1 if @report_results.count > (@page_size * @page)
     
     respond_to do |format|
       format.html do
@@ -99,9 +100,9 @@ private
   def query_records
     prep_variables
 
-    @report_result = GroupTag.find((params[:id] || params[:report_result_id]).to_s.downcase) \
+    @report_result = ReportResult.find((params[:id] || params[:report_result_id]).to_s.downcase) \
       || not_found
-    @is_creator = current_user && (current_user.id == @report_result.creator_id)
+    @is_creator = current_user && (current_user.id == @report_result.user_id)
   end
 
   def is_creator_or_bl_admin
