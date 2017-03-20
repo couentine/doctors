@@ -9,7 +9,7 @@
   <% content_for :app_header_content do %>
     <bl-app-header-form title="<%= @page_title %>">
       <% if @display_mode == 'form' %>
-        <bl-button js="addUsersToTag()" class="save-button" background="#FB8C00" color="white">
+        <bl-button js="runReport()" class="save-button" background="#FB8C00" color="white">
           Run
         </bl-button>
       <% end %>
@@ -76,6 +76,7 @@
     #reportCreationForm {
       display: flex;
       justify-content: center;
+      margin: 1em 0; 
     }
       #formContainer {
         display: flex;
@@ -144,13 +145,54 @@
           <h2>Report Parameters</h2>
         </div>
         <div id="formInnerContainer">
-          <bl-form headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'
-            action="<%= report_results_url(format: :json) %>" method="post"
+          <bl-form id="createReportResult" action="<%= report_results_url(format: :json) %>" 
+            method="post" headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'
             field-specs="<%= @field_specs_polymer.to_json %>"></bl-form>
         </div>
       </div>
     </div>
 
   <% end %>
+
+  <!-- #=== PAGE-SPECIFIC JAVASCRIPT ===# -->
+
+  <script type="text/javascript">
+    
+    function runReport() {
+      appContainer.openWaitingDialog({ color: 'orange', title: 'Submitting request...' });
+      document.getElementById('createReportResult').submit();
+    }
+
+    // Add listeners once the layout is ready
+    appLayout.addEventListener('dom-change', function() {
+      document.addEventListener('bl-form-response', handleResponse);
+      document.addEventListener('bl-form-error', handleError);
+    });
+
+    function handleResponse(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.openPollerDialog(e.detail.response.poller_id, {
+        color: 'orange', 
+        title: 'Report status',
+        confirm: { 
+          text: 'View results', 
+          action: function() { 
+            document.location.href = "/p/" + e.detail.response.poller_id;
+          }
+        }
+      });
+    }
+
+    function handleError(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.openAlertDialog({
+        color: 'orange', 
+        title: 'Error building report',
+        body: e.detail.errorMessage,
+        confirm: { text: 'Close' }
+      });
+    }
+
+  </script>
 
   

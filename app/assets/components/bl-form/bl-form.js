@@ -4,11 +4,28 @@
 
 /*
 
-FIXME
+This is a generic form component designed to accept a list of field specs (refer to bl-form-field
+for full documentation) and use the specs to build an iron-form which submits via ajax. 
+Call submit() to submit the form. This component automatically validates the form before 
+submitting the request (unless you set doNotValidate to true) and throws an error if any of the
+fields are invalid.
 
 Events:
-- bl-form-success
-- bl-form-error
+- bl-form-error: Fires after submit if there is a validation error, if no response is received,
+  or if the success key on the response is false.
+- bl-form-success: Fires after a response is received, but only if the success key is true.
+
+## How error messages are parsed ##
+  
+All responses should have a success key. If success is false then this component will check for 
+one of the following three keys in the reseponse:
+- error_message: If present, this should be a simple string. It is passed directly on to the 
+  component consumer (where it will be displayed to the users as is).
+- error_messages: If present, this should be an array of string. They will be preceded by a generic
+  error message and then appended into a comma delimited list.
+- field_error_messages: If this is present, it should be an object with a key for each error field
+  contained in the input. The form will attempt to display the errors on each field and if the 
+  fields cannot be found, extra errors will be treated in the same manner as error_messages.
 
 */
 
@@ -20,75 +37,64 @@ Polymer({
     method: { type: String, value: 'post' }, // = ['get', 'post']
     headers: Object,
     fieldSpecs: Array,
-    
-    loading: { type: Boolean, value: false },
-    isError: { type: Boolean, value: false },
-    valid: { type: Boolean, value: true },
-    errorText: String
+    doNotValidate: { type: Boolean, value: false }
   },
   listeners: { 
     'form.iron-form-response': 'handleResponse',
     'form.iron-form-error': 'handleError',
   },
   
-  // Methods
-  // FIXME
+  // Actions
+  submit: function() {
+    if (this.$.form.validate())
+      this.$.form.submit();
+    else
+      this.goError('One or more form values is invalid. Please review the error messages, fix '
+        + 'the problematic values and try again.');
+  },
   
   // Handles the json returned by rails
   handleResponse: function(e) {
-    //check if submission was successfull
     var response = e.detail.response;
+    
     if (response.success) {
-      this.fire('bl-form-success', response.group_tag); 
-      this.close();
+      this.fire('bl-form-success', { response: response }); 
     } else {
-      var errors = response.field_error_messages;
-      this.getContentChildren().forEach(function(inputElement) {
-        var fieldName;
-        //Regex to extract input name between square brackets.
-        if (inputElement.name.match(/\[(.*?)\]/)) {
-          fieldName = inputElement.name.match(/\[(.*?)\]/)[1];
-        } else {
-          fieldName = inputElement.name;
-        }
-        if (errors[fieldName]) {
-          inputElement.errorMessage = errors[fieldName][0].join('. ');
-          inputElement.invalid = true;
-        }
-      });
-      this.goError('There was a problem saving the record. ' 
-      + 'Please review the errors below and try again.');
-      this.fire('bl-form-error', response.group_tag);
+      var errorMessage;
+
+      if (response.field_error_messages) {
+        // NOTE: Field specific errors aren't fully working yet (bl-form-field doesn't yet support 
+        //       goError(); And I need to add an error clearing ability)
+
+        var unmatchedErrorMessages = [];
+        var fieldErrorMessages = response.field_error_messages; // shortcut
+        var matchedElement;
+        
+        for (var key in fieldErrorMessages)
+          if (fieldErrorMessages.hasOwnProperty(key) && fieldErrorMessages[key]) {
+            matchedElement = this.$$('bl-form-field#' + key);
+            if (matchedElement) matchedElement.goError(fieldErrorMessages[key]); //doesn't work yet
+            else unmatchedErrorMessages.push(fieldErrorMessages[key]);
+          }
+        
+        if (unmatchedErrorMessages.length)
+          errorMessage = 'One or more values were invalid: ' + unmatchedErrorMessages.join(', ');
+        else
+          errorMessage = 'One or more values were invalid, please review the error messages '
+            + 'on each field and try again.' 
+      } else if (response.error_messages) {
+        errorMessage = 'One or more errors occured: ' + unmatchedErrorMessages.join(', ');
+      }
+
+      this.goError(errorMessage, response);
     }
-    this.loading = false;
   }, 
   handleError: function(e) {
-    this.loading = false;
-    this.goError('There was a problem with the request, please try again.');
+    this.goError('There was a problem submitting your request, please try again.');
   },
-  
-  // Events
-  cancelButtonTap: function(e) {
-    this.clearError();
-    this.close();
-  },
-  saveButtonTap: function(e) {
-    this.clearError();
-    this.loading = true;
-    this.$.form.submit();
-  },
-  
   
   //Helpers
-  goError: function (errorText) {
-    this.isError = true;
-    this.errorText = errorText;
-  },
-  clearError: function () {
-    this.getContentChildren().forEach(function(inputElement) {
-      inputElement.invalid = false;
-    });
-    this.isError = false;
-    this.errorText = '';
+  goError: function (errorMessage, response = undefined) {
+    this.fire('bl-form-error', { errorMessage: errorMessage, response: response });
   }
 });

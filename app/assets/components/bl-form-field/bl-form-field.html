@@ -5,7 +5,7 @@
 
     <template is="dom-if" if="[[isPaperInput]]">
       <paper-input id="[[fieldSpec.key]" label="[[fieldSpec.label]]" name="[[fieldSpec.name]"
-        required="[[fieldSpec.required]]"></paper-input>
+        required="[[fieldSpec.required]]" error-message="[[errorMessage]]"></paper-input>
     </template>
 
     <template is="dom-if" if="[[isDatePicker]]">
@@ -17,7 +17,7 @@
 
     <template is="dom-if" if="[[isPaperDropdownMenu]]">
       <paper-dropdown-menu id="[[fieldSpec.key]]" label="[[fieldSpec.label]]" 
-          name="[[fieldSpec.name]]">
+          name="[[fieldSpec.name]]" error-message="[[errorMessage]]">
         <paper-listbox id="[[fieldSpec.key]]" class="dropdown-content" attr-for-selected="value"
             selected="[[fieldSpec.value]]">
           <template is="dom-repeat" items="[[options]]">
@@ -28,7 +28,8 @@
     </template>
 
     <template is="dom-if" if="[[isHidden]]">
-      <input type="hidden" id="[[fieldSpec.key]]" name="[[fieldSpec.name]]">
+      <input type="hidden" id="[[fieldSpec.key]]" name="[[fieldSpec.name]]" 
+        value="[[fieldSpec.value]]">
     </template>
 
   </template>

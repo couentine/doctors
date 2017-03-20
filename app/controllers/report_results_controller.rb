@@ -102,7 +102,7 @@ class ReportResultsController < ApplicationController
       # Build out base field spec list, add hidden field for type
       @field_specs_polymer = ReportResult.param_field_specs_for(@type)
       @field_specs_polymer << { key: 'type', type: 'hidden', value: @type, 
-        name: 'report_result[type]' }
+        name: 'report_result.type' }
 
       # Next inject options for the group dropdown
       group_field_spec = @field_specs_polymer.find{ |fs| fs[:key] == 'group_id' }
@@ -180,7 +180,7 @@ private
   end
 
   def report_result_params
-    params.require(:group_tag).permit(PERMITTED_PARAMS)
+    params.require(:report_result).permit(PERMITTED_PARAMS)
   end
 
 end
