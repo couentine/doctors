@@ -39,7 +39,7 @@ class ReportResult
   
   field :parameters,              type: Hash, default: {}, pre_processed: true
   field :cleaned_parameters,      type: Hash, default: {}, pre_processed: true
-  field :sort_field,              type: String # json only, should be REPORT_TYPE_VALUES key
+  field :sort_field,              type: String # json only, should be REPORT_TYPE_OUTPUT_VALUES key
   field :sort_order,              type: String # json only, should be 'asc' or 'desc'
   field :page,                    type: Integer # json only, defaults to 1
   field :results,                 type: Array, default: [], pre_processed: true
@@ -69,21 +69,31 @@ class ReportResult
   # This is used to display the different types of reports to the user
   # The icon value should be a material design iron-icon. List here: http://bit.ly/2nE9YrJ
   REPORT_TYPES = {
-    'group_users' => { label: 'Group Members', icon: 'social:people' },
-    'group_badge_logs' => { label: 'Badge Portfolios', icon: 'icons:assignment-ind' }
+    'group_users' => { label: 'Group Members', icon: 'social:people', 
+      description: 'Includes user details as well as number of badges joined and earned' },
+    'group_badge_logs' => { label: 'Badge Portfolios', icon: 'icons:assignment-ind', 
+      description: 'Includes portfolios for all badges in the group' }
   }
   
   # This constant defines all of the parameters which are accepted for each report type
-  # The spec for each parameter is used to validate it in the clean_parameters method
-  REPORT_TYPE_PARAMETERS = {
+  # The spec for each parameter field is used to validate it in the clean_parameters method
+  # The spec is also used to generate the bl-form 
+  REPORT_TYPE_PARAM_FIELD_SPECS = {
     'group_users' => {
       'group_id' => { type: BSON::ObjectId, label: 'Group', required: true },
-      'group_tag_id' => { type: BSON::ObjectId, label: 'Group Tag' }
+      'group_tag_id' => { type: BSON::ObjectId, label: 'Filter Users by Tag', 
+        dependent_key: 'group_id' }
     },
     'group_badge_logs' => {
       'group_id' => { type: BSON::ObjectId, label: 'Group', required: true },
-      'group_tag_id' => { type: BSON::ObjectId, label: 'Group Tag' },
-      'validation_status' => { type: String, label: 'Badge Status' },
+      'group_tag_id' => { type: BSON::ObjectId, label: 'Filter Users by Tag', 
+        dependent_key: 'group_id' },
+      'badge_status' => { type: String, label: 'Badge Status', element: 'paper-dropdown-menu',
+        value: 'all',
+        options: [{ label: 'Any', value: 'all' },
+          { label: 'Awarded', value: 'awarded' },
+          { label: 'Not Awarded', value: 'unawarded' }]
+      },
       'created_at_start' => { type: Date, label: 'Badge Join Start Date' },
       'created_at_end' => { type: Date, label: 'Badge Join End Date' },
       'date_issued_start' => { type: Date, label: 'Badge Award Start Date' },
@@ -112,7 +122,7 @@ class ReportResult
   # but you can't add parameters or anything like that.
   # VALID EXAMPLES for a badge: 'name', 'image_url', 'group.owner.name'
   # INVALID EXAMPLES for a badge: 'image_url(:medium)'
-  REPORT_TYPE_VALUES = {
+  REPORT_TYPE_OUTPUT_VALUES = {
     'group_users' => {
       user: [
         { key: 'name', label: 'Name', value: 'name' },
@@ -167,6 +177,28 @@ class ReportResult
     report_result = ReportResult.find(report_result_id) rescue nil
     report_result.delete if report_result
   end
+
+  # Simple method that returns an array of the report types
+  def self.report_types_list
+    # We just need to merge the key into the hash values and then convert it to an array
+    REPORT_TYPES.map do |key, properties|
+      { key: key }.merge(properties)
+    end
+  end
+  
+  # This method returns an array of field specs for the specified report type
+  # It injects the key as well as the form field name
+  # It also stringifies the type property
+  def self.param_field_specs_for(report_type)
+    # We just need to merge the key into the hash values and then convert it to an array
+    REPORT_TYPE_PARAM_FIELD_SPECS[report_type].map do |key, field_spec|
+      field_spec.merge({
+        type: field_spec[:type].to_s,
+        key: key,
+        name: "report_result[parameters][#{key}]"
+      })
+    end
+  end
   
   # === INSTANCE METHODS === #
 
@@ -208,7 +240,7 @@ protected
       # First clean up the sort parameters
       self.page = 1 if (format == 'json') && (page.blank? || (page < 1))
       self.sort_order = 'asc' if !SORT_ORDER_VALUES.include?(sort_order)
-      core_model_field_keys = REPORT_TYPE_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
+      core_model_field_keys = REPORT_TYPE_OUTPUT_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
         .map{ |field| field[:key] }
       if !core_model_field_keys.include? sort_field
         self.sort_field = REPORT_TYPE_DEFAULT_SORT_FIELD[type]
@@ -216,7 +248,7 @@ protected
 
       # Verify the presence and format of all parameters and build cleaned_parameters
       self.cleaned_parameters = {}
-      REPORT_TYPE_PARAMETERS[type].each do |name, spec|
+      REPORT_TYPE_PARAM_FIELD_SPECS[type].each do |name, spec|
         value = parameters[name]
 
         # Check for presence of required params
@@ -249,7 +281,7 @@ protected
         # We loop through looking for specific parameters names which we know correspond to record
         # ids which need to be verified. It's important that parameter names be consistent in order
         # for this logic to work.
-        REPORT_TYPE_PARAMETERS[type].each do |name, spec|
+        REPORT_TYPE_PARAM_FIELD_SPECS[type].each do |name, spec|
           
           value = cleaned_parameters[name]
 
@@ -308,7 +340,7 @@ protected
       # If this is a csv file then the first row needs to contain all of the field labels
       if format == 'csv'
         current_row = []
-        REPORT_TYPE_VALUES[type].each do |model, fields|
+        REPORT_TYPE_OUTPUT_VALUES[type].each do |model, fields|
           fields.each do |field|
             current_row << field[:label]
           end
@@ -320,7 +352,7 @@ protected
       source_rows.each do |row|
         current_row = (format == 'json') ? {} : []
 
-        REPORT_TYPE_VALUES[type].each do |model, fields|
+        REPORT_TYPE_OUTPUT_VALUES[type].each do |model, fields|
           fields.each do |field|
             if row[model].class == Hash
               # We use hashes to mock up summary fields, but they don't support 'send()'
@@ -371,7 +403,7 @@ protected
       end
 
       # Now initialize the user criteria
-      sort_field_item = REPORT_TYPE_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
+      sort_field_item = REPORT_TYPE_OUTPUT_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
         .find{ |field| field[:key] == sort_field }
       user_criteria = (group_tag) ? group_tag.users : group.users
       user_criteria = user_criteria.order_by("#{sort_field_item[:value]} #{sort_order}")
@@ -424,7 +456,7 @@ protected
       end
 
       # Now initialize the log criteria
-      sort_field_item = REPORT_TYPE_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
+      sort_field_item = REPORT_TYPE_OUTPUT_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
         .find{ |field| field[:key] == sort_field }
       if group_tag
         all_user_ids = group_tag.user_ids
@@ -437,8 +469,13 @@ protected
 
       # Next we add all of the optional parameters to the criteria
       cp = cleaned_parameters # alias / shortcut
-      if cp['validation_status']
-        log_criteria = log_criteria.where(validation_status: cp['validation_status'])
+      if cp['badge_status']
+        case cp['badge_status']
+        when 'awarded'
+          log_criteria = log_criteria.where(validation_status: 'validated')
+        when 'unawarded'
+          log_criteria = log_criteria.where(:validation_status.ne => 'validated')
+        end # in any other case we do not modify the query
       end
       if cp['created_at_start']
         log_criteria = log_criteria.where(:created_at.gte => cp['created_at_start'])

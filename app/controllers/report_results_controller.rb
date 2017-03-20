@@ -9,7 +9,7 @@ class ReportResultsController < ApplicationController
 
   # === CONSTANTS === #
 
-  PERMITTED_PARAMS = [:type, :format, :parameters]
+  PERMITTED_PARAMS = [:type, :parameters]
 
   # Normal usage is HTML version returns 1st page of results, JSON used to query additional pages
   # GET /report_results?page=2&page_size=12
@@ -23,7 +23,7 @@ class ReportResultsController < ApplicationController
     # Admins can see all results, non-admins only see the ones they've created
     @report_results = (@badge_list_admin ? ReportResult : current_user.report_results)\
       .order_by('created_at desc').page(@page).per(@page_size)
-    @report_results_hash = ReportResult.array_json(@report_results, :list_item)
+    @report_results_polymer = ReportResult.array_json(@report_results, :list_item)
     @next_page = @page + 1 if @report_results.count > (@page_size * @page)
     
     respond_to do |format|
@@ -31,7 +31,7 @@ class ReportResultsController < ApplicationController
         render layout: 'app'
       end
       format.json do
-        render json: { page: @page, page_size: @page_size, report_results: @report_results_hash, 
+        render json: { page: @page, page_size: @page_size, report_results: @report_results_polymer, 
           next_page: @next_page, success: true }
       end
     end
@@ -54,17 +54,84 @@ class ReportResultsController < ApplicationController
     end
   end
 
-  # GET /report_results/new?group=group_url&group_tag=tag_name
+  # If the type parameter is left off then the user is presented with a report type selector
+  # otherwise the user is shown a bl-form to specify the report parameters
+  # GET /report_results/new?type=report_type&group=group_url&group_tag=tag_name
   def new
-    @groups = current_user.admin_of
-    
-    if params[:group]
-      @selected_group = @groups.where(url: params[:group].to_s.downcase).first
-      if params[:group_tag]
-        @selected_group_tag = @selected_group.tags\
-          .where(name: params[:group_tag].to_s.downcase).first
+    @type = params['type'] if ReportResult::REPORT_TYPES.has_key?(params['type'])
+
+    # Construct the cancel url, which should return to where we came from
+    if params[:group].blank?
+      @cancel_url = report_results_url
+    else
+      if params[:group_tag].blank?
+        @cancel_url = "/#{params[:group]}"
+      else
+        @cancel_url = "/#{params[:group]}/tags/#{params[:group_tag]}"
       end
-    end      
+    end
+
+    if @type.blank?
+      @display_mode = 'selector'
+      @page_title = 'Run report'
+      @report_types_polymer = ReportResult.report_types_list
+
+      # Inject the url into each report type
+      @report_types_polymer.each do |item| 
+        item[:link] = new_report_result_url(type: item[:key], group: params[:group], 
+          group_tag: params[:group_tag])
+      end
+    else
+      @display_mode = 'form'
+      @report_type_label = ReportResult::REPORT_TYPES[@type][:label]
+      @report_type_icon = ReportResult::REPORT_TYPES[@type][:icon]
+      @page_title = "#{@report_type_label} report".downcase.capitalize
+      
+      @groups = current_user.admin_of.order_by('name asc')
+      @groups_polymer = Group.array_json(@groups, :simple_list_item_with_tags)
+     
+      # Validate the selected params
+      if params[:group]
+        @selected_group = @groups.where(url: params[:group].to_s.downcase).first
+        if params[:group_tag]
+          @selected_group_tag = @selected_group.tags\
+            .where(name: params[:group_tag].to_s.downcase).first
+        end
+      end
+
+      # Build out base field spec list, add hidden field for type
+      @field_specs_polymer = ReportResult.param_field_specs_for(@type)
+      @field_specs_polymer << { key: 'type', type: 'hidden', value: @type, 
+        name: 'report_result[type]' }
+
+      # Next inject options for the group dropdown
+      group_field_spec = @field_specs_polymer.find{ |fs| fs[:key] == 'group_id' }
+      group_field_spec[:value] = @selected_group.id.to_s if @selected_group
+      group_field_spec[:options] = @groups.map do |group|
+        { label: group.name, value: group.id.to_s }
+      end if group_field_spec
+
+      # Finally build the dependent options for the group tag dropdown
+      group_tag_field_spec = @field_specs_polymer.find{ |fs| fs[:key] == 'group_tag_id' }
+      group_tag_field_spec[:value] = @selected_group_tag.id.to_s if @selected_group_tag
+      if group_tag_field_spec
+        group_tag_field_spec[:dependent_options] = {}
+        @groups.each do |group|
+          if group.tags_cache.blank?
+            group_tag_field_spec[:dependent_options][group.id.to_s] \
+              = [{ label: 'Group has no tags' }]
+          else
+            group_tag_field_spec[:dependent_options][group.id.to_s] \
+              = [{ label: 'Include all users', value: '' }] \
+              + (group.tags_cache.map do |tag_id, tag_item|
+                { label: tag_item['name_with_caps'], value: tag_id }
+              end).sort_by{ |option| option[:label] }
+          end
+        end
+      end
+    end
+
+    render layout: 'app'    
   end
 
   # JSON only, returns hash with keys = [success, poller_id, field_error_messages]
@@ -76,6 +143,7 @@ class ReportResultsController < ApplicationController
       format.json do
         rr_params = report_result_params
         rr_params['user'] = current_user
+        rr_params['format'] = 'csv' # This is the only format supported for now
         
         # First we verify the attributes synchronously (avoid starting a poller if params are bad)
         @report_result = ReportResult.new(rr_params)

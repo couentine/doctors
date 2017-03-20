@@ -23,7 +23,8 @@ class Group
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
       :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,
-      :badge_count, :full_url, :full_path]
+      :badge_count, :full_url, :full_path],
+    simple_list_item_with_tags: [:id, :name, :url, :url_with_caps, :tags_cache]
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'

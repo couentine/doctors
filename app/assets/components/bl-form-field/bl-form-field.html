@@ -1,0 +1,37 @@
+<dom-module id="bl-form-field">
+  <link rel="stylesheet" href="bl-form-field.css" />
+  
+  <template>
+
+    <template is="dom-if" if="[[isPaperInput]]">
+      <paper-input id="[[fieldSpec.key]" label="[[fieldSpec.label]]" name="[[fieldSpec.name]"
+        required="[[fieldSpec.required]]"></paper-input>
+    </template>
+
+    <template is="dom-if" if="[[isDatePicker]]">
+      <paper-input id="[[fieldSpec.key]" label="[[fieldSpec.label]]" name="[[fieldSpec.name]"
+        required="[[fieldSpec.required]]" prevent-invalid-input auto-validate
+        pattern="\d{4}-\d{1,2}-\d{1,2}"
+        error-message="Enter a date in YYYY-MM-DD format"></paper-input>
+    </template>
+
+    <template is="dom-if" if="[[isPaperDropdownMenu]]">
+      <paper-dropdown-menu id="[[fieldSpec.key]]" label="[[fieldSpec.label]]" 
+          name="[[fieldSpec.name]]">
+        <paper-listbox id="[[fieldSpec.key]]" class="dropdown-content" attr-for-selected="value"
+            selected="[[fieldSpec.value]]">
+          <template is="dom-repeat" items="[[options]]">
+            <paper-item value="[[item.value]]">[[item.label]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+    </template>
+
+    <template is="dom-if" if="[[isHidden]]">
+      <input type="hidden" id="[[fieldSpec.key]]" name="[[fieldSpec.name]]">
+    </template>
+
+  </template>
+
+  <script src="bl-form-field.js"></script>
+</dom-module>

@@ -48,7 +48,7 @@
   <!-- #=== REPORT RESULTS ===# -->
 
   <bl-list id="report-result-list" object-mode="report_results" next-page-param="page"
-      items='<%= @report_results_hash.to_json %>' next-page="<%= @next_page %>" 
+      items='<%= @report_results_polymer.to_json %>' next-page="<%= @next_page %>" 
       next-page-url="<%= report_results_url(page_size: @page_size, format: :json) %>"
       simple-mode row-title-key="display_name" row-icon-key="report_type_icon" 
       row-link-key="full_url">

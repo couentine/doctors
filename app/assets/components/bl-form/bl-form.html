@@ -1,0 +1,16 @@
+<dom-module id="bl-form">
+  <link rel="stylesheet" href="bl-form.css" />
+
+  <template>
+    <form is="iron-form" id="form" method="[[method]]" action$="[[action]]"
+          headers="[[headers]]" content-type="application/json">
+
+      <template is="dom-repeat" items="[[fieldSpecs]]">
+        <bl-form-field id$="[[item.key]]" field-spec="[[item]]"></bl-form-field>
+      </template>
+
+    </form>
+  </template>
+
+  <script src="bl-form.js"></script>
+</dom-module>
