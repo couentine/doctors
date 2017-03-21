@@ -8,9 +8,9 @@
 
 2. Once the dependencies are installed, install tsung itself directly from the latest release like so:
 
-        $ wget http://tsung.erlang-projects.org/dist/tsung-1.5.1.tar.gz
-        $ tar zxvf tsung-.5.1.tar.gz
-        $ cd tsung-1.5.1
+        $ wget http://tsung.erlang-projects.org/dist/tsung-1.6.0.tar.gz
+        $ tar zxvf tsung-1.6.0.tar.gz
+        $ cd tsung-1.6.0
         $ ./configure && make && make install
 
 3. Tests are configured using an XML file, which is then executed to produce a series of output files. Launch the test, specifying the XML file, like so:
