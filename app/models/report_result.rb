@@ -195,7 +195,7 @@ class ReportResult
       field_spec.merge({
         type: field_spec[:type].to_s,
         key: key,
-        name: "report_result.parameters.#{key}"
+        name: "parameters.#{key}"
       })
     end
   end

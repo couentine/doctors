@@ -41,6 +41,21 @@ Polymer({
     isHidden: { type: Boolean, computed: '_isHidden(fieldSpec)' }
   },
 
+  // Actions
+  value: function() { 
+    if (this.isPaperInput || this.isDatePicker) 
+      return this.$$('paper-input').value;
+    else if (this.isPaperDropdownMenu) {
+      if (this.$$('paper-listbox').selectedItem)
+        return this.$$('paper-listbox').selectedItem.value;
+      else
+        return null;
+    } else if (this.isHidden)
+      return this.$$('input').value;
+    else
+      return null;
+  },
+
   // Events
   attached: function() {
     // If we have dependent options, then listen for changes of the dependent dropdown

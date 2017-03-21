@@ -10,6 +10,10 @@ Call submit() to submit the form. This component automatically validates the for
 submitting the request (unless you set doNotValidate to true) and throws an error if any of the
 fields are invalid.
 
+Be sure to set modelKey to the rails key that should wrap the bl-form-field key value pairs when
+the object is serialized. Example: 'report_result' or 'badge'. If you leave it blank then the 
+form field key value pairs will be added at the root level of the generated object.
+
 Events:
 - bl-form-error: Fires after submit if there is a validation error, if no response is received,
   or if the success key on the response is false.
@@ -37,23 +41,57 @@ Polymer({
     method: { type: String, value: 'post' }, // = ['get', 'post']
     headers: Object,
     fieldSpecs: Array,
+    modelKey: String, // if set, this is used by serialize() to wrap all field values
     doNotValidate: { type: Boolean, value: false }
   },
   listeners: { 
-    'form.iron-form-response': 'handleResponse',
-    'form.iron-form-error': 'handleError',
+    'actionAjax.response': 'handleResponse',
+    'actionAjax.error': 'handleError',
   },
   
   // Actions
   submit: function() {
-    if (this.$.form.validate())
-      this.$.form.submit();
-    else
+    if (this.$.form.validate()) {
+      // We need more control over the request contents, so we're just using the form to handle the 
+      // validation. The request itself will be sent via the actionAjax
+      this.$.actionAjax.body = this.serialize();
+      this.$.actionAjax.generateRequest();
+    } else {
       this.goError('One or more form values is invalid. Please review the error messages, fix '
         + 'the problematic values and try again.');
+    }
+  },
+  serialize: function() {
+    // Returns a json object version of all form-field values, suitable for submission to rails
+    var fieldElements = this.querySelectorAll('bl-form-field');
+    var returnValueInner = {}; // stores the key value pairs for all of the form fields
+    var returnValue = {};
+    var fieldName; var fieldValue; var outerKey; var innerKey;
+
+    for (var i = 0; i < fieldElements.length; i++) {
+      fieldName = fieldElements[i].fieldSpec.name;
+      fieldValue = fieldElements[i].value();
+
+      if (fieldName.includes('.')) {
+        // If the name is 'outer.inner' convert it to be { outer: { inner: value } }
+        // NOTE: For now we assume only one dot max.
+        outerKey = fieldName.split('.')[0];
+        innerKey = fieldName.split('.')[1];
+        
+        if (!returnValueInner[outerKey]) returnValueInner[outerKey] = {};
+        returnValueInner[outerKey][innerKey] = fieldValue;
+      } else 
+        returnValueInner[fieldElements[i].fieldSpec.name] = fieldElements[i].value();
+    }
+
+    // Finally we wrap the field values in the model key if needed
+    if (this.modelKey) returnValue[this.modelKey] = returnValueInner;
+    else returnValue = returnValueInner;
+
+    return returnValue;
   },
   
-  // Handles the json returned by rails
+  // Events
   handleResponse: function(e) {
     var response = e.detail.response;
     

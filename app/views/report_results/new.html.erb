@@ -147,7 +147,7 @@
         <div id="formInnerContainer">
           <bl-form id="createReportResult" action="<%= report_results_url(format: :json) %>" 
             method="post" headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'
-            field-specs="<%= @field_specs_polymer.to_json %>"></bl-form>
+            model-key="report_result" field-specs="<%= @field_specs_polymer.to_json %>"></bl-form>
         </div>
       </div>
     </div>
