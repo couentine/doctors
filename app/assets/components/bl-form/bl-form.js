@@ -132,7 +132,7 @@ Polymer({
   },
   
   //Helpers
-  goError: function (errorMessage, response = undefined) {
+  goError: function (errorMessage, response) {
     this.fire('bl-form-error', { errorMessage: errorMessage, response: response });
   }
 });
