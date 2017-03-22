@@ -1,0 +1,182 @@
+<% 
+  provide(:title, @page_title)  
+  provide(:hide_left_nav, 'true')
+  provide(:hide_right_nav, 'true')
+%>
+
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-form title="<%= @page_title %>">
+      <% if @display_mode == 'form' %>
+        <bl-button js="runReport()" class="save-button" background="#FB8C00" color="white">
+          Run
+        </bl-button>
+      <% end %>
+      <bl-button link="<%= @cancel_url %>" class="cancel-button" 
+          background="#FB8C00" color="white">
+        Cancel
+      </bl-button>
+    </bl-app-header-form>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+  
+  <style type="text/css">
+    
+    #pageHeader {
+      padding: 1em 1.4em 2em 1.4em;
+    }
+      #summary {
+        font-size: 1em;
+        line-height: 1.4em;
+        color: #FB8C00;
+      }
+
+    #reportTypeSelector ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      margin: 0 2em;
+    }
+      #reportTypeSelector ul li {
+        flex: 1 1 10em;
+        padding: 1em;
+        max-width: 20em;
+        display: flex;
+        flex-direction: column;
+      }
+        #reportTypeSelector ul li a, #reportTypeSelector ul li a:visited {
+          flex: 1 1 auto;
+          display: block;
+          padding: 1em;
+          text-align: center;
+          text-decoration: none;
+
+          border-radius: 3px;
+          background: #F5F5F5;
+          border: 1px solid #BDBDBD;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+          transition: 0.3s box-shadow;
+        }
+        #reportTypeSelector ul li a:hover, #reportTypeSelector ul li a:focus {
+          box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+        }
+          #reportTypeSelector ul li a .icon iron-icon {
+            width: 2em;
+            height: 2em;
+          }
+          #reportTypeSelector ul li a .label { font-weight: bold; }
+          #reportTypeSelector ul li a .description {
+            color: #757575;
+            font-style: italic;
+            padding-top: 0.5em;
+          }
+
+    #reportCreationForm {
+      display: flex;
+      justify-content: center;
+      margin: 1em 0; 
+    }
+      #formContainer {
+        display: flex;
+        flex-direction: column;
+        width: 30em;
+        max-width: 90%;
+
+        border-right: 2px;
+        background: #FAFAFA;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      }
+        #formHeader {
+          padding: 1em;
+          border-bottom: 1px solid #E0E0E0;
+        }
+          #formHeader h2 { 
+            margin: 0; 
+            font-size: 1.2em;
+          }
+        #formInnerContainer {
+          padding: 1em 2em 2em 2em;
+        }
+
+  </style>
+
+  <!-- #=== PAGE HEADER ===# -->
+
+  <div id="pageHeader">
+    <div id="summary">
+      <% if @display_mode == 'selector' %>
+        What type of report do you want to run?
+      <% else %>
+        Fill in the report parameters below and then click the run button.
+        When the report is complete you will be able to download the results as a CSV file.
+      <% end %>
+    </div>
+  </div>
+  
+  <% if @display_mode == 'selector' %>
+    
+    <!-- #=== REPORT TYPE SELECTOR ===# -->
+
+    <div id="reportTypeSelector">
+      <ul>
+        <template is="dom-repeat" items="<%= @report_types_polymer.to_json %>">
+          <li>
+            <a href$="[[item.link]]">
+              <div class="icon">
+                <iron-icon icon="[[item.icon]]" item-icon></iron-icon>
+              </div>
+              <div class="label">[[item.label]]</div>
+              <div class="description">[[item.description]]</div>
+            </a>
+          </li>
+        </template>
+      </ul>
+    </div>
+
+  <% else %>
+
+    <!-- #=== REPORT CREATION FORM ===# -->
+
+    <div id="reportCreationForm">
+      <div id="formContainer">
+        <div id="formHeader">
+          <h2>Report Parameters</h2>
+        </div>
+        <div id="formInnerContainer">
+          <bl-form id="createReportResult" action="<%= report_results_url(format: :json) %>" 
+            method="post" headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'
+            model-key="report_result" field-specs="<%= @field_specs_polymer.to_json %>"></bl-form>
+        </div>
+      </div>
+    </div>
+
+  <% end %>
+
+  <!-- #=== PAGE-SPECIFIC JAVASCRIPT ===# -->
+
+  <script type="text/javascript">
+    
+    function runReport() {
+      appContainer.openWaitingDialog({ color: 'orange', title: 'Submitting request...' });
+      document.getElementById('createReportResult').submit();
+    }
+
+    // Add listeners once the layout is ready
+    appLayout.addEventListener('dom-change', function() {
+      document.addEventListener('bl-form-success', handleFormSuccess);
+    });
+
+    function handleFormSuccess(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.openPollerDialog(e.detail.response.poller_id, {
+        color: 'orange', 
+        title: 'Report status',
+        confirm: { text: 'Close' }
+      });
+    }
+
+  </script>
+
+  

@@ -1,0 +1,18 @@
+<dom-module id="bl-form">
+  <link rel="stylesheet" href="bl-form.css" />
+
+  <template>
+    <iron-ajax id="actionAjax" bubbles method="[[method]]" content-type="application/json"
+      headers="[[headers]]" url="[[action]]"></iron-ajax>
+
+    <form is="iron-form" id="form">
+
+      <template is="dom-repeat" items="[[fieldSpecs]]">
+        <bl-form-field id$="[[item.key]]" field-spec="[[item]]"></bl-form-field>
+      </template>
+
+    </form>
+  </template>
+
+  <script src="bl-form.js"></script>
+</dom-module>

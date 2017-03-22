@@ -111,7 +111,8 @@ Polymer({
     if (this.dialogDismissFunction) this.dialogDismissFunction();
   },
   _pollerCompleted: function(e) {
-    $(this.$.pollerDialogButtons).removeClass('collapsed');
+    if (e.detail.poller.redirect_to) document.location.href = e.detail.poller.redirect_to;
+    else $(this.$.pollerDialogButtons).removeClass('collapsed');
   },
 
   // Observers

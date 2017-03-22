@@ -7,7 +7,7 @@ class UsersController < ApplicationController
   # === CONSTANTS === #
 
   PERMITTED_PARAMS = [:email, :name, :username_with_caps, :password, :password_confirmation, 
-    :remember_me, :avatar_key]
+    :remember_me, :avatar_key, :job_title, :organization_name, :website, :bio]
 
   # GET /a/users
   # GET /a/users.json

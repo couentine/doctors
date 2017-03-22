@@ -1,0 +1,176 @@
+<% 
+  provide(:title, "Report Result - #{@report_result.display_name}")
+  provide(:hide_left_nav, true)
+%>
+
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-text title="Report Result" left-nav-symbol="fa fa-arrow-left" extra-space
+      back-url="<%= report_results_url %>"
+      subtitle="<%= @report_result.created_at.to_s(:full_date_time) %>"></bl-app-header-text>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+  
+  <style type="text/css">
+    
+    #reportDetails {
+      margin: 0 auto;
+      padding: 0 2em;
+      max-width: 40em;
+    }
+      #banner {
+        padding: 1em;
+        font-size: 1.2em;
+        text-align: center;
+        background: #EEEEEE;
+        border-radius: 2px;
+      }
+      #banner.successful { background: #A5D6A7; }
+      #banner.failed { background: #EF9A9A; }
+        #banner span {
+          display: block;
+          margin-top: 1em
+        }
+        #banner span:first-child { margin-top: 0; }
+        #banner .buttonWrapper {
+          margin-top: 1em;
+        }
+      ul#metadata {
+        list-style: none;
+        margin: 2em 0;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+        ul#metadata li {
+          margin: 1em;
+          flex: 1 1 10em;
+        }
+          ul#metadata li .label {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            color: #424242;
+            margin-right: 1em;
+            font-weight: bold;
+          }
+      #reportDetails .header {
+        margin: 1em auto;
+        font-size: 1.1em;
+        font-weight: bold;
+        border-top: 1px solid #E0E0E0;
+        border-bottom: 1px solid #E0E0E0;
+        text-align: center;
+        padding: 1em 0;
+        max-width: 15em;
+      }
+      ul#parameters {
+        list-style: none;
+        margin: 2em 0;
+        padding: 0;
+        text-align: center;
+      }
+        ul#parameters li {
+          margin: 0.5em 1em;
+          display: inline-block;
+        }
+          ul#parameters li .label {
+            font-size: 0.9em;
+            color: #424242;
+            margin-right: 0.2em;
+            font-weight: bold;
+          }
+
+  </style>
+
+  <!-- #=== REPORT DETAILS ===# -->
+
+  <div id="reportDetails">
+    <div id="banner" class="<%= @report_result.status %>">
+      <% if @report_result.status == 'successful' %>
+        <% if @report_result.results_file && @report_result.results_file.url %>
+          <span>
+            The report is complete, click the button below to download the results.
+            Report results are automatically deleted after 
+            <%= pluralize (ReportResult::DELETE_AFTER.to_i / 3600), 'hours' %>.
+          </span>
+          <div class="buttonWrapper">
+            <bl-button class="download" background="#43A047" color="white" target="_blank"
+                link="<%= @report_result.results_file.url %>">
+              Download CSV
+            </bl-button>
+            </a>
+          </div>
+        <% else %>
+          <span>
+            The report is complete, but the file link is unavailable. 
+            Please try running the report again.
+          </span>
+        <% end %>
+      <% elsif @report_result.status == 'failed' %>
+        <span>
+          An error occured while trying to run your report. 
+          Please try again. If the problem persists please contact support.
+        </span>
+        <span>
+          <strong>Error Message:</strong>
+          <%= @report_result.error_message || 'NONE' %>
+        </span>
+      <% else %>
+        <span>
+          <strong>
+            <i class="fa fa-spin fa-refresh"></i>
+            The report is currently running.
+          </strong>
+        </span>
+        <span>Refresh the page to see the latest status.</span>
+      <% end %>
+    </div>
+
+    <ul id="metadata">
+      <% if @group %>
+        <li>
+          <span class="label">Group:</span>
+          <span class="value">
+            <%= link_to @group.name, @group %> 
+          </span>
+        </li>
+      <% end %>
+      <% if @group_tag %>
+        <li>
+          <span class="label">Group Tag:</span>
+          <span class="value">
+            <%= link_to "##{@group_tag.name}", group_tag_path(@group, @group_tag) %> 
+          </span>
+        </li>
+      <% end %>
+      <li>
+        <span class="label">Status:</span>
+        <span class="value"><%= @report_result.status.capitalize %></span>
+      </li>
+      <li>
+        <span class="label"># of Report Rows:</span>
+        <span class="value"><%= @report_result.total_result_count %></span>
+      </li>
+    </ul>
+
+    <div class="header">Report Parameters</div>
+    
+    <ul id="parameters">
+      <% @report_result.parameters.each do |key, value| %>
+        <% if !['group_id', 'group_tag_id'].include? key %>
+          <li>
+            <span class="label">
+              <%= ReportResult::REPORT_TYPE_PARAM_FIELD_SPECS[@report_result.type][key][:label] %>:
+            </span>
+            <span class="value">
+              <%= (value.blank?) ? 'blank' : value %>  
+            </span>
+          </li>
+        <% end %>
+      <% end %>
+    </ul>
+
+  </div>
+  

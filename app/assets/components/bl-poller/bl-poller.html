@@ -27,7 +27,8 @@
       <span>{{errorMessage}}</span>
     </div>
 
-    <paper-progress id="progress" value="{{poller.progress}}" class=$="{{progressClass}}">
+    <paper-progress id="progress" value="{{poller.progress}}" class=$="{{progressClass}}"
+      hidden="[[progressHidden]]">
     </paper-progress>
 
   </template>
