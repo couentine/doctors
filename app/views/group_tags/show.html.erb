@@ -131,6 +131,13 @@
             <%= link_to '<i class="fa fa-sliders"></i> Edit Permissions'.html_safe, 
               group_url(@group) + '#settings' %>
           </li>
+          <% if @group.has?(:reporting) %>
+            <li>
+              <%= link_to '<i class="fa fa-table"></i> Run report'.html_safe, 
+                new_report_result_path(group: @group.url_with_caps, 
+                  group_tag: @group_tag.name_with_caps), class: 'btn btn-small'%>
+            </li>
+          <% end %>
         <% end %>
         <li>
           <a href="#" onClick="editGroupTag(); return false;">
