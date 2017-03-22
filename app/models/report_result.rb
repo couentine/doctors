@@ -174,7 +174,7 @@ class ReportResult
     poller.save
 
     attributes[:poller_id] = poller.id.to_s
-    ReportResult.delay(queue: 'default', retry: true).create_with_poller(attributes)
+    ReportResult.delay(queue: 'default', retry: false).create_with_poller(attributes)
 
     poller.id
   end

@@ -38,6 +38,8 @@ class ReportResultsController < ApplicationController
   # GET /report_results/1
   # GET /report_results/1.json
   def show
+    @group = Group.find(@report_result.parameters['group_id']) rescue nil
+    
     respond_to do |format|
       format.html do
         render layout: 'app'

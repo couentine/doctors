@@ -1,0 +1,123 @@
+<% 
+  provide(:title, "Report Result - #{@report_result.display_name}")
+  provide(:hide_left_nav, true)
+%>
+
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-text title="Report Result" left-nav-symbol="fa fa-arrow-left" extra-space
+      back-url="<%= report_results_url %>"
+      subtitle="<%= @report_result.created_at.to_s(:full_date_time) %>"></bl-app-header-text>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+  
+  <style type="text/css">
+    
+    #reportDetails {
+      margin: 0 2em;
+      max-width: 40em;
+    }
+      #banner {
+        padding: 1em;
+        font-size: 1.2em;
+        text-align: center;
+        background: #EEEEEE;
+        border-radius: 2px;
+      }
+      #banner.successful { background: #A5D6A7; }
+      #banner.failed { background: #EF9A9A; }
+        #banner span {
+          display: block;
+          margin-top: 1em
+        }
+        #banner span:first-child { margin-top: 0; }
+        #banner .buttonWrapper {
+          margin-top: 1em;
+        }
+
+  </style>
+
+  <!-- #=== REPORT DETAILS ===# -->
+
+  <div id="reportDetails">
+    <div id="banner" class="<%= @report_result.status %>">
+      <% if @report_result.status == 'successful' %>
+        <% if @report_result.results_file && @report_result.results_file.url %>
+          <span>
+            The report is complete, click the button below to download the results.
+            Report results are automatically deleted after 
+            <%= pluralize (ReportResult::DELETE_AFTER.to_i / 3600), 'hours' %>.
+          </span>
+          <div class="buttonWrapper">
+            <bl-button class="download" background="#43A047" color="white" target="_blank"
+                link="<%= @report_result.results_file.url %>">
+              Download Results
+            </bl-button>
+            </a>
+          </div>
+        <% else %>
+          <span>
+            The report is complete, but the file link is unavailable. 
+            Please try running the report again.
+          </span>
+        <% end %>
+      <% elsif @report_result.status == 'failed' %>
+        <span>
+          An error occured while trying to run your report. 
+          Please try again. If the problem persists please contact support.
+        </span>
+        <span>
+          <strong>Error Message:</strong>
+          <%= @report_result.error_message || 'NONE' %>
+        </span>
+      <% else %>
+        <span>
+          <strong>
+            <i class="fa fa-spin fa-refresh"></i>
+            The report is currently running.
+          </strong>
+        </span>
+        <span>Refresh the page to see the latest status.</span>
+      <% end %>
+    </div>
+
+    <ul id="metadata">
+      <% if @group %>
+        <li>
+          <span class="label">Group</span>
+          <span class="value">
+            <%= link_to @group.name, @group %> 
+          </span>
+        </li>
+      <% end %>
+      <li>
+        <span class="label">Status</span>
+        <span class="value"><%= @report_result.status.capitalize %></span>
+      </li>
+      <li>
+        <span class="label">Format</span>
+        <span class="value"><%= @report_result.format %></span>
+      </li>
+      <li>
+        <span class="label"># of Report Rows</span>
+        <span class="value"><%= @report_result.total_result_count %></span>
+      </li>
+    </ul>
+
+    <ul id="parameters">
+      <div class="header">Report Parameters</div>
+        <% @report_result.parameters.each do |key, value| %>
+          <li>
+            <span class="label">
+              <%= ReportResult::REPORT_TYPE_PARAM_FIELD_SPECS[@report_result.type][key][:label] %>
+            </span>
+            <span class="value"><%= value %></span>
+          </li>
+        <% end %>
+      </ul>
+    </ul>
+
+  </div>
+  
