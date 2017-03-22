@@ -32,6 +32,13 @@
         line-height: 1.4em;
         color: #FB8C00;
       }
+      #summary.error { 
+        background: #E53935;
+        color: white;
+        padding: 0.5em 0.7em;
+        border-radius: 2px;
+      }
+      #summary a, #summary a:visited { color: inherit; }
 
     #reportTypeSelector ul {
       display: flex;
@@ -105,12 +112,18 @@
   <!-- #=== PAGE HEADER ===# -->
 
   <div id="pageHeader">
-    <div id="summary">
+    <div id="summary" class="<%= ((@display_mode=='form') && @groups.blank?) ? 'error' : '' %>">
       <% if @display_mode == 'selector' %>
         What type of report do you want to run?
       <% else %>
-        Fill in the report parameters below and then click the run button.
-        When the report is complete you will be able to download the results as a CSV file.
+        <% if @groups.blank? %>
+          <strong>Oops!</strong> In order to use Badge List's reporting tool you need to be 
+          the admin of at least one group. Why not 
+          <a href="<%= new_group_path %>">create one now</a>?
+        <% else %>
+          Fill in the report parameters below and then click the run button.
+          When the report is complete you will be able to download the results as a CSV file.
+        <% end %>
       <% end %>
     </div>
   </div>
