@@ -479,7 +479,7 @@ protected
       logs = Log.where(:user_id.in => user_ids, :badge_id.in => group.badges_cache.keys)
       logs.each do |log|
         row_map[log.user_id][:group_log_summary]['log_count'] += 1
-        if log.validation_status = 'validated'
+        if log.validation_status == 'validated'
           row_map[log.user_id][:group_log_summary]['validated_log_count'] += 1
         end
       end
