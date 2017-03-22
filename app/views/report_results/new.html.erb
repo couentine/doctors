@@ -166,6 +166,7 @@
     // Add listeners once the layout is ready
     appLayout.addEventListener('dom-change', function() {
       document.addEventListener('bl-form-success', handleFormSuccess);
+      document.addEventListener('bl-form-error', handleFormError);
     });
 
     function handleFormSuccess(e) {
@@ -173,6 +174,16 @@
       appContainer.openPollerDialog(e.detail.response.poller_id, {
         color: 'orange', 
         title: 'Report status',
+        confirm: { text: 'Close' }
+      });
+    }
+
+    function handleFormError(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.openAlertDialog({
+        color: 'red', 
+        title: 'Error building report',
+        body: e.detail.errorMessage,
         confirm: { text: 'Close' }
       });
     }

@@ -8,7 +8,8 @@ This is a generic form component designed to accept a list of field specs (refer
 for full documentation) and use the specs to build an iron-form which submits via ajax. 
 Call submit() to submit the form. This component automatically validates the form before 
 submitting the request (unless you set doNotValidate to true) and throws an error if any of the
-fields are invalid.
+fields are invalid. The bl-form-error event will always contain a 'detail.errorMessage' key 
+with an error message suitable for displaying directly to the user with no intro text needed.
 
 Be sure to set modelKey to the rails key that should wrap the bl-form-field key value pairs when
 the object is serialized. Example: 'report_result' or 'badge'. If you leave it blank then the 
@@ -16,7 +17,9 @@ form field key value pairs will be added at the root level of the generated obje
 
 Events:
 - bl-form-error: Fires after submit if there is a validation error, if no response is received,
-  or if the success key on the response is false.
+  or if the success key on the response is false. Always contains a 'detail.errorMessage' key
+  with an error message suitable for displaying directly to the user with no intro text needed.
+  There may also be a response detail key in the event (if there was a response).
 - bl-form-success: Fires after a response is received, but only if the success key is true.
 
 ## How error messages are parsed ##
@@ -51,7 +54,7 @@ Polymer({
   
   // Actions
   submit: function() {
-    if (this.$.form.validate()) {
+    if (this.doNotValidate || this.$.form.validate()) {
       // We need more control over the request contents, so we're just using the form to handle the 
       // validation. The request itself will be sent via the actionAjax
       this.$.actionAjax.body = this.serialize();
