@@ -74,6 +74,9 @@ Polymer({
         }
       });
     }
+
+    if (this.fieldSpec.required && !this.errorMessage)
+      this.errorMessage = 'This field is required';
   },
   _fieldSpecChanged: function(newValue, oldValue) {
     if (newValue.options && newValue.options.length) this.options = newValue.options;

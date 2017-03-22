@@ -7,9 +7,7 @@ class ReportResultsController < ApplicationController
   before_action :authenticate_user!
   before_action :is_creator_or_bl_admin, only: [:show]
 
-  # === CONSTANTS === #
-
-  PERMITTED_PARAMS = [:type, { parameters: {} }]
+  # === RESTFUL ACTIONS === #
 
   # Normal usage is HTML version returns 1st page of results, JSON used to query additional pages
   # GET /report_results?page=2&page_size=12
@@ -142,7 +140,7 @@ class ReportResultsController < ApplicationController
     respond_to do |format|
       format.json do
         rr_params = report_result_params
-        rr_params['user'] = current_user
+        rr_params['user_id'] = current_user.id.to_s
         rr_params['format'] = 'csv' # This is the only format supported for now
         
         # First we verify the attributes synchronously (avoid starting a poller if params are bad)
@@ -150,7 +148,7 @@ class ReportResultsController < ApplicationController
 
         if @report_result.valid?
           @poller_id = ReportResult.create_async(rr_params)
-          render json: { success: true, poller_id: @poller_id, field_error_messages: nil }
+          render json: { success: true, poller_id: @poller_id.to_s, field_error_messages: nil }
         else
           render json: { success: false, poller_id: nil, 
             field_error_messages: @report_result.errors.messages }
@@ -180,7 +178,7 @@ private
   end
 
   def report_result_params
-    params.require(:report_result).permit(PERMITTED_PARAMS)
+    params.require(:report_result).permit(ReportResult.permitted_params)
   end
 
 end

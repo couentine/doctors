@@ -17,6 +17,11 @@ class ReportResult
   DELETE_AFTER = 2.hours # old report results are automatically deleted
   PAGE_SIZE = 200
 
+  # These are the base fields which are permitted with strong parameters, they are referenced in
+  # in ReportResult.permitted_params (use that method because it adds parameters and all of its
+  # sub-keys which are contained in the constants)
+  BASE_PERMITTED_PARAMS = [:user_id, :type, :format, :poller_id, :sort_field, :sort_order, :page]
+
   JSON_TEMPLATES = {
     detail: [:id, :user_id, :type, :format, :status, :error_message, :parameters, :sort_field,
       :sort_order, :page, :results, :total_result_count, :report_type_label, :report_type_icon, 
@@ -165,17 +170,55 @@ class ReportResult
   def self.create_async(attributes = nil)
     poller = Poller.new
     poller.waiting_message = 'Building report results'
+    poller.data = { attributes: attributes }
     poller.save
 
-    attributes[:poller_id] = poller.id
-    ReportResult.delay(queue: 'default', retry: false).create(attributes)
+    attributes[:poller_id] = poller.id.to_s
+    ReportResult.delay(queue: 'default', retry: true).create_with_poller(attributes)
 
     poller.id
+  end
+
+  # This calls the normal create method but if there is an error it updates the poller instead of
+  # throwing it. (It looks for a poller_id attribute)
+  def self.create_with_poller(attributes)
+    begin
+      params = ActionController::Parameters.new(attributes)
+      ReportResult.create!(params.permit(ReportResult.permitted_params))
+    rescue Exception => e
+      poller = Poller.find(attributes[:poller_id] || attributes['poller_id']) rescue nil
+
+      if poller
+        poller.message = e.to_s
+        poller.status = 'failed'
+        poller.save
+        poller
+      else
+        throw e
+      end
+    end
   end
 
   def self.delete_report_result(report_result_id)
     report_result = ReportResult.find(report_result_id) rescue nil
     report_result.delete if report_result
+  end
+
+  # Returns a flat list of all unique param keys (for use in strong parameters in the controller)
+  def self.all_field_keys
+    return_list = []
+
+    REPORT_TYPE_PARAM_FIELD_SPECS.each do |report_type, field_specs|
+      return_list += field_specs.keys
+    end
+
+    return_list.uniq
+  end
+
+  # Pass this with the strong parameters permit() method to mark all user-settable fields and 
+  # parameter sub-keys as permitted.
+  def self.permitted_params
+    BASE_PERMITTED_PARAMS + [{ parameters: ReportResult.all_field_keys }]
   end
 
   # Simple method that returns an array of the report types
@@ -383,7 +426,7 @@ protected
     if poller
       poller.status = status
       poller.message = error_message || 'Report results complete'
-      poller.redirect_to = "report_result/#{id.to_s}"
+      poller.redirect_to = full_url
       poller.save
     end
   end

@@ -17,7 +17,8 @@
 
     <template is="dom-if" if="[[isPaperDropdownMenu]]">
       <paper-dropdown-menu id="[[fieldSpec.key]]" label="[[fieldSpec.label]]" 
-          name="[[fieldSpec.name]]" error-message="[[errorMessage]]">
+          name="[[fieldSpec.name]]" error-message="[[errorMessage]]" 
+          required="[[fieldSpec.required]]">
         <paper-listbox id="[[fieldSpec.key]]" class="dropdown-content" attr-for-selected="value"
             selected="[[fieldSpec.value]]">
           <template is="dom-repeat" items="[[options]]">

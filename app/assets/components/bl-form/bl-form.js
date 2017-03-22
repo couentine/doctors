@@ -45,8 +45,8 @@ Polymer({
     doNotValidate: { type: Boolean, value: false }
   },
   listeners: { 
-    'actionAjax.response': 'handleResponse',
-    'actionAjax.error': 'handleError',
+    'actionAjax.iron-ajax-response': 'handleResponse',
+    'actionAjax.iron-ajax-error': 'handleError',
   },
   
   // Actions
@@ -94,7 +94,7 @@ Polymer({
   // Events
   handleResponse: function(e) {
     var response = e.detail.response;
-    
+
     if (response.success) {
       this.fire('bl-form-success', { response: response }); 
     } else {
