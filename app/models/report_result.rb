@@ -65,9 +65,11 @@ class ReportResult
   # === CALLBACK === #
 
   after_create :generate_results
-  before_update :upload_results_file
+  after_create :intercom_rr_create
   after_save :queue_delete
-  before_destroy :remove_results_file
+  after_save :upload_results_file
+  after_destroy :remove_results_file
+
 
   # === REPORT TYPE CONFIGUATION === #
 
@@ -338,6 +340,9 @@ protected
                 errors.add(:parameters, 'Group id is invalid')
               elsif !user.admin_of?(group) && !user.admin
                 errors.add(:parameters, 'You do not have reporting permissions for this group')
+              elsif !group.has?('reporting')
+                errors.add(:parameters, 'This group does not have the reporting feature, '\
+                  + 'you\'ll need to upgrade your group to access this feature')
               else
                 object_cache[:group] = group
               end
@@ -416,7 +421,11 @@ protected
       end
 
       # We're good to go!
-      self.status = 'successful'
+      if format != 'csv'
+        # NOTE: If it's a CSV then it's not really done until the file is uploaded. Since that 
+        #   happens in a background thread, the status will be updated in upload_results_file()
+        self.status = 'successful'
+      end
     else
       self.status = 'failed'
     end
@@ -579,27 +588,93 @@ protected
     rows
   end
 
+  # Logs a 'report-result-create' event to intercom
+  def intercom_rr_create
+    group = Group.find(cleaned_parameters['group_id']) rescue nil
+    if group
+      group_id = group.id.to_s
+      group_name = group.name
+      group_url = group.url
+    end
+    
+    IntercomEventWorker.perform_async({
+      'event_name' => 'report-result-create',
+      'email' => user.email,
+      'created_at' => Time.now.to_i,
+      'metadata' => {
+        'group_id' => group_id,
+        'group_name' => group_name,
+        'group_url' => group_url,
+        'type' => type
+      }
+    })
+  end
+
   # Call from after update, checks if results have changed and the format is csv
   # If so it will upload the csv to S3
   def upload_results_file
     # NOTE that even a "blank" report will have one row in results
     if results_changed? && !results.blank? && (format == 'csv')
+      # We can't do the actual file upload in this same thread because for some reason Carrierwave
+      # won't end up setting the filename correctly (it has something to do with Carrierwave 
+      # needing the entire callback cycle to work properly)
+      ReportResult.delay(queue: 'high').upload_results_file(id)
+    end
+  end
+
+  # NOTE: Since the changes are often not committed to the database yet when this first runs,
+  # this method will recursively fire up to [times_to_run] times at 1s intervals until the
+  # results array is non-blank.
+  def self.upload_results_file(report_result_id, times_to_run = 10)
+    times_to_run -= 1
+    report_result = ReportResult.find(report_result_id)
+
+    if report_result.results.blank?
+      if times_to_run > 0
+        ReportResult.delay_for(1.second, queue: 'high')\
+          .upload_results_file(report_result.id, times_to_run)
+      end
+    else
+      poller = Poller.find(report_result.poller_id) rescue nil
+
       # Create a temp file and then use it to build the csv
-      output_file_path = "#{Rails.root}/tmp/report_result_#{id.to_s}.csv"
+      output_file_path = "#{Rails.root}/tmp/report_result_#{report_result.id.to_s}.csv"
       output_file = CSV.open(output_file_path, 'wb') do |csv|
-        results.each do |row|
+        report_result.results.each do |row|
           csv << row
         end
       end
       
       # Now store the file in S3
-      self.results_file = Pathname.new(output_file_path).open
+      report_result.results_file = Pathname.new(output_file_path).open
+      report_result.status = 'successful'
+
+      begin
+        report_result.save!
+
+        if poller
+          poller.status = report_result.status
+          poller.message = 'Report results generated'
+          poller.redirect_to = report_result.full_url
+          poller.data['remaining_times_to_run'] = times_to_run
+          poller.save
+        end
+      rescue Exception => e
+        if poller
+          poller.status = 'failed'
+          poller.message = error_message
+          poller.redirect_to = nil
+          poller.save
+        else
+          throw e
+        end
+      end
     end
   end
 
   # This should be called before destroy, it deletes the uploaded results file from S3
   def remove_results_file
-    if results_file && results_file.url.blank?
+    if results_file && !results_file.url.blank?
       self.remove_results_file!
     end
   end
