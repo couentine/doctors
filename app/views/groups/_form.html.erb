@@ -489,6 +489,8 @@
       <div id="bl-admin-panel" style="display: none;">
         <h2>Badge List Admin Panel</h2>
       
+        <%= f.input :feature_grant_reporting, label: 'Manually Grant Reporting Feature', 
+          as: :boolean, input_html: { class: 'input-mini' } %>
         <%= f.input :admin_limit, label: 'Admin Limit', input_html: { class: 'input-mini' } %>
         <%= f.input :sub_group_limit, label: 'Sub-Group Limit', 
           input_html: { class: 'input-mini' } %>

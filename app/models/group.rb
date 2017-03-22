@@ -90,6 +90,7 @@ class Group
   field :admin_limit,                     type: Integer, default: 1
   field :sub_group_limit,                 type: Integer, default: 0
   field :features,                        type: Array, default: [] # = ['community', 'branding']
+  field :feature_grant_reporting,         type: Boolean # Manually grants the reporting feature
   field :total_user_count,                type: Integer, default: 1
   field :admin_count,                     type: Integer, default: 1
   field :member_count,                    type: Integer, default: 0
@@ -310,7 +311,14 @@ class Group
 
   # Returns whether or not the features array contains the specified 'feature' or :feature
   def has?(feature)
-    !features.blank? && features.include?(feature.to_s)
+    return_value = !features.blank? && features.include?(feature.to_s)
+    
+    # Enable manual grant of the reporting feature
+    if (feature.to_s == 'reporting')
+      return_value ||= (feature_grant_reporting == true)
+    end
+
+    return_value
   end
 
   # This method will append the passed item to the bounced email log and automatically shorten
