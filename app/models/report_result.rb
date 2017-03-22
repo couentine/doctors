@@ -262,7 +262,7 @@ class ReportResult
   end
 
   def display_name
-    "#{report_type_label} - #{created_at.to_s(:full_date_time)}"
+    "#{report_type_label} Report (#{status.capitalize}) - #{created_at.to_s(:short_date_time)}"
   end
 
   def completed

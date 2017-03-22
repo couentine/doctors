@@ -68,19 +68,17 @@
       ul#parameters {
         list-style: none;
         margin: 2em 0;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        padding: 0;
+        text-align: center;
       }
         ul#parameters li {
-          margin: 1em;
-          flex: 1 1 10em;
+          margin: 0.5em 1em;
+          display: inline-block;
         }
           ul#parameters li .label {
             font-size: 0.9em;
-            text-transform: uppercase;
             color: #424242;
-            margin-right: 1em;
+            margin-right: 0.2em;
             font-weight: bold;
           }
 
@@ -139,13 +137,17 @@
           </span>
         </li>
       <% end %>
+      <% if @group_tag %>
+        <li>
+          <span class="label">Group Tag:</span>
+          <span class="value">
+            <%= link_to "##{@group_tag.name}", group_tag_path(@group, @group_tag) %> 
+          </span>
+        </li>
+      <% end %>
       <li>
         <span class="label">Status:</span>
         <span class="value"><%= @report_result.status.capitalize %></span>
-      </li>
-      <li>
-        <span class="label">Format:</span>
-        <span class="value"><%= @report_result.format %></span>
       </li>
       <li>
         <span class="label"># of Report Rows:</span>
@@ -157,7 +159,7 @@
     
     <ul id="parameters">
       <% @report_result.parameters.each do |key, value| %>
-        <% if key != 'group_id' %>
+        <% if !['group_id', 'group_tag_id'].include? key %>
           <li>
             <span class="label">
               <%= ReportResult::REPORT_TYPE_PARAM_FIELD_SPECS[@report_result.type][key][:label] %>:
