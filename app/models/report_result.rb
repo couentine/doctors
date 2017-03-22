@@ -65,6 +65,7 @@ class ReportResult
   # === CALLBACK === #
 
   after_create :generate_results
+  after_create :intercom_rr_create
   after_save :queue_delete
   after_save :upload_results_file
   after_destroy :remove_results_file
@@ -585,6 +586,28 @@ protected
     end
 
     rows
+  end
+
+  # Logs a 'report-result-create' event to intercom
+  def intercom_rr_create
+    group = Group.find(cleaned_parameters['group_id']) rescue nil
+    if group
+      group_id = group.id.to_s
+      group_name = group.name
+      group_url = group.url
+    end
+    
+    IntercomEventWorker.perform_async({
+      'event_name' => 'report-result-create',
+      'email' => user.email,
+      'created_at' => Time.now.to_i,
+      'metadata' => {
+        'group_id' => group_id,
+        'group_name' => group_name,
+        'group_url' => group_url,
+        'type' => type
+      }
+    })
   end
 
   # Call from after update, checks if results have changed and the format is csv

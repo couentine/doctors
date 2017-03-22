@@ -219,6 +219,14 @@ class Log
         end
       end
 
+      # Log an intercom event
+      IntercomEventWorker.perform_async({
+        'event_name' => 'log-bulk-validation',
+        'email' => creator_user.email,
+        'created_at' => Time.now.to_i,
+        'metadata' => { 'log_count' => logs.count }
+      })
+
       if poller
         poller.status = 'successful'
         poller.message = "Feedback has been successfully posted to #{log_count} logs."
