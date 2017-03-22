@@ -16,7 +16,8 @@
   <style type="text/css">
     
     #reportDetails {
-      margin: 0 2em;
+      margin: 0 auto;
+      padding: 0 2em;
       max-width: 40em;
     }
       #banner {
@@ -36,6 +37,52 @@
         #banner .buttonWrapper {
           margin-top: 1em;
         }
+      ul#metadata {
+        list-style: none;
+        margin: 2em 0;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+        ul#metadata li {
+          margin: 1em;
+          flex: 1 1 10em;
+        }
+          ul#metadata li .label {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            color: #424242;
+            margin-right: 1em;
+            font-weight: bold;
+          }
+      #reportDetails .header {
+        margin: 1em auto;
+        font-size: 1.1em;
+        font-weight: bold;
+        border-top: 1px solid #E0E0E0;
+        border-bottom: 1px solid #E0E0E0;
+        text-align: center;
+        padding: 1em 0;
+        max-width: 15em;
+      }
+      ul#parameters {
+        list-style: none;
+        margin: 2em 0;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+        ul#parameters li {
+          margin: 1em;
+          flex: 1 1 10em;
+        }
+          ul#parameters li .label {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            color: #424242;
+            margin-right: 1em;
+            font-weight: bold;
+          }
 
   </style>
 
@@ -53,7 +100,7 @@
           <div class="buttonWrapper">
             <bl-button class="download" background="#43A047" color="white" target="_blank"
                 link="<%= @report_result.results_file.url %>">
-              Download Results
+              Download CSV
             </bl-button>
             </a>
           </div>
@@ -86,37 +133,41 @@
     <ul id="metadata">
       <% if @group %>
         <li>
-          <span class="label">Group</span>
+          <span class="label">Group:</span>
           <span class="value">
             <%= link_to @group.name, @group %> 
           </span>
         </li>
       <% end %>
       <li>
-        <span class="label">Status</span>
+        <span class="label">Status:</span>
         <span class="value"><%= @report_result.status.capitalize %></span>
       </li>
       <li>
-        <span class="label">Format</span>
+        <span class="label">Format:</span>
         <span class="value"><%= @report_result.format %></span>
       </li>
       <li>
-        <span class="label"># of Report Rows</span>
+        <span class="label"># of Report Rows:</span>
         <span class="value"><%= @report_result.total_result_count %></span>
       </li>
     </ul>
 
+    <div class="header">Report Parameters</div>
+    
     <ul id="parameters">
-      <div class="header">Report Parameters</div>
-        <% @report_result.parameters.each do |key, value| %>
+      <% @report_result.parameters.each do |key, value| %>
+        <% if key != 'group_id' %>
           <li>
             <span class="label">
-              <%= ReportResult::REPORT_TYPE_PARAM_FIELD_SPECS[@report_result.type][key][:label] %>
+              <%= ReportResult::REPORT_TYPE_PARAM_FIELD_SPECS[@report_result.type][key][:label] %>:
             </span>
-            <span class="value"><%= value %></span>
+            <span class="value">
+              <%= (value.blank?) ? 'blank' : value %>  
+            </span>
           </li>
         <% end %>
-      </ul>
+      <% end %>
     </ul>
 
   </div>
