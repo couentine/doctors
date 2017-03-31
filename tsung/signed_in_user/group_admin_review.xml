@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+<tsung loglevel="debug" dumptraffic="true" version="1.0">
+
+  <clients>
+    <client host="localhost" maxusers="1" use_controller_vm="true"/>
+  </clients>
+
+  <servers>
+    <server host="bl-staging-mango.herokuapp.com" port="443" type="ssl"></server>
+  </servers>
+
+  <load>
+    <arrivalphase phase="1" duration="1" unit="second">
+      <users arrivalrate="1" unit="second"/>
+    </arrivalphase>
+  </load>
+
+  <sessions>
+    <session name="admin_review_session" probability="100" type="ts_http">
+
+      <request >
+        <dyn_variable name="authenticity_token" />
+        <dyn_variable name="utf8" />
+        <http url='/users/sign_in' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/users/sign_in" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "user": {&quot;email&quot;: &quot;vishal.jagtap+345@zibtek.com&quot;,&quot;password&quot;: &quot;tudip123&quot;}}'
+              content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url='/'  method='GET' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url='/TestingGroupDev'  method='GET' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <dyn_variable name="authenticity_token" xpath="//meta[@name='csrf-token']/@content" />
+        <http url='/TestingGroupDev/review' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <dyn_variable name="log_id" jsonpath="full_logs[0].id"/>
+        <http url='/TestingGroupDev/full_logs.json?page=1&amp;badge=new_badge9&amp;sort_by=date_requested&amp;sort_order=desc' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url='/TestingGroupDev/validations.json?summary=test&amp;body=test&amp;logs_validated=false&amp;log_ids%5B%5D=%%_log_id%%&amp;authenticity_token=%%_authenticity_token%%' version='1.1' method='POST'>
+        </http>
+      </request>
+
+    </session>
+  </sessions>
+
+</tsung>

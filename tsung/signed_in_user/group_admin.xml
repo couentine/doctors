@@ -17,7 +17,7 @@
   </load>
 
   <sessions>
-    <session name="http_test_1" probability="100" type="ts_http">
+    <session name="group_admin_session" probability="100" type="ts_http">
       <request >
         <dyn_variable name="authenticity_token" />
         <dyn_variable name="utf8" />
