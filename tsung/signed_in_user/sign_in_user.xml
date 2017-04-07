@@ -1,0 +1,289 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+<tsung loglevel="debug" dumptraffic="true" version="1.0">
+
+  <clients>
+    <client host="localhost" maxusers="1" use_controller_vm="true"/>
+  </clients>
+
+  <servers>
+    <server host="bl-staging-mango.herokuapp.com" port="443" type="ssl"></server>
+  </servers>
+
+  <load>
+    <arrivalphase phase="1" duration="1" unit="minute">
+      <users arrivalrate="2" unit="second"/>
+    </arrivalphase>
+    <user session="Group_Admin" start_time="1" unit="second"></user>
+    <user session="Badge-Earner" start_time="60" unit="second"></user>
+  </load>
+
+  <sessions>
+     <session name="Group_Admin" probability="40" type="ts_http">
+       <request subst="true" >
+        <dyn_variable name="authenticity_token"/>
+        <dyn_variable name="utf8" />
+        <http url='/users/sign_up' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/users" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "user": {&quot;name&quot;: &quot;vishaljagtap1010&quot;,&quot;username_with_caps&quot;: &quot;vishal1010&quot;,&quot;email&quot;: &quot; vishal.jagtap+1010@zibtek.com&quot;,&quot;password&quot;: &quot;tudip123&quot;}}' content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/groups/new" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='12'/>
+
+      <request subst="true">
+        <http url='/groups' contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;,&quot;group&quot;: {&quot;name&quot;: &quot;TestGroup1010&quot;,&quot;url_with_caps&quot;: &quot;TestGroup1010&quot;,&quot;type&quot;: &quot;open&quot;,&quot;pricing_group&quot;: &quot;standard&quot;,&quot;avatar_key&quot;: &quot;uploads/670070d1-544c-496b-b072-39497bbcd66f/Testing.jpeg&quot;, &quot;description&quot;: &quot;testingj3&quot;,&quot;location&quot;: &quot;standard&quot;,&quot;website&quot;: &quot;standard&quot;}}' content_type='application/json' method='POST' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url='/TestGroup1010'  method='GET' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='20'/>
+
+      <request subst="true">
+        <http url='/TestGroup1010/badges/new' method='GET' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='2'/>
+
+      <request subst="true">
+        <http url='/TestGroup1010/badges' version='1.1' contents='utf8=%%_utf8%%&amp;authenticity_token=%%_authenticity_token%%&amp;badge%5Bname%5D=TestBadge1010&amp;badge%5Burl_with_caps%5D=TestBadge1010&amp;badge%5Bsummary%5D=ttest&amp;badge%5Bcustom_image_key%5D=&amp;badge%5Bimage_frame%5D=4-point-skinny&amp;badge%5Bimage_icon%5D=gavel&amp;badge%5Bimage_color2%5D=AA8831&amp;badge%5Bimage_color1%5D=1C4587&amp;rl=%5B%7B%22id%22%3A%22%22%2C%22display_name%22%3A%22ttest%22%2C%22summary%22%3A%22ttest%22%2C%22format%22%3A%22any%22%2C%22privacy%22%3A%22public%22%2C%22is_deleted%22%3Afalse%7D%2C%7B%22id%22%3A%22%22%2C%22display_name%22%3A%22ttestt%22%2C%22summary%22%3A%22ttestt%22%2C%22format%22%3A%22any%22%2C%22privacy%22%3A%22public%22%2C%22is_deleted%22%3Afalse%7D%5D&amp;commit=Create+Badge' content_type='application/x-www-form-urlencoded' method='POST'>
+        </http>
+      </request>
+
+    </session>
+
+    <session name="Badge_Earner" probability="30" type="ts_http">
+
+      <request>
+        <dyn_variable name="authenticity_token" />
+        <dyn_variable name="utf8" />
+        <http url='/users/sign_up' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/users" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "user": {&quot;name&quot;: &quot;vishaljagtap10100&quot;,&quot;username_with_caps&quot;: &quot;vishal10100&quot;,&quot;email&quot;: &quot; vishal.jagtap+10100@zibtek.com&quot;,&quot;password&quot;: &quot;tudip123&quot;}}'
+              content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <dyn_variable name="authenticity_token"/>
+        <http url='/TestGroup1010' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <dyn_variable name="authenticity_token"/>
+        <http url="/TestGroup1010/join" contents='{&quot;_method&quot;: &quot;post&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;}' content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url='/TestGroup1010' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/TestGroup1010/TestBadge1010" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/TestGroup1010/TestBadge1010/join" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <dyn_variable name="authenticity_token"/>
+        <dyn_variable name="utf8" />
+        <http url="/TestGroup1010/TestBadge1010/u/vishal10100/entries/new?tag=ttest" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/TestGroup1010/TestBadge1010/u/vishal10100/entries" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "entry": {&quot;link_url&quot;: &quot;https://www.w3schools.com/js/&quot;, &quot;summary&quot;: &quot;testing_tudip722&quot;, &quot;type&quot;: &quot;post&quot;, &quot;format&quot;: &quot; link&quot;, &quot;parent_tag&quot;: &quot;testevidence&quot;}}' content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">           
+        <dyn_variable name="request_feedback_url" xpath="//a[@class='btn btn-small highlight-primary']/@href"/>
+        <dyn_variable name="_method"/>
+        <dyn_variable name="authenticity_token"/>                    
+        <http url="/TestGroup1010/TestBadge1010/u/vishal10100" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="%%_request_feedback_url%%" contents='{&quot;_method&quot;: &quot;%%__method%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;}' content_type='application/json'  method="PUT" version="1.1">
+        </http>
+      </request>
+    </session>
+
+    <session name="Admin_Review" probability="20" type="ts_http">   
+
+      <request>
+        <dyn_variable name="authenticity_token" />
+        <dyn_variable name="utf8" />
+        <http url='/users/sign_in' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/users/sign_in" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "user": {&quot;email&quot;: &quot;vishal.jagtap+1010@zibtek.com&quot;,&quot;password&quot;: &quot;tudip123&quot;}}' content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url='/'  method='GET' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url='/TestGroup1010' method='GET' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <dyn_variable name="authenticity_token" xpath="//meta[@name='csrf-token']/@content" />
+        <http url='/TestGroup1010/review' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <dyn_variable name="log_id" jsonpath="full_logs[0].id"/>
+        <http url='/TestGroup1010/full_logs.json?page=1&amp;badge=TestBadge1010&amp;sort_by=date_requested&amp;sort_order=desc' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url='/TestGroup1010/validations.json?summary=test&amp;body=test&amp;logs_validated=false&amp;log_ids%5B%5D=%%_log_id%%&amp;authenticity_token=%%_authenticity_token%%' version='1.1' method='POST'>
+        </http>
+      </request>
+    </session>
+
+    <session name="Delete_User1" probability="5" type="ts_http">
+
+      <request>
+        <dyn_variable name="authenticity_token" />
+        <dyn_variable name="utf8" />
+        <http url='/users/sign_in' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/users/sign_in" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "user": {&quot;email&quot;: &quot; vishal.jagtap+1010@zibtek.com&quot;,&quot;password&quot;: &quot;tudip123&quot;}}' content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url="/users/edit" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url="/users" contents='{&quot;_method&quot;: &quot;delete&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;}' content_type='application/json' method="DELETE" version="1.1">
+        </http>
+      </request>
+
+    </session>
+
+    <session name="Delete_User2" probability="5" type="ts_http">
+
+      <request>
+        <dyn_variable name="authenticity_token" />
+        <dyn_variable name="utf8" />
+        <http url='/users/sign_in' version='1.1' method='GET'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/users/sign_in" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "user": {&quot;email&quot;: &quot;vishal.jagtap+10100@zibtek.com&quot;,&quot;password&quot;: &quot;tudip123&quot;}}' content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url="/users/edit" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request subst="true">
+        <http url="/users" contents='{&quot;_method&quot;: &quot;delete&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;}' content_type='application/json' method="DELETE" version="1.1">
+        </http>
+      </request>
+
+    </session>
+
+  </sessions>
+
+</tsung>
