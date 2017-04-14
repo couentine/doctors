@@ -15,7 +15,7 @@
       <users arrivalrate="2" unit="second"/>
     </arrivalphase>
     <user session="Group_Admin" start_time="1" unit="second"></user>
-    <user session="Badge-Earner" start_time="60" unit="second"></user>
+    <user session="Badge_Earner" start_time="180" unit="second"></user>
   </load>
 
   <sessions>
