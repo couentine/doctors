@@ -50,6 +50,7 @@ Polymer({
     nextPageUrl: String, // and ampersand + next page and query options are appended to this
     nextPage: { type: Number, value: 1 },
     nextPageParam: { type: String, value: 'page' },
+    name: String, // Needed for times when context is not blank
     
     // Options
     queryOptions: Object, // Added to next page query: "&key1=value1&key2=value2" ...
@@ -85,7 +86,7 @@ Polymer({
     // Computed
     layoutMode: { type: String, computed: '_layoutMode(objectMode, simpleMode)' },
     itemClass: { type: String, computed: '_itemClass(layoutMode, objectMode)' },
-    wrapperClass: { type: String, computed: '_wrapperClass(layoutMode, objectMode)' },
+    wrapperClass: { type: String, computed: '_wrapperClass(layoutMode, objectMode, context)' },
     minColWidth: { type: Number, computed: '_minColWidth(objectMode)' },
     maxColCount: { type: Number, computed: '_maxColCount(minColWidth)' },
     colClassList: { type: Number, computed: '_colClassList(maxColCount)' },
@@ -101,6 +102,7 @@ Polymer({
 
     // Internal properties
     colCount: { type: Number, observer: '_colCountChanged' },
+    context:  { type: String, value: '' }, // Sets context when embedded into another bl-component
     loading: { type: Boolean, value: false },
     indexLastSelected: Number
   },
@@ -257,9 +259,13 @@ Polymer({
       $(window).on('resize', function() { self.updateColCount(); });
       self.updateColCount(); // update it on page load as well
     }
+    //Check if bl-list is inside an element which changes its behavior
+    if (this.parentElement.parentElement.tagName.toLowerCase() === 'bl-list-tabs') {
+      this.context = 'bl-list-tabs';
+    }
 
     // Refresh query if needed
-    if (this.refreshQueryOnLoad)
+    if (this.refreshQueryOnLoad && this.context !== 'bl-list-tabs')
       this.refreshQuery();
   },
   _colCountChanged: function(newValue, oldValue) {
@@ -303,7 +309,9 @@ Polymer({
     else return 'grid';
   },
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
-  _wrapperClass: function(layoutMode, objectMode) { return layoutMode + "-list " + objectMode; },
+  _wrapperClass: function(layoutMode, objectMode, context) {
+     return layoutMode + "-list " + objectMode + " " + context + "-context";
+  },
   _minColWidth: function(objectMode) {
     if (objectMode == "full_logs") return 500;
     else return 2000;

@@ -35,6 +35,31 @@ class BadgesController < ApplicationController
   ]
 
   # === RESTFUL ACTIONS === #
+def index
+    # Grab the current page of badges
+    @page = params[:page] || 1
+    @page_size = params[:page_size] || APP_CONFIG['page_size_normal']
+    @only_flag = params[:flag]
+    # @exclude_flags = params[:exclude_flags] || %w(sample_data internal-data)
+    @sort_by = params[:sort_by] || "last_active"
+    @sort_order = params[:sort_order] || "desc"
+    
+    if @only_flag
+      @badges = Badge.where(:flags.in => [@only_flag]).order_by("#{@sort_by} #{@sort_order}")\
+        .page(@page).per(@page_size)
+    else
+      @badges = Badge.order_by("#{@sort_by} #{@sort_order}").page(@page).per(@page_size)
+    end
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: @badges, filter_user: current_user }
+    end
+  end
+
+
+
+
 
   # GET /group-url/badge-url
   # GET /group-url/badge-url.json

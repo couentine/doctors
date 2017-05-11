@@ -1,0 +1,134 @@
+<% 
+  provide(:title, "Add badges to \##{@group_tag.name_with_caps} - #{@group.name}")  
+  provide(:hide_left_nav, 'true')
+  provide(:hide_right_nav, 'true')
+%>
+
+<% #=== APP HEADER CONTENT ===# %>
+
+  <% content_for :app_header_content do %>
+    <bl-app-header-form title="Add badges to tag" condensed-background="#388E3C" 
+        header-color="#43A047" selection-bar-for="badgeList" count-noun-singular="badge">
+      <bl-button js="addbadgesToTag()" class="save-button" background="#43A047" color="white">
+        Save
+      </bl-button>
+      <bl-button link="<%= group_tag_path(@group, @group_tag) %>" class="cancel-button" 
+          background="#43A047" color="white">
+        Cancel
+      </bl-button>
+    </bl-app-header-form>
+  <% end %>
+
+<% #=== PAGE BODY CONTENT ===# %>
+  
+  <style type="text/css">
+
+    #page-header {
+      padding: 1em 1.4em 2em 1.4em;
+    }
+      #summary {
+        font-size: 1em;
+        line-height: 1.4em;
+        color: #43A047;
+      }
+        #desktop-instructions { display: none; }
+        @media (min-width: 840px) { #desktop-instructions { display: initial; } }
+
+    bl-list { min-height: 20em; }
+
+  </style>
+
+  <!-- #=== PAGE HEADER ===# -->
+
+  <div id="page-header">
+    <div id="summary">
+      Select badges below to add them to #<%= @group_tag.name_with_caps %>.
+      <span id="desktop-instructions">
+        You can hold down the shift key to select a range of badges.
+      </span>
+    </div>
+  </div>
+
+  <!-- #=== AJAX CALL TO ADD badgeS ===# -->
+
+  <iron-ajax id="addbadgesAjax" bubbles method="POST" content-type="application/json"
+    headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'
+    url="<%= bulk_create_group_tag_badges_url(@group, @group_tag, format: :json) %>"></iron-ajax>
+
+  <!-- #=== badge LIST ===# -->
+
+  <bl-list id="badgeList" object-mode="badges" refresh-query-on-load simple-mode 
+      row-title="name" row-image="image_small_url" round-row-image
+      next-page-url="<%= group_badges_url(@group, format: :json, without_tag: @group_tag.name) %>"
+      for-ajax="addbadgesAjax" ajax-item-key="id" ajax-body-key="badge_ids">
+
+    <!-- #=== PLACEHOLDER ===# -->
+    <div class="placeholder transparent">
+      <i class="fa fa-id-badge"></i>
+      <div class="message">
+        <p><b>There are no badges left to add to your group.</b></p> 
+        <p>(That means everyone has already been added to the tag.)</p>
+      </div>
+    </div>
+
+  </bl-list>
+
+  <!-- #=== PAGE-SPECIFIC JAVASCRIPT ===# -->
+
+  <script type="text/javascript">
+    //#sourceUrl
+    function addbadgesToTag() {
+      if (document.getElementById('badgeList').selectedItemCount > 0) {
+        // First show the waiting dialog to prevent double-clicking the save button
+        appContainer.openWaitingDialog({ color: 'green', title: 'Submitting request...' });
+
+        // Then trigger the request (this will return a poller id)
+        // Execution continues in handleResponse() or handleError()
+        document.getElementById('addbadgesAjax').generateRequest();
+      } else appContainer.openAlertDialog({
+        color: 'green', 
+        title: 'No badges selected',
+        body: 'You must select at least one badge to add to the tag. To select badges, '
+          + 'click on the rows in the list below.',
+        confirm: { text: 'Continue' }
+      });
+    }
+
+    // Add listeners once the layout is ready
+    appLayout.addEventListener('dom-change', function() {
+      document.addEventListener('iron-ajax-response', handleResponse);
+      document.addEventListener('iron-ajax-error', handleError);
+    });
+
+    function handleResponse(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.openPollerDialog(e.detail.response.poller_id, {
+        color: 'green', 
+        title: 'Tag update status',
+        confirm: { 
+          text: 'Continue to tag', 
+          action: function() { 
+            document.location.href = '<%= group_tag_path(@group, @group_tag) %>'
+          }
+        },
+        dismiss: { 
+          text: 'Add more badges',
+          action: function() {
+            // We need to remove the badges who have already been added
+            document.getElementById('badgeList').removeSelectedItems();
+          }
+        }
+      });
+    }
+
+    function handleError(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.openAlertDialog({
+        color: 'green', 
+        title: 'Error submitting request',
+        body: 'There was a problem adding badges to this tag, please try again.',
+        confirm: { text: 'Continue' }
+      });
+    }
+
+  </script>

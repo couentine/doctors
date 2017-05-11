@@ -91,7 +91,10 @@ BadgeList::Application.routes.draw do
         via: :delete, as: :destroy_group_invited_admin,
         defaults: { type: 'admin' },
         constraints: { :email => /[^\/]+/ }
+
+  # These should eventually be moved to their own RESTfull controllers         
   match ':group_id/users' => 'groups#users', via: :get, as: :group_users
+  match ':group_id/badges' => 'groups#badges', via: :get, as: :group_badges
   match ':group_id/members/add' => 'groups#add_users', via: :get,
         as: :add_group_members, defaults: { type: 'member' }
   match ':group_id/admins/add' => 'groups#add_users', via: :get,
@@ -129,6 +132,12 @@ BadgeList::Application.routes.draw do
     resources :badges, only: [:new, :create]
     resources :group_tags, except: [:new, :edit], path: 'tags', as: 'tags' do
       resources :group_tag_users, path: 'users', as: 'users', only: [:index, :destroy] do
+        collection do
+          get 'add'
+          post 'bulk_create'
+        end
+      end
+      resources :group_tag_badges, path: 'badges', as: 'badges', only: [:index, :destroy] do
         collection do
           get 'add'
           post 'bulk_create'

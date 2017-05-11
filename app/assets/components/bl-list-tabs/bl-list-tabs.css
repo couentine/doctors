@@ -1,0 +1,29 @@
+:host.green paper-tabs {
+  --paper-tabs-selection-bar-color:  #7CB342;
+}
+
+:host.green paper-tab {
+    --paper-tab-ink: #AED581;
+}
+
+:host.blue paper-tabs {
+  --paper-tabs-selection-bar-color: #039BE5;
+}
+
+:host.blue paper-tab {
+    --paper-tab-ink: #4FC3F7;
+}
+
+:host.grey paper-tabs {
+  --paper-tabs-selection-bar-color: #757575;
+}
+
+:host.grey paper-tab {
+    --paper-tab-ink: #E0E0E0;
+}
+
+
+
+#listWrapper {
+    z-index: 10;
+}
