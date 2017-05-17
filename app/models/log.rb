@@ -422,6 +422,9 @@ class Log
           self.validation_count += 1
         else
           self.rejection_count += 1
+
+          # Automatically withdraw the feedback request if this is a rejection
+          self.date_withdrawn = Time.now if validation_status == 'requested'
         end
         self.next_entry_number += 1
         self.save
@@ -434,6 +437,9 @@ class Log
           else
             self.validation_count -= 1
             self.rejection_count += 1
+
+            # Automatically withdraw the feedback request if this is a rejection
+            self.date_withdrawn = Time.now if validation_status == 'requested'
           end
         end
 
@@ -458,6 +464,24 @@ class Log
       return entry
     else
       return nil
+    end
+  end
+
+  # This will destroy all child validations which with updated_at < [before_time].
+  def destroy_previous_validations(before_time)
+    validations.where(:updated_at.lt => before_time).each do |entry|
+      entry.context = 'bulk_destroy' # prevents updating of log
+      entry.destroy!
+
+      # Update the log validation counts
+      if entry.log_validated
+        self.validation_count -= 1
+      else
+        self.rejection_count -= 1
+      end
+      
+      # Then remove this item from the log validations cache and save
+      self.validations_cache.delete entry.creator_id.to_s
     end
   end
 
@@ -669,6 +693,11 @@ protected
         elsif date_requested_changed? && !date_requested.nil?
           self.validation_status = 'requested'
           self.date_withdrawn = nil # In case this is not their first request
+
+          # If this is not their first request then destroy all previous validations 
+          if !date_requested_was.nil?
+            destroy_previous_validations(date_requested)
+          end
         end 
       end
 
