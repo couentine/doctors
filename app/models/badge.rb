@@ -723,7 +723,6 @@ class Badge
       
       # The last step is to update progress tracking boolean if needed
       self.progress_tracking_enabled = (new_requirement_count > 0)
-      self.send_validation_request_emails = false if !progress_tracking_enabled
       self.save if self.changed?
     end
   end
