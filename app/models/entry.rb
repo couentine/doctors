@@ -435,7 +435,7 @@ protected
 
   # Update the log if this was a validation (runs after destroy)
   def check_log_validation_counts
-    if type == 'validation'
+    if (type == 'validation') && (context != 'bulk_destroy')
       # Update the log validation counts
       if log_validated
         log.validation_count -= 1
