@@ -800,8 +800,10 @@ namespace :db do
         # One-time fix: We need to filter out any items with ids that are not stringified
         # Refer to issue #374 for an explanation. We should be able to delete this once it is run,
         # though it shouldn't really hurt anything.
-        badge.json_clone['pages'] = badge.json_clone['pages'].reject do |tag_item|
-          tag_item['_id'].class == BSON::ObjectId
+        if badge.json_clone && badge.json_clone['pages']
+          badge.json_clone['pages'] = badge.json_clone['pages'].reject do |tag_item|
+            tag_item['_id'].class == BSON::ObjectId
+          end
         end
 
         badge.timeless.save
