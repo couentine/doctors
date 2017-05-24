@@ -381,7 +381,9 @@ class User
       user[hash_field] = auth.to_hash
       user.name ||= name
       user.email ||= email
-      user.confirmed_at ||= Time.now # confirmation no longer needed
+      if !user.confirmed? || user.pending_reconfirmation?
+        user.confirm
+      end
 
       user.save if user.changed?
     else
@@ -395,6 +397,7 @@ class User
       user[uid_field] = uid
       user[hash_field] = auth.to_hash # NOTE: The image information is pulled from this on save
       user.skip_confirmation!
+      user.skip_reconfirmation! # For some reason this is now needed
       user.password = Devise.friendly_token[0,20]
       user.user_defined_password = false # Records the fact that the user doesn't know the password
 
