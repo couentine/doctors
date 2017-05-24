@@ -21,7 +21,8 @@ class Badge
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'image_medium' => :image_medium_url, 'image_small' => :image_small_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps,
-    'full_url' => :badge_url }
+    'full_url' => :badge_url, 'experts' => :expert_user_id_strings, 
+    'learners' => :learner_user_ids_strings }
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
@@ -180,6 +181,24 @@ class Badge
   end
   def image_medium_url; image_url(:medium); end
   def image_small_url; image_url(:small); end
+
+  # Returns a stringified version of learner_user_ids
+  def learner_user_ids_strings
+    if learner_user_ids.blank?
+      []
+    else
+      learner_user_ids.map{ |user_id| user_id.to_s }
+    end
+  end
+
+  # Returns a stringified version of expert_user_ids
+  def expert_user_id_strings
+    if expert_user_ids.blank?
+      []
+    else
+      expert_user_ids.map{ |user_id| user_id.to_s }
+    end
+  end
 
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields

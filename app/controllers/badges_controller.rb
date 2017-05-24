@@ -89,7 +89,16 @@ class BadgesController < ApplicationController
         @group = Group.find(params[:group_id]) || not_found
         @badge = @group.badges.find_by(url: (params[:id] || params[:badge_id]).to_s.downcase) \
           || not_found
-        render json: @badge, filter_user: current_user
+        return_value = @badge.as_json(filter_user: current_user)
+
+        # If this is a private group we need to filter out user-related keys
+        if @group.private? && !@badge_list_admin && !@current_user_is_admin \
+            && !@current_user_is_member
+          return_value.delete 'experts'
+          return_value.delete 'learners'
+        end
+
+        render json: return_value
       end
     end
   end

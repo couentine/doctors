@@ -13,7 +13,8 @@ class Group
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
   JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'url' => :issuer_website,
-    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url }
+    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url,
+    'badges' => :badge_urls_with_caps }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
   TAG_ASSIGNABILITY_VALUES = ['members', 'admins']
@@ -197,6 +198,13 @@ class Group
   def avatar_image_small_url; avatar_url(:small); end
 
   def badge_count; badges_cache.count; end
+  def badge_urls_with_caps
+    if badges_cache.blank?
+      []
+    else
+      badges_cache.map{ |badge_id, badge_item| badge_item['url_with_caps'] }
+    end
+  end
 
   # === GROUP METHODS === #
 
