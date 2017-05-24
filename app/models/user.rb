@@ -412,7 +412,7 @@ class User
     username_with_caps = ActiveSupport::Inflector::transliterate(name_string)
     username_with_caps.gsub!(/[^a-zA-Z0-9\-_]+/, sep) # Turn unwanted chars into the separator
     unless sep.nil? || sep.empty?
-      re_sep = Regexp.escape(sep)
+      re_sep = ::Regexp.escape(sep)
       username_with_caps.gsub!(/#{re_sep}{2,}/, sep) # No more than one of the separator in a row.
       username_with_caps.gsub!(/^#{re_sep}|#{re_sep}$/, '') # Remove leading/trailing separator.
     end
