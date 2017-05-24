@@ -99,9 +99,18 @@
 </script>
 
 <div class="row">
+  <div class="span6 offset3">
+    <div class="oauth-signup">
+      <%= link_to "<i class='fa fa-google'></i> Sign up with Google".html_safe,
+        user_omniauth_authorize_path(:google_oauth2), class: 'btn' %>
+    </div>
+  </div>
+</div>
+
+<div class="row">
 
   <div class="span8 offset2">
-    <div class="signin-box">
+    <div class="signin-box no-top-margin">
       
       <div class="signin-header">
         <h2>Create a new account</h2>
