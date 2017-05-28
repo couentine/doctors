@@ -3,16 +3,23 @@
 /* ================================================== */
 
 /*
-  TODO: Fill this out.
+  This component creates a tabbed user interface for bl-lists passed in as content to the element.
+  A passed in bl-list will automatically populate the number of tabs and their names when passed in.
+
+  The coponent has an optional param, selectedListId, which determines which tab should be selected
+  when the component is displayed.
+
+  Styling: Set the class to one of ['orange', 'green', 'blue', 'grey']
 */
 
 Polymer({
   is: "bl-list-tabs",
   properties: {
-    tabs: Array, //Array of onjects with two keys: label and value
-    wrapperClass: String,
+    //Optional
     selectedListId: { type: String, notify: true, observer: '_selectedListIdChanged' },
-    childMap: Object
+    //Computed
+    childMap: Object, //Array of bl-lists passed in to the bl-list-tabs component
+    tabs: Array //Array of objects with two keys: label and value, based on bl-list items
   },
   attached: function() {
     var lightDOMChildren = this.getContentChildren();

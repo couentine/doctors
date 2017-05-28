@@ -36,9 +36,17 @@
       justify-content: flex-end;
     }
 
-  #listWrapper {
+#listWrapper.bl-list-context {
     z-index: 10;
-  }
+    margin: 0 1em;
+    padding-bottom: 0.5em;
+    background: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 1.25rem;
+}
+
+    @media (min-width: 840px) { #listWrapper { margin: 0 2em; padding-bottom: 2em; } }
+    @media (min-width: 1200px) { #listWrapper { margin: 0 4em; padding-bottom: 4em; } }
     .placeholder-wrapper {
       display: flex;
       flex: 1 100%;

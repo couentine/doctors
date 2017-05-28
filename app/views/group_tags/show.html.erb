@@ -59,22 +59,6 @@
           }
           #editButtons a:focus, #editButtons a:hover { color: #212121; }
 
-    #listWrapper {
-      margin: 0 1em;
-      padding-bottom: 0.5em;
-      background: white;
-      border: 1px solid #E0E0E0;
-      border-radius: 1.25rem;
-    }
-    @media (min-width: 840px) { #listWrapper { margin: 0 2em; padding-bottom: 2em; } }
-    @media (min-width: 1200px) { #listWrapper { margin: 0 4em; padding-bottom: 4em; } }
-      #userList {
-        // min-height: 22em;
-      }
-      // #badgeList {
-      //   min-height: 22em;
-      //   display: none;
-      // }
         paper-listbox.dropdown-content {
           min-width: 12em;
           margin-bottom: -6em;
@@ -243,11 +227,11 @@
 
       <!-- #=== PLACEHOLDER ===# -->
       <div class="placeholder transparent">
-        <i class="fa fa-user"></i>
+        <i class="fa fa-trophy"></i>
         <div class="message">
-          <p><b>No users have been added to this tag yet.</b></p> 
+          <p><b>No badges have been added to this tag yet.</b></p> 
           <% if @can_assign_group_tags %>
-            <p>Click the 'Add Users' button above to add some.</p>
+            <p>Click the 'Add Badges' button above to add some.</p>
           <% end %>
         </div>
       </div>
@@ -273,8 +257,6 @@
           .addEventListener('iron-ajax-response', handleDeleteGroupTagResponse);
         document.getElementById('deleteGroupTagAjax')
           .addEventListener('iron-ajax-error', handleDeleteGroupTagError);
-        document.getElementById('selector-tabs')
-          .addEventListener('bl-list-tabs-press', handleTabSwitch);
       });
 
       // #=== USER REMOVE HANDLING ===# 
@@ -360,18 +342,6 @@
         appContainer.closeWaitingDialog();
         appContainer.addToast('There was a problem deleting this tag. Please try again.', 
           'error', 30000);
-      }
-
-      function handleTabSwitch(e) {
-        console.log(e.detail.evtObject.toString());
-        var className = e.detail.evtObject.toString();
-        if (className === 'Users') {
-          document.getElementById('badgeList').style.display = 'none';
-          document.getElementById('userList').style.display = 'block';
-        } else {
-          document.getElementById('userList').style.display = ' none';
-          document.getElementById('badgeList').style.display = 'block';
-        }
       }
     </script>
 

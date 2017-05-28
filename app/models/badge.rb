@@ -26,9 +26,8 @@ class Badge
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
-    group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
-    :group_validation_request_counts, :expert_count, :image_url, :image_medium_url, 
-      :image_small_url]
+    group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
+    :expert_count, :image_url, :image_medium_url, :image_small_url]
   }
   
   # Below are the badge-level fields included in the clone
@@ -46,7 +45,6 @@ class Badge
   belongs_to :creator, inverse_of: :created_badges, class_name: "User"
   has_many :logs, dependent: :nullify
   has_many :tags, dependent: :destroy
-  has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
   has_and_belongs_to_many :group_tags
 
   # === FIELDS & VALIDATIONS === #
@@ -95,7 +93,6 @@ class Badge
   field :learner_user_ids,                type: Array, default: []
   field :all_user_ids,                    type: Array, default: []
   field :validation_request_count,        type: Integer, default: 0
-  field :group_validation_request_counts, type: Hash, default: {} #key-group_id,value=count
 
   field :group_name,                      type: String # local cache of group info
   field :group_url,                       type: String # local cache of group info
@@ -173,6 +170,13 @@ class Badge
 
   def full_path
     "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
+  end
+
+  def added_to_group_tag (group_tag)
+    added = false;
+    if self.group_tags.include? group_tag.name
+      added = true;
+    end
   end
 
   # Returns URL of the specified version of this badge's image
@@ -425,26 +429,6 @@ class Badge
 
   def update_validation_request_count
     self.validation_request_count = requesting_learner_logs.count
-  end
-
-  # This recalculates the appropriate key of group_validation_request_counts
-  # Then if needed it will update all related group tags
-  # NOTE: This is resource intensive and only designed to be called from other asynch methods
-  def update_validation_request_count_for(group)
-    new_count = \
-      logs.where(:badge_id.in => group.badges_cache.keys, validation_status: 'requested').count
-    
-    if !self.group_validation_request_counts.has_key?(group.id.to_s) \
-        || (self.group_validation_request_counts[group.id.to_s] != new_count)
-      self.group_validation_request_counts[group.id.to_s] = new_count
-      
-      # Now update all of the group tags
-      related_group_tags = group_tags.where(group: group.id)
-      related_group_tags.each do |group_tag|
-        group_tag.update_validation_request_count_for(self)
-        group_tag.timeless.save
-      end
-    end
   end
 
   # Removes badge from various user cache fields
@@ -818,10 +802,6 @@ class Badge
     elsif !is_deleted # create this item
       self.json_clone['pages'] << tag_json_clone
     end
-  end
-
-  def added_to_group (group)
-    group_tag_ids.include?(group.id)
   end
 
 protected

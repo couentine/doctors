@@ -22,8 +22,10 @@
     --paper-tab-ink: #E0E0E0;
 }
 
-
-
-#listWrapper {
-    z-index: 10;
+#listWrapper.bl-list-tabs {
+    margin: 0 1em;
+    padding-bottom: 0.5em;
+    background: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 1.25rem;
 }

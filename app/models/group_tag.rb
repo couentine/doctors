@@ -112,11 +112,11 @@ class GroupTag
 
   # === ADDING AND REMOVING USERS === #
 
-  # Updates user_count, user_magnitude, badges_count and badges_magnitude
-  # THE PURPOSE OF USER MAGNITUDE is to keep from having to update the group tag cache every single
-  # time that a user is added or removed. But since the group needs to know which are the most 
-  # popular tags, we do need to occasionally update the group. So instead of directly updating the
-  # group cache when the user count changes, we base it off of the 3rd log. So it will 
+  # Updates user_count, user_magnitude, badge_count and badge_magnitude
+  # THE PURPOSE OF MAGNITUDES is to keep from having to update the group tag cache every single
+  # time that a user / badge is added or removed. But since the group needs to know which are the 
+  # most popular tags, we do need to occasionally update the group. So instead of directly updating 
+  # the group cache when the user/badge count changes, we base it off of the 3rd log. So it will 
   # exponentially back off as the tag gets larger.
   def update_counts
     self.user_count = user_ids.count
@@ -134,7 +134,7 @@ class GroupTag
     if badge_count == 0
       self.badge_magnitude = 0
     elsif badge_count == 1
-      self.badge_magnitude =1
+      self.badge_magnitude = 1
     else
       self.badge_magnitude = Math.log(badge_count, 3).ceil
     end
@@ -345,24 +345,6 @@ class GroupTag
   end
 
   # === ADDING AND REMOVING BADGES === #
-
-  # Updates badge_count and badge_magnitude
-  # THE PURPOSE OF BADGE MAGNITUDE is to keep from having to update the group tag cache every single
-  # time that a badge is added or removed. But since the group needs to know which are the most 
-  # popular badges, we do need to occasionally update the group. So instead of directly updating the
-  # group cache when the badge count changes, we base it off of the 3rd log. So it will 
-  # exponentially back off as the tag gets larger.
-  def update_badge_counts
-    self.badge_count = badge_ids.count
-    
-    if badge_count == 0
-      self.badge_magnitude = 0
-    elsif badge_count == 1
-      self.badge_magnitude = 1
-    else
-      self.badge_magnitude = Math.log(badge_count, 3).ceil
-    end
-  end
   
   # Adds a list of badges and uses the specified badge id to set the badge history entries
   # If you set async to true then this method will return a poller id
@@ -406,13 +388,13 @@ class GroupTag
         new_badge_count = new_badges.count
         new_badges.each do |badge|
           # Only add them if they have not been added before
-          if !badge.added_to_group group
+          if !badge.added_to_group_tag group_tag
             group_tag.badges << badge
             badge_id_string = badge.id.to_s
             
             # Initialize this badge's spot in the validation request hash
             group_tag.badge_validation_request_counts[badge_id_string] \
-              = badge.group_validation_request_counts[group.id.to_s] || 0
+              = badge.validation_request_count || 0
             
             # Set or update this badge's audit history
             if group_tag.badge_history.has_key? badge_id_string
@@ -609,8 +591,7 @@ protected
     end
   end
 
-  # If the tag name changes we want to update the parent_tag field on all of the child entries.
-  # The parent_tag field isn't really used right now so this is mostly just to maintain consistency.
+  # Updates the tags cache on the group object if any of the cached field names change.
   def update_group_cache_if_needed
     # First find the intersection of the fields to watch and the fields that have changed
     cache_field_names = GROUP_CACHE_FIELDS.map{ |field_symbol| field_symbol.to_s }

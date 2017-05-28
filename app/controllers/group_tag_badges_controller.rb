@@ -34,35 +34,6 @@ class GroupTagBadgesController < ApplicationController
     end
   end
 
-  # # JSON only
-  # # GET /group-url/tags/tag-name/badges.json?page=2&page_size=50
-  # def index
-  #   respond_to do |format|
-  #     format.json do
-  #       # Get pagination variables
-  #       sort_fields = ['group', 'name', 'editability', 'awardability'] # defaults to first value 
-  #       #>> SEE NOTE
-  #       sort_orders = ['asc', 'desc'] # defaults to first value >> SEE NOTE
-  #       #  >> NOTE: If you change the defaults here, also update GroupTagsController#show
-  #       @page_size = params['page_size'] || APP_CONFIG['page_size_normal'] # default to normal
-  #       @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
-  #       @page = (params['page'] || 1).to_i
-  #       @next_page = nil
-  #       @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
-  #       @sort_order = \
-  #         (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
-
-  #       badge_criteria = @group_tag.badges.order_by("#{@sort_by} #{@sort_order}")\
-  #         .page(@page).per(@page_size)
-  #       @badges_hash = Badge.array_json(badge_criteria, :group_list_item)
-  #       @next_page = @page + 1 if badge_criteria.count > (@page_size * @page)
-
-  #       render json: { page: @page, page_size: @page_size, badges: @badges_hash, 
-  #         next_page: @next_page }
-  #     end
-  #   end
-  # end
-
   # JSON only. Returns 3 keys: success, badge, error_message
   # DELETE /group-url/tags/tag-name/badges/abc123.json
   def destroy

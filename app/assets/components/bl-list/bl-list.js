@@ -102,7 +102,7 @@ Polymer({
 
     // Internal properties
     colCount: { type: Number, observer: '_colCountChanged' },
-    context:  { type: String, value: '' }, // Sets context when embedded into another bl-component
+    context:  { type: String, value: 'bl-list' }, // Sets context when in another bl-component
     loading: { type: Boolean, value: false },
     indexLastSelected: Number
   },
@@ -310,6 +310,7 @@ Polymer({
   },
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
   _wrapperClass: function(layoutMode, objectMode, context) {
+    console.log(context);
      return layoutMode + "-list " + objectMode + " " + context + "-context";
   },
   _minColWidth: function(objectMode) {
