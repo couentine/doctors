@@ -39,6 +39,7 @@ Polymer({
     // Managed automatically
     running: { type: Boolean, value: false },
     timeout: { type: Boolean, value: false },
+    progressHidden: { type: Boolean, value: true },
     poller: Object,
     pollerStarted: Date,
     errorMessage: String,
@@ -82,12 +83,15 @@ Polymer({
           self.poller = result;
           self.tries++;
           
+          // NOTE: We can't check for null because somehow progress is being changed from null to 0
+          self.progressHidden = !(result.progress > 0);
+          
           if (result.completed) {
             self.stop();
             self.fireCompleteEvent();
-          } else if ((Date.now() - self.pollerStarted) < self.maxDuration)
-            setTimeout(function() { self.queryPoller() }, nextInterval); 
-          else {
+          } else if ((Date.now() - self.pollerStarted) < self.maxDuration) {
+            setTimeout(function() { self.queryPoller() }, nextInterval);
+          } else {
             self.timeout = true;
             self.goError('This job is taking a long time and the progress tracker has timed out, '
               + 'but the job will continue to run in the background.');

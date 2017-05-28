@@ -44,6 +44,15 @@
       }
     });
 
+    // OPTIONAL FIELDS
+    $('#show-optional-fields').click(function(e) {
+      $(this).slideUp();
+      $('#optional-fields').slideDown(function() {
+        $('#user_job_title').focus();
+      });
+      e.preventDefault();
+    });
+
     // IMAGE UPLOAD
 
     // Clicking the pretty upload button clicks on the file input element instead
@@ -90,9 +99,18 @@
 </script>
 
 <div class="row">
+  <div class="span6 offset3">
+    <div class="oauth-signup">
+      <%= link_to "<i class='fa fa-google'></i> Sign up with Google".html_safe,
+        user_omniauth_authorize_path(:google_oauth2), class: 'btn' %>
+    </div>
+  </div>
+</div>
+
+<div class="row">
 
   <div class="span8 offset2">
-    <div class="signin-box">
+    <div class="signin-box no-top-margin">
       
       <div class="signin-header">
         <h2>Create a new account</h2>
@@ -106,11 +124,13 @@
             <%= f.error_notification %>
 
             <%= f.input :name, label: 'Your full name', placeholder: 'Jane Lee', 
-              required: true, autofocus: true, input_html: { class: 'signin' } %>
+              required: true, autofocus: true, input_html: { class: 'signin',
+              maxlength: User::MAX_NAME_LENGTH } %>
             <%= f.input :email, label: 'Your email', placeholder: 'jane@lee.com', 
               required: true, input_html: { class: 'signin' } %>
             <%= f.input :username_with_caps, label: 'Pick a username', placeholder: 'Jane123', 
-              required: true, input_html: { class: 'signin' } %>
+              required: true, input_html: { class: 'signin', 
+                maxlength: User::MAX_USERNAME_LENGTH } %>
             <%= f.input :password, label: 'Enter a password', required: true, 
               input_html: { class: 'signin' } %>
 
@@ -140,9 +160,24 @@
               </div>
             </div>
 
+            <div id="optional-fields" style="display: none;">
+              <%= f.input :job_title, label: 'Job title', input_html: { class: 'signin',
+                maxlength: User::MAX_JOB_TITLE_LENGTH } %>
+              <%= f.input :organization_name, label: 'Organization name', 
+                input_html: { class: 'signin', maxlength: User::MAX_ORGANIZATION_NAME_LENGTH } %>
+              <%= f.input :website, label: 'Website', input_html: { class: 'signin',
+                maxlength: User::MAX_WEBSITE_LENGTH } %>
+              <%= f.input :bio, as: :text, label: 'Bio', input_html: { class: 'signin',
+                  data: { :'character-count' => true, :'max-length' => User::MAX_BIO_LENGTH } } %>
+            </div>
+
           </div>
             
           <div class="form-footer add-top-margin">
+            <a href="#" id="show-optional-fields" class="btn btn-small btn-link">
+              <i class="fa fa-arrow-down"></i>
+              Show Optional Profile Fields
+            </a><br>
             <%= f.button :submit, "Create an account", :class => 'btn-large btn-success' %><br>
             <%= link_to "Already have an account?", new_user_session_path, class: 'btn btn-link' %>
             <p class="button-info-block">

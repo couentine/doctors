@@ -19,7 +19,7 @@ defaults: &defaults
         icon: fa-user
         description: |
           1 admin / badge awarder
-        users: -1
+        users: 5000
         admins: 1
         sub_groups: 0
         features: []
@@ -32,8 +32,8 @@ defaults: &defaults
         statement_descriptor: Badge List Team
         icon: fa-users
         description: |
-          3 admins, unlimited badge awarders &amp; community features
-        users: -1
+          3 admins, unlimited badge awarders
+        users: 5000
         admins: 3
         sub_groups: 0
         features:
@@ -47,15 +47,14 @@ defaults: &defaults
         statement_descriptor: Badge List Org
         icon: fa-building
         description: |
-          5 sub-groups with 3 admins each, unlimited badge awarders, 
-          community features &amp; custom branding
-        users: -1
-        admins: 3
+          Unlimited admins &amp; badge awarders, reporting
+        users: 5000
+        admins: -1
         sub_groups: 5
         sub_group_amount: 1000
         features:
         - community
-        - branding
+        - reporting
     k12:
       k12-teacher-1y-1:
         name: K12 Teacher Annual
@@ -67,7 +66,7 @@ defaults: &defaults
         icon: fa-user
         description: |
           1 teacher, annual billing only
-        users: -1
+        users: 5000
         admins: 1
         sub_groups: 0
         features: []
@@ -80,8 +79,8 @@ defaults: &defaults
         statement_descriptor: Badge List K12 Team
         icon: fa-users
         description: |
-          3 admins, unlimited badge awarders &amp; community features
-        users: -1
+          3 admins, unlimited badge awarders
+        users: 5000
         admins: 3
         sub_groups: 0
         features:
@@ -95,15 +94,14 @@ defaults: &defaults
         statement_descriptor: Badge List K12 School
         icon: fa-building
         description: |
-          5 sub-groups with 3 admins each, unlimited badge awarders, 
-          community features &amp; custom branding
-        users: -1
-        admins: 3
+          Unlimited admins &amp; badge awarders, reporting
+        users: 5000
+        admins: -1
         sub_groups: 5
         sub_group_amount: 500
         features:
         - community
-        - branding
+        - reporting
       k12-team-1y-1:
         name: K12 Team Annual
         amount: 12000
@@ -113,9 +111,9 @@ defaults: &defaults
         statement_descriptor: Badge List K12 Team
         icon: fa-users
         description: |
-          3 admins, unlimited badge awarders &amp; community features
+          3 admins, unlimited badge awarders
           (Includes discount for annual billing)
-        users: -1
+        users: 5000
         admins: 3
         sub_groups: 0
         features:
@@ -129,16 +127,15 @@ defaults: &defaults
         statement_descriptor: Badge List K12 School
         icon: fa-building
         description: |
-          5 sub-groups with 3 admins each, unlimited badge awarders, 
-          community features &amp; custom branding
+          Unlimited admins &amp; badge awarders, reporting
           (Includes discount for annual billing)
-        users: -1
-        admins: 3
+        users: 5000
+        admins: -1
         sub_groups: 5
         sub_group_amount: 500
         features:
         - community
-        - branding
+        - reporting
     internal:
       solo-free-1:
         name: Free Solo
@@ -150,8 +147,7 @@ defaults: &defaults
         icon: fa-star
         description: |
           Badge List Free
-          Badge List Free
-        users: -1
+        users: 5000
         admins: 1
         sub_groups: 0
         features: []
@@ -165,8 +161,7 @@ defaults: &defaults
         icon: fa-star
         description: |
           Badge List Free
-          Badge List Free
-        users: -1
+        users: 5000
         admins: 3
         sub_groups: 0
         features:
@@ -181,14 +176,13 @@ defaults: &defaults
         icon: fa-star
         description: |
           Badge List Free
-          Badge List Free
-        users: -1
+        users: 5000
         admins: 3
         sub_groups: 5
         sub_group_amount: 0
         features:
         - community
-        - branding
+        - reporting
     test:
       test-100d-1:
         name: Daily 100
@@ -199,7 +193,6 @@ defaults: &defaults
         statement_descriptor: Badge List Daily 100
         icon: fa-star
         description: |
-          Badge List Daily 100
           Badge List Daily 100
         users: 100
         admins: -1
@@ -274,7 +267,7 @@ defaults: &defaults
         interval: year
         trial_period_days: 14
         statement_descriptor: Badge List K12 Teacher
-        users: -1
+        users: 5000
         admins: 1
         sub_groups: 0
         features: []

@@ -298,6 +298,7 @@ private
   def set_editing_parameters
     # Build format options
     @tag_format_options = [
+      ['Any Format', 'any'],
       ['Free Text Response', 'text'],
       ['Web Link', 'link'],
       ['Twitter Link', 'tweet'],

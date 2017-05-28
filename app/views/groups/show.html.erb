@@ -651,8 +651,8 @@
               <%= @group.name %> is currently an Open Group.
             </p>
             <p>
-              You can switch to a Closed Group at any time to get advanced privacy and membership
-              controls.
+              You can switch to a Closed Group at any time to get advanced membership controls
+              and run reports.
             </p>
           <% end %>
          </div>        
@@ -894,6 +894,52 @@
 
 <% end %> <!-- end if can create group tags -->
 
+<% if !@group.has?(:reporting) && (@current_user_is_admin || @badge_list_admin) %>
+  
+  <!-- === REPORTING FEATURE EXPLANATION MODAL === -->
+
+  <div id="reporting" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Reporting feature not enabled</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <% if @group.private? %>
+            <p>
+              <%= @group.name %> is currently a Closed Group with a subscription plan that does
+              not include reporting.
+            </p>
+          <% else %>
+            <p>
+              <%= @group.name %> is currently an Open Group. Reporting is only 
+              available to paid groups whose subscriptions include the feature. 
+            </p>
+          <% end %>
+          <p>
+            Badge List's reporting feature lets you run reports on your group's badge and
+            membership activity and export them to CSV files.
+            Click the button below to read more about subscription plans which 
+            include reporting.
+          </p>
+       </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="/pricing" target="_blank" class="btn btn-success">
+        <i class="fa fa-list-alt"></i>
+        View plans &amp; pricing
+      </a>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+<% end %>
+
 <% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
 
   <!-- === SUBSCRIPTION DETAILS MODAL === -->
@@ -1095,6 +1141,19 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                       '#enter-join-code', class: 'btn btn-small', data: { toggle: 'modal' } %>
                   </li>
                 <% end %>
+                <% if @badge_list_admin || @current_user_is_admin %>
+                  <% if @group.has?(:reporting) %>
+                    <li>
+                      <%= link_to '<i class="fa fa-table"></i> Run report'.html_safe, 
+                        new_report_result_path(group: @group.url_with_caps),class: 'btn btn-small'%>
+                    </li>
+                  <% else %>
+                    <li>
+                      <%= link_to '<i class="fa fa-table"></i> Run report'.html_safe, 
+                        '#reporting', class: 'btn btn-small', data: { toggle: 'modal' } %>
+                    </li>
+                  <% end %>
+                <% end %>
                 <% if @current_user_is_owner || @badge_list_admin %>
                   <% if @group.private? %>
                     <li>
@@ -1120,6 +1179,15 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                       </a>
                       <ul class="dropdown-menu pull-right" role="menu" 
                           aria-labelledby="dropdown-settings">
+
+                        <% if @group.has?(:reporting) %>
+                          <li>
+                            <%= link_to \
+                              '<i class="fa fa-table"></i> View all report results'.html_safe, 
+                              report_results_path %>
+                            </li>
+                        <% end %>
+
                         <% if @group.private? %>
                           <li>
                             <%= link_to '<i class="fa fa-wrench"></i> '.html_safe \

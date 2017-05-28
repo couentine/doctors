@@ -13,7 +13,8 @@ class Group
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
   JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'url' => :issuer_website,
-    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url }
+    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url,
+    'badges' => :badge_urls_with_caps }
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
   TAG_ASSIGNABILITY_VALUES = ['members', 'admins']
@@ -23,7 +24,8 @@ class Group
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
       :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,
-      :badge_count, :full_url, :full_path]
+      :badge_count, :full_url, :full_path],
+    simple_list_item_with_tags: [:id, :name, :url, :url_with_caps, :tags_cache]
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
@@ -89,6 +91,7 @@ class Group
   field :admin_limit,                     type: Integer, default: 1
   field :sub_group_limit,                 type: Integer, default: 0
   field :features,                        type: Array, default: [] # = ['community', 'branding']
+  field :feature_grant_reporting,         type: Boolean # Manually grants the reporting feature
   field :total_user_count,                type: Integer, default: 1
   field :admin_count,                     type: Integer, default: 1
   field :member_count,                    type: Integer, default: 0
@@ -196,6 +199,13 @@ class Group
   def avatar_image_small_url; avatar_url(:small); end
 
   def badge_count; badges_cache.count; end
+  def badge_urls_with_caps
+    if badges_cache.blank?
+      []
+    else
+      badges_cache.map{ |badge_id, badge_item| badge_item['url_with_caps'] }
+    end
+  end
 
   # === GROUP METHODS === #
 
@@ -310,7 +320,14 @@ class Group
 
   # Returns whether or not the features array contains the specified 'feature' or :feature
   def has?(feature)
-    !features.blank? && features.include?(feature.to_s)
+    return_value = !features.blank? && features.include?(feature.to_s)
+    
+    # Enable manual grant of the reporting feature
+    if (feature.to_s == 'reporting')
+      return_value ||= (feature_grant_reporting == true)
+    end
+
+    return_value
   end
 
   # This method will append the passed item to the bounced email log and automatically shorten
@@ -830,6 +847,22 @@ class Group
   end
 
   # === STRIPE RELATED METHODS === #
+
+  # This method will refresh the limits fields from the ALL_SUBSCRIPTION_PLANS configuration 
+  def refresh_subscription_limits
+    if !subscription_plan.blank? && ALL_SUBSCRIPTION_PLANS.has_key?(subscription_plan)
+      self.user_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['users']
+      self.admin_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['admins']
+      self.sub_group_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['sub_groups']
+    end
+  end
+
+  # This method will refresh the features field from the ALL_SUBSCRIPTION_PLANS configuration 
+  def refresh_subscription_features
+    if !subscription_plan.blank? && ALL_SUBSCRIPTION_PLANS.has_key?(subscription_plan)
+      self.features = ALL_SUBSCRIPTION_PLANS[subscription_plan]['features']
+    end
+  end
   
   # Calls out to stripe to create new subscription for the group
   # Set async to true to do the call asynchronously

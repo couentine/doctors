@@ -1,0 +1,10 @@
+/* === LAYOUT & BASE STYLES === */
+  
+  :host {
+    display: block;
+    font-size: 1rem; 
+  }
+
+/* === COMPONENT STYLES === */
+    
+  bl-form-field { display: block; }

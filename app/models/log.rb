@@ -159,57 +159,59 @@ class Log
 
   # === LOG CLASS ASYNC METHODS === #
 
-  # Runs the add_validation method on the logs belonging to the users with all of the passed 
-  # usernames for the specified badge. (Invalid usernames will be ignored.)
+  # Runs the add_validation method on the specified logs. Invalid log ids are ignored.
+  # This method WILL verify that the creator user actually has access to award each badge.
+  # Any logs which belong to badges which the creator can't award are ignored.
   # Returns a poller id if run in async mode
-  def self.add_validations(badge_id, log_usernames, creator_user_id, summary, body, logs_validated, 
+  def self.add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
       overwrite_existing = true, async = false)
     if async
       poller = Poller.new
-      poller.waiting_message = "Posting feedback for #{log_usernames.count} logs..."
+      poller.waiting_message = "Posting feedback for #{log_ids.count} logs..."
       poller.progress = 0 # this will put the poller into 'progress mode'
-      poller.data = { badge_id: badge_id.to_s, log_usernames: log_usernames, 
-        creator_user_id: creator_user_id.to_s, summary: summary, body: body, 
-        logs_validated: logs_validated, overwrite_existing: overwrite_existing }
+      poller.data = { log_ids: log_ids, creator_user_id: creator_user_id.to_s, summary: summary, 
+        body: body, logs_validated: logs_validated, overwrite_existing: overwrite_existing }
       poller.save
 
-      Log.delay.do_add_validations(badge_id, log_usernames, creator_user_id, 
-        summary, body, logs_validated, overwrite_existing, poller.id)
+      Log.delay.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
+        overwrite_existing, poller.id)
 
       poller.id
     else
-      Log.do_add_validations(badge_id, log_usernames, creator_user_id, summary, body, 
-        logs_validated, overwrite_existing)
+      Log.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
+        overwrite_existing)
     end
   end
 
-  def self.do_add_validations(badge_id, log_usernames, creator_user_id, summary, body, 
-      logs_validated, overwrite_existing = true, poller_id = nil)
+  def self.do_add_validations(log_ids, creator_user_id, summary, body, logs_validated, 
+    overwrite_existing = true, poller_id = nil)
     begin
       # Query for the core records
       poller = Poller.find(poller_id) rescue nil
       creator_user = User.find(creator_user_id)
-      badge = Badge.find(badge_id)
-      logs = badge.logs.where(:user_username.in => log_usernames)
+      logs = Log.where(:id.in => log_ids)
+      awardable_badge_ids = [] # array of ids which this creator CAN award
 
       # Initialize vars
       log_count = logs.count
       progress_count = 0
+      skipped_log_count = 0
       
+      # First check the permissions of each badge and build a filtered list of those we can award
+      badge_ids = logs.map{ |log| log.badge_id }.uniq
+      badges = Badge.where(:id.in => badge_ids)
+      badges.each do |badge|
+        awardable_badge_ids << badge.id if badge.can_be_awarded_by?(creator_user)
+      end
+
       # Now loop through and add the validations
       logs.each do |log|
-        log.context = 'bulk_validation' # this skips the updating of the badge validation count
-        log.add_validation(creator_user, summary, body, logs_validated, overwrite_existing)
-        progress_count += 1
-
-        # Update the badge in memory (since we're suppressing the log callback that does this)
-        if log.validation_status == 'validated'
-          badge.expert_user_ids << log.user_id unless badge.expert_user_ids.include? log.user_id
-          badge.learner_user_ids.delete log.user_id if badge.learner_user_ids.include? log.user_id
+        if awardable_badge_ids.include? log.badge_id
+          log.add_validation(creator_user, summary, body, logs_validated, overwrite_existing)
         else
-          badge.expert_user_ids.delete log.user_id if badge.expert_user_ids.include? log.user_id
-          badge.learner_user_ids << log.user_id unless badge.learner_user_ids.include? log.user_id
+          skipped_log_count += 1
         end
+        progress_count += 1
 
         if poller
           poller.progress = progress_count * 100 / log_count
@@ -217,13 +219,20 @@ class Log
         end
       end
 
-      # Now we need to update the parts of the badge that didn't get updated 
-      badge.update_validation_request_count
-      badge.timeless.save if badge.changed?
+      # Log an intercom event
+      IntercomEventWorker.perform_async({
+        'event_name' => 'log-bulk-validation',
+        'email' => creator_user.email,
+        'created_at' => Time.now.to_i,
+        'metadata' => { 'log_count' => logs.count }
+      })
 
       if poller
         poller.status = 'successful'
         poller.message = "Feedback has been successfully posted to #{log_count} logs."
+        if skipped_log_count > 0
+          poller.message += " Note: #{skipped_log_count} logs were skipped due to permissions."
+        end
         poller.save
       end
     rescue Exception => e
@@ -413,6 +422,9 @@ class Log
           self.validation_count += 1
         else
           self.rejection_count += 1
+
+          # Automatically withdraw the feedback request if this is a rejection
+          self.date_withdrawn = Time.now if validation_status == 'requested'
         end
         self.next_entry_number += 1
         self.save
@@ -425,6 +437,9 @@ class Log
           else
             self.validation_count -= 1
             self.rejection_count += 1
+
+            # Automatically withdraw the feedback request if this is a rejection
+            self.date_withdrawn = Time.now if validation_status == 'requested'
           end
         end
 
@@ -449,6 +464,24 @@ class Log
       return entry
     else
       return nil
+    end
+  end
+
+  # This will destroy all child validations which with updated_at < [before_time].
+  def destroy_previous_validations(before_time)
+    validations.where(:updated_at.lt => before_time).each do |entry|
+      entry.context = 'bulk_destroy' # prevents updating of log
+      entry.destroy!
+
+      # Update the log validation counts
+      if entry.log_validated
+        self.validation_count -= 1
+      else
+        self.rejection_count -= 1
+      end
+      
+      # Then remove this item from the log validations cache and save
+      self.validations_cache.delete entry.creator_id.to_s
     end
   end
 
@@ -660,6 +693,11 @@ protected
         elsif date_requested_changed? && !date_requested.nil?
           self.validation_status = 'requested'
           self.date_withdrawn = nil # In case this is not their first request
+
+          # If this is not their first request then destroy all previous validations 
+          if !date_requested_was.nil?
+            destroy_previous_validations(date_requested)
+          end
         end 
       end
 
@@ -715,7 +753,7 @@ protected
           ((validation_status == 'validated') || (validation_status_was == 'validated') \
             || (validation_status == 'requested') || (validation_status_was == 'requested')))
     
-    badge_needs_update = !context.in?(['bulk_validation', 'badge_add', 'badge_add_async']) \
+    badge_needs_update = !context.in?(['badge_add', 'badge_add_async']) \
       && user_needs_update
 
     if destroyed?

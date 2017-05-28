@@ -431,9 +431,22 @@
                       <%= f.error_notification %>
                       
                       <%= f.input :email, label: "Your email" %>
-                      <%= f.input :name, label: "Your full name" %>
-                      <%= f.input :username_with_caps, label: "Your username" %>
-                      <%= f.input :current_password, label: "Confirm your password", required: true %>
+                      <%= f.input :name, label: "Your full name", 
+                        input_html: { maxlength: User::MAX_NAME_LENGTH } %>
+                      <%= f.input :username_with_caps, label: "Your username", 
+                        input_html: { maxlength: User::MAX_USERNAME_LENGTH } %>
+                      <%= f.input :current_password, label: "Confirm your password", 
+                        required: true %>
+
+                      <%= f.input :job_title, label: 'Job title', 
+                        input_html: { maxlength: User::MAX_JOB_TITLE_LENGTH } %>
+                      <%= f.input :organization_name, label: 'Organization name', 
+                        input_html: { maxlength: User::MAX_ORGANIZATION_NAME_LENGTH } %>
+                      <%= f.input :website, label: 'Website', 
+                        input_html: { maxlength: User::MAX_WEBSITE_LENGTH } %>
+                      <%= f.input :bio, as: :text, label: 'Bio', 
+                        input_html: { data: { :'character-count' => true, 
+                          :'max-length' => User::MAX_BIO_LENGTH } } %>
                     </div>
 
                     <div class="form-footer">

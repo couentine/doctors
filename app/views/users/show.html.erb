@@ -72,11 +72,25 @@
                 </a>
               <% end %>
             </h1>
-            <h2><%= @user.username_with_caps %></h2>
+            <h2>
+              <%= @user.username_with_caps %> 
+            </h2>
             <h3>
-              <% ((@user.expert_logs.count || 0) / 5).to_i.times do |i| %>
-                <i class="fa fa-star"></i>
+              <%= (@user.job_title.blank?) ? '' : "#{@user.job_title}, " %> 
+              <% if !@user.organization_name.blank?  %>
+                <% if !@user.website.blank?  %>
+                  <%= link_to @user.organization_name, @user.website, target: '_blank' %>
+                <% else %>
+                  <%= @user.organization_name %>
+                <% end %>
               <% end %>
+              
+              <% if (!@user.job_title.blank? || !@user.organization_name.blank?) \
+                  && !@user.bio.blank? %>
+                <br>
+              <% end %>
+
+              <%= (@user.bio.blank?) ? '' : @user.bio %> 
             </h3>
           </span>
         </div>

@@ -33,6 +33,7 @@
             <% if allow_posting %>
               <%= link_to tag.display_name, 
                 group_badge_tag_path(group, badge, tag), title: "View full requirement details" %>
+              <i class='fa <%= tag.format_icon %> format-icon'></i>
             <% else %>
               <%= link_to "<i class='fa #{tag.format_icon}'></i> #{tag.display_name}".html_safe, 
                 group_badge_tag_path(group, badge, tag), title: "View full requirement details" %>

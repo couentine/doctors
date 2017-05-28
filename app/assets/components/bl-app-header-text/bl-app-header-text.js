@@ -3,7 +3,7 @@ Polymer({
 
   properties: {
     title: { type: String }, // Required: The page title
-    subtitle: { type: String }, // Optional
+    subtitle: { type: String, value: null }, // Optional
     background: { type: String, value:'#FFFFFF', observer:'_backgroundChanged' },
     condensedBackground: { type: String, value:'#FB8C00', observer:'_condensedBackgroundChanged' },
     topLineColor: { type: String, value:'#FB8C00', observer:'_topLineColorChanged' },
@@ -17,6 +17,8 @@ Polymer({
     // Computed Properties
     hasCustomLeftNav: { type: Boolean, computed: '_hasCustomLeftNav(leftNavSymbol)' },
     hasSubtitle: { type: Boolean, computed: '_hasSubtitle(subtitle)' },
+    isFullyCondensed: { type: Boolean, value: false },
+    titleClass: { type: Boolean, computed: '_titleClass(extraSpace, isFullyCondensed)' },
     
     condensedHeightEm: { type: Number, value: 3.3, readOnly: true } // used by bl-app-container
   },
@@ -49,6 +51,9 @@ Polymer({
       var titleWrapperBottom = 3 * (1 - condensedPercentage);
       this.$.titleWrapper.style.bottom = titleWrapperBottom + 'em';
     }
+
+    // Update is fully condensed variable
+    this.isFullyCondensed = (condensedPercentage == 1);
   },
 
   // Events
@@ -87,6 +92,9 @@ Polymer({
   },
   _hasSubtitle: function(subtitle) {
     return (subtitle && (subtitle.length > 0));
+  },
+  _titleClass: function(extraSpace, isFullyCondensed) {
+    return (extraSpace ? 'extraSpace ' : '') + (isFullyCondensed ? 'isFullyCondensed' : '');
   }
 
 });

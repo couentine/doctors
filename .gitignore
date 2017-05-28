@@ -26,3 +26,7 @@ doc/
 
 # Ignore foreman environment variable file
 .env
+
+# Ignore sublime-related files
+*.sublime-project
+*.sublime-workspace

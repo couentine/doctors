@@ -2051,6 +2051,7 @@ form#group-add-users-form {
     }
     h3 {
       font-size: 14px;
+      line-height: 1.4em;
       font-weight: normal;
       color: $medium-text-color;
     }
@@ -2436,6 +2437,10 @@ div.info-card {
         margin-left: 10px;
         position: relative;
         top: -3px;
+      }
+      .fa.format-icon {
+        margin-left: 0.2em;
+        color: $light-text-color;
       }
     }
     span.card-text {
@@ -3669,6 +3674,22 @@ div.topic-list-card, div.group-list-card {
   }
 }
 
+.oauth-signup {
+  text-align: center;
+  background: $tertiary-light;
+  border-radius: 2px;
+  margin: 1.5em 0 2em 0;
+
+  .btn {
+    color: white !important;
+    background: $tertiary-dark;
+    border: none;
+    text-shadow: none;
+    box-shadow: none;
+    margin: 1em;
+  }
+}
+
 .signin-box {
   border-radius: 3px;
   color: $dark-text-color;
@@ -3676,6 +3697,8 @@ div.topic-list-card, div.group-list-card {
   position: relative;
   background-color: $light-white;
   margin: 50px 0 0 0;
+
+  &.no-top-margin { margin-top: 0; }
 
   .signin-header {
     border-bottom: 2px solid $primary-medium;
@@ -3755,7 +3778,8 @@ div.topic-list-card, div.group-list-card {
         abbr { display: none; }
       }
 
-      input[type="email"].signin,input[type="password"].signin,input[type="text"].signin {
+      input[type="email"].signin,input[type="password"].signin,input[type="text"].signin,
+          textarea.signin {
         border-radius: 0 !important;
         border-top: none !important;
         border-right: none !important;
@@ -3767,8 +3791,32 @@ div.topic-list-card, div.group-list-card {
         width: 90%;
       }
       input[type="email"].signin:focus,input[type="password"].signin:focus,
-          input[type="text"].signin:focus {
+          input[type="text"].signin:focus, textarea.signin:focus {
         background-color: $really-light-gray !important;
+      }
+      textarea.signin {
+        font-size: 1em;
+        line-height: 1.3em;
+        height: 3em;
+      }
+
+      .character-count-wrap { 
+        position: relative; 
+      }
+      .character-count {
+        position: absolute;
+        right: 21px;
+        bottom: 5px;
+        font-size: 11px;
+        font-style: italic;
+        color: $light-text-color;
+        padding: 1px 3px;
+        border-radius: 5px;
+      }
+      .character-count.negative {
+        color: $primary-dark;
+        font-weight: bold;
+        background-color: $medium-white;
       }
       
       &.error {
@@ -3780,6 +3828,10 @@ div.topic-list-card, div.group-list-card {
   }
   .form-footer {
     text-align: center;
+
+    #show-optional-fields {
+      margin-bottom: 2em;
+    }
   }
 }
 

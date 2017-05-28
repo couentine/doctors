@@ -37,12 +37,15 @@
       <!-- #=== SIMPLE MODE ===# -->
       <template is="dom-if" if="[[simpleMode]]">
         <template id="item-repeat" is="dom-repeat" items="{{items}}">
-          <paper-icon-item class$="[[rowClass(item.selected)]]" on-tap="toggleItem">
-            <template is="dom-if" if="[[hasRowImage]]">
+          <paper-icon-item class$="[[rowClass(item.selected)]]" on-tap="simpleItemTap">
+            <template is="dom-if" if="[[showImageKey]]">
               <img src$="[[item.row.image]]" class$="[[roundRowImage]]" item-icon>
             </template>
-            <template is="dom-if" if="[[!hasRowImage]]">
-              <iron-icon icon="[[rowIcon]]" hidden="[[!hasRowImage]]" item-icon></iron-icon>
+            <template is="dom-if" if="[[showIconKey]]">
+              <iron-icon icon="[[item.row.icon]]" item-icon></iron-icon>
+            </template>
+            <template is="dom-if" if="[[showIcon]]">
+              <iron-icon icon="[[rowIcon]]" item-icon></iron-icon>
             </template>
 
             [[item.row.title]]

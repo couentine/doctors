@@ -21,7 +21,8 @@ class Badge
   JSON_MOCK_FIELDS = { 'description' => :summary, 'image' => :image_as_url, 
     'image_medium' => :image_medium_url, 'image_small' => :image_small_url, 
     'criteria' => :criteria_url, 'issuer' => :issuer_url, 'slug' => :url_with_caps,
-    'full_url' => :badge_url }
+    'full_url' => :badge_url, 'experts' => :expert_user_id_strings, 
+    'learners' => :learner_user_ids_strings }
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
@@ -190,6 +191,24 @@ class Badge
   end
   def image_medium_url; image_url(:medium); end
   def image_small_url; image_url(:small); end
+
+  # Returns a stringified version of learner_user_ids
+  def learner_user_ids_strings
+    if learner_user_ids.blank?
+      []
+    else
+      learner_user_ids.map{ |user_id| user_id.to_s }
+    end
+  end
+
+  # Returns a stringified version of expert_user_ids
+  def expert_user_id_strings
+    if expert_user_ids.blank?
+      []
+    else
+      expert_user_ids.map{ |user_id| user_id.to_s }
+    end
+  end
 
   # === BADGE TERMINOLOGY METHODS === #
   # These are shortcuts to the various inflections of the word_for_xxx fields
@@ -479,6 +498,13 @@ class Badge
     !wikis_json_clone.blank?
   end
 
+  # Returns boolean indicating whether the specified user has permission to award this badge
+  # Does NOT query any additional records, only references badge and user fields
+  def can_be_awarded_by?(user)
+    user.admin || user.admin_of_ids.include?(group_id) \
+      || ((awardability == 'experts') && expert_user_ids.include?(user.id))
+  end
+
   # Return tags with type = 'requirement' sorted by sort_order
   def requirements
     tags.where(type: 'requirement').order_by(:sort_order.asc)
@@ -726,7 +752,6 @@ class Badge
       
       # The last step is to update progress tracking boolean if needed
       self.progress_tracking_enabled = (new_requirement_count > 0)
-      self.send_validation_request_emails = false if !progress_tracking_enabled
       self.save if self.changed?
     end
   end

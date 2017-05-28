@@ -27,8 +27,11 @@
     Normally bl-list works by generating bl-list-item children for each item. Then the format
     is set to grid or column based on what looks best for that object type. But simple mode is 
     simpler, generating a collection of paper icon list items mashed together. To use
-    simple mode: set simpleMode=true, set rowTitle and set either rowImage OR rowIcon.
-    Simple mode includes selection functionality.
+    simple mode: set simpleMode=true, set rowTitleKey=field on each item that holds the title,
+                 and set either rowImageKey=field, rowIconKey=field OR rowIcon=one icon for all.
+    If you add the 'selectable' property then item selection is built in.
+    If you leave out the 'selectable' property then you can optionally set the 'rowLinkKey' 
+    property to an item field with returns a url or path to follow when the item is clicked.
 
   How to use ajax targetting:
     When bl-list is used as a multi-select tool, it is typically for the purposes of generating 
@@ -62,8 +65,12 @@ Polymer({
     
     // Simple Mode Options
     simpleMode: { type: Boolean, value: false }, // explained in comments at top of file
-    rowTitle: String, // field name of title in items (required)
-    rowImage: String, // field name of image in items (optional)
+    selectable: { type: Boolean, value: false }, // enables selection of items
+    rowTitleKey: String, // field name of title in items (required)
+    rowLinkKey: { type: String, value: null }, // field name of url or path in items (optional)
+    rowImageKey: { type: String, value: null }, // field name of image in items (1 of these req'd)
+    rowIconKey: { type: String, value: null }, // field name of icon in items (1 of these req'd)
+    rowIcon: { type: String, value: null }, // icon to use for ALL items (1 of these req'd)
     roundRowImage: Boolean, // set this to round the row image
 
     // Ajax Targetting Options (Explained in top comments)
@@ -98,7 +105,9 @@ Polymer({
     showPlaceholder: { type: Boolean, false: false, 
       computed: '_showPlaceholder(items.length, itemsLoaded, loading)' },
 
-    hasRowImage: { type: Boolean, computed: '_hasRowImage(rowImage)' },
+    showImageKey: { type: Boolean, computed: '_showImageKey(rowImageKey)' },
+    showIconKey: { type: Boolean, computed: '_showIconKey(rowImageKey, rowIconKey)' },
+    showIcon: { type: Boolean, computed: '_showIcon(rowImageKey, rowIconKey)' },
 
     // Internal properties
     colCount: { type: Number, observer: '_colCountChanged' },
@@ -166,8 +175,21 @@ Polymer({
 
     this.refreshQuery();
   },
+  simpleItemTap: function(e) {
+    // Fires when a simple item is tapped
+
+    if (this.selectable) this.toggleItem(e);
+    else this.followItemLink(e);
+  },
+  followItemLink: function(e) {
+    // Called from non-selectable simple item row to follow the item link if present
+    // If there's no link then nothing happens when the user clicks
+    var index = e.model.index;
+    if (this.items[index].row.link) 
+      document.location.href = this.items[index].row.link;
+  },
   toggleItem: function(e) {
-    // Called from simple item row to toggle that item's selection
+    // Called from selectable simple item row to toggle that item's selection
     var index = e.model.index;
 
     // First we toggle the selection
@@ -267,6 +289,9 @@ Polymer({
     // Refresh query if needed
     if (this.refreshQueryOnLoad && this.context !== 'bl-list-tabs')
       this.refreshQuery();
+    else if (this.simpleMode)
+      for (var i = 0; i < this.items.length; i++)
+        this.injectRowProperties(this.items[i]);
   },
   _colCountChanged: function(newValue, oldValue) {
     if (this.isColumnMode && (newValue != oldValue)) {
@@ -327,8 +352,16 @@ Polymer({
   _showPlaceholder: function(itemsLength, itemsLoaded, loading) { 
     return itemsLoaded && !loading && !itemsLength; 
   },
-  _hasRowImage: function(rowImage) {
-    return (rowImage != null) && (rowImage != undefined);
+  _showImageKey: function(rowImageKey) {
+    return (rowImageKey != null) && (rowImageKey != undefined);
+  },
+  _showIconKey: function(rowImageKey, rowIconKey) {
+    return ((rowImageKey == null) || (rowImageKey == undefined))
+      && (rowIconKey != null) && (rowIconKey != undefined);
+  },
+  _showIcon: function(rowImageKey, rowIconKey) {
+    return ((rowImageKey == null) || (rowImageKey == undefined))
+      && ((rowIconKey == null) || (rowIconKey == undefined));
   },
   _hasNextPage: function(nextPage, items, itemsLoaded, loading) { 
     return itemsLoaded && !loading && items && (nextPage > 0); 
@@ -394,12 +427,8 @@ Polymer({
                 
           // Next we inject the row properties if this is simple mode
           if (self.simpleMode)
-            for (var i = 0; i < resultItems.length; i++) {
-              resultItems[i].row = {};
-              resultItems[i].row.title = resultItems[i][self.rowTitle];
-              if (self.hasRowImage)
-                resultItems[i].row.image = resultItems[i][self.rowImage];
-            }
+            for (var i = 0; i < resultItems.length; i++)
+              self.injectRowProperties(resultItems[i]);
         }
 
         // Then we can call the complete function
@@ -407,6 +436,17 @@ Polymer({
         completeFunction(result);
       } else errorFunction();
     }).error(function() { errorFunction(); });
+  },
+  injectRowProperties: function(item) {
+    item.row = { title: item[this.rowTitleKey] };
+
+    if (this.showImageKey)
+      item.row.image = item[this.rowImageKey];
+    else if (this.showIconKey)
+      item.row.icon = item[this.rowIconKey];
+
+    if (this.rowLinkKey)
+      item.row.link = item[this.rowLinkKey];
   },
   setLoadingStatus: function(isLoading) {
     var nextPageButton = this.$$("#next-page-button");

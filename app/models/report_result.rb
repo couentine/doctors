@@ -1,0 +1,687 @@
+class ReportResult
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include JSONTemplater
+
+  # ============================================================================================= #
+  # NOTE: The results are generated via an after_create callback, so generally you will want to
+  #       use ReportResult.create_async() to make a new result item. 
+  # ============================================================================================= #
+  
+  # === CONSTANTS === #
+
+  TYPE_VALUES = ['group_users', 'group_badge_logs']
+  FORMAT_VALUES = ['json', 'csv']
+  STATUS_VALUES = ['pending', 'successful', 'failed']
+  SORT_ORDER_VALUES = ['asc', 'desc'] # NOTE: This isn't enforced in a validator
+  DELETE_AFTER = 2.hours # old report results are automatically deleted
+  PAGE_SIZE = 200
+
+  # These are the base fields which are permitted with strong parameters, they are referenced in
+  # in ReportResult.permitted_params (use that method because it adds parameters and all of its
+  # sub-keys which are contained in the constants)
+  BASE_PERMITTED_PARAMS = [:user_id, :type, :format, :poller_id, :sort_field, :sort_order, :page]
+
+  JSON_TEMPLATES = {
+    detail: [:id, :user_id, :type, :format, :status, :error_message, :parameters, :sort_field,
+      :sort_order, :page, :results, :total_result_count, :report_type_label, :report_type_icon, 
+      :display_name],
+    list_item: [:id, :user_id, :type, :format, :status, :error_message, :sort_field, :sort_order, 
+      :page, :total_result_count, :report_type_label, :report_type_icon, :display_name, :full_path,
+      :full_url]
+  }
+
+  # === RELATIONSHIPS === #
+
+  belongs_to :user
+
+  # === FIELDS & VALIDATIONS === #
+
+  field :type,                    type: String
+  field :format,                  type: String
+  field :status,                  type: String, default: 'pending'
+  field :error_message,           type: String # set if status = 'failed'
+  
+  field :parameters,              type: Hash, default: {}, pre_processed: true
+  field :cleaned_parameters,      type: Hash, default: {}, pre_processed: true
+  field :sort_field,              type: String # json only, should be REPORT_TYPE_OUTPUT_VALUES key
+  field :sort_order,              type: String # json only, should be 'asc' or 'desc'
+  field :page,                    type: Integer # json only, defaults to 1
+  field :results,                 type: Array, default: [], pre_processed: true
+  field :total_result_count,      type: Integer # automatically set to total row count
+  field :poller_id,               type: BSON::ObjectId # keep poller model lean = no relationships
+
+  mount_uploader :results_file,   OutputFileUploader # used to upload csv format to S3
+
+  validates :user, presence: true
+  validates :type, presence: true,
+    inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid type" }
+  validates :format, presence: true,
+    inclusion: { in: FORMAT_VALUES, message: "%{value} is not a valid format" }
+  validates :status, presence: true,
+    inclusion: { in: STATUS_VALUES, message: "%{value} is not a valid status" }
+  validate :clean_parameters
+
+  # === CALLBACK === #
+
+  after_create :generate_results
+  after_create :intercom_rr_create
+  after_save :queue_delete
+  after_save :upload_results_file
+  after_destroy :remove_results_file
+
+
+  # === REPORT TYPE CONFIGUATION === #
+
+  # This is used to display the different types of reports to the user
+  # The icon value should be a material design iron-icon. List here: http://bit.ly/2nE9YrJ
+  REPORT_TYPES = {
+    'group_users' => { label: 'Group Members', icon: 'social:people', 
+      description: 'Includes user details as well as number of badges joined and earned' },
+    'group_badge_logs' => { label: 'Badge Portfolios', icon: 'icons:assignment-ind', 
+      description: 'Includes portfolios for all badges in the group' }
+  }
+  
+  # This constant defines all of the parameters which are accepted for each report type
+  # The spec for each parameter field is used to validate it in the clean_parameters method
+  # The spec is also used to generate the bl-form 
+  REPORT_TYPE_PARAM_FIELD_SPECS = {
+    'group_users' => {
+      'group_id' => { type: BSON::ObjectId, label: 'Group', required: true },
+      'group_tag_id' => { type: BSON::ObjectId, label: 'Filter Users by Tag', 
+        dependent_key: 'group_id' }
+    },
+    'group_badge_logs' => {
+      'group_id' => { type: BSON::ObjectId, label: 'Group', required: true },
+      'group_tag_id' => { type: BSON::ObjectId, label: 'Filter Users by Tag', 
+        dependent_key: 'group_id' },
+      'badge_status' => { type: String, label: 'Badge Status', element: 'paper-dropdown-menu',
+        value: 'all',
+        options: [{ label: 'Any', value: 'all' },
+          { label: 'Awarded', value: 'awarded' },
+          { label: 'Not Awarded', value: 'unawarded' }]
+      },
+      'created_at_start' => { type: Date, label: 'Badge Join Start Date' },
+      'created_at_end' => { type: Date, label: 'Badge Join End Date' },
+      'date_issued_start' => { type: Date, label: 'Badge Award Start Date' },
+      'date_issued_end' => { type: Date, label: 'Badge Award End Date' }
+    }
+  }
+
+  # This constant defines the primary model which is used for pagination for each record type
+  REPORT_TYPE_CORE_MODEL = {
+    'group_users' => :user,
+    'group_badge_logs' => :log
+  }
+
+  # This constant defines the default sort_field for each report type
+  # NOTE: The value must be a key for on of the fields from the CORE_MODEL listed above
+  REPORT_TYPE_DEFAULT_SORT_FIELD = {
+    'group_users' => 'name',
+    'group_badge_logs' => 'portfolio_created'
+  }
+
+  # This constant defines the values which are returned in each row of results for each report type
+  # For each report type there should be one sub-key for each object returned in a row of results
+  # The sub-key array members should have a :key (for json), a :label (for csv) and a :value.
+  # The :value should be the name of a field or method on the model class.
+  # The values are retrieved using the model.send() method. You can chain multiple items with a dot
+  # but you can't add parameters or anything like that.
+  # VALID EXAMPLES for a badge: 'name', 'image_url', 'group.owner.name'
+  # INVALID EXAMPLES for a badge: 'image_url(:medium)'
+  REPORT_TYPE_OUTPUT_VALUES = {
+    'group_users' => {
+      user: [
+        { key: 'name', label: 'Name', value: 'name' },
+        { key: 'username', label: 'Username', value: 'username_with_caps' },
+        { key: 'email', label: 'Email', value: 'email' },
+        { key: 'organization_name', label: 'Organization Name', value: 'organization_name' },
+        { key: 'job_title', label: 'Job Title', value: 'job_title' },
+        { key: 'last_active', label: 'Last Active', value: 'last_active' }
+      ],
+      group_log_summary: [
+        { key: 'joined_badge_count', label: 'Joined Badge Count', value: 'log_count' },
+        { key: 'awarded_badge_count', label: 'Awarded Badge Count', value: 'validated_log_count' }
+      ]
+    },
+    'group_badge_logs' => {
+      badge: [
+        { key: 'badge_name', label: 'Badge Name', value: 'name' },
+        { key: 'badge_url', label: 'Badge URL', value: 'url_with_caps' }
+      ],
+      user: [
+        { key: 'user_name', label: 'User Name', value: 'name' },
+        { key: 'user_username', label: 'User Username', value: 'username_with_caps' },
+        { key: 'user_email', label: 'User Email', value: 'email' },
+        { key: 'user_organization_name', label: 'User Organization Name', 
+          value: 'organization_name' },
+        { key: 'user_job_title', label: 'User Job Title', value: 'job_title' }
+      ],
+      log: [
+        { key: 'portfolio_status', label: 'Portfolio Status', value: 'validation_status' },
+        { key: 'portfolio_retracted', label: 'Portfolio Retracted', value: 'retracted' },
+        { key: 'portfolio_created', label: 'Portfolio Created', value: 'date_started' },
+        { key: 'portfolio_awarded', label: 'Portfolio Awarded', value: 'date_issued' }
+      ]
+    }
+  }
+
+  # === CLASS METHODS === #
+
+  # This calls the standard create method in a background thread and returns a poller id. 
+  def self.create_async(attributes = nil)
+    poller = Poller.new
+    poller.waiting_message = 'Building report results'
+    poller.data = { attributes: attributes }
+    poller.save
+
+    attributes[:poller_id] = poller.id.to_s
+    ReportResult.delay(queue: 'default', retry: false).create_with_poller(attributes)
+
+    poller.id
+  end
+
+  # This calls the normal create method but if there is an error it updates the poller instead of
+  # throwing it. (It looks for a poller_id attribute)
+  def self.create_with_poller(attributes)
+    begin
+      params = ActionController::Parameters.new(attributes)
+      ReportResult.create!(params.permit(ReportResult.permitted_params))
+    rescue Exception => e
+      poller = Poller.find(attributes[:poller_id] || attributes['poller_id']) rescue nil
+
+      if poller
+        poller.message = e.to_s
+        poller.status = 'failed'
+        poller.save
+        poller
+      else
+        throw e
+      end
+    end
+  end
+
+  def self.delete_report_result(report_result_id)
+    report_result = ReportResult.find(report_result_id) rescue nil
+    report_result.delete if report_result
+  end
+
+  # Returns a flat list of all unique param keys (for use in strong parameters in the controller)
+  def self.all_field_keys
+    return_list = []
+
+    REPORT_TYPE_PARAM_FIELD_SPECS.each do |report_type, field_specs|
+      return_list += field_specs.keys
+    end
+
+    return_list.uniq
+  end
+
+  # Pass this with the strong parameters permit() method to mark all user-settable fields and 
+  # parameter sub-keys as permitted.
+  def self.permitted_params
+    BASE_PERMITTED_PARAMS + [{ parameters: ReportResult.all_field_keys }]
+  end
+
+  # Simple method that returns an array of the report types
+  def self.report_types_list
+    # We just need to merge the key into the hash values and then convert it to an array
+    REPORT_TYPES.map do |key, properties|
+      { key: key }.merge(properties)
+    end
+  end
+  
+  # This method returns an array of field specs for the specified report type
+  # It injects the key as well as the form field name
+  # It also stringifies the type property
+  def self.param_field_specs_for(report_type)
+    # We just need to merge the key into the hash values and then convert it to an array
+    REPORT_TYPE_PARAM_FIELD_SPECS[report_type].map do |key, field_spec|
+      field_spec.merge({
+        type: field_spec[:type].to_s,
+        key: key,
+        name: "parameters.#{key}"
+      })
+    end
+  end
+  
+  # === INSTANCE METHODS === #
+
+  def full_path
+    "/report_results/#{id.to_s}"
+  end
+
+  def full_url
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}#{full_path}"
+  end
+
+  def report_type_label
+    (REPORT_TYPES.has_key? type) ? REPORT_TYPES[type][:label] : ''
+  end
+  
+  def report_type_icon
+    (REPORT_TYPES.has_key? type) ? REPORT_TYPES[type][:icon] : ''
+  end
+
+  def display_name
+    "#{report_type_label} Report (#{status.capitalize}) - #{created_at.to_s(:short_date_time)}"
+  end
+
+  def completed
+    (status == 'successful') || (status == 'failed')
+  end
+
+protected
+  
+  # This builds the cleaned_parameters hash and adds errors if there are invalid parameters
+  # This method also checks that sort_field and page have valid values
+  def clean_parameters
+    object_cache = {}
+    core_model_field_keys = []
+
+    # Don't bother checking the parameters if there are other errors already
+    if errors.blank?
+
+      # First clean up the sort parameters
+      self.page = 1 if (format == 'json') && (page.blank? || (page < 1))
+      self.sort_order = 'asc' if !SORT_ORDER_VALUES.include?(sort_order)
+      core_model_field_keys = REPORT_TYPE_OUTPUT_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
+        .map{ |field| field[:key] }
+      if !core_model_field_keys.include? sort_field
+        self.sort_field = REPORT_TYPE_DEFAULT_SORT_FIELD[type]
+      end
+
+      # Verify the presence and format of all parameters and build cleaned_parameters
+      self.cleaned_parameters = {}
+      REPORT_TYPE_PARAM_FIELD_SPECS[type].each do |name, spec|
+        value = parameters[name]
+
+        # Check for presence of required params
+        if spec[:required] && value.blank?
+          errors.add(:parameters, spec[:label] + ' value is required')
+        end
+
+        # Now verify that fields which are set are valid, then add them to cleaned_parameters
+        if !value.blank?
+          case spec[:type]
+          when BSON::ObjectId
+            if BSON::ObjectId.legal?(value)
+              self.cleaned_parameters[name] = BSON::ObjectId.from_string(value)
+            else
+              errors.add(:parameters, spec[:label] + ' value is not a valid id')
+            end
+          when Date
+            self.cleaned_parameters[name] = Date.parse(value) rescue nil
+            if cleaned_parameters[name].nil?
+              errors.add(:parameters, spec[:label] + ' value is not a valid date')
+            end
+          else
+            self.cleaned_parameters[name] = value
+          end
+        end
+      end
+
+      # If we haven't gotten any errors yet then we proceed to object id validation
+      if errors.blank?
+        # We loop through looking for specific parameters names which we know correspond to record
+        # ids which need to be verified. It's important that parameter names be consistent in order
+        # for this logic to work.
+        REPORT_TYPE_PARAM_FIELD_SPECS[type].each do |name, spec|
+          
+          value = cleaned_parameters[name]
+
+          if !value.blank?
+            case name
+            when 'group_id'
+              group = Group.find(value) rescue nil
+
+              if group.nil?
+                self.cleaned_parameters[name] = nil
+                errors.add(:parameters, 'Group id is invalid')
+              elsif !user.admin_of?(group) && !user.admin
+                errors.add(:parameters, 'You do not have reporting permissions for this group')
+              elsif !group.has?('reporting')
+                errors.add(:parameters, 'This group does not have the reporting feature, '\
+                  + 'you\'ll need to upgrade your group to access this feature')
+              else
+                object_cache[:group] = group
+              end
+            when 'group_tag_id'
+              group = object_cache[:group]
+              if group.nil?
+                errors.add(:parameters, 'Group must be set in order to specify a group tag')
+              else
+                group_tag = GroupTag.find(value) rescue nil
+
+                if group_tag.nil?
+                  self.cleaned_parameters[name] = nil
+                  errors.add(:parameters, 'Group tag id is invalid')
+                elsif group_tag.group_id != group.id
+                  errors.add(:parameters, 'The specified group tag is in a different group')
+                else
+                  object_cache[:group_tag] = group_tag
+                end
+              end
+            end
+          end
+
+        end
+      end
+
+    end
+  end
+
+  # This is the method that actually builds out the results based on the type and cleaned_parameters
+  # If the poller_id property is set, then this method will keep that poller updated as the report
+  # generation progresses
+  def generate_results
+    self.error_message = nil
+    self.results = []
+
+    # First get the poller if needed
+    poller = Poller.find(poller_id) if poller_id
+
+    # Get the source rows from the appropriate method below
+    source_rows = self.send('build_source_rows_for_' + type)
+
+    if self.error_message.blank?
+      # If this is a csv file then the first row needs to contain all of the field labels
+      if format == 'csv'
+        current_row = []
+        REPORT_TYPE_OUTPUT_VALUES[type].each do |model, fields|
+          fields.each do |field|
+            current_row << field[:label]
+          end
+        end
+        self.results << current_row
+      end
+
+      # Now loop through each source row and render the result row
+      source_rows.each do |row|
+        current_row = (format == 'json') ? {} : []
+
+        REPORT_TYPE_OUTPUT_VALUES[type].each do |model, fields|
+          fields.each do |field|
+            if row[model].class == Hash
+              # We use hashes to mock up summary fields, but they don't support 'send()'
+              current_value = row[model][field[:value]]
+            else
+              current_value = row[model].send(field[:value])
+            end
+
+            if format == 'json'
+              current_row[field[:key]] = current_value
+            else
+              current_row << current_value.to_s
+            end
+          end
+        end
+
+        self.results << current_row
+      end
+
+      # We're good to go!
+      if format != 'csv'
+        # NOTE: If it's a CSV then it's not really done until the file is uploaded. Since that 
+        #   happens in a background thread, the status will be updated in upload_results_file()
+        self.status = 'successful'
+      end
+    else
+      self.status = 'failed'
+    end
+
+    # Commit everything to the DB (this will trigger the CSV upload if needed)
+    self.save
+    if poller
+      poller.status = status
+      poller.message = error_message || 'Report results complete'
+      poller.redirect_to = full_url
+      poller.save
+    end
+  end
+
+  # Returns source rows for group_users report, sets error_message if there is an exception.
+  # Each source row has two keys (:user and :group_log_summary)
+  def build_source_rows_for_group_users
+    rows = []
+    row_map = {} # user_id => row_for_that_user
+    user_ids = [] # array of ids in this current page
+
+    begin
+      # First query the parameter objects
+      group = Group.find(cleaned_parameters['group_id'])
+      if !cleaned_parameters['group_tag_id'].blank?
+        group_tag = GroupTag.find(cleaned_parameters['group_tag_id'])
+      end
+
+      # Now initialize the user criteria
+      sort_field_item = REPORT_TYPE_OUTPUT_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
+        .find{ |field| field[:key] == sort_field }
+      user_criteria = (group_tag) ? group_tag.users : group.users
+      user_criteria = user_criteria.order_by("#{sort_field_item[:value]} #{sort_order}")
+      
+      # Now do the core query and build the rows (and the row map for later)
+      self.total_result_count = user_criteria.count
+      if format == 'json'
+        user_criteria = user_criteria.page(page).per(PAGE_SIZE)
+      end
+      user_criteria.each do |user|
+        current_row = { 
+          user: user, 
+          group_log_summary: { 'log_count' => 0, 'validated_log_count' => 0 } 
+        }
+        rows << current_row
+        row_map[user.id] = current_row
+        user_ids << user.id
+      end
+
+      # Now query for the logs and loop through them to build out the group_log_summary counts
+      logs = Log.where(:user_id.in => user_ids, :badge_id.in => group.badges_cache.keys)
+      logs.each do |log|
+        row_map[log.user_id][:group_log_summary]['log_count'] += 1
+        if log.validation_status == 'validated'
+          row_map[log.user_id][:group_log_summary]['validated_log_count'] += 1
+        end
+      end
+    rescue Exception => e
+      self.error_message = e
+      throw e
+    end
+
+    rows
+  end
+  
+  # Returns source rows for group_badge_logs report, sets error_message if there is an exception.
+  # Each source row has three keys (:badge, :user and :log)
+  def build_source_rows_for_group_badge_logs
+    rows = []
+    user_row_map = {} # user_id => array_of_rows_for_user
+    badge_row_map = {} # user_id => array_of_rows_for_badge
+    user_ids = [] # array of ids in this current page
+    badge_ids = [] # array of ids in this current page
+
+    begin
+      # First query the parameter objects
+      group = Group.find(cleaned_parameters['group_id'])
+      if !cleaned_parameters['group_tag_id'].blank?
+        group_tag = GroupTag.find(cleaned_parameters['group_tag_id'])
+      end
+
+      # Now initialize the log criteria
+      sort_field_item = REPORT_TYPE_OUTPUT_VALUES[type][REPORT_TYPE_CORE_MODEL[type]]\
+        .find{ |field| field[:key] == sort_field }
+      if group_tag
+        all_user_ids = group_tag.user_ids
+      else
+        all_user_ids = (group.member_ids + group.admin_ids).uniq
+      end
+      log_criteria = Log.where(:user_id.in => all_user_ids, 
+        :badge_id.in => group.badges_cache.keys)\
+        .order_by("#{sort_field_item[:value]} #{sort_order}")
+
+      # Next we add all of the optional parameters to the criteria
+      cp = cleaned_parameters # alias / shortcut
+      if cp['badge_status']
+        case cp['badge_status']
+        when 'awarded'
+          log_criteria = log_criteria.where(validation_status: 'validated')
+        when 'unawarded'
+          log_criteria = log_criteria.where(:validation_status.ne => 'validated')
+        end # in any other case we do not modify the query
+      end
+      if cp['created_at_start']
+        log_criteria = log_criteria.where(:created_at.gte => cp['created_at_start'])
+      end
+      if cp['created_at_end']
+        log_criteria = log_criteria.where(:created_at.lte => cp['created_at_end'])
+      end
+      if cp['date_issued_start']
+        log_criteria = log_criteria.where(:date_issued.gte => cp['date_issued_start'])
+      end
+      if cp['date_issued_end']
+        log_criteria = log_criteria.where(:date_issued.lte => cp['date_issued_end'])
+      end
+      
+      # Now do the core query and build the rows (and the row maps for later)
+      self.total_result_count = log_criteria.count
+      if format == 'json'
+        log_criteria = log_criteria.page(page).per(PAGE_SIZE)
+      end
+      log_criteria.each do |log|
+        current_row = { log: log }
+        rows << current_row
+        
+        user_ids << log.user_id unless user_ids.include? log.user_id
+        if user_row_map.has_key? log.user_id
+          user_row_map[log.user_id] << current_row
+        else
+          user_row_map[log.user_id] = [current_row]
+        end
+        
+        badge_ids << log.badge_id unless badge_ids.include? log.badge_id
+        if badge_row_map.has_key? log.badge_id
+          badge_row_map[log.badge_id] << current_row
+        else
+          badge_row_map[log.badge_id] = [current_row]
+        end
+      end
+
+      # Next we query users
+      users = User.where(:id.in => user_ids)
+      users.each do |user|
+        user_row_map[user.id].each do |row|
+          row[:user] = user
+        end
+      end
+
+      # Finally we query badges
+      badges = Badge.where(:id.in => badge_ids)
+      badges.each do |badge|
+        badge_row_map[badge.id].each do |row|
+          row[:badge] = badge
+        end
+      end      
+    rescue Exception => e
+      self.error_message = e
+    end
+
+    rows
+  end
+
+  # Logs a 'report-result-create' event to intercom
+  def intercom_rr_create
+    group = Group.find(cleaned_parameters['group_id']) rescue nil
+    if group
+      group_id = group.id.to_s
+      group_name = group.name
+      group_url = group.url
+    end
+    
+    IntercomEventWorker.perform_async({
+      'event_name' => 'report-result-create',
+      'email' => user.email,
+      'created_at' => Time.now.to_i,
+      'metadata' => {
+        'group_id' => group_id,
+        'group_name' => group_name,
+        'group_url' => group_url,
+        'type' => type
+      }
+    })
+  end
+
+  # Call from after update, checks if results have changed and the format is csv
+  # If so it will upload the csv to S3
+  def upload_results_file
+    # NOTE that even a "blank" report will have one row in results
+    if results_changed? && !results.blank? && (format == 'csv')
+      # We can't do the actual file upload in this same thread because for some reason Carrierwave
+      # won't end up setting the filename correctly (it has something to do with Carrierwave 
+      # needing the entire callback cycle to work properly)
+      ReportResult.delay(queue: 'high').upload_results_file(id)
+    end
+  end
+
+  # NOTE: Since the changes are often not committed to the database yet when this first runs,
+  # this method will recursively fire up to [times_to_run] times at 1s intervals until the
+  # results array is non-blank.
+  def self.upload_results_file(report_result_id, times_to_run = 10)
+    times_to_run -= 1
+    report_result = ReportResult.find(report_result_id)
+
+    if report_result.results.blank?
+      if times_to_run > 0
+        ReportResult.delay_for(1.second, queue: 'high')\
+          .upload_results_file(report_result.id, times_to_run)
+      end
+    else
+      poller = Poller.find(report_result.poller_id) rescue nil
+
+      # Create a temp file and then use it to build the csv
+      output_file_path = "#{Rails.root}/tmp/report_result_#{report_result.id.to_s}.csv"
+      output_file = CSV.open(output_file_path, 'wb') do |csv|
+        report_result.results.each do |row|
+          csv << row
+        end
+      end
+      
+      # Now store the file in S3
+      report_result.results_file = Pathname.new(output_file_path).open
+      report_result.status = 'successful'
+
+      begin
+        report_result.save!
+
+        if poller
+          poller.status = report_result.status
+          poller.message = 'Report results generated'
+          poller.redirect_to = report_result.full_url
+          poller.data['remaining_times_to_run'] = times_to_run
+          poller.save
+        end
+      rescue Exception => e
+        if poller
+          poller.status = 'failed'
+          poller.message = error_message
+          poller.redirect_to = nil
+          poller.save
+        else
+          throw e
+        end
+      end
+    end
+  end
+
+  # This should be called before destroy, it deletes the uploaded results file from S3
+  def remove_results_file
+    if results_file && !results_file.url.blank?
+      self.remove_results_file!
+    end
+  end
+
+  # Call from after save, it queues the automatic deletion of the record when completed
+  def queue_delete
+    ReportResult.delay_for(DELETE_AFTER).delete_report_result(id.to_s) if completed
+  end
+
+end

@@ -20,6 +20,8 @@ Polymer({
     urlChangeImage: { type: String, computed: '_urlChangeImage(assetPaths)' },
     urlHome: { type: String, computed: '_urlHome(assetPaths)' },
     urlManageAccount: { type: String, computed: '_urlManageAccount(assetPaths)' },
+    urlProfile: { type: String, computed: '_urlProfile(assetPaths, currentUser)' },
+    urlRunReports: { type: String, computed: '_urlRunReports(assetPaths)' },
     urlSignIn: { type: String, computed: '_urlSignIn(assetPaths)' },
     urlSignOut: { type: String, computed: '_urlSignOut(assetPaths)' }
   },
@@ -35,14 +37,15 @@ Polymer({
   _headerPanelClass: function(pageName) { return pageName + '-page'; },
   _toolbarClass: function(pageName) { return pageName + '-page'; },
 
-  _urlProfile: function(currentUser) { 
+  _urlProfile: function(assetPaths, currentUser) { 
     if (currentUser == null) return '#';
-    else return '/u/' + currentUser.username_with_caps; 
+    else return this.getURL('/u/' + currentUser.username_with_caps); 
   },
   _urlAdmin: function(assetPaths) { return this.getURL('/a'); },
   _urlChangeImage: function(assetPaths) { return this.getURL('/users/edit#upload-image'); },
   _urlHome: function(assetPaths) { return this.getURL('/'); },
   _urlManageAccount: function(assetPaths) { return this.getURL('/users/edit'); },
+  _urlRunReports: function(assetPaths) { return this.getURL('/report_results'); },
   _urlSignIn: function(assetPaths) { return this.getURL('/users/sign_in'); },
   _urlSignOut: function(assetPaths) { return this.getURL('/users/sign_out'); },
 
