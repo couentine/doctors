@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+<tsung loglevel="debug" dumptraffic="true" version="1.0">
+
+  <clients>
+    <client host="localhost" maxusers="1" use_controller_vm="true"/>
+  </clients>
+
+  <servers>
+    <server host="bl-staging-mango.herokuapp.com" port="443" type="ssl"></server>
+  </servers>
+
+  <load>
+    <arrivalphase phase="1" duration="2" unit="second">
+      <users interarrival="1" unit="second"/>
+    </arrivalphase>
+  </load>
+
+ <sessions>
+  <session name="user_sign_up" probability="100" type="ts_http">
+    <request >
+      <dyn_variable name="authenticity_token" />
+      <dyn_variable name="utf8" />
+      <http url='/users/sign_up' version='1.1' method='GET'>
+      </http>
+    </request>
+    <thinktime random='true' value='5'/>
+
+    <request subst="true">
+      <http url="/users" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "user": {&quot;name&quot;: &quot;Test Sumit199&quot;,&quot;username_with_caps&quot;: &quot;TestingSumit199&quot;,&quot;email&quot;: &quot; vishal.jagtap+199@zibtek.com&quot;,&quot;password&quot;: &quot;tudip123&quot;}}'
+            content_type='application/json' method="POST" version="1.1">
+      </http>
+    </request>
+
+    <thinktime random='true' value='5'/>
+
+    <request subst="true">
+      <http url="/users/edit" method="GET" version="1.1">
+      </http>
+    </request>
+
+  </session>
+ </sessions>
+
+</tsung>
+
+
+

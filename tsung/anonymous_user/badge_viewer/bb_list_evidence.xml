@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+<tsung loglevel="debug" dumptraffic="true" version="1.0">
+
+  <clients>
+    <client host="localhost" maxusers="1" use_controller_vm="true"/>
+  </clients>
+
+  <servers>
+    <server host="bl-staging-mango.herokuapp.com" port="443" type="ssl"></server>
+  </servers>
+
+
+  <load duration="5" unit="minute">
+    <arrivalphase phase="1" duration="1" unit="minute">
+      <users arrivalrate="2" unit="second"/>
+    </arrivalphase>
+  </load>
+
+  <sessions>
+        <session name="http_test_1" probability="100" type="ts_http">      
+          <request subst="true">
+            <http url="/" method="GET" version="1.1">
+            </http>
+          </request>
+          <thinktime random='true' value='5'/>
+          <request subst="true">
+            <http url="/community" method="GET" version="1.1">
+            </http>
+          </request>
+          <thinktime random='true' value='5'/>
+          <request subst="true">
+            <http url="/community/Badge-Builder" method="GET" version="1.1">
+            </http>
+          </request>
+          <thinktime random='true' value='5'/>
+          <request subst="true">
+            <http url="/community/Badge-Builder/List-Evidence" method="GET" version="1.1">
+            </http>
+          </request>
+          <thinktime random='true' value='5'/>      
+        </session>
+  </sessions>
+</tsung>

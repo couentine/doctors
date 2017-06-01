@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+<tsung loglevel="debug" dumptraffic="true" version="1.0">
+
+  <clients>
+    <client host="localhost" maxusers="1" use_controller_vm="true"/>
+  </clients>
+
+  <servers>
+    <server host="bl-staging-mango.herokuapp.com" port="443" type="ssl"></server>
+  </servers>
+
+  <load>
+    <arrivalphase phase="1" duration="2" unit="second">
+      <users interarrival="1" unit="second"/>
+    </arrivalphase>
+  </load>
+
+  <sessions>
+    <session name="group_admin_session" probability="100" type="ts_http">
+      <request >
+        <dyn_variable name="authenticity_token" />
+        <dyn_variable name="utf8" />
+        <http url='/users/sign_up' version='1.1' method='GET'>
+        </http>
+      </request>
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/users" contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;, "user": {&quot;name&quot;: &quot;Test Sumit11&quot;,&quot;username_with_caps&quot;: &quot;TestingSumit11&quot;,&quot;email&quot;: &quot; vishal.jagtap+345@zibtek.com&quot;,&quot;password&quot;: &quot;tudip123&quot;}}'
+              content_type='application/json' method="POST" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/u/TestingSumit11" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='5'/>
+
+      <request subst="true">
+        <http url="/groups/new" method="GET" version="1.1">
+        </http>
+      </request>
+
+      <thinktime random='true' value='12'/>
+
+      <request subst="true">
+        <http url='/groups' contents='{&quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;,&quot;group&quot;: {&quot;name&quot;: &quot;TestingNew7Group&quot;,&quot;url_with_caps&quot;: &quot;TestingNew7Group&quot;,&quot;type&quot;: &quot;open&quot;,&quot;pricing_group&quot;: &quot;standard&quot;,&quot;avatar_key&quot;: &quot;uploads/670070d1-544c-496b-b209-39497bbcd66f/Testing.jpeg&quot;, &quot;description&quot;: &quot;testing&quot;,&quot;location&quot;: &quot;standard&quot;,&quot;website&quot;: &quot;standard&quot;}}' content_type='application/json' method='POST' version='1.1'>
+        </http>
+      </request>
+      <thinktime random='true' value='12'/>
+
+      <request subst="true">
+        <http url='/TestingNew7Group'  method='GET' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='12'/>
+
+      <request subst="true">
+        <http url='/TestingNew7Group/badges/new' method='GET' version='1.1'>
+        </http>
+      </request>
+
+      <thinktime random='true' value='12'/>
+
+      <request subst="true">
+        <http url='/TestingNew7Group/badges' version='1.1'  contents='{&quot;rl&quot;: {}, &quot;commit&quot;: &quot;Create Badge&quot;, &quot;utf8&quot;: &quot;%%_utf8%%&quot;, &quot;authenticity_token&quot;: &quot;%%_authenticity_token%%&quot;,&quot;badge&quot;: {&quot;name&quot;: &quot;TestingNewBadge6&quot;,&quot;url_with_caps&quot;: &quot;TestingNewBadge6&quot;,&quot;summary&quot;: &quot;TestingPurposes&quot;,&quot;custom_image_key&quot;: &quot;&quot;,&quot;image_frame&quot;: &quot;4-point-skinny&quot;, &quot;image_icon&quot;: &quot;mug&quot;,&quot;image_color2&quot;: &quot;A479E2&quot;,&quot;image_color1&quot;: &quot;F2C960&quot;}}'
+              content_type='application/json' method='POST'>
+        </http>
+      </request>
+
+    </session>
+  </sessions>
+
+</tsung>
