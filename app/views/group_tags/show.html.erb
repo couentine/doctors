@@ -59,18 +59,6 @@
           }
           #editButtons a:focus, #editButtons a:hover { color: #212121; }
 
-    #group-tags-panel {
-      margin: 0 1em;
-      padding-bottom: 0.5em;
-      background: white;
-      border: 1px solid #E0E0E0;
-      border-radius: 1.25rem;
-    }
-    @media (min-width: 840px) { #group-tags-panel { margin: 0 2em; padding-bottom: 2em; } }
-    @media (min-width: 1200px) { #group-tags-panel { margin: 0 4em; padding-bottom: 4em; } }
-      #userList {
-        min-height: 22em;
-      }
         paper-listbox.dropdown-content {
           min-width: 12em;
           margin-bottom: -6em;
@@ -83,6 +71,10 @@
         #feedback-requests {
           color: #F57C00;
           text-decoration: none;
+        }
+
+        #add-badges {
+          background: #03A9F4;
         }
 
   </style>
@@ -169,11 +161,9 @@
     <% end %>
   </div>
 
-  <!-- #=== GROUP TAG USERS ===# -->
-
-  <div id="group-tags-panel">
-  
-    <bl-list id="userList" object-mode="users" refresh-query-on-load
+  <bl-list-tabs id="selector-tabs" selected-list-id="<%= (params[:selected] == 'users') ? 'userList'
+   : 'badgeList'  %>" class="green">
+    <bl-list id="userList" object-mode="users" refresh-query-on-load name="Users"
         query-options="<%= @query_options %>" item-display-mode="<%= @item_display_mode %>"
         next-page-url="<%= group_tag_users_url(@group, @group_tag, format: :json) %>">
 
@@ -236,6 +226,55 @@
 
     </bl-list>
 
+    <bl-list id="badgeList" object-mode="badges" refresh-query-on-load name="Badges"
+        query-options="<%= @query_options %>" item-display-mode="<%= @item_display_mode %>"
+        next-page-url="<%= group_tag_badges_url(@group, @group_tag, format: :json) %>">
+
+      <!-- #=== LIST CONTROLS ===# -->
+      <div class="list-controls">
+        <ul class="left">
+          <bl-query-options for="badgeList" selected-options="<%= @sort_options %>" 
+              class="query-filter-option">
+            <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
+                horizontal-align="left" vertical-align="bottom">
+              <paper-listbox class="dropdown-content">
+                <paper-item data-options='{"sort_by":"name","sort_order":"asc"}'>
+                  By name
+                </paper-item>
+                <paper-item data-options='{"sort_by":"name","sort_order":"desc"}'>
+                  Reverse name
+                </paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+          </bl-query-options>
+        </ul>
+        <ul class="right">
+          <% if @can_assign_group_tags %>
+            <li>
+              <bl-button id="add-badges" type="flat"
+                  link="<%= add_group_tag_badges_path(@group, @group_tag) %>">
+                Add Badges
+              </bl-button>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+
+
+      <!-- #=== PLACEHOLDER ===# -->
+      <div class="placeholder transparent">
+        <i class="fa fa-trophy"></i>
+        <div class="message">
+          <p><b>No badges have been added to this tag yet.</b></p> 
+          <% if @can_assign_group_tags %>
+            <p>Click the 'Add Badges' button above to add some.</p>
+          <% end %>
+        </div>
+      </div>
+
+    </bl-list>
+
+  </bl-list-tabs>
 
     <!-- #=== PAGE-SPECIFIC JAVASCRIPT ===# -->
 
@@ -346,6 +385,7 @@
           'error', 30000);
       }
 
+
       // #=== TAG EDIT HANDLING ===# 
 
       function editGroupTag() {
@@ -370,7 +410,6 @@
         document
           .getElementById('editGroupTagDialog').valid = !document.getElementById('tagname').invalid;
       }
-
     </script>
 
   </div>

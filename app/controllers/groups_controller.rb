@@ -9,7 +9,7 @@ class GroupsController < ApplicationController
 
   prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :update_group_settings, :destroy_user, :send_invitation, :destroy_invited_user, 
-    :users, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, 
+    :users, :badges, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, 
     :review, :full_logs, :create_validations]
   before_action :authenticate_user!, except: [:show]
   before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :review, 
@@ -129,7 +129,9 @@ class GroupsController < ApplicationController
     # Set group tag variables
     @has_tags = !@group.tags_cache.blank?
     @top_user_tags = @group.top_user_tags(10)
+    @top_badge_tags = @group.top_badge_tags(10)
     @has_top_user_tags = !@top_user_tags.blank?
+    @has_top_badge_tags = !@top_badge_tags.blank?
 
     # Set options vars
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
@@ -822,6 +824,37 @@ class GroupsController < ApplicationController
         end # over limit tests
       end # valid emails empty
     end # can add admins test
+  end
+
+  # GET /group-url/badges?without_tag=group-tag-name
+  # Also accepts pagination params: page, page_size (default 200, max 200), sort_order, sort_by
+  # JSON only
+  # Returns json array of badges with keys from Badge group_list_item json template
+  def badges
+    sort_fields = ['name', 'url'] # defaults to first value
+    sort_orders = ['asc', 'desc'] # defaults to first value
+
+    without_tag_param = params['without_tag']
+    
+    @page = (params['page'] || 1).to_i
+    @page_size = [(params['page_size'] || 200).abs, 200].min # no more than 200, default to 200
+    @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
+    @sort_order = \
+      (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
+
+    # Build out the badges list
+    @badges_hash = []
+    badge_criteria = @group.badges_query(without_tag_name: without_tag_param).page(@page)\
+      .per(@page_size).order_by("#{@sort_by} #{@sort_order}")
+    @badges_hash = Badge.array_json(badge_criteria, :group_list_item)
+    @next_page = @page + 1 if badge_criteria.count > (@page_size * @page)
+
+    respond_to do |format|
+      format.json do
+        render json: { page: @page, page_size: @page_size, badges: @badges_hash, 
+          next_page: @next_page }
+      end
+    end
   end
 
   # GET /group-url/copy_badges

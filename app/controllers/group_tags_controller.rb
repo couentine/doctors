@@ -80,9 +80,11 @@ class GroupTagsController < ApplicationController
     # Create using the AuditHistory method
     @group_tag = GroupTag.new_with_audit(group_tag_params, current_user.id)
     @group_tag.group = @group
+    selected = params[:selected] #local variable to choose which tab to select upon redirect
 
     if @group_tag.save
-      redirect_to group_tag_path(@group, @group_tag), notice: 'Group tag was successfully created.'
+      redirect_to group_tag_path(@group, @group_tag,
+        :selected => selected), notice: 'Group tag was successfully created.'
     else
       redirect_to @group, 
         alert: "There was a problem creating a tag called #{@group_tag.name_with_caps}. " \

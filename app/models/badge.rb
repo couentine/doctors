@@ -26,7 +26,9 @@ class Badge
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
-      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path]
+      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
+    group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
+    :expert_count, :image_url, :image_medium_url, :image_small_url]
   }
   
   # Below are the badge-level fields included in the clone
@@ -44,6 +46,7 @@ class Badge
   belongs_to :creator, inverse_of: :created_badges, class_name: "User"
   has_many :logs, dependent: :nullify
   has_many :tags, dependent: :destroy
+  has_and_belongs_to_many :group_tags
 
   # === FIELDS & VALIDATIONS === #
 
@@ -168,6 +171,13 @@ class Badge
 
   def full_path
     "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
+  end
+
+  def added_to_group_tag (group_tag)
+    added = false;
+    if self.group_tags.include? group_tag.name
+      added = true;
+    end
   end
 
   # Returns URL of the specified version of this badge's image
