@@ -52,6 +52,8 @@ POSTMARK_WEBHOOK_KEY=abc123
 embedly_api_key=abc123
 oauth_google_client_id=abc123
 oauth_google_client_secret=abc123
+dev_gmail_address=knowledgestreem@gmail.com
+dev_gmail_password=PASSWORD_TO_GMAIL_ACCOUNT
 ```
 
 ## Running foreman ##
