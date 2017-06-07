@@ -32,6 +32,7 @@ BadgeList::Application.configure do
     authentication:       'plain',
     enable_starttls_auto: true  }
   config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.asset_host = ENV['cdn_asset_host'] || 'cdn.badgelist.com'
 
   config.log_level = :debug
 end

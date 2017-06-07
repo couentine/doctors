@@ -1,42 +1,29 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    <% if @badges.blank? %>
-      <p>
-        You've been added as a member to the <%= @group.name %> group in Badge List. 
-        You can now browse and join any of the badges in the group.
-        To view the group, login to Badge List as normal or click on the link below.
-      </p>
-    <% else %>
-      <p>
-        You've been added to <%= pluralize @badges.count, 'badge' %> in Badge List.
-        You've also been added as a member of the <%= @group.name %> group. 
-        To view the group and begin adding entries to your badge portfolio, 
-        login to Badge List as normal or click one of the links below.<br>
-        <br>
-        <strong>Badges you've been added to:</strong>
-      </p>
-      <ul>
-        <% @badges.each do |badge| %>
-          <li><%= link_to badge.name, group_badge_url(@group, badge) %></li>
-        <% end %>
-      </ul>
-    <% end %>
+<% 
+  provide(:title, "You've been added to #{@group.name}")
+  provide(:color, 'blue')
+  provide(:cta_link, group_url(@group))
+  provide(:cta_text, 'View the group in Badge List')
+%>
 
-    <p>
-      <strong><%= @group.name %>:</strong> 
-      <%= link_to group_url(@group), group_url(@group) %> 
-      (You were added by <%= @from_user.name %>.)
-    </p>
-    <p>
-      <i>
-        This email was sent automatically by the Badge List app.
-        Badge List is a badge-based tool for tracking learning progress. 
-        If you take no action you will not receive any further emails about this invitation.
-      </i>
-    </p>
-  </body>
-</html>
+
+<% if @badges.blank? %>
+  <p>
+    <%= @from_user.name %> has added you as a member to the <%= @group.name %> group in Badge List. 
+    You can now browse and join any of the badges in the group.
+    To view the group, login to Badge List as normal or click on the link below.
+  </p>
+<% else %>
+  <p>
+    <%= @from_user.name %> has added you to <%= pluralize @badges.count, 'badge' %> in Badge List.
+    You've also been added as a member of the <%= @group.name %> group. 
+    To view the group and begin adding entries to your badge portfolio, 
+    login to Badge List as normal or click one of the links below.<br>
+    <br>
+    <strong>Badges you've been added to:</strong>
+  </p>
+  <ul>
+    <% @badges.each do |badge| %>
+      <li><%= link_to badge.name, group_badge_url(@group, badge) %></li>
+    <% end %>
+  </ul>
+<% end %>
