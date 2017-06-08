@@ -33,7 +33,10 @@
               -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;
               background: <%= colors[600] %> none no-repeat center/cover;
               background-color: <%= colors[600] %>; 
-              background: linear-gradient(to bottom, <%=colors[400]%> 0%, <%=colors[600]%> 100%);">
+              <% if content_for?(:title) %>
+                background: linear-gradient(to bottom, <%=colors[400]%> 0%, <%=colors[600]%> 100%);
+              <% end %>
+              ">
             <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" 
                 style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;
                 -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;
