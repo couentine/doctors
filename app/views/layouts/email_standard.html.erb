@@ -7,15 +7,12 @@
 
   <%
     # Set the color variable based on the provided value of 'color'
-    color_list = { 
-      'orange' => '#FB8C00',
-      'green' => '#43A047',
-      'blue' => '#039BE5'
-    }
+    # NOTE: The standard colors are 'orange', 'light_blue' and 'green'
+    
     if content_for?(:color)
-      color = color_list[yield(:color)]
+      colors = APP_COLORS[yield(:color)]
     else
-      color = color_list['orange'] # default to orange
+      colors = APP_COLORS['orange'] # default to orange
     end
   %>
   
@@ -34,8 +31,9 @@
         <tr>
           <td align="center" valign="top" style="mso-line-height-rule: exactly; 
               -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;
-              background: <%= color %> none no-repeat center/cover;
-              background-color: <%= color %>; ">
+              background: <%= colors[600] %> none no-repeat center/cover;
+              background-color: <%= colors[600] %>; 
+              background: linear-gradient(to bottom, <%=colors[400]%> 0%, <%=colors[600]%> 100%);">
             <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" 
                 style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;
                 -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;
@@ -87,10 +85,16 @@
 
                     <% if content_for?(:cta_link) && content_for?(:cta_text) %>
                       <p style="line-height: 42px; margin-top: 30px; text-align: center;">
-                        <a href="<%= yield(:cta_link) %>" style="background-color: <%= color %>;
-                          padding: 12px 17px; border-radius: 2px; text-decoration: none; 
-                          color: white; 
-                          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);">
+                        <a href="<%= yield(:cta_link) %>" style="font-weight: 500; 
+                            font-size: 14px; color: white; line-height: 14px; 
+                            letter-spacing: 0.03em; text-transform: uppercase;
+                            background-color: <%= colors[500] %>;
+                            border-top: 1px solid <%= colors[300] %>; 
+                            border-left: 1px solid <%= colors[500] %>;
+                            border-right: 1px solid <%= colors[500] %>;
+                            border-bottom: 2px solid <%= colors[700] %>;
+                            display: inline-block; text-decoration: none; text-align: center;
+                            border-radius: 3px; padding: 10px 25px;">
                           <%= yield(:cta_text) %>
                         </a>
                       </p>
