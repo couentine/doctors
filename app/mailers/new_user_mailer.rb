@@ -1,6 +1,8 @@
 class NewUserMailer < ActionMailer::Base
   include EmailTools
 
+  layout 'email_standard'
+
   def group_member_add(to_email, to_name, from_user_id, group_id, badge_ids)
     @to_email, @to_name = to_email, to_name
     @from_user, @group, @badges = User.find(from_user_id), Group.find(group_id), \
@@ -53,7 +55,7 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "You've been awarded the #{@badge.name} badge!",
+      :subject  => "You've been awarded the #{@badge.name} badge",
       :to       => to_email_name,
       :from     => build_from_string(@from_user),
       :reply_to => @from_user.email_name,

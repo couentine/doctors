@@ -1,10 +1,9 @@
 <% 
   provide(:title, "You've been added to #{@group.name}")
   provide(:color, 'light_blue')
-  provide(:cta_link, group_url(@group))
   provide(:cta_text, 'View the group')
+  provide(:cta_link, group_url(@group))
 %>
-
 
 <% if @badges.blank? %>
   <p>
@@ -21,9 +20,17 @@
     <br>
     <strong>Badges you've been added to:</strong>
   </p>
-  <ul>
+  <ul style="list-style: none; padding: 0; margin: 0;">
     <% @badges.each do |badge| %>
-      <li><%= link_to badge.name, group_badge_url(@group, badge) %></li>
+      <li style="display: inline-block; padding: 15px 30px 15px 0; text-align: center;
+          max-width: 140px; vertical-align: top;">
+        <a href="<%= group_badge_url(@group, badge) %>" style="color: #424242 !important; 
+            text-decoration: none !important;">
+          <img src="<%= badge.image_medium_url %>" style="width: 100px; display: inline-block; 
+            margin-bottom: 10px;"><br>
+          <%= badge.name %>
+        </a>
+      </li>
     <% end %>
   </ul>
 <% end %>

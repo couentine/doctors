@@ -109,7 +109,7 @@ class UserMailer < ActionMailer::Base
     @Noun = @noun.capitalize
 
     mail(
-      :subject  => "#{@Noun} - #{@entry.summary}",
+      :subject  => "#{@Noun} for #{@badge.name}",
       :to       => @to_user.email_name,
       :from     => build_from_string(@from_user),
       :reply_to => @from_user.email_name,

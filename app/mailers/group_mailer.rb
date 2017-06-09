@@ -2,20 +2,22 @@ class GroupMailer < ActionMailer::Base
   include EmailTools
   include ActionView::Helpers::TextHelper
 
+  layout 'email_standard'
+
   def trial_ending(group_id)
     @group = Group.find(group_id)
-    @trial_end_date = @group.subscription_end_date
+    @trial_end_date = @group.subscription_end_date || Time.now
     @days_until_end = ((@trial_end_date - Time.now) / 86400).round
     @payment_info_needed = !@group.owner.has_stripe_card?
 
     if @payment_info_needed
-      subject = "We need your billing info"
+      @subject = "We need your billing info"
     else
-      subject = "Your trial ends in #{pluralize @days_until_end, 'day'}"
+      @subject = "#{@group.name} trial ends in #{pluralize @days_until_end, 'day'}"
     end
 
     mail(
-      :subject  => subject,
+      :subject  => @subject,
       :to       => @group.owner.email_name,
       :from     => build_from_string,
       :reply_to => build_from_string,
@@ -26,7 +28,7 @@ class GroupMailer < ActionMailer::Base
   def payment_failure(group_id)
     @group = Group.find(group_id)
     @payment_fail_date = @group.stripe_payment_fail_date
-    @retry_date = @group.stripe_payment_retry_date
+    @retry_date = @group.stripe_payment_retry_date || Time.now
     @days_until_retry = ((@retry_date - Time.now) / 86400).round
     
     subject = "Billing charge declined"

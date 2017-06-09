@@ -1,34 +1,38 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    <p>
-      <% if @from_self %>
-        You've joined the <%= @badge.name %> badge in Badge List as a badge <%= @badge.learner %>.
-      <% else %>
-        You've been added as a badge <%= @badge.learner %> to the <%= @badge.name %> badge in Badge List. 
-      <% end %>
-      This badge is part of the <%= @group.name %> group.
-      To begin adding entries to your learning log you can login to Badge List as normal or click on the link below.
-    </p>
-    <p>
-      <strong>Your <%= @badge.progress_log %>:</strong> 
-      <%= link_to group_badge_log_url(@group, @badge, @log), 
-        group_badge_log_url(@group, @badge, @log) %> <br>
-      <strong><%= @badge.name %>:</strong> 
-      <%= link_to group_badge_url(@group, @badge), group_badge_url(@group, @badge) %> 
-      <% if !@from_self %>
-        (You were added by <%= @from_user.name %>.)
-      <% end %>
-    </p>
-    <p>
-      <i>
-        This email was sent automatically by the Badge List app.
-        Badge List is a badge-based tool for tracking learning progress. 
-        If you take no action you will not receive any further emails about this change.
-      </i>
-    </p>
-  </body>
-</html>
+<% 
+  if @from_self
+    provide(:title, "You've joined #{@badge.name}")
+  else
+    provide(:title, "You've been added to #{@badge.name}")
+  end
+  provide(:color, 'orange')
+  provide(:cta_text, "View your #{@badge.log}")
+  provide(:cta_link, group_badge_log_url(@group, @badge, @log))
+%>
+
+<p style="text-align: center; margin: 10px 0 30px 0; padding: 0;">
+  <a href="<%= group_badge_url(@group, @badge) %>" style="display: inline-block; width: 180px;
+      color: <%= COLORS['grey'][800] %> !important; text-decoration: none !important;
+      border-bottom: 1px solid <%= COLORS['grey'][300] %>; padding: 0 20px 30px 20px;
+      font-weight: bold; font-size: 20px;">
+    <img src="<%= @badge.image_medium_url %>" style="width: 100px; display: inline-block; 
+      margin-bottom: 10px;"><br>
+    <%= @badge.name %>
+  </a>
+</p>
+
+<p>
+  <% if @from_self %>
+    You've joined the 
+    <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
+    badge in Badge List.
+  <% else %>
+    <%= @from_user.name %> 
+    has added you to the 
+    <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
+    badge in Badge List. 
+  <% end %>
+  This badge is part of the <%= link_to @group.name, group_url(@group) %> group.
+  To begin adding entries to your 
+  <%= @badge.progress_log %> 
+  you can login to Badge List as normal or click on the link below.
+</p>

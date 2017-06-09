@@ -9,7 +9,7 @@
   <p>
     <%= @from_user.name %> has invited you to join the
     <%= link_to @group.name, group_url(@group) %> 
-    group in Badge List.
+    group in Badge List as an admin.
   </p>
   <p>
     To view the group, follow the link below to create a new Badge List account. 
@@ -17,7 +17,7 @@
   </p>
   <p>
     After you login you will see the group on your home page and you can join any of the 
-    badges in the group.
+    badges in the group. As an admin you will also be able to help manage the group.
   </p>
 <% else %>
   <p>
@@ -25,11 +25,10 @@
     has invited you to join <%= pluralize @badges.count, 'badge' %> in Badge List.
   </p>
   <p>
-    You've also been added as a member of the 
+    You've also been added as an admin of the 
     <%= link_to @group.name, group_url(@group) %>
     group. 
-    To view the group and begin adding entries to your badge portfolio, 
-    follow the link below to create a new Badge List account. 
+    Follow the link below to create a new Badge List account. 
     (Be sure to sign up using the same email address.)<br>
     <br>
     <strong>Badges you've been invited to:</strong>

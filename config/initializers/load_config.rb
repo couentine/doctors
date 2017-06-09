@@ -1,3 +1,3 @@
 APP_CONFIG = YAML.load_file("#{Rails.root}/config/config.yml")[Rails.env]
-APP_COLORS = YAML.load_file("#{Rails.root}/config/colors.yml")
+COLORS = YAML.load_file("#{Rails.root}/config/colors.yml")
 BADGE_MAKER_CONFIG = BadgeMaker.init
