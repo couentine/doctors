@@ -1,6 +1,8 @@
 class UserMailer < ActionMailer::Base
   include EmailTools
 
+  layout 'email_standard'
+
   def group_admin_add(to_user_id, from_user_id, group_id, badge_ids)
     @to_user, @from_user, @group, @badges = User.find(to_user_id), User.find(from_user_id), \
       Group.find(group_id), Badge.where(:id.in => badge_ids)
@@ -107,7 +109,7 @@ class UserMailer < ActionMailer::Base
     @Noun = @noun.capitalize
 
     mail(
-      :subject  => "#{@Noun} - #{@entry.summary}",
+      :subject  => "#{@Noun} for #{@badge.name}",
       :to       => @to_user.email_name,
       :from     => build_from_string(@from_user),
       :reply_to => @from_user.email_name,

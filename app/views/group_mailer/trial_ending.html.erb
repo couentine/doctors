@@ -1,47 +1,38 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    <% if @payment_info_needed %>
-      <p>
-        This is a friendly heads up that the trial period for your Badge List group 
-        (<%= link_to @group.name, group_url(@group) %>)
-        ends in <%= pluralize @days_until_end, 'day' %>.  To continue using the group
-        you'll need to add a credit card to your account by clicking the link below.
-      </p>
-      <p>
-        <%= link_to 'Add a card to your account', 
-          edit_user_registration_url + '?d=ac#add-card' %>
-      </p>
-    <% else %>
-      <p>
-        This is a friendly heads up that the trial period for your Badge List group 
-        (<%= link_to @group.name, group_url(@group) %>)
-        ends in <%= pluralize @days_until_end, 'day' %>.  At the end of trial period your card
-        will be billed for your first month's service.
-      </p>
-    <% end %>
-    
-    <p>
-      <strong>Have any questions?</strong>
-      Try checking out the <a href="https://www.badgelist.com/help/docs">help documentation</a>
-      and earning some badges in the 
-      <a href="https://www.badgelist.com/community">Badge List Community</a>.
-      You can also email us at 
-      <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>. 
-    </p>
+<% 
+  provide(:title, @subject)
+  provide(:color, 'light_blue')
+  if @payment_info_needed
+    provide(:cta_text, 'Add a credit card')
+    provide(:cta_link, "#{edit_user_registration_url}?d=ac#add-card")
+  else
+    provide(:cta_text, 'View your group')
+    provide(:cta_link, "#{new_user_registration_url}?email=#{@to_email}&name=#{@to_name}")
+  end
+%>
 
-    <p>
-      Thanks for using Badge List!
-    </p>
+<% if @payment_info_needed %>
+  <p>
+    This is a friendly heads up that the trial period for your Badge List group 
+    ends in <%= pluralize @days_until_end, 'day' %>.  To continue using the group
+    you'll need to add a credit card to your account by clicking the link below.
+  </p>
+<% else %>
+  <p>
+    This is a friendly heads up that the trial period for your Badge List group 
+    ends in <%= pluralize @days_until_end, 'day' %>.  At the end of trial period your card
+    will be billed for your first month's service.
+  </p>
+<% end %>
 
-    <hr/>
-    <p>
-      <i>
-        This email was sent automatically by the Badge List app.
-      </i>
-    </p>
-  </body>
-</html>
+<p>
+  <strong>Have any questions?</strong>
+  Try checking out the <a href="https://www.badgelist.com/help/docs">help documentation</a>
+  and earning some badges in the 
+  <a href="https://www.badgelist.com/community">Badge List Community</a>.
+  You can also email us at 
+  <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>. 
+</p>
+
+<p>
+  Thanks for using Badge List!
+</p>

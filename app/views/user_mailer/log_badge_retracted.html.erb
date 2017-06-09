@@ -1,25 +1,16 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    <p>
-      Your badge has been retracted<%= (@retracted_by) ? " by #{@retracted_by.name}" : "" %>. 
-      How do you get the badge back? Not to worry! 
-      Any of the group admins or the badge creator are able to clear the retraction. After the 
-      retraction is cleared you can be reissued the badge.
-    <p>
-      <strong>Your <%= @badge.progress_log.titleize %>:</strong> 
-      <%= link_to group_badge_log_url(@group, @badge, @log), 
-        group_badge_log_url(@group, @badge, @log) %>
-    </p>
-    <p>
-      <i>
-        This email was sent automatically by the Badge List app.
-        Badge List is a badge-based tool for tracking learning progress. 
-        If you take no action you will not receive any further emails about this change.
-      </i>
-    </p>
-  </body>
-</html>
+<% 
+  provide(:title, "#{@badge.name} has been retracted")
+  provide(:color, 'orange')
+  provide(:cta_text, "View your #{@badge.log}")
+  provide(:cta_link, group_badge_log_url(@group, @badge, @log))
+%>
+
+<p>
+  Your badge has been retracted<%= (@retracted_by) ? " by #{@retracted_by.name}" : "" %>. 
+</p>
+<p>
+  <b>How do you get the badge back?</b> 
+  Not to worry! 
+  Any of the group admins or the badge creator are able to clear the retraction. After the 
+  retraction is cleared you can be reissued the badge.
+<p>

@@ -1,58 +1,38 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    
-    <table style="border-spacing: 0;">
-      <tbody>
-        <tr>
-          <td style="border-top: 15px solid #FF7C1C;">
-            <%= link_to image_tag(@badge.image_url(:medium), size: "100x100", \
-              alt: @badge.name), group_badge_url(@group, @badge) %>
-          </td>
-          <td style="padding: 10px; border-top: 15px solid #FF7C1C;">
-            
-            <p>
-              You have been awarded the 
-              <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
-              badge in Badge List. It has been added to your 
-              <%= link_to 'badge profile', "#{ENV['root_url']}/u/#{@to_user.username_with_caps}"%>
-              and you are now one of the <%= @badge.experts %>, congratulations!
-            </p>
-            <p>
-              Click the link below to view your newly awarded badge.
-              You'll be able to share it to social networks and add the badge to your Mozilla Open 
-              Badges Backpack.
-              <% if @badge.tracks_progress? %>
-                Also be aware that all non-private entries in your badge portfolio are now visible 
-                and will be linked to the badge as public evidence of your achievment. 
-              <% end %>
-            </p>
+<% 
+  provide(:title, "You earned a new badge!")
+  provide(:color, 'orange')
+  provide(:cta_text, "View your #{@badge.log}")
+  provide(:cta_link, group_badge_log_url(@group, @badge, @log))
+%>
 
-          </td>
-        </tr>
-      </tbody>
-    </table>
+<p style="text-align: center; margin: 10px 0 0 0; padding: 0;">
+  <a href="<%= group_badge_url(@group, @badge) %>" style="display: inline-block; width: 180px;
+      color: <%= COLORS['grey'][800] %> !important; text-decoration: none !important;
+      padding: 0 20px 30px 20px; font-weight: bold; font-size: 20px;">
+    <img src="<%= @badge.image_medium_url %>" style="width: 100px; display: inline-block; 
+      margin-bottom: 10px;"><br>
+    <%= @badge.name %>
+  </a>
+</p>
 
-    <p style="text-align: center">
-      <a href="<%= group_badge_log_url(@group, @badge, @log) %>"
-        style="color: #fff; border: 2px solid #a8cb17; background-color: #bedf36; 
-        padding: 10px 25px; border-radius: 500px; text-decoration: none; font-size: 18px;">
-        
-        View the badge
+<p style="text-align: center; margin: 0 0 30px 0; padding: 0; font-size: 50px;">
+  <span style="display: inline-block; padding: 30px; border-radius: 500px; 
+      border: 1px solid <%= COLORS['grey'][300] %>; 
+      background-color: <%= COLORS['grey'][100] %>;">
+    &#128079; &#127942; &#127881;
+  </span>
+</p>
 
-      </a>
-    </p>
-    
-    <p style="margin-top: 40px; background-color: #eaeaea; color: #999; padding: 10px 15px;
-      text-align: center; font-size: 14px;">
-      
-      This email was sent automatically by the Badge List app.
-      Badge List is a badge-based tool for tracking learning progress. 
-      If you take no action you will not receive any further emails about this change.
+<p>
+  You have been awarded the
+  <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
+  badge in Badge List. It has been added to your 
+  <%= link_to 'badge profile', "#{@to_user.user_url}"%>
+  and you are now one of the badge <%= @badge.experts %>, congratulations!
+</p>
 
-    </p>
-  </body>
-</html>
+<p>
+  Click the link below to view your newly awarded badge.
+  You'll be able to share it to social networks and add the badge to your Mozilla Open 
+  Badges Backpack.
+</p>

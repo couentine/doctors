@@ -57,6 +57,10 @@ module BadgeList
     # For devise
     config.assets.initialize_on_precompile = false
     config.action_mailer.default_url_options = { :host => ENV['root_domain'] }
+    config.to_prepare do
+      # Tell devise emails to use the standard email layout
+      Devise::Mailer.layout 'email_standard'
+    end
 
     config.assets.precompile += %w( rich-text-editor.css )
 

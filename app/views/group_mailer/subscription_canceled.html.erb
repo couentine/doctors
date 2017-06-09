@@ -1,48 +1,38 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    <p>
-      This is a friendly heads up that the subscription for your Badge List group
-      (<%= link_to @group.name, group_url(@group) %>)
-      has been canceled. That means that your group is currently inactive.
-    </p>
-    <p>
-      While your group is inactive you won't be able to create any new badges and your members
-      won't be able to award badges or post new evidence. All groups come with free lifetime 
-      hosting, so you are welcome to leave your group inactive for as long as you like and you
-      will be able to revive it at any time.
-    </p>
-    <p>
-      <strong>Want to bring the group back?</strong> Here are your options:
-      <ol>
-        <li>Change the group to be open. (Open groups are free.)</li>
-        <li>Pick a new subscription plan. 
-          (Make sure you've added a credit card to your account too.)</li>
-        <li>Transfer the group to a new owner. (Then they can revive it!)</li>
-      </ol>
-      <em>
-        To do any of the above just <%= link_to 'edit your group', edit_group_url(@group) %>.
-      </em>
-    </p>
-    <p>
-      Need some help? You can email us at 
-      <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
-      You can also refer to the 
-      <a href="https://www.badgelist.com/help/docs">help documentation</a>.
-    </p>
+<% 
+  provide(:title, "Badge List subscription canceled for #{@group.name}")
+  provide(:color, 'grey')
+%>
 
-    <p>
-      Thanks for using Badge List!
-    </p>
+<p>
+  This is a friendly heads up that the subscription for the 
+  <%= link_to @group.name, group_url(@group) %>
+  group has been canceled. That means that your group is currently inactive.
+</p>
+<p>
+  While your group is inactive you won't be able to create any new badges and your members
+  won't be able to award badges or post new evidence. All groups come with free lifetime 
+  hosting, so you are welcome to leave your group inactive for as long as you like and you
+  will be able to revive it at any time.
+</p>
+<p>
+  <strong>Want to bring the group back?</strong> Here are your options:
+  <ol>
+    <li>Change the group to be open. (Open groups are free.)</li>
+    <li>Pick a new subscription plan. 
+      (Make sure you've added a credit card to your account too.)</li>
+    <li>Transfer the group to a new owner. (Then they can revive it!)</li>
+  </ol>
+  <em>
+    To do any of the above just <%= link_to 'edit your group', edit_group_url(@group) %>.
+  </em>
+</p>
+<p>
+  Need some help? You can email us at 
+  <a href="mailto:solutions@badgelist.com">solutions@badgelist.com</a>.
+  You can also refer to the 
+  <a href="https://www.badgelist.com/help/docs">help documentation</a>.
+</p>
 
-    <hr/>
-    <p>
-      <i>
-        This email was sent automatically by the Badge List app.
-      </i>
-    </p>
-  </body>
-</html>
+<p>
+  Thanks for using Badge List!
+</p>

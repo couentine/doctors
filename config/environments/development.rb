@@ -22,14 +22,17 @@ BadgeList::Application.configure do
   config.assets.debug = true
 
   # Send email through gmail for this environment 
+  # NOTE: You need to configure the gmail account and password in your .env file
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address:              'smtp.gmail.com',
     port:                 587,
-    user_name:            'knowledgestreem@gmail.com',
-    password:             'educ8every1!',
+    user_name:            ENV['dev_gmail_address'],
+    password:             ENV['dev_gmail_password'],
     authentication:       'plain',
     enable_starttls_auto: true  }
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.asset_host = ENV['cdn_asset_host'] || 'cdn.badgelist.com'
 
   config.log_level = :debug
 end

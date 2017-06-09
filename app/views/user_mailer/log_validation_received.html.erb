@@ -1,51 +1,29 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    <p>
-      <% if @entry.log_validated %>
-        Congratulations! 
-        You've received an endorsement from <%= @from_user.name %> for the <%= @badge.name %> 
-        badge in Badge List.
-      <% else %>
-        You've gotten feedback from <%= @from_user.name %> for the <%= @badge.name %> 
-        badge in Badge List.
-      <% end %>
-    </p>
+<% 
+  provide(:title, "#{@Noun} received for #{@badge.name}")
+  provide(:color, 'purple')
+  provide(:cta_text, "View the #{@noun}")
+  provide(:cta_link, group_badge_log_entry_url(@group, @badge, @log, @entry))
+%>
 
-    <p>
-      <strong>View the <%= @noun %>:</strong> 
-      <%= link_to group_badge_log_entry_url(@group, @badge, @log, @entry), 
-        group_badge_log_entry_url(@group, @badge, @log, @entry) %> <br>
-      <strong>View your badge portfolio:</strong> 
-      <%= link_to group_badge_log_url(@group, @badge, @log), group_badge_log_url(@group, @badge, @log) %>
-    </p>
+<p>
+  <% if @entry.log_validated %>
+    <b>Congratulations!</b> You've received an endorsement from
+  <% else %>
+    You've gotten feedback from 
+  <% end %>
+  <%= @from_user.name %>
+  for the
+  <%= link_to @badge.name, group_badge_url(@group, @badge) %> 
+  badge in the
+  <%= link_to @group.name, group_url(@group) %> 
+  group.
+</p>
 
-    <hr>
-
-    <p>
-      <strong><u>Content of the <%= @Noun %></u></strong>
-    </p>
-
-    <p><b>Summary:</b> <%= @entry.summary %></p>
-    
-    <% unless @entry.body.blank? %>
-      <p><b>Body:</b></p>
-      <p>
-        <%= (@entry.body_sections.join '</p><hr><p>').html_safe %>
-      </p>
-    <% end %>
-
-    <hr>
-    
-    <p>
-      <i>
-        This email was sent automatically by the Badge List app.
-        Badge List is a badge-based tool for tracking learning progress. 
-        If you take no action you will not receive any further emails about this change.
-      </i>
-    </p>
-  </body>
-</html>
+<p style="padding: 20px; text-align: center; font-size: 20px; font-weight: bold; border-radius: 3px;
+    background-color: <%= COLORS['grey'][100] %>; border: 1px solid <%= COLORS['grey'][300] %>;
+    margin-top: 30px;">
+  <img src="<%= @from_user.avatar_image_medium_url %>" style="width: 100px; display: inline-block;
+    margin-bottom: 15px; border-radius: 500px; border: 3px solid <%= COLORS['grey'][600] %>;">
+  <br>
+  &ldquo;<%= @entry.summary %>&rdquo;
+</p>
