@@ -513,7 +513,6 @@ class Group
     badges_cache.count
   end
   
-
   def has_member?(user)
     member_ids.include?(user.id)
   end
