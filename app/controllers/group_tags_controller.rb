@@ -42,9 +42,10 @@ class GroupTagsController < ApplicationController
 
   # The HTML version only sets up the page size variable (used for users query), 
   # All of the querying for related users is done in json calls to group_tag_users_controller.
-  # GET /group-url/tags/tag-name
+  # GET /group-url/tags/tag-name?selected=user
   # GET /group-url/tags/tag-name.json
   def show
+    @selected = params[:selected] #local variable to choose which tab to select upon redirect
     @page_size = params['page_size'] || APP_CONFIG['page_size_normal']
     @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
 
