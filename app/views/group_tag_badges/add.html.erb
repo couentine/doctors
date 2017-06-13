@@ -9,7 +9,7 @@
   <% content_for :app_header_content do %>
     <bl-app-header-form title="Add badges to tag" condensed-background="#388E3C" 
         header-color="#43A047" selection-bar-for="badgeList" count-noun-singular="badge">
-      <bl-button js="addbadgesToTag()" class="save-button" background="#43A047" color="white">
+      <bl-button js="addBadgesToTag()" class="save-button" background="#43A047" color="white">
         Save
       </bl-button>
       <bl-button link="<%= group_tag_path(@group, @group_tag) %>" class="cancel-button" 
@@ -49,25 +49,25 @@
     </div>
   </div>
 
-  <!-- #=== AJAX CALL TO ADD badgeS ===# -->
+  <!-- #=== AJAX CALL TO ADD BADGES ===# -->
 
-  <iron-ajax id="addbadgesAjax" bubbles method="POST" content-type="application/json"
+  <iron-ajax id="addBadgesAjax" bubbles method="POST" content-type="application/json"
     headers='{"X-CSRF-Token": "<%= form_authenticity_token.to_s %>"}'
     url="<%= bulk_create_group_tag_badges_url(@group, @group_tag, format: :json) %>"></iron-ajax>
 
-  <!-- #=== badge LIST ===# -->
+  <!-- #=== BADGE LIST ===# -->
 
   <bl-list id="badgeList" object-mode="badges" refresh-query-on-load simple-mode 
       row-title="name" row-image="image_small_url" round-row-image
       next-page-url="<%= group_badges_url(@group, format: :json, without_tag: @group_tag.name) %>"
-      for-ajax="addbadgesAjax" ajax-item-key="id" ajax-body-key="badge_ids">
+      for-ajax="addBadgesAjax" ajax-item-key="id" ajax-body-key="badge_ids">
 
     <!-- #=== PLACEHOLDER ===# -->
     <div class="placeholder transparent">
-      <i class="fa fa-id-badge"></i>
+      <i class="fa fa-shield"></i>
       <div class="message">
         <p><b>There are no badges left to add to your group.</b></p> 
-        <p>(That means everyone has already been added to the tag.)</p>
+        <p>(That means all of the badges have already been added to the tag.)</p>
       </div>
     </div>
 
@@ -77,14 +77,14 @@
 
   <script type="text/javascript">
     //#sourceUrl
-    function addbadgesToTag() {
+    function addBadgesToTag() {
       if (document.getElementById('badgeList').selectedItemCount > 0) {
         // First show the waiting dialog to prevent double-clicking the save button
         appContainer.openWaitingDialog({ color: 'green', title: 'Submitting request...' });
 
         // Then trigger the request (this will return a poller id)
         // Execution continues in handleResponse() or handleError()
-        document.getElementById('addbadgesAjax').generateRequest();
+        document.getElementById('addBadgesAjax').generateRequest();
       } else appContainer.openAlertDialog({
         color: 'green', 
         title: 'No badges selected',
@@ -108,7 +108,7 @@
         confirm: { 
           text: 'Continue to tag', 
           action: function() { 
-            document.location.href = '<%= group_tag_path(@group, @group_tag) %>'
+            document.location.href = '<%= group_tag_path(@group, @group_tag, selected: 'badges') %>'
           }
         },
         dismiss: { 
@@ -132,3 +132,4 @@
     }
 
   </script>
+

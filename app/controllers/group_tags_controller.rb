@@ -42,10 +42,10 @@ class GroupTagsController < ApplicationController
 
   # The HTML version only sets up the page size variable (used for users query), 
   # All of the querying for related users is done in json calls to group_tag_users_controller.
-  # GET /group-url/tags/tag-name?selected=user
+  # GET /group-url/tags/tag-name?selected=badges
   # GET /group-url/tags/tag-name.json
   def show
-    @selected = params[:selected] #local variable to choose which tab to select upon redirect
+    @selected = params[:selected] # local variable to choose which tab to select upon redirect
     @page_size = params['page_size'] || APP_CONFIG['page_size_normal']
     @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
 
@@ -84,7 +84,7 @@ class GroupTagsController < ApplicationController
     # Create using the AuditHistory method
     @group_tag = GroupTag.new_with_audit(group_tag_params, current_user.id)
     @group_tag.group = @group
-    @selected = params[:selected] #local variable to choose which tab to select upon redirect
+    @selected = params[:selected] # local variable to choose which tab to select upon redirect
 
     if @group_tag.save
       redirect_to group_tag_path(@group, @group_tag,

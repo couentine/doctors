@@ -108,7 +108,7 @@
         confirm: { 
           text: 'Continue to tag', 
           action: function() { 
-            document.location.href = '<%= group_tag_path(@group, @group_tag) %>'
+            document.location.href = '<%= group_tag_path(@group, @group_tag, selected: 'users') %>'
           }
         },
         dismiss: { 
