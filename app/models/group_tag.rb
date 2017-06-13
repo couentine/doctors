@@ -50,13 +50,19 @@ class GroupTag
   field :total_count,                 type: Integer, default: 0
   field :total_magnitude,             type: Integer, default: 0 # = lograthimic of count
 
+  field :validation_request_count,    type: Integer, default: 0 # RETIRED - this was initially...
+    # ... used to store user validation count total... this will be re-assigned in production...
+    # ... via a rake task. then we can delete this altogether
   field :user_validation_request_counts,  
                                       type: Hash, default: {} # key=user_id, value=req_count
+  field :user_validation_request_count,
+                                      type: Integer, default: 0 # the total from all users
   field :badge_validation_request_counts,
                                       type: Hash, default: {} # key=badge_id, value=req_count
+  field :badge_validation_request_count,
+                                      type: Integer, default: 0 # the total from all users
   field :user_history,                type: Hash, default: {} #key=user_id,val=hash w/ audit info
   field :badge_history,               type: Hash, default: {} #key=badge_id, val=hash w/ audit info
-  field :validation_request_count,    type: Integer, default: 0 # the total from all users
 
   validates :group, presence: true
   validates :name, presence: true, length: { within: 2..MAX_NAME_LENGTH }, 
@@ -69,7 +75,7 @@ class GroupTag
 
   before_validation :update_validated_fields
   after_validation :copy_name_field_errors
-  before_save :update_validation_request_count_if_needed
+  before_save :update_validation_request_counts_if_needed
   after_save :update_group_cache_if_needed
   before_destroy :remove_from_group_cache_before_destroy
 
@@ -585,9 +591,14 @@ protected
     self.errors[:name_with_caps] = self.errors[:name] if self.errors[:name_with_caps].blank?
   end
 
-  def update_validation_request_count_if_needed
+  def update_validation_request_counts_if_needed
     if user_validation_request_counts_changed?
-      self.validation_request_count = (user_validation_request_counts || {}).values.reduce(0, :+)
+      self.user_validation_request_count = \
+        (user_validation_request_counts || {}).values.reduce(0, :+)
+    end
+    if badge_validation_request_counts_changed?
+      self.badge_validation_request_count = \
+        (badge_validation_request_counts || {}).values.reduce(0, :+)
     end
   end
 

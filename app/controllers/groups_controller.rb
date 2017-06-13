@@ -686,7 +686,6 @@ class GroupsController < ApplicationController
 
           # For existing users: We can add them right away
           unless users_to_add.empty?
-            badge_ids = []
             if @type == :admin
               users_to_add.each do |user|
                 if @group.has_admin?(user)

@@ -54,8 +54,11 @@ class GroupTagsController < ApplicationController
     @query_options = @sort_options # they are the same for now
 
     @item_display_mode = (@can_assign_group_tags) ? 'admin' : ''
-    @show_validation_requests = \
-      (@group_tag.validation_request_count > 0) \
+    @show_user_validation_requests = \
+      (@group_tag.user_validation_request_count > 0) \
+      & (@current_user_is_admin || @current_user_is_member || @badge_list_admin)
+    @show_badge_validation_requests = \
+      (@group_tag.badge_validation_request_count > 0) \
       & (@current_user_is_admin || @current_user_is_member || @badge_list_admin)
 
     respond_to do |format|
@@ -80,11 +83,11 @@ class GroupTagsController < ApplicationController
     # Create using the AuditHistory method
     @group_tag = GroupTag.new_with_audit(group_tag_params, current_user.id)
     @group_tag.group = @group
-    selected = params[:selected] #local variable to choose which tab to select upon redirect
+    @selected = params[:selected] #local variable to choose which tab to select upon redirect
 
     if @group_tag.save
       redirect_to group_tag_path(@group, @group_tag,
-        :selected => selected), notice: 'Group tag was successfully created.'
+        :selected => @selected), notice: 'Group tag was successfully created.'
     else
       redirect_to @group, 
         alert: "There was a problem creating a tag called #{@group_tag.name_with_caps}. " \
