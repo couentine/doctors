@@ -50,9 +50,6 @@ class GroupTag
   field :total_count,                 type: Integer, default: 0
   field :total_magnitude,             type: Integer, default: 0 # = lograthimic of count
 
-  field :validation_request_count,    type: Integer, default: 0 # RETIRED - this was initially...
-    # ... used to store user validation count total... this will be re-assigned in production...
-    # ... via a rake task. then we can delete this altogether
   field :user_validation_request_counts,  
                                       type: Hash, default: {} # key=user_id, value=req_count
   field :user_validation_request_count,
