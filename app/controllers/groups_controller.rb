@@ -12,8 +12,8 @@ class GroupsController < ApplicationController
     :users, :badges, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, 
     :review, :full_logs, :create_validations]
   before_action :authenticate_user!, except: [:show]
-  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :review, 
-    :full_logs, :create_validations]
+  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :badges, 
+    :review, :full_logs, :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
