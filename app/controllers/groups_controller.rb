@@ -9,11 +9,11 @@ class GroupsController < ApplicationController
 
   prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :update_group_settings, :destroy_user, :send_invitation, :destroy_invited_user, 
-    :users, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, 
+    :users, :badges, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, 
     :review, :full_logs, :create_validations]
   before_action :authenticate_user!, except: [:show]
-  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :review, 
-    :full_logs, :create_validations]
+  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :badges, 
+    :review, :full_logs, :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
     :create_users, :clear_bounce_log]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
@@ -129,7 +129,9 @@ class GroupsController < ApplicationController
     # Set group tag variables
     @has_tags = !@group.tags_cache.blank?
     @top_user_tags = @group.top_user_tags(10)
+    @top_badge_tags = @group.top_badge_tags(10)
     @has_top_user_tags = !@top_user_tags.blank?
+    @has_top_badge_tags = !@top_badge_tags.blank?
 
     # Set options vars
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
@@ -823,6 +825,37 @@ class GroupsController < ApplicationController
     end # can add admins test
   end
 
+  # GET /group-url/badges?without_tag=group-tag-name
+  # Also accepts pagination params: page, page_size (default 200, max 200), sort_order, sort_by
+  # JSON only
+  # Returns json array of badges with keys from Badge group_list_item json template
+  def badges
+    sort_fields = ['name', 'url'] # defaults to first value
+    sort_orders = ['asc', 'desc'] # defaults to first value
+
+    without_tag_param = params['without_tag']
+    
+    @page = (params['page'] || 1).to_i
+    @page_size = [(params['page_size'] || 200).abs, 200].min # no more than 200, default to 200
+    @sort_by = (sort_fields.include? params['sort_by']) ? params['sort_by'] : sort_fields.first
+    @sort_order = \
+      (sort_orders.include? params['sort_order']) ? params['sort_order'] : sort_orders.first
+
+    # Build out the badges list
+    @badges_hash = []
+    badge_criteria = @group.badges_query(without_tag_name: without_tag_param).page(@page)\
+      .per(@page_size).order_by("#{@sort_by} #{@sort_order}")
+    @badges_hash = Badge.array_json(badge_criteria, :group_list_item)
+    @next_page = @page + 1 if badge_criteria.count > (@page_size * @page)
+
+    respond_to do |format|
+      format.json do
+        render json: { page: @page, page_size: @page_size, badges: @badges_hash, 
+          next_page: @next_page }
+      end
+    end
+  end
+
   # GET /group-url/copy_badges
   # Presents UI for selecting a list of badges and a destination group
   def copy_badges_form
@@ -901,6 +934,7 @@ class GroupsController < ApplicationController
   # GET /group-url/review?badge=badge-url&sort_by=date_requested&sort_order=asc
   # GET /group-url/review?user=username
   # GET /group-url/review?user_tag=Group-Tag-Name
+  # GET /group-url/review?badge_tag=Group-Tag-Name
   # Presents UI for seeing all pending validation requests / existing experts for all badges
   # and allows bulk validation. If badge isn't set it will display a badge selection UI.
   # This method basically just queries for the badges, the actual logs come from full_logs.
@@ -911,6 +945,7 @@ class GroupsController < ApplicationController
     badge_param = params['badge'].to_s.downcase
     user_param = params['user'].to_s.downcase
     @user_tag = (params['user_tag']) ? params['user_tag'].downcase : 'NONE'
+    @badge_tag = (params['badge_tag']) ? params['badge_tag'].downcase : 'NONE'
     @badges, @users = [], []
     @badge_url, @badge_id = nil, nil
     @user_username, @user_id = nil, nil
@@ -931,6 +966,9 @@ class GroupsController < ApplicationController
     elsif @user_tag != 'NONE'
       @query_mode = 'user'
       @back_url = group_tag_url(@group, @user_tag)
+    elsif @badge_tag != 'NONE'
+      @query_mode = 'badge'
+      @back_url = group_tag_url(@group, @badge_tag)
     else # no params, default = go back to group
       @back_url = group_url(@group)
     end
@@ -973,9 +1011,11 @@ class GroupsController < ApplicationController
         @user_id = valid_user_map[user_param]
       end
 
-      # Now query for tags which have users and pending validation requests
-      @user_tags = GroupTag.array_json(@group.user_tags.where(:validation_request_count.gt => 0),
-        :list_with_children)
+      # Now query for tags which have users/badges and pending validation requests
+      @user_tags = GroupTag.array_json(
+        @group.user_tags.where(:user_validation_request_count.gt => 0), :list_with_children)
+      @badge_tags = GroupTag.array_json(
+        @group.badge_tags.where(:badge_validation_request_count.gt => 0), :list_with_children)
     end
 
     # Build the default query options parameter for the bl-list component

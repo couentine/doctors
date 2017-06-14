@@ -1062,4 +1062,28 @@ namespace :db do
     puts " >> Done."
   end
 
+  # This is a one-time task to move the values from 
+  # group_tag.validation_request_count to group_tag.user_validation_request_count
+  # The old field is being retired because it was poorly named and is no longer relevant now
+  # that group tags can have users AND badges.
+  task migrate_group_tag_validation_request_counts: :environment do
+    print "Updating #{GroupTag.count} group tags"
+
+    GroupTag.each do |group_tag|
+      if (group_tag.validation_request_count || 0)>=(group_tag.user_validation_request_count || 0)
+        group_tag.user_validation_request_count = group_tag.validation_request_count
+
+        if group_tag.timeless.save
+          print "."
+        else
+          print "!#{group_tag.id}"
+        end
+      else
+        print "-"
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end

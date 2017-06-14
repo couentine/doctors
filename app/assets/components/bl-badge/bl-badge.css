@@ -54,7 +54,22 @@
     flex: none;
     z-index: 1;
     margin-top: -1em;
+    position: relative;
+    text-align: center;
   }
+    paper-icon-button {
+      position: absolute;
+      bottom: -1.1em; right: -1.1em;
+
+      --paper-icon-button: {
+        width: 2.4em;
+        color: #616161;
+        transition: color 0.3s;
+      };
+      --paper-icon-button-hover: {
+        color: #D32F2F;
+      };
+    }
     .label-title {
       display: inline-block;
       background-color: rgb(250,250,250);

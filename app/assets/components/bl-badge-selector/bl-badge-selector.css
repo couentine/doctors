@@ -67,6 +67,22 @@
       right: 1em;
     }
 
+  .group-tags {
+    margin-top: 1em;
+    padding: 1em 1.5em;
+    
+    background: #E8F5E9;
+    border-radius: 3px;
+    color: #43A047;
+  }
+    .group-tags a, .group-tags a:visited { color: #43A047; }
+    paper-dropdown-menu {
+      --primary-color: #2E7D32;
+      --primary-text-color: #43A047;
+      --secondary-text-color: #43A047;
+      --disabled-text-color: #2E7D32;
+    }
+
   .badge-grid {
     display: flex;
     flex-direction: row;

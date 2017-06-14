@@ -115,7 +115,8 @@ class Group
   field :badges_cache,                    type: Hash, default: {} # key=badge_id, value=key_fields
 
   field :tags_cache,                      type: Hash, default: {} # key=gtag_id, value=key_fields
-  field :top_user_tags_cache,             type: Array, default: [] # key=gtag_id, value=key_fields
+  field :top_user_tags_cache,             type: Array, default: []
+  field :top_badge_tags_cache,            type: Array, default: []
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, 
@@ -508,6 +509,10 @@ class Group
     admin_ids.count + member_ids.count
   end
 
+  def badge_count
+    badges_cache.count
+  end
+  
   def has_member?(user)
     member_ids.include?(user.id)
   end
@@ -546,7 +551,7 @@ class Group
     
     # Add the without tag filter as needed
     if !options[:without_tag_name].blank?
-      without_tag = GroupTag.find_by(name: options[:without_tag_name].downcase) rescue nil
+      without_tag = tags.find_by(name: options[:without_tag_name].downcase) rescue nil
     else
       without_tag = options[:without_tag]
     end
@@ -557,6 +562,26 @@ class Group
     users_criteria
   end
 
+  # Returns badge criteria
+  # OPTIONS: 
+  # Include without_tag to filter out badge with that tag (pass the queried tag)
+  # Or include without_tag_name to filter out badge that tag (pass the tag name)
+  def badges_query(options = {})
+    badges_criteria = badges
+    
+    # Add the without tag filter as needed
+    if !options[:without_tag_name].blank?
+      without_tag = tags.find_by(name: options[:without_tag_name].downcase) rescue nil
+    else
+      without_tag = options[:without_tag]
+    end
+    if without_tag
+      badges_criteria = badges_criteria.where(:id.nin => without_tag.badge_ids)
+    end
+
+    badges_criteria
+  end
+
   # === GROUP TAGS === #
 
   # This does not use a query. It returns items from the top_user_tags_cache.
@@ -564,7 +589,19 @@ class Group
   # Returns an empty array if there are no tags or if none have been attached to users.
   # Set [first] to an integer get the top [first] items
   def top_user_tags(first = nil)
-    return_list = top_user_tags_cache.select{ |tag_item| tag_item['user_magnitude'] >= 0 }
+    return_list = top_user_tags_cache.select{ |tag_item| tag_item['user_magnitude'] > 0 }
+    if !first.blank?
+      return_list = return_list.first(first)
+    end
+    return_list
+  end
+
+  # This does not use a query. It returns items from the top_badge_tags_cache.
+  # Specifically it returns only the tags which have been attached to at least one badge.
+  # Returns an empty array if there are no tags or if none have been attached to badges.
+  # Set [first] to an integer get the top [first] items
+  def top_badge_tags(first = nil)
+    return_list = top_badge_tags_cache.select{ |tag_item| tag_item['badge_magnitude'] > 0 }
     if !first.blank?
       return_list = return_list.first(first)
     end
@@ -579,6 +616,18 @@ class Group
     return_criteria = tags.where(:user_count.gt => 0)
     unless options[:unsorted]
       return_criteria = return_criteria.order_by('user_magnitude desc, name asc')
+    end
+    return_criteria
+  end
+
+  # Returns a group tag criteria selecting only tags which have been attached to badges.
+  # Default sort is by descending magnitude then by ascending name.
+  # OPTIONS:
+  # - unsorted: Set this to true to leave off the sort parameters
+  def badge_tags(options = {})
+    return_criteria = tags.where(:badge_count.gt => 0)
+    unless options[:unsorted]
+      return_criteria = return_criteria.order_by('badge_magnitude desc, name asc')
     end
     return_criteria
   end
@@ -1181,12 +1230,16 @@ protected
     end
   end
 
-  # Any changes toe tags_cache cause a complete rebuild of top_user_tags_cache
+  # Any changes toe tags_cache cause a complete rebuild of top_user_tags_cache && top_badges
   def process_tags_cache_changes
     if tags_cache_changed?
       self.top_user_tags_cache = tags_cache.values.sort_by do |tag_item| 
         # Sort first by the magnitude descending, then by name ascending
         [tag_item['user_magnitude']*-1, tag_item['name']]
+      end
+      self.top_badge_tags_cache = tags_cache.values.sort_by do |tag_item|
+        # Sort first by the magnitude descending, then by name ascending
+        [tag_item['badge_magnitude']*-1, tag_item['name']]
       end
     end
   end

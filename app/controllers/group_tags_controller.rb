@@ -25,7 +25,7 @@ class GroupTagsController < ApplicationController
     @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
     @page = (params['page'] || 1).to_i
     
-    @group_tags = @group.tags.order_by('user_magnitude desc, name asc').page(@page).per(@page_size)
+    @group_tags = @group.tags.order_by('total_magnitude desc, name asc').page(@page).per(@page_size)
     @group_tags_hash = GroupTag.array_json(@group_tags, :list_item)
     @next_page = @page + 1 if @group_tags.count > (@page_size * @page)
       
@@ -42,11 +42,21 @@ class GroupTagsController < ApplicationController
 
   # The HTML version only sets up the page size variable (used for users query), 
   # All of the querying for related users is done in json calls to group_tag_users_controller.
-  # GET /group-url/tags/tag-name
+  # GET /group-url/tags/tag-name?selected=badges
   # GET /group-url/tags/tag-name.json
   def show
     @page_size = params['page_size'] || APP_CONFIG['page_size_normal']
     @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
+    
+    # Set which tab is selected by default
+    @selected = params[:selected]
+    if @selected.blank?
+      if (@group_tag.user_count == 0) && (@group_tag.badge_count > 0)
+        @selected = 'badges'
+      else
+        @selected = 'users'
+      end
+    end
 
     # Set the default sort options for display in the bl-query-options
     # NOTE: This is a hard-coded version of the logic in GroupTagUsersController#index
@@ -54,8 +64,11 @@ class GroupTagsController < ApplicationController
     @query_options = @sort_options # they are the same for now
 
     @item_display_mode = (@can_assign_group_tags) ? 'admin' : ''
-    @show_validation_requests = \
-      (@group_tag.validation_request_count > 0) \
+    @show_user_validation_requests = \
+      (@group_tag.user_validation_request_count > 0) \
+      & (@current_user_is_admin || @current_user_is_member || @badge_list_admin)
+    @show_badge_validation_requests = \
+      (@group_tag.badge_validation_request_count > 0) \
       & (@current_user_is_admin || @current_user_is_member || @badge_list_admin)
 
     respond_to do |format|
@@ -80,9 +93,11 @@ class GroupTagsController < ApplicationController
     # Create using the AuditHistory method
     @group_tag = GroupTag.new_with_audit(group_tag_params, current_user.id)
     @group_tag.group = @group
+    @selected = params[:selected] # local variable to choose which tab to select upon redirect
 
     if @group_tag.save
-      redirect_to group_tag_path(@group, @group_tag), notice: 'Group tag was successfully created.'
+      redirect_to group_tag_path(@group, @group_tag,
+        :selected => @selected), notice: 'Group tag was successfully created.'
     else
       redirect_to @group, 
         alert: "There was a problem creating a tag called #{@group_tag.name_with_caps}. " \

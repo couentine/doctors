@@ -686,6 +686,11 @@
 
     var MAX_TAG_NAME_LENGTH = <%= GroupTag::MAX_NAME_LENGTH %>;
 
+    // Call this to set the selected hidden field to badges or users
+    function setNewGroupTagSelected(selectedValue) {
+      $('#group_tag_selected').val(selectedValue);
+    }
+
     $(document).ready(function() {
 
       $('#new-group-tag').on('shown', function() {
@@ -726,13 +731,12 @@
           alert('The tag name must be at least 2 characters.');
       });
 
-
     });
 
   </script>
 
   <div id="new-group-tag" class="modal hide fade" tabindex="-1" role="dialog" 
-   aria-labelledby="mimm-label" aria-hidden="true">
+      aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
       <h3 id="mimm-label">Create new group tag<h3>
@@ -742,8 +746,10 @@
       <div class="bl-modal-form">
         <div class="form-body">
 
-          <%= form_tag(group_tags_path(@group), method: :post, id: 'create-group-tag-form',
-            class: 'form-horizontal') do %>
+          <%= form_tag(group_tags_path(@group), method: :post, id: 'create-group-tag-form', 
+              class: 'form-horizontal') do %>
+
+            <input type="hidden" id="group_tag_selected" name="selected" value="">
 
             <div class="control-group">
               <label class="control-label" for="tag-name">Tag Name</label>
@@ -1240,6 +1246,54 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
         <% end %>
       </div>
 
+      <div class="row">
+        <div class="span12">
+          <div class="group-tag-list">
+
+            <div class="tag-label">
+              <i class="fa fa-tag"></i>
+              Tags:
+            </div>
+
+            <ul class="tag-items <%= (@has_top_badge_tags) ? '' : 'no-tags' %>">
+              <% if @has_top_badge_tags %>
+                <% @top_badge_tags.each do |tag_item| %>
+                  <li>
+                    <a href="<%= group_tag_path(@group, tag_item['name_with_caps'], 
+                        selected: 'badges') %>">
+                      #<%= tag_item['name_with_caps'] %>
+                    </a>
+                  </li>
+                <% end %>
+              <% elsif @has_tags %>
+                <li class="no-tags">No group tags have been attached to badges yet.</li>
+              <% else %>
+                <li class="no-tags">No group tags have been created yet.</li>
+              <% end %>
+
+              <% if @has_tags %>
+                <li class="browse-tags">
+                  <%= link_to "<i class='fa fa-search'></i> Browse all tags".html_safe,
+                    group_tags_path(@group), class: 'browse-tags-link' %>
+                </li>
+              <% end %>
+            </ul>
+
+            <% if @can_create_group_tags %>
+              <div class="tag-button">
+                <a href="#new-group-tag" class="btn btn-small btn-success" data-toggle="modal"
+                    onclick="setNewGroupTagSelected('badges')">
+                  <i class='fa fa-plus'></i> 
+                  <span class="hide-when-small">Create new tag</span>
+                  <span class="show-when-small">New</span>
+                </a>
+              </div>
+            <% end %>
+
+          </div>
+        </div>
+      </div>
+
       <% if !@has_badges %>
         <% if @current_user_is_admin || @badge_list_admin %>
           <div class="well span7 offset2">
@@ -1398,7 +1452,8 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
               <% if @has_top_user_tags %>
                 <% @top_user_tags.each do |tag_item| %>
                   <li>
-                    <a href="<%= group_tag_path(@group, tag_item['name_with_caps']) %>">
+                    <a href="<%= group_tag_path(@group, tag_item['name_with_caps'], 
+                        selected: 'users') %>">
                       #<%= tag_item['name_with_caps'] %>
                     </a>
                   </li>
@@ -1419,7 +1474,8 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
 
             <% if @can_create_group_tags %>
               <div class="tag-button">
-                <a href="#new-group-tag" class="btn btn-small btn-success" data-toggle="modal">
+                <a href="#new-group-tag-users" class="btn btn-small btn-success" data-toggle="modal"
+                    onclick="setNewGroupTagSelected('users')">
                   <i class='fa fa-plus'></i> 
                   <span class="hide-when-small">Create new tag</span>
                   <span class="show-when-small">New</span>

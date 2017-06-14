@@ -6,11 +6,22 @@
 
   :host ::content .list-controls {
     display: flex;
-    margin: 1em 0;
+    padding: 1em 0;
     color: white;
   }
-  @media (min-width: 840px) { :host ::content .list-controls { margin: 1em 2em; } }
-  @media (min-width: 1200px) { :host ::content .list-controls { margin: 1em 4em; } }
+  :host ::content .list-controls.bl-list-tabs-context {
+    margin-bottom: 1em;
+    background: #EEEEEE; 
+  }
+  :host ::content .list-controls.bl-list-tabs-context.green { background: #A5D6A7; }
+  :host ::content .list-controls.bl-list-tabs-context.blue { background: #81D4FA; }
+  :host ::content .list-controls.bl-list-tabs-context.orange { background: #FFCC80; }
+  @media (min-width: 840px) { 
+    :host ::content .list-controls { padding-right: 2em; padding-left: 2em; } 
+  }
+  @media (min-width: 1200px) { 
+    :host ::content .list-controls { padding-right: 4em; padding-left: 4em; } 
+  }
     :host ::content .list-controls ul {
       display: flex;
       flex-direction: row;
@@ -38,6 +49,12 @@
 
   #listWrapper {
     z-index: 10;
+  }
+  @media (min-width: 840px) { #listWrapper:not(.simple-list) {
+    margin: 0 2em; padding-bottom: 2em; } 
+  }
+  @media (min-width: 1200px) { #listWrapper:not(.simple-list) {
+    margin: 0 4em; padding-bottom: 4em; } 
   }
     .placeholder-wrapper {
       display: flex;
@@ -117,21 +134,11 @@
 /* === SIMPLE LAYOUT === */
 
   .simple-list {
-    margin: 0 0.5em;
+    max-width: 25em;
+    margin: 1em auto;
     
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   }
-  .simple-list.users {
-    max-width: 25em;
-    margin: 1em auto;
-  }
-  .simple-list.report_results {
-    max-width: 25em;
-    margin: 1em auto;
-  }
-  @media (min-width: 480px) { .grid-list { margin: 0 2em; } }
-  @media (min-width: 840px) { .grid-list { margin: 0 4em; } }
-  @media (min-width: 1200px) { .grid-list { margin: 0 8em; } }
     .simple-item {
       padding: 0.5em 1em;
       border-bottom: 1px solid #EEEEEE;
@@ -140,7 +147,10 @@
       cursor: pointer;
     }
       .simple-item:last-of-type { border: none; }
-      .simple-item.selected.users { background-color: #C8E6C9; border-color: #A5D6A7; }
+      .simple-item.selected.green { background-color: #C8E6C9; border-color: #A5D6A7; }
+      .simple-item.selected.orange { background-color: #FFE0B2; border-color: #FFCC80; }
+      .simple-item.selected.blue { background-color: #B3E5FC; border-color: #81D4FA; }
+      .simple-item.selected.grey { background-color: #F5F5F5; border-color: #EEEEEE; }
       .simple-item img.true { /* true = this.roundRowImage */
         border-radius: 500px;
       }

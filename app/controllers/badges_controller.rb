@@ -35,7 +35,6 @@ class BadgesController < ApplicationController
   ]
 
   # === RESTFUL ACTIONS === #
-
   # GET /group-url/badge-url
   # GET /group-url/badge-url.json
   def show

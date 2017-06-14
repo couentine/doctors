@@ -32,6 +32,7 @@
     If you add the 'selectable' property then item selection is built in.
     If you leave out the 'selectable' property then you can optionally set the 'rowLinkKey' 
     property to an item field with returns a url or path to follow when the item is clicked.
+    Use 'listColor' to set the color of the simple list: blue, green, orange, grey.
 
   How to use ajax targetting:
     When bl-list is used as a multi-select tool, it is typically for the purposes of generating 
@@ -53,6 +54,7 @@ Polymer({
     nextPageUrl: String, // and ampersand + next page and query options are appended to this
     nextPage: { type: Number, value: 1 },
     nextPageParam: { type: String, value: 'page' },
+    name: String, // Needed for times when context is not blank
     
     // Options
     queryOptions: Object, // Added to next page query: "&key1=value1&key2=value2" ...
@@ -71,6 +73,7 @@ Polymer({
     rowIconKey: { type: String, value: null }, // field name of icon in items (1 of these req'd)
     rowIcon: { type: String, value: null }, // icon to use for ALL items (1 of these req'd)
     roundRowImage: Boolean, // set this to round the row image
+    listColor: { type: String, value: 'grey' },
 
     // Ajax Targetting Options (Explained in top comments)
     forAjax: String, // Set this to the id of an iron-ajax
@@ -92,7 +95,7 @@ Polymer({
     // Computed
     layoutMode: { type: String, computed: '_layoutMode(objectMode, simpleMode)' },
     itemClass: { type: String, computed: '_itemClass(layoutMode, objectMode)' },
-    wrapperClass: { type: String, computed: '_wrapperClass(layoutMode, objectMode)' },
+    wrapperClass: { type: String, computed: '_wrapperClass(layoutMode, objectMode, context)' },
     minColWidth: { type: Number, computed: '_minColWidth(objectMode)' },
     maxColCount: { type: Number, computed: '_maxColCount(minColWidth)' },
     colClassList: { type: Number, computed: '_colClassList(maxColCount)' },
@@ -110,6 +113,7 @@ Polymer({
 
     // Internal properties
     colCount: { type: Number, observer: '_colCountChanged' },
+    context:  { type: String, value: 'bl-list' }, // Sets context when in another bl-component
     loading: { type: Boolean, value: false },
     indexLastSelected: Number
   },
@@ -279,9 +283,13 @@ Polymer({
       $(window).on('resize', function() { self.updateColCount(); });
       self.updateColCount(); // update it on page load as well
     }
+    //Check if bl-list is inside an element which changes its behavior
+    if (this.parentElement.parentElement.tagName.toLowerCase() === 'bl-list-tabs') {
+      this.context = 'bl-list-tabs';
+    }
 
     // Refresh query if needed
-    if (this.refreshQueryOnLoad)
+    if (this.refreshQueryOnLoad && this.context !== 'bl-list-tabs')
       this.refreshQuery();
     else if (this.simpleMode)
       for (var i = 0; i < this.items.length; i++)
@@ -328,7 +336,9 @@ Polymer({
     else return 'grid';
   },
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
-  _wrapperClass: function(layoutMode, objectMode) { return layoutMode + "-list " + objectMode; },
+  _wrapperClass: function(layoutMode, objectMode, context) {
+     return layoutMode + "-list " + objectMode + " " + context + "-context";
+  },
   _minColWidth: function(objectMode) {
     if (objectMode == "full_logs") return 500;
     else return 2000;
@@ -488,6 +498,7 @@ Polymer({
   },
   rowClass: function(itemSelected) {
     // Called in simple mode to calculate the class of he paper items
-    return this.layoutMode + '-item ' + this.objectMode + (itemSelected ? ' selected' : '');
+    return this.layoutMode + '-item ' + this.listColor + ' ' + this.objectMode 
+      + (itemSelected ? ' selected' : '');
   }
 });

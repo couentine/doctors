@@ -26,6 +26,8 @@ class Badge
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
+      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
+    group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path]
   }
   
@@ -44,6 +46,7 @@ class Badge
   belongs_to :creator, inverse_of: :created_badges, class_name: "User"
   has_many :logs, dependent: :nullify
   has_many :tags, dependent: :destroy
+  has_and_belongs_to_many :group_tags # DO NOT EDIT DIRECTLY: Use group_tag.add_badges/remove_badges
 
   # === FIELDS & VALIDATIONS === #
 
@@ -142,6 +145,7 @@ class Badge
   before_save :update_json_clone_badge_fields_if_needed
   after_save :update_requirement_editability
   before_destroy :remove_from_group_and_user_cache
+  after_destroy :clear_from_group_tags
 
   before_save :update_analytics
 
@@ -168,6 +172,13 @@ class Badge
 
   def full_path
     "/#{group_url_with_caps || group.url_with_caps}/#{url_with_caps}"
+  end
+
+  def added_to_group_tag(group_tag)
+    added = false;
+    if self.group_tags.include? group_tag.name
+      added = true;
+    end
   end
 
   # Returns URL of the specified version of this badge's image
@@ -438,6 +449,12 @@ class Badge
 
   def update_validation_request_count
     self.validation_request_count = requesting_learner_logs.count
+
+    # Now update all of the group tags
+    group_tags.each do |group_tag|
+      group_tag.update_validation_request_count_for(self)
+      group_tag.timeless.save
+    end
   end
 
   # Removes badge from various user cache fields
@@ -956,6 +973,11 @@ protected
 
     # Now clear this badges presence from the user caches
     Badge.delay_for(5.seconds, queue: 'low').clear_user_badge_caches(log_ids, id, group_id)
+  end
+
+  # Makes async to group tag clearing method
+  def clear_from_group_tags
+    GroupTag.delay(queue: 'low').clear_deleted_badge_from_all(self.id)
   end
 
   # Validates that the destination group id points to a real group that is owned by the same user

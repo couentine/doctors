@@ -11,7 +11,6 @@
           <template is="dom-if" if="[[hasBadge]]">
             <img src$="[[badge.image_medium_url]]">
           </template>
-          
           <template is="dom-if" if="[[!hasBadge]]">
             <i class$="[[blankBadgeIconClass]]"></i>
           </template>
@@ -30,6 +29,10 @@
               </li>
             </ul>
           </div>
+
+          <template is="dom-if" if="[[showRemove]]">
+            <paper-icon-button icon="cancel" on-tap="removeBadge"></paper-icon-button>
+          </template>
         </div>
       </a>
     </template>
@@ -61,6 +64,10 @@
               </li>
             </ul>
           </div>
+
+          <template is="dom-if" if="[[showRemove]]">
+            <paper-icon-button icon="cancel" on-tap="removeBadge"></paper-icon-button>
+          </template>
         </div>
       </div>
     </template>
