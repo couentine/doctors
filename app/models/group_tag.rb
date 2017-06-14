@@ -16,13 +16,15 @@ class GroupTag
   }
   JSON_TEMPLATES = {
     list_item: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
-      :badge_count, :badge_magnitude, :total_count, :total_magnitude, :validation_request_count],
+      :badge_count, :badge_magnitude, :total_count, :total_magnitude, 
+      :user_validation_request_count, :badge_validation_request_count],
     list_with_children: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, 
       :user_magnitude, :badge_count, :badge_magnitude, :total_count, :total_magnitude,
-       :validation_request_count, :user_id_strings, :badge_id_strings],
+      :user_validation_request_count, :badge_validation_request_count, :user_id_strings, 
+      :badge_id_strings],
     detail: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
-      :badge_count, :badge_magnitude, :total_count, :total_magnitude,
-        :validation_request_count, :permissions_text]
+      :badge_count, :badge_magnitude, :total_count, :total_magnitude, 
+      :user_validation_request_count, :badge_validation_request_count, :permissions_text]
   }
 
   # === INSTANCE VARIABLES === #
