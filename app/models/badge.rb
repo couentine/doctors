@@ -449,6 +449,12 @@ class Badge
 
   def update_validation_request_count
     self.validation_request_count = requesting_learner_logs.count
+
+    # Now update all of the group tags
+    group_tags.each do |group_tag|
+      group_tag.update_validation_request_count_for(self)
+      group_tag.timeless.save
+    end
   end
 
   # Removes badge from various user cache fields

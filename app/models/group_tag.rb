@@ -547,11 +547,16 @@ class GroupTag
 
   # === GROUP TAG INSTANCE METHODS === #
 
-  # Updates the validation request count has for the specified user
-  def update_validation_request_count_for(user)
-    if user_ids.include? user.id
+  # Updates the validation request count for the specified user OR badge
+  def update_validation_request_count_for(user_or_badge)
+    user = user_or_badge if user_or_badge.class == User
+    badge = user_or_badge if user_or_badge.class == Badge
+    
+    if !user.nil? && user_ids.include?(user.id)
       self.user_validation_request_counts[user.id.to_s] = \
         user.group_validation_request_counts[group_id.to_s] || 0
+    elsif !badge.nil? && badge_ids.include?(badge.id)
+      self.badge_validation_request_counts[badge.id.to_s] = badge.validation_request_count || 0
     end
   end
 
