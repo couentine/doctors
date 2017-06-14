@@ -59,6 +59,17 @@
           }
           #editButtons a:focus, #editButtons a:hover { color: #212121; }
 
+        .query-options-dropdown label.paper-input.style-scope,
+        .query-options-dropdown input.paper-input.style-scope,
+        .query-options-dropdown .floated-label-placeholder.style-scope,
+        .query-options-dropdown iron-icon.style-scope.paper-dropdown-menu {
+          color: white !important;
+        }
+        .query-options-dropdown .unfocused-line.style-scope,
+        .query-options-dropdown .focused-line.style-scope { 
+          background: white;
+          border-color: white;
+        }
         paper-listbox.dropdown-content {
           min-width: 12em;
           margin-bottom: -6em;
@@ -66,10 +77,15 @@
         @media (min-width: 480px) { paper-listbox.dropdown-content { margin-bottom: -4em; } }
         @media (min-width: 840px) { paper-listbox.dropdown-content { margin-bottom: -2em; } }
         
-        #add-users { background: #03A9F4; }
-        #add-badges { background: #03A9F4; }
-        
-        #feedback-requests {
+    #tag-items-panel {
+      margin: 0 1em;
+      padding-bottom: 0.5em;
+    }
+    @media (min-width: 840px) { #tag-items-panel { margin: 0 2em; padding-bottom: 2em; } }
+    @media (min-width: 1200px) { #tag-items-panel { margin: 0 4em; padding-bottom: 4em; } }
+      #userList, #badgeList { min-height: 22em; }
+        #add-users, #add-badges { background: #388E3C; }
+        #user-feedback-requests, #badge-feedback-requests {
           color: #F57C00;
           text-decoration: none;
         }
@@ -163,317 +179,321 @@
     <% end %>
   </div>
 
-  <bl-list-tabs id="selector-tabs" class="green"
-      selected-list-id="<%= (params[:selected] == 'badges') ? 'badgeList' : 'userList' %>">
+  <!-- #=== TAG ITEMS ===# -->
 
-    <bl-list id="userList" object-mode="users" refresh-query-on-load name="Users"
-        query-options="<%= @query_options %>" item-display-mode="<%= @item_display_mode %>"
-        next-page-url="<%= group_tag_users_url(@group, @group_tag, format: :json) %>">
+  <div id="tag-items-panel">
 
-      <!-- #=== LIST CONTROLS ===# -->
-      <div class="list-controls">
-        <ul class="left">
-          <bl-query-options for="userList" selected-options="<%= @sort_options %>" 
-              class="query-filter-option">
-            <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
-                horizontal-align="left" vertical-align="bottom">
-              <paper-listbox class="dropdown-content">
-                <paper-item data-options='{"sort_by":"name","sort_order":"asc"}'>
-                  By name
-                </paper-item>
-                <paper-item data-options='{"sort_by":"name","sort_order":"desc"}'>
-                  Reverse name
-                </paper-item>
-                <paper-item data-options='{"sort_by":"username","sort_order":"asc"}'>
-                  By username
-                </paper-item>
-                <paper-item data-options='{"sort_by":"username","sort_order":"desc"}'>
-                  Reverse username
-                </paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-          </bl-query-options>
-        </ul>
-        <ul class="right">
-          <% if @show_user_validation_requests %>
-            <li class="margin-right">
-              <a id="feedback-requests"
-                  href="<%= group_review_url(@group, user_tag: @group_tag.name_with_caps) %>">
-                <i class="fa fa-flag-checkered"></i> &nbsp;
-                <%= pluralize @group_tag.user_validation_request_count, 'feedback request' %>
-              </a>
-            </li>
-          <% end %>
-          <% if @can_assign_group_tags %>
-            <li>
-              <bl-button id="add-users" type="flat"
-                  link="<%= add_group_tag_users_path(@group, @group_tag) %>">
-                Add Users
-              </bl-button>
-            </li>
-          <% end %>
-        </ul>
-      </div>
+    <bl-list-tabs id="selector-tabs" class="green" 
+        selected-list-id="<%= (@selected == 'badges') ? 'badgeList' : 'userList' %>">
 
+      <bl-list id="userList" object-mode="users" refresh-query-on-load name="Users"
+          query-options="<%= @query_options %>" item-display-mode="<%= @item_display_mode %>"
+          next-page-url="<%= group_tag_users_url(@group, @group_tag, format: :json) %>">
 
-      <!-- #=== PLACEHOLDER ===# -->
-      <div class="placeholder transparent">
-        <i class="fa fa-user"></i>
-        <div class="message">
-          <p><b>No users have been added to this tag yet.</b></p> 
-          <% if @can_assign_group_tags %>
-            <p>Click the 'Add Users' button above to add some.</p>
-          <% end %>
+        <!-- #=== LIST CONTROLS ===# -->
+        <div class="list-controls bl-list-tabs-context green">
+          <ul class="left">
+            <bl-query-options for="userList" selected-options="<%= @sort_options %>" 
+                class="query-filter-option">
+              <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
+                  horizontal-align="left" vertical-align="bottom">
+                <paper-listbox class="dropdown-content">
+                  <paper-item data-options='{"sort_by":"name","sort_order":"asc"}'>
+                    By name
+                  </paper-item>
+                  <paper-item data-options='{"sort_by":"name","sort_order":"desc"}'>
+                    Reverse name
+                  </paper-item>
+                  <paper-item data-options='{"sort_by":"username","sort_order":"asc"}'>
+                    By username
+                  </paper-item>
+                  <paper-item data-options='{"sort_by":"username","sort_order":"desc"}'>
+                    Reverse username
+                  </paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </bl-query-options>
+          </ul>
+          <ul class="right">
+            <% if @show_user_validation_requests %>
+              <li class="margin-right">
+                <a id="user-feedback-requests"
+                    href="<%= group_review_url(@group, user_tag: @group_tag.name_with_caps) %>">
+                  <i class="fa fa-flag-checkered"></i> &nbsp;
+                  <%= pluralize @group_tag.user_validation_request_count, 'feedback request' %>
+                </a>
+              </li>
+            <% end %>
+            <% if @can_assign_group_tags %>
+              <li>
+                <bl-button id="add-users" type="raised"
+                    link="<%= add_group_tag_users_path(@group, @group_tag) %>">
+                  Add Users
+                </bl-button>
+              </li>
+            <% end %>
+          </ul>
         </div>
-      </div>
-
-    </bl-list>
-
-    <bl-list id="badgeList" object-mode="badges" refresh-query-on-load name="Badges"
-        query-options="<%= @query_options %>" item-display-mode="<%= @item_display_mode %>"
-        next-page-url="<%= group_tag_badges_url(@group, @group_tag, format: :json) %>">
-
-      <!-- #=== LIST CONTROLS ===# -->
-      <div class="list-controls">
-        <ul class="left">
-          <bl-query-options for="badgeList" selected-options="<%= @sort_options %>" 
-              class="query-filter-option">
-            <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
-                horizontal-align="left" vertical-align="bottom">
-              <paper-listbox class="dropdown-content">
-                <paper-item data-options='{"sort_by":"name","sort_order":"asc"}'>
-                  By name
-                </paper-item>
-                <paper-item data-options='{"sort_by":"name","sort_order":"desc"}'>
-                  Reverse name
-                </paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-          </bl-query-options>
-        </ul>
-        <ul class="right">
-          <% if @show_badge_validation_requests %>
-            <li class="margin-right">
-              <a id="feedback-requests"
-                  href="<%= group_review_url(@group, badge_tag: @group_tag.name_with_caps) %>">
-                <i class="fa fa-flag-checkered"></i> &nbsp;
-                <%= pluralize @group_tag.badge_validation_request_count, 'feedback request' %>
-              </a>
-            </li>
-          <% end %>
-          <% if @can_assign_group_tags %>
-            <li>
-              <bl-button id="add-badges" type="flat"
-                  link="<%= add_group_tag_badges_path(@group, @group_tag) %>">
-                Add Badges
-              </bl-button>
-            </li>
-          <% end %>
-        </ul>
-      </div>
 
 
-      <!-- #=== PLACEHOLDER ===# -->
-      <div class="placeholder transparent">
-        <i class="fa fa-trophy"></i>
-        <div class="message">
-          <p><b>No badges have been added to this tag yet.</b></p> 
-          <% if @can_assign_group_tags %>
-            <p>Click the 'Add Badges' button above to add some.</p>
-          <% end %>
+        <!-- #=== PLACEHOLDER ===# -->
+        <div class="placeholder transparent">
+          <i class="fa fa-user"></i>
+          <div class="message">
+            <p><b>No users have been added to this tag yet.</b></p> 
+            <% if @can_assign_group_tags %>
+              <p>Click the 'Add Users' button above to add some.</p>
+            <% end %>
+          </div>
         </div>
-      </div>
 
-    </bl-list>
+      </bl-list>
 
-  </bl-list-tabs>
+      <bl-list id="badgeList" object-mode="badges" refresh-query-on-load name="Badges"
+          query-options="<%= @query_options %>" item-display-mode="<%= @item_display_mode %>"
+          next-page-url="<%= group_tag_badges_url(@group, @group_tag, format: :json) %>">
 
-    <!-- #=== PAGE-SPECIFIC JAVASCRIPT ===# -->
+        <!-- #=== LIST CONTROLS ===# -->
+        <div class="list-controls bl-list-tabs-context green">
+          <ul class="left">
+            <bl-query-options for="badgeList" selected-options="<%= @sort_options %>" 
+                class="query-filter-option">
+              <paper-dropdown-menu label="Sort order" class="query-options-dropdown" 
+                  horizontal-align="left" vertical-align="bottom">
+                <paper-listbox class="dropdown-content">
+                  <paper-item data-options='{"sort_by":"name","sort_order":"asc"}'>
+                    By name
+                  </paper-item>
+                  <paper-item data-options='{"sort_by":"name","sort_order":"desc"}'>
+                    Reverse name
+                  </paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </bl-query-options>
+          </ul>
+          <ul class="right">
+            <% if @show_badge_validation_requests %>
+              <li class="margin-right">
+                <a id="badge-feedback-requests"
+                    href="<%= group_review_url(@group, badge_tag: @group_tag.name_with_caps) %>">
+                  <i class="fa fa-flag-checkered"></i> &nbsp;
+                  <%= pluralize @group_tag.badge_validation_request_count, 'feedback request' %>
+                </a>
+              </li>
+            <% end %>
+            <% if @can_assign_group_tags %>
+              <li>
+                <bl-button id="add-badges" type="raised"
+                    link="<%= add_group_tag_badges_path(@group, @group_tag) %>">
+                  Add Badges
+                </bl-button>
+              </li>
+            <% end %>
+          </ul>
+        </div>
 
-    <script type="text/javascript">
 
-      // #=== EVENT LISTENER SETUP ===# 
-      appLayout.addEventListener('dom-change', function() {
-        document.addEventListener('bl-user-remove', handleBLUserRemove);
-        document.getElementById('removeUserAjax')
-          .addEventListener('iron-ajax-response', handleRemoveUserResponse);
-        document.getElementById('removeUserAjax')
-          .addEventListener('iron-ajax-error', handleRemoveUserError);
+        <!-- #=== PLACEHOLDER ===# -->
+        <div class="placeholder transparent">
+          <i class="fa fa-shield"></i>
+          <div class="message">
+            <p><b>No badges have been added to this tag yet.</b></p> 
+            <% if @can_assign_group_tags %>
+              <p>Click the 'Add Badges' button above to add some.</p>
+            <% end %>
+          </div>
+        </div>
 
-        document.addEventListener('bl-badge-remove', handleBLBadgeRemove);
-        document.getElementById('removeBadgeAjax')
-          .addEventListener('iron-ajax-response', handleRemoveBadgeResponse);
-        document.getElementById('removeBadgeAjax')
-          .addEventListener('iron-ajax-error', handleRemoveBadgeError);
-        
-        document.getElementById('deleteGroupTagAjax')
-          .addEventListener('iron-ajax-response', handleDeleteGroupTagResponse);
-        document.getElementById('deleteGroupTagAjax')
-          .addEventListener('iron-ajax-error', handleDeleteGroupTagError);
+      </bl-list>
 
-        document.getElementById('editGroupTagDialog')
-          .addEventListener('bl-ajax-dialog-success', handleEditGroupTagSuccess);
+    </bl-list-tabs>
 
-        document.getElementById('tagname').addEventListener('keyup', handleFormValidation);
+  </div> <!-- #tag-items-panel -->
+
+  <!-- #=== PAGE-SPECIFIC JAVASCRIPT ===# -->
+
+  <script type="text/javascript">
+
+    // #=== EVENT LISTENER SETUP ===# 
+    appLayout.addEventListener('dom-change', function() {
+      document.addEventListener('bl-user-remove', handleBLUserRemove);
+      document.getElementById('removeUserAjax')
+        .addEventListener('iron-ajax-response', handleRemoveUserResponse);
+      document.getElementById('removeUserAjax')
+        .addEventListener('iron-ajax-error', handleRemoveUserError);
+
+      document.addEventListener('bl-badge-remove', handleBLBadgeRemove);
+      document.getElementById('removeBadgeAjax')
+        .addEventListener('iron-ajax-response', handleRemoveBadgeResponse);
+      document.getElementById('removeBadgeAjax')
+        .addEventListener('iron-ajax-error', handleRemoveBadgeError);
+      
+      document.getElementById('deleteGroupTagAjax')
+        .addEventListener('iron-ajax-response', handleDeleteGroupTagResponse);
+      document.getElementById('deleteGroupTagAjax')
+        .addEventListener('iron-ajax-error', handleDeleteGroupTagError);
+
+      document.getElementById('editGroupTagDialog')
+        .addEventListener('bl-ajax-dialog-success', handleEditGroupTagSuccess);
+
+      document.getElementById('tagname').addEventListener('keyup', handleFormValidation);
+    });
+
+    // #=== USER REMOVE HANDLING ===# 
+    
+    var removeUserBaseUrl = '<%= "#{group_tag_users_url(@group, @group_tag)}/" %>';
+
+    function handleBLUserRemove(e) {
+      var user = e.detail.user;
+
+      appContainer.openAlertDialog({
+        color: 'green',
+        title: 'Remove ' + user.name + ' from tag?',
+        body: 'The user will only be removed from the tag, not from the group itself. '
+          + 'They can be added back to the tag at any time.',
+        confirm: {
+          text: 'Remove them',
+          action: function() {
+            var removeUserAjax = document.getElementById('removeUserAjax');
+            removeUserAjax.url = removeUserBaseUrl + user.id + '.json'
+            removeUserAjax.generateRequest();
+            
+            // Hide the bl-list-item for this user
+            document.querySelector('[item-id="' + user.id + '"]').hidden = true;
+          }
+        },
+        dismiss: { text: 'Nevermind' }
       });
+    }
 
-      // #=== USER REMOVE HANDLING ===# 
-      
-      var removeUserBaseUrl = '<%= "#{group_tag_users_url(@group, @group_tag)}/" %>';
+    function handleRemoveUserResponse(e) {
+      var response = e.detail.response;
+      var user = response.user;
 
-      function handleBLUserRemove(e) {
-        var user = e.detail.user;
+      if (response.success) {
+        appContainer.addToast(user.name + ' was removed from the tag', 'success');
+      } else {
+        appContainer.addToast('There was a problem removing ' + user.name + ' from the tag '
+          + '(Error Message: ' + response.error_message + ')', 'error', 30000);
 
-        appContainer.openAlertDialog({
-          color: 'green',
-          title: 'Remove ' + user.name + ' from tag?',
-          body: 'The user will only be removed from the tag, not from the group itself. '
-            + 'They can be added back to the tag at any time.',
-          confirm: {
-            text: 'Remove them',
-            action: function() {
-              var removeUserAjax = document.getElementById('removeUserAjax');
-              removeUserAjax.url = removeUserBaseUrl + user.id + '.json'
-              removeUserAjax.generateRequest();
-              
-              // Hide the bl-list-item for this user
-              document.querySelector('[item-id="' + user.id + '"]').hidden = true;
-            }
-          },
-          dismiss: { text: 'Nevermind' }
-        });
+        // Unhide the bl-list-item for this user
+        document.querySelector('[item-id="' + user.id + '"]').hidden = false;
       }
+    }
 
-      function handleRemoveUserResponse(e) {
-        var response = e.detail.response;
-        var user = response.user;
+    function handleRemoveUserError(e) {
+      appContainer.addToast('There was a problem removing the user from the tag, '
+        + 'please refresh the page and try again', 'error', 30000);
+    }
 
-        if (response.success) {
-          appContainer.addToast(user.name + ' was removed from the tag', 'success');
-        } else {
-          appContainer.addToast('There was a problem removing ' + user.name + ' from the tag '
-            + '(Error Message: ' + response.error_message + ')', 'error', 30000);
+    // #=== BADGE REMOVE HANDLING ===# 
+    
+    var removeBadgeBaseUrl = '<%= "#{group_tag_badges_url(@group, @group_tag)}/" %>';
 
-          // Unhide the bl-list-item for this user
-          document.querySelector('[item-id="' + user.id + '"]').hidden = false;
-        }
+    function handleBLBadgeRemove(e) {
+      var badge = e.detail.badge;
+
+      appContainer.openAlertDialog({
+        color: 'green',
+        title: 'Remove ' + badge.name + ' from tag?',
+        body: 'The badge will only be removed from the tag, not from the group itself. '
+          + 'It can be added back to the tag at any time.',
+        confirm: {
+          text: 'Remove it',
+          action: function() {
+            var removeBadgeAjax = document.getElementById('removeBadgeAjax');
+            removeBadgeAjax.url = removeBadgeBaseUrl + badge.id + '.json'
+            removeBadgeAjax.generateRequest();
+            
+            // Hide the bl-list-item for this badge
+            document.querySelector('[item-id="' + badge.id + '"]').hidden = true;
+          }
+        },
+        dismiss: { text: 'Nevermind' }
+      });
+    }
+
+    function handleRemoveBadgeResponse(e) {
+      var response = e.detail.response;
+      var badge = response.badge;
+
+      if (response.success) {
+        appContainer.addToast(badge.name + ' was removed from the tag', 'success');
+      } else {
+        appContainer.addToast('There was a problem removing ' + badge.name + ' from the tag '
+          + '(Error Message: ' + response.error_message + ')', 'error', 30000);
+
+        // Unhide the bl-list-item for this badge
+        document.querySelector('[item-id="' + badge.id + '"]').hidden = false;
       }
+    }
 
-      function handleRemoveUserError(e) {
-        appContainer.addToast('There was a problem removing the user from the tag, '
-          + 'please refresh the page and try again', 'error', 30000);
-      }
+    function handleRemoveBadgeError(e) {
+      appContainer.addToast('There was a problem removing the badge from the tag, '
+        + 'please refresh the page and try again', 'error', 30000);
+    }
 
-      // #=== BADGE REMOVE HANDLING ===# 
-      
-      var removeBadgeBaseUrl = '<%= "#{group_tag_badges_url(@group, @group_tag)}/" %>';
+    // #=== TAG DELETE HANDLING ===# 
 
-      function handleBLBadgeRemove(e) {
-        var badge = e.detail.badge;
+    function deleteGroupTag() {
+      appContainer.openAlertDialog({
+        color: 'red',
+        title: 'Delete the #<%= @group_tag.name_with_caps %> tag?',
+        body: 'Are you sure you want to remove all users from this tag and then delete the tag '
+          + 'itself? This cannot be undone.',
+        confirm: {
+          text: 'Delete this tag',
+          action: function() {
+            document.getElementById('deleteGroupTagAjax').generateRequest();
+            appContainer.openWaitingDialog({ color: 'red', title: 'Deleting group tag...' });
+          }
+        },
+        dismiss: { text: 'Nevermind' }
+      });
+    }
 
-        appContainer.openAlertDialog({
-          color: 'green',
-          title: 'Remove ' + badge.name + ' from tag?',
-          body: 'The badge will only be removed from the tag, not from the group itself. '
-            + 'It can be added back to the tag at any time.',
-          confirm: {
-            text: 'Remove it',
-            action: function() {
-              var removeBadgeAjax = document.getElementById('removeBadgeAjax');
-              removeBadgeAjax.url = removeBadgeBaseUrl + badge.id + '.json'
-              removeBadgeAjax.generateRequest();
-              
-              // Hide the bl-list-item for this badge
-              document.querySelector('[item-id="' + badge.id + '"]').hidden = true;
-            }
-          },
-          dismiss: { text: 'Nevermind' }
-        });
-      }
+    function handleDeleteGroupTagResponse(e) {
+      var response = e.detail.response;
+      var user = response.user;
 
-      function handleRemoveBadgeResponse(e) {
-        var response = e.detail.response;
-        var badge = response.badge;
-
-        if (response.success) {
-          appContainer.addToast(badge.name + ' was removed from the tag', 'success');
-        } else {
-          appContainer.addToast('There was a problem removing ' + badge.name + ' from the tag '
-            + '(Error Message: ' + response.error_message + ')', 'error', 30000);
-
-          // Unhide the bl-list-item for this badge
-          document.querySelector('[item-id="' + badge.id + '"]').hidden = false;
-        }
-      }
-
-      function handleRemoveBadgeError(e) {
-        appContainer.addToast('There was a problem removing the badge from the tag, '
-          + 'please refresh the page and try again', 'error', 30000);
-      }
-
-      // #=== TAG DELETE HANDLING ===# 
-
-      function deleteGroupTag() {
-        appContainer.openAlertDialog({
-          color: 'red',
-          title: 'Delete the #<%= @group_tag.name_with_caps %> tag?',
-          body: 'Are you sure you want to remove all users from this tag and then delete the tag '
-            + 'itself? This cannot be undone.',
-          confirm: {
-            text: 'Delete this tag',
-            action: function() {
-              document.getElementById('deleteGroupTagAjax').generateRequest();
-              appContainer.openWaitingDialog({ color: 'red', title: 'Deleting group tag...' });
-            }
-          },
-          dismiss: { text: 'Nevermind' }
-        });
-      }
-
-      function handleDeleteGroupTagResponse(e) {
-        var response = e.detail.response;
-        var user = response.user;
-
-        if (response.success) {
-          document.location.href = '<%= group_tags_url(@group) %>';
-        } else {
-          appContainer.closeWaitingDialog();
-          appContainer.addToast('There was a problem deleting this tag. '
-            + '(Error Message: ' + response.error_message + ')', 'error', 30000);
-        }
-      }
-
-      function handleDeleteGroupTagError(e) {
+      if (response.success) {
+        document.location.href = '<%= group_tags_url(@group) %>';
+      } else {
         appContainer.closeWaitingDialog();
-        appContainer.addToast('There was a problem deleting this tag. Please try again.', 
-          'error', 30000);
+        appContainer.addToast('There was a problem deleting this tag. '
+          + '(Error Message: ' + response.error_message + ')', 'error', 30000);
       }
+    }
 
-      // #=== TAG EDIT HANDLING ===# 
+    function handleDeleteGroupTagError(e) {
+      appContainer.closeWaitingDialog();
+      appContainer.addToast('There was a problem deleting this tag. Please try again.', 
+        'error', 30000);
+    }
 
-      function editGroupTag() {
-        document.getElementById('editGroupTagDialog').open();
+    // #=== TAG EDIT HANDLING ===# 
+
+    function editGroupTag() {
+      document.getElementById('editGroupTagDialog').open();
+    }
+
+    function handleEditGroupTagSuccess(data) {
+      if (document.getElementById('summaryText')
+       && document.getElementById('summaryText').innerHTML) {
+        document.getElementById('summaryText').innerHTML = data.detail.summary;
       }
-
-      function handleEditGroupTagSuccess(data) {
-        if (document.getElementById('summaryText')
-         && document.getElementById('summaryText').innerHTML) {
-          document.getElementById('summaryText').innerHTML = data.detail.summary;
-        }
-        if(document.querySelector('bl-app-header-tag').name !== data.detail.name_with_caps) {
-          document.querySelector('bl-app-header-tag').name = data.detail.name_with_caps;
-          var location = window.location.href;
-          var newLocation = location
-            .substring(0, location.lastIndexOf('/')) + '/' + data.detail.name_with_caps;
-          window.location.replace(newLocation);
-        }
+      if(document.querySelector('bl-app-header-tag').name !== data.detail.name_with_caps) {
+        document.querySelector('bl-app-header-tag').name = data.detail.name_with_caps;
+        var location = window.location.href;
+        var newLocation = location
+          .substring(0, location.lastIndexOf('/')) + '/' + data.detail.name_with_caps;
+        window.location.replace(newLocation);
       }
+    }
 
-      function handleFormValidation(e) {
-        document
-          .getElementById('editGroupTagDialog').valid = !document.getElementById('tagname').invalid;
-      }
+    function handleFormValidation(e) {
+      document
+        .getElementById('editGroupTagDialog').valid = !document.getElementById('tagname').invalid;
+    }
 
-    </script>
-
-  </div>
+  </script>

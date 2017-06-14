@@ -12,8 +12,8 @@
       <bl-button js="addBadgesToTag()" class="save-button" background="#43A047" color="white">
         Save
       </bl-button>
-      <bl-button link="<%= group_tag_path(@group, @group_tag) %>" class="cancel-button" 
-          background="#43A047" color="white">
+      <bl-button link="<%= group_tag_path(@group, @group_tag, selected: 'badges') %>" 
+          class="cancel-button" background="#43A047" color="white">
         Cancel
       </bl-button>
     </bl-app-header-form>
@@ -57,8 +57,8 @@
 
   <!-- #=== BADGE LIST ===# -->
 
-  <bl-list id="badgeList" object-mode="badges" refresh-query-on-load simple-mode 
-      row-title="name" row-image="image_small_url" round-row-image
+  <bl-list id="badgeList" object-mode="badges" refresh-query-on-load simple-mode selectable
+      row-title-key="name" row-image-key="image_small_url" list-color="green"
       next-page-url="<%= group_badges_url(@group, format: :json, without_tag: @group_tag.name) %>"
       for-ajax="addBadgesAjax" ajax-item-key="id" ajax-body-key="badge_ids">
 

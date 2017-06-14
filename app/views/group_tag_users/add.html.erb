@@ -12,8 +12,8 @@
       <bl-button js="addUsersToTag()" class="save-button" background="#43A047" color="white">
         Save
       </bl-button>
-      <bl-button link="<%= group_tag_path(@group, @group_tag) %>" class="cancel-button" 
-          background="#43A047" color="white">
+      <bl-button link="<%= group_tag_path(@group, @group_tag, selected: 'users') %>" 
+          class="cancel-button" background="#43A047" color="white">
         Cancel
       </bl-button>
     </bl-app-header-form>
@@ -58,7 +58,7 @@
   <!-- #=== USER LIST ===# -->
 
   <bl-list id="userList" object-mode="users" refresh-query-on-load simple-mode selectable
-      row-title-key="name" row-image-key="avatar_image_small_url" round-row-image
+      row-title-key="name" row-image-key="avatar_image_small_url" round-row-image list-color="green"
       next-page-url="<%= group_users_url(@group, format: :json, without_tag: @group_tag.name) %>"
       for-ajax="addUsersAjax" ajax-item-key="id" ajax-body-key="user_ids">
 

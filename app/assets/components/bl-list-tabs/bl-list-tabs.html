@@ -3,14 +3,18 @@
 
   <template>
     <div id="listWrapper" class$="[[wrapperClass]]">
-      <paper-tabs id="paperTabs" selected="{{selectedListId}}" scrollable fit-container attr-for-selected="value">
+
+      <paper-tabs id="paperTabs" selected="{{selectedListId}}" scrollable fit-container 
+          attr-for-selected="value">
         <template id="item-repeat" is="dom-repeat" items="{{tabs}}" as="tab">
           <paper-tab value="[[tab.value]]" name="[[tab.label]]">
             [[tab.label]]
           </paper-tab>
         </template>
       </paper-tabs>
+      
       <content id="lists" select="bl-list"></content>
+
     </div>
   </template>
 

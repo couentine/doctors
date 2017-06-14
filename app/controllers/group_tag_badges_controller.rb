@@ -39,7 +39,7 @@ class GroupTagBadgesController < ApplicationController
   def destroy
     respond_to do |format|
       format.json do
-        @badge = badge.find(params['id']) || not_found
+        @badge = Badge.find(params['id']) || not_found
         
         begin
           @group_tag.remove_badges([@badge.id], current_user.id)

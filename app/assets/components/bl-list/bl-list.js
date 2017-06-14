@@ -32,6 +32,7 @@
     If you add the 'selectable' property then item selection is built in.
     If you leave out the 'selectable' property then you can optionally set the 'rowLinkKey' 
     property to an item field with returns a url or path to follow when the item is clicked.
+    Use 'listColor' to set the color of the simple list: blue, green, orange, grey.
 
   How to use ajax targetting:
     When bl-list is used as a multi-select tool, it is typically for the purposes of generating 
@@ -72,6 +73,7 @@ Polymer({
     rowIconKey: { type: String, value: null }, // field name of icon in items (1 of these req'd)
     rowIcon: { type: String, value: null }, // icon to use for ALL items (1 of these req'd)
     roundRowImage: Boolean, // set this to round the row image
+    listColor: { type: String, value: 'grey' },
 
     // Ajax Targetting Options (Explained in top comments)
     forAjax: String, // Set this to the id of an iron-ajax
@@ -335,7 +337,6 @@ Polymer({
   },
   _itemClass: function(layoutMode, objectMode) { return layoutMode + "-item " + objectMode; },
   _wrapperClass: function(layoutMode, objectMode, context) {
-    console.log(context);
      return layoutMode + "-list " + objectMode + " " + context + "-context";
   },
   _minColWidth: function(objectMode) {
@@ -497,6 +498,7 @@ Polymer({
   },
   rowClass: function(itemSelected) {
     // Called in simple mode to calculate the class of he paper items
-    return this.layoutMode + '-item ' + this.objectMode + (itemSelected ? ' selected' : '');
+    return this.layoutMode + '-item ' + this.listColor + ' ' + this.objectMode 
+      + (itemSelected ? ' selected' : '');
   }
 });

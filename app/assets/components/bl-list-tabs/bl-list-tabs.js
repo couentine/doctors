@@ -21,6 +21,7 @@ Polymer({
     childMap: Object, //Array of bl-lists passed in to the bl-list-tabs component
     tabs: Array //Array of objects with two keys: label and value, based on bl-list items
   },
+
   attached: function() {
     var lightDOMChildren = this.getContentChildren();
     this.tabs = [];
@@ -40,6 +41,7 @@ Polymer({
       }
     });
   },
+  
   _selectedListIdChanged: function(newVal, oldVal) {
     if (this.childMap) {
       if (oldVal) this.childMap[oldVal].hidden = true; 

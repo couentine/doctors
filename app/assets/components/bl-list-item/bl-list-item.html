@@ -4,7 +4,7 @@
   <template>
 
     <template is="dom-if" if="[[isBadgeMode]]">
-      <bl-badge badge="{{item}}" link></bl-badge>
+      <bl-badge badge="{{item}}" display-mode="[[itemDisplayMode]]" link></bl-badge>
     </template>
     
     <template is="dom-if" if="[[isFullLogMode]]">

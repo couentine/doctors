@@ -25,7 +25,7 @@ class GroupTagsController < ApplicationController
     @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
     @page = (params['page'] || 1).to_i
     
-    @group_tags = @group.tags.order_by('user_magnitude desc, name asc').page(@page).per(@page_size)
+    @group_tags = @group.tags.order_by('total_magnitude desc, name asc').page(@page).per(@page_size)
     @group_tags_hash = GroupTag.array_json(@group_tags, :list_item)
     @next_page = @page + 1 if @group_tags.count > (@page_size * @page)
       
@@ -45,9 +45,18 @@ class GroupTagsController < ApplicationController
   # GET /group-url/tags/tag-name?selected=badges
   # GET /group-url/tags/tag-name.json
   def show
-    @selected = params[:selected] # local variable to choose which tab to select upon redirect
     @page_size = params['page_size'] || APP_CONFIG['page_size_normal']
     @page_size = [@page_size, APP_CONFIG['page_size_large']].min # cap it at largest
+    
+    # Set which tab is selected by default
+    @selected = params[:selected]
+    if @selected.blank?
+      if (@group_tag.user_count == 0) && (@group_tag.badge_count > 0)
+        @selected = 'badges'
+      else
+        @selected = 'users'
+      end
+    end
 
     # Set the default sort options for display in the bl-query-options
     # NOTE: This is a hard-coded version of the logic in GroupTagUsersController#index

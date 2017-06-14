@@ -1,31 +1,43 @@
-:host.green paper-tabs {
-  --paper-tabs-selection-bar-color:  #7CB342;
+/* === WRAPPER LAYOUT === */
+
+#listWrapper.bl-list-tabs {
+  margin: 0 1em;
+  padding-bottom: 0.5em;
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-radius: 1.25rem;
 }
 
-:host.green paper-tab {
-    --paper-tab-ink: #AED581;
+/* === PAPER TABS === */
+
+paper-tabs { /* default = grey */
+  --paper-tabs-selection-bar-color: #E0E0E0;
+  --paper-tabs: {
+    border-radius: 1.25rem 1.25rem 0 0; color: white; text-transform: uppercase;
+    background: #BDBDBD;
+  };
+}
+
+:host.green paper-tabs {
+  --paper-tabs-selection-bar-color: #C8E6C9; /* green-100 */
+  --paper-tabs: { 
+    border-radius: 1.25rem 1.25rem 0 0; color: white; text-transform: uppercase;
+    background: #66BB6A; /* green-400 */
+  }
 }
 
 :host.blue paper-tabs {
-  --paper-tabs-selection-bar-color: #039BE5;
+  --paper-tabs-selection-bar-color: #B3E5FC; /* light-blue-100 */
+  --paper-tabs: { 
+    border-radius: 1.25rem 1.25rem 0 0; color: white; text-transform: uppercase;
+    background: #29B6F6; /* light-blue-400 */
+  }
 }
 
-:host.blue paper-tab {
-    --paper-tab-ink: #4FC3F7;
-}
-
-:host.grey paper-tabs {
-  --paper-tabs-selection-bar-color: #757575;
-}
-
-:host.grey paper-tab {
-    --paper-tab-ink: #E0E0E0;
-}
-
-#listWrapper.bl-list-tabs {
-    margin: 0 1em;
-    padding-bottom: 0.5em;
-    background: white;
-    border: 1px solid #E0E0E0;
-    border-radius: 1.25rem;
+:host.orange paper-tabs {
+  --paper-tabs-selection-bar-color: #FFE0B2; /* orange-100 */
+  --paper-tabs: { 
+    border-radius: 1.25rem 1.25rem 0 0; color: white; text-transform: uppercase;
+    background: #FFA726; /* orange-400 */
+  }
 }

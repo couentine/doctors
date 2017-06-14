@@ -28,7 +28,7 @@ class Badge
     list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
     group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
-    :expert_count, :image_url, :image_medium_url, :image_small_url]
+      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path]
   }
   
   # Below are the badge-level fields included in the clone
