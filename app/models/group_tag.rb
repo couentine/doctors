@@ -19,7 +19,7 @@ class GroupTag
       :badge_count, :badge_magnitude, :total_count, :total_magnitude, :validation_request_count],
     list_with_children: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, 
       :user_magnitude, :badge_count, :badge_magnitude, :total_count, :total_magnitude,
-       :validation_request_count, :user_id_strings],
+       :validation_request_count, :user_id_strings, :badge_id_strings],
     detail: [:id, :group_id, :name, :name_with_caps, :summary, :user_count, :user_magnitude,
       :badge_count, :badge_magnitude, :total_count, :total_magnitude,
         :validation_request_count, :permissions_text]
@@ -94,6 +94,11 @@ class GroupTag
   # Returns stringified version of user_ids
   def user_id_strings
     (user_ids || []).map{ |id| id.to_s }
+  end
+
+  # Returns stringified version of badge_ids
+  def badge_id_strings
+    (badge_ids || []).map{ |id| id.to_s }
   end
 
   # Returns user-facing explanation of this group tag's privacy settings

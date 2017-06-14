@@ -60,7 +60,9 @@
     </bl-toggle-bar>
 
     <bl-badge-selector badges="<%= @badges.to_json %>" 
-        selected-badge-url="<%= @badge_url.to_s %>" for="log-list" 
+        selected-badge-url="<%= @badge_url.to_s %>" for="log-list"
+        selected-tag-name="<%= @badge_tag %>"
+        group-tags="<%= @badge_tags.to_json %>" group-tags-link="<%= group_tags_url(@group) %>"
         <%= (@query_mode != 'badge') ? 'disabled' : '' %>
         <%= (@badge_url.blank?) ? 'expanded' : '' %>>
       <h2>Select a badge</h2>

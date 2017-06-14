@@ -24,10 +24,29 @@
       <content select="h2"></content>
       <content select=".subtitle"></content>
 
+      <div class="group-tags">
+        <div class="no-tags" hidden="[[hasGroupTags]]">
+          <strong>Tip:</strong>
+          If you 
+          <a href$="[[groupTagsLink]]" target="_blank">create group tags</a>, 
+          you'll be able to filter feedback requests by tag.
+        </div>
+        
+        <paper-dropdown-menu label="Filter badges by tag" hidden="[[!hasGroupTags]]">
+          <paper-listbox id="groupTagFilter" class="dropdown-content" attr-for-selected="value"
+              selected="{{selectedTagName}}" on-iron-select="groupTagFilterSelect">
+            <paper-item value="NONE">All Tags</paper-item>
+            <template is="dom-repeat" items="[[groupTags]]">
+              <paper-item value="[[item.name]]">#[[item.name_with_caps]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </div>
+
       <div class="badge-grid">
         
         <template is="dom-repeat" items="[[badges]]">
-          <a href="#" on-tap="selectThisBadge" class="badge select-link"
+          <a href="#" on-tap="selectThisBadge" class$="[[item.classNames]]"
               data-badge-url="[[item.url]]">
             <bl-badge badge="[[item]]" show-expert-count show-request-count></bl-badge>
           </a>

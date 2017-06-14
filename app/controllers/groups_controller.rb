@@ -934,6 +934,7 @@ class GroupsController < ApplicationController
   # GET /group-url/review?badge=badge-url&sort_by=date_requested&sort_order=asc
   # GET /group-url/review?user=username
   # GET /group-url/review?user_tag=Group-Tag-Name
+  # GET /group-url/review?badge_tag=Group-Tag-Name
   # Presents UI for seeing all pending validation requests / existing experts for all badges
   # and allows bulk validation. If badge isn't set it will display a badge selection UI.
   # This method basically just queries for the badges, the actual logs come from full_logs.
@@ -944,6 +945,7 @@ class GroupsController < ApplicationController
     badge_param = params['badge'].to_s.downcase
     user_param = params['user'].to_s.downcase
     @user_tag = (params['user_tag']) ? params['user_tag'].downcase : 'NONE'
+    @badge_tag = (params['badge_tag']) ? params['badge_tag'].downcase : 'NONE'
     @badges, @users = [], []
     @badge_url, @badge_id = nil, nil
     @user_username, @user_id = nil, nil
@@ -964,6 +966,9 @@ class GroupsController < ApplicationController
     elsif @user_tag != 'NONE'
       @query_mode = 'user'
       @back_url = group_tag_url(@group, @user_tag)
+    elsif @badge_tag != 'NONE'
+      @query_mode = 'badge'
+      @back_url = group_tag_url(@group, @badge_tag)
     else # no params, default = go back to group
       @back_url = group_url(@group)
     end
@@ -1006,9 +1011,11 @@ class GroupsController < ApplicationController
         @user_id = valid_user_map[user_param]
       end
 
-      # Now query for tags which have users and pending validation requests
-      @user_tags = GroupTag.array_json(@group.user_tags.where(:validation_request_count.gt => 0),
-        :list_with_children)
+      # Now query for tags which have users/badges and pending validation requests
+      @user_tags = GroupTag.array_json(
+        @group.user_tags.where(:user_validation_request_count.gt => 0), :list_with_children)
+      @badge_tags = GroupTag.array_json(
+        @group.badge_tags.where(:badge_validation_request_count.gt => 0), :list_with_children)
     end
 
     # Build the default query options parameter for the bl-list component

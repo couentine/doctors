@@ -620,6 +620,18 @@ class Group
     return_criteria
   end
 
+  # Returns a group tag criteria selecting only tags which have been attached to badges.
+  # Default sort is by descending magnitude then by ascending name.
+  # OPTIONS:
+  # - unsorted: Set this to true to leave off the sort parameters
+  def badge_tags(options = {})
+    return_criteria = tags.where(:badge_count.gt => 0)
+    unless options[:unsorted]
+      return_criteria = return_criteria.order_by('badge_magnitude desc, name asc')
+    end
+    return_criteria
+  end
+
   # === GROUP ACTIONS === #
 
   # This updates or deletes the cached copy of the specified badge in the badges_cache

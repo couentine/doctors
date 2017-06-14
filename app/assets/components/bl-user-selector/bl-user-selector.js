@@ -112,5 +112,4 @@ Polymer({
                   + this.groupTags[i].name;
     }
   }
-
 });
