@@ -88,6 +88,12 @@
         } else if (this.files[0].type != 'image/png') {
           alert("Only PNG images are supported for badge images, please select a different image.");
           $(this).val("");
+        } else if (/[%\+]/.test(this.files[0].name)) {
+          alert("The filename of the image you are trying to upload contains special characters "
+            + "which are not supported by Badge List. "
+            + "Please rename the file and remove any plus (+) or percent (%) signs, "
+            + "then try your upload again.");
+          $(this).val("");
         } else {
           $("#upload-spinner").fadeIn();
           $("#custom_image_form").submit();
@@ -379,7 +385,6 @@
   var currentImageCreated; // helps only display latest image in case there are network delays
   var lastPoller;
   function imageGeneratorCompleted(poller) {
-    console.log(poller);
     if ((currentImageCreated == null) || (Date.parse(poller.created_at) > currentImageCreated)) {
       currentImageCreated = Date.parse(poller.created_at);
       lastPoller = poller;
