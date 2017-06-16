@@ -25,9 +25,9 @@ class GroupsController < ApplicationController
   PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, 
     :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, :feature_grant_reporting,
-    :stripe_subscription_card, :new_subscription, :member_visibility, :admin_visibility, 
-    :badge_copyability, :join_code, :avatar_key, :tag_assignability, :tag_creatability,
-    :tag_visibility]
+    :stripe_subscription_card, :stripe_subscription_id, :new_subscription, :member_visibility, 
+    :admin_visibility, :badge_copyability, :join_code, :avatar_key, :tag_assignability, 
+    :tag_creatability, :tag_visibility]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   GROUP_TYPE_OPTIONS = [

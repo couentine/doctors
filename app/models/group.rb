@@ -207,6 +207,18 @@ class Group
     end
   end
 
+  def stripe_subscription_url
+    if stripe_subscription_id.blank?
+      nil
+    else
+      if ENV['stripe_livemode'] == 'true'
+        "https://dashboard.stripe.com/subscriptions/#{stripe_subscription_id}"
+      else
+        "https://dashboard.stripe.com/test/subscriptions/#{stripe_subscription_id}"
+      end
+    end
+  end
+
   # === GROUP METHODS === #
 
   # This will find by ObjectId OR by URL

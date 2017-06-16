@@ -208,6 +208,18 @@ class User
     !admin_of_ids.blank? || !created_group_ids.blank? || !owned_group_ids.blank?
   end
 
+  def stripe_customer_url
+    if stripe_customer_id.blank?
+      nil
+    else
+      if ENV['stripe_livemode'] == 'true'
+        "https://dashboard.stripe.com/customers/#{stripe_customer_id}"
+      else
+        "https://dashboard.stripe.com/test/customers/#{stripe_customer_id}"
+      end
+    end
+  end
+
   # === CLASS METHODS === #
 
   # This will find by ObjectId OR by username

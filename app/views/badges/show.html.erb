@@ -307,7 +307,7 @@
 
             <% if @badge.tracks_progress? %>
               <%= f.input :send_validation_request_emails, as: :radio_buttons, include_blank: false,
-                label: 'Feedback requeest emails', collection: @send_email_options, 
+                label: 'Feedback request emails', collection: @send_email_options, 
                 hint: "By default, feedback request emails are sent automatically to those who " \
                   + "can award the badge whenever a #{@badge.learner} completes all of the " \
                   + "badge requirements." %>
