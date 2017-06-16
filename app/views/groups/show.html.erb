@@ -588,73 +588,102 @@
     <div class="modal-body">
       <div class="bl-modal-form">
         <div class="form-body">
-          <% if @group.private? %>
-            <%= simple_form_for @group, html: { id: 'settings-form', 
-                class: 'form-horizontal' } do |f| %>
+          <%= simple_form_for @group, html: { id: 'settings-form', 
+              class: 'form-horizontal' } do |f| %>
+            <div id="welcome-settings" class="form-section">
+              <h4>Welcome settings</h4>
+              
+              <%= f.input :welcome_message, as: :text, label: 'Welcome Message', 
+                placeholder: 'Leave this field blank to disable the welcome message',
+                hint: 'Optional: Send a welcome email to new members when they join',
+                input_html: { data: { 'character-count' => true, 
+                  'max-length' => Group::MAX_WELCOME_MESSAGE_LENGTH } } %>
+            </div>
 
-              <%= f.input :badge_copyability, as: :radio_buttons, 
-                label: 'Who can copy badges from the group?', 
-                include_blank: false, collection: @badge_copyability_options %>
-
-              <%= f.input :tag_visibility, as: :radio_buttons, 
-                label: 'Who can see group tags?', 
-                include_blank: false, collection: @tag_visibility_options %>
-
-              <%= f.input :tag_assignability, as: :radio_buttons, 
-                label: 'Who can assign group tags?', 
-                include_blank: false, collection: @tag_assignability_options %>
-
-              <%= f.input :tag_creatability, as: :radio_buttons, 
-                label: 'Who can create new group tags?', 
-                include_blank: false, collection: @tag_creatability_options %>
-
-              <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
-                include_blank: false, collection: @group_visibility_options %>
-
-              <%= f.input :admin_visibility, as: :radio_buttons, label: 'Group Admin List', 
-                include_blank: false, collection: @group_visibility_options %>
-
-              <div class="control-group">
-                <label class="control-label" for="join-code-enabled">
-                  Allow Public Signup with Join Code?
-                </label>
-                <div class="controls">
-                  <% if @group.join_code.blank? %>
-                    <input type="checkbox" id="join-code-enabled">
-                  <% else %>
-                    <input type="checkbox" id="join-code-enabled" checked>
-                  <% end %>
-                </div>
+            <% if !@group.private? %>
+              <div id="group-private-message" class="form-section">
+                
               </div>
-
-              <%= f.input :join_code, label: 'Join Code', 
-                hint: 'This code can either be manually entered by new members when they join or '\
-                  + 'you can point them to the link below and it will be pre-filled. ' \
-                  + '(The join code is not case sensitive and you can change or retract it at ' \
-                  + 'any time.)',
-                wrapper_html: { style: d?(!@group.join_code.blank?) } %>              
-
-              <div class="control-group" id="join-url-preview-panel" 
-                  style="<%= d? !@group.join_code.blank? %>">
-                <label class="control-label" for="join-url-preview">
-                  Group Link with Join Code
-                </label>
-                <div class="controls">
-                  <input type="text" id="join-url-preview" class="input-xlarge embed-code"
-                    value="<%= "#{@group.group_url}?code=#{@group.join_code}" %>">
-                </div>
-              </div>
-
             <% end %>
-          <% else %>
-            <p>
-              <%= @group.name %> is currently an Open Group.
-            </p>
-            <p>
-              You can switch to a Closed Group at any time to get advanced membership controls
-              and run reports.
-            </p>
+            
+            <div id="closed-group-settings" 
+                class="form-section">
+              <h4>Closed group settings</h4>
+
+              <% if @group.private? %>
+
+                <%= f.input :badge_copyability, as: :radio_buttons, 
+                  label: 'Who can copy badges from the group?', 
+                  include_blank: false, collection: @badge_copyability_options %>
+
+                <%= f.input :tag_visibility, as: :radio_buttons, 
+                  label: 'Who can see group tags?', 
+                  include_blank: false, collection: @tag_visibility_options %>
+
+                <%= f.input :tag_assignability, as: :radio_buttons, 
+                  label: 'Who can assign group tags?', 
+                  include_blank: false, collection: @tag_assignability_options %>
+
+                <%= f.input :tag_creatability, as: :radio_buttons, 
+                  label: 'Who can create new group tags?', 
+                  include_blank: false, collection: @tag_creatability_options %>
+
+                <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
+                  include_blank: false, collection: @group_visibility_options %>
+
+                <%= f.input :admin_visibility, as: :radio_buttons, label: 'Group Admin List', 
+                  include_blank: false, collection: @group_visibility_options %>
+                
+                <div class="control-group">
+                  <label class="control-label" for="join-code-enabled">
+                    Allow Public Signup with Join Code?
+                  </label>
+                  <div class="controls">
+                    <% if @group.join_code.blank? %>
+                      <input type="checkbox" id="join-code-enabled">
+                    <% else %>
+                      <input type="checkbox" id="join-code-enabled" checked>
+                    <% end %>
+                  </div>
+                </div>
+
+                <%= f.input :join_code, label: 'Join Code', 
+                  hint: 'This code can either be manually entered by new members when they join or '\
+                    + 'you can point them to the link below and it will be pre-filled. ' \
+                    + '(The join code is not case sensitive and you can change or retract it at ' \
+                    + 'any time.)',
+                  wrapper_html: { style: d?(!@group.join_code.blank?) } %>              
+
+                <div class="control-group" id="join-url-preview-panel" 
+                    style="<%= d? !@group.join_code.blank? %>">
+                  <label class="control-label" for="join-url-preview">
+                    Group Link with Join Code
+                  </label>
+                  <div class="controls">
+                    <input type="text" id="join-url-preview" class="input-xlarge embed-code"
+                      value="<%= "#{@group.group_url}?code=#{@group.join_code}" %>">
+                  </div>
+                </div>
+
+              <% else %>
+
+                <div class="info-block">
+                  <p>
+                    <%= @group.name %> is currently an Open Group.
+                  </p>
+                  <p>
+                    You can switch to a Closed Group at any time to get advanced membership 
+                    controls and run reports.
+                  </p>
+                </div>
+
+              <% end %>
+              <% # end of @group.private? if %>
+
+            </div>
           <% end %>
+          <% # end of simple_form %>
+
          </div>        
       </div>
     </div>

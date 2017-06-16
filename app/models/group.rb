@@ -9,6 +9,7 @@ class Group
   MAX_NAME_LENGTH = 50
   MAX_URL_LENGTH = 30
   MAX_DESCRIPTION_LENGTH = 140
+  MAX_WELCOME_MESSAGE_LENGTH = 1000
   MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
@@ -118,6 +119,9 @@ class Group
   field :top_user_tags_cache,             type: Array, default: []
   field :top_badge_tags_cache,            type: Array, default: []
 
+  field :welcome_message,                 type: String
+  field :welcome_badge_tag,               type: String
+
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, 
     uniqueness: { message: "The '%{value}' url is already taken."}, 
@@ -131,6 +135,7 @@ class Group
     exclusion: { in: APP_CONFIG['blocked_url_slugs'],
     message: "%{value} is a specially reserved url." }
   validates :description, length: { maximum: MAX_DESCRIPTION_LENGTH }
+  validates :welcome_message, length: { maximum: MAX_WELCOME_MESSAGE_LENGTH }
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
   validates :website, url: true
   validates :image_url, url: true

@@ -1051,6 +1051,22 @@ div.bl-inline-form {
     margin: 0;
 
     p.help-block:first-child { margin-top: 0; }
+
+    .info-block {
+      float: left;
+
+      p { float: left; }
+    }
+
+    #welcome-settings {
+      .help-block {
+        float: left;
+        display: block;
+        width: 100%;
+      }
+      
+      #group_welcome_message { margin-top: 1em; }
+    }
   }
 }
 
@@ -1321,7 +1337,7 @@ h2.form-header {
 }
 
 /* Specific Form Fields */
-#group_description,#badge_summary,#entry_summary,#tag_summary {
+#group_description,#badge_summary,#entry_summary,#tag_summary,#group_welcome_message {
   width: 300px;
   height: 6em;
 }
