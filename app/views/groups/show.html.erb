@@ -1113,6 +1113,22 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                         
                         <% if @badge_list_admin %>
                           <li class="divider"></li>
+                          
+                          <% if @group.stripe_subscription_url %>
+                            <li>
+                                <%= link_to \
+                                  '<i class="fa fa-building-o"></i> Stripe Subscription'.html_safe,
+                                  @group.stripe_subscription_url, target: '_blank' %>
+                            </li>
+                          <% end %>
+                          <% if @group.owner && @group.owner.stripe_customer_url %>
+                            <li>
+                                <%= link_to \
+                                  '<i class="fa fa-user"></i> Stripe Customer'.html_safe,
+                                  @group.owner.stripe_customer_url, target: '_blank' %>
+                            </li>
+                          <% end %>
+
                           <li>
                               <%= link_to '<i class="fa fa-cog"></i> BL Admin Mode'.html_safe,
                                   group_path(@group, bl_admin_mode: true) %>
