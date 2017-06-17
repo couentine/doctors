@@ -555,7 +555,7 @@
     </div>
   </div>
 
-  <!-- === GROUP SETTINGS MODAL === -->
+  <!-- === GROUP PRIVACY SETTINGS MODAL === -->
 
   <script type="text/javascript">
 
@@ -578,112 +578,90 @@
 
   </script>
 
-  <div id="settings" class="modal hide fade" tabindex="-1" role="dialog" 
+  <div id="privacy-settings" class="modal hide fade" tabindex="-1" role="dialog" 
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Group settings</h3>
+      <h3 id="mimm-label">Group privacy settings</h3>
     </div>
 
     <div class="modal-body">
       <div class="bl-modal-form">
         <div class="form-body">
-          <%= simple_form_for @group, html: { id: 'settings-form', 
+          <%= simple_form_for @group, html: { id: 'privacy-settings-form', 
               class: 'form-horizontal' } do |f| %>
-            <div id="welcome-settings" class="form-section">
-              <h4>Welcome settings</h4>
+
+            <% if @group.private? %>
+
+              <%= f.input :badge_copyability, as: :radio_buttons, 
+                label: 'Who can copy badges from the group?', 
+                include_blank: false, collection: @badge_copyability_options %>
+
+              <%= f.input :tag_visibility, as: :radio_buttons, 
+                label: 'Who can see group tags?', 
+                include_blank: false, collection: @tag_visibility_options %>
+
+              <%= f.input :tag_assignability, as: :radio_buttons, 
+                label: 'Who can assign group tags?', 
+                include_blank: false, collection: @tag_assignability_options %>
+
+              <%= f.input :tag_creatability, as: :radio_buttons, 
+                label: 'Who can create new group tags?', 
+                include_blank: false, collection: @tag_creatability_options %>
+
+              <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
+                include_blank: false, collection: @group_visibility_options %>
+
+              <%= f.input :admin_visibility, as: :radio_buttons, label: 'Group Admin List', 
+                include_blank: false, collection: @group_visibility_options %>
               
-              <%= f.input :welcome_message, as: :text, label: 'Welcome Message', 
-                placeholder: 'Leave this field blank to disable the welcome message',
-                hint: 'Optional: Send a welcome email to new members when they join',
-                input_html: { data: { 'character-count' => true, 
-                  'max-length' => Group::MAX_WELCOME_MESSAGE_LENGTH } } %>
-            </div>
-
-            <% if !@group.private? %>
-              <div id="group-private-message" class="form-section">
-                
+              <div class="control-group">
+                <label class="control-label" for="join-code-enabled">
+                  Allow Public Signup with Join Code?
+                </label>
+                <div class="controls">
+                  <% if @group.join_code.blank? %>
+                    <input type="checkbox" id="join-code-enabled">
+                  <% else %>
+                    <input type="checkbox" id="join-code-enabled" checked>
+                  <% end %>
+                </div>
               </div>
+
+              <%= f.input :join_code, label: 'Join Code', 
+                hint: 'This code can either be manually entered by new members when they join or '\
+                  + 'you can point them to the link below and it will be pre-filled. ' \
+                  + '(The join code is not case sensitive and you can change or retract it at ' \
+                  + 'any time.)',
+                wrapper_html: { style: d?(!@group.join_code.blank?) } %>              
+
+              <div class="control-group" id="join-url-preview-panel" 
+                  style="<%= d? !@group.join_code.blank? %>">
+                <label class="control-label" for="join-url-preview">
+                  Group Link with Join Code
+                </label>
+                <div class="controls">
+                  <input type="text" id="join-url-preview" class="input-xlarge embed-code"
+                    value="<%= "#{@group.group_url}?code=#{@group.join_code}" %>">
+                </div>
+              </div>
+
+            <% else %>
+              <% #=== NOT A PRIVATE GROUP ===# %>
+              
+              <p>
+                <%= @group.name %> is currently an Open Group.
+              </p>
+              <p>
+                You can switch to a Closed Group at any time to get advanced membership 
+                controls and run reports.
+              </p>
+
             <% end %>
-            
-            <div id="closed-group-settings" 
-                class="form-section">
-              <h4>Closed group settings</h4>
+            <% # === END OF IF PRIVATE GROUP %>
 
-              <% if @group.private? %>
-
-                <%= f.input :badge_copyability, as: :radio_buttons, 
-                  label: 'Who can copy badges from the group?', 
-                  include_blank: false, collection: @badge_copyability_options %>
-
-                <%= f.input :tag_visibility, as: :radio_buttons, 
-                  label: 'Who can see group tags?', 
-                  include_blank: false, collection: @tag_visibility_options %>
-
-                <%= f.input :tag_assignability, as: :radio_buttons, 
-                  label: 'Who can assign group tags?', 
-                  include_blank: false, collection: @tag_assignability_options %>
-
-                <%= f.input :tag_creatability, as: :radio_buttons, 
-                  label: 'Who can create new group tags?', 
-                  include_blank: false, collection: @tag_creatability_options %>
-
-                <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
-                  include_blank: false, collection: @group_visibility_options %>
-
-                <%= f.input :admin_visibility, as: :radio_buttons, label: 'Group Admin List', 
-                  include_blank: false, collection: @group_visibility_options %>
-                
-                <div class="control-group">
-                  <label class="control-label" for="join-code-enabled">
-                    Allow Public Signup with Join Code?
-                  </label>
-                  <div class="controls">
-                    <% if @group.join_code.blank? %>
-                      <input type="checkbox" id="join-code-enabled">
-                    <% else %>
-                      <input type="checkbox" id="join-code-enabled" checked>
-                    <% end %>
-                  </div>
-                </div>
-
-                <%= f.input :join_code, label: 'Join Code', 
-                  hint: 'This code can either be manually entered by new members when they join or '\
-                    + 'you can point them to the link below and it will be pre-filled. ' \
-                    + '(The join code is not case sensitive and you can change or retract it at ' \
-                    + 'any time.)',
-                  wrapper_html: { style: d?(!@group.join_code.blank?) } %>              
-
-                <div class="control-group" id="join-url-preview-panel" 
-                    style="<%= d? !@group.join_code.blank? %>">
-                  <label class="control-label" for="join-url-preview">
-                    Group Link with Join Code
-                  </label>
-                  <div class="controls">
-                    <input type="text" id="join-url-preview" class="input-xlarge embed-code"
-                      value="<%= "#{@group.group_url}?code=#{@group.join_code}" %>">
-                  </div>
-                </div>
-
-              <% else %>
-
-                <div class="info-block">
-                  <p>
-                    <%= @group.name %> is currently an Open Group.
-                  </p>
-                  <p>
-                    You can switch to a Closed Group at any time to get advanced membership 
-                    controls and run reports.
-                  </p>
-                </div>
-
-              <% end %>
-              <% # end of @group.private? if %>
-
-            </div>
           <% end %>
           <% # end of simple_form %>
-
          </div>        
       </div>
     </div>
@@ -691,7 +669,7 @@
     <div class="modal-footer">
       <% if @group.private? %>
         <button class="btn btn-primary" aria-hidden="true" 
-            onclick="$('#settings-form').submit();">
+            onclick="$('#privacy-settings-form').submit();">
           Save changes
         </button>
         <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
@@ -702,6 +680,52 @@
         </a>
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
       <% end %>
+    </div>
+  </div>
+
+  <!-- === NEW MEMBER WELCOME SETTINGS MODAL === -->
+
+  <div id="welcome-settings" class="modal hide fade" tabindex="-1" role="dialog" 
+      aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">New member welcome settings</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <%= simple_form_for @group, html: { id: 'welcome-settings-form', 
+              class: 'form-horizontal' } do |f| %>
+              
+            <div class="info-block">
+              <p>
+                If you specify a group welcome message below, all new group members will be sent
+                a welcome email.
+              </p>
+              <p>
+                You can also specify below whether you would like all new members to automatically 
+                be joined to some or all of the badges in the group.
+              </p>
+            </div>
+
+            <%= f.input :welcome_message, as: :text, label: 'Welcome Message',
+              input_html: { data: { 'character-count' => true, 
+                'max-length' => Group::MAX_WELCOME_MESSAGE_LENGTH } } %>
+
+
+          <% end %>
+          <% # end of simple_form %>
+         </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" aria-hidden="true" 
+          onclick="$('#welcome-settings-form').submit();">
+        Save changes
+      </button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
     </div>
   </div>
 
@@ -1047,13 +1071,12 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                   This is a closed group.
                 <% end %>
               </span>
+              
+              <!-- #=== GROUP ACTION BAR ===# -->
               <ul class="action-list">
-                <% if @current_user_is_member || @current_user_is_admin %>
-                  <li>
-                    <%= link_to '<i class="fa fa-sliders"></i> Edit group membership'.html_safe, \
-                      '#membership-settings', class: 'btn btn-small', data: { toggle: 'modal' } %>
-                  </li>
-                <% elsif can_join_group %>
+                
+                <!-- #=== GROUP JOINING ===# -->
+                <% if can_join_group %>
                   <li>
                     <% if current_user %>
                       <%= link_to '<i class="fa fa-plus-circle"></i> Join the group'.html_safe, 
@@ -1069,62 +1092,99 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                       '#enter-join-code', class: 'btn btn-small', data: { toggle: 'modal' } %>
                   </li>
                 <% end %>
+
                 <% if @badge_list_admin || @current_user_is_admin %>
                   <% if @group.has?(:reporting) %>
+                    <!-- #=== REPORTING DROPDOWN ===# -->
                     <li>
-                      <%= link_to '<i class="fa fa-table"></i> Run report'.html_safe, 
-                        new_report_result_path(group: @group.url_with_caps),class: 'btn btn-small'%>
+                      <div class="btn-group">
+                        <a class="btn btn-small dropdown-toggle" data-toggle="dropdown" href="#">
+                          <i class="fa fa-table"></i> Group reports
+                          <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-right">
+                          <li>
+                            <%= link_to '<i class="fa fa-table"></i> Run new report'.html_safe, 
+                              new_report_result_path(group: @group.url_with_caps) %>
+                          </li>
+                          <li>
+                            <%= link_to '<i class="fa fa-list-alt"></i> '.html_safe \
+                              + 'View all report results', report_results_path %>
+                          </li>
+                        </ul>
+                      </div>
                     </li>
                   <% else %>
+                    <!-- #=== NO REPORTING INFO LINK ===# -->
                     <li>
                       <%= link_to '<i class="fa fa-table"></i> Run report'.html_safe, 
                         '#reporting', class: 'btn btn-small', data: { toggle: 'modal' } %>
                     </li>
                   <% end %>
                 <% end %>
-                <% if @current_user_is_owner || @badge_list_admin %>
-                  <% if @group.private? %>
-                    <li>
-                      <a href="#subscription-details" data-toggle="modal" class='btn btn-small'>
-                        <i class="fa fa-info-circle"></i> Subscription details
-                      </a>
-                    </li>
-                  <% end %>
+
+                <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
+                  <!-- #=== GROUP SETTINGS ===# -->
+
                   <li>
-                    <%= link_to '<i class="fa fa-pencil"></i> Edit the group'.html_safe, 
-                      edit_group_path, class: 'btn btn-small' %>
-                  </li>
-                <% end %>
-                  
-                <% if @current_user_is_owner || @badge_list_admin \
-                    || (@group.private? && @current_user_is_admin) %>
-                  <li class="collapsible">
-                    <div class="dropdown">
-                      <a href="#" class="dropdown-toggle" id="dropdown-settings" 
-                        role="button" data-toggle="dropdown" data-target="#" title="Admin Options">
-                        <i class="fa fa-cog"></i>
-                        <b class="caret"></b>
+                    <div class="btn-group">
+                      <a class="btn btn-small dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-cog"></i> Group settings
+                        <span class="caret"></span>
                       </a>
-                      <ul class="dropdown-menu pull-right" role="menu" 
-                          aria-labelledby="dropdown-settings">
-
-                        <% if @group.has?(:reporting) %>
+                      <ul class="dropdown-menu pull-right">
+                        <% if @current_user_is_member || @current_user_is_admin %>
+                          <!-- #=== MEMBERSHIP SETTINGS ===# -->
                           <li>
-                            <%= link_to \
-                              '<i class="fa fa-table"></i> View all report results'.html_safe, 
-                              report_results_path %>
-                            </li>
-                        <% end %>
-
-                        <% if @group.private? %>
-                          <li>
-                            <%= link_to '<i class="fa fa-wrench"></i> '.html_safe \
-                              + 'Group settings', '#settings', data: { toggle: 'modal' } %>
+                            <%= link_to '<i class="fa fa-sliders"></i> '.html_safe \
+                              + 'Your membership settings', '#membership-settings', 
+                              data: { toggle: 'modal' } %>
                           </li>
-                          <% if @current_user_is_owner || @badge_list_admin %>
-                            <li class="divider"></li>
-                          <% end %>
                         <% end %>
+                        
+                        <!-- ================================================================== -->
+                        <% if @current_user_is_admin || @badge_list_admin %>
+                          <!-- #=== DIVIDER TO DENOTE BEGINNING OF ADMIN-ONLY SETINGS ===# -->
+                          <li class="divider"></li>
+                        <% end %>
+                        <!-- ================================================================== -->
+                        
+                        <% if @current_user_is_admin || @badge_list_admin %>
+                          <!-- #=== PRIVACY SETTINGS ===# -->
+                          <li>
+                            <%= link_to '<i class="fa fa-eye-slash"></i> '.html_safe \
+                              + 'Group privacy settings', '#privacy-settings', 
+                              data: { toggle: 'modal' } %>
+                          </li>
+                          <!-- #=== NEW MEMBER WELCOME SETTINGS ===# -->
+                          <li>
+                            <%= link_to '<i class="fa fa-envelope"></i> '.html_safe \
+                              + 'New member welcome settings', '#welcome-settings', 
+                              data: { toggle: 'modal' } %>
+                          </li>
+                        <% end %>
+                        <% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
+                          <!-- #=== SUBSCRIPTION DETAILS ===# -->
+                          <li>
+                            <a href="#subscription-details" data-toggle="modal">
+                              <i class="fa fa-info-circle"></i> Group subscription details
+                            </a>
+                          </li>
+                        <% end %>
+                        <% if @current_user_is_owner || @badge_list_admin %>
+                          <!-- #=== EDIT THE GROUP ===# -->
+                          <li>
+                            <%= link_to '<i class="fa fa-pencil"></i> Edit the group'.html_safe, 
+                              edit_group_path %>
+                          </li>
+                        <% end %>
+                        
+                        <!-- ================================================================== -->
+                        <% if @current_user_is_owner || @badge_list_admin %>
+                          <!-- #=== DIVIDER TO DENOTE BEGINNING OF NON-REVERSABLE SETTINGS ===# -->
+                          <li class="divider"></li>
+                        <% end %>
+                        <!-- ================================================================== -->
 
                         <% if @current_user_is_owner || @badge_list_admin %>
                           <li>
@@ -1139,35 +1199,47 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                                 + 'you want to permanently delete this group?' } %>
                           </li>
                         <% end %>
-                        
-                        <% if @badge_list_admin %>
-                          <li class="divider"></li>
-                          
-                          <% if @group.stripe_subscription_url %>
-                            <li>
-                                <%= link_to \
-                                  '<i class="fa fa-building-o"></i> Stripe Subscription'.html_safe,
-                                  @group.stripe_subscription_url, target: '_blank' %>
-                            </li>
-                          <% end %>
-                          <% if @group.owner && @group.owner.stripe_customer_url %>
-                            <li>
-                                <%= link_to \
-                                  '<i class="fa fa-user"></i> Stripe Customer'.html_safe,
-                                  @group.owner.stripe_customer_url, target: '_blank' %>
-                            </li>
-                          <% end %>
 
+                        <!-- ================================================================== -->
+                        <% if @badge_list_admin %>
+                          <!-- #=== DIVIDER TO DENOTE BEGINNING OF BL ADMIN SETTINGS ===# -->
+                          <li class="divider"></li>
+                        <% end %>
+                        <!-- ================================================================== -->
+
+                        <% if @badge_list_admin && @group.stripe_subscription_url %>
+                          <!-- #=== LINK TO STRIPE SUBSCRIPTION ===# -->
                           <li>
-                              <%= link_to '<i class="fa fa-cog"></i> BL Admin Mode'.html_safe,
-                                  group_path(@group, bl_admin_mode: true) %>
+                              <%= link_to \
+                                '<i class="fa fa-building-o"></i> Stripe Subscription'.html_safe,
+                                @group.stripe_subscription_url, target: '_blank' %>
+                          </li>
+                        <% end %>
+                        <% if @badge_list_admin && @group.owner&&@group.owner.stripe_customer_url %>
+                          <!-- #=== LINK TO STRIPE CUSTOMER ===# -->
+                          <li>
+                              <%= link_to \
+                                '<i class="fa fa-user"></i> Stripe Customer'.html_safe,
+                                @group.owner.stripe_customer_url, target: '_blank' %>
+                          </li>
+                        <% end %>
+                        <% if @badge_list_admin %>
+                          <!-- #=== BADGE LIST ADMIN MODE TOGGLE ===# -->
+                          <li>
+                            <%= link_to '<i class="fa fa-cog"></i> BL Admin Mode'.html_safe,
+                                group_path(@group, bl_admin_mode: true) %>
                           </li>
                         <% end %>
                       </ul>
                     </div>
                   </li>
+
+                  <!-- #=== END GROUP SETTINGS ===# -->
                 <% end %>
+
               </ul>
+              <!-- #=== END GROUP ACTION BAR ===# -->
+
             </td>
           </tr>
         </tbody>
@@ -1283,7 +1355,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
             <% end %>
 
             <% if @current_user_is_admin || @badge_list_admin %>
-              <a href="#settings" class="btn h3-btn" data-toggle="modal">
+              <a href="#privacy-settings" class="btn h3-btn" data-toggle="modal">
                 Settings
               </a>
             <% end %>
@@ -1470,7 +1542,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
               <% end %>
 
               <% if @current_user_is_admin || @badge_list_admin %>
-                <a href="#settings" class="btn h3-btn" data-toggle="modal">
+                <a href="#privacy-settings" class="btn h3-btn" data-toggle="modal">
                   Settings
                 </a>
               <% end %>
@@ -1649,7 +1721,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
               <% end %>
 
               <% if @current_user_is_admin || @badge_list_admin %>
-                <a href="#settings" class="btn h3-btn" data-toggle="modal">
+                <a href="#privacy-settings" class="btn h3-btn" data-toggle="modal">
                   Settings
                 </a>
               <% end %>

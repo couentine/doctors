@@ -1174,6 +1174,7 @@ div.bl-form {
     .left-button {
       float: left;
       border-radius: 500px;
+      margin-right: 0.5em;
     }
   } 
 }
@@ -1823,6 +1824,7 @@ form#group-add-users-form {
               background-color: $medium-white;
               color: $light-text-color;
               text-shadow: none;
+              border-radius: 2px;
 
               &:hover, &:focus {
                 background-color: $light-gray;
@@ -1830,6 +1832,7 @@ form#group-add-users-form {
               &.btn-danger {
                 background-color: #C3211D;
               }
+              .caret { border-top-color: $light-text-color; }
             }
 
             &.collapsible > .dropdown a {
