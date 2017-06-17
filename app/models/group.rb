@@ -21,6 +21,7 @@ class Group
   TAG_ASSIGNABILITY_VALUES = ['members', 'admins']
   TAG_CREATABILITY_VALUES = ['members', 'admins']
   TAG_VISIBILITY_VALUES = ['public', 'members', 'admins']
+  WELCOME_BADGE_TAG_ALL_BADGES = '***ALL BADGES***'
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 

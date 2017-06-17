@@ -707,12 +707,20 @@
                 You can also specify below whether you would like all new members to automatically 
                 be joined to some or all of the badges in the group.
               </p>
+              <p>&nbsp;</p>
             </div>
 
             <%= f.input :welcome_message, as: :text, label: 'Welcome Message',
+              placeholder: 'Leave this blank to disable the group welcome message',
               input_html: { data: { 'character-count' => true, 
                 'max-length' => Group::MAX_WELCOME_MESSAGE_LENGTH } } %>
 
+            <%= f.input :welcome_badge_tag, as: :select, include_blank: false,
+              collection: @badge_tag_options, label_method: :last, value_method: :first, 
+              label: 'Auto join new members to badges',
+              hint: "Tip: You can use ".html_safe \
+                + link_to('group tags', group_tags_path(@group)) \
+                + " to specify a subset of the group's badges." %>
 
           <% end %>
           <% # end of simple_form %>

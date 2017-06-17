@@ -27,7 +27,7 @@ class GroupsController < ApplicationController
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, :feature_grant_reporting,
     :stripe_subscription_card, :stripe_subscription_id, :new_subscription, :member_visibility, 
     :admin_visibility, :badge_copyability, :join_code, :avatar_key, :tag_assignability, 
-    :tag_creatability, :tag_visibility]
+    :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   GROUP_TYPE_OPTIONS = [
@@ -132,6 +132,10 @@ class GroupsController < ApplicationController
     @top_badge_tags = @group.top_badge_tags(10)
     @has_top_user_tags = !@top_user_tags.blank?
     @has_top_badge_tags = !@top_badge_tags.blank?
+    @badge_tag_options = [['', 'None'], [Group::WELCOME_BADGE_TAG_ALL_BADGES, 'All Badges']] \
+      + @group.top_badge_tags.map do |group_tag_item| 
+        [group_tag_item['name'], "##{group_tag_item['name_with_caps']}"]
+      end
 
     # Set options vars
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
