@@ -24,6 +24,7 @@ class BadgesController < ApplicationController
     :image_color1, :image_color2, :icon_search_text, :topic_list_text, :custom_image_key, 
     :send_validation_request_emails, :move_to_group_id]
       
+  MAX_INVITATION_MESSAGE_LENGTH = 500
   EXPERT_WORDS = %w(expert master guide guru jedi)
   LEARNER_WORDS = %w(learner trainee student novice padawan)
   BADGE_VISIBILITY_OPTIONS = [
@@ -248,10 +249,17 @@ class BadgesController < ApplicationController
   # POST /group-url/badge-url/learners.json
   # :usernames[] => array_of_usernames_to_add[]
   # :notify_by_email => boolean
+  # :invitation_message => String
   def create_learners
     @notify_by_email = params[:notify_by_email] == "1"
     new_learner_count = 0
     new_learner_log = nil
+
+    # Get the invitation message and truncate it if needed
+    @invitation_message = params[:invitation_message]
+    if !@invitation_message.blank? && (@invitation_message.length > MAX_INVITATION_MESSAGE_LENGTH)
+      @invitation_message = @invitation_message.first(MAX_INVITATION_MESSAGE_LENGTH-3) + '...'
+    end
 
     params[:usernames].each do |username|
       user = User.find(username.to_s.downcase) rescue nil
@@ -261,7 +269,7 @@ class BadgesController < ApplicationController
         
         if @notify_by_email && !user.email_inactive
           UserMailer.delay.log_new(user.id, current_user.id, @group.id, @badge.id, \
-            new_learner_log.id)
+            new_learner_log.id, @invitation_message)
         end
       end
     end unless params[:usernames].blank?

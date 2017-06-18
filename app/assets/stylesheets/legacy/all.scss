@@ -1485,9 +1485,9 @@ div.control-group.badge-roles {
   }
 }
 
-/* Add users form */
+/* Add users forms */
 
-form#group-add-users-form {
+form#group-add-users-form, form#badge-add-learners-form {
   label.notify-by-email {
     float: left;
     margin-top: 10px;

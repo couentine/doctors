@@ -36,3 +36,8 @@
   <%= @badge.progress_log %> 
   you can login to Badge List as normal or click on the link below.
 </p>
+
+<% if !@invitation_message.blank? %>
+  <%= render partial: "shared/mailers/user_quote", locals: { user: @from_user, 
+    message: @invitation_message } %>
+<% end %>

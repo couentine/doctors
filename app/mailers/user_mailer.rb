@@ -76,10 +76,11 @@ class UserMailer < ActionMailer::Base
     )
   end
 
-  def log_new(to_user_id, from_user_id, group_id, badge_id, log_id)
+  def log_new(to_user_id, from_user_id, group_id, badge_id, log_id, invitation_message=nil)
     @to_user, @from_user, @group, @badge, @log = User.find(to_user_id), User.find(from_user_id), \
       Group.find(group_id), Badge.find(badge_id), Log.find(log_id)
     @from_self = @from_user == @to_user
+    @invitation_message = invitation_message
 
     if @from_self
       subject = "You've joined a badge"
