@@ -5,6 +5,11 @@
   provide(:cta_link, group_url(@group))
 %>
 
+<% if !@invitation_message.blank? %>
+  <%= render partial: "shared/mailers/user_quote", locals: { user: @from_user, 
+    message: @invitation_message } %>
+<% end %>
+
 <% if @badges.blank? %>
   <p>
     <%= @from_user.name %> has added you as an admin to the <%= @group.name %> group in 
@@ -21,17 +26,6 @@
     <br>
     <strong>Badges you've been added to:</strong>
   </p>
-  <ul style="list-style: none; padding: 0; margin: 0;">
-    <% @badges.each do |badge| %>
-      <li style="display: inline-block; padding: 15px 30px 15px 0; text-align: center;
-          max-width: 140px; vertical-align: top;">
-        <a href="<%= group_badge_url(@group, badge) %>" style="color: #424242 !important; 
-            text-decoration: none !important;">
-          <img src="<%= badge.image_medium_url %>" style="width: 100px; display: inline-block; 
-            margin-bottom: 10px;"><br>
-          <%= badge.name %>
-        </a>
-      </li>
-    <% end %>
-  </ul>
+  
+  <%= render partial: "shared/mailers/badge_list", locals: { badges: @badges } %>
 <% end %>

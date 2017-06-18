@@ -523,8 +523,10 @@
 
     <%= f.button :submit, class: 'btn btn-primary', id: 'submit-group-form' %>
     <% if !@group.new_record? %>
-      <%= link_to "<i class='fa fa-wrench'></i> Group Settings".html_safe, 
-        group_path(@group) + '#settings', class: "btn left-button", target: '_blank' %>
+      <%= link_to "<i class='fa fa-eye-slash'></i> Privacy".html_safe, 
+        group_path(@group) + '#privacy-settings', class: "btn left-button", target: '_blank' %>
+      <%= link_to "<i class='fa fa-envelope'></i> New Members".html_safe, 
+        group_path(@group) + '#welcome-settings', class: "btn left-button", target: '_blank' %>
     <% end %>
     <%= 
       if @group.new_record?

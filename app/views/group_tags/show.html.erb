@@ -142,7 +142,7 @@
         <% if @current_user_is_admin || @badge_list_admin %>
           <li>
             <%= link_to '<i class="fa fa-sliders"></i> Edit Permissions'.html_safe, 
-              group_url(@group) + '#settings' %>
+              group_url(@group) + '#privacy-settings' %>
           </li>
           <% if @group.has?(:reporting) %>
             <li>

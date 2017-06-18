@@ -1051,6 +1051,22 @@ div.bl-inline-form {
     margin: 0;
 
     p.help-block:first-child { margin-top: 0; }
+
+    .info-block {
+      float: left;
+
+      p { float: left; }
+    }
+
+    #welcome-settings {
+      .help-block {
+        float: left;
+        display: block;
+        width: 100%;
+      }
+      
+      #group_welcome_message { margin-top: 1em; }
+    }
   }
 }
 
@@ -1158,6 +1174,7 @@ div.bl-form {
     .left-button {
       float: left;
       border-radius: 500px;
+      margin-right: 0.5em;
     }
   } 
 }
@@ -1321,7 +1338,7 @@ h2.form-header {
 }
 
 /* Specific Form Fields */
-#group_description,#badge_summary,#entry_summary,#tag_summary {
+#group_description,#badge_summary,#entry_summary,#tag_summary,#group_welcome_message {
   width: 300px;
   height: 6em;
 }
@@ -1468,9 +1485,9 @@ div.control-group.badge-roles {
   }
 }
 
-/* Add users form */
+/* Add users forms */
 
-form#group-add-users-form {
+form#group-add-users-form, form#badge-add-learners-form {
   label.notify-by-email {
     float: left;
     margin-top: 10px;
@@ -1807,6 +1824,7 @@ form#group-add-users-form {
               background-color: $medium-white;
               color: $light-text-color;
               text-shadow: none;
+              border-radius: 2px;
 
               &:hover, &:focus {
                 background-color: $light-gray;
@@ -1814,6 +1832,7 @@ form#group-add-users-form {
               &.btn-danger {
                 background-color: #C3211D;
               }
+              .caret { border-top-color: $light-text-color; }
             }
 
             &.collapsible > .dropdown a {

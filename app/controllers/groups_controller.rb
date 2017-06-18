@@ -27,9 +27,10 @@ class GroupsController < ApplicationController
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, :feature_grant_reporting,
     :stripe_subscription_card, :stripe_subscription_id, :new_subscription, :member_visibility, 
     :admin_visibility, :badge_copyability, :join_code, :avatar_key, :tag_assignability, 
-    :tag_creatability, :tag_visibility]
+    :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
+  MAX_INVITATION_MESSAGE_LENGTH = 500
   GROUP_TYPE_OPTIONS = [
     ['<b><i class="fa fa-globe"></i> Open Group</b><span>Anyone can join '.html_safe \
       + 'and everything is public.<br>Free forever.</span>'.html_safe, 'open'],
@@ -132,6 +133,10 @@ class GroupsController < ApplicationController
     @top_badge_tags = @group.top_badge_tags(10)
     @has_top_user_tags = !@top_user_tags.blank?
     @has_top_badge_tags = !@top_badge_tags.blank?
+    @badge_tag_options = [['', 'None'], [Group::WELCOME_BADGE_TAG_ALL_BADGES, 'All Badges']] \
+      + @group.top_badge_tags.map do |group_tag_item| 
+        [group_tag_item['name'], "##{group_tag_item['name_with_caps']}"]
+      end
 
     # Set options vars
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
@@ -479,10 +484,10 @@ class GroupsController < ApplicationController
       else
         if params[:type] == 'admin'
           NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
-            current_user.id, @group.id, badge_ids)
+            current_user.id, @group.id, badge_ids, found_user["invitation_message"])
         else
           NewUserMailer.delay.group_member_add(found_user["email"], found_user["name"], 
-            current_user.id, @group.id, badge_ids)
+            current_user.id, @group.id, badge_ids, found_user["invitation_message"])
         end
         found_user[:invite_date] = Time.now
       end
@@ -612,6 +617,7 @@ class GroupsController < ApplicationController
   # :emails => '"Bob Smith" <bob@example.com>, another@example.com \n yet@example.com'
   # :badges[] => ["badge-url1","badge-url2"] >> Users with be added/invited to these
   # :notify_by_email => boolean
+  # :invitation_message => String
   # State variables for output: 
   #   @group, @type, @invalid_emails, @upgraded_member_emails, @new_member_emails,
   #   @new_admin_emails, @skipped_member_emails, @skipped_admin_emails
@@ -626,6 +632,12 @@ class GroupsController < ApplicationController
     @skipped_admin_emails = [] # skipped because either...
                                # type=admin >> They are already admins
                                # type=member >> Admins cannot be down-graded
+    
+    # Get the invitation message and truncate it if needed
+    @invitation_message = params[:invitation_message]
+    if !@invitation_message.blank? && (@invitation_message.length > MAX_INVITATION_MESSAGE_LENGTH)
+      @invitation_message = @invitation_message.first(MAX_INVITATION_MESSAGE_LENGTH-3) + '...'
+    end
 
     if (@type == :admin) && !@group.can_add_admins?
       redirect_to @group, notice: 'You cannot add new admins to this group.'
@@ -700,7 +712,7 @@ class GroupsController < ApplicationController
                       @group.log_bounced_email(user.email, Time.now, true)
                     else
                       UserMailer.delay.group_admin_add(user.id, current_user.id, @group.id, 
-                        badge_ids)
+                        badge_ids, @invitation_message)
                     end
                   end
                   if @group.has_member?(user)
@@ -732,7 +744,7 @@ class GroupsController < ApplicationController
                       @group.log_bounced_email(user.email, Time.now, true)
                     else
                       UserMailer.delay.group_member_add(user.id, current_user.id, @group.id, 
-                        badge_ids)
+                        badge_ids, @invitation_message)
                     end
                   end
                   @new_member_emails << user.email
@@ -771,8 +783,8 @@ class GroupsController < ApplicationController
           end
           emails_to_invite.each do |email|
             email_inactive = inactive_email_list.include? email
-            invited_user = {:email => email, 
-              :name => name_from_email[email], :invite_date => invite_date }
+            invited_user = {:email => email, name: name_from_email[email], 
+              invite_date: invite_date, invitation_message: @invitation_message }
             invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
 
             if @group.has_invited_admin?(email)
@@ -793,7 +805,7 @@ class GroupsController < ApplicationController
                   @group.log_bounced_email(email, Time.now, true)
                 else
                   NewUserMailer.delay.group_admin_add(email, name_from_email[email],
-                    current_user.id, @group.id, badge_ids)
+                    current_user.id, @group.id, badge_ids, @invitation_message)
                 end
               end
             else
@@ -809,7 +821,7 @@ class GroupsController < ApplicationController
                     @group.log_bounced_email(email, Time.now, true)
                   else
                     NewUserMailer.delay.group_member_add(email, name_from_email[email],
-                      current_user.id, @group.id, badge_ids) 
+                      current_user.id, @group.id, badge_ids, @invitation_message)
                   end
                 end
               end

@@ -16,6 +16,20 @@
   <li class="active">Add Badge <%= @Learners %></li>
 <% end %>
 
+<script type="text/javascript">
+  
+  $(document).ready(function() {
+
+    // The invitation message should only be visible if notify by email is checked
+    $('#notify_by_email').change(function() {
+      if (this.checked) $('#invitation-message-panel').slideDown();
+      else $('#invitation-message-panel').slideUp();
+    });
+
+  });
+
+</script>
+
 <div class="row">
   <div class="bl-form bl-form-members span10 offset1">
     
@@ -47,7 +61,7 @@
         <div class="form-body">
 
           <div class="control-group">
-            <%= label_tag :usernames, "Add existing group members & admins", class: "control-label" %>
+            <%= label_tag :usernames, "Add Existing Group Members & Admins", class: "control-label" %>
             <div class="controls">
               <ul class="unstyled">
                 <% @learner_list.each do |item| %>
@@ -67,16 +81,27 @@
               </p>
             </div>
           </div>
-        </div>
 
-        <div class="control-group">
-          <%= label_tag :notify_by_email, "Send email notifications", class: "control-label" %>
-          <div class="controls">
-            <label class="checkbox">
-              <%= check_box_tag :notify_by_email, "1", true %> 
-              Notify new <%= @learners %> by email
-            </label>
+          <div class="control-group">
+            <%= label_tag :notify_by_email, "Email Notification", class: 'control-label' %>
+            <div class="controls">
+              <%= check_box_tag :notify_by_email, "1", true %>
+              <%= label_tag :notify_by_email, "Notify new #{@learners} by email",
+                  class: "notify-by-email"%>
+            </div>
           </div>
+
+          <div id="invitation-message-panel" class="control-group">
+            <%= label_tag :invitation_message, 'Invitation Message (Optional)', 
+              class: 'control-label' %>
+            <div class="controls">
+              <%= text_area_tag :invitation_message, params[:invitation_message], size: "150x4", 
+                placeholder: 'Enter a custom message that will be included in the ' \
+                  + 'invitation email', class: "span6", data: { :'character-count' => true, 
+                  :'max-length' => BadgesController::MAX_INVITATION_MESSAGE_LENGTH } %>
+            </div>
+          </div>
+
         </div>
         
         <div class="form-footer">

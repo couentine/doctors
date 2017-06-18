@@ -9,6 +9,7 @@ class Group
   MAX_NAME_LENGTH = 50
   MAX_URL_LENGTH = 30
   MAX_DESCRIPTION_LENGTH = 140
+  MAX_WELCOME_MESSAGE_LENGTH = 1000
   MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
@@ -20,6 +21,7 @@ class Group
   TAG_ASSIGNABILITY_VALUES = ['members', 'admins']
   TAG_CREATABILITY_VALUES = ['members', 'admins']
   TAG_VISIBILITY_VALUES = ['public', 'members', 'admins']
+  WELCOME_BADGE_TAG_ALL_BADGES = '***ALL BADGES***'
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
@@ -50,7 +52,8 @@ class Group
   belongs_to :creator, inverse_of: :created_groups, class_name: 'User'
   belongs_to :owner, inverse_of: :owned_groups, class_name: 'User'
   has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: 'User'
-  has_and_belongs_to_many :members, inverse_of: :member_of, class_name: 'User'
+  has_and_belongs_to_many :members, inverse_of: :member_of, class_name: 'User',
+    after_add: :do_group_welcome
   has_many :badges, dependent: :restrict # You have to delete all the badges FIRST
   has_many :info_items, dependent: :destroy
   has_many :tags, dependent: :destroy, class_name: 'GroupTag'
@@ -118,6 +121,9 @@ class Group
   field :top_user_tags_cache,             type: Array, default: []
   field :top_badge_tags_cache,            type: Array, default: []
 
+  field :welcome_message,                 type: String
+  field :welcome_badge_tag,               type: String
+
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
   validates :url_with_caps, presence: true, 
     uniqueness: { message: "The '%{value}' url is already taken."}, 
@@ -131,6 +137,7 @@ class Group
     exclusion: { in: APP_CONFIG['blocked_url_slugs'],
     message: "%{value} is a specially reserved url." }
   validates :description, length: { maximum: MAX_DESCRIPTION_LENGTH }
+  validates :welcome_message, length: { maximum: MAX_WELCOME_MESSAGE_LENGTH }
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
   validates :website, url: true
   validates :image_url, url: true
@@ -1112,6 +1119,36 @@ protected
 
   def add_creator_to_admins
     self.admins << self.creator unless self.creator.blank?
+  end
+
+  # This is a mongoid relation callback that fires every time a new member is added to the group.
+  # It checks to see if there are any group welcome actions to do and then does them.
+  def do_group_welcome(user)
+    badge_ids = [] # default this to a blank array
+
+    # First check to see if we need to join to any badges
+    if !welcome_badge_tag.blank?
+      if welcome_badge_tag == WELCOME_BADGE_TAG_ALL_BADGES
+        badge_query = badges
+      else
+        group_tag = tags.find_by(name: welcome_badge_tag.downcase) rescue nil
+        if group_tag
+          badge_query = group_tag.badges
+        end
+      end
+
+      if badge_query
+        badge_query.each do |badge|
+          badge_ids << badge.id
+          badge.add_learner user
+        end
+      end
+    end
+
+    # Then send the welcome message email if there's a welcome message
+    if !welcome_message.blank?
+      UserMailer.delay.group_welcome_message(user.id, self.id, badge_ids)
+    end
   end
 
   def update_counts
