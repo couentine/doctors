@@ -5,6 +5,11 @@
   provide(:cta_link, group_url(@group))
 %>
 
+<% if !@invitation_message.blank? %>
+  <%= render partial: "shared/mailers/user_quote", locals: { user: @from_user, 
+    message: @invitation_message } %>
+<% end %>
+
 <% if @badges.blank? %>
   <p>
     <%= @from_user.name %> has added you as a member to the <%= @group.name %> group in Badge List. 

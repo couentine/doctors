@@ -1,0 +1,20 @@
+<%
+  # This contains a well formatted gray box with the user's avatar and the supplied message
+  # in quotes.
+  # Required local variables: user, message
+%>
+
+<div style="padding: 20px; text-align: center; font-size: 20px; font-weight: bold; 
+    border-radius: 3px; background-color: <%= COLORS['grey'][100] %>; 
+    border: 1px solid <%= COLORS['grey'][300] %>; margin: 30px 0;">
+  <img src="<%= user.avatar_image_medium_url %>" style="width: 100px; display: inline-block;
+    margin: 0; border-radius: 500px; border: 3px solid <%= COLORS['grey'][600] %>;">
+  <br>
+  <small style="color: <%= COLORS['grey'][600] %>; font-size: 16px; font-weight: 300;
+      display: inline-block;">
+    <%= user.name %>
+  </small>
+  
+  <%= simple_format("&ldquo;#{message}&rdquo;".html_safe, 
+    style: "margin: 20px 0 0 0; padding: 0;") %>
+</div>

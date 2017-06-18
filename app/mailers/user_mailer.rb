@@ -3,9 +3,10 @@ class UserMailer < ActionMailer::Base
 
   layout 'email_standard'
 
-  def group_admin_add(to_user_id, from_user_id, group_id, badge_ids)
+  def group_admin_add(to_user_id, from_user_id, group_id, badge_ids, invitation_message=nil)
     @to_user, @from_user, @group, @badges = User.find(to_user_id), User.find(from_user_id), \
       Group.find(group_id), Badge.where(:id.in => badge_ids)
+    @invitation_message = invitation_message
 
     mail(
       :subject  => "You're now an admin of #{@group.name}",
@@ -16,9 +17,10 @@ class UserMailer < ActionMailer::Base
     )
   end
 
-  def group_member_add(to_user_id, from_user_id, group_id, badge_ids)
+  def group_member_add(to_user_id, from_user_id, group_id, badge_ids, invitation_message=nil)
     @to_user, @from_user, @group, @badges = User.find(to_user_id), User.find(from_user_id), \
       Group.find(group_id), Badge.where(:id.in => badge_ids)
+    @invitation_message = invitation_message
 
     mail(
       :subject  => "You're now a member of #{@group.name}",

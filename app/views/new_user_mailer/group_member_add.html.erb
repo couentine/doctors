@@ -5,6 +5,11 @@
   provide(:cta_link, "#{new_user_registration_url}?email=#{@to_email}&name=#{@to_name}")
 %>
 
+<% if !@invitation_message.blank? %>
+  <%= render partial: "shared/mailers/user_quote", locals: { user: @from_user, 
+    message: @invitation_message } %>
+<% end %>
+
 <% if @badges.blank? %>
   <p>
     <%= @from_user.name %> has invited you to join the

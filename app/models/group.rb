@@ -52,7 +52,8 @@ class Group
   belongs_to :creator, inverse_of: :created_groups, class_name: 'User'
   belongs_to :owner, inverse_of: :owned_groups, class_name: 'User'
   has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: 'User'
-  has_and_belongs_to_many :members, inverse_of: :member_of, class_name: 'User'
+  has_and_belongs_to_many :members, inverse_of: :member_of, class_name: 'User',
+    after_add: :do_group_welcome
   has_many :badges, dependent: :restrict # You have to delete all the badges FIRST
   has_many :info_items, dependent: :destroy
   has_many :tags, dependent: :destroy, class_name: 'GroupTag'
@@ -1118,6 +1119,36 @@ protected
 
   def add_creator_to_admins
     self.admins << self.creator unless self.creator.blank?
+  end
+
+  # This is a mongoid relation callback that fires every time a new member is added to the group.
+  # It checks to see if there are any group welcome actions to do and then does them.
+  def do_group_welcome(user)
+    badge_ids = [] # default this to a blank array
+
+    # First check to see if we need to join to any badges
+    if !welcome_badge_tag.blank?
+      if welcome_badge_tag == WELCOME_BADGE_TAG_ALL_BADGES
+        badge_query = badges
+      else
+        group_tag = tags.find_by(name: welcome_badge_tag.downcase) rescue nil
+        if group_tag
+          badge_query = group_tag.badges
+        end
+      end
+
+      if badge_query
+        badge_query.each do |badge|
+          badge_ids << badge.id
+          badge.add_learner user
+        end
+      end
+    end
+
+    # Then send the welcome message email if there's a welcome message
+    if !welcome_message.blank?
+      UserMailer.delay.group_welcome_message(user.id, self.id, badge_ids)
+    end
   end
 
   def update_counts

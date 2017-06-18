@@ -12,6 +12,20 @@
   <li class="active">Add New Admins</li>
 <% end %>
 
+<script type="text/javascript">
+  
+  $(document).ready(function() {
+
+    // The invitation message should only be visible if notify by email is checked
+    $('#notify_by_email').change(function() {
+      if (this.checked) $('#invitation-message-panel').slideDown();
+      else $('#invitation-message-panel').slideUp();
+    });
+
+  });
+
+</script>
+
 <div class="row">
   <div class="bl-form bl-form-members span10 offset1">
     
@@ -27,23 +41,39 @@
       <div class="form-body">
 
         <div class="control-group">
-          <%= label_tag :emails, "New #{@type.to_s.capitalize} Emails", class: "control-label" %>
+          <%= label_tag :emails, "New #{@type.to_s.capitalize} Emails", class: 'control-label' %>
           <div class="controls">
             <%= text_area_tag :emails, params[:emails], size: "150x4", autofocus: true,
               placeholder: 'josh.cassada@nasa.gov, "Jessica U. Meir, Ph.D." <j.meir@nasa.gov>, ' \
                 + '"Anne McClain" <anne.mcclain@nasa.gov>', class: "span6", 
               data: { :'character-count' => true, 
                 :'max-length' => GroupsController::MAX_EMAIL_TEXT_LENGTH } %>
-            <br/>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <%= label_tag :notify_by_email, "Email Notification", class: 'control-label' %>
+          <div class="controls">
             <%= check_box_tag :notify_by_email, "1", true %>
             <%= label_tag :notify_by_email, "Notify new #{@type.to_s.pluralize} by email",
                 class: "notify-by-email"%>
           </div>
         </div>
 
+        <div id="invitation-message-panel" class="control-group">
+          <%= label_tag :invitation_message, 'Invitation Message (Optional)', 
+            class: 'control-label' %>
+          <div class="controls">
+            <%= text_area_tag :invitation_message, params[:invitation_message], size: "150x4", 
+              placeholder: 'Enter a custom message that will be included in the ' \
+                + 'invitation email', class: "span6", data: { :'character-count' => true, 
+                :'max-length' => GroupsController::MAX_INVITATION_MESSAGE_LENGTH } %>
+          </div>
+        </div>
+
         <% unless @badge_options.blank? %>
           <div class="control-group">
-            <%= label_tag :badges, "(Optional) Invite to badges", class: "control-label" %>
+            <%= label_tag :badges, "Invite to Badges (Optional)", class: 'control-label' %>
             <div class="controls">
               <ul class="unstyled badge-icons">
                 <% @badge_options.each do |item| %>
