@@ -1,0 +1,20 @@
+<% 
+  provide(:title, "Welcome to #{@group.name}")
+  provide(:color, 'light_blue')
+  provide(:cta_text, 'View the group')
+  provide(:cta_link, group_url(@group))
+%>
+
+<% if !@group.welcome_message.blank? %>
+  <%= simple_format(@group.welcome_message)  %>
+
+  <%= render partial: 'shared/mailers/seperator' %>
+<% end %>
+
+<% if !@badges.blank? %>
+  <p>
+    <strong>You've been automatically added to the following badges:</strong>
+  </p>
+
+  <%= render partial: 'shared/mailers/badge_list', locals: { badges: @badges } %>
+<% end %>

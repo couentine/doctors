@@ -21,11 +21,24 @@ class UserMailer < ActionMailer::Base
       Group.find(group_id), Badge.where(:id.in => badge_ids)
 
     mail(
-      :subject  => "Welcome to #{@group.name}!",
+      :subject  => "You're now a member of #{@group.name}",
       :to       => @to_user.email_name,
       :from     => build_from_string(@from_user),
       :reply_to => @from_user.email_name,
       :tag      => 'group_member_add,user_mailer'
+    )
+  end
+
+  def group_welcome_message(to_user_id, group_id, badge_ids)
+    @to_user, @group, @badges = User.find(to_user_id), Group.find(group_id), \
+    Badge.where(:id.in => badge_ids)
+
+    mail(
+      :subject  => "Welcome to #{@group.name}!",
+      :to       => @to_user.email_name,
+      :from     => build_from_string,
+      :reply_to => build_from_string,
+      :tag      => 'group_welcome_message,user_mailer'
     )
   end
 

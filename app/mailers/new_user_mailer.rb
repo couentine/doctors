@@ -15,7 +15,7 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "Welcome to #{@group.name}!",
+      :subject  => "You've been invited to #{@group.name}",
       :to       => to_email_name,
       :from     => build_from_string(@from_user),
       :reply_to => @from_user.email_name,
@@ -35,7 +35,7 @@ class NewUserMailer < ActionMailer::Base
     end
 
     mail(
-      :subject  => "You're now an admin of #{@group.name}",
+      :subject  => "You've been invited to be an admin of #{@group.name}",
       :to       => to_email_name,
       :from     => build_from_string(@from_user),
       :reply_to => @from_user.email_name,
