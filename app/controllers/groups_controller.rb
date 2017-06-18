@@ -484,10 +484,10 @@ class GroupsController < ApplicationController
       else
         if params[:type] == 'admin'
           NewUserMailer.delay.group_admin_add(found_user["email"], found_user["name"], 
-            current_user.id, @group.id, badge_ids)
+            current_user.id, @group.id, badge_ids, found_user["invitation_message"])
         else
           NewUserMailer.delay.group_member_add(found_user["email"], found_user["name"], 
-            current_user.id, @group.id, badge_ids)
+            current_user.id, @group.id, badge_ids, found_user["invitation_message"])
         end
         found_user[:invite_date] = Time.now
       end
@@ -783,8 +783,8 @@ class GroupsController < ApplicationController
           end
           emails_to_invite.each do |email|
             email_inactive = inactive_email_list.include? email
-            invited_user = {:email => email, 
-              :name => name_from_email[email], :invite_date => invite_date }
+            invited_user = {:email => email, name: name_from_email[email], 
+              invite_date: invite_date, invitation_message: @invitation_message }
             invited_user[:badges] = @badges.map{|b| b.url} unless @badges.blank?
 
             if @group.has_invited_admin?(email)
