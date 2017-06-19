@@ -32,6 +32,7 @@ var termMessages = {
     + "Badge List users registered with email addresses on your domain "
     + "(eg: 'anyone@yourdomain.edu') are only visible to other users who are also on the "
     + "domain (regardless of group membership).",
+  "integration": "Includes access to Canvas LMS integration and all future integrations.",
   "lifetime-hosting": "If you ever decide to cancel your paid subscription, all of the awarded "
     + "badges and evidence will continue to be hosted at no additional cost.",
   "membership-controls": "Closed groups can only be joined if a user is invited by an admin.",

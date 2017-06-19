@@ -93,8 +93,9 @@ class Group
   field :user_limit,                      type: Integer, default: 5
   field :admin_limit,                     type: Integer, default: 1
   field :sub_group_limit,                 type: Integer, default: 0
-  field :features,                        type: Array, default: [] # = ['community', 'branding']
-  field :feature_grant_reporting,         type: Boolean # Manually grants the reporting feature
+  field :features,                        type: Array, default: [] # use feature methods to access
+  field :feature_grant_reporting,         type: Boolean
+  field :feature_grant_integration,       type: Boolean
   field :total_user_count,                type: Integer, default: 1
   field :admin_count,                     type: Integer, default: 1
   field :member_count,                    type: Integer, default: 0
@@ -339,14 +340,36 @@ class Group
 
   # Returns whether or not the features array contains the specified 'feature' or :feature
   def has?(feature)
-    return_value = !features.blank? && features.include?(feature.to_s)
+    return_value = features.present? && features.include?(feature.to_s)
     
-    # Enable manual grant of the reporting feature
+    # Enable manual granting of features
     if (feature.to_s == 'reporting')
       return_value ||= (feature_grant_reporting == true)
+    elsif (feature.to_s == 'integration')
+      return_value ||= (feature_grant_integration == true)
     end
 
     return_value
+  end
+
+  # Returns an array of string values representing the keys of all features present on this group.
+  # NOTE: Use this instead of accessing features directly (in order to include manual grants)
+  def all_features
+    return_list = features || []
+    
+    if feature_grant_reporting && !return_list.include?('reporting')
+      return_list << 'reporting'
+    end
+    if feature_grant_integration && !return_list.include?('integration')
+      return_list << 'integration'
+    end
+
+    return_list
+  end
+
+  # Returns true if this group has features either as part of a subscription *or* manually granted
+  def has_features?
+    all_features.present?
   end
 
   # This method will append the passed item to the bounced email log and automatically shorten

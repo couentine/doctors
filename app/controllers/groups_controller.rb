@@ -25,9 +25,10 @@ class GroupsController < ApplicationController
   PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, 
     :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, :feature_grant_reporting,
-    :stripe_subscription_card, :stripe_subscription_id, :new_subscription, :member_visibility, 
-    :admin_visibility, :badge_copyability, :join_code, :avatar_key, :tag_assignability, 
-    :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag]
+    :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
+    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, 
+    :avatar_key, :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, 
+    :welcome_badge_tag]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500
@@ -1163,7 +1164,8 @@ private
     @current_user_is_admin = current_user && @group.has_admin?(current_user)
     @current_user_is_member = current_user && @group.has_member?(current_user)
     @current_user_is_owner = current_user && (@group.owner_id == current_user.id)
-    @badge_list_admin = current_user && current_user.admin?
+    @badge_list_admin = current_user && current_user.admin? \
+      && (params['suppress_bl_admin'] != 'true')
 
     # Set user visibility variables
     @can_see_members = @group.public? \

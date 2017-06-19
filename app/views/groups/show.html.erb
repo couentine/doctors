@@ -900,7 +900,7 @@
 
 <% end %>
 
-<% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
+<% if @current_user_is_owner || @badge_list_admin %>
 
   <!-- === SUBSCRIPTION DETAILS MODAL === -->
 
@@ -912,36 +912,57 @@
     </div>
 
     <div class="modal-body">
-      <h4 class="<%= status_details[:color] %>">
-        <i class="fa <%= status_details[:icon] %>"></i>
-        <%= status_details[:alert_title] %>
-      </h4>
-      <p><b><%= status_details[:summary] %></b></p>
-      <p><%= status_details[:alert_body] %></p>
+      <% if @group.private? %>
+        <h4 class="<%= status_details[:color] %>">
+          <i class="fa <%= status_details[:icon] %>"></i>
+          <%= status_details[:alert_title] %>
+        </h4>
+        <p><b><%= status_details[:summary] %></b></p>
+        <p><%= status_details[:alert_body] %></p>
+      <% else %>
+        <p>
+          <%= @group.name %> is currently an Open Group.
+        </p>
+        <p>
+          You can switch to a Closed Group at any time to get more features. 
+        </p>
+      <% end %>
+
       <ul>
-        <li><b>Current Plan:</b> <%= @group.subscription_plan_name %></li>
-        <li><b>Cost:</b> <%= @group.subscription_plan_cost %></li>
-        <li>
-          <b>Plan Limits:</b>
-        <%= (@group.user_limit<0) ? 'Unlimited members' : pluralize(@group.user_limit,'member') %>,
-          <%=(@group.admin_limit<0) ? 'Unlimited admins' : pluralize(@group.admin_limit,'admin')%>,
-          <%= (@group.sub_group_limit<0) ? \
-            'Unlimited sub-groups' : pluralize(@group.sub_group_limit,'sub-group') %>
-        </li>
-        <li>
-          <b>Included Plan Features:</b>
-          <% if @group.features.blank? %>
-            None
-          <% else %>
-            <%= @group.features.map(&:capitalize).join(', ') %>
-          <% end %>
-        </li>
+        <% if @group.private? %>
+          <li><b>Current Plan:</b> <%= @group.subscription_plan_name %></li>
+          <li><b>Cost:</b> <%= @group.subscription_plan_cost %></li>
+          <li>
+            <b>Plan Limits:</b>
+          <%= (@group.user_limit<0) ? 'Unlimited members' : pluralize(@group.user_limit,'member') %>,
+            <%=(@group.admin_limit<0) ? 'Unlimited admins' : pluralize(@group.admin_limit,'admin')%>,
+            <%= (@group.sub_group_limit<0) ? \
+              'Unlimited sub-groups' : pluralize(@group.sub_group_limit,'sub-group') %>
+          </li>
+        <% end %>
+        <% if @group.has_features? %>
+          <li>
+            <b>Included Plan Features:</b>
+            <ul>
+              <% @group.all_features.each do |feature| %>
+                <li>
+                  <% if APP_CONFIG['feature_details'].has_key?(feature) %>
+                    <strong><%= APP_CONFIG['feature_details'][feature]['label'] %>:</strong>
+                    <%= APP_CONFIG['feature_details'][feature]['description'] %>
+                  <% else %>
+                    <strong><%= feature.capitalize %></strong>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </li>
+        <% end %>
       </ul>
     </div>
 
     <div class="modal-footer">
       <% pricing_url = (@group.pricing_group == 'k12') ? '/pricing#k12' : '/pricing' %>
-      <a href="<%= pricing_url %>" target="_blank" class="btn">
+      <a href="<%= pricing_url %>" target="_blank" class="btn btn-success">
         <i class="fa fa-list-alt"></i>
         View plans &amp; pricing
       </a>
@@ -1171,7 +1192,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                               data: { toggle: 'modal' } %>
                           </li>
                         <% end %>
-                        <% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
+                        <% if @current_user_is_owner || @badge_list_admin %>
                           <!-- #=== SUBSCRIPTION DETAILS ===# -->
                           <li>
                             <a href="#subscription-details" data-toggle="modal">
