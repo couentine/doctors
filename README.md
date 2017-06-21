@@ -56,20 +56,16 @@ dev_gmail_address=knowledgestreem@gmail.com
 dev_gmail_password=PASSWORD_TO_GMAIL_ACCOUNT
 ```
 
-## Running foreman ##
+## Running the app ##
 
-Note that there is a seprate foreman procfile for development which will also forward webhooks
-using the ultrahook client.
-```
-$ foreman start -f Procfile.dev
-```
+To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. 
 
-### Example Procfile.dev ###
+You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). To open a rails console in your terminal the command is `foreman run rails c`.
+
+**Note:** If you are testing webhooks with external services (such as Stripe or Postmark) you will need to use `Procfile.ultrahook.dev`. That will forward `http://dev.[ultrahook_username].ultrahook.com` to `http://localhost:5000`. The ultrahook username will be the username of the account linked to the `ULTRAHOOK_API_KEY` in your `.env` file. To specify the procfile use the command below:
 
 ```
-web: bundle exec puma -C config/puma.rb
-worker: bundle exec sidekiq
-ultrahook: ultrahook stripe http://localhost:5000/h/stripe_event
+$ foreman start -f Procfile.ultrahook.dev
 ```
 
 ## Stripe Webhooks ##

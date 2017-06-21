@@ -1,6 +1,9 @@
 # Load the rails application
 require File.expand_path('../application', __FILE__)
 
+# Neccessary to enable verification of LTI signatures with the OAuth gem
+require 'oauth/request_proxy/rack_request'
+
 # Initialize the rails application
 BadgeList::Application.initialize!
 

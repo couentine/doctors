@@ -16,10 +16,15 @@ ruby '2.1.2'
   gem 'carrierwave_direct'
   gem 'fog'
   gem 'mini_magick', '~> 4.3.6'
+
+#=== USERS & AUTHORIZATION ===#
+
   gem 'devise', '~> 3.5'
   gem 'devise-async'
+  gem 'oauth'
   gem 'omniauth'
   gem 'omniauth-google-oauth2'
+  gem 'omniauth-canvas'
 
 #=== FRONT-END ===#
   

@@ -36,6 +36,7 @@ BadgeList::Application.routes.draw do
   end
   
   # === WEBHOOK PATHS === #
+  match 'h/lti/launch' => 'lti#launch', via: :post
   match 'h/stripe_event' => 'webhooks#stripe_event', via: :post
   match 'h/postmark_bounce' => 'webhooks#postmark_bounce', via: :post
 

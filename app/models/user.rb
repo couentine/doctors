@@ -113,7 +113,7 @@ class User
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, 
     :validatable, :confirmable, :lockable, :async, :omniauthable, 
-    :omniauth_providers => [:google_oauth2]
+    :omniauth_providers => [:google_oauth2, :canvas]
 
   # === STANDARD DEVISE FIELDS === #
 
