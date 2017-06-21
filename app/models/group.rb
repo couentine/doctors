@@ -936,7 +936,7 @@ class Group
   # - status: ready (LTI is configured and active), pending (LTI key needs to be registered), 
   #           inactive (Expired group subscription), invalid (bad signature, no match, etc)
   # - error_message: User-safe error message (if inactive or invalid)
-  def Group.get_lti_status(launch_params)
+  def self.get_lti_status(launch_params)
     consumer_key = launch_params['oauth_consumer_key']
     context_id = launch_params['context_id']
     oauth_signature = launch_params['oauth_signature']
