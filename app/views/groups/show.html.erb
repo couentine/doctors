@@ -642,7 +642,7 @@
                 </label>
                 <div class="controls">
                   <input type="text" id="join-url-preview" class="input-xlarge embed-code"
-                    value="<%= "#{@group.group_url}?code=#{@group.join_code}" %>">
+                    value="<%= "#{@group.group_url}?code=#{@group.join_code}" %>" readonly>
                 </div>
               </div>
 
@@ -680,6 +680,364 @@
         </a>
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
       <% end %>
+    </div>
+  </div>
+
+  <!-- === GROUP INTEGRATIONS MODAL === -->
+
+  <script type="text/javascript">
+
+    var createGroupLTIKeyURL = "<%= create_group_lti_key_url(@group, format: :json) %>";
+    var groupLTIKeyURL = "<%= group_lti_key_url(@group, '+consumerKey+', format: :json) %>";
+    var groupLTIContextURL = "<%= group_lti_context_url(@group, '+contextId+', format: :json) %>";
+
+    $(document).ready(function() {
+      
+      // Make the modal nav tabs work
+      $('#integration-tabs a').click(function(e) {
+        $(this).tab('show');
+        e.preventDefault();
+        document.location.hash = '#integrations'; // fix the hash since it gets overwritten
+      });
+
+      // Create new LTI key button
+      $('#new-lti-key-save').click(function(e) {
+        e.preventDefault();
+        $('#integration-tab-spinner').fadeIn();
+        $('#new-lti-key-open').show();
+        $('#new-lti-key-panel').hide();
+
+        $.ajax({
+          url: createGroupLTIKeyURL + '?name=' + $('#new-lti-key-name').val(),
+          type: 'POST',
+          success: function(response) {
+            if (response.success) {
+              var ltiKey = response.lti_key;
+
+              // Add the new key to the table and hide the empty row
+              $('#lti-key-table-body').append("<tr data-key='" + ltiKey.consumer_key + "'><td>" 
+                + ltiKey.name + "</td><td><input readonly type='text' "
+                + "class='input-small embed-code no-width' value='" + ltiKey.consumer_key 
+                + "'></td><td><input readonly type='text' class='input-small embed-code no-width' "
+                + "value='" + ltiKey.secret_key + "'></td><td>&nbsp;</td></tr>"
+              ).find("input.embed-code").click(function() { $(this).select(); });
+              $('#lti-key-table-body tr.empty').hide();
+              $('#new-lti-key-name').val('');
+            } else {
+              alert('There was a problem creating a new LTI key, please try again later.');
+            }
+
+            $('#integration-tab-spinner').fadeOut();
+          },
+          error: function() {
+            alert('There was a problem creating a new LTI key, please try again later.');
+            $('#integration-tab-spinner').fadeOut();
+          }
+        });
+      });
+
+      // Delete LTI key links
+      $('.delete-lti-key').click(function(e) {
+        var consumerKey = $(this).data('key');
+        var self = this; // makes it available in the ajax anonymous functions
+        var spinnerElement = $(".lti-key-spinner[data-key='" + consumerKey + "']");
+
+        e.preventDefault();
+        $(self).fadeOut();
+        spinnerElement.fadeIn();
+
+        $.ajax({
+          url: groupLTIKeyURL.replace('+consumerKey+', consumerKey),
+          type: 'DELETE',
+          success: function(response) {
+            if (response.success) {
+              var ltiKey = response.lti_key;
+
+              // Remove the table row and show the empty row if needed
+              $("#lti-key-table-body tr[data-key='" + consumerKey + "']").remove();
+              if ($('#lti-key-table-body tr:not(.empty)').length == 0)
+                $('#lti-key-table-body tr.empty').show();
+            } else {
+              if (spinnerElement.siblings('i.fa-exclamation-triangle').length == 0)
+                spinnerElement.before("<i class='fa fa-exclamation-triangle red'></i>");
+            }
+
+            spinnerElement.fadeOut();
+            $(self).fadeIn();
+          },
+          error: function() {
+            spinnerElement.fadeOut();
+            if (spinnerElement.siblings('i.fa-exclamation-triangle').length == 0)
+                spinnerElement.before("<i class='fa fa-exclamation-triangle red'></i>");
+            $(self).fadeIn();
+          }
+        });
+      });
+
+    });
+
+  </script>
+
+  <div id="integrations" class="modal hide fade" tabindex="-1" role="dialog" 
+      aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Manage app integrations</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <% if @group.has?(:integration) %>
+            <% #=== HAS INTEGRATION FEATURE ===# %>
+
+            <ul class="nav nav-tabs modal-tabs" id="integration-tabs">
+              <li class="active">
+                <a class="no-hash" href="#lti-integration" data-toggle="tab">LTI</a>
+              </li>
+              <li>
+                <a class="no-hash" href="#canvas-integration" data-toggle="tab">Canvas</a>
+              </li>
+            </ul>
+
+            <div class="tab-content">
+              <!-- === LTI INTEGRATION TAB === -->
+              <div class="tab-pane modal-tab-pane active" id="lti-integration">
+                <div class="spinner-wrapper" id="integration-tab-spinner" style="display: none;">
+                  <div class="spinner large tertiary">&nbsp;</div>
+                </div>
+
+                <div class="info-block">
+                  <p>
+                    Your Badge List group is able to be integrated as a tool provider into any 
+                    LTI-compatible tool consumer such as Canvas, Moodle, Blackboard and 
+                    <a 
+                    href="https://www.imsglobal.org/all-learning-tools-interoperability-lti-tools"
+                    target="_blank">many more</a>.
+                    To set up an LTI integration you will need to have administrative permissions 
+                    in the LMS instance or course.
+                  </p>
+                  <p>
+                    We've put together 
+                    <a href="/help/docs/LTI-Integration" target="_blank">instructions for 
+                    configuring the LTI integration</a> in most major LMS platforms.
+                    If you have any questions, 
+                    <a href="#" onclick="Intercom('show'); return false;">chat with us</a>.
+                  </p>
+                </div>
+
+                <!-- === ACTIVE LTI INTEGRATIONS === -->
+
+                <h4>Active LTI Integrations</h4>
+
+                <% if @group.lti_context_details.present? %>
+                  <% @group.lti_context_details.each do |context_id, details| %>
+                    <div class="modal-body-card">
+                      <a href="#" class="btn btn-small modal-body-card-action" 
+                          title="Remove this LTI integration"
+                          onclick="deleteLTIContext('<%= context_id %>');">
+                        <i class="fa fa-trash"></i>
+                      </a>
+                      <h5><%= details['name'] %></h5>
+                      <div class="modal-body-card-contents">
+                        <p>
+                          <strong>Context Id:</strong> <%= context_id %>
+                        </p>
+                        <p>
+                          <strong>Navigate users to:</strong> <%= context_id %>
+                        </p>
+                        <div class="radio-group">
+                          <input type="radio" name="<%= context_id %>_navigate_to" value="group">
+                            Group home
+                            <br>
+                          <input type="radio" name="<%= context_id %>_navigate_to" value="badge">
+                            A specific badge:
+                            <select name="<%= context_id %>_navigate_to_badge" disabled>
+                              <% group.badges_cache do |badge_id, badge_item| %>
+                                <option value="<%= badge_id %>">
+                                  <%= badge_item['name'] %>
+                                </option>
+                              <% end %>
+                            </select>
+                            <br>
+                          <input type="radio" name="<%= context_id %>_navigate_to" value="group_tag">
+                            A specific group tag:
+                            <select name="<%= context_id %>_navigate_to_group_tag" disabled>
+                              <% group.tags_cache do |tag_id, tag_item| %>
+                                <option value="<%= tag_id %>">
+                                  #<%= tag_item['name_with_caps'] %>
+                                </option>
+                              <% end %>
+                            </select>
+                        </div>
+
+                        <a href="#" class="btn btn-primary btn-small" 
+                            onclick="updateLTIContext('<%= context_id %>');">
+                          Save Changes
+                        </a>
+                      </div>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div class="modal-body-card empty">
+                    <h5>None yet...</h5>
+                    <div class="modal-body-card-contents">
+                      <p>
+                        After you activate an LTI integration by opening Badge List from 
+                        the link in your LMS it will show up here. 
+                        To get started click the blue button below.
+                      </p>
+                    </div>
+                  </div>
+                <% end %>
+
+                <!-- === PENDING LTI KEYS === -->
+
+                <div class="header-wrapper">
+                  <a href="#" class="btn btn-small btn-primary" id="new-lti-key-open" 
+                      data-toggle="custom" data-hide="#new-lti-key-open" 
+                      data-show="#new-lti-key-panel" data-focus="#new-lti-key-name">
+                    <i class="fa fa-plus"></i> Create New Key
+                  </a>
+                  <h4>Pending LTI Keys</h4>
+                </div>
+
+                <div id="new-lti-key-panel" class="input-block" style="display: none;">
+                  <p>
+                    Enter a name to help you identify this key later, then click the Generate Key
+                    button. The name can be anything (such as the name of the course), it is for
+                    your reference only.
+                  </p>
+                  <div class="input-wrapper">
+                    <label for="new-lti-key-name">Display Name</label>
+                    <input id="new-lti-key-name" type="text" class="input-medium" maxlength="30">
+                  </div>
+                  <div class="input-footer">
+                    <a id="cancel-lti-key-save" href="#" class="btn" data-toggle="custom"
+                        data-show="#new-lti-key-open" data-hide="#new-lti-key-panel">
+                      Cancel
+                    </a>
+                    <a id="new-lti-key-save" href="#" class="btn btn-primary">
+                      Generate Key
+                    </a>
+                  </div>
+                </div>
+
+                <div class="info-block">
+                  <p>
+                    The first integration step is to generate a unique key pair.
+                    You will then need to copy and paste both keys into your LMS along with the 
+                    configuration XML link below.
+                  </p>
+                  <p>
+                    Once you've added Badge List as an external app 
+                    you'll just need to click the Badge List tab in your LMS to activate the
+                    integration.
+                  </p>
+                </div>
+
+                <div class="table-wrapper">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Consumer Key</th>
+                        <th>Secret Key</th>
+                        <th>&nbsp;</th>
+                      </tr>
+                    </thead>
+                    <tbody id="lti-key-table-body">
+                      <% if @group.lti_pending_key_details.present? %>
+                        <% @group.lti_pending_key_details.each do |consumer_key, details| %>
+                          <tr data-key="<%= consumer_key %>">
+                            <td><%= details['name'] %></td>
+                            <td>
+                              <input type="text" class="input-small embed-code no-width"
+                                value="<%= consumer_key %>" readonly>
+                            </td>
+                            <td>
+                              <input type="text" class="input-small embed-code no-width"
+                                value="<%= details['secret_key'] %>" readonly>
+                            </td>
+                            <td>
+                              <a href="#" class="btn btn-small delete-lti-key"
+                                  title="Delete this key" data-key="<%= consumer_key %>">
+                                <i class="fa fa-trash"></i>
+                              </a>
+                              <i class="fa fa-refresh fa-spin lti-key-spinner" 
+                                data-key="<%= consumer_key %>" style="display: none;"></i>
+                            </td>
+                          </tr>
+                        <% end %>
+                      <% end %>
+                      <tr class="empty" style="<%= d?(@group.lti_pending_key_details.blank?) %>">
+                        <td colspan="4">
+                          <em>
+                            The group doesn't have any currently pending LTI integration keys
+                          </em>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="info-block">
+                  <label for="lti-config-xml">
+                    LTI Configuration XML Link:
+                  </label>
+                  <input id="lti-config-xml" type="text" class="input-xlarge embed-code" readonly
+                    value="https://FIXME">
+                </div>
+              </div>
+              <!-- === END LTI INTEGRATION TAB === -->
+
+              <!-- === CANVAS INTEGRATION TAB === -->
+              <div class="tab-pane modal-tab-pane" id="canvas-integration">
+                <div class="info-block">
+                  <p>
+                    Badge List is currently working on a deeper integration with Canvas which
+                    will allow learners to easily post work from Canvas to their badge portfolios,
+                    but it's not ready yet.
+                  </p>
+                  <p>
+                    We're looking for organizations to help test the new integration, so please
+                    <a href="#" onclick="Intercom('show'); return false;">reach out to us</a> 
+                    if you're interested in testing the new integration when it becomes available.
+                  </p>
+                  <p>
+                    In the meantime you can setup the LTI integration. It was designed to work
+                    very well with Canvas.
+                  </p>
+                </div>
+              </div>
+              <!-- === END CANVAS INTEGRATION TAB === -->
+            </div>
+
+          <% else %>
+            <% #=== DOES NOT HAVE INTEGRATION FEATURE ===# %>
+              
+            <p>
+              <%= @group.name %> does not currently have the integration feature.
+            </p>
+            <p>
+              To be able to integrate your group with third-party applications you will need to 
+              upgrade to a subscription plan which includes the integration feature. 
+            </p>
+
+          <% end %>
+          <% # === END OF IF HAS INTEGRATION %>
+         </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <% if !@group.has?(:integration) %>
+        <a href="/pricing" target="_blank" class="btn btn-success">
+          <i class="fa fa-list-alt"></i>
+          View plans &amp; pricing
+        </a>
+      <% end %>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
   </div>
 
@@ -1190,6 +1548,12 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                             <%= link_to '<i class="fa fa-envelope"></i> '.html_safe \
                               + 'New member welcome settings', '#welcome-settings', 
                               data: { toggle: 'modal' } %>
+                          </li>
+                          <!-- #=== INTEGRATIONS ===# -->
+                          <li>
+                            <a href="#integrations" data-toggle="modal">
+                              <i class="fa fa-cogs"></i> Integrations
+                            </a>
                           </li>
                         <% end %>
                         <% if @current_user_is_owner || @badge_list_admin %>

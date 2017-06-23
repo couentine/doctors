@@ -907,8 +907,8 @@ class Group
   # === LTI (CLASS & INSTANCE) METHODS === #
 
   # Generates a new lti key pair and adds it to the lti_pending_keys/details
-  # Returns hash with following keys: consumer_key, secret_key
-  # NOTE: To commit the save use add_lti_key_pair!()
+  # Returns hash with following keys: name, consumer_key, secret_key
+  # NOTE: Does not commit the save
   def add_lti_key_pair(creator_user, name)
     consumer_key, secret_key = SecureRandom.hex(30), SecureRandom.hex(30)
 
@@ -919,12 +919,66 @@ class Group
       'secret_key' => secret_key
     }
 
-    { consumer_key: consumer_key, secret_key: secret_key }
+    { name: name, consumer_key: consumer_key, secret_key: secret_key }
   end
 
-  def add_lti_key_pair!(creator_user, name)
-    return_value = self.add_lti_key_pair(creator_user, name)
-    self.save!
+  # Removes the specified key pair
+  # Returns nil if not found else returns hash with following keys: name, consumer_key, secret_key
+  # NOTE: Does not commit the save
+  def remove_lti_key_pair(consumer_key)
+    return_value = nil
+    
+    if lti_pending_keys.include?(consumer_key) && lti_pending_key_details.has_key?(consumer_key)
+      return_value = { 
+        name: lti_pending_key_details[consumer_key]['name'], 
+        consumer_key: consumer_key,
+        secret_key: lti_pending_key_details[consumer_key]['secret_key']
+      }
+
+      self.lti_pending_keys.delete consumer_key
+      self.lti_pending_key_details.delete consumer_key
+    end
+
+    return_value
+  end
+
+  # Updates the navigation keys of the specified context id
+  # Returns hash with following keys: context_id, name, navigate_to, navigate_to_id
+  # NOTE: Does not commit the save
+  def update_lti_context_details(context_id, navigate_to, navigate_to_id)
+    return_value = nil
+
+    if lti_context_ids.include?(context_id) && lti_context_details.has_key?(context_id)
+      self.lti_context_details[context_id]['navigate_to'] = navigate_to
+      self.lti_context_details[context_id]['navigate_to_id'] = navigate_to_id
+
+      return_value = {
+        context_id: context_id,
+        name: lti_context_details[context_id]['name'],
+        navigate_to: navigate_to,
+        navigate_to_id: navigate_to_id
+      }
+    end
+
+    return_value
+  end
+
+  # Removes the specified context id and details
+  # Returns nil if not found else returns hash with following keys: name, context_id
+  # NOTE: Does not commit the save
+  def remove_lti_context(context_id)
+    return_value = nil
+    
+    if lti_context_ids.include?(context_id) && lti_context_details.has_key?(context_id)
+      return_value = { 
+        name: lti_context_details[context_id]['name'], 
+        context_id: context_id
+      }
+
+      self.lti_context_ids.delete context_id
+      self.lti_context_details.delete context_id
+    end
+
     return_value
   end
 
@@ -936,11 +990,10 @@ class Group
   # - status: ready (LTI is configured and active), pending (LTI key needs to be registered), 
   #           inactive (Expired group subscription), invalid (bad signature, no match, etc)
   # - error_message: User-safe error message (if inactive or invalid)
-  def self.get_lti_status(launch_params)
+  def self.get_lti_status(request, launch_params)
     consumer_key = launch_params['oauth_consumer_key']
-    context_id = launch_params['context_id']
+    context_id = launch_params['context_id'].to_s.parameterize
     oauth_signature = launch_params['oauth_signature']
-    oauth_signature_method = launch_params['oauth_signature_method']
 
     # First find the group so we can retrieve the secret key
     group = Group.where(:lti_context_ids.in => [context_id]).first
@@ -949,7 +1002,7 @@ class Group
       secret_key = group.lti_context_details[context_id]['secret_key']
     else
       group = Group.where(:lti_pending_keys.in => [consumer_key]).first
-      secret_key = group.lti_pending_keys[consumer_key]['secret_key'] if group
+      secret_key = group.lti_pending_key_details[consumer_key]['secret_key'] if group
     end
 
     if group && secret_key
@@ -1004,7 +1057,7 @@ class Group
   # IF UNSUCCESSFUL: Raises a StandardError.
   def register_pending_lti_key(launch_params)
     consumer_key = launch_params['oauth_consumer_key']
-    context_id = launch_params['context_id']
+    context_id = launch_params['context_id'].to_s.parameterize
     context_name = launch_params['context_title'] || launch_params['context_label']
 
     if lti_pending_keys.include?(consumer_key) && lti_pending_key_details.has_key?(consumer_key)

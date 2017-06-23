@@ -6,7 +6,8 @@ class LtiController < ApplicationController
     begin
       # render nothing: true, status: :ok
 
-      render json: { lti_status: Group.get_lti_status(params), params: params }
+      render json: { lti_status: Group.get_lti_status(request, params), params: params }
+      # render json: { lti_status: nil, params: params }
     rescue Exception => e
       render nothing: true, status: :internal_server_error
     end
