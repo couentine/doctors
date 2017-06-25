@@ -1,0 +1,75 @@
+<%
+  # This is used to display errors inside of iframes (it does not load the app container)
+
+  # Accepts the following class variables:
+  # - @error_title: (Required) String used for the header
+  # - @error_page_title: (Optional) String used for the page title in the browser
+  # - @error_message: (Required) String used for the body (can contain HTML)
+
+  provide(:title, 'Error')
+  provide(:no_container, true)
+%>
+
+<style type="text/css">
+    
+  #wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    padding: 2em;
+    background: #E57373;
+
+  }
+    #header {
+      position: absolute;
+      top: 0; right: 0; left: 0;  
+      padding: 2em;
+      text-align: center;
+    }
+      #header img {
+        height: 2em;
+      }
+      #header img.icon {
+        position: relative;
+        top: -0.2em;
+        margin-right: 0.5em;
+      }
+    #content {
+      margin: 0 auto;
+      max-width: 600px;
+    }
+      .card-actions a {
+        display: inline-block;
+        text-decoration: none;
+      }
+
+</style>
+
+<div id="wrapper">
+  <div id="header">
+    <%= image_tag 'badge-list-shield-white.png', class: 'icon' %>
+    <%= image_tag 'badge-list-text-inv.png', class: 'text' %>
+  </div>
+    
+  <paper-card heading="<%= @error_title %>" id="content">
+    <div class="card-content">
+      <%= @error_message.html_safe %>
+    </div>
+    <div class="card-actions">
+      <a href="mailto:support@badgelist.com">
+        <paper-button>Contact Support</paper-button>
+      </a>
+    </div>
+  </paper-card>
+
+</div>
+
+<script type="text/javascript">
+  
+  // For debugging purposes we will export the page parameters to javascript which can be
+  // retrieved via the debug console.
+  var pageParams = <%= params.to_json.html_safe %>;
+
+</script>

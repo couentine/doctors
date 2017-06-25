@@ -990,52 +990,44 @@ class Group
   # - status: ready (LTI is configured and active), pending (LTI key needs to be registered), 
   #           inactive (Expired group subscription), invalid (bad signature, no match, etc)
   # - error_message: User-safe error message (if inactive or invalid)
-  def self.get_lti_status(request, launch_params)
+  # - lti_pending_key_details: Returned if status = 'pending'
+  # - lti_context_details: Returned if status = 'active'
+  def self.get_lti_status(launch_params)
     consumer_key = launch_params['oauth_consumer_key']
     context_id = launch_params['context_id'].to_s.parameterize
     oauth_signature = launch_params['oauth_signature']
 
-    # First find the group so we can retrieve the secret key
+    # First attempt to find the group
     group = Group.where(:lti_context_ids.in => [context_id]).first
     context_id_match = !group.nil?
-    if context_id_match
-      secret_key = group.lti_context_details[context_id]['secret_key']
-    else
-      group = Group.where(:lti_pending_keys.in => [consumer_key]).first
-      secret_key = group.lti_pending_key_details[consumer_key]['secret_key'] if group
-    end
+    group = Group.where(:lti_pending_keys.in => [consumer_key]).first if !context_id_match
 
-    if group && secret_key
-      # We have a group match and the secret key so it's time to verify the oauth signature
-      if OAuth::Signature.verify(request, consumer_secret: secret_key)
-        if context_id_match
-          # The LTI integration is at least properly configured, but there are more things to check
-          if group.has?(:integration)
-            if group.disabled?
-              # The integration feature is not enabled
-              status = 'inactive'
-              error_message = 'The LTI integration is properly configured, but the linked ' \
-                + 'Badge List group has an expired subscription. Please contact Badge List support.'
-            else
-              # We're good to go!
-              status = 'ready'
-            end
-          else
+    if group
+      if context_id_match
+        # The LTI integration is at least properly configured, but there are more things to check
+        lti_context_details = group.lti_context_details[context_id]
+
+        if group.has?(:integration)
+          if group.disabled?
             # The integration feature is not enabled
             status = 'inactive'
             error_message = 'The LTI integration is properly configured, but the linked ' \
-              + 'Badge List group no longer has the integration feature. ' \
-              + 'Please contact Badge List support.'
+              + 'Badge List group has an expired subscription. Please contact Badge List support.'
+          else
+            # We're good to go!
+            status = 'ready'
           end
         else
-          # The request is valid and we've got a match but we still need to register the context id
-          status = 'pending'
+          # The integration feature is not enabled
+          status = 'inactive'
+          error_message = 'The LTI integration is properly configured, but the linked ' \
+            + 'Badge List group no longer has the integration feature. ' \
+            + 'Please contact Badge List support.'
         end
       else
-        # Somebody is being sneaky or the math is messed up. The OAuth signature is busted. :(
-        status = 'invalid'
-        error_message = 'The OAuth signature, which is used to ensure secure communications ' \
-          + 'between Badge List and the LMS, is inaccurate. Please contact your site administrator.'
+        # The request is valid and we've got a match but we still need to register the context id
+        lti_pending_key_details = group.lti_pending_key_details[consumer_key]
+        status = 'pending'
       end
     else
       # There's no match whatsoever
@@ -1045,13 +1037,14 @@ class Group
     end
 
     # Return the hash
-    { group: group, status: status, error_message: error_message }
+    { group: group, status: status, error_message: error_message, 
+      lti_pending_key_details: lti_pending_key_details, lti_context_details: lti_context_details }
   end
 
   # Call this method to upgrade a pending lti key to a registered context id.
   # This method checks for the following error states: No matching key on group, context_id has 
   # already been assigned to another group.
-  # NOTE: To commit the save use register_pending_lti_key!()
+  # NOTE: Does not commit the save
   #
   # IF SUCCESSFUL: Returns the created context details hash.
   # IF UNSUCCESSFUL: Raises a StandardError.
@@ -1068,8 +1061,8 @@ class Group
         self.lti_context_details[context_id] = {
           name: context_name,
           consumer_key: consumer_key,
-          secret_key: lti_pending_key_details[context_id]['secret_key'],
-          creator_user_id: lti_pending_key_details[context_id]['creator_user_id'],
+          secret_key: lti_pending_key_details[consumer_key]['secret_key'],
+          creator_user_id: lti_pending_key_details[consumer_key]['creator_user_id'],
           navigate_to: 'group',
           navigate_to_id: nil,
           initial_launch_params: launch_params
@@ -1085,12 +1078,6 @@ class Group
     else
       raise StandardError.new('The provided key does not match any pending keys on this group.')
     end
-  end
-
-  def register_pending_lti_key!(launch_params)
-    return_value = register_pending_lti_key(launch_params)
-    self.save!
-    return_value
   end
 
   # === STRIPE RELATED METHODS === #

@@ -853,7 +853,7 @@
                           <input type="radio" name="<%= context_id %>_navigate_to" value="badge">
                             A specific badge:
                             <select name="<%= context_id %>_navigate_to_badge" disabled>
-                              <% group.badges_cache do |badge_id, badge_item| %>
+                              <% @group.badges_cache do |badge_id, badge_item| %>
                                 <option value="<%= badge_id %>">
                                   <%= badge_item['name'] %>
                                 </option>
@@ -863,7 +863,7 @@
                           <input type="radio" name="<%= context_id %>_navigate_to" value="group_tag">
                             A specific group tag:
                             <select name="<%= context_id %>_navigate_to_group_tag" disabled>
-                              <% group.tags_cache do |tag_id, tag_item| %>
+                              <% @group.tags_cache do |tag_id, tag_item| %>
                                 <option value="<%= tag_id %>">
                                   #<%= tag_item['name_with_caps'] %>
                                 </option>
