@@ -1,5 +1,4 @@
 class LtiController < ApplicationController
-
   # === FILTERS === #
 
   skip_before_filter :verify_authenticity_token
@@ -115,7 +114,13 @@ class LtiController < ApplicationController
         + "<p><strong>Error Details:</strong> #{e.message}</p>"
       render 'errors/error_no_container', layout: 'app'
     end
+  end
 
+  # GET /h/lti/config.xml
+  # This returns an LTI configuration XML. (Refer here: https://www.edu-apps.org/build_xml.html)
+  # NOTE: This action is called config_xml because when you try to call it config it breaks rails.
+  def config_xml
+    # renders /views/lti/config_xml.xml.erb
   end
 
 end

@@ -54,6 +54,9 @@ oauth_google_client_id=abc123
 oauth_google_client_secret=abc123
 dev_gmail_address=knowledgestreem@gmail.com
 dev_gmail_password=PASSWORD_TO_GMAIL_ACCOUNT
+lti_app_name=Badge List Dev
+lti_app_description=Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.
+lti_unique_tool_id=badgelist-dev
 ```
 
 ## Running the app ##
