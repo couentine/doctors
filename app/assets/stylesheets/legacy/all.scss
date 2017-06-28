@@ -1145,20 +1145,66 @@ div.bl-inline-form {
     }
     .modal-body-card {
       margin: 0 0 1.5em 0;
-      padding: 1em;
       background-color: white;
       border-radius: 5px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 
-      h5 {
-        margin: 0 0 1em 0;
-        font-size: 1em;
+      .modal-body-card-header {
+        padding: 1em;
+        border-bottom: 1px solid $really-light-gray;
+        position: relative;
+        
+        h5 {
+          margin: 0;
+          font-weight: 900;
+          font-size: 1.1em;
+        }
+
+        .btn { float: right; }
+        .btn-large {
+          position: relative;
+          right: -1em;
+          top: -0.7em;
+        }
+      }
+      .modal-body-card-contents {
+        padding: 1em;
+
+        ul.radio-group {
+          margin: 1em 0;
+
+          li {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0.5em;
+
+            input[type='radio'] { margin: 0; }
+            label { 
+              margin: 0 1em; 
+              font-weight: normal;
+            }
+            select { margin: 0; }
+          }
+
+          &:last-child { margin-bottom: 0; }
+        }
+      }
+      .modal-body-card-footer {
+        text-align: right;
+        border-top: 1px solid $really-light-gray;
+        padding: 1em;
       }
 
       &.empty {
         background-color: rgba(255, 255, 255, 0.8);
         border: 2px dashed #ddd;
         box-shadow: none;
+
+        h5 {
+          margin: 1em 1em 0em 1em;
+          font-size: 1.1em;
+        }
       }
     }
   }

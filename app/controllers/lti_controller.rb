@@ -26,7 +26,7 @@ class LtiController < ApplicationController
         secret_key = (@lti_context_details || @lti_pending_key_details)['secret_key']
         timestamp_delta = (Time.now.to_i - params['oauth_timestamp'].to_i).abs
 
-        if (timestamp_delta < MAX_TIMESTAMP_DELTA) \
+        if (timestamp_delta <= MAX_TIMESTAMP_DELTA) \
             && OAuth::Signature.verify(request, consumer_secret: secret_key)
           # If this is pending then we now have all the info needed to register it
           if @lti_status[:status] == 'pending'
@@ -91,10 +91,16 @@ class LtiController < ApplicationController
             end
           end
         else
-          @error_title = 'OAuth Error'
-          @error_message = '<p>The OAuth signature, which is used to ensure secure ' \
-            + 'communications between Badge List and the LMS, is inaccurate. ' \
-            + 'Please contact your site administrator.</p>'
+          if (timestamp_delta > MAX_TIMESTAMP_DELTA)
+            @error_title = 'LTI Launch Link Expired'
+            @error_message = '<p>The launch link which you are following has expired. ' \
+              + 'Please return to your LMS and try clicking the Badge List tab again.</p>'
+          else
+            @error_title = 'OAuth Error'
+            @error_message = '<p>The OAuth signature, which is used to ensure secure ' \
+              + 'communications between Badge List and the LMS, is inaccurate. ' \
+              + 'Please contact your site administrator.</p>'
+          end
           render 'errors/error_no_container', layout: 'app'
         end
       when 'inactive'

@@ -691,6 +691,68 @@
     var groupLTIKeyURL = "<%= group_lti_key_url(@group, '+consumerKey+', format: :json) %>";
     var groupLTIContextURL = "<%= group_lti_context_url(@group, '+contextId+', format: :json) %>";
 
+    function updateLTIContext(contextId) {
+      var navigateTo; var navigateToId;
+
+      $('#integration-tab-spinner').fadeIn();
+
+      // Figure out the navigate to id value
+      navigateTo = $("input:radio[name='" + contextId + "_navigate_to']:checked").val();
+      if (navigateTo == 'badge')
+        navigateToId = $("select[name='" + contextId + "_navigate_to_badge']").val();
+      else if (navigateTo == 'group_tag')
+        navigateToId = $("select[name='" + contextId + "_navigate_to_group_tag']").val();
+
+      // Send the ajax request
+      $.ajax({
+        url: groupLTIContextURL.replace('+contextId+', contextId) + '?navigate_to=' + navigateTo
+          + (navigateToId ? ('&navigate_to_id=' + navigateToId) : ''),
+        type: 'PUT',
+        success: function(response) {
+          if (response.success) {
+            // Nothing to do!
+          } else {
+            alert('There was a problem updating the LTI context settings. Please try again.');
+          }
+
+          $('#integration-tab-spinner').fadeOut();
+        },
+        error: function() {
+          alert('There was an error updating the LTI context settings. Please try again.');
+          $('#integration-tab-spinner').fadeOut();
+        }
+      });
+    }
+
+    function deleteLTIContext(contextId) {
+      if (confirm('Are you sure you want to remove this LTI integration?\n\n'
+          + 'Note: You will also need to remove it from the LMS, otherwise users will be '
+          + 'presented with an error message when they click on the Badge List tab.')) {
+        $('#integration-tab-spinner').fadeIn();
+
+        $.ajax({
+          url: groupLTIContextURL.replace('+contextId+', contextId),
+          type: 'DELETE',
+          success: function(response) {
+            if (response.success) {
+              // Remove the modal body card and show the empty card if needed
+              $('#context-card-' + contextId).remove();
+              if ($('#lti-integration .modal-body-card:not(.empty)').length == 0)
+                $('#lti-integration .modal-body-card.empty').show();
+            } else {
+              alert('There was a problem removing the specified LTI context. Please try again.');
+            }
+
+            $('#integration-tab-spinner').fadeOut();
+          },
+          error: function() {
+            alert('There was an error removing the specified LTI context. Please try again.');
+            $('#integration-tab-spinner').fadeOut();
+          }
+        });
+      }
+    }
+
     $(document).ready(function() {
       
       // Make the modal nav tabs work
@@ -699,6 +761,14 @@
         e.preventDefault();
         document.location.hash = '#integrations'; // fix the hash since it gets overwritten
       });
+
+      // Clicking the radios in the active integration cards toggles the select boxes next to them
+      $("#lti-integration ul.radio-group input[type='radio']").change(function() {
+        $(this).closest('ul.radio-group').find('select').prop('disabled', true);
+        if ($(this).prop('checked'))
+          $(this).siblings('select').prop('disabled', false);
+      });
+
 
       // Create new LTI key button
       $('#new-lti-key-save').click(function(e) {
@@ -830,65 +900,84 @@
 
                 <h4>Active LTI Integrations</h4>
 
+                <div class="modal-body-card empty" 
+                    style="<%= d?(@group.lti_context_details.blank?) %>">
+                  <h5>None yet...</h5>
+                  <div class="modal-body-card-contents">
+                    <p>
+                      After you activate an LTI integration by opening Badge List from 
+                      the link in your LMS it will show up here. 
+                      To get started click the blue button below.
+                    </p>
+                  </div>
+                </div>
+
                 <% if @group.lti_context_details.present? %>
                   <% @group.lti_context_details.each do |context_id, details| %>
-                    <div class="modal-body-card">
-                      <a href="#" class="btn btn-small modal-body-card-action" 
-                          title="Remove this LTI integration"
-                          onclick="deleteLTIContext('<%= context_id %>');">
-                        <i class="fa fa-trash"></i>
-                      </a>
-                      <h5><%= details['name'] %></h5>
+                    <div class="modal-body-card" id="context-card-<%= context_id %>">
+                      <div class="modal-body-card-header">
+                        <a href="#" class="btn btn-large btn-link modal-body-card-action" 
+                            title="Remove this LTI integration"
+                            onclick="deleteLTIContext('<%= context_id %>'); return false;">
+                          <i class="fa fa-trash"></i>
+                        </a>
+                        <h5><%= details['name'] %></h5>
+                      </div>
+
                       <div class="modal-body-card-contents">
                         <p>
-                          <strong>Context Id:</strong> <%= context_id %>
+                          <strong>Navigate users to:</strong>
                         </p>
-                        <p>
-                          <strong>Navigate users to:</strong> <%= context_id %>
-                        </p>
-                        <div class="radio-group">
-                          <input type="radio" name="<%= context_id %>_navigate_to" value="group">
-                            Group home
-                            <br>
-                          <input type="radio" name="<%= context_id %>_navigate_to" value="badge">
-                            A specific badge:
-                            <select name="<%= context_id %>_navigate_to_badge" disabled>
-                              <% @group.badges_cache do |badge_id, badge_item| %>
-                                <option value="<%= badge_id %>">
+                        <ul class="radio-group">
+                          <li>
+                            <input type="radio" name="<%= context_id %>_navigate_to" value="group"
+                                id="<%= context_id %>_n2g"
+                                <%= (details['navigate_to'] == 'group') ? 'checked' : '' %>>
+                            <label for="<%= context_id %>_n2g">Group home</label>
+                          </li>
+                          <li>
+                            <input type="radio" name="<%= context_id %>_navigate_to" value="badge"
+                              id="<%= context_id %>_n2b"
+                              <%= (details['navigate_to'] == 'badge') ? 'checked' : '' %>>
+                            <label for="<%= context_id %>_n2b">A specific badge:</label>
+                            <select name="<%= context_id %>_navigate_to_badge"
+                                <%= (details['navigate_to'] == 'badge') ? '' : 'disabled' %>>
+                              <option value="">Select a Badge</option>
+                              <% @group.badges_cache.each do |badge_id, badge_item| %>
+                                <option value="<%= badge_id %>"
+                                  <%= (details['navigate_to_id'] == badge_id) ? 'selected' : '' %>>
                                   <%= badge_item['name'] %>
                                 </option>
                               <% end %>
                             </select>
-                            <br>
-                          <input type="radio" name="<%= context_id %>_navigate_to" value="group_tag">
-                            A specific group tag:
-                            <select name="<%= context_id %>_navigate_to_group_tag" disabled>
-                              <% @group.tags_cache do |tag_id, tag_item| %>
-                                <option value="<%= tag_id %>">
+                          </li>
+                          <li>
+                            <input type="radio" name="<%= context_id %>_navigate_to" 
+                              id="<%= context_id %>_n2gt" value="group_tag"
+                              <%= (details['navigate_to'] == 'group_tag') ? 'checked' : '' %>>
+                            <label for="<%= context_id %>_n2gt">A specific group tag:</label>
+                            <select name="<%= context_id %>_navigate_to_group_tag"
+                                <%= (details['navigate_to'] == 'group_tag') ? '' : 'disabled' %>>
+                              <option value="">Select a Group Tag</option>
+                              <% @group.tags_cache.each do |group_tag_id, tag_item| %>
+                                <option value="<%= group_tag_id %>"
+                              <%= (details['navigate_to_id'] == group_tag_id) ? 'selected' : '' %>>
                                   #<%= tag_item['name_with_caps'] %>
                                 </option>
                               <% end %>
                             </select>
-                        </div>
+                          </li>
+                        </ul>
+                      </div>
 
-                        <a href="#" class="btn btn-primary btn-small" 
-                            onclick="updateLTIContext('<%= context_id %>');">
+                      <div class="modal-body-card-footer">
+                        <a href="#" class="btn btn-primary" 
+                            onclick="updateLTIContext('<%= context_id %>'); return false;">
                           Save Changes
                         </a>
                       </div>
                     </div>
                   <% end %>
-                <% else %>
-                  <div class="modal-body-card empty">
-                    <h5>None yet...</h5>
-                    <div class="modal-body-card-contents">
-                      <p>
-                        After you activate an LTI integration by opening Badge List from 
-                        the link in your LMS it will show up here. 
-                        To get started click the blue button below.
-                      </p>
-                    </div>
-                  </div>
                 <% end %>
 
                 <!-- === PENDING LTI KEYS === -->

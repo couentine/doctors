@@ -997,13 +997,18 @@ class Group
     context_id = launch_params['context_id'].to_s.parameterize
     oauth_signature = launch_params['oauth_signature']
 
-    # First attempt to find the group
-    group = Group.where(:lti_context_ids.in => [context_id]).first
-    context_id_match = !group.nil?
-    group = Group.where(:lti_pending_keys.in => [consumer_key]).first if !context_id_match
+    # First attempt to find the group (look for the pending key first since it's more unique)
+    # NOTE: If the context id is a dupe that will get caught when they try to register it
+    group = Group.where(:lti_pending_keys.in => [consumer_key]).first
+    consumer_key_match = !group.nil?
+    group = Group.where(:lti_context_ids.in => [context_id]).first if !consumer_key_match
 
     if group
-      if context_id_match
+      if consumer_key_match
+        # The request is valid and we've got a match but we still need to register the context id
+        lti_pending_key_details = group.lti_pending_key_details[consumer_key]
+        status = 'pending'
+      else
         # The LTI integration is at least properly configured, but there are more things to check
         lti_context_details = group.lti_context_details[context_id]
 
@@ -1024,10 +1029,6 @@ class Group
             + 'Badge List group no longer has the integration feature. ' \
             + 'Please contact Badge List support.'
         end
-      else
-        # The request is valid and we've got a match but we still need to register the context id
-        lti_pending_key_details = group.lti_pending_key_details[consumer_key]
-        status = 'pending'
       end
     else
       # There's no match whatsoever
@@ -1054,9 +1055,9 @@ class Group
     context_name = launch_params['context_title'] || launch_params['context_label']
 
     if lti_pending_keys.include?(consumer_key) && lti_pending_key_details.has_key?(consumer_key)
-      already_linked_group_count = Group.where(:lti_context_ids.in => [context_id]).count
+      already_linked_group = Group.where(:lti_context_ids.in => [context_id]).first
 
-      if already_linked_group_count == 0
+      if already_linked_group.nil?
         self.lti_context_ids << context_id
         self.lti_context_details[context_id] = {
           name: context_name,
@@ -1073,7 +1074,8 @@ class Group
         self.lti_context_details[context_id]
       else
         raise StandardError.new('This LTI course has already been linked with another Badge List '\
-          'group. The same LTI course cannot be linked to multiple Badge List groups.')
+          + "group (#{already_linked_group.name}). The same LTI course cannot be linked to " \
+          + 'multiple Badge List groups.')
       end
     else
       raise StandardError.new('The provided key does not match any pending keys on this group.')
