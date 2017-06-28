@@ -133,4 +133,16 @@ class UserMailer < ActionMailer::Base
     )
   end
 
+  def group_new_lti_integration(to_user_id, group_id, lti_context_details)
+    @group = Group.find(group_id)
+
+    mail(
+      :subject  => 'New LTI integration activated',
+      :to       => @to_user.email_name,
+      :from     => from_string,
+      :reply_to => reply_to_string,
+      :tag      => 'group_new_lti_integration,user_mailer'
+    )
+  end
+
 end

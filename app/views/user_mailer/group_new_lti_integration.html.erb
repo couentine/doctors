@@ -1,0 +1,7 @@
+<% 
+  provide(:title, "#{@group.name} has been integrated with #{lti_context_details['name']}")
+  provide(:color, 'light_blue')
+  provide(:cta_text, 'View integration settings')
+  provide(:cta_link, group_url(@group) + '#integrations')
+%>
+
