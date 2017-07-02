@@ -58,10 +58,4 @@ Devise.setup do |config|
   config.omniauth :google_oauth2, 
     ENV['oauth_google_client_id'], ENV['oauth_google_client_secret'], { }
 
-  # Canvas oauth (https://github.com/atomicjolt/omniauth-canvas)
-  config.omniauth :canvas, 'canvas_key', 'canvas_secret', :setup => lambda{|env|
-    request = Rack::Request.new(env)
-    env['omniauth.strategy'].options[:client_options].site = env['rack.session']['oauth_site']
-  }
-
 end

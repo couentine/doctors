@@ -24,7 +24,6 @@ ruby '2.1.2'
   gem 'oauth'
   gem 'omniauth'
   gem 'omniauth-google-oauth2'
-  gem 'omniauth-canvas'
 
 #=== FRONT-END ===#
   

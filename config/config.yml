@@ -16,7 +16,7 @@ defaults: &defaults
       description: Admins are able to export group activity to CSV
     integration:
       label: Third-Party Integrations
-      description: Includes access to Canvas LMS integration and all future integrations
+      description: Includes access to LTI integration and all future integrations
 
   # Subscription Plans
   subscription_plans:
