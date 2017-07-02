@@ -240,6 +240,7 @@ class User
     user
   end
 
+  # Returns a string list of all inactive emails
   def self.get_inactive_email_list
     inactive_email_list_item = InfoItem.find_by(key: INACTIVE_EMAIL_LIST_KEY) rescue nil
     (inactive_email_list_item) ? (inactive_email_list_item.data['emails'] || []) : []

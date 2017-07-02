@@ -990,8 +990,8 @@ class Group
   # - status: ready (LTI is configured and active), pending (LTI key needs to be registered), 
   #           inactive (Expired group subscription), invalid (bad signature, no match, etc)
   # - error_message: User-safe error message (if inactive or invalid)
-  # - lti_pending_key_details: Returned if status = 'pending'
-  # - lti_context_details: Returned if status = 'active'
+  # - lti_pending_key_details: Returned if status = 'pending', adds the consumer_key key
+  # - lti_context_details: Returned if status = 'active', adds the context_id key
   def self.get_lti_status(launch_params)
     consumer_key = launch_params['oauth_consumer_key']
     context_id = launch_params['context_id'].to_s.parameterize
@@ -1006,11 +1006,13 @@ class Group
     if group
       if consumer_key_match
         # The request is valid and we've got a match but we still need to register the context id
-        lti_pending_key_details = group.lti_pending_key_details[consumer_key]
+        lti_pending_key_details = group.lti_pending_key_details[consumer_key]\
+          .merge({ 'consumer_key' => consumer_key })
         status = 'pending'
       else
         # The LTI integration is at least properly configured, but there are more things to check
-        lti_context_details = group.lti_context_details[context_id]
+        lti_context_details = group.lti_context_details[context_id]\
+          .merge({ 'context_id' => context_id })
 
         if group.has?(:integration)
           if group.disabled?
@@ -1046,8 +1048,9 @@ class Group
   # This method checks for the following error states: No matching key on group, context_id has 
   # already been assigned to another group.
   # NOTE: Does not commit the save
+  # TO SEND NOTIFICATION EMAIL TO ADMINS use Group.send_new_lti_notifications()
   #
-  # IF SUCCESSFUL: Returns the created context details hash.
+  # IF SUCCESSFUL: Returns the created context details hash (with a context_id key added).
   # IF UNSUCCESSFUL: Raises a StandardError.
   def register_pending_lti_key(launch_params)
     consumer_key = launch_params['oauth_consumer_key']
@@ -1071,7 +1074,8 @@ class Group
         self.lti_pending_keys.delete consumer_key
         self.lti_pending_key_details.delete consumer_key
 
-        self.lti_context_details[context_id]
+        # Return context details, but merge in the context id
+        return lti_context_details[context_id].merge({ context_id: context_id })
       else
         raise StandardError.new('This LTI course has already been linked with another Badge List '\
           + "group (#{already_linked_group.name}). The same LTI course cannot be linked to " \
@@ -1079,6 +1083,18 @@ class Group
       end
     else
       raise StandardError.new('The provided key does not match any pending keys on this group.')
+    end
+  end
+
+  # This method sends the new lti integration email notification to all of the group admins
+  def self.send_new_lti_notifications(group_id, context_id)
+    group = Group.find(group_id)
+
+    group.admins.each do |user|
+      if !user.email_inactive
+        UserMailer.group_new_lti_integration(user.id, group_id, 
+          group.lti_context_details[context_id]).deliver
+      end
     end
   end
 

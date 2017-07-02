@@ -4,8 +4,11 @@ class UserMailer < ActionMailer::Base
   layout 'email_standard'
 
   def group_admin_add(to_user_id, from_user_id, group_id, badge_ids, invitation_message=nil)
-    @to_user, @from_user, @group, @badges = User.find(to_user_id), User.find(from_user_id), \
-      Group.find(group_id), Badge.where(:id.in => badge_ids)
+    @to_user = User.find(to_user_id)
+    @from_user = User.find(from_user_id)
+    @group = Group.find(group_id)
+    @badges = Badge.where(:id.in => badge_ids)
+
     @invitation_message = invitation_message
 
     mail(
@@ -18,8 +21,11 @@ class UserMailer < ActionMailer::Base
   end
 
   def group_member_add(to_user_id, from_user_id, group_id, badge_ids, invitation_message=nil)
-    @to_user, @from_user, @group, @badges = User.find(to_user_id), User.find(from_user_id), \
-      Group.find(group_id), Badge.where(:id.in => badge_ids)
+    @to_user = User.find(to_user_id)
+    @from_user = User.find(from_user_id)
+    @group = Group.find(group_id)
+    @badges = Badge.where(:id.in => badge_ids)
+
     @invitation_message = invitation_message
 
     mail(
@@ -32,8 +38,9 @@ class UserMailer < ActionMailer::Base
   end
 
   def group_welcome_message(to_user_id, group_id, badge_ids)
-    @to_user, @group, @badges = User.find(to_user_id), Group.find(group_id), \
-    Badge.where(:id.in => badge_ids)
+    @to_user = User.find(to_user_id)
+    @group = Group.find(group_id)
+    @badges = Badge.where(:id.in => badge_ids)
 
     mail(
       :subject  => "Welcome to #{@group.name}!",
@@ -45,8 +52,10 @@ class UserMailer < ActionMailer::Base
   end
 
   def log_badge_issued(to_user_id, group_id, badge_id, log_id)
-    @to_user, @group, @badge, @log = User.find(to_user_id), Group.find(group_id), \
-      Badge.find(badge_id), Log.find(log_id)
+    @to_user = User.find(to_user_id)
+    @group = Group.find(group_id)
+    @badge = Badge.find(badge_id)
+    @log = Log.find(log_id)
 
     subject = "You've been awarded a badge"
     mail(
@@ -59,8 +68,10 @@ class UserMailer < ActionMailer::Base
   end
 
   def log_badge_retracted(to_user_id, group_id, badge_id, log_id)
-    @to_user, @group, @badge, @log = User.find(to_user_id), Group.find(group_id), \
-      Badge.find(badge_id), Log.find(log_id)
+    @to_user = User.find(to_user_id)
+    @group = Group.find(group_id)
+    @badge = Badge.find(badge_id)
+    @log = Log.find(log_id)
 
     if @log.retracted_by
       # Retracted by is an id field not a user field so we need to query for it
@@ -77,8 +88,12 @@ class UserMailer < ActionMailer::Base
   end
 
   def log_new(to_user_id, from_user_id, group_id, badge_id, log_id, invitation_message=nil)
-    @to_user, @from_user, @group, @badge, @log = User.find(to_user_id), User.find(from_user_id), \
-      Group.find(group_id), Badge.find(badge_id), Log.find(log_id)
+    @to_user = User.find(to_user_id)
+    @from_user = User.find(from_user_id)
+    @group = Group.find(group_id)
+    @badge = Badge.find(badge_id)
+    @log = Log.find(log_id)
+
     @from_self = @from_user == @to_user
     @invitation_message = invitation_message
 
@@ -102,8 +117,11 @@ class UserMailer < ActionMailer::Base
   end
   
   def log_validation_request(to_user_id, from_user_id, group_id, badge_id, log_id)
-    @to_user, @from_user, @group, @badge, @log = User.find(to_user_id), User.find(from_user_id), \
-      Group.find(group_id), Badge.find(badge_id), Log.find(log_id)
+    @to_user = User.find(to_user_id)
+    @from_user = User.find(from_user_id)
+    @group = Group.find(group_id)
+    @badge = Badge.find(badge_id)
+    @log = Log.find(log_id)
 
     @is_badge_member = @to_user.learner_of?(@badge) || @to_user.expert_of?(@badge)
     
@@ -117,9 +135,12 @@ class UserMailer < ActionMailer::Base
   end
 
   def log_validation_received(to_user_id, from_user_id, group_id, badge_id, log_id, entry_id)
-    @to_user, @from_user, @group, @badge, @log, @entry = User.find(to_user_id), \
-      User.find(from_user_id), Group.find(group_id), Badge.find(badge_id), Log.find(log_id), \
-      Entry.find(entry_id)
+    @to_user = User.find(to_user_id)
+    @from_user = User.find(from_user_id)
+    @group = Group.find(group_id)
+    @badge = Badge.find(badge_id)
+    @log = Log.find(log_id)
+    @entry = Entry.find(entry_id)
 
     @noun = (@entry.log_validated) ? "endorsement" : "feedback"
     @Noun = @noun.capitalize
@@ -134,13 +155,17 @@ class UserMailer < ActionMailer::Base
   end
 
   def group_new_lti_integration(to_user_id, group_id, lti_context_details)
+    @to_user = User.find(to_user_id)
     @group = Group.find(group_id)
+    @creator_user = User.find(lti_context_details['creator_user_id']) rescue nil
+
+    @lti_context_details = lti_context_details
 
     mail(
       :subject  => 'New LTI integration activated',
       :to       => @to_user.email_name,
-      :from     => from_string,
-      :reply_to => reply_to_string,
+      :from     => build_from_string,
+      :reply_to => build_from_string,
       :tag      => 'group_new_lti_integration,user_mailer'
     )
   end

@@ -34,6 +34,10 @@ class LtiController < ApplicationController
               @lti_context_details = @group.register_pending_lti_key(params)
               @group.save!
               @new_context_registration = true # redirects to integrations panel if user is admin
+
+              # Also send out the notification to admins
+              Group.delay(queue: 'low').send_new_lti_notifications(@group.id, 
+                @lti_context_details[:context_id])
             rescue Exception => e
               @error_title = 'There was an error registering your LTI integration'
               @error_message = "<p><strong>Error Details:</strong> #{e.message}</p>"
