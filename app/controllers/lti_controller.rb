@@ -56,10 +56,10 @@ class LtiController < ApplicationController
                 # Now we need to determine where to redirect the user. Step 1: is this a new setup?
                 if @new_context_registration
                   if @user.admin_of? @group
-                    @navigate_to_path = group_path(@group) + '#integrations'
-                    flash[:notice] = 'Your LTI integration is now configured! You can now use ' \
-                      + 'the integrations panel to control where users are navigated to when ' \
-                      + 'they click the link in your LMS.'
+                    @navigate_to_path = group_path(@group)
+                    flash[:notice] = 'Your LTI integration is now configured! Select ' \
+                      + '"Integrations" from the "Group settings" menu to control where users ' \
+                      + 'are navigated to when they click the link in your LMS.'
                   else
                     # This user doesn't have access to the integrations panel, so we'll just
                     # post an explanatory notice.
