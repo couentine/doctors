@@ -93,6 +93,9 @@ class User
   field :omniauth_last_provider,            type: String
   field :omniauth_google_oauth2_uid,        type: String
   field :omniauth_google_oauth2_hash,       type: Hash # stores the full auth hash
+  
+  # LTI Fields
+  field :lti_launch_hash,                   type: Hash # stores the most recent LTI launch params
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
@@ -237,6 +240,7 @@ class User
     user
   end
 
+  # Returns a string list of all inactive emails
   def self.get_inactive_email_list
     inactive_email_list_item = InfoItem.find_by(key: INACTIVE_EMAIL_LIST_KEY) rescue nil
     (inactive_email_list_item) ? (inactive_email_list_item.data['emails'] || []) : []
@@ -367,7 +371,7 @@ class User
     intercom_user.delete if intercom_user
   end
 
-  # === OMNIAUTH CLASS METHODS === #
+  # === AUTHENTICATION CLASS METHODS === #
 
   # This method will either find or create a new user account from the supplied omniauth auth hash
   # If an existing user is found it will be linked to this oauth identity and updated.
@@ -387,7 +391,7 @@ class User
     user = User.where(email: email).first
 
     if user
-      # Then update any fields that need updating and sign the user in
+      # Then update any fields that need updating and disable email confirmation
       user.omniauth_last_provider = provider
       user[uid_field] = uid
       user[hash_field] = auth.to_hash
@@ -417,6 +421,59 @@ class User
     end
 
     user
+  end
+
+  # This method will either find or create a new user account from the supplied LTI launch hash.
+  # It will also make sure that they have been added as a group member (or are already an admin).
+  # WILL RAISE ArgumentError if email or full name is missing from the launch params.
+  def self.from_lti(launch_params, add_to_group)
+    # First pull out the key fields from the launch params
+    email = launch_params['lis_person_contact_email_primary']
+    name = launch_params['lis_person_name_full']
+
+    if email.present? && name.present? 
+      # Try to locate an existing user account
+      user = User.where(email: email).first
+
+      if user
+        # Then update any fields that need updating and disable email confirmation
+        user.lti_launch_hash = launch_params
+        user.name ||= name
+        user.email ||= email
+        if !user.confirmed? || user.pending_reconfirmation?
+          user.confirm
+        end
+
+        user.save if user.changed?
+      else
+        # Then create a new user
+        user = User.new
+        user.name = name
+        user.email = email
+        user.username_with_caps = User.generate_unique_username_from(name)
+        user.auto_username_needs_review = true # triggers a review screen on signin
+        user.lti_launch_hash = launch_params
+        user.skip_confirmation!
+        user.skip_reconfirmation! # For some reason this is now needed
+        user.password = Devise.friendly_token[0,20]
+        user.user_defined_password = false # Records the fact that the user doesn't know the pass
+
+        user.save
+      end
+
+      # Now we add the user to the group if needed
+      if add_to_group && !user.member_of?(add_to_group) && !user.admin_of?(add_to_group)
+        add_to_group.members << user
+        user.initialize_group_settings_for(add_to_group)
+        user.save
+      end
+
+      user
+    else
+      raise ArgumentError.new('The LTI link you have followed is missing the name and email ' \
+        + 'fields. Those fields are required for compatibility with Badge List. ' \
+        + 'Please contact your site administrator.')
+    end
   end
 
   # This method accepts any string (such as 'John Doe, Ph.D.') and returns a value suitable for
@@ -1062,7 +1119,7 @@ protected
     user = User.find(user_id)
     user.processing_avatar = false
 
-    if !user.direct_avatar.blank?
+    if user.direct_avatar.present?
       user.remote_avatar_url = user.direct_avatar.direct_fog_url(with_path: true)
       
       if user.save
@@ -1074,9 +1131,13 @@ protected
         user.save! # This should trigger the callback again calling a new instance of this method
       end
     elsif user.omniauth_google_oauth2_hash && user.omniauth_google_oauth2_hash['info'] \
-        && !user.omniauth_google_oauth2_hash['info']['image'].blank?
+        && user.omniauth_google_oauth2_hash['info']['image'].present?
       # Use the image from their google profile if available
       user.remote_avatar_url = user.omniauth_google_oauth2_hash['info']['image']
+      user.save!
+    elsif user.lti_launch_hash.present? && user.lti_launch_hash['user_image'].present?
+      # Use the image from their LTI profile if available
+      user.remote_avatar_url = user.lti_launch_hash['user_image']
       user.save!
     else
       # Use the default image

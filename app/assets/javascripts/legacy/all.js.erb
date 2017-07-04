@@ -236,7 +236,7 @@ function checkForLocationHash() {
 // Changes the location hash when modals & tabs are toggled
 function registerLocationHashEvents() {
   // Tabs
-  $('.nav-tabs a').on('shown', function (e) {
+  $('.nav-tabs a:not(.no-hash)').on('shown', function (e) {
     var scrollTop = $(document).scrollTop();
     window.location.hash = e.target.hash; 
     $(document).scrollTop(scrollTop);
@@ -451,7 +451,9 @@ function updateDynamicColumnGroup(key, targetColCount) {
 }
 
 function registerToggleLinks() {
-  $('a[data-toggle=custom]').click(function() {
+  $('a[data-toggle=custom]').click(function(e) {
+    e.preventDefault();
+    
     var showSelector = $(this).data('show');
     var hideSelector = $(this).data('hide');
     var focusSelector = $(this).data('focus');

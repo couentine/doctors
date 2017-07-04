@@ -1042,6 +1042,7 @@ namespace :db do
   # Run this is production any time you update the subscription FEATURES for existing plans
   # in config.yml. This method will call the refresh_subscription_features method on all groups
   # with subscription plans.
+  # This does *not* override manually granted features (those are stored in separate booleans).
   task refresh_group_subscription_features: :environment do
     print "Updating #{Group.where(:subscription_plan.ne => nil).count} groups"
 

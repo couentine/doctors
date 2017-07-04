@@ -3,9 +3,7 @@ BadgeList::Application.routes.draw do
 
   resources :tags
 
-
   resources :entries
-
 
   devise_for :users, :controllers => { registrations: 'registrations', sessions: 'sessions',
     omniauth_callbacks: 'users/omniauth_callbacks' }
@@ -36,6 +34,8 @@ BadgeList::Application.routes.draw do
   end
   
   # === WEBHOOK PATHS === #
+  match 'h/lti/launch' => 'lti#launch', via: :post, as: :lti_launch
+  match 'h/lti/config' => 'lti#config_xml', via: :get, as: :lti_config
   match 'h/stripe_event' => 'webhooks#stripe_event', via: :post
   match 'h/postmark_bounce' => 'webhooks#postmark_bounce', via: :post
 
@@ -72,6 +72,12 @@ BadgeList::Application.routes.draw do
   match ':group_id/validations' => 'groups#create_validations', via: :post, as: :group_validations
   match ':group_id/copy_badges' => 'groups#copy_badges_form',via: :get, as: :copy_badges_form
   match ':group_id/copy_badges' => 'groups#copy_badges_action',via: :post, as: :copy_badges_action
+  match ':group_id/lti_keys/:consumer_key' => 'groups#destroy_lti_key', via: :delete, 
+    as: :group_lti_key
+  match ':group_id/lti_keys' => 'groups#create_lti_key', via: :post, as: :create_group_lti_key
+  match ':group_id/lti_contexts/:context_id' => 'groups#update_lti_context',via: :put,
+    as: :group_lti_context
+  match ':group_id/lti_contexts/:context_id' => 'groups#destroy_lti_context', via: :delete
   match ':group_id/members/:user_id' => 'groups#destroy_user', 
         via: :delete, as: :destroy_group_member, defaults: { type: 'member' }
   match ':group_id/admins/:user_id' => 'groups#destroy_user', 

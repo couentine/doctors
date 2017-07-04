@@ -521,6 +521,7 @@ DEPENDENCIES
   mini_magick (~> 4.3.6)
   mongoid (~> 5.0)
   newrelic_rpm
+  oauth
   omniauth
   omniauth-google-oauth2
   polymer-elements-rails!
@@ -543,3 +544,9 @@ DEPENDENCIES
   twitter
   uglifier (~> 2.7)
   ultrahook
+
+RUBY VERSION
+   ruby 2.1.2p95
+
+BUNDLED WITH
+   1.15.1

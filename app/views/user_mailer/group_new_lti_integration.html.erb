@@ -1,0 +1,33 @@
+<% 
+  provide(:title, "#{@group.name} has been integrated with #{@lti_context_details['name']}")
+  provide(:color, 'light_blue')
+  provide(:cta_text, 'View integration settings')
+  provide(:cta_link, group_url(@group) + '#integrations')
+%>
+
+<p>
+  A new LTI integration has just been activated for the <%= @group.name %> group. 
+  The integration was added by
+  <%= (@creator_user.present?) ? @creator_user.name : 'an admin who has since deleted their Badge List account' %>
+  and is with a course called "<%= @lti_context_details['name'] %>".
+</p>
+
+<p>
+  <strong>How to configure the new integration:</strong>
+</p>
+
+<p>
+  Now that the LTI context has been activated, the integration is working and ready for action.
+  There is, however, one additional setting which you can customize if desired.
+</p>
+
+<p>
+  When users in the newly linked LMS click the Badge List tab they will be navigated to the 
+  group's home screen. If you would prefer that they be navigated directly to a specific badge or 
+  group tag you can specify that in your group's integration settings panel.
+</p>
+
+<p>
+  To reach this panel click the the "Group settings" button on your group's page then select 
+  the "Integrations" option from the menu, or just click the button below.
+</p>

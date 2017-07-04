@@ -6,6 +6,18 @@ defaults: &defaults
   page_size_normal: 36
   page_size_large: 72
 
+  # Subscription Features
+  feature_details:
+    community:
+      label: Community Badges & Wiki
+      description: Includes unlimited badge awarders and community wiki pages
+    reporting:
+      label: Reporting
+      description: Admins are able to export group activity to CSV
+    integration:
+      label: Third-Party Integrations
+      description: Includes access to LTI integration and all future integrations
+
   # Subscription Plans
   subscription_plans:
     standard:
@@ -47,7 +59,7 @@ defaults: &defaults
         statement_descriptor: Badge List Org
         icon: fa-building
         description: |
-          Unlimited admins &amp; badge awarders, reporting
+          Unlimited admins &amp; badge awarders, reporting, integrations
         users: 5000
         admins: -1
         sub_groups: 5
@@ -55,6 +67,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - integration
     k12:
       k12-teacher-1y-1:
         name: K12 Teacher Annual
@@ -94,7 +107,7 @@ defaults: &defaults
         statement_descriptor: Badge List K12 School
         icon: fa-building
         description: |
-          Unlimited admins &amp; badge awarders, reporting
+          Unlimited admins &amp; badge awarders, reporting, integrations
         users: 5000
         admins: -1
         sub_groups: 5
@@ -102,6 +115,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - integration
       k12-team-1y-1:
         name: K12 Team Annual
         amount: 12000
@@ -127,7 +141,7 @@ defaults: &defaults
         statement_descriptor: Badge List K12 School
         icon: fa-building
         description: |
-          Unlimited admins &amp; badge awarders, reporting
+          Unlimited admins &amp; badge awarders, reporting, integrations
           (Includes discount for annual billing)
         users: 5000
         admins: -1
@@ -136,6 +150,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - integration
     internal:
       solo-free-1:
         name: Free Solo
@@ -183,6 +198,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - integration
     test:
       test-100d-1:
         name: Daily 100

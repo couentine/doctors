@@ -93,14 +93,20 @@ class Group
   field :user_limit,                      type: Integer, default: 5
   field :admin_limit,                     type: Integer, default: 1
   field :sub_group_limit,                 type: Integer, default: 0
-  field :features,                        type: Array, default: [] # = ['community', 'branding']
-  field :feature_grant_reporting,         type: Boolean # Manually grants the reporting feature
+  field :features,                        type: Array, default: [] # use feature methods to access
+  field :feature_grant_reporting,         type: Boolean
+  field :feature_grant_integration,       type: Boolean
   field :total_user_count,                type: Integer, default: 1
   field :admin_count,                     type: Integer, default: 1
   field :member_count,                    type: Integer, default: 0
   field :sub_group_count,                 type: Integer, default: 0
   field :active_user_count,               type: Integer # RETIRED
   field :monthly_active_users,            type: Hash # RETIRED
+
+  field :lti_pending_keys,                type: Array, default: []
+  field :lti_pending_key_details,         type: Hash, default: {}
+  field :lti_context_ids,                 type: Array, default: []
+  field :lti_context_details,             type: Hash, default: {}
   
   field :pricing_group,                   type: String, default: 'standard'
   field :subscription_plan,               type: String # values are defined in config.yml
@@ -339,14 +345,36 @@ class Group
 
   # Returns whether or not the features array contains the specified 'feature' or :feature
   def has?(feature)
-    return_value = !features.blank? && features.include?(feature.to_s)
+    return_value = features.present? && features.include?(feature.to_s)
     
-    # Enable manual grant of the reporting feature
+    # Enable manual granting of features
     if (feature.to_s == 'reporting')
       return_value ||= (feature_grant_reporting == true)
+    elsif (feature.to_s == 'integration')
+      return_value ||= (feature_grant_integration == true)
     end
 
     return_value
+  end
+
+  # Returns an array of string values representing the keys of all features present on this group.
+  # NOTE: Use this instead of accessing features directly (in order to include manual grants)
+  def all_features
+    return_list = features || []
+    
+    if feature_grant_reporting && !return_list.include?('reporting')
+      return_list << 'reporting'
+    end
+    if feature_grant_integration && !return_list.include?('integration')
+      return_list << 'integration'
+    end
+
+    return_list
+  end
+
+  # Returns true if this group has features either as part of a subscription *or* manually granted
+  def has_features?
+    all_features.present?
   end
 
   # This method will append the passed item to the bounced email log and automatically shorten
@@ -874,6 +902,200 @@ class Group
     end
 
     group.save if group.changed?
+  end
+
+  # === LTI (CLASS & INSTANCE) METHODS === #
+
+  # Generates a new lti key pair and adds it to the lti_pending_keys/details
+  # Returns hash with following keys: name, consumer_key, secret_key
+  # NOTE: Does not commit the save
+  def add_lti_key_pair(creator_user, name)
+    consumer_key, secret_key = SecureRandom.hex(30), SecureRandom.hex(30)
+
+    self.lti_pending_keys << consumer_key
+    self.lti_pending_key_details[consumer_key] = {
+      'creator_user_id' => creator_user.id.to_s,
+      'name' => name,
+      'secret_key' => secret_key
+    }
+
+    { name: name, consumer_key: consumer_key, secret_key: secret_key }
+  end
+
+  # Removes the specified key pair
+  # Returns nil if not found else returns hash with following keys: name, consumer_key, secret_key
+  # NOTE: Does not commit the save
+  def remove_lti_key_pair(consumer_key)
+    return_value = nil
+    
+    if lti_pending_keys.include?(consumer_key) && lti_pending_key_details.has_key?(consumer_key)
+      return_value = { 
+        name: lti_pending_key_details[consumer_key]['name'], 
+        consumer_key: consumer_key,
+        secret_key: lti_pending_key_details[consumer_key]['secret_key']
+      }
+
+      self.lti_pending_keys.delete consumer_key
+      self.lti_pending_key_details.delete consumer_key
+    end
+
+    return_value
+  end
+
+  # Updates the navigation keys of the specified context id
+  # Returns hash with following keys: context_id, name, navigate_to, navigate_to_id
+  # NOTE: Does not commit the save
+  def update_lti_context_details(context_id, navigate_to, navigate_to_id)
+    return_value = nil
+
+    if lti_context_ids.include?(context_id) && lti_context_details.has_key?(context_id)
+      self.lti_context_details[context_id]['navigate_to'] = navigate_to
+      self.lti_context_details[context_id]['navigate_to_id'] = navigate_to_id
+
+      return_value = {
+        context_id: context_id,
+        name: lti_context_details[context_id]['name'],
+        navigate_to: navigate_to,
+        navigate_to_id: navigate_to_id
+      }
+    end
+
+    return_value
+  end
+
+  # Removes the specified context id and details
+  # Returns nil if not found else returns hash with following keys: name, context_id
+  # NOTE: Does not commit the save
+  def remove_lti_context(context_id)
+    return_value = nil
+    
+    if lti_context_ids.include?(context_id) && lti_context_details.has_key?(context_id)
+      return_value = { 
+        name: lti_context_details[context_id]['name'], 
+        context_id: context_id
+      }
+
+      self.lti_context_ids.delete context_id
+      self.lti_context_details.delete context_id
+    end
+
+    return_value
+  end
+
+  # Call this method to check whether LTI launch params are valid and match a group and if so what
+  # the current status of the LTI configuration is for the group.
+  #
+  # RETURNS a hash with following keys:
+  # - group: This is the queried group object (if a matching group is found)
+  # - status: ready (LTI is configured and active), pending (LTI key needs to be registered), 
+  #           inactive (Expired group subscription), invalid (bad signature, no match, etc)
+  # - error_message: User-safe error message (if inactive or invalid)
+  # - lti_pending_key_details: Returned if status = 'pending', adds the consumer_key key
+  # - lti_context_details: Returned if status = 'active', adds the context_id key
+  def self.get_lti_status(launch_params)
+    consumer_key = launch_params['oauth_consumer_key']
+    context_id = launch_params['context_id'].to_s.parameterize
+    oauth_signature = launch_params['oauth_signature']
+
+    # First attempt to find the group (look for the pending key first since it's more unique)
+    # NOTE: If the context id is a dupe that will get caught when they try to register it
+    group = Group.where(:lti_pending_keys.in => [consumer_key]).first
+    consumer_key_match = !group.nil?
+    group = Group.where(:lti_context_ids.in => [context_id]).first if !consumer_key_match
+
+    if group
+      if consumer_key_match
+        # The request is valid and we've got a match but we still need to register the context id
+        lti_pending_key_details = group.lti_pending_key_details[consumer_key]\
+          .merge({ 'consumer_key' => consumer_key })
+        status = 'pending'
+      else
+        # The LTI integration is at least properly configured, but there are more things to check
+        lti_context_details = group.lti_context_details[context_id]\
+          .merge({ 'context_id' => context_id })
+
+        if group.has?(:integration)
+          if group.disabled?
+            # The integration feature is not enabled
+            status = 'inactive'
+            error_message = 'The LTI integration is properly configured, but the linked ' \
+              + 'Badge List group has an expired subscription. Please contact Badge List support.'
+          else
+            # We're good to go!
+            status = 'ready'
+          end
+        else
+          # The integration feature is not enabled
+          status = 'inactive'
+          error_message = 'The LTI integration is properly configured, but the linked ' \
+            + 'Badge List group no longer has the integration feature. ' \
+            + 'Please contact Badge List support.'
+        end
+      end
+    else
+      # There's no match whatsoever
+      status = 'invalid'
+      error_message = 'No matching Badge List group found. The LTI integration might need to be ' \
+        + 'reconfigured. Please contact your site administrator.'
+    end
+
+    # Return the hash
+    { group: group, status: status, error_message: error_message, 
+      lti_pending_key_details: lti_pending_key_details, lti_context_details: lti_context_details }
+  end
+
+  # Call this method to upgrade a pending lti key to a registered context id.
+  # This method checks for the following error states: No matching key on group, context_id has 
+  # already been assigned to another group.
+  # NOTE: Does not commit the save
+  # TO SEND NOTIFICATION EMAIL TO ADMINS use Group.send_new_lti_notifications()
+  #
+  # IF SUCCESSFUL: Returns the created context details hash (with a context_id key added).
+  # IF UNSUCCESSFUL: Raises a StandardError.
+  def register_pending_lti_key(launch_params)
+    consumer_key = launch_params['oauth_consumer_key']
+    context_id = launch_params['context_id'].to_s.parameterize
+    context_name = launch_params['context_title'] || launch_params['context_label']
+
+    if lti_pending_keys.include?(consumer_key) && lti_pending_key_details.has_key?(consumer_key)
+      already_linked_group = Group.where(:lti_context_ids.in => [context_id]).first
+
+      if already_linked_group.nil?
+        self.lti_context_ids << context_id
+        self.lti_context_details[context_id] = {
+          name: context_name,
+          consumer_key: consumer_key,
+          secret_key: lti_pending_key_details[consumer_key]['secret_key'],
+          creator_user_id: lti_pending_key_details[consumer_key]['creator_user_id'],
+          navigate_to: 'group',
+          navigate_to_id: nil,
+          initial_launch_params: launch_params
+        }
+        self.lti_pending_keys.delete consumer_key
+        self.lti_pending_key_details.delete consumer_key
+
+        # Return context details, but merge in the context id
+        return lti_context_details[context_id].merge({ context_id: context_id })
+      else
+        raise StandardError.new('This LTI course has already been linked with another Badge List '\
+          + "group (#{already_linked_group.name}). The same LTI course cannot be linked to " \
+          + 'multiple Badge List groups.')
+      end
+    else
+      raise StandardError.new('The provided key does not match any pending keys on this group.')
+    end
+  end
+
+  # This method sends the new lti integration email notification to all of the group admins
+  def self.send_new_lti_notifications(group_id, context_id)
+    group = Group.find(group_id)
+
+    group.admins.each do |user|
+      if !user.email_inactive
+        UserMailer.group_new_lti_integration(user.id, group_id, 
+          group.lti_context_details[context_id]).deliver
+      end
+    end
   end
 
   # === STRIPE RELATED METHODS === #

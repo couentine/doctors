@@ -9,13 +9,15 @@ class GroupsController < ApplicationController
 
   prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
     :join, :leave, :update_group_settings, :destroy_user, :send_invitation, :destroy_invited_user, 
-    :users, :badges, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, :copy_badges_action, 
-    :review, :full_logs, :create_validations]
+    :users, :badges, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, 
+    :copy_badges_action, :review, :full_logs, :create_validations, :create_lti_key, 
+    :destroy_lti_key, :update_lti_context, :destroy_lti_context]
   before_action :authenticate_user!, except: [:show]
   before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :badges, 
     :review, :full_logs, :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
-    :create_users, :clear_bounce_log]
+    :create_users, :clear_bounce_log, :create_lti_key, :destroy_lti_key, :update_lti_context, 
+    :destroy_lti_context]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
   before_action :can_copy_badges, only: [:copy_badges_form, :copy_badges_action]
   before_action :badge_list_admin, only: [:index]
@@ -25,9 +27,10 @@ class GroupsController < ApplicationController
   PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, 
     :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, :feature_grant_reporting,
-    :stripe_subscription_card, :stripe_subscription_id, :new_subscription, :member_visibility, 
-    :admin_visibility, :badge_copyability, :join_code, :avatar_key, :tag_assignability, 
-    :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag]
+    :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
+    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, 
+    :avatar_key, :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, 
+    :welcome_badge_tag]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500
@@ -1155,6 +1158,91 @@ class GroupsController < ApplicationController
     end
   end
 
+  # POST /group-url/lti_keys.json?name=Display+Name+of+Key
+  # Returns json hash with following keys:
+  # - success: boolean
+  # - lti_key: If successful returns hash w/ following keys: name, consumer_key, secret_key
+  def create_lti_key
+    respond_to do |format|
+      format.json do
+        @name = params[:name]
+        @name = 'Unnamed Key' if @name.blank?
+        @lti_key = @group.add_lti_key_pair(current_user, @name)
+
+        if @group.save
+          render json: { success: true, lti_key: @lti_key }
+        else
+          render json: { success: false, lti_key: nil }
+        end
+      end
+    end
+  end
+
+  # DELETE /group-url/lti_keys/abc123.json
+  # Deletes the specified consumer key (the abc123 part above)
+  # Returns json hash with following keys:
+  # - success: boolean
+  # - lti_key: If successful returns hash w/ following keys: name, consumer_key, secret_key
+  def destroy_lti_key
+    respond_to do |format|
+      format.json do
+        @lti_key = @group.remove_lti_key_pair(params['consumer_key'])
+
+        if @lti_key.present? && @group.save
+          render json: { success: true, lti_key: @lti_key }
+        else
+          render json: { success: false, lti_key: nil }
+        end
+      end
+    end
+  end
+
+  # PUT /group-url/lti_contexts/abc123.json?navigate_to=badge&navigate_to=xyz456
+  # Updates the specified context id (the abc123 part above).
+  # Returns json hash with following keys:
+  # - success: boolean
+  # - context: If successful returns hash w/ following keys: 
+  #            context_id, name, navigate_to, navigate_to_id
+  def update_lti_context
+    respond_to do |format|
+      format.json do
+        # Get the params
+        navigate_to_values = ['group', 'badge', 'group_tag'] # first is default
+        @navigate_to = params['navigate_to']
+        @navigate_to = navigate_to_values.first if !navigate_to_values.include? @navigate_to
+        @navigate_to_id = params['navigate_to_id']
+        @context_id = params['context_id']
+
+        # Do the update and save
+        @context = @group.update_lti_context_details(@context_id, @navigate_to, @navigate_to_id)
+        if @context.present? && @group.save
+          render json: { success: true, context: @context }
+        else
+          render json: { success: false, context: nil }
+        end
+      end
+    end
+  end
+
+  # DELETE /group-url/lti_contexts/abc123.json
+  # Deletes the specified context id (the abc123 part above)
+  # Returns json hash with following keys:
+  # - success: boolean
+  # - context: If successful returns hash w/ following keys: name, context_id
+  def destroy_lti_context
+    respond_to do |format|
+      format.json do
+        @context = @group.remove_lti_context(params['context_id'])
+
+        if @context.present? && @group.save
+          render json: { success: true, context: @context }
+        else
+          render json: { success: false, context: nil }
+        end
+      end
+    end
+  end
+
 private
 
   def find_group
@@ -1163,7 +1251,8 @@ private
     @current_user_is_admin = current_user && @group.has_admin?(current_user)
     @current_user_is_member = current_user && @group.has_member?(current_user)
     @current_user_is_owner = current_user && (@group.owner_id == current_user.id)
-    @badge_list_admin = current_user && current_user.admin?
+    @badge_list_admin = current_user && current_user.admin? \
+      && (params['suppress_bl_admin'] != 'true')
 
     # Set user visibility variables
     @can_see_members = @group.public? \
