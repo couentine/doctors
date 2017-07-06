@@ -26,7 +26,7 @@ defaults: &defaults
         amount: 500
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Solo
         icon: fa-user
         description: |
@@ -40,7 +40,7 @@ defaults: &defaults
         amount: 3000
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Team
         icon: fa-users
         description: |
@@ -55,7 +55,7 @@ defaults: &defaults
         amount: 13000
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Org
         icon: fa-building
         description: |
@@ -74,7 +74,7 @@ defaults: &defaults
         amount: 2500
         currency: usd
         interval: year
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List K12 Teacher
         icon: fa-user
         description: |
@@ -88,7 +88,7 @@ defaults: &defaults
         amount: 1500
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List K12 Team
         icon: fa-users
         description: |
@@ -103,7 +103,7 @@ defaults: &defaults
         amount: 6500
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List K12 School
         icon: fa-building
         description: |
@@ -121,7 +121,7 @@ defaults: &defaults
         amount: 12000
         currency: usd
         interval: year
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List K12 Team
         icon: fa-users
         description: |
@@ -137,7 +137,7 @@ defaults: &defaults
         amount: 48000
         currency: usd
         interval: year
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List K12 School
         icon: fa-building
         description: |
@@ -157,7 +157,7 @@ defaults: &defaults
         amount: 0
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Free
         icon: fa-star
         description: |
@@ -171,7 +171,7 @@ defaults: &defaults
         amount: 0
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Free
         icon: fa-star
         description: |
@@ -186,7 +186,7 @@ defaults: &defaults
         amount: 0
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Free
         icon: fa-star
         description: |
@@ -237,7 +237,7 @@ defaults: &defaults
         amount: 5000
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Starter
         users: 100
         admins: -1
@@ -248,7 +248,7 @@ defaults: &defaults
         amount: 12000
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Basic
         users: 500
         admins: -1
@@ -259,7 +259,7 @@ defaults: &defaults
         amount: 20000
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Standard
         users: 1000
         admins: -1
@@ -270,7 +270,7 @@ defaults: &defaults
         amount: 45000
         currency: usd
         interval: month
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List Premium
         users: 5000
         admins: -1
@@ -281,7 +281,7 @@ defaults: &defaults
         amount: 2500
         currency: usd
         interval: year
-        trial_period_days: 14
+        trial_period_days: 0
         statement_descriptor: Badge List K12 Teacher
         users: 5000
         admins: 1

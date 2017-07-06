@@ -88,7 +88,7 @@ class Group
   field :admin_visibility,                type: String, default: 'public'
   field :badge_copyability,               type: String, default: 'public'
   field :join_code,                       type: String
-  field :tag_assignability,                type: String, default: 'members'
+  field :tag_assignability,               type: String, default: 'members'
   field :tag_creatability,                type: String, default: 'members'
   field :tag_visibility,                  type: String, default: 'public'
   
