@@ -162,7 +162,6 @@ class Group
     message: "%{value} is not a valid type of creatability" }
   validates :tag_visibility, inclusion: { in: TAG_VISIBILITY_VALUES, 
     message: "%{value} is not a valid type of visibility" }
-  validates :creator, presence: true
   
   validate :new_owner_username_exists
   validate :subscription_fields_valid
@@ -1647,7 +1646,7 @@ protected
     if new_record?
       IntercomEventWorker.perform_async({
         'event_name' => 'group-create',
-        'email' => creator.email,
+        'email' => ((creator.present?) ? creator.email : nil),
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => id.to_s,
