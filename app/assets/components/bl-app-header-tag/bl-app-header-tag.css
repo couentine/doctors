@@ -28,6 +28,23 @@
     opacity: 0;
   }
 
+  #groupInfo {
+    position: absolute;
+    top: 4px; right: 3em; bottom: 1.25em; left: 3em;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+    #groupInfo a {
+      color: white;
+      text-decoration: none;
+      line-height: 1.2em;
+      font-weight: 300;
+      display: inline-block;
+    }
+      #groupInfo a img { height: 2em; }
+
   #tagWrapper {
     display: flex;
     justify-content: center;

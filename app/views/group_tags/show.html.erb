@@ -9,7 +9,8 @@
 
   <% content_for :app_header_content do %>
     <bl-app-header-tag name="<%= @group_tag.name_with_caps %>" 
-      back-url="<%= group_tags_url(@group) %>"></bl-app-header-tag>
+      group="<%= @group.json(:link_info).to_json %>" back-url="<%= group_tags_url(@group) %>">
+    </bl-app-header-tag>
   <% end %>
 
 <% #=== PAGE BODY CONTENT ===# %>
@@ -92,6 +93,11 @@
           padding: 0.2em 0.6em;
           border-radius: 3px;
         }
+
+    bl-list-tabs paper-tabs {
+      border-radius: 1.25rem 1.25rem 0 0; color: white; text-transform: uppercase;
+      background: #66BB6A; /* green-400 */
+    }
 
   </style>
 

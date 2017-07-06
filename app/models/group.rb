@@ -27,7 +27,9 @@ class Group
     list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
       :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,
       :badge_count, :full_url, :full_path],
-    simple_list_item_with_tags: [:id, :name, :url, :url_with_caps, :tags_cache]
+    simple_list_item_with_tags: [:id, :name, :url, :url_with_caps, :tags_cache],
+    link_info: [:id, :name, :full_url, :full_path, :avatar_image_url, 
+      :avatar_image_medium_url, :avatar_image_small_url]
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
