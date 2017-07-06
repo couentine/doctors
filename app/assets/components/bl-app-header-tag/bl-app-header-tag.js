@@ -2,8 +2,9 @@ Polymer({
   is: "bl-app-header-tag",
 
   properties: {
-    name: { type: String }, // Required: The tag name
-    backUrl: { type: String }, // Required: The href for the back arrow
+    name: String, // Required: The tag name
+    backUrl: String, // Required: The href for the back arrow
+    group: Object, // Required: Need name, medium avatar_image_medium_url and full_url
     
     condensedHeightEm: { type: Number, value: 3.3, readOnly: true } // used by bl-app-container
   },
@@ -32,6 +33,7 @@ Polymer({
     var containerOpacity = (1 - condensedPercentage);
     this.$.background.style.opacity = containerOpacity;
     this.$.divider.style.opacity = containerOpacity;
+    this.$.groupInfo.style.opacity = containerOpacity;
     
     // Slide the hashtag closer to the the name
     var symbolMarginRight = 0.4*(1 - condensedPercentage);
