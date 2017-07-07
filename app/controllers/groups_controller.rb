@@ -30,7 +30,7 @@ class GroupsController < ApplicationController
     :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
     :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, 
     :avatar_key, :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, 
-    :welcome_badge_tag]
+    :welcome_badge_tag, :joinability]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500
@@ -39,6 +39,10 @@ class GroupsController < ApplicationController
       + 'and everything is public.<br>Free forever.</span>'.html_safe, 'open'],
     ['<b><i class="fa fa-users"></i> Closed Group</b><span>You control privacy '.html_safe \
       + 'and membership.<br>Plans start at $5 per month.</span>'.html_safe, 'private']
+  ]
+  GROUP_JOINABILITY_OPTIONS = [
+    ['<i class="fa fa-globe"></i> Open to Public'.html_safe, 'open'],
+    ['<i class="fa fa-lock"></i> By Invitation Only'.html_safe, 'closed']
   ]
   PRICING_GROUP_OPTIONS = [
     ['Standard Pricing', 'standard'],
@@ -142,6 +146,7 @@ class GroupsController < ApplicationController
       end
 
     # Set options vars
+    @group_joinability_options = GROUP_JOINABILITY_OPTIONS
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
     @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
     @tag_assignability_options = TAG_ASSIGNABILITY_OPTIONS
@@ -296,7 +301,7 @@ class GroupsController < ApplicationController
     end
   end
 
-  # POST /group-url/join?code=123
+  # POST or GET /group-url/join?code=123
   def join
     notice = ""
     join_code = params[:code]

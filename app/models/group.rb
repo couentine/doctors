@@ -12,16 +12,18 @@ class Group
   MAX_WELCOME_MESSAGE_LENGTH = 1000
   MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['open', 'closed', 'private']
-  JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
-  JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'url' => :issuer_website,
-    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url,
-    'badges' => :badge_urls_with_caps }
+  JOINABILITY_VALUES = ['open', 'closed']
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
   TAG_ASSIGNABILITY_VALUES = ['members', 'admins']
   TAG_CREATABILITY_VALUES = ['members', 'admins']
   TAG_VISIBILITY_VALUES = ['public', 'members', 'admins']
   WELCOME_BADGE_TAG_ALL_BADGES = '***ALL BADGES***'
+
+  JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
+  JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'url' => :issuer_website,
+    'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url,
+    'badges' => :badge_urls_with_caps }
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
@@ -69,6 +71,7 @@ class Group
   field :location,                        type: String
   field :website,                         type: String
   field :type,                            type: String, default: 'open'
+  field :joinability,                     type: String, default: 'open'
   field :customer_code,                   type: String
   field :validation_threshold,            type: Integer, default: 1 # RETIRED FIELD
   field :invited_admins,                  type: Array, default: []
@@ -150,6 +153,8 @@ class Group
   validates :website, url: true
   validates :image_url, url: true
   validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid Group Type" }
+  validates :joinability, inclusion: { in: JOINABILITY_VALUES, 
+    message: "%{value} is not a valid joinability type" }
   validates :member_visibility, inclusion: { in: VISIBILITY_VALUES, 
     message: "%{value} is not a valid type of visibility" }
   validates :admin_visibility, inclusion: { in: VISIBILITY_VALUES, 
@@ -550,7 +555,12 @@ class Group
 
   # Does this group have open membership?
   def open?
-    (type == 'open')
+    joinability == 'open'
+  end
+
+  # Does this group have closed membership?
+  def closed?
+    joinability == 'closed'
   end
 
   def user_count
@@ -1393,6 +1403,11 @@ protected
     end
     if !image_url.blank? && !image_url.downcase.start_with?("http")
         self.image_url = "http://#{image_url}"
+    end
+
+    if (new_record? || type_changed?) && (type == 'private')
+      # Paid groups default to closed joinability
+      self.joinability = 'closed'
     end
   end
   

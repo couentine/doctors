@@ -1,7 +1,7 @@
 <% 
   provide(:title, @group.name)
   can_join_group = @group.open? && !@current_user_is_admin && !@current_user_is_member
-  can_join_group_with_code = @group.private? && !@current_user_is_admin \
+  can_join_group_with_code = @group.closed? && !@current_user_is_admin \
     && !@current_user_is_member && !@group.join_code.blank?
 
   provide(:include_metadata, true)
@@ -560,6 +560,17 @@
   <script type="text/javascript">
 
     $(document).ready(function() {
+      $('#group_joinability_open').click(function() {
+        if ($(this).prop('checked')) {
+          $('#join-code-panel').fadeOut();
+        }
+      });
+      $('#group_joinability_closed').click(function() {
+        if ($(this).prop('checked')) {
+          $('#join-code-panel').fadeIn();
+        }
+      });
+
       $("#join-code-enabled").change(function() {
         if (this.checked) {
           $(".control-group.group_join_code,#join-url-preview-panel").fadeIn();
@@ -582,7 +593,7 @@
    aria-labelledby="mimm-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="mimm-label">Group privacy settings</h3>
+      <h3 id="mimm-label">Group membership &amp; privacy</h3>
     </div>
 
     <div class="modal-body">
@@ -591,30 +602,13 @@
           <%= simple_form_for @group, html: { id: 'privacy-settings-form', 
               class: 'form-horizontal' } do |f| %>
 
-            <% if @group.private? %>
+            <h4>Membership Controls</h4>
 
-              <%= f.input :badge_copyability, as: :radio_buttons, 
-                label: 'Who can copy badges from the group?', 
-                include_blank: false, collection: @badge_copyability_options %>
+            <%= f.input :joinability, as: :radio_buttons, 
+              label: 'Group Membership', 
+              include_blank: false, collection: @group_joinability_options %>
 
-              <%= f.input :tag_visibility, as: :radio_buttons, 
-                label: 'Who can see group tags?', 
-                include_blank: false, collection: @tag_visibility_options %>
-
-              <%= f.input :tag_assignability, as: :radio_buttons, 
-                label: 'Who can assign group tags?', 
-                include_blank: false, collection: @tag_assignability_options %>
-
-              <%= f.input :tag_creatability, as: :radio_buttons, 
-                label: 'Who can create new group tags?', 
-                include_blank: false, collection: @tag_creatability_options %>
-
-              <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
-                include_blank: false, collection: @group_visibility_options %>
-
-              <%= f.input :admin_visibility, as: :radio_buttons, label: 'Group Admin List', 
-                include_blank: false, collection: @group_visibility_options %>
-              
+            <div id="join-code-panel" style="<%= d?(@group.joinability == 'closed') %>">
               <div class="control-group">
                 <label class="control-label" for="join-code-enabled">
                   Allow Public Signup with Join Code?
@@ -645,17 +639,49 @@
                     value="<%= "#{@group.group_url}?code=#{@group.join_code}" %>" readonly>
                 </div>
               </div>
+            </div>
+
+            <hr>
+
+            <h4>Privacy Controls</h4>
+            
+            <% if @group.private? %>
+
+              <%= f.input :badge_copyability, as: :radio_buttons, 
+                label: 'Who can copy badges from the group?', 
+                include_blank: false, collection: @badge_copyability_options %>
+
+              <%= f.input :tag_visibility, as: :radio_buttons, 
+                label: 'Who can see group tags?', 
+                include_blank: false, collection: @tag_visibility_options %>
+
+              <%= f.input :tag_assignability, as: :radio_buttons, 
+                label: 'Who can assign group tags?', 
+                include_blank: false, collection: @tag_assignability_options %>
+
+              <%= f.input :tag_creatability, as: :radio_buttons, 
+                label: 'Who can create new group tags?', 
+                include_blank: false, collection: @tag_creatability_options %>
+
+              <%= f.input :member_visibility, as: :radio_buttons, label: 'Group Member List', 
+                include_blank: false, collection: @group_visibility_options %>
+
+              <%= f.input :admin_visibility, as: :radio_buttons, label: 'Group Admin List', 
+                include_blank: false, collection: @group_visibility_options %>
 
             <% else %>
               <% #=== NOT A PRIVATE GROUP ===# %>
               
-              <p>
-                <%= @group.name %> is currently an Open Group.
-              </p>
-              <p>
-                You can switch to a Closed Group at any time to get advanced membership 
-                controls and run reports.
-              </p>
+              <div class="info-block">
+                <p>
+                  <%= @group.name %> is currently an Open Group.
+                </p>
+                <p>
+                  You can switch to a Closed Group at any time to get advanced membership 
+                  controls and run reports.
+                  (<a href="/pricing" target="_blank">View plans &amp; pricing here</a>.)
+                </p>
+              </div>
 
             <% end %>
             <% # === END OF IF PRIVATE GROUP %>
@@ -667,19 +693,11 @@
     </div>
 
     <div class="modal-footer">
-      <% if @group.private? %>
-        <button class="btn btn-primary" aria-hidden="true" 
-            onclick="$('#privacy-settings-form').submit();">
-          Save changes
-        </button>
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-      <% else %>
-        <a href="/pricing" target="_blank" class="btn btn-success">
-          <i class="fa fa-list-alt"></i>
-          View plans &amp; pricing
-        </a>
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-      <% end %>
+      <button class="btn btn-primary" aria-hidden="true" 
+          onclick="$('#privacy-settings-form').submit();">
+        Save changes
+      </button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
     </div>
   </div>
 
@@ -1629,7 +1647,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                           <!-- #=== PRIVACY SETTINGS ===# -->
                           <li>
                             <%= link_to '<i class="fa fa-eye-slash"></i> '.html_safe \
-                              + 'Group privacy settings', '#privacy-settings', 
+                              + 'Group membership &amp; privacy'.html_safe, '#privacy-settings', 
                               data: { toggle: 'modal' } %>
                           </li>
                           <!-- #=== NEW MEMBER WELCOME SETTINGS ===# -->
