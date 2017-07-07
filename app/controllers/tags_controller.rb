@@ -317,10 +317,10 @@ private
     
     # Build privacy options
     @tag_privacy_options = []
-    Tag.privacy_values(@group.type).each do |privacy_string|
+    Tag.privacy_values(@group.has?(:privacy)).each do |privacy_string|
       @tag_privacy_options << [
         ("<strong>#{privacy_string.capitalize}</strong>" \
-        + " - #{Tag.privacy_text(@group.type, privacy_string).capitalize}").html_safe,
+        + " - #{Tag.privacy_text(@group.has?(:privacy), privacy_string).capitalize}").html_safe,
         privacy_string
       ]
     end

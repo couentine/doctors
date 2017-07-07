@@ -94,9 +94,9 @@ class Tag
     end
   end
 
-  # Returns list of valid privacy values for a group of the specified type
-  def self.privacy_values(group_type)
-    if group_type == 'private'
+  # Returns list of valid privacy values for the specified group
+  def self.privacy_values(group_has_privacy)
+    if group_has_privacy
       return ['public', 'private', 'secret']
     else
       return ['public', 'secret']
@@ -104,15 +104,14 @@ class Tag
   end
 
   # Returns the font awesome icon which represents the specified privacy state
-  # group_type should equal the type field from the group record
-  def self.privacy_icon(group_type, privacy_string)
+  def self.privacy_icon(group_has_privacy, privacy_string)
     case privacy_string
     when 'secret'
       return 'fa-lock'
     when 'private'
       return 'fa-users'
     else
-      if group_type == 'private'
+      if group_has_privacy
         return 'fa-link'
       else
         return 'fa-globe'
@@ -121,15 +120,14 @@ class Tag
   end
 
   # Returns text describing who can see entries for the specified privacy state
-  # group_type should equal the type field from the group record
-  def self.privacy_text(group_type, privacy_string)
+  def self.privacy_text(group_has_privacy, privacy_string)
     case privacy_string
     when 'secret'
       return 'only visible to badge awarders'
     when 'private'
       return 'only visible to group members'
     else
-      if group_type == 'private'
+      if group_has_privacy
         return 'visible to group members and anyone with the link'
       else
         return 'visible to public'
@@ -158,15 +156,13 @@ class Tag
   end
 
   # Returns the font awesome icon which represents this tag's privacy state
-  # group_type should equal the type field from the group record
-  def privacy_icon(group_type)
-    return Tag.privacy_icon(group_type, privacy)
+  def privacy_icon(group_has_privacy)
+    return Tag.privacy_icon(group_has_privacy, privacy)
   end
 
   # Returns text describing who can see entries for this tag
-  # group_type should equal the type field from the group record
-  def privacy_text(group_type)
-    return Tag.privacy_text(group_type, privacy)
+  def privacy_text(group_has_privacy)
+    return Tag.privacy_text(group_has_privacy, privacy)
   end
 
   def update_json_clone

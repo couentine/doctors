@@ -645,7 +645,7 @@
 
             <h4>Privacy Controls</h4>
             
-            <% if @group.private? %>
+            <% if @group.has?(:privacy) %>
 
               <%= f.input :badge_copyability, as: :radio_buttons, 
                 label: 'Who can copy badges from the group?', 
@@ -674,10 +674,10 @@
               
               <div class="info-block">
                 <p>
-                  <%= @group.name %> is currently an Open Group.
+                  <%= @group.name %> is currently a free group.
                 </p>
                 <p>
-                  You can switch to a Closed Group at any time to get advanced membership 
+                  You can switch to a paid group at any time to get advanced membership 
                   controls and run reports.
                   (<a href="/pricing" target="_blank">View plans &amp; pricing here</a>.)
                 </p>
@@ -1333,14 +1333,14 @@
     <div class="modal-body">
       <div class="bl-modal-form">
         <div class="form-body">
-          <% if @group.private? %>
+          <% if @group.paid? %>
             <p>
-              <%= @group.name %> is currently a Closed Group with a subscription plan that does
+              <%= @group.name %> is currently a paid group with a subscription plan that does
               not include reporting.
             </p>
           <% else %>
             <p>
-              <%= @group.name %> is currently an Open Group. Reporting is only 
+              <%= @group.name %> is currently a free group. Reporting is only 
               available to paid groups whose subscriptions include the feature. 
             </p>
           <% end %>
@@ -1377,7 +1377,7 @@
     </div>
 
     <div class="modal-body">
-      <% if @group.private? %>
+      <% if @group.paid? %>
         <h4 class="<%= status_details[:color] %>">
           <i class="fa <%= status_details[:icon] %>"></i>
           <%= status_details[:alert_title] %>
@@ -1386,15 +1386,15 @@
         <p><%= status_details[:alert_body] %></p>
       <% else %>
         <p>
-          <%= @group.name %> is currently an Open Group.
+          <%= @group.name %> is currently a free group.
         </p>
         <p>
-          You can switch to a Closed Group at any time to get more features. 
+          You can switch to a paid group at any time to get more features. 
         </p>
       <% end %>
 
       <ul>
-        <% if @group.private? %>
+        <% if @group.paid? %>
           <li><b>Current Plan:</b> <%= @group.subscription_plan_name %></li>
           <li><b>Cost:</b> <%= @group.subscription_plan_cost %></li>
           <li>
@@ -1465,17 +1465,14 @@
               <h1><%= @group.name %></h1>
               <h2>
                 <%=
-                  case @group.type
-                    when "open"
-                      "<i class='fa fa-globe'></i> Open Group".html_safe
-                    when "closed"
-                      "<i class='fa fa-eye'></i> Open Group (Closed Membership)".html_safe
-                    when "private"
-                      "<i class='fa fa-lock'></i> Closed Group".html_safe
+                  if @group.paid?
+                    "<i class='fa fa-diamond'></i> Paid Group".html_safe
+                  else
+                    "<i class='fa fa-check-circle free-icon'></i> Free Group".html_safe
                   end
                 %>
 
-                <% if @group.private? && (@current_user_is_owner || @badge_list_admin) %>
+                <% if @group.paid? && (@current_user_is_owner || @badge_list_admin) %>
                   <br>
                   <a href="#subscription-details" data-toggle="modal">
                     <span class="label <%= status_details[:color] %>">
@@ -1484,7 +1481,7 @@
                       <%= @group.subscription_status_string %>
                     </span>
                   </a>
-                <% elsif @group.private? && @current_user_is_admin %>
+                <% elsif @group.paid? && @current_user_is_admin %>
                   <br>
                   <span class="label <%= status_details[:color] %>">
                     <%= @group.subscription_plan_name %> - 
@@ -1984,7 +1981,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                   group_path(@group, show_emails: true), class: 'btn btn-small' %>
             <% end %>
 
-            <% if @group.private? %>
+            <% if @group.paid? %>
               <a href="#subscription-details" data-toggle="modal">
                 <span class="label <%= member_details[:color] %>" data-toggle="tooltip"
                    title="<%= member_details[:summary] %>">
@@ -2163,7 +2160,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                   group_path(@group, show_emails: true), class: 'btn btn-small' %>
             <% end %>
 
-            <% if @group.private? %>
+            <% if @group.paid? %>
               <a href="#subscription-details" data-toggle="modal">
                 <span class="label <%= admin_details[:color] %>" data-toggle="tooltip"
                    title="<%= admin_details[:summary] %>">

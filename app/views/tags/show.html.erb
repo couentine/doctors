@@ -215,8 +215,8 @@
               <% end %>
               <% if @tag.type == 'requirement' %>
                 <li>
-                  <i class="fa <%= @tag.privacy_icon(@group.type) %>"></i>
-                  Evidence <%= @tag.privacy_text(@group.type) %>
+                  <i class="fa <%= @tag.privacy_icon(@group.has?(:privacy)) %>"></i>
+                  Evidence <%= @tag.privacy_text(@group.has?(:privacy)) %>
                 </li>
               <% end %>
             </ul>

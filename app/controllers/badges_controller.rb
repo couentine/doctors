@@ -92,7 +92,7 @@ class BadgesController < ApplicationController
         return_value = @badge.as_json(filter_user: current_user)
 
         # If this is a private group we need to filter out user-related keys
-        if @group.private? && !@badge_list_admin && !@current_user_is_admin \
+        if @group.has?(:privacy) && !@badge_list_admin && !@current_user_is_admin \
             && !@current_user_is_member
           return_value.delete 'experts'
           return_value.delete 'learners'
@@ -134,7 +134,7 @@ class BadgesController < ApplicationController
     # First build the badge as normal to make sure that it's valid
     @badge = Badge.new(badge_params)
     @badge.group = @group
-    @badge.visibility = 'private' if @group.private?
+    @badge.visibility = 'private' if @group.has?(:privacy)
     @badge.creator = current_user
     @badge.current_user = current_user
     @badge.current_username = current_user.username
@@ -538,15 +538,15 @@ private
     end
     @tag_privacy_map = {}
     @tag_privacy_options_string = ''
-    Tag.privacy_values(@group.type).each do |privacy_string|
+    Tag.privacy_values(@group.has?(:privacy)).each do |privacy_string|
       @tag_privacy_map[privacy_string] = {
-        icon: Tag.privacy_icon(@group.type, privacy_string),
+        icon: Tag.privacy_icon(@group.has?(:privacy), privacy_string),
         name: privacy_string.capitalize,
-        text: Tag.privacy_text(@group.type, privacy_string)
+        text: Tag.privacy_text(@group.has?(:privacy), privacy_string)
       }
       @tag_privacy_options_string += \
         "<option value='#{privacy_string}'>#{privacy_string.capitalize} " \
-        + "(#{Tag.privacy_text(@group.type, privacy_string).capitalize})</option>"
+        + "(#{Tag.privacy_text(@group.has?(:privacy), privacy_string).capitalize})</option>"
     end
   end
 

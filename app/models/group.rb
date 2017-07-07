@@ -11,7 +11,7 @@ class Group
   MAX_DESCRIPTION_LENGTH = 140
   MAX_WELCOME_MESSAGE_LENGTH = 1000
   MAX_LOCATION_LENGTH = 100
-  TYPE_VALUES = ['open', 'closed', 'private']
+  TYPE_VALUES = ['free', 'paid', 'open', 'closed', 'private']
   JOINABILITY_VALUES = ['open', 'closed']
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
@@ -182,7 +182,7 @@ class Group
   before_update :change_owner
   before_update :update_counts
   
-  before_save :update_private_defaults
+  before_save :update_paid_defaults
   before_save :process_subscription_field_updates
   before_create :create_first_subscription
   after_save :process_avatar
@@ -258,14 +258,14 @@ class Group
   # === LIMIT-FOCUSED INSTANCE METHODS === #
 
   def disabled?
-    private? && ( \
+    paid? && ( \
       ((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date)) \
         || (stripe_subscription_status == 'unpaid')
     )
   end
 
   def can_add_members?(how_many = 1)
-    public? || ((user_limit < 0) || ((member_count + how_many) <= user_limit))
+    free? || ((user_limit < 0) || ((member_count + how_many) <= user_limit))
   end
 
   # Returns hash = {
@@ -275,9 +275,9 @@ class Group
   #   requires_attention: true or false
   # }
   def member_limit_details
-    if public? || user_limit.blank?
+    if free? || user_limit.blank?
       { color: 'default', requires_attention: false, label: 'Unlimited', 
-        summary: 'Public groups support unlimited members.' }
+        summary: 'Free groups support unlimited members.' }
     elsif user_limit < 0
       { color: 'default', requires_attention: false, label: 'Unlimited', 
         summary: 'Your plan supports unlimited members.' }
@@ -299,7 +299,7 @@ class Group
   end
 
   def can_add_admins?(how_many = 1)
-    public? || ((admin_limit < 0) || ((admin_count + how_many) <= admin_limit))
+    free? || ((admin_limit < 0) || ((admin_count + how_many) <= admin_limit))
   end
 
   # Returns hash = {
@@ -309,9 +309,9 @@ class Group
   #   requires_attention: true or false
   # }
   def admin_limit_details
-    if public? || admin_limit.blank?
+    if free? || admin_limit.blank?
       { color: 'default', requires_attention: false, label: 'Unlimited', 
-        summary: 'Public groups support unlimited admins.' }
+        summary: 'Free groups support unlimited admins.' }
     elsif admin_limit < 0
       { color: 'default', requires_attention: false, label: 'Unlimited', 
         summary: 'Your plan supports unlimited admins.' }
@@ -346,7 +346,7 @@ class Group
   end
 
   def can_create_sub_groups?
-    public? || ((sub_group_limit < 0) || (sub_group_count < sub_group_limit))
+    free? || ((sub_group_limit < 0) || (sub_group_count < sub_group_limit))
   end
 
   # Returns whether or not the features array contains the specified 'feature' or :feature
@@ -358,6 +358,8 @@ class Group
       return_value ||= (feature_grant_reporting == true)
     elsif (feature.to_s == 'integration')
       return_value ||= (feature_grant_integration == true)
+    elsif (feature.to_s == 'privacy')
+      return_value ||= paid?
     end
 
     return_value
@@ -373,6 +375,9 @@ class Group
     end
     if feature_grant_integration && !return_list.include?('integration')
       return_list << 'integration'
+    end
+    if paid? && !return_list.include?('privacy')
+      return_list << 'privacy'
     end
 
     return_list
@@ -414,7 +419,7 @@ class Group
 
   # Returns stripe_subscription_status as a readable string
   def subscription_status_string
-    if private?
+    if paid?
       case stripe_subscription_status
       when 'trialing', 'new', 'force-new'
         'Trial'
@@ -443,8 +448,8 @@ class Group
   #   alert_body: body_of_alert_if_shown,
   # }
   def status_details_for_admins
-    if public?
-      { color: 'green', summary: 'Free open group', icon: 'fa-check-circle', show_alert: false }
+    if free?
+      { color: 'green', summary: 'Free group', icon: 'fa-check-circle', show_alert: false }
     else
       date_failed = stripe_payment_fail_date || Time.now
       date_retry = stripe_payment_retry_date || (Time.now + 3.days)
@@ -457,7 +462,7 @@ class Group
           summary: "Trial ends on " \
             + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}",
           alert_title: "Group is in trial period",
-          alert_body: ("Your private group trial ends on " \
+          alert_body: ("Your paid group trial ends on " \
                       + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}. " \
                       + "Your card will be charged when the trial is complete. " \
                       + "If you have any questions, send us an email at " \
@@ -478,7 +483,7 @@ class Group
           alert_body: "There was a problem renewing your subscription after several attempts. " \
             + "The final payment attempt was made on #{date_failed.to_s(:short_date_time)}. "\
             + "Your group will remain inactive until you update your billing details or change " \
-            + "the group type to public. You can also choose to cancel your subscription which " \
+            + "the group type to free. You can also choose to cancel your subscription which " \
             + "will leave your group's contents online but prevent new content from being posted." }
       when 'canceled'
         if (Time.now < subscription_end_date)
@@ -513,7 +518,7 @@ class Group
   #   alert_body: body_of_alert_if_shown,
   # }
   def status_details_for_members
-    if private? && \
+    if paid? && \
         ((stripe_subscription_status == 'canceled') && (Time.now >= subscription_end_date) \
           || (stripe_subscription_status == 'unpaid'))
       { color: 'blue', icon: 'fa-close', show_alert: true,
@@ -544,13 +549,12 @@ class Group
     flags.include? flag
   end
 
-  # Is this group visible to the public?
-  def public?
-    (type == 'open') || (type == 'closed')
+  def free?
+    (type == 'free') || (type == 'open') || (type == 'closed')
   end
   
-  def private?
-    type == "private"
+  def paid?
+    (type == 'paid') || (type == 'private')
   end
 
   # Does this group have open membership?
@@ -1404,11 +1408,6 @@ protected
     if !image_url.blank? && !image_url.downcase.start_with?("http")
         self.image_url = "http://#{image_url}"
     end
-
-    if (new_record? || type_changed?) && (type == 'private')
-      # Paid groups default to closed joinability
-      self.joinability = 'closed'
-    end
   end
   
   def update_avatar_key
@@ -1493,7 +1492,7 @@ protected
 
         # Cancel the subscription if needed 
         # NOTE: This callback runs AFTER process_subscription_field_updates
-        if private?
+        if paid?
           set_flag PENDING_SUBSCRIPTION_FLAG
           self.stripe_subscription_status = 'canceled'
           self.stripe_subscription_id = nil
@@ -1535,21 +1534,24 @@ protected
 
   # Validates any subscription related field logic
   def subscription_fields_valid
-    if private?
+    if paid?
       errors.add(:subscription_plan, 'is required') unless subscription_plan
     end
   end
 
-  def update_private_defaults
+  def update_paid_defaults
     if new_record? || type_changed?
-      # Overwrite the badge copyability setting when we change between open & private
-      self.badge_copyability = (private?) ? 'admins' : 'public'
+      unless (type == 'paid')  && (type_was == 'private')
+        # The above is a one-time conditional needed during the migration from private to paid
+        self.badge_copyability = (has?(:privacy)) ? 'admins' : 'public'
+      end
+      self.joinability = 'closed' if paid?
     end
   end
 
   # Updates flags and subscription metadata whenever the plan or status changes
   def process_subscription_field_updates
-    if private?
+    if paid?
       if new_subscription
         if stripe_subscription_status == 'new'
           self.stripe_subscription_status = 'force-new' # forces dirty state to fire callback
@@ -1596,9 +1598,9 @@ protected
     end
   end
 
-  # This creates the initial stripe subscription if this is a private group
+  # This creates the initial stripe subscription if this is a paid group
   def create_first_subscription
-    if private? && (stripe_subscription_status == 'new')
+    if paid? && (stripe_subscription_status == 'new')
       create_stripe_subscription(true) # asynchronous
       
       # Default to a 2 week trial (until we hear back from strip via webhook)
@@ -1609,7 +1611,7 @@ protected
 
   # This creates a new subscription when status moves to new
   def create_another_subscription
-    if private? && stripe_subscription_status_changed? \
+    if paid? && stripe_subscription_status_changed? \
         && ((stripe_subscription_status == 'new') || (stripe_subscription_status == 'force-new'))
       if !stripe_subscription_id.blank? 
         # Then first we cancel the existing subscription (but don't update sub status after)
@@ -1627,7 +1629,7 @@ protected
   # Updates core fields in stripe if they change locally 
   # NOTE: It won't run if this callback is being fired by stripe itself
   def update_stripe_if_needed
-    if private? && !stripe_subscription_id.blank? && (context != 'stripe') \
+    if paid? && !stripe_subscription_id.blank? && (context != 'stripe') \
         && (subscription_plan_changed? || stripe_subscription_card_changed?)
       update_stripe_subscription(true) # asynchronous
 
@@ -1648,7 +1650,7 @@ protected
     end
   end
 
-  # Cancels the stripe subscription when destroying a private group
+  # Cancels the stripe subscription when destroying a paid group
   def cancel_subscription_on_destroy
     if !stripe_subscription_id.blank?
       cancel_stripe_subscription(false, true); # asynchronous

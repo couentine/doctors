@@ -115,10 +115,10 @@
             <% end %>
 
             <% 
-              if @group.private? 
+              if @group.has?(:privacy) 
                 private_text = 'This will break Mozilla compatibility'
               else
-                private_text = 'Only available for private learning grouups'
+                private_text = 'Only available for groups with privacy feature'
               end 
             %>
             
@@ -536,8 +536,8 @@
 
                   <div class="topic-info">
                     <div class="privacy-info">
-                      <i class="fa <%= Tag.privacy_icon(@group.type, tag.privacy) %>"></i>
-                      Evidence <%= Tag.privacy_text(@group.type, tag.privacy) %>
+                      <i class="fa <%= Tag.privacy_icon(@group.has?(:privacy), tag.privacy) %>"></i>
+                      Evidence <%= Tag.privacy_text(@group.has?(:privacy), tag.privacy) %>
                     </div>
                     <div class="summary">
                       <%= tag.summary %>

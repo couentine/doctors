@@ -552,14 +552,14 @@
                   <%= link_to group.name, group, title: "View the group" %>
                 </td>
                 <td>
-                  <% if group.private? %>
-                    <i class="fa fa-lock"></i> Closed
+                  <% if group.paid? %>
+                    <i class="fa fa-diamond"></i> Paid
                   <% else %>
-                    <i class="fa fa-globe"></i> Open
+                    <i class="fa fa-check-circle free-icon"></i> Free
                   <% end %>
                 </td>
                 <td>
-                  <% if group.private? && group.subscription_plan %>
+                  <% if group.paid? && group.subscription_plan %>
                     <%= group.subscription_plan_name %> - 
                     <% subscription_status = group.status_details_for_admins %>
                     <span class="label <%= subscription_status[:color] %>">

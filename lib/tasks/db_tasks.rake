@@ -711,7 +711,7 @@ namespace :db do
     print "Updating #{Badge.count} badges"
     
     Badge.each do |badge|
-      if badge.group.private?
+      if badge.group.has?(:privacy)
         badge.visibility = 'private'
       else
         badge.visibility = 'public'
