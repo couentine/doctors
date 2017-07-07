@@ -1502,7 +1502,7 @@ protected
 
         # Notify the new owner
         unless new_owner.email_inactive
-          GroupMailer.delay(queue: 'low').group_transfer(id)
+          GroupMailer.delay(queue: 'low').group_transfer(id, new_owner.id, previous_owner_id)
         end
       end
       self.new_owner_username = nil
