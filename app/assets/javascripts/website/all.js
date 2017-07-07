@@ -35,19 +35,15 @@ var termMessages = {
   "integration": "Includes access to LTI integration and all future integrations.",
   "lifetime-hosting": "If you ever decide to cancel your paid subscription, all of the awarded "
     + "badges and evidence will continue to be hosted at no additional cost.",
-  "membership-controls": "Closed groups can only be joined if a user is invited by an admin.",
   "one-badge-awarder": "The Solo plan only supports badges which are awarded by the admin.",
-  "open-groups": "Open groups allow anyone to join. All badges and evidence in open groups "
-    + "are public and indexed by search engines.",
-  "privacy-controls": "Closed groups let admins decide between three levels of privacy for "
+  "privacy-controls": "Privacy controls let admins decide between three levels of privacy for "
     + "each badge and piece of required evidence: public, private and secret.",
   "reporting": "Reporting enables group admins to generate reports on membership and badge "
     + "activity. Reports can be exported to CSV.",
   "teacher": "The Teacher plan only supports the creation and awarding of badges by a single "
     + "teacher.",
-  "unlimited-badge-awarders": "Unlimited badge awarder plans support 3 different types of badge "
-    + "awarding: awarding by admins, awarding by badge experts and awarding by a specific "
-    + "list of users."
+  "unlimited-badge-awarders": "Unlimited badge awarder plans support 2 different types of badge "
+    + "awarding: awarding by admins or awarding by badge experts."
 };
 
 function setupTermTooltips() {
