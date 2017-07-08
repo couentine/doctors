@@ -1063,4 +1063,32 @@ namespace :db do
     puts " >> Done."
   end
 
+  # ONE TIME MIGRATION: Retiring the previous values of group type
+  task migrate_group_types: :environment do
+    print "Updating #{Group.count} groups"
+
+    Group.each do |group|
+      if group.type == 'open'
+        group.type = 'free'
+      elsif group.type == 'closed'
+        group.type = 'free'
+        group.joinability = 'closed'
+      elsif group.type == 'private'
+        group.type = 'paid'
+      end
+
+      if group.changed?
+        if group.timeless.save
+          print "."
+        else
+          print "!#{group.url_with_caps}"
+        end
+      else
+        print '-'
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end
