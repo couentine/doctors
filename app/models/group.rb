@@ -70,7 +70,7 @@ class Group
   field :description,                     type: String
   field :location,                        type: String
   field :website,                         type: String
-  field :type,                            type: String, default: 'open'
+  field :type,                            type: String, default: 'free'
   field :joinability,                     type: String, default: 'open'
   field :customer_code,                   type: String
   field :validation_threshold,            type: Integer, default: 1 # RETIRED FIELD
@@ -1355,7 +1355,12 @@ class Group
 protected
 
   def add_creator_to_admins
-    self.admins << self.creator unless self.creator.blank?
+    if creator.present?
+      self.admins << self.creator
+      self.creator.save
+    end
+
+    true
   end
 
   # This is a mongoid relation callback that fires every time a new member is added to the group.
@@ -1433,7 +1438,7 @@ protected
       
       if group.save
         # If it worked then update all of the child badges
-        Group.delay(queue: 'low').update_child_badge_fields(self.id)
+        Group.delay(queue: 'low').update_child_badge_fields(group_id)
       else
         # If there was an error then clear out the uploaded image and use the default
         group.avatar_key = nil

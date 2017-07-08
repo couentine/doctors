@@ -153,44 +153,44 @@ defaults: &defaults
         - integration
     internal:
       solo-free-1:
-        name: Free Solo
+        name: Enterprise Solo
         amount: 0
         currency: usd
         interval: month
         trial_period_days: 0
-        statement_descriptor: Badge List Free
+        statement_descriptor: Badge List Enterprise
         icon: fa-star
         description: |
-          Badge List Free
+          Badge List Enterprise
         users: 5000
         admins: 1
         sub_groups: 0
         features: []
       team-free-1:
-        name: Free Team
+        name: Enterprise Team
         amount: 0
         currency: usd
         interval: month
         trial_period_days: 0
-        statement_descriptor: Badge List Free
+        statement_descriptor: Badge List Enterprise
         icon: fa-star
         description: |
-          Badge List Free
+          Badge List Enterprise
         users: 5000
         admins: 3
         sub_groups: 0
         features:
         - community
       org-free-1:
-        name: Free Org
+        name: Enterprise Org
         amount: 0
         currency: usd
         interval: month
         trial_period_days: 0
-        statement_descriptor: Badge List Free
+        statement_descriptor: Badge List Enterprise
         icon: fa-star
         description: |
-          Badge List Free
+          Badge List Enterprise
         users: 5000
         admins: 3
         sub_groups: 5
