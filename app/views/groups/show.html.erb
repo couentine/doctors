@@ -1860,53 +1860,58 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
         <% end %>
       </div>
 
-      <div class="row">
-        <div class="span12">
-          <div class="group-tag-list">
+      <% if @can_view_group_tags && @has_badges %>
+        <!-- === BADGE TAGS === -->
 
-            <div class="tag-label">
-              <i class="fa fa-tag"></i>
-              Tags:
-            </div>
+        <div class="row">
+          <div class="span12">
+            <div class="group-tag-list">
 
-            <ul class="tag-items <%= (@has_top_badge_tags) ? '' : 'no-tags' %>">
-              <% if @has_top_badge_tags %>
-                <% @top_badge_tags.each do |tag_item| %>
-                  <li>
-                    <a href="<%= group_tag_path(@group, tag_item['name_with_caps'], 
-                        selected: 'badges') %>">
-                      #<%= tag_item['name_with_caps'] %>
-                    </a>
+              <div class="tag-label">
+                <i class="fa fa-tag"></i>
+                Tags:
+              </div>
+
+              <ul class="tag-items <%= (@has_top_badge_tags) ? '' : 'no-tags' %>">
+                <% if @has_top_badge_tags %>
+                  <% @top_badge_tags.each do |tag_item| %>
+                    <li>
+                      <a href="<%= group_tag_path(@group, tag_item['name_with_caps'], 
+                          selected: 'badges') %>">
+                        #<%= tag_item['name_with_caps'] %>
+                      </a>
+                    </li>
+                  <% end %>
+                <% elsif @has_tags %>
+                  <li class="no-tags">No group tags have been attached to badges yet.</li>
+                <% else %>
+                  <li class="no-tags">No group tags have been created yet.</li>
+                <% end %>
+
+                <% if @has_tags %>
+                  <li class="browse-tags">
+                    <%= link_to "<i class='fa fa-search'></i> Browse all tags".html_safe,
+                      group_tags_path(@group), class: 'browse-tags-link' %>
                   </li>
                 <% end %>
-              <% elsif @has_tags %>
-                <li class="no-tags">No group tags have been attached to badges yet.</li>
-              <% else %>
-                <li class="no-tags">No group tags have been created yet.</li>
+              </ul>
+
+              <% if @can_create_group_tags %>
+                <div class="tag-button">
+                  <a href="#new-group-tag" class="btn btn-small btn-success" data-toggle="modal"
+                      onclick="setNewGroupTagSelected('badges')">
+                    <i class='fa fa-plus'></i> 
+                    <span class="hide-when-small">Create new tag</span>
+                    <span class="show-when-small">New</span>
+                  </a>
+                </div>
               <% end %>
 
-              <% if @has_tags %>
-                <li class="browse-tags">
-                  <%= link_to "<i class='fa fa-search'></i> Browse all tags".html_safe,
-                    group_tags_path(@group), class: 'browse-tags-link' %>
-                </li>
-              <% end %>
-            </ul>
-
-            <% if @can_create_group_tags %>
-              <div class="tag-button">
-                <a href="#new-group-tag" class="btn btn-small btn-success" data-toggle="modal"
-                    onclick="setNewGroupTagSelected('badges')">
-                  <i class='fa fa-plus'></i> 
-                  <span class="hide-when-small">Create new tag</span>
-                  <span class="show-when-small">New</span>
-                </a>
-              </div>
-            <% end %>
-
+            </div>
           </div>
         </div>
-      </div>
+
+      <% end %>
 
       <% if !@has_badges %>
         <% if @current_user_is_admin || @badge_list_admin %>
@@ -2050,7 +2055,7 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
       </div>
     </div>
 
-    <% if @can_view_group_tags %>
+    <% if @can_view_group_tags && @group.member_ids.present? %>
       <!-- === USER TAGS === -->
 
       <div class="row">
