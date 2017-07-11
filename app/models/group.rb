@@ -11,7 +11,7 @@ class Group
   MAX_DESCRIPTION_LENGTH = 140
   MAX_WELCOME_MESSAGE_LENGTH = 1000
   MAX_LOCATION_LENGTH = 100
-  TYPE_VALUES = ['free', 'paid', 'open', 'closed', 'private']
+  TYPE_VALUES = ['free', 'paid']
   JOINABILITY_VALUES = ['open', 'closed']
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
@@ -550,11 +550,11 @@ class Group
   end
 
   def free?
-    (type == 'free') || (type == 'open') || (type == 'closed')
+    type == 'free'
   end
   
   def paid?
-    (type == 'paid') || (type == 'private')
+    type == 'paid'
   end
 
   # Does this group have open membership?
