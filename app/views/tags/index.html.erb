@@ -63,7 +63,7 @@
       </div>
 
       <div class="secondary-header span6">
-        <% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
+        <% if @can_see_badge %>
           <span class="header-text">
             <h1>Badge Wiki</h1>
           </span>     
@@ -73,9 +73,9 @@
   </div>
 </div>
 
-<% if @group.public? || @current_user_is_admin || @current_user_is_member || @badge_list_admin %>
+<% if @can_see_badge %>
 
-  <!-- === ENTRIES LIST === -->
+  <!-- === TOPICS LIST === -->
 
   <% if @topics.blank? %>
   

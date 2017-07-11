@@ -143,8 +143,8 @@
           <% end %>
           <li>
             <% if @parent_tag %>
-              <i class="fa <%= @parent_tag.privacy_icon(@group.type) %>"></i>
-              <%= @parent_tag.privacy_text(@group.type).capitalize %>
+              <i class="fa <%= @parent_tag.privacy_icon(@group.has?(:privacy)) %>"></i>
+              <%= @parent_tag.privacy_text(@group.has?(:privacy)).capitalize %>
             <% else %>
               <i class='fa fa-globe'></i> 
               Visible to public

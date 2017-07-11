@@ -21,8 +21,9 @@
     <strong>Have questions?</strong> Reply to this email to ask the previous owner.
   </p>
   <p>
-    <strong>Don't want the group?</strong> You can transfer it back by
-    <%= link_to 'editing the group', edit_group_url(@group) %>.
+    <strong>Don't want the group?</strong> You can transfer it back by using the 
+    "<%= link_to 'Transfer Group Ownership', edit_group_url(@group, transfer: true) %>" 
+    tool. (The previous owner's username is "<%= @previous_owner.username_with_caps %>").
   </p>
 <% else %>
   <p>

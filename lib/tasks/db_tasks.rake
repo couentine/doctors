@@ -711,7 +711,7 @@ namespace :db do
     print "Updating #{Badge.count} badges"
     
     Badge.each do |badge|
-      if badge.group.private?
+      if badge.group.has?(:privacy)
         badge.visibility = 'private'
       else
         badge.visibility = 'public'
@@ -1048,6 +1048,34 @@ namespace :db do
 
     Group.where(:subscription_plan.ne => nil).each do |group|
       group.refresh_subscription_features
+
+      if group.changed?
+        if group.timeless.save
+          print "."
+        else
+          print "!#{group.url_with_caps}"
+        end
+      else
+        print '-'
+      end
+    end
+    
+    puts " >> Done."
+  end
+
+  # ONE TIME MIGRATION: Retiring the previous values of group type
+  task migrate_group_types: :environment do
+    print "Updating #{Group.count} groups"
+
+    Group.each do |group|
+      if group.type == 'open'
+        group.type = 'free'
+      elsif group.type == 'closed'
+        group.type = 'free'
+        group.joinability = 'closed'
+      elsif group.type == 'private'
+        group.type = 'paid'
+      end
 
       if group.changed?
         if group.timeless.save

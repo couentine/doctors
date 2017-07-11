@@ -30,15 +30,19 @@ class GroupsController < ApplicationController
     :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
     :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, 
     :avatar_key, :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, 
-    :welcome_badge_tag]
+    :welcome_badge_tag, :joinability]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500
   GROUP_TYPE_OPTIONS = [
-    ['<b><i class="fa fa-globe"></i> Open Group</b><span>Anyone can join '.html_safe \
-      + 'and everything is public.<br>Free forever.</span>'.html_safe, 'open'],
-    ['<b><i class="fa fa-users"></i> Closed Group</b><span>You control privacy '.html_safe \
-      + 'and membership.<br>Plans start at $5 per month.</span>'.html_safe, 'private']
+    ['<b><i class="fa fa-check-circle free-icon"></i> Free Group</b><span>'.html_safe \
+      + 'Everything is public.<br>Free forever.</span>'.html_safe, 'free'],
+    ['<b><i class="fa fa-diamond"></i> Paid Group</b><span>Privacy controls '.html_safe \
+      + 'and advanced features.<br>Plans start at $5 per month.</span>'.html_safe, 'paid']
+  ]
+  GROUP_JOINABILITY_OPTIONS = [
+    ['<i class="fa fa-globe"></i> Open to Public'.html_safe, 'open'],
+    ['<i class="fa fa-lock"></i> By Invitation Only'.html_safe, 'closed']
   ]
   PRICING_GROUP_OPTIONS = [
     ['Standard Pricing', 'standard'],
@@ -142,6 +146,7 @@ class GroupsController < ApplicationController
       end
 
     # Set options vars
+    @group_joinability_options = GROUP_JOINABILITY_OPTIONS
     @group_visibility_options = GROUP_VISIBILITY_OPTIONS
     @badge_copyability_options = BADGE_COPYABILITY_OPTIONS
     @tag_assignability_options = TAG_ASSIGNABILITY_OPTIONS
@@ -185,7 +190,7 @@ class GroupsController < ApplicationController
       @uploader.success_action_redirect = image_key_url
 
       if subscription_plan
-        @group.type = 'private'
+        @group.type = 'paid'
         if ALL_SUBSCRIPTION_PLANS[subscription_plan] \
             && ['standard', 'k12'].include?(SUBSCRIPTION_PRICING_GROUP[subscription_plan])
           @group.pricing_group = SUBSCRIPTION_PRICING_GROUP[subscription_plan]
@@ -296,7 +301,7 @@ class GroupsController < ApplicationController
     end
   end
 
-  # POST /group-url/join?code=123
+  # POST or GET /group-url/join?code=123
   def join
     notice = ""
     join_code = params[:code]
@@ -1255,12 +1260,10 @@ private
       && (params['suppress_bl_admin'] != 'true')
 
     # Set user visibility variables
-    @can_see_members = @group.public? \
-      || (@group.member_visibility == 'public') \
+    @can_see_members = (@group.member_visibility == 'public') \
       || ((@group.member_visibility == 'private') \
         && (@current_user_is_admin || @current_user_is_member || @badge_list_admin))
-    @can_see_admins = @group.public? \
-      || (@group.admin_visibility == 'public') \
+    @can_see_admins = (@group.admin_visibility == 'public') \
       || ((@group.admin_visibility == 'private') \
         && (@current_user_is_admin || @current_user_is_admin || @badge_list_admin))
 

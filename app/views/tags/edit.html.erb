@@ -23,7 +23,7 @@
 
   $(document).ready(function() {
     
-    <% if @group.private? && !@group.has?(:community) %>
+    <% if @group.paid? && !@group.has?(:community) %>
       // Community feature missing: Fix editability options
       $("#tag_editability_learners").attr("disabled", true).parent().addClass("disabled")
         .append("<span class='label'>Requires Community Features</span>");

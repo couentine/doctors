@@ -43,15 +43,15 @@
         e.preventDefault();
       });
 
-      <% if @group.private? && (@group.stripe_subscription_status != 'canceled') %>
+      <% if @group.paid? && (@group.stripe_subscription_status != 'canceled') %>
         $("#group-type-collapsed a.btn").remove();
         $("#group-type-collapsed .controls").first()
-          .append("<p class='help-block'>(To change your group from open to closed, "
+          .append("<p class='help-block'>(To change your group from free to paid, "
             + "cancel the subscription first.)</p>");
       <% end %>
     <% end %>
 
-    $("#group_type_private").click(function() {
+    $("#group_type_paid").click(function() {
       $("#group_new_subscription").val("true"); // only relevant if edit mode
       $("#group-type-expanded").fadeOut(function() {
         $("#group-type-collapsed").fadeIn();
@@ -64,9 +64,9 @@
       });
     });
     
-    $("#switch-to-open").click(function(e) {
+    $("#switch-to-free").click(function(e) {
       $("#group_new_subscription").val(""); // only relevant if edit mode
-      $("#group_type_open").click();
+      $("#group_type_free").click();
       $("#group-type-collapsed").fadeOut();
       $("#subscription-details-panel").fadeOut(function() {
         $("#submit-group-form").prop("disabled", false);
@@ -164,8 +164,8 @@
       }
     });
 
-    <% if @group.private? %>
-      $("#group_type_private").click(); // Fire the logic 
+    <% if @group.paid? %>
+      $("#group_type_paid").click(); // Fire the logic 
     <% end %>
 
     <% if @allow_url_editing %>
@@ -293,16 +293,16 @@
       <% end %>
     </div>
 
-    <div id="group-type-expanded" style="<%= (@group.private?) ? 'display: none;' : '' %>">
+    <div id="group-type-expanded" style="<%= (@group.paid?) ? 'display: none;' : '' %>">
       <%= f.input :type, label: 'Group Type', as: :radio_buttons, collection:@group_type_options %>
     </div>
-    <div id="group-type-collapsed" style="<%= (@group.private?) ? '' : 'display: none;' %>">
+    <div id="group-type-collapsed" style="<%= (@group.paid?) ? '' : 'display: none;' %>">
       <div class="control-group">
         <label class="control-label">Group Type</label>
         <div class="controls">
-          <b><i class="fa fa-users"></i> Closed Group</b>
-          <a class="btn btn-small" href="#" id="switch-to-open">
-            <i class="fa fa-undo"></i> Switch to Open Group
+          <b><i class="fa fa-users"></i> Paid Group</b>
+          <a class="btn btn-small" href="#" id="switch-to-free">
+            <i class="fa fa-undo"></i> Switch to Free Group
           </a>
         </div>
       </div>
@@ -311,7 +311,7 @@
     <!-- === SUBSCRIPTION DETAILS === -->
 
     <% 
-      if @group.public?
+      if @group.free?
         subscription_panel_mode = 'none'
       elsif @group.new_record? || !@group.owner.has_stripe_card?
         subscription_panel_mode = 'edit'

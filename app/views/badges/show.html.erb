@@ -151,10 +151,10 @@
             <% end %>
 
             <% 
-              if @group.private? 
+              if @group.has?(:privacy) 
                 private_text = 'This will break Mozilla compatibility'
               else
-                private_text = 'Only available for private learning grouups'
+                private_text = 'Only available for groups with privacy feature'
               end 
             %>
             
@@ -259,7 +259,7 @@
 
     $(document).ready(function() {
       
-      <% if @group.private? && !@group.has?(:community) %>
+      <% if @group.paid? && !@group.has?(:community) %>
         // Community feature missing: Fix badge settings
         $("#badge_editability_experts").attr("disabled", true).parent().addClass("disabled")
           .append("<span class='label'>Requires Community Features</span>");
@@ -269,7 +269,7 @@
         $("#badge_awardability_admins").attr("checked", true);
       <% end %>
       
-      <% if @group.public? %>
+      <% if !@group.has?(:privacy) %>
         // Public group: Fix badge settings
         $("#badge_visibility_private").attr("disabled", true).parent().addClass("disabled")
           .append("<span class='label'>Closed Groups Only</span>");

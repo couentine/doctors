@@ -54,9 +54,10 @@ class GroupMailer < ActionMailer::Base
     )
   end
 
-  def group_transfer(group_id)
+  def group_transfer(group_id, new_owner_id, previous_owner_id)
     @group = Group.find(group_id)
-    @previous_owner = User.find(@group.previous_owner_id) rescue nil
+    @new_owner = User.find(new_owner_id) rescue nil
+    @previous_owner = User.find(previous_owner_id) rescue nil
 
     if @previous_owner
       from_string = build_from_string @previous_owner
@@ -68,7 +69,7 @@ class GroupMailer < ActionMailer::Base
 
     mail(
       :subject  => "You're the new owner of #{@group.name}",
-      :to       => @group.owner.email_name,
+      :to       => @new_owner.email_name,
       :from     => from_string,
       :reply_to => reply_to_string,
       :tag      => 'group_mailer,group_transfer'

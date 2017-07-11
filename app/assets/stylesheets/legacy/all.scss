@@ -1051,6 +1051,11 @@ div.bl-inline-form {
   form {
     margin: 0;
 
+    hr {
+      float: left;
+      width: 100%;
+      margin: 1em 0 2em 0;
+    }
     p.help-block:first-child { margin-top: 0; }
 
     .info-block {
