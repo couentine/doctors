@@ -456,11 +456,8 @@ class Group
 
       case stripe_subscription_status
       when 'new', 'force-new', 'trialing'
-        { color: 'orange', summary: "Trial ends on " \
-            + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}", 
-          icon: 'fa-clock-o', show_alert: true,
-          summary: "Trial ends on " \
-            + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}",
+        { color: 'orange', icon: 'fa-clock-o', show_alert: true,
+          summary: "Trial ends on #{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}",
           alert_title: "Group is in trial period",
           alert_body: ("Your paid group trial ends on " \
                       + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}. " \

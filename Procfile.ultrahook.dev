@@ -1,3 +1,5 @@
+# This is the development procfile (this one loads ultrahook for inbound webhooks)
+
 web: cd backend && bundle exec puma -C config/puma.rb
 worker: cd backend && bundle exec sidekiq
 ultrahook: cd backend && ultrahook dev 5000

@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
-ruby '2.1.2'
+ruby '2.3.4'
 
 #=== CORE GEMS ===#
 
-  gem 'rails', '4.2.5'
+  gem 'rails', '4.2.6'
   gem 'puma', '~> 2.15'
 
 #=== STORAGE, MODELS & QUEUEING ===#
@@ -66,6 +66,7 @@ ruby '2.1.2'
     gem 'rack-mini-profiler'
     gem 'ultrahook'
     gem 'byebug'
+    gem 'thor', '0.19.1' # Needed to prevent rails c from breaking >> http://bit.ly/2ugFwe2
   end
 
   group :test do

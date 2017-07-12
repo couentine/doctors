@@ -114,6 +114,21 @@ remotes = { # first is default
 
   puts "===> Selected Branch: #{selected_branch}"
   puts "===> Selected Target: #{selected_remote}"
+  
+  # Ensure that production deployments can only happen from master branch
+  if (selected_remote == 'production') && (selected_branch != 'master')
+    puts "===> ERROR: Production deployments must be from master branch"
+    puts "--------------------------------------------------\n\n\n"
+    puts "ERROR! Production deployments are only allowed from the master branch. "\
+      + "Here are the steps..."
+    puts "1) Sync all of your changes up to your Github feature branch"
+    puts "2) Do a pull request from your feature branch into master"
+    puts "3) Go through the code review process and merge the feature branch into master"
+    puts "4) Come back to your local dev environment, checkout master and 'pull origin master'"
+    puts "5) Run this script again\n\n"
+    exit
+  end
+
   puts "===> PUSHING BACKEND SUBTREE TO HEROKU..."
   puts "===> GIT COMMAND ===> #{git_command}"
 
