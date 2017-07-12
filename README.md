@@ -63,7 +63,7 @@ lti_unique_tool_id=badgelist-dev
 
 ## Running the app ##
 
-To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. 
+To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. This will run both the rails app (at localhost:5000) and the polymer app (at localhost:8081).
 
 You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). To open a rails console in your terminal, navigate to the `backend` folder and run `foreman run rails c`. (Note: This is currently a little broken and doesn't load the environment variables.)
 

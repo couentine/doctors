@@ -2,3 +2,4 @@
 
 web: cd backend && bundle exec puma -C config/puma.rb
 worker: cd backend && bundle exec sidekiq
+polymer: cd frontend && polymer serve

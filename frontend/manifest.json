@@ -1,0 +1,7 @@
+{
+  "name": "badgelist",
+  "short_name": "badgelist",
+  "description": "Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.",
+  "start_url": "/",
+  "display": "standalone"
+}
