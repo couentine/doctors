@@ -1,7 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="/src/bl-hello-world/bl-hello-world.html">
 
-<dom-module id="bl-app">
+<dom-module id="bl-hello-world">
   <template>
     <style>
       :host {
@@ -9,7 +8,8 @@
       }
     </style>
     
-    <bl-hello-world name="Human User"></bl-hello-world>
+    <h1>Hello [[name]]!</h1>
+
   </template>
 
   <script>
@@ -17,18 +17,18 @@
      * @customElement
      * @polymer
      */
-    class BlApp extends Polymer.Element {
-      static get is() { return 'bl-app'; }
+    class BlHelloWorld extends Polymer.Element {
+      static get is() { return 'bl-hello-world'; }
       static get properties() {
         return {
-          prop1: {
+          name: {
             type: String,
-            value: 'bl-app'
+            value: 'BLANK'
           }
         };
       }
     }
 
-    window.customElements.define(BlApp.is, BlApp);
+    window.customElements.define(BlHelloWorld.is, BlHelloWorld);
   </script>
 </dom-module>
