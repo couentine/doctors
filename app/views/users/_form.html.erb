@@ -1,0 +1,90 @@
+<style>
+  .form-body hr { 
+    float: left; 
+    width: 100%;
+  }
+</style>
+
+<%= simple_form_for @user, url: "#{users_path}/#{(@user.new_record?) ? '' : @user.username }", 
+    method: ((@user.new_record? ? :post : :put)), html: {class: 'form-horizontal'} do |f| %>
+
+  <%= f.error_notification %>
+
+  <div class="form-body">
+
+    <%= f.input :name, label: 'Full name', placeholder: 'Jane Lee', required: true, 
+      autofocus: true, input_html: { maxlength: User::MAX_NAME_LENGTH } %>
+    <%= f.input :email, label: 'Email', placeholder: 'jane@lee.com', required: true %>
+    <%= f.input :username_with_caps, label: 'Username', placeholder: 'Jane123', 
+      required: true, input_html: { maxlength: User::MAX_USERNAME_LENGTH } %>
+
+    <hr>
+    
+    <%= f.input :job_title, label: 'Job Title' %>
+    <%= f.input :organization_name, label: 'Organization Name' %>
+
+    <hr>
+
+    <% if @user.new_record? %>
+
+      <%= f.input :password, label: 'Password', required: true, as: :string %>
+
+    <% else %>
+    
+      <div class="control-group">
+        <label class="control-label">
+          Account Confirmed?
+        </label>
+        <div class="controls">
+          <p>
+            <% if @user.confirmed? %>
+              <% if @user.pending_reconfirmation? %>
+                Email Change Needs Confirmation
+                <%= link_to 'Manually Confirm', user_confirm_path, method: :post, class: 'btn' %>
+              <% else %>
+                Yes
+              <% end %>
+            <% else %>
+              No <%= link_to 'Manually Confirm', user_confirm_path, method: :post, class: 'btn' %>
+            <% end %>
+          </p>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">
+          Email Blocked?
+        </label>
+        <div class="controls">
+          <p>
+            <% if @user.email_inactive %>
+              Email has been blocked, user will not be emailed.
+              <%= link_to 'Manually Unblock', user_unblock_path, method: :post, class: 'btn' %>
+            <% else %>
+              Email is unblocked, user receives emails as normal.
+            <% end %>
+          </p>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">
+          Password
+        </label>
+        <div class="controls">
+          <p>
+            <a href="#new-password" data-toggle="modal" class="btn">Set New Password</a>
+          </p>
+        </div>
+      </div>
+
+    <% end %>
+  
+  </div>
+  
+  <div class="form-footer">
+    <%= f.button :submit, class: 'btn btn-primary', id: 'submit-user-form' %>
+    <%= link_to 'Cancel', users_path, class: 'btn' %>
+  </div>
+
+<% end %>
