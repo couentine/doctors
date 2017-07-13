@@ -23,7 +23,7 @@ BadgeList::Application.routes.draw do
 
   # === ADMIN PATHS === #
   scope '/a' do
-    resources :users, :only => [:index]
+    resources :users, :only => [:index, :edit, :new, :create, :update]
     resources :info_items, :only => [:index, :show]
   end
   match 'a/groups' => 'groups#index', via: :get, as: :group_index
@@ -55,6 +55,7 @@ BadgeList::Application.routes.draw do
   match 'users/cards' => 'users#refresh_cards', via: :get, as: :refresh_cards
   match 'users/card/:id' => 'users#delete_card', via: :delete, as: :delete_card
   match 'users/payments' => 'users#payment_history', via: :get, as: :payment_history
+  match 'u/:id/new_password' => 'users#new_password', via: :post, as: :user_new_password
   match 'u/:id/confirm_account' => 'users#confirm_account', via: :post, as: :user_confirm
   match 'u/:id/unblock_email' => 'users#unblock_email', via: :post, as: :user_unblock
   match 'u/:id/update_image' => 'users#update_image', via: :post, as: :user_update_image
