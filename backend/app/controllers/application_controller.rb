@@ -111,7 +111,9 @@ private
     if Rails.env.production?
       @polymer_root_url = "https://#{ENV['cdn_asset_host'] || ENV['root_domain']}/p"
     else
-      @polymer_root_url = ENV['polymer_base_url'] || 'http://localhost:8081'
+      # NOTE: We're using the polymer-proxy server (on port 8080) to add CORS headers to the 
+      #   responses from the standard polymer server (on port 8081).
+      @polymer_root_url = 'http://localhost:8080/0.0.0.0:8081'
     end
   end
 

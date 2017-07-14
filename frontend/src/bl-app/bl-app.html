@@ -9,7 +9,7 @@
       }
     </style>
     
-    <bl-hello-world name="Human User"></bl-hello-world>
+    <bl-hello-world name="[[manifest.current_user.name]]"></bl-hello-world>
   </template>
 
   <script>
@@ -21,10 +21,7 @@
       static get is() { return 'bl-app'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'bl-app'
-          }
+          manifest: { type: Object }
         };
       }
     }
