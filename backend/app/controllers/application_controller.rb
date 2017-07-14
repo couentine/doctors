@@ -91,7 +91,7 @@ private
   end
 
   def set_app_variables
-    # First set the current user json var
+    # Set the current user json var
     @current_user_json = (current_user) ? current_user.json(:current_user).to_json : '{}'
 
     # The @asset_paths variable is passed into bl-app-container.assetPaths and is used to provide
@@ -106,6 +106,13 @@ private
         => url.asset_url('badge-list-shield-white-square.png')
     }
     @ap_json = @asset_paths.to_json
+
+    # Set the root url of the polymer server (in dev) or the polymer asset folder (in production)
+    if Rails.env.production?
+      @polymer_root_url = "https://#{ENV['cdn_asset_host'] || ENV['root_domain']}/p"
+    else
+      @polymer_root_url = ENV['polymer_base_url'] || 'http://localhost:8081'
+    end
   end
 
 protected

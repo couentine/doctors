@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<%
+  
+  #=== POLYMER APP LAYOUT ===#
+  #------------------------------
+  # This layout is used to display the polymer-only UI contained in '/frontend'.
+  # The polymer only app doesn't use any of the features of the Rails views, routing is handled
+  # by the polymer frontend and everything is served from a single controller action.
+
+%>
+
+  <head>
+    <% #=== PAGE TITLE, APP ICON & BASE ===# %>
+    <title>Badge List</title>
+    <link rel="icon" type="image/png" href="<%= image_path('badge-list-icon-32-square.png') %>"/>
+    
+    <% #=== ANALYTICS ===# %>
+    <%= render 'layouts/shared/analytics' if Rails.env.production? %>
+
+    <% #=== METADATA ===# %>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+    <meta name="description" 
+      content="Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.">
+    <link rel="manifest" href="<%= @polymer_root_url %>/manifest.json">
+
+    <% #=== POLYMER ===# %>
+    <script src="<%= @polymer_root_url %>/bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+    <link rel="import" href="<%= @polymer_root_url %>/src/bl-app/bl-app.html">
+  </head>
+
+  <% #=== PAGE BODY ===# %>
+  <body unresolved>
+
+    <%= yield %>
+
+  </body>
+
+</html>
