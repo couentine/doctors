@@ -11,7 +11,8 @@ BadgeList::Application.configure do
   config.action_controller.perform_caching = true
 
   # We need to turn this on so that we serve the polymer frontend on heroku
-  config.serve_static_files = true
+  # UPDATE ==> Setting this to false for now
+  config.serve_static_files = false
 
   # Compress JavaScripts and CSS
   config.assets.js_compressor = :uglifier
