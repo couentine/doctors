@@ -1,7 +1,16 @@
 {
+  "entryPoint": "index.html",
+  "shell": "src/bl-app/bl-app.html",
+  "fragments": [
+      "src/bl-hello-world/bl-hello-world.html"
+    ],
   "extraDependencies": [
     "manifest.json",
-    "bower_components/webcomponentsjs/webcomponents-lite.js"
+    "bower_components/webcomponentsjs/*.js"
+  ],
+  "sources": [
+    "src/**/*",
+    "bower.json"
   ],
   "lint": {
     "rules": [

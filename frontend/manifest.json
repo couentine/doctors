@@ -1,7 +1,13 @@
 {
-  "name": "badgelist",
+  "name": "Badge List",
   "short_name": "badgelist",
-  "description": "Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.",
+  "description": "A platform for awarding digital credentials and tracking learning progress.",
   "start_url": "/",
+  "background_color": "#fb8c00",
+  "icons": [{
+    "src": "https://badgelist.s3.amazonaws.com/images/badge-list-icon.png",
+    "sizes": "500x500",
+    "type": "image/png"
+  }],
   "display": "standalone"
 }

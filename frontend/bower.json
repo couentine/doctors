@@ -1,6 +1,6 @@
 {
   "name": "badgelist",
-  "description": "Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.",
+  "description": "A platform for awarding digital credentials and tracking learning progress.",
   "main": "index.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
