@@ -21,6 +21,7 @@ BadgeList::Application.routes.draw do
   match 'terms-of-service' => 'home#terms_of_service', via: :get, as: :terms_of_service
   match 'help-staging' => 'home#help', via: :get, as: :help
   match 'hw' => 'polymer#show', via: :get
+  match 'hwt' => 'polymer#test', via: :get
 
   # === ADMIN PATHS === #
   scope '/a' do
