@@ -162,9 +162,6 @@ polymer_build_options = [
   system("git add .")
   system("git commit -m 'Rebuilt polymer frontend.'")
 
-  puts "#===[TEMP EXIT... SUCCESSFUL!]===#\n\n"
-  exit
-  
   # Push the changes to github
   puts "--------------------------------------------------------------------------------"
   puts "===> PUSHING POLYMER REBUILD TO REMOTE ORIGIN..."
