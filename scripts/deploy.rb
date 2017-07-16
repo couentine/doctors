@@ -13,7 +13,6 @@ polymer_build_options = [
   '--html-minify',
   '--bundle',
   '--add-service-worker',
-  '--add-push-manifest',
   '--insert-prefetch-links'
 ]
 
