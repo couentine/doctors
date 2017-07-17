@@ -1,4 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/shadycss/apply-shim.html">
+
 <link rel="import" href="../bl-hello-world/bl-hello-world.html">
 
 <dom-module id="bl-app">
@@ -23,6 +25,14 @@
         return {
           manifest: { type: Object }
         };
+      }
+
+      ready() {
+        super.ready();
+
+        // Register service worker if supported.
+        if (('serviceWorker' in navigator) && !this.manifest.polymer_root_url.includes('localhost'))
+          navigator.serviceWorker.register(this.manifest.polymer_root_url + '/service-worker.js');
       }
     }
 
