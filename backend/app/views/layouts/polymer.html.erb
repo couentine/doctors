@@ -36,6 +36,15 @@
 
     <%= yield %>
 
+    <% #=== LOAD SERVICE WORKER (Not supported in dev due to different domains) ===# %>
+    <% if Rails.env.production? %>
+      <script type="text/javascript">
+        // Register service worker if supported.
+        if ('serviceWorker' in navigator)
+          navigator.serviceWorker.register('<%= "#{@polymer_root_url}/service-worker.js" %>');
+      </script>
+    <% end %>
+
   </body>
 
 </html>
