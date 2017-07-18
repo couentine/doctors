@@ -90,6 +90,29 @@ class GroupsController < ApplicationController
     end
   end
 
+  # GET /?page=1
+  # JSON Only
+  # This returns a list of the current user's groups
+  def my_index
+    @page_size = APP_CONFIG['page_size_small']
+    
+    @page = (params[:page] || 1).to_i
+    @groups = Group.array_json(current_user.groups(false).asc(:name).page(@page).per(@page_size), 
+      :api_v1, current_user: current_user, stringify_ids: true)
+    
+    if current_user.groups(false).count > (@page_size * @page)
+      @next_page = @page + 1
+    else
+      @next_page = nil
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: { next_page: @next_page, groups: @groups }
+      end
+    end
+  end
+
   # GET /group-url
   # GET /group-url.json
   def show

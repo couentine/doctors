@@ -1,0 +1,273 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is the interim internal Polymer API for Badge List",
+    "version": "0.1",
+    "title": "Internal Badge List API",
+    "termsOfService": "https://www.badgelist.com/terms-of-service",
+    "contact": {
+      "email": "team@badgelist.com"
+    }
+  },
+  "host": "www.badgelist.com",
+  "tags": [
+    {
+      "name": "group",
+      "description": "Badge List group"
+    },
+    {
+      "name": "badge",
+      "description": "Badge List badge"
+    }
+  ],
+  "paths": {
+    "/groups/my": {
+      "get": {
+        "tags": [
+          "group"
+        ],
+        "summary": "Gets all groups for the current user",
+        "operationId": "getMyGroups",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number of results",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "next_page": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "badges": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Group"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/badges/my": {
+      "get": {
+        "tags": [
+          "badge"
+        ],
+        "summary": "Gets all badges for the current user",
+        "operationId": "getMyBadges",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number of results",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "next_page": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "badges": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Badge"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Group": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "url_with_caps": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "description": "Group Type",
+          "enum": [
+            "free",
+            "paid"
+          ]
+        },
+        "member_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "admin_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "total_user_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "avatar_image_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "avatar_image_medium_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "avatar_image_small_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "badge_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "full_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "full_path": {
+          "type": "string"
+        },
+        "current_user_permissions": {
+          "$ref": "#/definitions/GroupPermissions"
+        }
+      },
+      "xml": {
+        "name": "Group"
+      }
+    },
+    "GroupPermissions": {
+      "type": "object",
+      "properties": {
+        "is_member": {
+          "type": "boolean"
+        },
+        "is_admin": {
+          "type": "boolean"
+        }
+      },
+      "xml": {
+        "name": "GroupPermissions"
+      }
+    },
+    "Badge": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "url_with_caps": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "validation_request_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "learner_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "expert_user_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "image_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "image_medium_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "image_small_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "full_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "full_path": {
+          "type": "string"
+        },
+        "current_user_permissions": {
+          "$ref": "#/definitions/BadgePermissions"
+        }
+      },
+      "xml": {
+        "name": "Badge"
+      }
+    },
+    "BadgePermissions": {
+      "type": "object",
+      "properties": {
+        "is_learner": {
+          "type": "boolean"
+        },
+        "is_expert": {
+          "type": "boolean"
+        }
+      },
+      "xml": {
+        "name": "GroupPermissions"
+      }
+    }
+  }
+}

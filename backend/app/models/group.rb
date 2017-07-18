@@ -31,7 +31,10 @@ class Group
       :badge_count, :full_url, :full_path],
     simple_list_item_with_tags: [:id, :name, :url, :url_with_caps, :tags_cache],
     link_info: [:id, :name, :full_url, :full_path, :avatar_image_url, 
-      :avatar_image_medium_url, :avatar_image_small_url]
+      :avatar_image_medium_url, :avatar_image_small_url],
+    api_v1: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
+      :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,
+      :badge_count, :full_url, :full_path, :current_user_permissions]
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
@@ -50,6 +53,7 @@ class Group
   # === INSTANCE VARIABLES === #
 
   attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
+  attr_accessor :current_user # Used to set current user context during API calls
 
   # === RELATIONSHIPS === #
 
@@ -223,6 +227,21 @@ class Group
       []
     else
       badges_cache.map{ |badge_id, badge_item| badge_item['url_with_caps'] }
+    end
+  end
+
+  # This is used by the API and requires that the current_user model attribute be set
+  def current_user_permissions
+    if current_user
+      {
+        is_member: has_member?(current_user),
+        is_admin: has_admin?(current_user)
+      }
+    else
+      {
+        is_member: false,
+        is_admin: false
+      }
     end
   end
 

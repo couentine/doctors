@@ -28,7 +28,10 @@ class Badge
     list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, 
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
     group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
-      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path]
+      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
+    api_v1: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, :learner_count,
+      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path,
+      :current_user_permissions]
   }
   
   # Below are the badge-level fields included in the clone
@@ -39,6 +42,7 @@ class Badge
   # === INSTANCE VARIABLES === #
 
   attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
+  attr_accessor :current_user # Used to set current user context during API calls
 
   # === RELATIONSHIPS === #
 
@@ -208,6 +212,21 @@ class Badge
       []
     else
       expert_user_ids.map{ |user_id| user_id.to_s }
+    end
+  end
+
+  # This is used by the API and requires that the current_user model attribute be set
+  def current_user_permissions
+    if current_user
+      {
+        is_learner: learner_user_ids.include?(current_user.id),
+        is_expert: expert_user_ids.include?(current_user.id)
+      }
+    else
+      {
+        is_learner: false,
+        is_expert: false
+      }
     end
   end
 

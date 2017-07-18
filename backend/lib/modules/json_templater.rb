@@ -42,11 +42,15 @@ module JSONTemplater
   
   included do
     # This converts an array of items (with JSONTemplater setup on their classes) into json
+    # Pass current_user option to temporarily set the current_user attribute
     def self.array_json(array_of_templated_items, key, options = { stringify_ids: true })
       return_list = []
+      current_user = options[:current_user]
 
       array_of_templated_items.each do |item|
+        item.current_user = current_user if current_user
         return_list << item.json_from_template(key, options)
+        item.current_user = nil if current_user
       end
 
       return_list
