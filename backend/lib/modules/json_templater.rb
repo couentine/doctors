@@ -8,6 +8,7 @@ module JSONTemplater
   # OPTIONS (with default value):
   # - stringify_ids (true): Turns instances of BSON::ObjectId into strings.
   # - unixify_times (true): Turns instances of ActiveSupport::TimeWithZone into unix timestamps.
+  # - current_user (nil): Sets the current_user attribute then restores original value afterward
   
   def json_from_template(key, options = { stringify_ids: true, unixify_times: true })
     if self.class::JSON_TEMPLATES[key].blank?
@@ -15,6 +16,12 @@ module JSONTemplater
     else
       return_hash = {}
       current_value = nil
+
+      # Set the current user if needed, but first store the previous value so we can restore it
+      if options[:current_user]
+        previous_current_user_value = self.current_user
+        self.current_user = options[:current_user]
+      end
 
       self.class::JSON_TEMPLATES[key].each do |field_or_method|
         current_value = self.send(field_or_method)
@@ -25,6 +32,11 @@ module JSONTemplater
         end
 
         return_hash[field_or_method] = current_value
+      end
+
+      # Restore the previous current user value, just in case it was something important
+      if options[:current_user]
+        self.current_user = previous_current_user_value
       end
 
       return_hash
@@ -42,15 +54,11 @@ module JSONTemplater
   
   included do
     # This converts an array of items (with JSONTemplater setup on their classes) into json
-    # Pass current_user option to temporarily set the current_user attribute
     def self.array_json(array_of_templated_items, key, options = { stringify_ids: true })
       return_list = []
-      current_user = options[:current_user]
 
       array_of_templated_items.each do |item|
-        item.current_user = current_user if current_user
         return_list << item.json_from_template(key, options)
-        item.current_user = nil if current_user
       end
 
       return_list
