@@ -1,0 +1,246 @@
+<link rel="import" href="../../../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+
+<link rel="import" href="bl-app-navbar-left.html">
+<link rel="import" href="bl-app-navbar-right.html">
+
+<!--
+# Badge List App Container #
+-->
+<dom-module id="bl-app-container">
+  <template>
+
+    <style>
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          height: 100%;
+          font-size: 1rem; 
+        }
+
+      /* === HEADER CHILD STYLES === */
+
+        ::slotted(.outer-header-content) {
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+        }
+
+      /* === HEADER PANEL === */
+
+        paper-scroll-header-panel {
+          height: 100%;
+          -ms-flex: 1;
+          -webkit-flex: 1;
+          flex: 1;
+          
+          background: var(--page-background, white);
+          color: #616161;
+          
+          --paper-scroll-header-panel-header-container: {
+            /* NOTE: The line below works in dev but not production so I'm commenting it out. */
+            /* z-index: 100; */
+          };
+        }
+        paper-scroll-header-panel.true { /* true = this.whiteBodyText */
+          --paper-scroll-header-panel-container: {
+            color: white;
+          }
+        }
+          #appHeader { /* aka ".paper-header" */
+            position: relative;
+            z-index: 100;
+            transition: box-shadow 0.3s ease-in-out;
+          }
+          #appHeader.elevated {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+          }
+
+      /* === STANDARD DIALOGS === */
+
+        paper-dialog.standard {
+          border-radius: 6px;
+          border: 1px solid var(--dialog-300-color, #FFB74D);
+          border-top: 5px solid var(--dialog-600-color, #FB8C00);
+          background: var(--dialog-50-color, #FFF3E0);
+          transition: top 1s linear, left 1s linear;
+        }
+          paper-dialog.standard .buttons {
+            margin-top: 2em;
+
+            background: var(--dialog-100-color, #FFE0B2);
+            color: #424242;
+            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px;
+
+            transition: all 0.6s;
+            max-height: 100em;
+          }
+          paper-dialog.standard .buttons.collapsed {
+            padding: 0 !important;
+            max-height: 0 !important;
+          }
+          
+          paper-dialog.standard.poller .buttons { overflow: hidden; }
+          paper-dialog.standard.waiting p { text-align: center; }
+
+    </style>
+
+    <app-header-layout class$="[[whiteBodyText]]" id="appHeaderLayout">
+      <!-- #=== APP HEADER ===# -->
+      <app-header slot="header" condenses effects="waterfall" fixed="[[!hideCondensedHeader]]" id="appHeader">
+        <slot name="outer-header-content"></slot>
+
+        <app-toolbar style$="height: [[condensedHeaderHeightPx]]px;">
+          <slot name="sticky-header-content"></slot>
+        </app-toolbar>
+        
+        <bl-app-navbar-left id="leftNav" white-text="[[whiteHeaderText]]" hidden="[[hideLeftNav]]"></bl-app-navbar-left>
+        <bl-app-navbar-right id="rightNav" white-text="[[whiteHeaderText]]" hidden="[[hideRightNav]]"></bl-app-navbar-right>
+      </app-header>
+      
+      <!-- #=== PAGE CONTENT ===# -->
+      <slot></slot>
+    </app-header-layout>
+
+  </template>
+
+  <script>
+    class BlAppContainer extends Polymer.Element {
+      static get is() { return 'bl-app-container'; }
+
+      static get properties() {
+        return {
+          // Required
+          assetPaths: { type: Object },
+          currentUser: { type: Object },
+          
+          // Optional
+          pageBackground: { type: String, value:'#FFFFFF', observer:'_pageBackgroundChanged' },
+          whiteHeaderText: { type: Boolean, value: false },
+          whiteBodyText: { type: Boolean, value: false },
+          hideCondensedHeader: { type: Boolean, value: false }, // Scroll away header after condensing
+          hideLeftNav: { type: Boolean, value: false },
+          hideRightNav: { type: Boolean, value: false },
+          hideIntercom: { type: Boolean, value: false },
+          
+          // Computed
+          condensedHeaderHeightPx: { type: Number, 
+            computed: '_condensedHeaderHeightPx(condensedHeaderHeightEm, screenWidth)' },
+
+          // Automatically Set
+          condensedHeaderHeightEm: { type: Number, value: 3 }, // set from child app header element
+          screenWidth: { type: Number, readOnly: true },
+
+          // Font Size Contant (Maps from screenWidth to fontSize)
+          fontSizeBreakpoints: { type: Array, value: function() { return [
+            { minWidth: 0, fontSize: 14 },
+            { minWidth: 480, fontSize: 16 },
+            { minWidth: 840, fontSize: 18 }
+          ]; } }
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      // NONE
+      
+      // #=== PRIVATE ACTION METHODS ===#
+
+      // NONE
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        // Update the screenWidth property anytime the window is resized
+        var self = this;
+        window.addEventListener('resize', () => function() {
+          self._setScreenWidth(window.innerWidth); 
+        });
+        self._setScreenWidth(window.innerWidth); // set it on page load as well
+
+        if (this.hideIntercom) this._tryToHideIntercom();
+      }
+
+      ready() {
+        super.ready();
+        
+        // Add Listeners
+        window.addEventListener('bl-app-header-content-ready', (e) => this._appHeaderContentReady(e));
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _appHeaderLayoutTransform(e) {
+        var detail = e.detail; // detail keys = [condensedHeight, height, y]
+        var y = detail.y;
+
+        // Move the navbars down to accomodate the condensed space
+        var newY = (y === null) ? null : Math.min(y, detail.height - detail.condensedHeight);
+        this.transform((newY === null) ? '' : 'translate3d(0, ' + newY + 'px, 0)', this.$.leftNav);
+        this.transform((newY === null) ? '' : 'translate3d(0, ' + newY + 'px, 0)', this.$.rightNav);
+
+        // If header is condensed then add the shadow, otherwise remove it
+        if (this.$.appHeaderLayout.headerState == Polymer.PaperScrollHeaderPanel.HEADER_STATE_CONDENSED)
+          this.$.appHeader.classList.add('elevated');
+        else
+          this.$.appHeader.classList.remove('elevated');
+      }
+
+      _appHeaderContentReady(e) {
+        // Pull the condensed header from the bl-app-header-* element
+        this.condensedHeaderHeightEm = e.detail.condensedHeightEm;
+      }
+
+      _pageBackgroundChanged(newValue, oldValue) {
+        // Update the css variable that controls background any time the value changes
+        this.updateStyles({'--page-background': newValue});
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _condensedHeaderHeightPx(condensedHeaderHeightEm, screenWidth) {
+        return this._fontSizeForScreenWidth(screenWidth) * condensedHeaderHeightEm;
+      }
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      _fontSizeForScreenWidth(screenWidth) {
+        // Returns integer value of font size in pixels for the specified screen width
+        // Refers to fontSizeBreakpoints
+
+        var returnValue = 14; // default value is 14 if breakpoints haven't been loaded yet
+        var breakpoints = this.fontSizeBreakpoints; // shortcut for code brevity
+
+        if (breakpoints && breakpoints.length)
+          for (var i=0; (i < breakpoints.length) && (screenWidth >= breakpoints[i].minWidth); i++)
+            returnValue = breakpoints[i].fontSize;
+        
+        return returnValue;
+      }
+
+      _tryToHideIntercom(tryCount) {
+        var self = this;
+
+        if (!tryCount) tryCount = 1;
+
+        if (document.querySelector('#intercom-container'))
+          document.querySelector('#intercom-container').hidden = true;
+        else if (tryCount < 100)
+          setTimeout(function() { self._tryToHideIntercom(tryCount + 1); }, 100);
+      }
+
+    }
+
+    window.customElements.define(BlAppContainer.is, BlAppContainer);
+  </script>
+</dom-module>
