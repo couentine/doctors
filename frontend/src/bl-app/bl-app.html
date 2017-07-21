@@ -22,6 +22,7 @@ The mixin also provides various actions for interacting with the container. (Ref
         :host {
           @apply --bl-font-common-base;
           
+          display: block;
           position: absolute;
           top: 0; right: 0; bottom: 0; left: 0;
         }
@@ -58,7 +59,7 @@ The mixin also provides various actions for interacting with the container. (Ref
     
     <!-- #=== APP VIEWS (Just one for now) ===# -->
 
-    <bl-view-home></bl-view-home>
+    <bl-view-home id="homeView"></bl-view-home>
     
 
     <!-- #=== TOAST CONTAINER ===# -->

@@ -11,8 +11,7 @@ It also provides methods for adding toast and opening dialogs.
 
       static get properties() {
         return {
-          app: Object,
-          currentUser: Object
+          app: Object
         };
       }
 
@@ -126,7 +125,6 @@ It also provides methods for adding toast and opening dialogs.
         if (super.connectedCallback) super.connectedCallback();
         
         this.app = document.querySelector('bl-app');
-        this.currentUser = this.app.currentUser;
       }
 
     }
