@@ -14,12 +14,4 @@ class PolymerController < ApplicationController
     render layout: 'polymer'
   end
 
-  def test
-    if current_user
-      render json: { logged_in: true }
-    else
-      render json: { logged_in: false }
-    end
-  end
-
 end

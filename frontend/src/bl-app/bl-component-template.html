@@ -1,0 +1,80 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Component Template #
+
+Use this html file as your starting point when creating new components.
+It contains comments which are ordered in the standard way and aligned with Badge List's polymer style.
+-->
+<dom-module id="bl-component-template">
+  <template>
+
+    <style>
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+        }
+
+      /* === COMPONENT STYLES === */
+
+    </style>
+
+    <!-- INSERT COMPONENT DOM HERE -->
+
+  </template>
+
+  <script>
+    class BlComponentTemplate extends BlAppComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-component-template'; }
+
+      static get properties() {
+        return {
+          // INSERT PROPERTIES HERE
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      // ...
+      
+      // #=== PRIVATE ACTION METHODS ===#
+
+      // ...
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        // ...
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      // ...
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      // ...
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      // ...
+
+    }
+
+    window.customElements.define(BlComponentTemplate.is, BlComponentTemplate);
+  </script>
+</dom-module>

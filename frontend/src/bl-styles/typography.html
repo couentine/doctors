@@ -1,0 +1,166 @@
+<!--
+# Badge List Fonts #
+
+This import contains includes the fonts base typographic settings and all typographic-related css variables / mixins.
+-->
+<link rel="import" href="fonts.html">
+
+<custom-style>
+  <style>
+
+    /* === RESPONSIVE FONT SIZES === */
+
+    html {
+      font-size: 14px;
+    }
+    @media (min-width: 480px) {
+      html { font-size: 16px; }
+    }
+    @media (min-width: 840px) {
+      html { font-size: 18px; }
+    }
+    
+    /* === CSS MIXINS === */
+
+    html {
+      
+      /* === SHARED STYLES === */
+
+        --bl-font-common-base: {
+          font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+          -webkit-font-smoothing: antialiased;
+        };
+
+        --bl-font-common-code: {
+          font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
+          -webkit-font-smoothing: antialiased;
+        };
+
+        --bl-font-common-expensive-kerning: {
+          text-rendering: optimizeLegibility;
+        };
+
+        --bl-font-common-nowrap: {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        };
+
+      /* === MATERIAL FONT STYLES === */
+      
+        --bl-font-display4: {
+          @apply --bl-font-common-base;
+          @apply --bl-font-common-nowrap;
+          font-size: 8em;
+          font-weight: 300;
+          letter-spacing: -.044em;
+          line-height: 8.57em;
+        };
+
+        --bl-font-display3: {
+          @apply --bl-font-common-base;
+          @apply --bl-font-common-nowrap;
+          font-size: 4em;
+          font-weight: 400;
+          letter-spacing: -.026em;
+          line-height: 4.29em;
+        };
+
+        --bl-font-display2: {
+          @apply --bl-font-common-base;
+          font-size: 3.21em;
+          font-weight: 400;
+          letter-spacing: -.018em;
+          line-height: 3.43em;
+        };
+
+        --bl-font-display1: {
+          @apply --bl-font-common-base;
+          font-size: 2.43em;
+          font-weight: 400;
+          letter-spacing: -.01em;
+          line-height: 2.86em;
+        };
+
+        --bl-font-headline: {
+          @apply --bl-font-common-base;
+          font-size: 1.71em;
+          font-weight: 400;
+          letter-spacing: -.012em;
+          line-height: 2.29em;
+        };
+
+        --bl-font-title: {
+          @apply --bl-font-common-base;
+          @apply --bl-font-common-nowrap;
+          font-size: 1.43em;
+          font-weight: 500;
+          line-height: 2em;
+        };
+
+        --bl-font-subhead: {
+          @apply --bl-font-common-base;
+          font-size: 1.14em;
+          font-weight: 400;
+          line-height: 1.71em;
+        };
+
+        --bl-font-body2: {
+          @apply --bl-font-common-base;
+          font-size: 1em;
+          font-weight: 500;
+          line-height: 1.71em;
+        };
+
+        --bl-font-body1: {
+          @apply --bl-font-common-base;
+          font-size: 1em;
+          font-weight: 400;
+          line-height: 1.43em;
+        };
+
+        --bl-font-caption: {
+          @apply --bl-font-common-base;
+          @apply --bl-font-common-nowrap;
+          font-size: 0.86em;
+          font-weight: 400;
+          letter-spacing: 0.011em;
+          line-height: 1.43em;
+        };
+
+        --bl-font-menu: {
+          @apply --bl-font-common-base;
+          @apply --bl-font-common-nowrap;
+          font-size: 0.93em;
+          font-weight: 500;
+          line-height: 1.71em;
+        };
+
+        --bl-font-button: {
+          @apply --bl-font-common-base;
+          @apply --bl-font-common-nowrap;
+          font-size: 1em;
+          font-weight: 500;
+          letter-spacing: 0.018em;
+          line-height: 1.71em;
+          text-transform: uppercase;
+        };
+
+        --bl-font-code2: {
+          @apply --bl-font-common-code;
+          font-size: 1em;
+          font-weight: 700;
+          line-height: 1.43em;
+        };
+
+        --bl-font-code1: {
+          @apply --bl-font-common-code;
+          font-size: 1em;
+          font-weight: 500;
+          line-height: 1.43em;
+        };
+
+    }
+
+  </style>
+</custom-style>

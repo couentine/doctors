@@ -1,9 +1,7 @@
 {
   "entryPoint": "index.html",
   "shell": "src/bl-app/bl-app.html",
-  "fragments": [
-      "src/bl-hello-world/bl-hello-world.html"
-    ],
+  "fragments": [],
   "extraDependencies": [
     "manifest.json",
     "bower_components/webcomponentsjs/*.js"

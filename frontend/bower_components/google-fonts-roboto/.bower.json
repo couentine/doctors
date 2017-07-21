@@ -1,0 +1,15 @@
+{
+  "name": "google-fonts-roboto",
+  "main": [
+    "*.ttf",
+    "*.css"
+  ],
+  "_cacheHeaders": {
+    "Content-Type": "application/octet-stream",
+    "Content-Disposition": "attachment; filename=roboto.zip"
+  },
+  "_source": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto?family=Roboto",
+  "_target": "*",
+  "_originalSource": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto?family=Roboto",
+  "_direct": true
+}

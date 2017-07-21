@@ -1,0 +1,22 @@
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+
+<!--
+# Badge List View Mixin #
+  
+All Badge List app views components should extend this mixin. It extends the `bl-app-component-mixin`.
+-->
+<script>
+
+  BlViewMixin = function(superClass) {
+    return class extends BlAppComponentMixin(superClass) {
+
+      static get properties() {
+        return {
+          isView: { type: Boolean, value: true }
+        };
+      }
+
+    }
+  }
+
+</script>

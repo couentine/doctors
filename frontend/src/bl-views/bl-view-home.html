@@ -1,0 +1,112 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="bl-view-mixin.html">
+
+<!--
+# Badge List Component Template #
+
+Use this html file as your starting point when creating new components.
+It contains comments which are ordered in the standard way and aligned with Badge List's polymer style.
+-->
+<dom-module id="bl-view-home">
+  <template>
+
+    <style>
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          font-size: 1rem; 
+          position: fixed;
+          top: 0; right: 0; bottom: 0; left: 0;
+          background-color: var(--bl-orange-600);
+          
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+      /* === COMPONENT STYLES === */
+
+        #content {
+          color: white;
+          text-align: center;
+        }
+          h1 {
+            margin: 0;
+          }
+
+    </style>
+
+    <div id="content">
+      <h1>Home Page</h1>
+    </div>
+
+    <!--
+      <app-header-layout class$="[[whiteBodyText]]" id="appHeaderLayout">
+        <app-header slot="header" condenses effects="waterfall" fixed="[[!hideCondensedHeader]]" id="appHeader">
+          <slot name="outer-header-content"></slot>
+
+          <app-toolbar style$="height: [[condensedHeaderHeightPx]]px;">
+            <slot name="sticky-header-content"></slot>
+          </app-toolbar>
+          
+          <bl-app-navbar-left id="leftNav" white-text="[[whiteHeaderText]]" hidden="[[hideLeftNav]]"></bl-app-navbar-left>
+          <bl-app-navbar-right id="rightNav" white-text="[[whiteHeaderText]]" hidden="[[hideRightNav]]"></bl-app-navbar-right>
+        </app-header>
+        
+        <slot></slot>
+      </app-header-layout>
+    -->
+
+  </template>
+
+  <script>
+    class BlViewHome extends BlViewMixin(Polymer.Element) {
+
+      static get is() { return 'bl-view-home'; }
+
+      static get properties() {
+        return {
+          // INSERT PROPERTIES HERE
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      // ...
+      
+      // #=== PRIVATE ACTION METHODS ===#
+
+      // ...
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        // ...
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      // ...
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      // ...
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      // ...
+
+    }
+
+    window.customElements.define(BlViewHome.is, BlViewHome);
+  </script>
+</dom-module>

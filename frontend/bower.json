@@ -13,7 +13,11 @@
     "components-font-awesome": "^4.7.0",
     "paper-item": "PolymerElements/paper-item#^2.0.0",
     "paper-menu": "PolymerElements/paper-menu#^1.3.0",
-    "paper-menu-button": "PolymerElements/paper-menu-button#^2.0.0"
+    "paper-menu-button": "PolymerElements/paper-menu-button#^2.0.0",
+    "google-fonts-lato": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-lato?family=Lato",
+    "google-fonts-roboto": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto?family=Roboto",
+    "google-fonts-roboto-mono": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto-mono?family=Roboto+Mono",
+    "paper-styles": "PolymerElements/paper-styles#^2.0.0"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",

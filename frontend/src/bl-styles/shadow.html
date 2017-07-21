@@ -1,0 +1,57 @@
+<!--
+# Badge List Shadows #
+
+This import contains all of the Badge List shadow variables.
+They are currently based on the material design shadows, but referencing the bl-variables allows flexibility to redefine in the future.
+-->
+<custom-style>
+  <style>
+    
+    /* === CSS VARIABLES === */
+
+    html {
+
+      --bl-shadow-transition: {
+        transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      };
+
+      --bl-shadow-0: {
+        box-shadow: none;
+      };
+
+      --bl-shadow-1: {
+        @apply: --shadow-elevation-2dp;
+      };
+
+      --bl-shadow-2: {
+        @apply: --shadow-elevation-3dp;
+      };
+
+      --bl-shadow-3: {
+        @apply: --shadow-elevation-4dp;
+      };
+
+      --bl-shadow-4: {
+        @apply: --shadow-elevation-6dp;
+      };
+
+      --bl-shadow-5: {
+        @apply: --shadow-elevation-8dp;
+      };
+
+      --bl-shadow-6: {
+        @apply: --shadow-elevation-12dp;
+      };
+
+      --bl-shadow-7: {
+        @apply: --shadow-elevation-16dp;
+      };
+
+      --bl-shadow-8: {
+        @apply: --shadow-elevation-24dp;
+      };
+
+    }
+
+  </style>
+</custom-style>
