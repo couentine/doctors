@@ -41,10 +41,28 @@ The home page for logged in users.
           #condensedBackground {
             background-color: white;
           }
+          #headerBottomLinks {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+
+            @apply --bl-font-subhead;
+          }
+            #headerBottomLinks>li {
+              flex: 0 0 auto;
+              margin: 0.5em;
+            }
+              #headerBottomLinks>li>a, #headerBottomLinks>li>a:visited {
+                color: white;
+                text-decoration: none;
+              }
 
     </style>
 
-    <bl-header-panel id="headerPanel" expanded-height="6" condensed-height="4">
+    <bl-header-panel id="headerPanel" expanded-height="10" condensed-height="4">
       <div id="expandedBackground" slot="expandedBackground">
         &nbsp;
       </div>
@@ -52,25 +70,23 @@ The home page for logged in users.
         &nbsp;
       </div>
 
-      <div id="headerBottom" slot="headerBottom">
-        <ul id="headerBottomLinks">
-          <li>
-            <a href="/community">
-              <i class="fa fa-users"></i> Community
-            </a>
-          </li>
-          <li>
-            <a href="/help/docs">
-              <i class="fa fa-question-circle"></i> Help Docs
-            </a>
-          </li>
-          <li>
-            <a href="/w">
-              <i class="fa fa-globe"></i> Website
-            </a>
-          </li>
-        </ul>
-      </div>
+      <ul id="headerBottomLinks" slot="headerBottom">
+        <li>
+          <a href="/community">
+            <i class="fa fa-users"></i> Community
+          </a>
+        </li>
+        <li>
+          <a href="/help/docs">
+            <i class="fa fa-question-circle"></i> Help Docs
+          </a>
+        </li>
+        <li>
+          <a href="/w">
+            <i class="fa fa-globe"></i> Website
+          </a>
+        </li>
+      </ul>
 
       <div id="content" slot="content">
         <p>

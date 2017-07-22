@@ -5,6 +5,26 @@ This import contains includes the fonts base typographic settings and all typogr
 -->
 <link rel="import" href="fonts.html">
 
+<script>
+
+  const RESPONSIVE_FONT_SIZES = [
+    { minWidth: 0, fontSize: 14 },
+    { minWidth: 480, fontSize: 16 },
+    { minWidth: 840, fontSize: 18 }
+  ];
+
+  /* Returns integer value of font size in pixels for the current window inner width. */
+  function blCurrentFontSize() {
+    var returnValue = 14; // default value is 14 if breakpoints haven't been loaded yet
+
+    for (var i=0; (i < RESPONSIVE_FONT_SIZES.length) && (window.innerWidth >= RESPONSIVE_FONT_SIZES[i].minWidth); i++)
+      returnValue = RESPONSIVE_FONT_SIZES[i].fontSize;
+    
+    return returnValue;
+  }
+
+</script>
+
 <custom-style>
   <style>
 

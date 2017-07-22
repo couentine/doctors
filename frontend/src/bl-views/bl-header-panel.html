@@ -33,36 +33,59 @@ It provides a sliding header panel and holds the page content.
           position: fixed;
           top: 0; right: 0; left: 0;
           height: 4em;
+
+          display: flex;
+          flex-direction: row;
+
+          @apply --header;
         }
-          #condensedBackgroundWrapper, #expandedBackgroundWrapper {
-            position: fixed;
-            top: 0; right: 0; bottom: 0; left: 0;
+          #headerInner {
+            flex: 1 1 auto;
           }
-          #headerBottomWrapper {
-            position: fixed;
-            right: 0; bottom: 0; left: 0;
-          }
+            #condensedBackgroundWrapper {
+              position: absolute;
+              top: 0; right: 0; bottom: 0; left: 0;
+              display: flex;
+              flex-direction: row;
+            }
+              ::slotted([slot=condensedBackground]) {
+                flex: 1 1 auto;
+              }
+            #expandedBackgroundWrapper {
+              position: absolute;
+              top: 0; right: 0; bottom: 0; left: 0;
+              display: flex;
+              flex-direction: row;
+            }
+              ::slotted([slot=expandedBackground]) {
+                flex: 1 1 auto;
+              }
+            ::slotted([slot=headerBottom]) {
+              position: absolute;
+              right: 0; bottom: 0; left: 0;
+            }
         #body {
           overflow: auto;
-          padding-top: 4em;
           position: fixed;
           top: 0; right: 0; bottom: 0; left: 0;
+          
+          @apply --bl-font-body1;
         }
 
     </style>
 
-    <div id="body">
+    <div id="body" style$="padding-top: [[expandedHeight]]em;">
       <slot name="content"></slot>
     </div>
 
-    <div id="header">
-      <div id="condensedBackgroundWrapper">
-        <slot name="condensedBackground"></slot>
-      </div>
-      <div id="expandedBackgroundWrapper">
-        <slot name="expandedBackground"></slot>
-      </div>
-      <div id="headerBottomWrapper">
+    <div id="header" style$="height: [[headerHeight]]em;">
+      <div id="headerInner">
+        <div id=condensedBackgroundWrapper"">
+          <slot name="condensedBackground"></slot>
+        </div>
+        <div id="expandedBackgroundWrapper" style$="opacity: [[expandedPercentage]];">
+          <slot name="expandedBackground"></slot>
+        </slot>
         <slot name="headerBottom"></slot>
       </div>
     </div>
@@ -76,7 +99,32 @@ It provides a sliding header panel and holds the page content.
 
       static get properties() {
         return {
-          // INSERT PROPERTIES HERE
+          /* Header height when fully expanded. In em. */
+          expandedHeight: Number,
+          
+          /* Header height when fully condensed. In em. */
+          condensedHeight: Number,
+
+          /* Between zero (fully expanded) and 1 (fully condensed). */
+          condensedPercentage: {
+            type: Number, 
+            value: 0.0,
+            notify: true
+          },
+
+          /* Between zero (fully condensed) and 1 (fully expanded). */
+          expandedPercentage: {
+            type: Number, 
+            value: 0.0,
+            notify: true
+          },
+          
+          /* Current header height. In em. */
+          headerHeight: { 
+            type: Number, 
+            computed: '_headerHeight(condensedHeight, expandedHeight, condensedPercentage)',
+            notify: true
+          }
         };
       }
 
@@ -94,14 +142,35 @@ It provides a sliding header panel and holds the page content.
         if (super.connectedCallback) super.connectedCallback();
         
         var bodyElement = this.$.body;
+        var self = this;
         bodyElement.addEventListener('scroll', function() {
-          console.log(bodyElement.scrollTop);
+          var scrollTopEm = bodyElement.scrollTop / blCurrentFontSize(); // global method from bl-styles
+          var condensationDelta = self.expandedHeight - self.condensedHeight;
+          
+          if (scrollTopEm >= condensationDelta) {
+            if (self.condensedPercentage < 1.0) {
+              self.condensedPercentage = 1.0;
+              self.expandedPercentage = 0.0;
+            }
+          } else {
+            self.condensedPercentage = scrollTopEm / condensationDelta;
+            self.expandedPercentage = 1.0 - self.condensedPercentage;
+          }
         });
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
 
       // ...
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _headerHeight(condensedHeight, expandedHeight, condensedPercentage) {
+        if (condensedHeight && expandedHeight && condensedPercentage)
+          return this.condensedHeight + ((this.expandedHeight - this.condensedHeight) * (1 - condensedPercentage))
+        else
+          return this.expandedHeight;
+      }
 
       // #=== PRIVATE HELPER & UTILITY METHODS ===#
 
