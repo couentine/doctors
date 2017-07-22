@@ -17,7 +17,8 @@
     "google-fonts-lato": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-lato?family=Lato",
     "google-fonts-roboto": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto?family=Roboto",
     "google-fonts-roboto-mono": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto-mono?family=Roboto+Mono",
-    "paper-styles": "PolymerElements/paper-styles#^2.0.0"
+    "paper-styles": "PolymerElements/paper-styles#^2.0.0",
+    "iron-scroll-target-behavior": "PolymerElements/iron-scroll-target-behavior#^2.0.0"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",

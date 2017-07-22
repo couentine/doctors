@@ -1,0 +1,114 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Header Panel #
+
+This is the primary app container. It should be included in each view component.
+It provides a sliding header panel and holds the page content.
+-->
+<dom-module id="bl-header-panel">
+  <template>
+
+    <style>
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          position: fixed;
+          top: 0; right: 0; bottom: 0; left: 0;
+        }
+
+      /* === COMPONENT STYLES === */
+
+        #header {
+          position: fixed;
+          top: 0; right: 0; left: 0;
+          height: 4em;
+        }
+          #condensedBackgroundWrapper, #expandedBackgroundWrapper {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+          }
+          #headerBottomWrapper {
+            position: fixed;
+            right: 0; bottom: 0; left: 0;
+          }
+        #body {
+          overflow: auto;
+          padding-top: 4em;
+          position: fixed;
+          top: 0; right: 0; bottom: 0; left: 0;
+        }
+
+    </style>
+
+    <div id="body">
+      <slot name="content"></slot>
+    </div>
+
+    <div id="header">
+      <div id="condensedBackgroundWrapper">
+        <slot name="condensedBackground"></slot>
+      </div>
+      <div id="expandedBackgroundWrapper">
+        <slot name="expandedBackground"></slot>
+      </div>
+      <div id="headerBottomWrapper">
+        <slot name="headerBottom"></slot>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlHeaderPanel extends Polymer.Element {
+      
+      static get is() { return 'bl-header-panel'; }
+
+      static get properties() {
+        return {
+          // INSERT PROPERTIES HERE
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      // ...
+      
+      // #=== PRIVATE ACTION METHODS ===#
+
+      // ...
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        var bodyElement = this.$.body;
+        bodyElement.addEventListener('scroll', function() {
+          console.log(bodyElement.scrollTop);
+        });
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      // ...
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      // ...
+
+    }
+
+    window.customElements.define(BlHeaderPanel.is, BlHeaderPanel);
+  </script>
+</dom-module>

@@ -2,20 +2,16 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!-- #=== STANDARD POLYMER COMPONENTS ===# -->
-<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
-<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
-<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="bl-header-panel.html">
 <link rel="import" href="bl-view-mixin.html">
 
 <!--
-# Badge List Component Template #
+# Badge List Home View #
 
-Use this html file as your starting point when creating new components.
-It contains comments which are ordered in the standard way and aligned with Badge List's polymer style.
+The home page for logged in users.
 -->
 <dom-module id="bl-view-home">
   <template>
@@ -30,26 +26,53 @@ It contains comments which are ordered in the standard way and aligned with Badg
           top: 0; right: 0; bottom: 0; left: 0;*/
         }
 
-      /* === COMPONENT STYLES === */
+      /* === HEADER PANEL STYLES === */
 
-        app-header {
-          color: #fff;
-          background-color: #C62828;
-          position: fixed;
-          top: 0; right: 0; left: 0;
+        bl-header-panel {
+          border-top: 4px solid var(--bl-orange-500);
+
+          --header: {
+            color: white;
+          };
         }
+          #expandedBackground {
+            background-color: var(--bl-orange-500);
+          }
+          #condensedBackground {
+            background-color: white;
+          }
 
     </style>
 
-    <app-header-layout fullbleed>
-      <app-header slot="header" style="height: 96px;" condenses fixed effects="waterfall">
-        <app-toolbar>sofijdslsjf</app-toolbar>
-        <app-toolbar sticky style="height: 64px;">
-          <div main-title>App name</div>
-        </app-toolbar>
-      </app-header>
+    <bl-header-panel id="headerPanel" expanded-height="6" condensed-height="4">
+      <div id="expandedBackground" slot="expandedBackground">
+        &nbsp;
+      </div>
+      <div id="condensedBackground" slot="condensedBackground">
+        &nbsp;
+      </div>
 
-      <div>
+      <div id="headerBottom" slot="headerBottom">
+        <ul id="headerBottomLinks">
+          <li>
+            <a href="/community">
+              <i class="fa fa-users"></i> Community
+            </a>
+          </li>
+          <li>
+            <a href="/help/docs">
+              <i class="fa fa-question-circle"></i> Help Docs
+            </a>
+          </li>
+          <li>
+            <a href="/w">
+              <i class="fa fa-globe"></i> Website
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div id="content" slot="content">
         <p>
           Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
           tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -123,7 +146,7 @@ It contains comments which are ordered in the standard way and aligned with Badg
           proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         </p>
       </div>
-    </app-header-layout>
+    </bl-header-panel>
 
   </template>
 
