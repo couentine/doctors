@@ -1,33 +1,13 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
 <!--
-# Badge List Fonts #
+# Badge List Typography #
 
 This import contains includes the fonts base typographic settings and all typographic-related css variables / mixins.
 -->
-<link rel="import" href="fonts.html">
-
-<script>
-
-  const RESPONSIVE_FONT_SIZES = [
-    { minWidth: 0, fontSize: 14 },
-    { minWidth: 480, fontSize: 16 },
-    { minWidth: 840, fontSize: 18 }
-  ];
-
-  /* Returns integer value of font size in pixels for the current window inner width. */
-  function blCurrentFontSize() {
-    var returnValue = 14; // default value is 14 if breakpoints haven't been loaded yet
-
-    for (var i=0; (i < RESPONSIVE_FONT_SIZES.length) && (window.innerWidth >= RESPONSIVE_FONT_SIZES[i].minWidth); i++)
-      returnValue = RESPONSIVE_FONT_SIZES[i].fontSize;
-    
-    return returnValue;
-  }
-
-</script>
-
 <custom-style>
   <style>
-
+  
     /* === RESPONSIVE FONT SIZES === */
 
     html {
@@ -181,6 +161,25 @@ This import contains includes the fonts base typographic settings and all typogr
         };
 
     }
-
   </style>
 </custom-style>
+
+<script>
+
+  const RESPONSIVE_FONT_SIZES = [
+    { minWidth: 0, fontSize: 14 },
+    { minWidth: 480, fontSize: 16 },
+    { minWidth: 840, fontSize: 18 }
+  ];
+
+  /* Returns integer value of font size in pixels for the current window inner width. */
+  function blCurrentFontSize() {
+    var returnValue = 14; // default value is 14 if breakpoints haven't been loaded yet
+
+    for (var i=0; (i < RESPONSIVE_FONT_SIZES.length) && (window.innerWidth >= RESPONSIVE_FONT_SIZES[i].minWidth); i++)
+      returnValue = RESPONSIVE_FONT_SIZES[i].fontSize;
+    
+    return returnValue;
+  }
+
+</script>

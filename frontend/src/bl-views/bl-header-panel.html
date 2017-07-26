@@ -3,7 +3,6 @@
 
 <!-- #=== STANDARD POLYMER COMPONENTS ===# -->
 
-
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="../bl-app/bl-app-component-mixin.html">
 <link rel="import" href="../bl-styles/bl-styles.html">
@@ -17,7 +16,7 @@ It provides a sliding header panel and holds the page content.
 <dom-module id="bl-header-panel">
   <template>
 
-    <style>
+    <style include="bl-style-classes">
       
       /* === LAYOUT & BASE STYLES === */
         
@@ -37,27 +36,21 @@ It provides a sliding header panel and holds the page content.
           display: flex;
           flex-direction: row;
 
+          @apply --bl-shadow-transition;
+
           @apply --header;
         }
+        #header.condensed { @apply --bl-shadow-3; } 
           #headerInner {
             flex: 1 1 auto;
           }
-            #condensedBackgroundWrapper {
+            #condensedBackgroundWrapper, #expandedBackgroundWrapper {
               position: absolute;
               top: 0; right: 0; bottom: 0; left: 0;
               display: flex;
               flex-direction: row;
             }
-              ::slotted([slot=condensedBackground]) {
-                flex: 1 1 auto;
-              }
-            #expandedBackgroundWrapper {
-              position: absolute;
-              top: 0; right: 0; bottom: 0; left: 0;
-              display: flex;
-              flex-direction: row;
-            }
-              ::slotted([slot=expandedBackground]) {
+              ::slotted([slot=condensedBackground]), ::slotted([slot=expandedBackground]) {
                 flex: 1 1 auto;
               }
             ::slotted([slot=headerBottom]) {
@@ -78,15 +71,17 @@ It provides a sliding header panel and holds the page content.
       <slot name="content"></slot>
     </div>
 
-    <div id="header" style$="height: [[headerHeight]]em;">
+    <div id="header" style$="height: [[headerHeight]]em;" class$="[[headerStatus]]">
       <div id="headerInner">
-        <div id=condensedBackgroundWrapper"">
+        <div id="expandedBackgroundWrapper">
+          <slot name="expandedBackground"></slot>
+        </div>
+        <div id="condensedBackgroundWrapper" style$="opacity: [[condensedPercentage]];">
           <slot name="condensedBackground"></slot>
         </div>
-        <div id="expandedBackgroundWrapper" style$="opacity: [[expandedPercentage]];">
-          <slot name="expandedBackground"></slot>
-        </slot>
         <slot name="headerBottom"></slot>
+        <slot name="leftNav"></slot>
+        <slot name="rightNav"></slot>
       </div>
     </div>
 
@@ -105,6 +100,13 @@ It provides a sliding header panel and holds the page content.
           /* Header height when fully condensed. In em. */
           condensedHeight: Number,
 
+          /* Returns `expanded`, `partial` or `condensed`. */
+          headerStatus: {
+            type: String,
+            value: 'expanded',
+            notify: true
+          },
+
           /* Between zero (fully expanded) and 1 (fully condensed). */
           condensedPercentage: {
             type: Number, 
@@ -115,7 +117,7 @@ It provides a sliding header panel and holds the page content.
           /* Between zero (fully condensed) and 1 (fully expanded). */
           expandedPercentage: {
             type: Number, 
-            value: 0.0,
+            value: 1.0,
             notify: true
           },
           
@@ -151,10 +153,14 @@ It provides a sliding header panel and holds the page content.
             if (self.condensedPercentage < 1.0) {
               self.condensedPercentage = 1.0;
               self.expandedPercentage = 0.0;
+              self.headerStatus = 'condensed';
             }
           } else {
             self.condensedPercentage = scrollTopEm / condensationDelta;
             self.expandedPercentage = 1.0 - self.condensedPercentage;
+
+            if (scrollTopEm == 0) self.headerStatus = 'partial'
+            else self.headerStatus = 'expanded';
           }
         });
       }
