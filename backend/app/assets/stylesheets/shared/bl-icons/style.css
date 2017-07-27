@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'bl-icons';
-  src:  url('fonts/bl-icons.eot?xei0ew');
-  src:  url('fonts/bl-icons.eot?xei0ew#iefix') format('embedded-opentype'),
-    url('fonts/bl-icons.ttf?xei0ew') format('truetype'),
-    url('fonts/bl-icons.woff?xei0ew') format('woff'),
-    url('fonts/bl-icons.svg?xei0ew#bl-icons') format('svg');
+  src:  url('fonts/bl-icons.eot?llafn1');
+  src:  url('fonts/bl-icons.eot?llafn1#iefix') format('embedded-opentype'),
+    url('fonts/bl-icons.ttf?llafn1') format('truetype'),
+    url('fonts/bl-icons.woff?llafn1') format('woff'),
+    url('fonts/bl-icons.svg?llafn1#bl-icons') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -24,6 +24,85 @@ i {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-brand:before {
+  content: "\ef07";
+  color: #a4c639;
+}
+.icon-brand2:before {
+  content: "\ef08";
+  color: #999;
+}
+.icon-brand3:before {
+  content: "\ef09";
+  color: #1572b6;
+}
+.icon-brand4:before {
+  content: "\ef0a";
+  color: #f43059;
+}
+.icon-brand5:before {
+  content: "\ef0b";
+  color: #3b5998;
+}
+.icon-brand6:before {
+  content: "\ef0c";
+}
+.icon-brand7:before {
+  content: "\ef0d";
+  color: #4285f4;
+}
+.icon-brand8:before {
+  content: "\ef0e";
+  color: #dc4e41;
+}
+.icon-brand9:before {
+  content: "\ef0f";
+  color: #e34f26;
+}
+.icon-brand10:before {
+  content: "\ef10";
+  color: #1f8ded;
+}
+.icon-brand11:before {
+  content: "\ef11";
+  color: #bd081c;
+}
+.icon-brand12:before {
+  content: "\ef12";
+  color: #ef3f56;
+}
+.icon-brand13:before {
+  content: "\ef13";
+  color: #b92b27;
+}
+.icon-brand14:before {
+  content: "\ef14";
+  color: #ff4500;
+}
+.icon-brand15:before {
+  content: "\ef15";
+  color: #ffa500;
+}
+.icon-brand16:before {
+  content: "\ef16";
+  color: #cc342d;
+}
+.icon-brand17:before {
+  content: "\ef17";
+  color: #008cdd;
+}
+.icon-brand18:before {
+  content: "\ef18";
+  color: #1da1f2;
+}
+.icon-brand19:before {
+  content: "\ef19";
+  color: #21759b;
+}
+.icon-brand20:before {
+  content: "\ef1a";
+  color: #cd201f;
+}
 .icon-home:before {
   content: "\e900";
 }

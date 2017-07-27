@@ -6,12 +6,25 @@
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="../bl-app/bl-app-component-mixin.html">
 <link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="bl-header-nav-right.html">
+<link rel="import" href="bl-footer.html">
 
 <!--
 # Badge List Header Panel #
 
 This is the primary app container. It should be included in each view component.
 It provides a sliding header panel and holds the page content.
+
+## Slots ##
+
+- content: Page content
+- expandedBackground: Insert a div which will be resized to fully cover the header background.
+- condensedBackground: Insert a div which will be resized to fully cover the header background. 
+  This is faded in over the `expandedBackground` as the header condenses.
+- headerBottom: Insert a div which will be stuck to the bottom of the header panel.
+- leftNav: Usually insert a `<bl-header-nav-left>` which contains an image or icon to use.
+- rightNav: Optional, defaults to `<bl-header-nav-right>` if left out.
+- footer: Optional, defaults to `<bl-footer>` if left out.
 -->
 <dom-module id="bl-header-panel">
   <template>
@@ -69,6 +82,9 @@ It provides a sliding header panel and holds the page content.
 
     <div id="body" style$="padding-top: [[expandedHeight]]em;">
       <slot name="content"></slot>
+      <slot name="footer">
+        <bl-footer></bl-footer>
+      </slot>
     </div>
 
     <div id="header" style$="height: [[headerHeight]]em;" class$="[[headerStatus]]">
@@ -81,7 +97,9 @@ It provides a sliding header panel and holds the page content.
         </div>
         <slot name="headerBottom"></slot>
         <slot name="leftNav"></slot>
-        <slot name="rightNav"></slot>
+        <slot name="rightNav">
+          <bl-header-nav-right id="rightNav"></bl-header-nav-right>
+        </slot>
       </div>
     </div>
 
