@@ -56,6 +56,6 @@ Devise.setup do |config|
 
   # Google oauth (https://github.com/plataformatec/devise/wiki/OmniAuth:-Overview)
   config.omniauth :google_oauth2, 
-    ENV['oauth_google_client_id'], ENV['oauth_google_client_secret'], { }
+    ENV['oauth_google_client_id'], ENV['oauth_google_client_secret'], { verify_iss: false }
 
 end
