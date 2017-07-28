@@ -108,7 +108,7 @@ class GroupsController < ApplicationController
 
     respond_to do |format|
       format.json do
-        render json: { next_page: @next_page, groups: @groups }
+        render json: { next_page: @next_page, items: @groups }
       end
     end
   end

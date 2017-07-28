@@ -53,7 +53,7 @@ class BadgesController < ApplicationController
 
     respond_to do |format|
       format.json do
-        render json: { next_page: @next_page, badges: @badges }
+        render json: { next_page: @next_page, items: @badges }
       end
     end
   end

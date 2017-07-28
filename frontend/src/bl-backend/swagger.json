@@ -52,7 +52,7 @@
                   "type": "integer",
                   "format": "int64"
                 },
-                "badges": {
+                "items": {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/Group"
@@ -98,7 +98,7 @@
                   "type": "integer",
                   "format": "int64"
                 },
-                "badges": {
+                "items": {
                   "type": "array",
                   "items": {
                     "$ref": "#/definitions/Badge"

@@ -1,0 +1,95 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== SWAGGER JS CLIENT ===# -->
+<script src="../../bower_components/swagger-js/browser/swagger-client.js" type="text/javascript"></script>
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+
+<!--
+# Badge List Backend Client #
+
+This is a wrapper around the 2.x version of the [Swagger JS Client](https://github.com/swagger-api/swagger-js/tree/2.x).
+(The 3.0 version of the swagger js library requires a more complex build process so for now we're using the 2.x branch.)
+There is only one backend client for the whole app, stored in the `<bl-app>` component with id `backend`. You can access the client
+from any component using the component mixin with `this.app.$.backend`.
+
+You shouldn't need to reference this directly from a component, though. It is designed to be used via on of the model binding elements
+contained in the `bl-backend` folder.
+
+The client uses the `swagger.json` file located in the component folder.
+-->
+<dom-module id="bl-backend-client">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+        }
+
+      /* === COMPONENT STYLES === */
+
+    </style>
+
+    <!-- INSERT COMPONENT DOM HERE -->
+
+  </template>
+
+  <script>
+    class BlBackendClient extends BlAppComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-backend-client'; }
+
+      static get properties() {
+        return {
+          
+          client: Object,
+
+          initialized: {
+            type: Boolean,
+            value: false
+          }
+
+        };
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+
+        var self = this;
+        var apiHost = this.app.manifest.app_root_url.replace(/https?:\/\//i, '');
+
+        // Initialize the swagger client
+        this.client = new SwaggerClient({
+          url: Polymer.rootPath + "/src/bl-backend/swagger.json",
+          success: function() {
+            // We need to override the host if we are in a non-production environment
+            if (this.host != apiHost)
+              this.setHost(apiHost);
+            
+            self.initialized = true;
+          },
+          failure: function(message) {
+            self.openAlertDialog({
+              color: 'orange', 
+              title: 'Connection problem',
+              body: 'There was a problem connecting with the Badge List server. Please review the error message below '
+                + 'and try reloading the page.<br><br><strong>Error Message:</strong> ' + message,
+              dismiss: { text: 'Close', action: function(){} }
+            });
+          }
+        });
+      }
+
+    }
+
+    window.customElements.define(BlBackendClient.is, BlBackendClient);
+  </script>
+</dom-module>

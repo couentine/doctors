@@ -6,6 +6,7 @@
 <link rel="import" href="../bl-styles/fonts.html">
 <link rel="import" href="../bl-styles/bl-styles.html">
 <link rel="import" href="../bl-views/bl-view-home.html">
+<link rel="import" href="../bl-backend/bl-backend-client.html">
 
 <!--
 # Badge List App #
@@ -58,6 +59,9 @@ The mixin also provides various actions for interacting with the container. (Ref
 
     </style>
     
+    <!-- #=== API CONNECTION TO THE BACKEND ===# -->
+    <bl-backend-client id="backend"></bl-backend-client>
+
     <!-- #=== APP VIEWS (Just one for now) ===# -->
 
     <bl-view-home id="homeView"></bl-view-home>
@@ -127,32 +131,41 @@ The mixin also provides various actions for interacting with the container. (Ref
         // It sets all of the appropriate css variables to match the specified color
         // Defaults to orange
         if (color == 'blue') { // material light blue
-          this.customStyle['--dialog-50-color'] = '#E1F5FE';
-          this.customStyle['--dialog-100-color'] = '#B3E5FC';
-          this.customStyle['--dialog-300-color'] = '#4FC3F7';
-          this.customStyle['--dialog-600-color'] = '#039BE5';
+          this.updateStyles({
+            '--dialog-50-color': '#E1F5FE',
+            '--dialog-100-color': '#B3E5FC',
+            '--dialog-300-color': '#4FC3F7',
+            '--dialog-600-color': '#039BE5'
+          });
         } else if (color == 'green') {
-          this.customStyle['--dialog-50-color'] = '#F1F8E9';
-          this.customStyle['--dialog-100-color'] = '#C8E6C9';
-          this.customStyle['--dialog-300-color'] = '#AED581';
-          this.customStyle['--dialog-600-color'] = '#7CB342';
+          this.updateStyles({
+            '--dialog-50-color': '#F1F8E9',
+            '--dialog-100-color': '#C8E6C9',
+            '--dialog-300-color': '#AED581',
+            '--dialog-600-color': '#7CB342'
+          });
         } else if (color == 'grey') {
-          this.customStyle['--dialog-50-color'] = '#FAFAFA';
-          this.customStyle['--dialog-100-color'] = '#F5F5F5';
-          this.customStyle['--dialog-300-color'] = '#E0E0E0';
-          this.customStyle['--dialog-600-color'] = '#757575';
+          this.updateStyles({
+            '--dialog-50-color': '#FAFAFA',
+            '--dialog-100-color': '#F5F5F5',
+            '--dialog-300-color': '#E0E0E0',
+            '--dialog-600-color': '#757575'
+          });
         } else if (color == 'red') {
-          this.customStyle['--dialog-50-color'] = '#FFEBEE';
-          this.customStyle['--dialog-100-color'] = '#FFCDD2';
-          this.customStyle['--dialog-300-color'] = '#E57373';
-          this.customStyle['--dialog-600-color'] = '#E53935';
+          this.updateStyles({
+            '--dialog-50-color': '#FFEBEE',
+            '--dialog-100-color': '#FFCDD2',
+            '--dialog-300-color': '#E57373',
+            '--dialog-600-color': '#E53935'
+          });
         } else { // default = orange
-          this.customStyle['--dialog-50-color'] = '#FFF3E0';
-          this.customStyle['--dialog-100-color'] = '#FFE0B2';
-          this.customStyle['--dialog-300-color'] = '#FFB74D';
-          this.customStyle['--dialog-600-color'] = '#FB8C00';
+          this.updateStyles({
+            '--dialog-50-color': '#FFF3E0',
+            '--dialog-100-color': '#FFE0B2',
+            '--dialog-300-color': '#FFB74D',
+            '--dialog-600-color': '#FB8C00'
+          });
         }
-        this.updateStyles(); // FIXME
       }
 
       // #=== PRIVATE ACTION METHODS ===#
@@ -174,7 +187,7 @@ The mixin also provides various actions for interacting with the container. (Ref
 
       ready() {
         super.ready();
-        
+
         // Add Listeners
         // FIXME: this.$.appHeaderLayout.addEventListener('paper-header-transform', e => this._appHeaderLayoutTransform(e));
         this.$.pollerDialogPoller.addEventListener('bl-poller-completed', e => this._pollerCompleted(e));
