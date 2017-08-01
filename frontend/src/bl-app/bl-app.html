@@ -188,6 +188,9 @@ The mixin also provides various actions for interacting with the container. (Ref
       ready() {
         super.ready();
 
+        // Activate the home view
+        this.$.homeView.activate();
+
         // Add Listeners
         // FIXME: this.$.appHeaderLayout.addEventListener('paper-header-transform', e => this._appHeaderLayoutTransform(e));
         this.$.pollerDialogPoller.addEventListener('bl-poller-completed', e => this._pollerCompleted(e));

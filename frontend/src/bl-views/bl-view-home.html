@@ -9,6 +9,7 @@
 <link rel="import" href="bl-header-nav-left.html">
 <link rel="import" href="bl-header-nav-right.html">
 <link rel="import" href="bl-view-mixin.html">
+<link rel="import" href="../bl-backend/bl-backend-list.html">
 
 <!--
 # Badge List Home View #
@@ -67,6 +68,9 @@ The home page for logged in users.
           }
 
     </style>
+
+    <bl-backend-list id="badgeList" target="{{badges}}" type="myBadges" parent-view-status="[[status]]"></bl-backend-list>
+    <bl-backend-list id="groupList" target="{{groups}}" type="myGroups" parent-view-status="[[status]]"></bl-backend-list>
 
     <bl-header-panel id="headerPanel" expanded-height="9" condensed-height="6">
       <div id="expandedBackground" slot="expandedBackground">
@@ -183,7 +187,13 @@ The home page for logged in users.
 
       static get properties() {
         return {
-          // INSERT PROPERTIES HERE
+          
+          /** Displays badges in progress. */
+          badges: Object,
+            
+          /** Displays my groups. */
+          groups: Object
+
         };
       }
 

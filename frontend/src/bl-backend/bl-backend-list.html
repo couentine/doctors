@@ -1,0 +1,195 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+
+<!--
+# Badge List Backend List #
+
+Use this component to bind a local component property with a list endpoint in the Badge List backend.
+-->
+<dom-module id="bl-backend-list">
+  <template>
+  </template>
+
+  <script>
+    class BlBackendList extends BlAppComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-backend-list'; }
+
+      static get properties() {
+        return {
+          
+          /** 
+           * Required. The list type determines the model and available actions.
+           * Currently this only supports 'myGroups' and 'myBadges'.
+           */
+          type: String,
+          
+          /** 
+           * Required. Bind this to the `status` property of the parent view.
+           * Allows the list to load dynamically based on the view's status.
+           */
+          parentViewStatus: {
+            type: String,
+            observer: '_parentViewStatusChanged'
+          },
+
+          backendClientInitialized: {
+            type: Boolean,
+            readOnly: true,
+            notify: true,
+            observer: '_backendClientInitializedChanged'
+          },
+
+          /** 
+           * If set to FALSE then the list 'auto loads', meaning that it gets the first page of results whenever the view goes to 
+           * the 'active' state and reloads the results anytime the parameters change while the view is active.
+           * Set to TRUE to disable the auto load. Then you must manually call the `listActions` methods to load results.
+           */
+          manualLoad: {
+            type: Boolean,
+            value: false
+          },
+
+          /** Optional. URL parameters to pass to the get operation. */
+          parameters: {
+            type: Object,
+            notify: true,
+            observer: '_parametersChanged',
+            value: function() { return {} }
+          },
+
+          /**
+           * Required. The target object receiving the binding. The following properties and methods are added on connection.
+           * @property {object[]} items - The model items returned from the server. Getting more pages appends items to the end of the list.
+           *   Each item will have a `backend` object added to it. For now this is going unused, but it will eventually be used to provide
+           *   status properties and callbacks related item selection and item actions.
+           * @property {number} nextPage - The integer of the next page of results, equal to null if there are no more results.
+           * @property {boolean} hasNextPage - True if nextPage is non-null.
+           * @property {object} status - Stores the current state of the network connection.
+           * @property {string} status.text - Equal to 'uninitialized', 'loading', 'ready' or 'error'.
+           * @property {boolean} status.isError - True if the status is 'error'.
+           * @property {boolean} status.isInitialized - Always true once the inital loading is complete.
+           * @property {boolean} status.isLoading - A network action is pending. True whenever the status is 'loading'.
+           * @property {boolean} status.isReady - No network action is pending. True whenever the status is 'ready'.
+           * @property {string} status.errorMessage - Error message from backend. Null unless `isError` is `true`.
+           * @property {object} listActions - Contains callbacks which apply list-level actions.
+           * @property {function} listActions.getNextPage() - Adds next page of items to the items list, updates nextPage and hasNextPage.
+           * @property {function} listActions.reload() - Resets the items list and gets the first page of results.
+           * @property {object} selectedItemActions - NOT USED YET. Contains callbacks which apply actions to the currently selected items.
+           */
+          target: {
+            type: Object,
+            notify: true,
+            value: function() { return {} }
+          }
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      reload() {
+        console.log('Reload action');
+        console.log(this.type);
+      }
+
+      getNextPage() {
+        console.log('Get next page action');
+        console.log(this.type);
+      }
+      
+      // #=== PRIVATE ACTION METHODS ===#
+
+      setupTargetObject() {
+        var self = this;
+
+        // Add to the existing target object instead of overwriting it, in case the parent element has given it extra properties
+        this.target.items = [];
+        this.target.nextPage = undefined;
+        this.target.hasNextPage = undefined;
+        this.target.status = {
+          text: 'uninitialized',
+          isError: false,
+          isInitialized: false,
+          isLoading: false,
+          isReady: false,
+          errorMessage: null
+        }
+        this.target.listActions = {
+          getNextPage: () => this.getNextPage(),
+          reload: () => this.reload()
+        }
+        this.target.selectedItemActions = {}
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+
+        // Add a listener for the backend client status
+        this.app.$.backend.addEventListener('initialized-changed', e => this._appBackendInitializedChanged(e));
+        
+        // Setup the target object
+        this.setupTargetObject();
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _parametersChanged(newValue, oldValue) {
+        if (!this.manualLoad && this.backendClientInitialized && (this.parentViewStatus == 'active'))
+          this.reload();
+      }
+
+      _parentViewStatusChanged(newValue, oldValue) {
+        if (!this.manualLoad && (newValue == 'active') && (oldValue != 'active') && (this.backendClientInitialized))
+          this.reload();
+      }
+
+      _appBackendInitializedChanged(e) {
+        // This is fired by the event listener, it copies the value to the local property, thus firing the property change observer below.
+        this._setBackendClientInitialized(e.detail.value);
+      }
+
+      _backendClientInitializedChanged(newValue, oldValue) {
+        if (!this.manualLoad && newValue && !oldValue && (this.parentViewStatus == 'active'))
+          this.reload();
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      // ...
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      /** 
+       * Executes the passed action on the client then updates the target list along with status and next page (or error if relevant).
+       */
+      _executeListAction(action, parameters) {
+        var operationId = action + this.type.charAt(0).toUpperCase() + this.type.slice(1);
+        var self = this;
+        
+        this.app.$.backend.client[this.type][operationId](parameters)
+          .then(function(response) {
+            /* LEFT OFF HERE... I need to think this through more. How generic do I want to make this? 
+              If it's going to be fairly generic then I should probably just return the promise so the consuming function can deal with it
+              But then I feel like it should probably live in the client component itself.
+              The current use pattern is readonly with no filtering... augmenting the items array.
+              But also think through the future use patterns:
+              - Readonly with filter parameters which can change
+              - Other actions that actually return some sort of value and require the consuming page to do something upon success
+            */
+          }).catch(function(errorMessage) {
+            console.log('Error operationId');
+            console.log(errorMessage);
+          });
+      }
+
+    }
+
+    window.customElements.define(BlBackendList.is, BlBackendList);
+  </script>
+</dom-module>

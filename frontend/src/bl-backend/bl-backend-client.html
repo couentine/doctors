@@ -22,22 +22,6 @@ The client uses the `swagger.json` file located in the component folder.
 -->
 <dom-module id="bl-backend-client">
   <template>
-
-    <style include="bl-style-classes">
-      
-      /* === LAYOUT & BASE STYLES === */
-        
-        :host {
-          display: block;
-          font-size: 1rem; 
-        }
-
-      /* === COMPONENT STYLES === */
-
-    </style>
-
-    <!-- INSERT COMPONENT DOM HERE -->
-
   </template>
 
   <script>
@@ -52,7 +36,8 @@ The client uses the `swagger.json` file located in the component folder.
 
           initialized: {
             type: Boolean,
-            value: false
+            value: false,
+            notify: true
           }
 
         };
@@ -69,22 +54,23 @@ The client uses the `swagger.json` file located in the component folder.
         // Initialize the swagger client
         this.client = new SwaggerClient({
           url: Polymer.rootPath + "/src/bl-backend/swagger.json",
-          success: function() {
+          usePromise: true
+        }).then(function(client) {
             // We need to override the host if we are in a non-production environment
-            if (this.host != apiHost)
-              this.setHost(apiHost);
+            if (client.host != apiHost)
+              client.setHost(apiHost);
             
+            console.log('Client initialized.');
+            self.client = client;
             self.initialized = true;
-          },
-          failure: function(message) {
+        }).catch(function(errorMessage) {
             self.openAlertDialog({
               color: 'orange', 
               title: 'Connection problem',
               body: 'There was a problem connecting with the Badge List server. Please review the error message below '
-                + 'and try reloading the page.<br><br><strong>Error Message:</strong> ' + message,
+                + 'and try reloading the page.<br><br><strong>Error Message:</strong> ' + errorMessage,
               dismiss: { text: 'Close', action: function(){} }
             });
-          }
         });
       }
 

@@ -12,19 +12,19 @@
   "host": "www.badgelist.com",
   "tags": [
     {
-      "name": "group",
-      "description": "Badge List group"
+      "name": "myGroups",
+      "description": "Badge List groups which the current user is a member of"
     },
     {
-      "name": "badge",
-      "description": "Badge List badge"
+      "name": "myBadges",
+      "description": "Badge List badges which the current user is working on"
     }
   ],
   "paths": {
     "/groups/my": {
       "get": {
         "tags": [
-          "group"
+          "myGroups"
         ],
         "summary": "Gets all groups for the current user",
         "operationId": "getMyGroups",
@@ -70,7 +70,7 @@
     "/badges/my": {
       "get": {
         "tags": [
-          "badge"
+          "myBadges"
         ],
         "summary": "Gets all badges for the current user",
         "operationId": "getMyBadges",
