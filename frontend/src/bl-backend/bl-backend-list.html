@@ -70,20 +70,29 @@ Use this component to bind a local component property with a list endpoint in th
            * @property {boolean} hasNextPage - True if nextPage is non-null.
            * @property {object} status - Stores the current state of the network connection.
            * @property {string} status.text - Equal to 'uninitialized', 'loading', 'ready' or 'error'.
-           * @property {boolean} status.isError - True if the status is 'error'.
            * @property {boolean} status.isInitialized - Always true once the inital loading is complete.
            * @property {boolean} status.isLoading - A network action is pending. True whenever the status is 'loading'.
            * @property {boolean} status.isReady - No network action is pending. True whenever the status is 'ready'.
+           * @property {boolean} status.isError - True if the status is 'error'.
            * @property {string} status.errorMessage - Error message from backend. Null unless `isError` is `true`.
            * @property {object} listActions - Contains callbacks which apply list-level actions.
            * @property {function} listActions.getNextPage() - Adds next page of items to the items list, updates nextPage and hasNextPage.
            * @property {function} listActions.reload() - Resets the items list and gets the first page of results.
-           * @property {object} selectedItemActions - NOT USED YET. Contains callbacks which apply actions to the currently selected items.
+           * @property {object} selectionActions - NOT USED YET. Contains callbacks which apply actions to the currently selected items.
            */
           target: {
             type: Object,
             notify: true,
             value: function() { return {} }
+          },
+
+          /** 
+           * Set using the `buildActionCallbacks` method in `<bl-backend-client>`. Used to power public action methods.
+           * Consuming components should not reference this object directly as it may change with future implementations.
+           */
+          _clientActionCallbacks: {
+            type: Object,
+            readOnly: true
           }
 
         }
@@ -91,38 +100,86 @@ Use this component to bind a local component property with a list endpoint in th
 
       // #=== PUBLIC ACTION METHODS ===#
 
+      /** 
+       * Clears current items and reloads first page.
+       * Typically called via binding (`target.listActions.reload()`), but ok to call directly as well.
+       */
       reload() {
-        console.log('Reload action');
-        console.log(this.type);
+        this.set('target.items', []);
+        this.set('target.nextPage', 1);
+        this.set('target.hasNextPage', undefined);
+        this.getNextPage();
       }
 
+      /** 
+       * Loads next items and appends them to existing items. Then updates next page properties.
+       * Typically called via binding (`target.listActions.getNextPage()`), but ok to call directly as well.
+       */
       getNextPage() {
-        console.log('Get next page action');
-        console.log(this.type);
+        var parametersWithPage;
+
+        this._updateStatus('loading');
+
+        // Clone the parameters so we can inject the page without messing up the bound parameters property
+        parametersWithPage = {};
+        Object.assign(parametersWithPage, this.parameters);
+        parametersWithPage.page = (this.target.nextPage) ? this.target.nextPage : 1;
+
+        this._clientActionCallbacks.paginatedListGetter.get(parametersWithPage).then(function(response) {
+          if (response.items && response.items.length)
+            for (var i = 0; i < response.items.length; i++)
+              this.push('target.items', response.items[i]);
+
+          this.set('target.nextPage', response.nextPage);
+          this.set('target.hasNextPage', (response.nextPage != null) && !isNaN(response.nextPage));
+          this._updateStatus('ready');
+        }.bind(this)).catch(function(error) { 
+          this._updateStatus('error', (error.message) ? error.message : error);
+        });
       }
       
       // #=== PRIVATE ACTION METHODS ===#
 
-      setupTargetObject() {
-        var self = this;
+      /** Sets and notifies all of the target properties related to status. Only include errorMessage if if statusText is 'error'. */
+      _updateStatus(statusText, errorMessage) {
+        var isInitialized = this.target.status.isInitialized || (statusText == 'ready');
+        var isLoading = (statusText == 'loading');
+        var isReady = (statusText == 'ready');
+        var isError = (statusText == 'error');
 
+        this.set('target.status.text', statusText);
+
+        // Only trigger a notification for the booleans if they are changing
+        if (this.target.status.isInitialized != isInitialized) this.set('target.status.isInitialized', isInitialized);
+        if (this.target.status.isLoading != isLoading) this.set('target.status.isLoading', isLoading);
+        if (this.target.status.isReady != isReady) this.set('target.status.isReady', isReady);
+        if (this.target.status.isError != isError) this.set('target.status.isError', isError);
+
+        // Always trigger a notification for the error message, but ensure that it's always null if there's no error
+        if (isError) this.set('target.status.errorMessage', errorMessage);
+        else this.set('target.status.errorMessage', null);
+      }
+
+      /** Initializes the object bound to the target property. Adds callbacks and sets initial property values. */
+      _setupTargetObject() {
         // Add to the existing target object instead of overwriting it, in case the parent element has given it extra properties
-        this.target.items = [];
-        this.target.nextPage = undefined;
-        this.target.hasNextPage = undefined;
-        this.target.status = {
-          text: 'uninitialized',
-          isError: false,
-          isInitialized: false,
-          isLoading: false,
-          isReady: false,
-          errorMessage: null
-        }
+        this.set('target.items', []);
+        this.set('target.nextPage', undefined);
+        this.set('target.hasNextPage', undefined);
+        this.set('target.status', {});
+        this.set('target.status.text', 'uninitialized');
+        this.set('target.status.isError', false);
+        this.set('target.status.isInitialized', false);
+        this.set('target.status.isLoading', false);
+        this.set('target.status.isReady', false);
+        this.set('target.status.errorMessage', null);
+
+        // No need to notify for these ones
         this.target.listActions = {
           getNextPage: () => this.getNextPage(),
           reload: () => this.reload()
         }
-        this.target.selectedItemActions = {}
+        this.target.selectionActions = {}
       }
 
       // #=== LIFECYCLE EVENTS ===#
@@ -134,7 +191,7 @@ Use this component to bind a local component property with a list endpoint in th
         this.app.$.backend.addEventListener('initialized-changed', e => this._appBackendInitializedChanged(e));
         
         // Setup the target object
-        this.setupTargetObject();
+        this._setupTargetObject();
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
@@ -155,37 +212,14 @@ Use this component to bind a local component property with a list endpoint in th
       }
 
       _backendClientInitializedChanged(newValue, oldValue) {
-        if (!this.manualLoad && newValue && !oldValue && (this.parentViewStatus == 'active'))
-          this.reload();
-      }
-
-      // #=== PROPERTY COMPUTER METHODS ===#
-
-      // ...
-
-      // #=== PRIVATE HELPER & UTILITY METHODS ===#
-
-      /** 
-       * Executes the passed action on the client then updates the target list along with status and next page (or error if relevant).
-       */
-      _executeListAction(action, parameters) {
-        var operationId = action + this.type.charAt(0).toUpperCase() + this.type.slice(1);
-        var self = this;
-        
-        this.app.$.backend.client[this.type][operationId](parameters)
-          .then(function(response) {
-            /* LEFT OFF HERE... I need to think this through more. How generic do I want to make this? 
-              If it's going to be fairly generic then I should probably just return the promise so the consuming function can deal with it
-              But then I feel like it should probably live in the client component itself.
-              The current use pattern is readonly with no filtering... augmenting the items array.
-              But also think through the future use patterns:
-              - Readonly with filter parameters which can change
-              - Other actions that actually return some sort of value and require the consuming page to do something upon success
-            */
-          }).catch(function(errorMessage) {
-            console.log('Error operationId');
-            console.log(errorMessage);
-          });
+        if (newValue && !oldValue) {
+          // First we need to create the action callbacks
+          this._set_clientActionCallbacks(this.app.$.backend.buildActionCallbacks(this.type));
+          
+          // Now trigger a reload if needed
+          if (!this.manualLoad && (this.parentViewStatus == 'active'))
+            this.reload();
+        }
       }
 
     }

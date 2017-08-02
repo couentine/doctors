@@ -12,19 +12,24 @@
   "host": "www.badgelist.com",
   "tags": [
     {
+      "name": "paginatedListGetter",
+      "description": "Endpoints which accept page parameter and respond with an items array and nextPage field."
+    },
+    {
       "name": "myGroups",
-      "description": "Badge List groups which the current user is a member of"
+      "description": "List of current user's groups."
     },
     {
       "name": "myBadges",
-      "description": "Badge List badges which the current user is working on"
+      "description": "List of current user's badges in progress."
     }
   ],
   "paths": {
     "/groups/my": {
       "get": {
         "tags": [
-          "myGroups"
+          "myGroups",
+          "paginatedListGetter"
         ],
         "summary": "Gets all groups for the current user",
         "operationId": "getMyGroups",
@@ -70,7 +75,8 @@
     "/badges/my": {
       "get": {
         "tags": [
-          "myBadges"
+          "myBadges",
+          "paginatedListGetter"
         ],
         "summary": "Gets all badges for the current user",
         "operationId": "getMyBadges",
