@@ -6,12 +6,14 @@
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="../bl-badge/bl-badge.html">
 <link rel="import" href="bl-header-panel.html">
 <link rel="import" href="bl-header-nav-left.html">
 <link rel="import" href="bl-header-nav-right.html">
 <link rel="import" href="bl-view-mixin.html">
 <link rel="import" href="../bl-backend/bl-backend-list.html">
 <link rel="import" href="../bl-text/bl-label.html">
+<link rel="import" href="../bl-text/bl-subheader.html">
 <link rel="import" href="../bl-user/bl-user-badge-count.html">
 
 <!--
@@ -69,87 +71,94 @@ The home page for logged in users.
 
       /* === PAGE HEADER STYLES === */
 
-      #pageHeader {
-        line-height: 1.3em;
-        padding-top: 1em;
-        background-color: var(--bl-grey-200);
-        border-top: 1px solid var(--bl-grey-400);
-        border-bottom: 1px solid var(--bl-grey-400);
-        color: var(--bl-grey-700);
-        
-        display: flex;
-        justify-content: center;
-        padding: 1em;
-      }
-        #imagePanel { 
-          display: inline-block;
-          vertical-align: top;
-          margin: 0 1em 0 0;
-          position: relative;
-          width: 70px; height: 70px;
-          flex: none;
-        }
-        @media (min-width: 480px) { #imagePanel { width: 120px; height: 120px; } }
-        @media (min-width: 840px) { #imagePanel { width: 150px; height: 150px; } }
-          #imagePanel img { 
-            display: block;
-            border-radius: 500px; 
-            border: 2px solid rgb(250,250,250);
-            width: 66px;
-          }
-          @media (min-width: 480px) { #imagePanel img { width: 116px; } }
-          @media (min-width: 840px) { #imagePanel img { width: 146px; } }
-
-          #imagePanel a, #imagePanel a:visited {
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            color: white;
-            opacity: 0;
-            text-align: center;
-            text-decoration: none;
-            font-size: 3em;
-            padding-top: 0.3em;
-            border-radius: 500px;
-            filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2));
-            -webkit-filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2)); 
-            transition: opacity 0.3s;
-          }
-            #imagePanel a:hover, #imagePanel a:hover:focus {
-              opacity: 0.65;
-            }
-            @media (min-width: 480px) { #imagePanel a { font-size: 4.5em; } }
-            @media (min-width: 840px) { #imagePanel a { font-size: 5rem; } }
-
-        #textPanel { 
-          display: inline-block;
-          vertical-align: top;
-          margin-right: 1em;
-          flex: 1 1 auto;
-          max-width: 27em;
-        }
-          #textPanel h1 {
-            font-size: 2em;
-            line-height: 1.3em;
-            margin: 0;
-          }
-          #textPanel .subtitle { 
-            font-size: 1.8em;
-            line-height: 1.3em;
-            margin: 0;
-          }
-          #textPanel a.button { 
-            margin-top: 0.5em;
-          }
-          #textPanel bl-label { 
-            font-size: 1em;
-            margin: 0.5em 0; 
-          }
-        #badgeCountPanel { 
+        #pageHeader {
+          line-height: 1.3em;
+          padding-top: 1em;
+          background-color: var(--bl-grey-200);
+          border-top: 1px solid var(--bl-grey-400);
+          border-bottom: 1px solid var(--bl-grey-400);
+          color: var(--bl-grey-700);
+          
           display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          flex: 0 0 auto;
+          justify-content: center;
+          padding: 1em;
         }
+          #imagePanel { 
+            display: inline-block;
+            vertical-align: top;
+            margin: 0 1em 0 0;
+            position: relative;
+            width: 70px; height: 70px;
+            flex: none;
+          }
+          @media (min-width: 480px) { #imagePanel { width: 120px; height: 120px; } }
+          @media (min-width: 840px) { #imagePanel { width: 150px; height: 150px; } }
+            #imagePanel img { 
+              display: block;
+              border-radius: 500px; 
+              border: 2px solid rgb(250,250,250);
+              width: 66px;
+            }
+            @media (min-width: 480px) { #imagePanel img { width: 116px; } }
+            @media (min-width: 840px) { #imagePanel img { width: 146px; } }
+
+            #imagePanel a, #imagePanel a:visited {
+              position: absolute;
+              top: 0; right: 0; bottom: 0; left: 0;
+              color: white;
+              opacity: 0;
+              text-align: center;
+              text-decoration: none;
+              font-size: 3em;
+              padding-top: 0.3em;
+              border-radius: 500px;
+              filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2));
+              -webkit-filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2)); 
+              transition: opacity 0.3s;
+            }
+              #imagePanel a:hover, #imagePanel a:hover:focus {
+                opacity: 0.65;
+              }
+              @media (min-width: 480px) { #imagePanel a { font-size: 4.5em; } }
+              @media (min-width: 840px) { #imagePanel a { font-size: 5rem; } }
+
+          #textPanel { 
+            display: inline-block;
+            vertical-align: top;
+            margin-right: 1em;
+            flex: 1 1 auto;
+            max-width: 27em;
+          }
+            #textPanel h1 {
+              font-size: 2em;
+              line-height: 1.3em;
+              margin: 0;
+            }
+            #textPanel .subtitle { 
+              font-size: 1.8em;
+              line-height: 1.3em;
+              margin: 0;
+            }
+            #textPanel a.button { 
+              margin-top: 0.5em;
+            }
+            #textPanel bl-label { 
+              font-size: 1em;
+              margin: 0.5em 0; 
+            }
+          #badgeCountPanel { 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            flex: 0 0 auto;
+          }
+
+        /* === BADGE PANEL === */
+
+          #badgePanel {
+            display: flex;
+            flex-wrap: wrap;
+          }
 
 
     </style>
@@ -162,33 +171,17 @@ The home page for logged in users.
     <!-- #=== HEADER PANEL ===# -->
 
     <bl-header-panel id="headerPanel" expanded-height="9" condensed-height="6">
-      <div id="expandedBackground" slot="expandedBackground">
-        &nbsp;
-      </div>
-      <div id="condensedBackground" slot="condensedBackground">
-        &nbsp;
-      </div>
+      <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
+      <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
 
       <ul id="headerBottomLinks" slot="headerBottom">
-        <li>
-          <a href="/community">
-            <i class="icon-group-circle"></i> Community
-          </a>
-        </li>
-        <li>
-          <a href="/help/docs">
-            <i class="icon-question-circle"></i> Help Docs
-          </a>
-        </li>
-        <li>
-          <a href="/w">
-            <i class="icon-earth"></i> Website
-          </a>
-        </li>
+        <li><a href="/community"><i class="icon-group-circle"></i> Community</a></li>
+        <li><a href="/help/docs"><i class="icon-question-circle"></i> Help Docs</a></li>
+        <li><a href="/w"><i class="icon-earth"></i> Website</a></li>
       </ul>
 
       <bl-header-nav-left slot="leftNav">
-        
+        <img src$="[[rootPath]]/images/badge-list-shield-square.png">
       </bl-header-nav-left>
 
       <div id="content" slot="content">
@@ -196,7 +189,6 @@ The home page for logged in users.
         <!-- #=== PAGE HEADER ===# -->
 
         <div id="pageHeader">
-
           <div id="imagePanel">
             <img src$="[[currentUser.avatar_image_medium_url]]">
             <a href$="/u/[[currentUser.username_with_caps]]#upload-image">
@@ -229,6 +221,31 @@ The home page for logged in users.
             <bl-user-badge-count id="badgeCount" user="[[currentUser]]"></bl-user-badge-count>
           </div>
         </div>
+
+        <!-- #=== BADGES ===# -->
+
+        <bl-subheader>
+          <span slot="title">Badges in progress</span>
+        </bl-subheader>
+
+        <div id="badgePanel" class="page-content-spacing">
+          <template is="dom-repeat" items="[[badges.items]]" id="badgeRepeat">
+            <bl-badge badge="[[item]]"></bl-badge>
+          </template>
+        </div>
+
+        <!-- #=== GROUPs ===# -->
+
+        <bl-subheader>
+          <span slot="title">Your groups</span>
+          <div slot="buttons">
+            <a href="/groups/new" class="button">
+              <paper-button class="light-blue">
+                <i class="icon-plus"></i> New Group
+              </paper-button>
+            </a>
+          </div>
+        </bl-subheader>
 
       </div>
     </bl-header-panel>

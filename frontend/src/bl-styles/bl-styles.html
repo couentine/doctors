@@ -6,6 +6,7 @@ This import contains all of the Badge List styles and needed shims.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/shadycss/apply-shim.html">
 
+<link rel="import" href="layout.html">
 <link rel="import" href="typography.html">
 <link rel="import" href="color.html">
 <link rel="import" href="shadow.html">
@@ -13,6 +14,19 @@ This import contains all of the Badge List styles and needed shims.
 <dom-module id="bl-style-classes">
   <template>
     <style>
+
+      /* === BUTTONS & LINKS === */
+
+        .page-content-spacing {
+          padding: 1em;
+        }
+        
+        @media (min-width: 840px) { 
+          .page-content-spacing { margin: 0 2em; }
+        }
+        @media (min-width: 1200px) { 
+          .page-content-spacing { margin: 0 4em; }
+        }
 
       /* === BUTTONS & LINKS === */
 
