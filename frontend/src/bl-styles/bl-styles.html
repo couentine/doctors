@@ -14,6 +14,108 @@ This import contains all of the Badge List styles and needed shims.
   <template>
     <style>
 
+      /* === BUTTONS & LINKS === */
+
+        paper-button {
+          text-transform: none;
+          padding: 0.7em 0.9em;
+          border-radius: 7px;
+
+          background: radial-gradient(circle at 60% 40%, var(--bl-grey-50), var(--bl-grey-200));
+          border: 1px solid white;
+          color: white;
+        }
+        paper-button:not([class]), paper-button[class=""] {
+          color: var(--bl-grey-800);
+        }
+        paper-button.red {
+          background: radial-gradient(circle at 60% 40%, var(--bl-red-500), var(--bl-red-600));
+          border: 1px solid var(--bl-red-300);
+        }
+        paper-button.pink {
+          background: radial-gradient(circle at 60% 40%, var(--bl-pink-500), var(--bl-pink-600));
+          border: 1px solid var(--bl-pink-300);
+        }
+        paper-button.purple {
+          background: radial-gradient(circle at 60% 40%, var(--bl-purple-500), var(--bl-purple-600));
+          border: 1px solid var(--bl-purple-300);
+        }
+        paper-button.deep-purple {
+          background: radial-gradient(circle at 60% 40%, var(--bl-deep-purple-500), var(--bl-deep-purple-600));
+          border: 1px solid var(--bl-deep-purple-300);
+        }
+        paper-button.indigo {
+          background: radial-gradient(circle at 60% 40%, var(--bl-indigo-500), var(--bl-indigo-600));
+          border: 1px solid var(--bl-indigo-300);
+        }
+        paper-button.blue {
+          background: radial-gradient(circle at 60% 40%, var(--bl-blue-500), var(--bl-blue-600));
+          border: 1px solid var(--bl-blue-300);
+        }
+        paper-button.light-blue {
+          background: radial-gradient(circle at 60% 40%, var(--bl-light-blue-500), var(--bl-light-blue-600));
+          border: 1px solid var(--bl-light-blue-300);
+        }
+        paper-button.cyan {
+          background: radial-gradient(circle at 60% 40%, var(--bl-cyan-500), var(--bl-cyan-600));
+          border: 1px solid var(--bl-cyan-300);
+        }
+        paper-button.teal {
+          background: radial-gradient(circle at 60% 40%, var(--bl-teal-500), var(--bl-teal-600));
+          border: 1px solid var(--bl-teal-300);
+        }
+        paper-button.green {
+          background: radial-gradient(circle at 60% 40%, var(--bl-green-500), var(--bl-green-600));
+          border: 1px solid var(--bl-green-300);
+        }
+        paper-button.light-green {
+          background: radial-gradient(circle at 60% 40%, var(--bl-light-green-500), var(--bl-light-green-600));
+          border: 1px solid var(--bl-light-green-300);
+        }
+        paper-button.lime {
+          background: radial-gradient(circle at 60% 40%, var(--bl-lime-500), var(--bl-lime-600));
+          border: 1px solid var(--bl-lime-300);
+        }
+        paper-button.yellow {
+          background: radial-gradient(circle at 60% 40%, var(--bl-yellow-500), var(--bl-yellow-600));
+          border: 1px solid var(--bl-yellow-300);
+        }
+        paper-button.amber {
+          background: radial-gradient(circle at 60% 40%, var(--bl-amber-500), var(--bl-amber-600));
+          border: 1px solid var(--bl-amber-300);
+        }
+        paper-button.orange {
+          background: radial-gradient(circle at 60% 40%, var(--bl-orange-500), var(--bl-orange-600));
+          border: 1px solid var(--bl-orange-300);
+        }
+        paper-button.deep-orange {
+          background: radial-gradient(circle at 60% 40%, var(--bl-deep-orange-500), var(--bl-deep-orange-600));
+          border: 1px solid var(--bl-deep-orange-300);
+        }
+        paper-button.brown {
+          background: radial-gradient(circle at 60% 40%, var(--bl-brown-500), var(--bl-brown-600));
+          border: 1px solid var(--bl-brown-300);
+        }
+        paper-button.grey {
+          background: radial-gradient(circle at 60% 40%, var(--bl-grey-500), var(--bl-grey-600));
+          border: 1px solid var(--bl-grey-300);
+        }
+        paper-button.blue-grey {
+          background: radial-gradient(circle at 60% 40%, var(--bl-blue-grey-500), var(--bl-blue-grey-600));
+          border: 1px solid var(--bl-blue-grey-300);
+        }
+
+        a.button {
+          display: inline-block;
+        }
+        a.button, a.button:visited {
+          color: inherit;
+        }
+        a.button paper-button { 
+          display: inline-block; 
+          margin: 0;
+        }
+
       /* === ICON CLASSES === */
 
       /* 

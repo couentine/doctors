@@ -1,0 +1,57 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Label #
+
+This is a simple CSS-only component which presents a neatly formatted label inline.
+
+Usage: `<bl-label class="orange">Text goes here</bl-label>`
+
+It supports all of the standard color codes. If no color code then it will be light grey background with dark grey text.
+-->
+<dom-module id="bl-label">
+  <template>
+
+    <style include="bl-style-classes">
+        
+      :host {
+        display: inline-block;
+        
+        font-size: 0.8em;
+        line-height: 1.5em;
+        padding: 0.3em 0.5em;
+        border-radius: 2px;
+        
+        background: var(--bl-grey-300);
+        color: var(--bl-grey-700);
+      }
+
+      :host(.orange) {
+        background: var(--bl-orange-400);
+        color: white;
+      }
+
+    </style>
+
+    <slot></slot>
+
+  </template>
+
+  <script>
+    class BlLabel extends BlAppComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-label'; }
+
+      static get properties() {
+        return {}
+      }
+
+    }
+
+    window.customElements.define(BlLabel.is, BlLabel);
+  </script>
+</dom-module>

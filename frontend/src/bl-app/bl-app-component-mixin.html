@@ -11,7 +11,13 @@ It also provides methods for adding toast and opening dialogs.
 
       static get properties() {
         return {
-          app: Object
+          
+          /** Links to the `<bl-app>` component. */
+          app: Object,
+          
+          /** The details of the logged in user provided from the backend on initial page load. Null if logged out. */
+          currentUser: Object
+
         };
       }
 
@@ -123,8 +129,17 @@ It also provides methods for adding toast and opening dialogs.
 
       connectedCallback() {
         if (super.connectedCallback) super.connectedCallback();
-        
+
         this.app = document.querySelector('bl-app');
+
+        // Add a listener for when the current user is set
+        this.app.addEventListener('current-user-changed', e => this._appCurrentUserChanged(e));
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _appCurrentUserChanged(e) {
+        this.currentUser = this.app.currentUser;
       }
 
     }

@@ -18,7 +18,8 @@ class User
 
   JSON_TEMPLATES = {
     current_user: [:id, :name, :username, :username_with_caps, :admin, :avatar_image_url, 
-      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive, :full_path],
+      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive, :full_path,
+      :email_verification_needed, :learner_badge_count, :expert_badge_count],
     group_list_item: [:id, :name, :username, :username_with_caps, :group_validation_request_counts,
       :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :full_path] 
   }
@@ -191,6 +192,18 @@ class User
     gravatar_id = Digest::MD5::hexdigest(email_temp)
     size_map = { nil => 500, medium: 200, small: 50 }
     "https://secure.gravatar.com/avatar/#{gravatar_id}?s=#{size_map[version]}&d=mm"
+  end
+
+  def email_verification_needed
+    !self.confirmed? || self.pending_reconfirmation?
+  end
+
+  def learner_badge_count
+    (learner_badge_ids || []).count
+  end
+
+  def expert_badge_count
+    (expert_badge_ids || []).count
   end
 
   # JSON Template String Shortcuts

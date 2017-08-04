@@ -116,11 +116,22 @@ The mixin also provides various actions for interacting with the container. (Ref
 
       static get properties() {
         return {
-          manifest: { type: Object, observer: '_manifestChanged'},
-          currentUser: Object,
+          
+          /** The manifest is required from the backend. It contains details of the logged in user and a CSRF token to use for forms. */
+          manifest: {
+            type: Object,
+            observer: '_manifestChanged'
+          },
+
+          /** Automatically set to the current user from the manifest. */
+          currentUser: {
+            type: Object,
+            notify: true
+          },
 
           dialogConfirmFunction: Object,
           dialogDismissFunction: Object
+
         };
       }
 
@@ -199,7 +210,7 @@ The mixin also provides various actions for interacting with the container. (Ref
       // #=== LISTENER & OBSERVER METHODS ===#
 
       _manifestChanged(newValue, oldValue) {
-        this.currentUser = newValue.current_user;
+        if (newValue) this.currentUser = newValue.current_user;
       }
     }
 
