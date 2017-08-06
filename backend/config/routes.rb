@@ -7,6 +7,9 @@ BadgeList::Application.routes.draw do
 
   devise_for :users, :controllers => { registrations: 'registrations', sessions: 'sessions',
     omniauth_callbacks: 'users/omniauth_callbacks' }
+  devise_scope :user do
+    get 'users/logout', to: 'devise/sessions#destroy' # custom path for polymer pages (they can't fake the delete method as easily)
+  end
 
   root :to => 'home#root'
   resources :users, :only => [:show], path: 'u'
