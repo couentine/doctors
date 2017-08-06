@@ -24,7 +24,7 @@ class GroupsController < ApplicationController
 
   # === CONSTANTS === #
 
-  PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, 
+  PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, :color,
     :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, :feature_grant_reporting,
     :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
@@ -39,6 +39,27 @@ class GroupsController < ApplicationController
       + 'Everything is public.<br>Free forever.</span>'.html_safe, 'free'],
     ['<b><i class="fa fa-diamond"></i> Paid Group</b><span>Privacy controls '.html_safe \
       + 'and advanced features.<br>Plans start at $5 per month.</span>'.html_safe, 'paid']
+  ]
+  GROUP_COLOR_OPTIONS = [
+    ['Red', 'red'],
+    ['Pink', 'pink'],
+    ['Purple', 'purple'],
+    ['Deep Purple', 'deep-purple'],
+    ['Indigo', 'indigo'],
+    ['Blue', 'blue'],
+    ['Light Blue', 'light-blue'],
+    ['Cyan', 'cyan'],
+    ['Teal', 'teal'],
+    ['Green', 'green'],
+    ['Light Green', 'light-green'],
+    ['Lime', 'lime'],
+    ['Yellow', 'yellow'],
+    ['Amber', 'amber'],
+    ['Orange', 'orange'],
+    ['Deep Orange', 'deep-orange'],
+    ['Brown', 'brown'],
+    ['Grey', 'grey'],
+    ['Blue Grey', 'blue-grey']
   ]
   GROUP_JOINABILITY_OPTIONS = [
     ['<i class="fa fa-globe"></i> Open to Public'.html_safe, 'open'],

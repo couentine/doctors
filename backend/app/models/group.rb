@@ -12,6 +12,9 @@ class Group
   MAX_WELCOME_MESSAGE_LENGTH = 1000
   MAX_LOCATION_LENGTH = 100
   TYPE_VALUES = ['free', 'paid']
+  COLOR_VALUES = ['red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue', 'light-blue', 'cyan', 
+    'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 
+    'grey', 'blue-grey']
   JOINABILITY_VALUES = ['open', 'closed']
   VISIBILITY_VALUES = ['public', 'private']
   COPYABILITY_VALUES = ['public', 'members', 'admins']
@@ -32,9 +35,8 @@ class Group
     simple_list_item_with_tags: [:id, :name, :url, :url_with_caps, :tags_cache],
     link_info: [:id, :name, :full_url, :full_path, :avatar_image_url, 
       :avatar_image_medium_url, :avatar_image_small_url],
-    api_v1: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
-      :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,
-      :badge_count, :full_url, :full_path, :current_user_permissions]
+    api_v1: [:id, :name, :url, :url_with_caps, :location, :type, :color, :member_count, :admin_count, :total_user_count, :avatar_image_url,
+      :avatar_image_medium_url, :avatar_image_small_url, :badge_count, :full_url, :full_path, :current_user_permissions,]
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
@@ -75,6 +77,7 @@ class Group
   field :location,                        type: String
   field :website,                         type: String
   field :type,                            type: String, default: 'free'
+  field :color,                           type: String, default: 'light-blue'
   field :joinability,                     type: String, default: 'open'
   field :customer_code,                   type: String
   field :validation_threshold,            type: Integer, default: 1 # RETIRED FIELD
@@ -157,6 +160,7 @@ class Group
   validates :website, url: true
   validates :image_url, url: true
   validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid Group Type" }
+  validates :color, inclusion: { in: COLOR_VALUES, message: "%{value} is not a valid color value" }
   validates :joinability, inclusion: { in: JOINABILITY_VALUES, 
     message: "%{value} is not a valid joinability type" }
   validates :member_visibility, inclusion: { in: VISIBILITY_VALUES, 

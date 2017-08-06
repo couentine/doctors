@@ -424,6 +424,10 @@
 
     </div>
 
+    <!-- === GROUP COLOR === -->
+
+    <%= f.input :color, label: 'Group Color', as: :select, include_blank: false, collection: GroupsController::GROUP_COLOR_OPTIONS %>
+
     <!-- === GROUP IMAGE === -->
 
     <%= f.input :avatar_key, as: :hidden %>

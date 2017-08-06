@@ -26,7 +26,7 @@ This displays a standard group card.
           max-width: 20em;
         }
 
-      /* === COMPONENT STYLES === */
+      /* === GROUP CARD STYLES === */
 
         paper-ripple { z-index: 50; }
 
@@ -79,12 +79,64 @@ This displays a standard group card.
           padding: 0.25em;
         }
 
+      /* === GROUP COLORS === */
+
+        #bannerWrapper.red { border-bottom-color: var(--bl-red-800); }
+        #bannerWrapper.pink { border-bottom-color: var(--bl-pink-800); }
+        #bannerWrapper.purple { border-bottom-color: var(--bl-purple-800); }
+        #bannerWrapper.deep-purple { border-bottom-color: var(--bl-deep-purple-800); }
+        #bannerWrapper.indigo { border-bottom-color: var(--bl-indigo-800); }
+        #bannerWrapper.blue { border-bottom-color: var(--bl-blue-800); }
+        #bannerWrapper.light-blue { border-bottom-color: var(--bl-light-blue-800); }
+        #bannerWrapper.cyan { border-bottom-color: var(--bl-cyan-800); }
+        #bannerWrapper.teal { border-bottom-color: var(--bl-teal-800); }
+        #bannerWrapper.green { border-bottom-color: var(--bl-green-800); }
+        #bannerWrapper.light-green { border-bottom-color: var(--bl-light-green-800); }
+        #bannerWrapper.lime { border-bottom-color: var(--bl-lime-800); }
+        #bannerWrapper.yellow { border-bottom-color: var(--bl-yellow-800); }
+        #bannerWrapper.amber { border-bottom-color: var(--bl-amber-800); }
+        #bannerWrapper.orange { border-bottom-color: var(--bl-orange-800); }
+        #bannerWrapper.deep-orange { border-bottom-color: var(--bl-deep-orange-800); }
+        #bannerWrapper.brown { border-bottom-color: var(--bl-brown-800); }
+        #bannerWrapper.grey { border-bottom-color: var(--bl-grey-800); }
+        #bannerWrapper.blue-grey { border-bottom-color: var(--bl-blue-grey-800); }
+
+        #banner.red { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-red-300), var(--bl-red-600)); }
+        #banner.pink { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-pink-300), var(--bl-pink-600)); }
+        #banner.purple { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-purple-300), var(--bl-purple-600)); }
+        #banner.deep-purple { 
+          background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-deep-purple-300), var(--bl-deep-purple-600)); 
+        }
+        #banner.indigo { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-indigo-300), var(--bl-indigo-600)); }
+        #banner.blue { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-blue-300), var(--bl-blue-600)); }
+        #banner.light-blue { 
+          background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-light-blue-300), var(--bl-light-blue-600)); 
+        }
+        #banner.cyan { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-cyan-300), var(--bl-cyan-600)); }
+        #banner.teal { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-teal-300), var(--bl-teal-600)); }
+        #banner.green { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-green-300), var(--bl-green-600)); }
+        #banner.light-green { 
+          background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-light-green-300), var(--bl-light-green-600));
+        }
+        #banner.lime { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-lime-300), var(--bl-lime-600)); }
+        #banner.yellow { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-yellow-300), var(--bl-yellow-600)); }
+        #banner.amber { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-amber-300), var(--bl-amber-600)); }
+        #banner.orange { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-orange-300), var(--bl-orange-600)); }
+        #banner.deep-orange {
+          background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-deep-orange-300), var(--bl-deep-orange-600));
+        }
+        #banner.brown { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-brown-300), var(--bl-brown-600)); }
+        #banner.grey { background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-grey-300), var(--bl-grey-600)); }
+        #banner.blue-grey {
+          background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-blue-grey-300), var(--bl-blue-grey-600));
+        }
+
     </style>
 
     <paper-ripple></paper-ripple>
 
-    <div id="bannerWrapper">
-      <div id="banner">
+    <div id="bannerWrapper" class$="[[group.color]]">
+      <div id="banner" class$="[[group.color]]">
         <!-- #=== BACKGROUND IMAGES DEPENDENT ON BADGE COUNT ===# -->
         <template is="dom-if" if="[[isSmallGroup]]">
           <svg xmlns="http://www.w3.org/2000/svg" class="background" preserveAspectRatio="none" viewBox="0 0 1068.3 554.3">
