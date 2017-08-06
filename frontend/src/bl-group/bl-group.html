@@ -1,0 +1,199 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Group Card #
+
+This displays a standard group card.
+-->
+<dom-module id="bl-group">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          max-width: 20em;
+        }
+
+      /* === COMPONENT STYLES === */
+
+        paper-ripple { z-index: 50; }
+
+        #bannerWrapper {
+          display: block;
+          position: relative;
+          width: 100%;
+          padding-top: 50%; /* enforces a 2:1 aspect ratio */
+
+          border-bottom: 5px solid var(--bl-light-blue-800);
+        }
+          #banner {
+            position: absolute; /* enforces the aspect ratio according to the padding defined in the wrapper */
+            top: 0; right: 0; bottom: 0; left: 0;
+            overflow: hidden;
+            
+            background: radial-gradient(circle farthest-side at 50% 100%, var(--bl-light-blue-300), var(--bl-light-blue-600));
+            border-radius: 100em 100em 0 0;
+          }
+            .background {
+              z-index: 0;
+              opacity: 0.6;
+              position: absolute;
+              bottom: 0; left: 0;
+              height: 90%;
+              width: 100%;
+            }
+            #logo {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              
+              position: absolute;
+              z-index: 1;
+              top: 0; right: 0; bottom: 0; left: 0;
+            }
+              #logo img {
+                margin: 9% auto 0 auto;
+                height: 50%;
+                filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.2));
+                -webkit-filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.2)); 
+              }
+        
+        #text {
+          font-size: 1.1em;
+          line-height: 1.3em;
+          color: var(--bl-grey-700);
+          font-weight: 600;
+          text-align: center;
+          padding: 0.25em;
+        }
+
+    </style>
+
+    <paper-ripple></paper-ripple>
+
+    <div id="bannerWrapper">
+      <div id="banner">
+        <!-- #=== BACKGROUND IMAGES DEPENDENT ON BADGE COUNT ===# -->
+        <template is="dom-if" if="[[isSmallGroup]]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="background" preserveAspectRatio="none" viewBox="0 0 1068.3 554.3">
+            <defs>
+              <style>
+                .cls-1,.cls-2,.cls-3{fill:#fff;}.cls-1{opacity:0.75;}.cls-2{opacity:0.9;}.cls-3{opacity:0.97;}
+              </style>
+            </defs>
+            <title>
+              Small Group
+            </title>
+            <g data-name="Paths">
+              <path class="cls-1" d="M725.7 213.3c65.4 0 139.6 341 264.7 341H450.5C575.6 554.3 657.4 213.3 725.7 213.3Z"/>
+              <path class="cls-2" d="M524.7 0C411.3 0 324.4 554.3 151.3 554.3H898C725 554.3 640.3 0 524.7 0Z"/>
+              <path class="cls-3" d="M319.7 173.7C222.9 193.9 190 554.3 77.9 554.3H561.5C449.4 554.3 393.9 158.2 319.7 173.7Z"/>
+            </g>
+          </svg>
+        </template>
+        <template is="dom-if" if="[[isMediumGroup]]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="background" preserveAspectRatio="none" viewBox="0 0 1068.3 520.8">
+            <defs>
+              <style>
+                .cls-1,.cls-2,.cls-3{fill:#fff;}.cls-1{opacity:0.75;}.cls-2{opacity:0.97;}.cls-3{opacity:0.9;}
+              </style>
+            </defs>
+            <title>
+              Medium Group
+            </title>
+            <g data-name="Paths">
+              <path class="cls-1" d="M694.4 70.8C679.2 27.9 661.6 0 640 0s-39.2 27.9-54.4 70.8C535.1 213.1 511.9 520.8 465 520.8H815.1C768.2 520.8 744.9 213.1 694.4 70.8Z"/>
+              <path class="cls-2" d="M553.7 520.8h489.7c-34.6 0-70.6-115.8-99.2-221.4-24-88.5-41.4-169.9-85.6-169.9-31.1 0-49.8 53.2-61.2 98.4C768.8 341.2 742.4 521.9 553.7 520.8Z"/>
+              <path class="cls-3" d="M659.9 252.3c-9.1 0-17 4.4-24.1 11.6-12.4 12.8-22.2 115-31 138.3-6.8 18.1-40.1 17.4-45.6-1C536 323.6 514 238.3 483.4 165.5c-20-47.8-43.7-80.7-73.8-80.7-32.5 0-57.5 38.4-78.5 92.4-18.2 46.7-33.3 105-47.7 160.3-4.6 17.7-36.1 20.1-44.9 3.4-15.9-30-34.9-51.6-59.8-51.7h-0.2c-81.7 0-100 231.9-153.6 231.9H765.3C728.5 520.8 715.9 252.3 659.9 252.3Z"/>
+            </g>
+          </svg>
+        </template>
+        <template is="dom-if" if="[[isLargeGroup]]">
+          <svg class="background" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1068.28 452.36">
+            <defs>
+              <style>
+                .cls-1,.cls-2{fill:#fff;}.cls-1{opacity:0.9;}.cls-2{opacity:0.75;}
+              </style>
+            </defs>
+            <title>Large Group</title>
+            <g data-name="Paths">
+              <path class="cls-1" d="M887.56,129.66c-32.84,0-52.93,87.72-76.17,184.12-3.59,14.89-21.67,16.38-27.09,2.22-15.21-39.73-31.17-129.25-53.1-129.25-27,0-45,106.65-63.67,157.79-4.77,13.06-20.9,13.59-26.28.84-13-30.84-26.7-56.33-45.45-56.33C578,289,564.7,312.14,552.24,341c-5.7,13.18-22.6,12-26.63-2C486.87,205,459.42,0,408.48,0,362.81,0,336,164.76,303,295.41c-5.39,21.34-31.74,22.11-38,1.09-22.85-76.39-44.68-152.19-77.74-152.19-66.65,0-87.65,308-163.4,308H1029.57C963.74,452.35,945.49,129.66,887.56,129.66Z"/>
+              <path class="cls-2" d="M822.22,223c-29.52,0-49.66,61.16-70,114.09-11.4,29.69-45.78,28.32-55.63-2.22C661.36,225.64,632.89,42,584.17,42c-61.1,0-90.36,251.45-141.07,355.92-11.42,23.53-38.7,24.5-51.1,1.75C355.24,332.25,330,224,282.35,224c-69.26,0-91.08,228.32-169.79,228.32H978.19C905.89,452.35,885.84,223,822.22,223Z"/>
+            </g>
+          </svg>
+        </template>
+
+        <div id="logo">
+          <img src$="[[group.avatar_image_medium_url]]">
+        </div>
+      </div>
+    </div>
+
+    <div id="text">
+      [[group.name]]
+    </div>
+
+  </template>
+
+  <script>
+    class BlGroup extends Polymer.Element {
+      
+      static get is() { return 'bl-group'; }
+
+      static get properties() {
+        return {
+          
+          group: Object,
+
+          /** A group is small if it has from 1 to 9 badges. */
+          isSmallGroup: {
+            type: Boolean,
+            computed: '_isSmallGroup(group.badge_count)'
+          },
+
+          /** A group is medium if it has from 10 to 49 badges. */
+          isMediumGroup: {
+            type: Boolean,
+            computed: '_isMediumGroup(group.badge_count)'
+          },
+
+          /** A group is large if it has from over 50 badges. */
+          isLargeGroup: {
+            type: Boolean,
+            computed: '_isLargeGroup(group.badge_count)'
+          }
+
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _isSmallGroup(badgeCount) {
+        return badgeCount && (badgeCount < 10);
+      }
+
+      _isMediumGroup(badgeCount) {
+        return badgeCount && (badgeCount >= 10) && (badgeCount < 50);
+      }
+
+      _isLargeGroup(badgeCount) {
+        return badgeCount && (badgeCount >= 50);
+      }
+
+    }
+
+    window.customElements.define(BlGroup.is, BlGroup);
+  </script>
+</dom-module>

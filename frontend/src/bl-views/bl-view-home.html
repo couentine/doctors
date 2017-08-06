@@ -5,18 +5,19 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
-<link rel="import" href="../bl-styles/bl-styles.html">
-<link rel="import" href="../bl-badge/bl-badge.html">
-<link rel="import" href="bl-header-panel.html">
-<link rel="import" href="bl-header-nav-left.html">
-<link rel="import" href="bl-header-nav-right.html">
-<link rel="import" href="bl-view-mixin.html">
-<link rel="import" href="../bl-backend/bl-backend-list.html">
 <link rel="import" href="../bl-backend/bl-backend-list-load-more.html">
 <link rel="import" href="../bl-backend/bl-backend-list-placeholder.html">
+<link rel="import" href="../bl-backend/bl-backend-list.html">
+<link rel="import" href="../bl-badge/bl-badge.html">
+<link rel="import" href="../bl-group/bl-group.html">
+<link rel="import" href="../bl-styles/bl-styles.html">
 <link rel="import" href="../bl-text/bl-label.html">
 <link rel="import" href="../bl-text/bl-subheader.html">
 <link rel="import" href="../bl-user/bl-user-badge-count.html">
+<link rel="import" href="bl-header-nav-left.html">
+<link rel="import" href="bl-header-nav-right.html">
+<link rel="import" href="bl-header-panel.html">
+<link rel="import" href="bl-view-mixin.html">
 
 <!--
 # Badge List Home View #
@@ -169,6 +170,24 @@ The home page for logged in users.
               color: inherit;
             }
 
+        /* === GROUP PANEL === */
+
+          #groupPanel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+            #groupPanel a.item {
+              margin: 1em;
+              flex: 1 1 10em;
+            }
+            #groupPanel a.placeholder-link, #groupPanel a.placeholder-link:visited {
+              color: inherit;
+            }
+              #groupPanel bl-group {
+                margin: 0 auto;
+              }
+
 
     </style>
 
@@ -238,19 +257,19 @@ The home page for logged in users.
         </bl-subheader>
 
         <div id="badgePanel" class="page-content-spacing">
-          <template is="dom-repeat" items="[[badges.items]]" id="badgeRepeat">
-            <a href$="[[item.full_path]]" class="item">
-              <bl-badge badge="[[item]]"></bl-badge>
+          <template is="dom-repeat" items="[[badges.items]]" id="badgeRepeat" as="badge">
+            <a href$="[[badge.full_path]]" class="item">
+              <bl-badge badge="[[badge]]"></bl-badge>
             </a>
           </template>
-          <bl-backend-list-placeholder target-list="[[badges]]" icon-class="icon-shield" id="badgePlaceholder">
+          <bl-backend-list-placeholder target-list="[[badges]]" icon-class="icon-shield">
             <p><b>You aren't working on any badges.</b></p> 
             <p>
               Maybe check out the <a class="placeholder-link" href="/community">Badge List Community</a>?
             </p>
           </bl-backend-list-placeholder>
         </div>
-        <bl-backend-list-load-more target-list="[[badges]]" color="orange" id="loadBadges"></bl-backend-list-load-more>
+        <bl-backend-list-load-more target-list="[[badges]]" color="orange"></bl-backend-list-load-more>
 
         <!-- #=== GROUPs ===# -->
 
@@ -264,6 +283,21 @@ The home page for logged in users.
             </a>
           </div>
         </bl-subheader>
+
+        <div id="groupPanel" class="page-content-spacing">
+          <template is="dom-repeat" items="[[groups.items]]" id="groupRepeat" as="group">
+            <a href$="[[group.full_path]]" class="item">
+              <bl-group group="[[group]]"></bl-group>
+            </a>
+          </template>
+          <bl-backend-list-placeholder target-list="[[groups]]" icon-class="icon-shield">
+            <p><b>You aren't working on any groups.</b></p> 
+            <p>
+              Maybe check out the <a class="placeholder-link" href="/community">Badge List Community</a>?
+            </p>
+          </bl-backend-list-placeholder>
+        </div>
+        <bl-backend-list-load-more target-list="[[groups]]" color="light-blue"></bl-backend-list-load-more>
 
       </div>
     </bl-header-panel>
