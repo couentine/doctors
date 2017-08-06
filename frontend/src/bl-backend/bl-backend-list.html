@@ -130,12 +130,12 @@ Use this component to bind a local component property with a list endpoint in th
             for (var i = 0; i < response.items.length; i++)
               this.push('target.items', response.items[i]);
 
-          this.set('target.nextPage', response.nextPage);
-          this.set('target.hasNextPage', (response.nextPage != null) && !isNaN(response.nextPage));
+          this.set('target.nextPage', response.next_page);
+          this.set('target.hasNextPage', (response.next_page != null) && !isNaN(response.next_page));
           this._updateStatus('ready');
         }.bind(this)).catch(function(error) { 
-          this._updateStatus('error', (error.message) ? error.message : error);
-        });
+          this._updateStatus('error', (error.errObj && error.errObj.message) ? error.errObj.message : error);
+        }.bind(this));
       }
       
       // #=== PRIVATE ACTION METHODS ===#

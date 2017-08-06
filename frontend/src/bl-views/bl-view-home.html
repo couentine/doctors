@@ -12,6 +12,8 @@
 <link rel="import" href="bl-header-nav-right.html">
 <link rel="import" href="bl-view-mixin.html">
 <link rel="import" href="../bl-backend/bl-backend-list.html">
+<link rel="import" href="../bl-backend/bl-backend-list-load-more.html">
+<link rel="import" href="../bl-backend/bl-backend-list-placeholder.html">
 <link rel="import" href="../bl-text/bl-label.html">
 <link rel="import" href="../bl-text/bl-subheader.html">
 <link rel="import" href="../bl-user/bl-user-badge-count.html">
@@ -159,6 +161,13 @@ The home page for logged in users.
             display: flex;
             flex-wrap: wrap;
           }
+            #badgePanel a.item {
+              margin: 1em;
+              flex: 1 1 10em;
+            }
+            #badgePanel a.placeholder-link, #badgePanel a.placeholder-link:visited {
+              color: inherit;
+            }
 
 
     </style>
@@ -230,9 +239,18 @@ The home page for logged in users.
 
         <div id="badgePanel" class="page-content-spacing">
           <template is="dom-repeat" items="[[badges.items]]" id="badgeRepeat">
-            <bl-badge badge="[[item]]"></bl-badge>
+            <a href$="[[item.full_path]]" class="item">
+              <bl-badge badge="[[item]]"></bl-badge>
+            </a>
           </template>
+          <bl-backend-list-placeholder target-list="[[badges]]" icon-class="icon-shield" id="badgePlaceholder">
+            <p><b>You aren't working on any badges.</b></p> 
+            <p>
+              Maybe check out the <a class="placeholder-link" href="/community">Badge List Community</a>?
+            </p>
+          </bl-backend-list-placeholder>
         </div>
+        <bl-backend-list-load-more target-list="[[badges]]" color="orange" id="loadBadges"></bl-backend-list-load-more>
 
         <!-- #=== GROUPs ===# -->
 
