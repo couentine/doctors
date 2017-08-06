@@ -20,15 +20,17 @@ This displays a standard group card.
       /* === LAYOUT & BASE STYLES === */
         
         :host {
-          display: flex;
-          flex-direction: column;
-          position: relative;
+          display: block;
           max-width: 20em;
+          position: relative; /* for paper-ripple */
         }
 
       /* === GROUP CARD STYLES === */
 
-        paper-ripple { z-index: 50; }
+        paper-ripple {
+          z-index: 50;
+          color: white;
+        }
 
         #bannerWrapper {
           display: block;

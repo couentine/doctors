@@ -10,6 +10,15 @@
 Binds to a local target property that is managed by a backend-list.
 If the list is initialized and it is empty this will display a placeholder panel.
 If the list is in an error state, the placeholder panel will be colored red and will display the error message.
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--placeholder-background` | Background color of the placeholder panel | `--bl-grey-50`
+`--placeholder-border` | Color of the placeholder border | `--bl-grey-100`
+`--placeholder-icon-color` | Color of the icon in the background of the panel | `--bl-grey-500`
+`--placeholder-text-color` | Color of the panel body text | `--bl-grey-700`
 -->
 <dom-module id="bl-backend-list-placeholder">
   <template>

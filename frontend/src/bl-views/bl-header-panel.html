@@ -63,10 +63,10 @@ It provides a sliding header panel and holds the page content.
               display: flex;
               flex-direction: row;
             }
-              ::slotted([slot=condensedBackground]), ::slotted([slot=expandedBackground]) {
+              #expandedBackgroundWrapper ::slotted(*), #condensedBackgroundWrapper ::slotted(*) {
                 flex: 1 1 auto;
               }
-            ::slotted([slot=headerBottom]) {
+            #headerInner ::slotted([slot=headerBottom]) {
               position: absolute;
               right: 0; bottom: 0; left: 0;
             }
