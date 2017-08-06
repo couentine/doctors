@@ -1,10 +1,28 @@
 @font-face {
+  /*
+
+    NOTE: The original version of the paths below was as follows:
+
+    ```
+    font-family: 'bl-icons';
+    src:  url('fonts/bl-icons.eot?llafn1');
+    src:  url('fonts/bl-icons.eot?llafn1#iefix') format('embedded-opentype'),
+      url('fonts/bl-icons.ttf?llafn1') format('truetype'),
+      url('fonts/bl-icons.woff?llafn1') format('woff'),
+      url('fonts/bl-icons.svg?llafn1#bl-icons') format('svg');
+    ```
+
+    First of all I am changing these to use the sprockets asset helpers.
+    Secondly, in order to serve these via the asset pipeline I am removing the query strings. The query strings seem to only be present for
+    caching and since rails will handle this for us they are unneeded.
+
+  */
   font-family: 'bl-icons';
-  src:  url('fonts/bl-icons.eot?llafn1');
-  src:  url('fonts/bl-icons.eot?llafn1#iefix') format('embedded-opentype'),
-    url('fonts/bl-icons.ttf?llafn1') format('truetype'),
-    url('fonts/bl-icons.woff?llafn1') format('woff'),
-    url('fonts/bl-icons.svg?llafn1#bl-icons') format('svg');
+  src:  asset-url('shared/bl-icons/fonts/bl-icons.eot');
+  src:  asset-url('shared/bl-icons/fonts/bl-icons.eot') format('embedded-opentype'),
+    asset-url('shared/bl-icons/fonts/bl-icons.ttf') format('truetype'),
+    asset-url('shared/bl-icons/fonts/bl-icons.woff') format('woff'),
+    asset-url('shared/bl-icons/fonts/bl-icons.svg') format('svg');
   font-weight: normal;
   font-style: normal;
 }
