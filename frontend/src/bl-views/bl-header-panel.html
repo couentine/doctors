@@ -144,48 +144,66 @@ It provides a sliding header panel and holds the page content.
             type: Number, 
             computed: '_headerHeight(condensedHeight, expandedHeight, condensedPercentage)',
             notify: true
+          },
+
+          /* Used internally to track the scroll position. */
+          _lastKnownScrollPosition: {
+            type: Number,
+            readOnly: true,
+            value: 0
+          },
+
+          /* Used internally to prevent unneccessary code execution while waiting for the scroll animation to paint. */
+          _animationTicking: {
+            type: Boolean,
+            readOnly: true,
+            value: false
           }
+
         };
       }
-
-      // #=== PUBLIC ACTION METHODS ===#
-
-      // ...
       
       // #=== PRIVATE ACTION METHODS ===#
 
-      // ...
+      _recalculateScrollProperties() {
+        var scrollTopEm = this._lastKnownScrollPosition / blCurrentFontSize(); // global method from bl-styles
+        var condensationDelta = this.expandedHeight - this.condensedHeight;
+        
+        if (scrollTopEm >= condensationDelta) {
+          if (this.condensedPercentage < 1.0) {
+            this.condensedPercentage = 1.0;
+            this.expandedPercentage = 0.0;
+            this.headerStatus = 'condensed';
+          }
+        } else {
+          this.condensedPercentage = scrollTopEm / condensationDelta;
+          this.expandedPercentage = 1.0 - this.condensedPercentage;
+
+          if (scrollTopEm == 0) this.headerStatus = 'partial'
+          else this.headerStatus = 'expanded';
+        }
+      }
 
       // #=== LIFECYCLE EVENTS ===#
 
       connectedCallback() {
         if (super.connectedCallback) super.connectedCallback();
         
-        var bodyElement = this.$.body;
-        var self = this;
-        bodyElement.addEventListener('scroll', function() {
-          var scrollTopEm = bodyElement.scrollTop / blCurrentFontSize(); // global method from bl-styles
-          var condensationDelta = self.expandedHeight - self.condensedHeight;
-          
-          if (scrollTopEm >= condensationDelta) {
-            if (self.condensedPercentage < 1.0) {
-              self.condensedPercentage = 1.0;
-              self.expandedPercentage = 0.0;
-              self.headerStatus = 'condensed';
-            }
-          } else {
-            self.condensedPercentage = scrollTopEm / condensationDelta;
-            self.expandedPercentage = 1.0 - self.condensedPercentage;
+        // Register the scroll listener, but use requestAnimationFrame() to decouple it from the event and optimize performance.
+        // Details here: https://developer.mozilla.org/en-US/docs/Web/Events/scroll
+        this.$.body.addEventListener('scroll', function() {
+          this._set_lastKnownScrollPosition(this.$.body.scrollTop);
 
-            if (scrollTopEm == 0) self.headerStatus = 'partial'
-            else self.headerStatus = 'expanded';
+          if (!this._animationTicking) {
+            window.requestAnimationFrame(function () {
+              this._recalculateScrollProperties();
+              this._set_animationTicking(false);
+            }.bind(this));
+
+            this._set_animationTicking(true);
           }
-        });
+        }.bind(this));
       }
-
-      // #=== LISTENER & OBSERVER METHODS ===#
-
-      // ...
 
       // #=== PROPERTY COMPUTER METHODS ===#
 
@@ -195,10 +213,6 @@ It provides a sliding header panel and holds the page content.
         else
           return this.expandedHeight;
       }
-
-      // #=== PRIVATE HELPER & UTILITY METHODS ===#
-
-      // ...
 
     }
 
