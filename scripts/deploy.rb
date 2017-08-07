@@ -7,6 +7,8 @@ remotes = { # first is default
   'production' => 'badgelist'
 }
 
+# If you need to manually build here is a version to copy and paste:
+# polymer build --js-minify --css-minify --html-minify --bundle --add-service-worker --insert-prefetch-links
 polymer_build_options = [
   '--js-minify',
   '--css-minify',
