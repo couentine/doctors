@@ -1,13 +1,21 @@
 {
   "name": "Badge List",
-  "short_name": "badgelist",
+  "short_name": "Badge List",
   "description": "A platform for awarding digital credentials and tracking learning progress.",
   "start_url": "/",
-  "background_color": "#fb8c00",
-  "icons": [{
-    "src": "https://badgelist.s3.amazonaws.com/images/badge-list-icon.png",
-    "sizes": "500x500",
-    "type": "image/png"
-  }],
+  "background_color": "#FB8C00",
+  "theme_color": "#FF9800",
+  "icons": [
+    {
+      "src": "https://badgelist.s3.amazonaws.com/images/badge-list-icon.png",
+      "sizes": "500x500",
+      "type": "image/png"
+    },
+    {
+      "src": "https://badgelist.s3.amazonaws.com/images/badge-list-icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }
+  ],
   "display": "standalone"
 }
