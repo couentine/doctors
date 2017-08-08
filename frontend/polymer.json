@@ -9,8 +9,7 @@
     "bower_components/google-fonts-lato/*.ttf",
     "bower_components/google-fonts-roboto/*.ttf",
     "bower_components/google-fonts-roboto-mono/*.ttf",
-    "bower_components/google-fonts-roboto-mono/*.ttf",
-    "src/bl-backend/swagger-client.min.js"
+    "bower_components/google-fonts-roboto-mono/*.ttf"
   ],
   "sources": [
     "src/**/*",
