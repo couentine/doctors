@@ -36,7 +36,7 @@
     <%= stylesheet_link_tag 'shared/bl-icons/style', media: 'all' %>
 
     <% #=== POLYMER ===# %>
-    <script src="<%= @polymer_root_url %>/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="<%= @polymer_root_url %>/bower_components/webcomponentsjs/webcomponents-lite.js" shadydom></script>
     <script>
       // Configure Polymer global settings *before* import
       window.Polymer = {
