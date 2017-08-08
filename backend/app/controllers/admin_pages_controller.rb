@@ -176,6 +176,9 @@ class AdminPagesController < ApplicationController
     ]
   end
 
+  def icons
+  end
+
 private
 
   def badge_list_admin

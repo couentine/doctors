@@ -31,6 +31,7 @@ BadgeList::Application.routes.draw do
   end
   match 'a/groups' => 'groups#index', via: :get, as: :group_index
   match 'a/metrics' => 'admin_pages#metrics', via: :get, as: :admin_metrics
+  match 'a/icons' => 'admin_pages#icons', via: :get, as: :icon_list
   match 'a' => 'admin_pages#index', via: :get
   authenticate :user, lambda { |u| u.admin? } do
     mount Sidekiq::Web => '/a/sidekiq'

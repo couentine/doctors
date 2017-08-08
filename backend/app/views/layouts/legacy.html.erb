@@ -54,6 +54,11 @@
       <meta name="twitter:image" content="<%= yield(:metadata_image) %>" />
       <meta name="twitter:url" content="<%= yield(:metadata_url) %>" />
     <% end %>
+    
+    <% #=== BL ICONS DEMO (Breaks font awesome) ===# %>
+    <% if content_for? :include_bl_icons %>
+      <%= stylesheet_link_tag "shared/bl-icons/style.css", media: "all" %>
+    <% end %>
   </head>
 
   <body class="<%= "with-subheader" if content_for?(:show_subheader) \
