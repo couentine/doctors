@@ -13,6 +13,24 @@
 
 </style>
 
+<script type="text/javascript">
+
+  var userSearchURL = '<%= users_url(search: '__search__') %>';
+  
+  $(document).ready(function() {
+
+    $('#search-users').click(function(e) {
+      e.preventDefault();
+
+      var userSearch = prompt('Enter text to search email, username and name:');
+      if ((userSearch != null) && (userSearch != undefined))
+        document.location.href = userSearchURL.replace('__search__', userSearch);
+    });
+
+  });
+
+</script>
+
 <!-- === PAGE HEADER === -->
 
 <div class="row add-top-margin">
@@ -37,16 +55,28 @@
             - <%= [(@page.to_i * @page_size.to_i), @users.count].min %>
             of <%= @users.count %>
           </h2>
-          <% if @only_flag %>
-            <h3>
-              Only Showing Flag: 
-              <%= @only_flag %>
-              <%= link_to 'Clear search', users_path, class: 'btn btn-small' %>
-            </h3>
-          <% end %>
+          <h3>
+            <% if @search.present? %>
+                Showing Search Results for '<%= @search %>'
+                <%= link_to 'Clear search', users_path, class: 'btn btn-small' %>
+            <% else %>
+              <a id="search-users" href="#" class="btn btn-small">
+                <i class="fa fa-search"></i> Search for Users
+              </a>
+            <% end %>
+
+            <%= link_to "<i class='fa fa-plus'></i> New User".html_safe, new_user_path, 
+              class: 'btn btn-small' %>
+          </h3>
         </span>            
       </div>
     </div>
+  </div>
+</div>
+
+<div class="row add-top-margin">
+  <div class="span12">
+
   </div>
 </div>
 
@@ -69,12 +99,10 @@
             <tr>
               <th>User</th>
               <th>Email</th>
-              <th>Join, Logins</th>
+              <th>Joined</th>
               <th>Last Active</th>
-              <th>Groups Owned</th>
-              <th>Memberships</th>
-              <th>Entries</th>
-              <th>Flags</th>
+              <th>Group Memberships</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -90,25 +118,18 @@
                   <%= user.email %>
                 </td>
                 <td>
-                  <%= user.created_at.to_s :short_date %>, <%= user.sign_in_count %>
+                  <%= user.created_at.to_s :short_date %>
                 </td>
                 <td>
                   <%= user.last_active.to_s unless user.last_active.nil? %>
                 </td>
                 <td>
-                  <%= (user.owned_group_ids || []).count %>
-                </td>
-                <td>
                   <%= (user.admin_of_ids || []).count + (user.member_of_ids || []).count  %>
                 </td>
                 <td>
-                  <%= (user.created_entry_ids || []).count %>
-                </td>
-                <td>
-                  <% user.flags.each do |flag| %>
-                    <%= link_to flag, users_path(page_size: @page_size, flag: flag), 
-                      class: 'label' %>
-                  <% end unless user.flags.blank? %>
+                  <% if !user.admin %>
+                    <%= link_to 'Edit', edit_user_path(user), class: 'btn btn-small' %>
+                  <% end %>
                 </td>
               </tr>
             <% end %>

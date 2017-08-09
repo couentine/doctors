@@ -446,7 +446,7 @@ class User
 
     if email.present? && name.present? 
       # Try to locate an existing user account
-      user = User.where(email: email).first
+      user = User.where(email: email.downcase).first
 
       if user
         # Then update any fields that need updating and disable email confirmation
