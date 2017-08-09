@@ -18,6 +18,9 @@ polymer_build_options = [
   '--insert-prefetch-links'
 ]
 
+# This is the commit message used when committing the rebuilt polymer files to git (if needed)
+POLYMER_REBUILD_COMMIT_MESSAGE = "Rebuilt polymer frontend."
+
 #=== SCRIPT BANNER ===#
 
   puts "\n\n#===[BADGE LIST DEPLOYMENT SCRIPT]===#\n\n\n"
@@ -51,9 +54,9 @@ polymer_build_options = [
   puts "===> Found #{branches.count} local branches."
 
   # Ensure that there are no untracked files
-  untracked_files = `git status --porcelain`
-  if !untracked_files.empty?
-    puts "===> ERROR: Uncommitted changes found...\n#{untracked_files}"
+  uncommitted_changes = `git status --porcelain`
+  if !uncommitted_changes.empty?
+    puts "===> ERROR: Uncommitted changes found...\n#{uncommitted_changes}"
     puts "--------------------------------------------------------------------------------\n\n\n"
     puts "ERROR! You have uncommitted changes in your local git environment."
     puts "Please make sure all files are committed before continuing.\n\n"
@@ -151,22 +154,37 @@ polymer_build_options = [
     exit
   end
   
-  # Switch to the selected git branch, do the polymer build, commit the changes
+  # Switch to the selected git branch, do the polymer build
   puts "--------------------------------------------------------------------------------"
-  puts "===> REBUILDING POLYMER & COMMITTING TO GIT..."
+  puts "===> REBUILDING POLYMER"
   system("git checkout #{selected_branch}")
   Dir.chdir(frontend_path) do
     system("polymer build #{polymer_build_options.join(' ')}")
   end
   FileUtils.remove_dir(polymer_build_target_path) # clear existing build
   FileUtils.move(polymer_build_source_path, polymer_build_target_path) # move built files
-  system("git add .")
-  system("git commit -m 'Rebuilt polymer frontend.'")
 
-  # Push the changes to github
+  # Figure out if the build changed anything and, if so, make sure we're not on master (master doesn't allow git pushes only PRs)
   puts "--------------------------------------------------------------------------------"
-  puts "===> PUSHING POLYMER REBUILD TO REMOTE ORIGIN..."
-  system("git push origin #{selected_branch}")
+  puts "===> COMMITTING REBUILT POLYMER AND PUSHING TO GITHUB"
+  uncommitted_changes = `git status --porcelain`
+  if uncommitted_changes.empty?
+    puts "===> No frontend changes since last build, skipping Github push."
+  elsif selected_branch == 'master'
+    puts "===> ERROR: Frontend changes need to be pushed to staging first"
+    puts "--------------------------------------------------------------------------------\n\n\n"
+    puts "ERROR! There were changes to the frontend in this commit cycle."
+    puts "You cannot push untested changes directly from the master branch."
+    puts "Push to staging first, then do a pull request into master."
+    puts "Then after the pull request is merged, come back to your local dev environment,"
+    puts "'pull origin master' and retry the deployment.\n\n"
+    exit
+  else
+    # Commit the changes and push them to Github
+    system("git add .")
+    system("git commit -m '#{POLYMER_REBUILD_COMMIT_MESSAGE}'")
+    system("git push origin #{selected_branch}")
+  end
 
   # Deploy to heroku
   puts "--------------------------------------------------------------------------------"
