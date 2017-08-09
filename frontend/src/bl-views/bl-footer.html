@@ -1,0 +1,139 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Footer #
+
+This is included in the footer slot of the header panel by default.
+-->
+<dom-module id="bl-footer">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          padding-top: 2em;
+        }
+
+      /* === COMPONENT STYLES === */
+
+        footer {
+          display: flex;
+          padding: 0.5em 2em;
+          color: var(--bl-grey-800);
+          background-color: var(--bl-grey-200);
+          border-top: 1px solid var(--bl-grey-400);
+        }
+        footer.true { color: white; background-color: transparent; border-color: white; }
+
+          .left,
+          .right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-right: 3.5em;
+          }
+          .left { 
+            flex: 1 1; 
+          }
+          .right { 
+            flex: 0 0;
+            text-align: right; 
+          }
+            ul.links { 
+              display: flex; 
+              list-style: none; 
+              margin: 0; 
+              padding: 0; 
+            }
+            ul.links li { display: block; }
+            ul.legal { 
+              margin: 0 0 1em 0; 
+              display: none;
+            }
+            @media (min-width: 550px) { ul.legal { display: flex; } }
+            .left ul.links li { margin-right: 1em; }
+            .right ul.links li { margin-left: 1em; }
+              a.social, a:visited.social,
+              a.legal, a:visited.legal {
+                text-decoration: none;
+                color: inherit;
+                transition: 0.2s color;
+              }
+              a.social:focus, a.social:hover,
+              a.legal:focus, a.legal:hover { color: var(--bl-grey-400); }
+              a.social i { font-size: 1.5em; }
+
+        footer.no-intercom .right { margin-right: 0; }
+
+
+    </style>
+
+    <footer class$="[[whiteText]]">
+      <div class="left">
+        <p>
+          Made with <i class="icon-heart3"></i> by Knowledgestreem in San Francisco.
+        </p>
+        <ul class="links legal">
+          <li>
+            <a href="/privacy-policy" target="_blank" class="legal">Privacy Policy</a>
+          </li>
+          <li>
+            <a href="/terms-of-service" target="_blank" class="legal">Terms of Service</a>
+          </li>
+        </ul>
+      </div>
+      <div class="right">
+        <ul class="links">
+          <li>
+            <a href="http://blog.badgelist.com" target="_blank" class="social" 
+                title="Badge List Blog">
+              <i class="icon-news"></i>
+            </a>
+          </li>
+          <li>
+            <a href="https://twitter.com/badgelist" target="_blank" class="social"
+                title="Badge List on Twitter">
+              <i class="icon-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a href="https://facebook.com/badgelist" target="_blank" class="social"
+                title="Badge List Facebook Page">
+              <i class="icon-facebook"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </footer>
+
+  </template>
+
+  <script>
+    class BlFooter extends BlAppComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-footer'; }
+
+      static get properties() {
+        return {
+          
+          whiteText: {
+            type: Boolean,
+            value: false
+          }
+
+        };
+      }
+
+    }
+
+    window.customElements.define(BlFooter.is, BlFooter);
+  </script>
+</dom-module>

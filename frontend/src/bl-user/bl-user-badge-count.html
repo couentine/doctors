@@ -1,0 +1,151 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# User Badge Count Widget #
+
+This displays an orange ribbon with the number of expert badges earned by this user.
+The ribbon is a link to the user's badge profile.
+-->
+<dom-module id="bl-user-badge-count">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host { 
+          display: inline-block; 
+        }
+
+      /* === OUTER === */
+        
+        .outer {
+          display: block;
+          font-size: 4rem;
+          height: 1.3em;
+          position: relative;
+          text-decoration: none;
+          z-index: 0;
+          color: var(--bl-orange-100);
+        }
+        @media (min-width: 480px) {
+          .outer { font-size: 4.5rem; }
+        }
+
+      /* === INNER === */
+
+        .inner {
+          box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
+          width: 1em; height: 1em;
+          position: relative;
+          border: none;
+          border-radius: 1em; -webkit-border-radius: 1em;
+          -o-text-overflow: clip;
+          text-overflow: clip;
+          margin: 0 auto 0.3em auto;
+          text-align: center;
+          z-index: 2;
+          background: var(--bl-orange-500);
+          box-shadow: 2px 1px 0px var(--bl-orange-900);
+          transition: background-color 0.5s; -webkit-transition: background-color 0.5s;
+        }
+        .outer:hover .inner,
+        .outer:focus .inner { background: var(--bl-orange-700); }
+        .inner::before {
+          box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
+          content: "";
+          position: absolute;
+          top: 0.7em; left: -0.1em;
+          border: 0.4em solid rgba(0,0,0,0);
+          border-top: 0 solid; border-bottom: 0.7em solid var(--bl-orange-500);
+          text-overflow: clip; -o-text-overflow: clip;
+          text-shadow: none;
+          transform: rotateZ(-140deg); -webkit-transform: rotateZ(-140deg);
+          z-index: 1;
+          transition: border-bottom-color 0.5s; -webkit-transition: border-bottom-color 0.5s;
+        }
+        .inner::after {
+          box-sizing: content-box; -webkit-box-sizing: content-box; -moz-box-sizing: content-box;
+          position: absolute;
+          content: "";
+          top: 0.7em; right: -0.1em;
+          border: 0.4em solid rgba(0,0,0,0);
+          border-top: 0 solid; border-bottom: 0.7em solid var(--bl-orange-500);
+          text-overflow: clip; -o-text-overflow: clip;
+          text-shadow: none;
+          transform: rotateZ(140deg); -webkit-transform: rotateZ(140deg);
+          z-index: 1;
+          transition: border-bottom-color 0.5s; -webkit-transition: border-bottom-color 0.5s;
+        }
+        .outer:hover .inner::before,
+        .outer:focus .inner::before,
+        .outer:hover .inner::after,
+        .outer:focus .inner::after { border-bottom-color: var(--bl-orange-700); }
+          .number {
+            text-align: center;
+            position: absolute;
+            left: 0; right: 0;
+            z-index: 3;
+            letter-spacing: -0.02em;
+          }
+            .digit-count-1 { font-size: 0.65em; top: 0.52em; left: -0.03em; }
+            .digit-count-2 { font-size: 0.6em; top: 0.5em; left: -0.04em; }
+            .digit-count-3 { font-size: 0.46em; top: 0.65em; left: -0.03em; }
+
+    </style>
+
+    <a class="outer" href$="/u/[[user.username_with_caps]]">
+      <div class="inner">
+        <div class$="number digit-count-[[digitCount]]">[[count]]</div>  
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlUserBadgeCount extends Polymer.Element {
+      
+      static get is() { return 'bl-user-badge-count'; }
+
+      static get properties() {
+        return {
+          
+          /** Required. The user record to pull information from. */
+          user: Object,
+          
+          /** Extracts the count from the user or returns 0. */
+          count: {
+            type: Number,
+            computed: '_count(user)'
+          },
+
+          /** Returns the number of digits in `count`. Used to size the text. */
+          digitCount: {
+            type: Number,
+            computed: "_digitCount(count)"
+          }
+
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _count(user) {
+        if (user) return user.expert_badge_count;
+        else return 0;
+      }
+
+      _digitCount(count) {
+        if (count) return count.toString().length
+        else return 1;
+      }
+
+    }
+
+    window.customElements.define(BlUserBadgeCount.is, BlUserBadgeCount);
+  </script>
+</dom-module>

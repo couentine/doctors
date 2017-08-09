@@ -3,6 +3,8 @@
 This repository stores the code that powers Badge List. It uses Mongoid (hosted now on MongoLab) for persistence and 
 the Postmark gem for email. It also uses Redis (hosted now on on RedisCloud) for queueing along with Sidekiq for asynch operations.
 
+The repo is broken into two main sections: `backend` which contains the Rails app (and all of the legacy frontend views) and `frontend` which contains the newer Polymer-powered front end app. Upon deployment the polymer app is built and copied to the assets folder of the backend so that the files can be served via Heroku and the CDN.
+
 ## Setting up your dev environment (OS X) ##
 
 1. Install the basics: Xcode, Homebrew, Git, Github RVM, Ruby & Rails >> [Instructions here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac) >> Be sure to install the current app version of ruby (2.1.2)
@@ -61,9 +63,9 @@ lti_unique_tool_id=badgelist-dev
 
 ## Running the app ##
 
-To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. 
+To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. This will run both the rails app (at localhost:5000) and the polymer app (at localhost:8081). The polymer app is actually proxied via the polymer-proxy server (at localhost:8080) which exists to add CORS headers.
 
-You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). To open a rails console in your terminal the command is `foreman run rails c`.
+You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). To open a rails console in your terminal, navigate to the `backend` folder and run `foreman run rails c`. (Note: This is currently a little broken and doesn't load the environment variables.)
 
 **Note:** If you are testing webhooks with external services (such as Stripe or Postmark) you will need to use `Procfile.ultrahook.dev`. That will forward `http://dev.[ultrahook_username].ultrahook.com` to `http://localhost:5000`. The ultrahook username will be the username of the account linked to the `ULTRAHOOK_API_KEY` in your `.env` file. To specify the procfile use the command below:
 
@@ -78,3 +80,13 @@ WebhooksController is designed to accept the following events at the '/h/stripe_
 - customer.subscription.deleted
 - invoice.payment_succeeded
 - invoice.payment_failed
+
+## Deployment Process ##
+
+To deploy to staging or production you **must** use the deployment script. If you try to push directly to Heroku it will fail (because the Rails app is not located in the root of the git repo). There are also other important checks and processes which are handled by the deployment script.
+
+To use the deployment script, navigate to the root of git repo and run the command below. (The script will walk you through the deployment process with prompts.)
+
+```
+$ ruby scripts/deploy.rb
+```

@@ -1,0 +1,157 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Backend List Placeholder Panel #
+
+Binds to a local target property that is managed by a backend-list.
+If the list is initialized and it is empty this will display a placeholder panel.
+If the list is in an error state, the placeholder panel will be colored red and will display the error message.
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--placeholder-background` | Background color of the placeholder panel | `--bl-grey-50`
+`--placeholder-border` | Color of the placeholder border | `--bl-grey-100`
+`--placeholder-icon-color` | Color of the icon in the background of the panel | `--bl-grey-500`
+`--placeholder-text-color` | Color of the panel body text | `--bl-grey-700`
+-->
+<dom-module id="bl-backend-list-placeholder">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          flex: 1 1 auto;
+          position: relative;
+          height: 8em;
+          padding: 1em;
+          
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+
+          background: var(--placeholder-background, var(--bl-grey-50));
+          border: 1px solid var(--placeholder-border, var(--bl-grey-100));
+          border-radius: 10px;
+        }
+
+      /* === COMPONENT STYLES === */
+
+        #backgroundIcon {
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          z-index: 1;
+          text-align: center;
+        }
+          #backgroundIcon i {
+            margin: 0 auto;
+            color: var(--placeholder-icon-color, var(--bl-grey-500));
+            font-size: 8em;
+            opacity: 0.1;
+          }
+
+        .text {
+          text-align: center;
+          z-index: 2;
+          color: var(--placeholder-text-color, var(--bl-grey-700));
+        }
+
+        #errorMessage { display: none; }
+
+      /* === ERROR MODE === */
+
+        :host([is-error]) {
+          background: var(--bl-red-50);
+          border: 1px solid var(--bl-red-100);
+        }
+          :host([is-error]) #message { display: none; }
+          :host([is-error]) #errorMessage { display: block; }
+
+    </style>
+
+    <div id="backgroundIcon">
+      <i class$="[[iconClass]]"></i>
+    </div>
+
+    <div id="message" class="text">
+      <slot></slot>
+    </div>
+
+    <div id="errorMessage" class="text">
+      <p>
+        <b>There was a problem loading the requested resource.</b>
+      </p>
+      <p>
+        <b>Error Message:</b> [[targetList.status.errorMessage]]
+      </p>
+    </div>
+
+  </template>
+
+  <script>
+    class BlBackendListPlaceholder extends Polymer.Element {
+      
+      static get is() { return 'bl-backend-list-placeholder'; }
+
+      static get properties() {
+        return {
+          
+          /** Set this to the local property which is managed by `<bl-backend-list>`. */
+          targetList: {
+            type: Object
+          },
+
+          /** Set this to an icon class to use for the icon in the background of the placeholder. (Example: `icon-user`) */
+          iconClass: {
+            type: String
+          },
+
+          /** The placeholder will automatically be hidden if the element is not initialized or if it is not empty. */
+          hidden: {
+            type: Boolean,
+            reflectToAttribute: true,
+            computed: '_hidden(targetList.status.isInitialized, targetList.items, targetList.status.isError)'
+          },
+
+          isError: {
+            type: Boolean,
+            reflectToAttribute: true,
+            computed: '_isError(targetList.status.isError)'
+          }
+
+        }
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      // ...
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _hidden(isInitialized, items, isError) {
+        return !isError && (!isInitialized || !items || (items.length > 0));
+      }
+
+      _isError(isError) {
+        return isError;
+      }
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      // ...
+
+    }
+
+    window.customElements.define(BlBackendListPlaceholder.is, BlBackendListPlaceholder);
+  </script>
+</dom-module>

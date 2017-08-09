@@ -1,0 +1,556 @@
+<%
+  half_off = @group.owner.has_flag? User::HALF_OFF_FLAG
+
+  pricing_group_hint = "<a href='/pricing' target='_blank'>".html_safe \
+    + "<i class='fa fa-info-circle'></i> View full pricing details</a>".html_safe
+  
+  subscription_plan_label = 'Subscription Plan'.html_safe
+  if half_off
+    subscription_plan_label += \
+      "<br><span class='label'><i class='fa fa-gift'></i> You get 50% off!</span>".html_safe
+  end
+  
+%>
+
+<script>
+
+  var MAX_IMAGE_UPLOAD_SIZE = 7000000;
+  var MAX_IMAGE_UPLOAD_DESCRIPTION = "6 megabytes";
+  var MAX_URL_LENGTH = <%= Group::MAX_URL_LENGTH %>;
+
+  $(document).ready(function() {
+
+    <% if @group.new_record? %>
+      <% if @group.owner.stripe_default_source %>
+        // Set the credit card dropdown to be their default stripe card
+        $("#group_stripe_subscription_card").val("<%= @group.owner.stripe_default_source %>");
+      <% end %>
+    <% else %>
+      $("#cancel-subscription").click(function(e) {
+        if (confirm("Are you sure you want to cancel your subscription? All of your group's "
+            + "content will still be available and you can create a new subscription at any "
+            + "time.")) {
+          $('#cancel-subscription-spinner').fadeIn();
+          $.ajax({
+            url: "<%= cancel_subscription_path(@group) %>",
+            type: "POST",
+            success: function(response) {
+              startPoller(response.poller_id, cancelSubscriptionCompleted, cancelSubscriptionError);
+            },
+            error: cancelSubscriptionError
+          });
+        }
+        e.preventDefault();
+      });
+
+      <% if @group.paid? && (@group.stripe_subscription_status != 'canceled') %>
+        $("#group-type-collapsed a.btn").remove();
+        $("#group-type-collapsed .controls").first()
+          .append("<p class='help-block'>(To change your group from free to paid, "
+            + "cancel the subscription first.)</p>");
+      <% end %>
+    <% end %>
+
+    $("#group_type_paid").click(function() {
+      $("#group_new_subscription").val("true"); // only relevant if edit mode
+      $("#group-type-expanded").fadeOut(function() {
+        $("#group-type-collapsed").fadeIn();
+        $("#subscription-details-panel").fadeIn();
+        if (($("#group_stripe_subscription_card").val() == null)
+            || ($("#group_stripe_subscription_card").val() == "")) {
+          $("#submit-group-form").prop("disabled", true);
+          $("#card-required-label").show();
+        }
+      });
+    });
+    
+    $("#switch-to-free").click(function(e) {
+      $("#group_new_subscription").val(""); // only relevant if edit mode
+      $("#group_type_free").click();
+      $("#group-type-collapsed").fadeOut();
+      $("#subscription-details-panel").fadeOut(function() {
+        $("#submit-group-form").prop("disabled", false);
+        $("#card-required-label").hide();
+        $("#group-type-expanded").fadeIn();
+      });
+      e.preventDefault();
+    });
+
+    $("#group_pricing_group").change(function() {
+      if ($(this).val() == "k12") {
+        $("#subscription-options-standard").fadeOut(function() {
+          $("#subscription-options-k12").fadeIn();
+        });
+      } else {
+        $("#subscription-options-k12").fadeOut(function() {
+          $("#subscription-options-standard").fadeIn();
+        });
+      }
+    });
+
+    $("#show-edit-subscription-panel").click(function(e) {
+      e.preventDefault();
+      $("#view-subscription-panel").fadeOut(function() {
+        $("#edit-subscription-panel").fadeIn();
+      });
+    });
+
+    $("#revive-subscription").click(function(e) {
+      e.preventDefault();
+      $("#view-subscription-panel").fadeOut(function() {
+        $("#edit-subscription-panel").fadeIn();
+      });
+      $("#group_new_subscription").val("true");
+    });
+
+    // IMAGE UPLOAD
+
+    // Clicking the pretty upload button clicks on the file input element instead
+    $("#select-image-file").click(function(e) {
+      $("#s3_direct_uploader_direct_avatar").click();
+      e.preventDefault();
+    });
+    
+    // Process the image file after selection
+    $("#s3_direct_uploader_direct_avatar").change(function() {
+      if ($(this).val()) {
+        if (this.files[0].size > MAX_IMAGE_UPLOAD_SIZE) {
+          alert("The image you have selected is too big. The maximum supported file size is "
+            + MAX_IMAGE_UPLOAD_DESCRIPTION + ".");
+          $(this).val("");
+        } else {
+          $("#select-image-file").fadeOut(function() {
+            $("#upload-spinner").fadeIn();
+          });
+          $("form input[type=submit]").attr("disabled", true); // disable the submit button
+          $("#avatar_form").submit();
+        }
+      }
+    });
+
+    // Add Extra Info Buttons
+
+    $("#add-description").click(function(e) {
+      e.preventDefault();
+      $(".control-group.group_description").fadeIn(function() {
+        $(this).find("textarea").focus();
+      });
+      if ($(this).parents("ul.button-list").find("li:visible").length < 2) {
+        $(this).parents(".control-group").fadeOut();
+      } else {
+        $(this).parent("li").fadeOut();
+      }
+    });
+    $("#add-location").click(function(e) {
+      e.preventDefault();
+      $(".control-group.group_location").fadeIn(function() {
+        $(this).find("input").focus();
+      });
+      if ($(this).parents("ul.button-list").find("li:visible").length < 2) {
+        $(this).parents(".control-group").fadeOut();
+      } else {
+        $(this).parent("li").fadeOut();
+      }
+    });
+    $("#add-website").click(function(e) {
+      e.preventDefault();
+      $(".control-group.group_website").fadeIn(function() {
+        $(this).find("input").focus();
+      });
+      if ($(this).parents("ul.button-list").find("li:visible").length < 2) {
+        $(this).parents(".control-group").fadeOut();
+      } else {
+        $(this).parent("li").fadeOut();
+      }
+    });
+
+    <% if @group.paid? %>
+      $("#group_type_paid").click(); // Fire the logic 
+    <% end %>
+
+    <% if @allow_url_editing %>
+      // URL Editing Logic
+
+      // Auto set the URL as they type the name
+      $('#group_name').keyup(function() {
+        $('#group_url_with_caps').val(parameterizeText($(this).val(), MAX_URL_LENGTH));
+        $('#url-preview-label').text($('#group_url_with_caps').val());
+        if (($('#group_url_with_caps').val().length > 0) && !$("#url-panel").is(":visible"))
+          $("#url-panel").fadeIn();
+        else if (($('#group_url_with_caps').val().length == 0) && $("#url-panel").is(":visible"))
+          $("#url-panel").fadeOut();
+      });
+
+      // Pressing enter in the url editor clicks url save
+      $('#group_url_with_caps').keypress(function(e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          $('#url-save').click();
+        }
+      });
+
+      $("#url-edit").click(function() {
+        // Save the current value then show the input box
+        $('#group_url_with_caps').data('oldValue', $('#group_url_with_caps').val());
+        $("#url-preview").fadeOut(function() {
+          $("#url-editor").show();
+          $('#group_url_with_caps').focus();
+        });
+      });
+      $("#url-save").click(function() {
+        // Parameterize the value then update the label and hide the text box
+        $('#group_url_with_caps').val(parameterizeText($('#group_url_with_caps').val(), 
+          MAX_URL_LENGTH));
+        $('#url-preview-label').text($('#group_url_with_caps').val());
+        $("#url-editor").fadeOut(function() {
+          $("#url-preview").show();
+          $('#group_name').focus();
+        });
+      });
+      $("#url-cancel").click(function() {
+        // Restore the old value
+        $('#group_url_with_caps').val($('#group_url_with_caps').data('oldValue'));
+        $('#url-preview-label').text($('#group_url_with_caps').val());
+        $("#url-editor").fadeOut(function() {
+          $("#url-preview").show();
+          $('#group_name').focus();
+        });
+      });
+
+    <% end %>
+
+  });
+
+  var imageBaseURL = '<%= "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/" %>';
+  function processImageKey(imageKey) {
+    $("#group_avatar_key").val(imageKey);
+    $("#group-image").attr("src", imageBaseURL + imageKey);
+
+    $("#upload-spinner").fadeOut(function() {
+      $("#select-image-file").fadeIn();
+    });
+    
+    $("form input[type=submit]").attr("disabled", false); // re-enable the submit button
+  }
+
+  /* === Stripe polling functionality === */
+
+  function cancelSubscriptionCompleted(poller) {
+    if (poller.status == 'successful') {
+      window.location.reload();
+    } else {
+      $('#cancel-subscription-spinner').fadeOut();
+      alert(poller.message);
+    }
+  }
+
+  function cancelSubscriptionError() {
+    $('#cancel-subscription-spinner').fadeOut();
+    alert("There was an error cancelling your subscription, please try again.");
+  }
+
+</script>
+
+<div class="spinner-wrapper" id="cancel-subscription-spinner" style="display: none;">
+  <div class="spinner large tertiary">&nbsp;</div>
+</div>
+
+<%= simple_form_for(@group, html: { class: 'form-horizontal' }) do |f| %>
+  <%= f.error_notification %>
+  <div class="form-body">
+    <%= f.input :name, label: 'Group Name', placeholder: 'Example: NASA Astronaut Training',
+      autofocus: true, input_html: { class: 'input-xlarge' } %>
+
+    <div id="url-panel">
+      <% if @allow_url_editing  %>
+        <i class="fa fa-question-circle" data-toggle="tooltip" title=
+          "You will not be able to edit the Group's URL after you've added members and badges."></i>
+      <% end %>
+      <label for="group_url_with_caps">URL: </label>
+        
+      <span id="url-preview">
+        "<span id="url-preview-label"><%= @group.url_with_caps %></span>"
+        <% if @allow_url_editing  %>
+          <a href="#" id="url-edit" class="btn btn-small btn-link">Edit</a>
+        <% else %>
+          <i class="fa fa-lock" data-toggle="tooltip" title=
+          "You can no longer to edit the Group's URL because it would break badge links."></i>
+        <% end %>
+      </span>
+    
+      <% if @allow_url_editing  %>
+        <span id="url-editor" style="display: none;">
+          <%= f.text_field :url_with_caps %>
+          <ul class="unstyled">
+            <li><a href="#" id="url-save" class="btn btn-small btn-link">
+              <i class="fa fa-check"></i>
+            </a></li>
+            <li><a href="#" id="url-cancel" class="btn btn-small btn-link">
+              <i class="fa fa-remove"></i>
+            </a></li>
+          </ul>
+        </span>
+      <% end %>
+    </div>
+
+    <div id="group-type-expanded" style="<%= (@group.paid?) ? 'display: none;' : '' %>">
+      <%= f.input :type, label: 'Group Type', as: :radio_buttons, collection:@group_type_options %>
+    </div>
+    <div id="group-type-collapsed" style="<%= (@group.paid?) ? '' : 'display: none;' %>">
+      <div class="control-group">
+        <label class="control-label">Group Type</label>
+        <div class="controls">
+          <b><i class="fa fa-users"></i> Paid Group</b>
+          <a class="btn btn-small" href="#" id="switch-to-free">
+            <i class="fa fa-undo"></i> Switch to Free Group
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- === SUBSCRIPTION DETAILS === -->
+
+    <% 
+      if @group.free?
+        subscription_panel_mode = 'none'
+      elsif @group.new_record? || !@group.owner.has_stripe_card?
+        subscription_panel_mode = 'edit'
+      else
+        subscription_panel_mode = 'view'
+      end
+    %>
+
+    <div id="subscription-details-panel" 
+      style="<%= (subscription_panel_mode == 'none') ? 'display:none;' : '' %>">
+
+      <% if subscription_panel_mode == 'view' %>
+        <div id="view-subscription-panel">
+
+          <% subscription_status = @group.status_details_for_admins %>
+          <div class="control-group">
+            <label class="control-label">Current Plan &amp; Status</label>
+            <div class="controls">
+              <%= @group.subscription_plan_name %><br>
+              <span class="label <%= subscription_status[:color] %>">
+                <i class="fa <%= subscription_status[:icon] %>"></i>
+                <%= @group.subscription_status_string %> - 
+                <%= subscription_status[:summary] %>
+              </span> 
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+              <% if @group.stripe_subscription_status == 'canceled' %>
+                <a href="#" id="revive-subscription" class="btn">
+                  <i class="fa fa-credit-card"></i>
+                  Revive Subscription
+                </a>
+              <% else %>
+                <a href="#" id="show-edit-subscription-panel" class="btn">
+                  <i class="fa fa-pencil"></i>
+                  Edit Subscription
+                </a>
+                
+                <% unless @group.stripe_subscription_id.blank? %>
+                  <a href="#" id="cancel-subscription" class="btn btn-danger">
+                    <i class="fa fa-remove"></i>
+                    Cancel Subscription
+                  </a>
+                <% end %>
+              <% end %>
+            </div>
+          </div> 
+
+        </div> <!-- /view-subscription-panel -->
+      <% end %>
+
+      <div id="edit-subscription-panel" 
+          style="<%= (subscription_panel_mode != 'view') ? '' : 'display:none;' %>">
+
+        <%= f.input :pricing_group, label: 'Pricing Group', as: :select, include_blank: false,
+          collection: @pricing_group_options, hint: pricing_group_hint %>
+
+        <% if !@group.new_record? %>
+          <%= f.input :new_subscription, label: 'Revive Subscription', as: :hidden %>
+        <% end %>
+
+        <% if @badge_list_admin %>
+          <%= f.input :subscription_plan, label: subscription_plan_label, as: :select, 
+            include_blank: false, collection: SUBSCRIPTION_OPTIONS['admin'] %>
+        <% else %> 
+          <div id="subscription-options-standard" 
+              style="<%= (@group.pricing_group == 'standard') ? '' : 'display: none;' %>">
+            <%= f.input :subscription_plan, label: subscription_plan_label, as: :radio_buttons, 
+              include_blank: false, collection: SUBSCRIPTION_OPTIONS['standard'] %>
+          </div>
+          <div id="subscription-options-k12" 
+              style="<%= (@group.pricing_group == 'standard') ? 'display: none;' : '' %>">
+            <%= f.input :subscription_plan, label: subscription_plan_label, as: :radio_buttons, 
+              include_blank: false, collection: SUBSCRIPTION_OPTIONS['k12'] %>
+          </div>
+        <% end %>
+
+
+        <div id="has-credit-card-panel" 
+            style="<%= (@group.owner.has_stripe_card?) ? '' : 'display: none;' %>">
+          <%= f.input :stripe_subscription_card, label: 'Credit Card', as: :select, 
+            include_blank: false, collection: @group.owner.stripe_card_options %>
+
+          <div class="control-group">
+            <div class="controls">
+              <a class="btn" href="#add-credit-card" data-toggle="modal">
+                <i class="fa fa-plus"></i>
+                Add a credit card
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <% unless @group.owner.has_stripe_card? %>
+          <div class="control-group" id="no-credit-card-panel">
+            <label class="optional control-label">Credit Card</label>
+            <div class="controls">
+              <a class="btn" href="#add-credit-card" data-toggle="modal">
+                <i class="fa fa-credit-card"></i>
+                Add a credit card
+              </a>
+            </div>
+          </div>
+        <% end %>
+
+      </div> <!-- /edit-subscription-panel -->
+
+    </div>
+
+    <!-- === GROUP COLOR === -->
+
+    <%= f.input :color, label: 'Group Color', as: :select, include_blank: false, collection: GroupsController::GROUP_COLOR_OPTIONS %>
+
+    <!-- === GROUP IMAGE === -->
+
+    <%= f.input :avatar_key, as: :hidden %>
+    <div class="control-group image_upload_button">
+      <label class="optional control-label">Group Image</label>
+      <div class="controls">
+        <%= image_tag @group.avatar_image_url(:small), id: 'group-image',
+          class: 'thumbnail small' %>
+        <a href="#" class="btn" id="select-image-file">
+          <i class="fa fa-upload"></i>
+          Upload an image file
+        </a>
+        <a href="#" class="btn disabled" id="upload-spinner" disabled="true" 
+            style="display: none;">
+          <i class="fa fa-refresh fa-spin"></i>
+          Uploading...
+        </a>
+      </div>
+    </div>
+    
+    <!-- === EXTRA INFO === -->
+
+    <div class="control-group" 
+        style="<%= d?(@group.description.blank?||@group.location.blank?||@group.website.blank?) %>"
+        >
+      <label class="control-label">Add Extra Info</label>
+      <div class="controls">
+        <ul class="button-list">
+          <li style="<%= d?(@group.description.blank?) %>">
+            <a href="#" class="btn" id="add-description">
+              <i class="fa fa-info-circle"></i> Description
+            </a>
+          </li>
+          <li style="<%= d?(@group.location.blank?) %>">
+            <a href="#" class="btn" id="add-location">
+              <i class="fa fa-map-marker"></i> Location
+            </a>
+          </li>
+          <li style="<%= d?(@group.website.blank?) %>">
+            <a href="#" class="btn" id="add-website">
+              <i class="fa fa-link"></i> Website
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <%= f.input :description, as: :text, label: 'Description', 
+      placeholder: 'Describe the purpose of your group', input_html: { data: {
+        :'character-count' => true, :'max-length' => Group::MAX_DESCRIPTION_LENGTH } },
+        wrapper_html: { style: d?(!@group.description.blank?)} %>
+
+    <%= f.input :location, label: 'Location', placeholder: 'Where is your group located?', 
+      input_html: { class: 'input-xlarge' }, wrapper_html: { style: d?(!@group.location.blank?)} %>
+
+    <%= f.input :website, label: 'Website', placeholder: 'Enter your group\'s website',
+      input_html: { class: 'input-xlarge' }, wrapper_html: { style: d?(!@group.website.blank?) } %>
+
+    <% if @badge_list_admin && !@group.new_record? %>
+      
+      <!-- === BADGE LIST ADMIN PANEL === -->
+
+      <div id="bl-admin-panel" style="display: none;">
+        <h2>Badge List Admin Panel</h2>
+      
+        <%= f.input :feature_grant_reporting, label: 'Manually Grant Reporting Feature', 
+          as: :boolean, input_html: { class: 'input-mini' } %>
+        <%= f.input :feature_grant_integration, label: 'Manually Grant Integration Feature', 
+          as: :boolean, input_html: { class: 'input-mini' } %>
+        <%= f.input :admin_limit, label: 'Admin Limit', input_html: { class: 'input-mini' } %>
+        <%= f.input :sub_group_limit, label: 'Sub-Group Limit', 
+          input_html: { class: 'input-mini' } %>
+        <%= f.input :stripe_subscription_id, label: 'Stripe Subscription Id', 
+          input_html: { class: 'input-medium' } %>
+      </div>
+
+      <script type="text/javascript">
+        function showAdminPanel() {
+          $("#show-admin-panel").fadeOut();
+          $("#bl-admin-panel").fadeIn();
+        }
+      </script>
+
+    <% end %>
+  </div>  
+  
+  <div class="form-footer add-top-margin">
+    <span class="label label-primary" id="card-required-label" style="display: none;">
+      <i class="fa fa-credit-card"></i>
+      Credit card required to continue
+    </span>
+
+    <% if @badge_list_admin && !@group.new_record? %>
+      <a class="btn btn-link" id="show-admin-panel" style="border-radius: 500px;" 
+          onclick="showAdminPanel(); return false;">
+        <i class="fa fa-cog"></i>
+      </a>
+    <% end %>
+
+    <%= f.button :submit, class: 'btn btn-primary', id: 'submit-group-form' %>
+    <% if !@group.new_record? %>
+      <%= link_to "<i class='fa fa-eye-slash'></i> Privacy".html_safe, 
+        group_path(@group) + '#privacy-settings', class: "btn left-button", target: '_blank' %>
+      <%= link_to "<i class='fa fa-envelope'></i> New Members".html_safe, 
+        group_path(@group) + '#welcome-settings', class: "btn left-button", target: '_blank' %>
+    <% end %>
+    <%= 
+      if @group.new_record?
+        link_to "Cancel", root_path, class: "btn"
+      else 
+        link_to "Cancel", @group, class: "btn"
+      end
+    %>
+  </div>
+<% end %>
+
+<!-- === CARRIERWAVE DIRECT FORM === -->
+
+<%= direct_upload_form_for(@uploader, html: { id: 'avatar_form', style: 'display: none;',
+    target: 'avatar_result_frame' } ) do |u| %>
+  <%= u.file_field :direct_avatar, accept: 'image/*' %>
+<% end %>
+
+<iframe id="avatar_result_frame" name="avatar_result_frame" 
+  style="display: none;"></iframe>
+

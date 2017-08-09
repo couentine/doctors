@@ -1,0 +1,71 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Subheader #
+
+Includes an h2 and optional buttons panel and standard margins around.
+-->
+<dom-module id="bl-subheader">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+
+        :host {
+          display: flex;
+          justify-content: center;
+          padding: 1em;
+        }
+        @media (min-width: 840px) {
+          :host { margin: 0 2em; }
+        }
+        @media (min-width: 1200px) {
+          :host { margin: 0 4em; }
+        }
+
+      /* === COMPONENT STYLES === */
+
+        .left { flex: 1 1 auto; }
+          h2 {
+            font-size: 1.5em;
+            color: rgb(158,158,158);
+            display: inline-block;
+            margin: 0.25em 0 0 0;
+          }
+
+        .right { flex: none; }
+          ::slotted([slot=buttons]) {
+            font-size: 0.8rem;
+          }
+
+    </style>
+
+    <div class="left">
+      <h2><slot name="title"></slot></h2>
+    </div>
+
+    <div class="right">
+      <slot name="buttons"></slot>
+    </div>
+
+  </template>
+
+  <script>
+    class BlSubheader extends Polymer.Element {
+      
+      static get is() { return 'bl-subheader'; }
+
+      static get properties() {
+        return {}
+      }
+
+    }
+
+    window.customElements.define(BlSubheader.is, BlSubheader);
+  </script>
+</dom-module>

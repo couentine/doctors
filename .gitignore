@@ -5,15 +5,14 @@
 #   git config --global core.excludesfile ~/.gitignore_global
 
 # Ignore bundler config
-/.bundle
+/backend/.bundle
 
 # Ignore the default SQLite database.
-/db/*.sqlite3
+/backend/db/*.sqlite3
 
 # Ignore all logfiles and tempfiles.
-/log/*.log
-/tmp
-doc/
+/backend/log/*.log
+/backend/tmp
 *.swp
 *~
 .project
@@ -22,7 +21,7 @@ doc/
 .secret
 
 # Ignore upload files
-/public/uploads
+/backend/public/uploads
 
 # Ignore foreman environment variable file
 .env

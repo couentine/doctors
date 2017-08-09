@@ -1,0 +1,4 @@
+# This is the production / staging procfile, meant for Heroku
+
+web: bundle exec puma -C config/puma.rb
+worker: bundle exec sidekiq

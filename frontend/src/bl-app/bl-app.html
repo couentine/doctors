@@ -1,0 +1,219 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bl-styles/fonts.html">
+<link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="../bl-views/bl-view-home.html">
+<link rel="import" href="../bl-backend/bl-backend-client.html">
+
+<!--
+# Badge List App #
+
+All app components should use `BlAppComponentMixin`. That provides an `app` property which points at the container.
+The mixin also provides various actions for interacting with the container. (Refer to `bl-app-component-mixin.html` for more info.)
+-->
+<dom-module id="bl-app">
+  <template>
+
+    <style include="bl-style-classes">
+
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          @apply --bl-font-common-base;
+          
+          display: block;
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+        }
+
+      /* === STANDARD DIALOGS === */
+
+        paper-dialog.standard {
+          border-radius: 6px;
+          border: 1px solid var(--dialog-300-color, #FFB74D);
+          border-top: 5px solid var(--dialog-600-color, #FB8C00);
+          background: var(--dialog-50-color, #FFF3E0);
+          transition: top 1s linear, left 1s linear;
+        }
+          paper-dialog.standard .buttons {
+            margin-top: 2em;
+
+            background: var(--dialog-100-color, #FFE0B2);
+            color: #424242;
+            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px;
+
+            transition: all 0.6s;
+            max-height: 100em;
+          }
+          paper-dialog.standard .buttons.collapsed {
+            padding: 0 !important;
+            max-height: 0 !important;
+          }
+          
+          paper-dialog.standard.poller .buttons { overflow: hidden; }
+          paper-dialog.standard.waiting p { text-align: center; }
+
+    </style>
+    
+    <!-- #=== API CONNECTION TO THE BACKEND ===# -->
+    <bl-backend-client id="backend"></bl-backend-client>
+
+    <!-- #=== APP VIEWS (Just one for now) ===# -->
+
+    <bl-view-home id="homeView"></bl-view-home>
+    
+
+    <!-- #=== TOAST CONTAINER ===# -->
+    <content id="toastContainer" select="bl-toast-container"></content>
+
+    <!-- #=== STANDARD ALERT DIALOG ===# -->
+    <paper-dialog id="alertDialog" class="standard alert" modal>
+      <h2 id="alertDialogTitle"></h2>
+      <p id="alertDialogBody"></p>
+      <div class="buttons">
+        <paper-button id="alertDialogDismiss" dialog-dismiss on-tap="dialogDismiss">
+          <span id="alertDialogDismissText"></span>
+        </paper-button>
+        <paper-button id="alertDialogConfirm" dialog-confirm autofocus on-tap="dialogConfirm">
+          <span id="alertDialogConfirmText"></span>
+        </paper-button>
+      </div>
+    </paper-dialog>
+    
+    <!-- #=== STANDARD POLLER DIALOG ===# -->
+    <paper-dialog id="pollerDialog" class="standard poller" modal>
+      <h2 id="pollerDialogTitle"></h2>
+      <p>
+        <bl-poller id="pollerDialogPoller"></bl-poller>
+      </p>
+      <div id="pollerDialogButtons" class="buttons collapsed">
+        <paper-button id="pollerDialogDismiss" dialog-dismiss on-tap="dialogDismiss">
+          <span id="pollerDialogDismissText"></span>
+        </paper-button>
+        <paper-button id="pollerDialogConfirm" dialog-confirm autofocus on-tap="dialogConfirm">
+          <span id="pollerDialogConfirmText"></span>
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- #=== STANDARD WAITING DIALOG ===# -->
+    <paper-dialog id="waitingDialog" class="standard waiting" modal>
+      <h2 id="waitingDialogTitle"></h2>
+      <p>
+        <bl-spinner id="waitingDialogSpinner" active></bl-spinner>
+      </p>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    class BlApp extends Polymer.Element {
+      static get is() { return 'bl-app'; }
+
+      static get properties() {
+        return {
+          
+          /** The manifest is required from the backend. It contains details of the logged in user and a CSRF token to use for forms. */
+          manifest: {
+            type: Object,
+            observer: '_manifestChanged'
+          },
+
+          /** Automatically set to the current user from the manifest. */
+          currentUser: {
+            type: Object,
+            notify: true
+          },
+
+          dialogConfirmFunction: Object,
+          dialogDismissFunction: Object
+
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      setDialogColor(color) {
+        // This is primarily called by the standard dialog functions
+        // It sets all of the appropriate css variables to match the specified color
+        // Defaults to orange
+        if (color == 'blue') { // material light blue
+          this.updateStyles({
+            '--dialog-50-color': '#E1F5FE',
+            '--dialog-100-color': '#B3E5FC',
+            '--dialog-300-color': '#4FC3F7',
+            '--dialog-600-color': '#039BE5'
+          });
+        } else if (color == 'green') {
+          this.updateStyles({
+            '--dialog-50-color': '#F1F8E9',
+            '--dialog-100-color': '#C8E6C9',
+            '--dialog-300-color': '#AED581',
+            '--dialog-600-color': '#7CB342'
+          });
+        } else if (color == 'grey') {
+          this.updateStyles({
+            '--dialog-50-color': '#FAFAFA',
+            '--dialog-100-color': '#F5F5F5',
+            '--dialog-300-color': '#E0E0E0',
+            '--dialog-600-color': '#757575'
+          });
+        } else if (color == 'red') {
+          this.updateStyles({
+            '--dialog-50-color': '#FFEBEE',
+            '--dialog-100-color': '#FFCDD2',
+            '--dialog-300-color': '#E57373',
+            '--dialog-600-color': '#E53935'
+          });
+        } else { // default = orange
+          this.updateStyles({
+            '--dialog-50-color': '#FFF3E0',
+            '--dialog-100-color': '#FFE0B2',
+            '--dialog-300-color': '#FFB74D',
+            '--dialog-600-color': '#FB8C00'
+          });
+        }
+      }
+
+      // #=== PRIVATE ACTION METHODS ===#
+
+      _dialogConfirm() {
+        if (this.dialogConfirmFunction) this.dialogConfirmFunction();
+      }
+
+      _dialogDismiss() {
+        if (this.dialogDismissFunction) this.dialogDismissFunction();
+      }
+
+      _pollerCompleted(e) {
+        if (e.detail.poller.redirect_to) document.location.href = e.detail.poller.redirect_to;
+        else this.appContainer.$.pollerDialogButtons.classList.remove('collapsed');
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      ready() {
+        super.ready();
+
+        // Activate the home view
+        this.$.homeView.activate();
+
+        // Add Listeners
+        // FIXME: this.$.appHeaderLayout.addEventListener('paper-header-transform', e => this._appHeaderLayoutTransform(e));
+        this.$.pollerDialogPoller.addEventListener('bl-poller-completed', e => this._pollerCompleted(e));
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _manifestChanged(newValue, oldValue) {
+        if (newValue) this.currentUser = newValue.current_user;
+      }
+    }
+
+    window.customElements.define(BlApp.is, BlApp);
+  </script>
+</dom-module>

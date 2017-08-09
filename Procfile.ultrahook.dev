@@ -1,3 +1,7 @@
-web: bundle exec puma -C config/puma.rb
-worker: bundle exec sidekiq
-ultrahook: ultrahook dev 5000
+# This is the development procfile (this one loads ultrahook for inbound webhooks)
+
+web: cd backend && bundle exec puma -C config/puma.rb
+worker: cd backend && bundle exec sidekiq
+polymer: cd frontend && polymer serve
+polymer-proxy: cd dev/polymer-proxy && npm start
+ultrahook: cd backend && ultrahook dev 5000
