@@ -44,7 +44,7 @@ BadgeList::Application.routes.draw do
   match 'h/postmark_bounce' => 'webhooks#postmark_bounce', via: :post
 
   # === POLLER PATHS === #
-  match 'p/:id' => 'pollers#show', via: :get, as: :poller
+  match 'pollers/:id' => 'pollers#show', via: :get, as: :poller
   
   # === RESTFUL PATHS TO PRELOAD === #
   resources :domains
