@@ -388,7 +388,7 @@
     if ((currentImageCreated == null) || (Date.parse(poller.created_at) > currentImageCreated)) {
       currentImageCreated = Date.parse(poller.created_at);
       lastPoller = poller;
-      $("#badge-image").attr('src', '/p/' + poller._id + '.png');
+      $("#badge-image").attr('src', '/pollers/' + poller._id + '.png');
     }
   }
 

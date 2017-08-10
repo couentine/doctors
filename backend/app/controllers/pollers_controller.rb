@@ -1,6 +1,6 @@
 class PollersController < ApplicationController
 
-  # GET /p/1.json
+  # GET /pollers/1.json
   # This endpoint checks the status of a poller (only accessible by JSON)
   def show
     respond_to do |format|

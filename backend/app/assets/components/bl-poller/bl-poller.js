@@ -76,7 +76,7 @@ Polymer({
         self.initialInterval * Math.pow(2, Math.floor(self.tries/self.intervalDoubleRate)));
 
       // Do the query
-      $.getJSON('/p/' + self.pollerId + '.json', function(result) {
+      $.getJSON('/pollers/' + self.pollerId + '.json', function(result) {
         if (result == null) 
           self.goError('The specified poller could not be found.');
         else {
