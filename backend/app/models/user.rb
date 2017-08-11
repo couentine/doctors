@@ -926,13 +926,13 @@ class User
   # Returns false if there is no domain
   def domain_visible_to(current_user)
     !domain_id.blank? && \
-      (current_user.admin? || visible_to_domain_urls.include?(current_user.email_domain))
+      (current_user.present? && (current_user.admin? || visible_to_domain_urls.include?(current_user.email_domain)))
   end
 
   # Returns boolean indicating whether current_user can see this user's profile
   def profile_visible_to(current_user)
     if is_private
-      (self.id == current_user.id) || domain_visible_to(current_user)
+      current_user.present? && ((self.id == current_user.id) || domain_visible_to(current_user))
     else
       true
     end
