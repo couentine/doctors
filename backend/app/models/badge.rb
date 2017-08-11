@@ -41,6 +41,7 @@ class Badge
 
   # === INSTANCE VARIABLES === #
 
+  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
   attr_accessor :current_user_accessor # Used to set current user context during API calls
 
   # === RELATIONSHIPS === #
