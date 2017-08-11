@@ -19,8 +19,15 @@ module JSONTemplater
 
       # Set the current user if needed, but first store the previous value so we can restore it
       if options[:current_user]
-        previous_current_user_value = self.current_user
-        self.current_user = options[:current_user]
+        if self.respond_to? :current_user_accessor
+          # For badges there is already a current_user FIELD so we have another name for the accessor
+          previous_current_user_value = self.current_user_accessor
+          self.current_user_accessor = options[:current_user]
+        else
+          # Assume that if there's no current_user_accessor that we're supposed to use current_user
+          previous_current_user_value = self.current_user
+          self.current_user = options[:current_user]
+        end
       end
 
       self.class::JSON_TEMPLATES[key].each do |field_or_method|
