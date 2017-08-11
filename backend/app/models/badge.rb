@@ -41,8 +41,7 @@ class Badge
 
   # === INSTANCE VARIABLES === #
 
-  attr_accessor :context # Used to prevent certain callbacks from firing in certain contexts
-  # attr_accessor :current_user # Used to set current user context during API calls ==> Already exists as an actual field
+  attr_accessor :current_user_accessor # Used to set current user context during API calls
 
   # === RELATIONSHIPS === #
 
@@ -217,10 +216,10 @@ class Badge
 
   # This is used by the API and requires that the current_user model attribute be set
   def current_user_permissions
-    if current_user
+    if current_user_accessor
       {
-        is_learner: learner_user_ids.include?(current_user.id),
-        is_expert: expert_user_ids.include?(current_user.id)
+        is_learner: learner_user_ids.include?(current_user_accessor.id),
+        is_expert: expert_user_ids.include?(current_user_accessor.id)
       }
     else
       {
