@@ -1,4 +1,5 @@
 Stripe.api_key = ENV['stripe_secret_key']
+Stripe.api_version = ENV['stripe_api_version']
 
 # First build out the subscription plan constants from the config yaml
 all_subscription_plans = {} # plan_id => plan_fields

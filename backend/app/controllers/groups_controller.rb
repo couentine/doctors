@@ -339,7 +339,7 @@ class GroupsController < ApplicationController
   def cancel_subscription
     respond_to do |format|
       format.json do     
-        @poller_id = @group.cancel_stripe_subscription(true, true)
+        @poller_id = @group.cancel_stripe_subscription
         render json: { poller_id: @poller_id.to_s }
       end
     end

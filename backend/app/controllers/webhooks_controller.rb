@@ -10,25 +10,28 @@ class WebhooksController < ApplicationController
       event = JSON.parse(request.body.read)
 
       case event['type']
-      when 'customer.subscription.created'
-        Group.delay(queue: 'high').refresh_stripe_subscription(\
-          event['data']['object']['id'], context: 'stripe', queue_send_trial_ending_email: true)
+      when 'customer.subscription.trial_will_end', 'customer.subscription.updated'
+        Group.delay(queue: 'high', retry: false).pull_from_stripe(
+          event['data']['object']['id']
+        )
       when 'customer.subscription.deleted'
-        Group.delay(queue: 'high').refresh_stripe_subscription(\
-          event['data']['object']['id'], context: 'stripe')
+        Group.delay(queue: 'high', retry: false).cancel_stripe_subscription(
+          event['data']['object']['id'],
+          context: 'stripe'
+        )
       when 'invoice.payment_succeeded'
-        Group.delay(queue: 'high').refresh_stripe_subscription(\
-          event['data']['object']['subscription'], context: 'stripe', info_item_data: event)
+        Group.delay(queue: 'high', retry: false).pull_from_stripe(
+          event['data']['object']['subscription'],
+          info_item_data: event
+        )
       when 'invoice.payment_failed'
-        Group.delay(queue: 'high').refresh_stripe_subscription(\
-          event['data']['object']['subscription'], context: 'stripe', info_item_data: event,\
-          payment_fail_date: Time.at(event['data']['object']['date']), \
-          payment_retry_date: Time.at(event['data']['object']['next_payment_attempt']))
-        group = Group.find_by(stripe_subscription_id: event['data']['object']['subscription']) \
-          rescue nil
-        if group
-          GroupMailer.delay(retry: 5, queue: 'low').payment_failure(group.id)
-        end
+        Group.delay(queue: 'high', retry: false).pull_from_stripe(
+          event['data']['object']['subscription'], 
+          info_item_data: event,
+          payment_fail_date: Time.at(event['data']['object']['date']), 
+          payment_retry_date: Time.at(event['data']['object']['next_payment_attempt']),
+          send_payment_failure_email: true
+        )
       end
 
       # Save a copy of the request body as an info item
@@ -36,8 +39,6 @@ class WebhooksController < ApplicationController
       item.type = 'webhook-log-stripe-event'
       item.name = 'Stripe Webhook Request Body'
       item.data = event.to_hash
-      # For now let's keep all of these...
-      # item.delete_at = 1.day.from_now if Rails.env.production?
       item.save
 
       render nothing: true, status: :ok
