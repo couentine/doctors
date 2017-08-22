@@ -19,6 +19,11 @@ class WebhooksController < ApplicationController
           event['data']['object']['id'],
           context: 'stripe'
         )
+      when 'invoice.created'
+        Group.delay(queue: 'high', retry: false).validate_stripe_invoice(
+          event['data']['object']['id'],
+          event['data']['object']['subscription']
+        )
       when 'invoice.payment_succeeded'
         Group.delay(queue: 'high', retry: false).pull_from_stripe(
           event['data']['object']['subscription'],

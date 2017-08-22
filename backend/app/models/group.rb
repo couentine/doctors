@@ -1174,10 +1174,18 @@ class Group
       group.stripe_push_pending = true
       group.save
 
-      # Get the customer from stripe and confirm the existence of the payment source specified on the group (fix if needed)
+      # Get the customer from stripe and set the customer's default source to be source specified on the group
       customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
       confirmed_source = customer.sources.data.find{ |s| s.id == group.stripe_subscription_card }
-      group.stripe_subscription_card = customer.default_source if confirmed_source.blank?
+      if confirmed_source.blank?
+        group.stripe_subscription_card = customer.default_source
+      elsif (customer.default_source != confirmed_source)
+        customer.default_source = confirmed_source
+        customer.save
+
+        group.owner.stripe_default_source = confirmed_source.id
+        group.owner.save
+      end
 
       # If there is already a subscription id then we try to retrieve it from the stripe list on the customer
       if group.stripe_subscription_id.present?
@@ -1187,12 +1195,12 @@ class Group
           # Either the id is corrupted (and we can safely discard it) or the plan is canceled (and we can safely discard it) 
           # or it corresponds to an active subscription on another customer (and discarding is bad)
           # Since this is a weird edge case that might never happen, for now we will record an info item and move on.
-          item = InfoItem.new
-          item.type = 'stripe-error'
-          item.name = 'Stripe Subscription Id Not Found (Group.push_to_stripe)'
-          item.data = { group_id: group_id.to_s, group_url: group.url, group_name: group.name, 
-            stripe_subscription_id: group.stripe_subscription_id, stripe_customer_id: customer.id }
-          item.save
+          group.info_items.new(
+            type: 'stripe-error',
+            name: 'Stripe Subscription Id Not Found (Group.push_to_stripe)',
+            data: { group_id: group_id.to_s, group_url: group.url, group_name: group.name, 
+              stripe_subscription_id: group.stripe_subscription_id, stripe_customer_id: customer.id }
+          ).save
 
           # With that done, we can clear the invalid id
           group.stripe_subscription_id = nil
@@ -1205,7 +1213,6 @@ class Group
           items: [
             { plan: group.subscription_plan }
           ],
-          source: group.stripe_subscription_card,
           metadata: {
             description: "#{group.name} (#{group.url})",
             group_id: group.id.to_s,
@@ -1260,11 +1267,11 @@ class Group
         throw e
       else
         # Log this error
-        item = InfoItem.new
-        item.type = 'stripe-error'
-        item.name = 'Problem Pushing to Stripe (Group.push_to_stripe)'
-        item.data = { group_id: group_id.to_s, error: e.to_s }
-        item.save
+        group.info_items.new(
+          type: 'stripe-error',
+          name: 'Problem Pushing to Stripe (Group.push_to_stripe)',
+          data: { group_id: group_id.to_s, error: e.to_s }
+        ).save
       end
     end
   end
@@ -1359,6 +1366,14 @@ class Group
     else
       raise StandardError.new('This group does not have an active subscription!')
     end
+  end
+
+  # Called from the stripe webhook. This method verifies that the stripe_subscription_id can be found on a group in the database.
+  # If so, then it does nothing (which allows the invoice to be paid). If not, then it calls out to stripe to close the invoice without payment.
+  # Either way an InfoItem is recorded.
+  # This is intended to prevent spurious charges from inactive / duplicate subscriptions.
+  def self.validate_stripe_invoice(stripe_invoice_id, stripe_subscription_id)
+    # FIXME >> Code this
   end
 
   # Calls out to stripe to cancel subscription then updates the subscription status of any group with the specified subscription id
@@ -1612,13 +1627,15 @@ protected
   # Updates flags and subscription metadata whenever the plan or status changes
   def process_subscription_field_updates
     if paid?
-      if new_subscription
+      if new_subscription # set by the group form when reviving a subscription
         if stripe_subscription_status == 'new'
           self.stripe_subscription_status = 'force-new' # forces dirty state to fire callback
         else
           self.stripe_subscription_status = 'new'
         end
         self.new_subscription = nil
+      elsif stripe_subscription_status.blank? # will be true on new group record
+        self.stripe_subscription_status = 'new'
       end
 
       if new_record? || stripe_subscription_status_changed?
