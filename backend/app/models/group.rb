@@ -496,10 +496,10 @@ class Group
                         + "<a href='mailto:solutions@badgelist.com'>solutions@badgelist.com" \
                         + "</a>.").html_safe }
         else
-          { color: 'green', icon: 'fa-clock-0', show_alert: false,
+          { color: 'green', icon: 'fa-clock-o', show_alert: false,
             alert_title: "Initial charge pending",
             summary: "Subscription has just been created and is active pending the success of " \
-            + "the initial payment. Check back in the next few minutes to confirm success." }
+            + "the initial payment. Check back in the next few minutes to confirm successful payment." }
         end
       when 'past_due'
         { color: 'red', icon: 'fa-exclamation-circle', show_alert: true,
