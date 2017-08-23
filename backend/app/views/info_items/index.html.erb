@@ -74,7 +74,7 @@
                   <%= info_item.created_at.to_s :short_date_time %>
                 </td>
                 <td>
-                  <% if info_item.group_id %>
+                  <% if info_item.group_id && info_item.group.present? %>
                     <%= link_to info_item.group.name, group_path(info_item.group) %>
                   <% end %>
                 </td>

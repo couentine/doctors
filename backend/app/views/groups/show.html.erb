@@ -1431,6 +1431,7 @@
         <i class="fa fa-list-alt"></i>
         View plans &amp; pricing
       </a>
+      <%= link_to '<i class="fa fa-pencil"></i> Change subscription'.html_safe, edit_group_path, class: 'btn' %>
       <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
   </div>
@@ -1472,13 +1473,18 @@
                   end
                 %>
 
-                <% if @group.paid? && (@current_user_is_owner || @badge_list_admin) %>
+                <% if @current_user_is_owner || @badge_list_admin %>
                   <br>
                   <a href="#subscription-details" data-toggle="modal">
                     <span class="label <%= status_details[:color] %>">
-                      <%= @group.subscription_plan_name %> - 
-                      <i class="fa <%= status_details[:icon] %>"></i>
-                      <%= @group.subscription_status_string %>
+                      <% if @group.paid? %>
+                        <%= @group.subscription_plan_name %> - 
+                        <i class="fa <%= status_details[:icon] %>"></i>
+                        <%= @group.subscription_status_string %>
+                      <% else %>
+                        <i class="fa fa-info-circle"></i>
+                        Subscription Details
+                      <% end %>
                     </span>
                   </a>
                 <% elsif @group.paid? && @current_user_is_admin %>

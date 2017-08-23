@@ -46,13 +46,12 @@
       <% if @group.paid? && (@group.stripe_subscription_status != 'canceled') %>
         $("#group-type-collapsed a.btn").remove();
         $("#group-type-collapsed .controls").first()
-          .append("<p class='help-block'>(To change your group from free to paid, "
-            + "cancel the subscription first.)</p>");
+          .append("<p class='help-block'>(To change your group from paid to free, "
+            + "click the Cancel Subscription button below.)</p>");
       <% end %>
     <% end %>
 
     $("#group_type_paid").click(function() {
-      $("#group_new_subscription").val("true"); // only relevant if edit mode
       $("#group-type-expanded").fadeOut(function() {
         $("#group-type-collapsed").fadeIn();
         $("#subscription-details-panel").fadeIn();
@@ -65,7 +64,6 @@
     });
     
     $("#switch-to-free").click(function(e) {
-      $("#group_new_subscription").val(""); // only relevant if edit mode
       $("#group_type_free").click();
       $("#group-type-collapsed").fadeOut();
       $("#subscription-details-panel").fadeOut(function() {
@@ -100,7 +98,7 @@
       $("#view-subscription-panel").fadeOut(function() {
         $("#edit-subscription-panel").fadeIn();
       });
-      $("#group_new_subscription").val("true");
+      $("#group_revive_subscription").val("true");
     });
 
     // IMAGE UPLOAD
@@ -373,7 +371,7 @@
           collection: @pricing_group_options, hint: pricing_group_hint %>
 
         <% if !@group.new_record? %>
-          <%= f.input :new_subscription, label: 'Revive Subscription', as: :hidden %>
+          <%= f.input :revive_subscription, label: 'Revive Subscription', as: :hidden %>
         <% end %>
 
         <% if @badge_list_admin %>

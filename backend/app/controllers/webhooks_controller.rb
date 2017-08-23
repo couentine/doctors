@@ -20,7 +20,9 @@ class WebhooksController < ApplicationController
           context: 'stripe'
         )
       when 'invoice.created'
-        Group.delay(queue: 'high', retry: false).validate_stripe_invoice(
+        # This enables a process for preventing erroneous charges (those which do not correspond to group subscription ids in the DB).
+        # NOTE: Invoice validation is only enabled if 'stripe_enable_invoice_validation' environment variable is set to the string 'true'.
+        Group.delay(queue: 'high', retry: 5).validate_stripe_invoice(
           event['data']['object']['id'],
           event['data']['object']['subscription']
         )
