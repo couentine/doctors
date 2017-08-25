@@ -1,0 +1,353 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+  `<bl-user>` displays a user card. It is typically used in conjuction with bl-list.
+    
+    ADMIN DISPLAY MODE
+    If you set displayMode to 'admin' a remove button is included in the upper right corner of the
+    card. Clicking that button will fire a 'bl-user-remove' event with e.detail.user = the user.
+  -->
+  <dom-module id="bl-user">
+    <template>
+      
+      <style>
+        
+        /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+          justify-content: center;
+          font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+        }
+        
+        /* === USER STYLES === */
+        
+        paper-ripple { z-index: 50; }
+        
+        #paper {
+          flex: 1 1 auto;
+          background-color: var(--background-color, #F5F5F5);
+          border-radius: 5px;
+          z-index: 0;
+        }
+        .wrapper {
+          display: flex;
+          flex-direction: row;
+          border-radius: 5px;
+          height: 5em;
+          position: relative;
+          overflow: hidden;
+          font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+          text-decoration: none;
+        }
+        .image {
+          text-align: center;
+          flex: 0 0 auto;
+          height: 5em;
+          border-radius: 5px;
+          margin-right: 1em;
+          background: #BDBDBD;
+        }
+        img {
+          display: inline-block;
+          width: 5em; height: 5em;
+          border-radius: 5px;
+        }
+        .image i {
+          font-size: 4.2em;
+          color: rgb(97,97,97);
+          line-height: 1.2em;
+          margin: 0;
+          position: relative;
+          left: -0.06em;
+        }
+        .divider {
+          position: absolute;
+          border-radius: 500em;
+          background: transparent;
+          border: 1em solid var(--divider-color, #E0E0E0);
+          left: -17.1em;
+          top: -9em;
+          width: 21em;
+          height: 21em;
+        }
+        .label {
+          flex: 1 1 auto;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          height: 4em;
+          padding: 0.5em;
+          text-align: left;
+          z-index: 1;
+        }
+        .label-title {
+          flex: 0 0 auto;
+          @apply --bl-user-title;
+        }
+        h2 {
+          display: block;
+          margin: 0;
+          font-size: 1em;
+          line-height: 1.3em;
+          font-weight: 600;
+          color: rgb(97,97,97);
+          
+          height: 1.3em;
+          overflow: hidden;
+        }
+        .label-subtitle {
+          font-size: 0.9em;
+          flex: 0 0 auto;
+          
+          line-height: 1.6em;
+          height: 1.6em;
+          overflow: hidden;
+          
+          @apply --bl-user-subtitle;
+        }
+        paper-icon-button {
+          --paper-icon-button: {
+            width: 2.4em;
+            color: #616161;
+            transition: color 0.3s;
+          };
+          --paper-icon-button-hover: {
+            color: #D32F2F;
+          };
+        }
+        ul.metric-list {
+          list-style: none;
+          padding: 0; margin: 0;
+          color: rgb(97,97,97);
+          font-size: 0.8em;
+          display: block;
+        } 
+        ul.metric-list li {
+          display: inline-block;
+          margin: 0 0.5em 0 0;
+        }
+        ul.metric-list i {
+          color: rgb(249,168,37);
+          margin: 0 0.15em 0 0;
+        }
+        
+        /* === COMPONENT STYLES === */
+        
+      </style>
+      
+      <!-- INSERT COMPONENT DOM HERE -->
+
+      <paper-material id="paper" elevation="[[currentElevation]]" animated>
+
+      <template is="dom-if" if="[[link]]">
+        <a href$="[[user.full_path]]" class="wrapper">
+          <paper-ripple></paper-ripple>
+          
+          <div class="image">
+            <template is="dom-if" if="[[hasUser]]">
+              <img src$="[[avatarUrl]]">
+            </template>
+            <template is="dom-if" if="[[!hasUser]]">
+              <i class$="[[blankUserIconClass]]"></i>
+            </template>
+          </div>
+          <div class="divider">&nbsp;</div>
+          <div class="label">
+            <div class="label-title">
+              <template is="dom-if" if="[[hasUser]]">
+                <h2>[[user.name]]</h2>
+              </template>
+              <template is="dom-if" if="[[!hasUser]]">
+                <h2>[[blankUserText]]</h2>
+              </template>
+            </div>
+            <div class="label-subtitle">[[user.username_with_caps]]</div>
+            <ul class="metric-list" hidden$="[[!showMetricList]]">
+              <li hidden="[[!showRequestCount]]" class="request-count">
+                <i class="fa fa-flag-checkered"></i>
+                <span class="metric">[[requestCount]]</span>
+              </li>
+            </ul>
+          </div>
+          <template is="dom-if" if="[[showRemove]]">
+            <paper-icon-button icon="cancel" on-tap="removeUser"></paper-icon-button>
+          </template>
+        </a>
+      </template>
+
+      <template is="dom-if" if="[[!link]]">
+        <div class="wrapper">
+          <!-- === THIS SECTION IS EXACTLY THE SAME AS ABOVE BUT WITH <div> INSTEAD OF <a> === -->
+          <paper-ripple></paper-ripple>
+          
+          <div class="image">
+            <template is="dom-if" if="[[hasUser]]">
+              <img src$="[[avatarUrl]]">
+            </template>
+            <template is="dom-if" if="[[!hasUser]]">
+              <i class$="[[blankUserIconClass]]"></i>
+            </template>
+          </div>
+          <div class="divider">&nbsp;</div>
+          <div class="label">
+            <div class="label-title">
+              <template is="dom-if" if="[[hasUser]]">
+                <h2>[[user.name]]</h2>
+              </template>
+              <template is="dom-if" if="[[!hasUser]]">
+                <h2>[[blankUserText]]</h2>
+              </template>
+            </div>
+            <div class="label-subtitle">[[user.username_with_caps]]</div>
+            <ul class="metric-list" hidden$="[[!showMetricList]]">
+              <li hidden="[[!showRequestCount]]" class="request-count">
+                <i class="fa fa-flag-checkered"></i>
+                <span class="metric">[[requestCount]]</span>
+              </li>
+            </ul>
+          </div>
+          <template is="dom-if" if="[[showRemove]]">
+            <paper-icon-button icon="cancel" on-tap="removeUser"></paper-icon-button>
+          </template>
+        </div>
+      </template>
+
+    </paper-material>
+      
+    </template>
+    
+    <script>
+      class BlUser extends BlAppComponentMixin(Polymer.Element) {
+        
+        static get is() { return 'bl-user'; }
+
+        static get properties() {
+          return {
+            // INSERT PROPERTIES HERE
+            /* Current user */
+            user: { type: Object, observer: '_userObserver' },
+            /* Sets display mode. optional = ['admin'] */
+            displayMode: String,
+            /* Used to extract appropriate request count from user */
+            groupId: String,
+            /* Placeholder text for when user is blank */
+            blankUserText: { type: String, value: 'Nobody' },
+            /* Placeholder icon class when user is blank */
+            blankUserIconClass: { type: String, value: 'fa fa-fw fa-user' },
+            link: { type: Boolean, value: false },
+            elevation: { type: Number, value: 1 },
+            hoverElevation: { type: Number, value: 3 },
+            showRequestCount: { type: Boolean, value: false },
+            
+            // Read Only
+            currentElevation: { type: Number, readOnly: true, value: 1 },
+            hasUser: { type: Boolean, readOnly: true, value: false },
+            
+            // Computed
+            avatarUrl: { type: String, computed: '_avatarUrl(user)' },
+            requestCount: { type: Number, computed: '_requestCount(user, groupId)' },
+            showMetricList: { type: Boolean, computed: '_showMetricList(hasUser, showRequestCount)' },
+            showRemove: { type: Boolean, computed: '_showRemove(displayMode)' }
+          };
+        }
+        
+        // #=== PUBLIC ACTION METHODS ===#
+        
+        // ...
+        
+        // #=== PRIVATE ACTION METHODS ===#
+        
+        // ...
+        
+        // #=== LIFECYCLE EVENTS ===#
+        
+        connectedCallback() {
+          if (super.connectedCallback) super.connectedCallback();
+          this._setCurrentElevation(this.elevation);
+          /*
+          Fired when you over over the element.
+          @event paper.mouseover
+          */
+
+          //this.$.paper.addEventListener
+          //TODO: Refactor this.
+          this.addEventListener('paper.mouseover', this.paperMouseOver.bind(this));
+          /*
+          Fired when you hover out  of element.
+          @event paper.mouseout
+          */
+          this.addEventListener('paper.mouseout', this.paperMouseOut.bind(this));
+          
+          // ...
+        }
+        
+        // ready() {
+        //   super.ready();
+        // }
+        
+        getObservers() {
+          return [
+          'userObserver(users.*, filter)'
+          ];
+        }
+        
+        // #=== LISTENER & OBSERVER METHODS ===#
+        
+        userObserver(newValue, oldValue) {
+          //TODO: There does not seem to be a method that handles this.
+          this._setHasUser(newValue && newValue.username_with_caps);
+        }
+        
+        paperMouseOver() {
+          this._setCurrentElevation(this.hoverElevation);
+        }
+        
+        paperMouseOut() {
+          this._setCurrentElevation(this.elevation);
+        }
+        
+        removeUser(e) {
+          e.preventDefault(); // This prevents the anchor tag from being followed
+          this.dispatchEvent(new CustomEvent('bl-user-remove', { user: this.user }));
+        }
+        
+        // #=== PROPERTY COMPUTER METHODS ===#
+        _avatarUrl(user) {
+          if (user && user.avatar_image_medium_url) return user.avatar_image_medium_url;
+          else return "https://secure.gravatar.com/avatar/0?s=200&d=mm";
+        }
+        
+        _requestCount(user, groupId) {
+          if (user && user.grup_validation_request_counts && groupId)
+          return user.group_validation_request_counts[groupId];
+          else 
+          return null;
+        }
+        
+        _showMetricList(hasUser, showRequestCount) {
+          //This is in case in the future there are multiple metrics
+          return hasUser && showRequestCount;
+        }
+        
+        _showRemove(displayMode) { return displayMode = 'admin'; }
+        
+        
+        // #=== PRIVATE HELPER & UTILITY METHODS ===#
+        
+        
+        
+      }
+      
+      window.customElements.define(BlUser.is, BlUser);
+    </script>
+  </dom-module>
