@@ -165,6 +165,7 @@ class User
   after_save :process_avatar
   before_update :process_email_change
   after_update :update_logs
+  after_update :push_stripe_field_changes
   after_destroy :clear_from_group_tags
   after_destroy :delete_from_intercom
 
@@ -944,21 +945,65 @@ class User
     !stripe_customer_id.blank? && !stripe_cards.blank?
   end
 
+  # Use this to generate the hash which gets set as the metadata property of the user's stripe customer record.
+  # NOTE: If adding new metadata to this method, be sure to also update stripe_customer_metadata_changed? below.
+  def stripe_customer_metadata
+    {
+      user_id: id,
+      username: username,
+      name: name
+    }
+  end
+
+  # Generates the value used for the standard customer `description` field in Stripe.
+  # NOTE: If adding new metadata to this method, be sure to also update stripe_customer_metadata_changed? below.
+  def stripe_customer_description
+    "#{name} (#{username_with_caps})"
+  end
+
+  # Use this determine if stripe needs to be updated with changes to stripe_customer_metadata, stripe_customer_description or email
+  def stripe_customer_fields_changed?
+    username_with_caps_changed? || name_changed? || email_changed?
+  end
+
+  # This updates stripe with a refreshed copy of stripe_customer_metadata, stripe_customer_description and email
+  def self.push_fields_to_stripe(user_id)
+    begin
+      user = User.find(user_id)
+
+      if user.stripe_customer_id.present?
+        customer = Stripe::Customer.retrieve(user.stripe_customer_id)
+        customer.email = user.email if customer.email != user.email
+        customer.description = user.stripe_customer_description if customer.description != user.stripe_customer_description
+        customer.metadata = user.stripe_customer_metadata
+        customer.save
+      end
+    rescue Exception => e
+      if user
+        # Log this error
+        user.info_items.new(
+          type: 'stripe-error',
+          name: 'Problem Pushing Metadata to Stripe (User.push_fields_to_stripe)',
+          data: { error: e.to_s }
+        ).save
+      else
+        # No group so just throw the error
+        throw e
+      end
+    end
+  end
+
   # Calls out to stripe to create a new customer record and then saves the strip cust id locally
   def create_stripe_customer
     if stripe_customer_id.blank?
-      response = Stripe::Customer.create(
+      customer = Stripe::Customer.create(
         email: email,
-        description: "#{name} (#{username_with_caps})",
-        metadata: {
-          user_id: id,
-          username: username,
-          name: name
-        }
+        description: stripe_customer_description,
+        metadata: stripe_customer_metadata
       )
       
-      if response
-        self.stripe_customer_id = response.id
+      if customer
+        self.stripe_customer_id = customer.id
         self.save
       end
     end
@@ -1334,6 +1379,13 @@ protected
       if matched_domain
         update_domain_cache_from matched_domain.json(:for_user_cache)
       end
+    end
+  end
+
+  # Called after an update (not on insert) to check if stripe customer field need updating
+  def push_stripe_field_changes
+    if stripe_customer_id.present? && stripe_customer_fields_changed?
+      User.delay_for(30.seconds, queue: 'low', retry: false).push_fields_to_stripe(id)
     end
   end
 

@@ -39,6 +39,8 @@ s3_asset_url=https://s3-us-east-1.amazonaws.com
 s3_bucket_name=bl-staging
 stripe_key=ABC123
 stripe_livemode=false
+stripe_api_version=2017-06-05
+stripe_enable_invoice_validation=true
 twitter_consumer_key=abc123
 twitter_consumer_secret=abc123
 twitter_access_token=abc123
@@ -59,13 +61,14 @@ dev_gmail_password=PASSWORD_TO_GMAIL_ACCOUNT
 lti_app_name=Badge List Dev
 lti_app_description=Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.
 lti_unique_tool_id=badgelist-dev
+bl_admin_email=app-errors@badgelist.com
 ```
 
 ## Running the app ##
 
 To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. This will run both the rails app (at localhost:5000) and the polymer app (at localhost:8081). The polymer app is actually proxied via the polymer-proxy server (at localhost:8080) which exists to add CORS headers.
 
-You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). To open a rails console in your terminal, navigate to the `backend` folder and run `foreman run rails c`. (Note: This is currently a little broken and doesn't load the environment variables.)
+You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). To open a rails console in your terminal, navigate to the `backend` folder and run `foreman run --env ../.env rails console`. (You have to run the foreman command from backend in order to be able to use the rails command, but you then need to explicitly pass it the path to the .env file since it is located in a different directory.)
 
 **Note:** If you are testing webhooks with external services (such as Stripe or Postmark) you will need to use `Procfile.ultrahook.dev`. That will forward `http://dev.[ultrahook_username].ultrahook.com` to `http://localhost:5000`. The ultrahook username will be the username of the account linked to the `ULTRAHOOK_API_KEY` in your `.env` file. To specify the procfile use the command below:
 

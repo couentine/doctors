@@ -128,10 +128,11 @@ class Group
   field :stripe_subscription_card,        type: String
   field :stripe_subscription_id,          type: String
   field :stripe_subscription_details,     type: String
-  field :stripe_subscription_status,      type: String, default: 'new'
+  field :stripe_subscription_status,      type: String
     # Possible Status Values = ['trialing', 'active', 'past_due', 'canceled', 'unpaid'] 
-    #                          & 'new' & 'force-new'
-  field :new_subscription,                type: Boolean # used to set subscription status to 'new'
+    #                          & 'new' & 'force-new', 'pending'
+  field :revive_subscription,             type: Boolean
+  field :stripe_push_pending,             type: Boolean, default: false # used to freeze webhook updates while pushing changes to stripe
 
   field :badges_cache,                    type: Hash, default: {} # key=badge_id, value=key_fields
 
@@ -192,13 +193,12 @@ class Group
   
   before_save :update_paid_defaults
   before_save :process_subscription_field_updates
-  before_create :create_first_subscription
-  after_save :process_avatar
-  before_update :create_another_subscription
-  after_update :update_child_badges
   before_save :process_tags_cache_changes
-  after_update :update_stripe_if_needed
-  before_destroy :cancel_subscription_on_destroy
+  after_save :push_stripe_changes
+  after_save :process_avatar
+  after_update :update_child_badges
+  after_update :push_stripe_metadata_changes
+  after_destroy :cancel_subscription_on_destroy
   
   before_save :update_analytics
 
@@ -444,8 +444,14 @@ class Group
   def subscription_status_string
     if paid?
       case stripe_subscription_status
-      when 'trialing', 'new', 'force-new'
-        'Trial'
+      when 'new', 'force-new', 'pending'
+        'Pending'
+      when 'trialing'
+        if subscription_end_date.present?
+          'Trial'
+        else
+          'Pending'
+        end
       when 'active'
         'Active'
       when 'past_due'
@@ -478,16 +484,23 @@ class Group
       date_retry = stripe_payment_retry_date || (Time.now + 3.days)
 
       case stripe_subscription_status
-      when 'new', 'force-new', 'trialing'
-        { color: 'orange', icon: 'fa-clock-o', show_alert: true,
-          summary: "Trial ends on #{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}",
-          alert_title: "Group is in trial period",
-          alert_body: ("Your paid group trial ends on " \
-                      + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}. " \
-                      + "Your card will be charged when the trial is complete. " \
-                      + "If you have any questions, send us an email at " \
-                      + "<a href='mailto:solutions@badgelist.com'>solutions@badgelist.com" \
-                      + "</a>.").html_safe }
+      when 'new', 'force-new', 'trialing', 'pending'
+        if subscription_end_date.present?
+          { color: 'orange', icon: 'fa-clock-o', show_alert: true,
+            summary: "Trial ends on #{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}",
+            alert_title: "Group is in trial period",
+            alert_body: ("Your paid group trial ends on " \
+                        + "#{(subscription_end_date || 2.weeks.from_now).to_s(:short_date)}. " \
+                        + "Your card will be charged when the trial is complete. " \
+                        + "If you have any questions, send us an email at " \
+                        + "<a href='mailto:solutions@badgelist.com'>solutions@badgelist.com" \
+                        + "</a>.").html_safe }
+        else
+          { color: 'green', icon: 'fa-clock-o', show_alert: false,
+            alert_title: "Initial charge pending",
+            summary: "Subscription has just been created and is active pending the success of " \
+            + "the initial payment. Check back in the next few minutes to confirm successful payment." }
+        end
       when 'past_due'
         { color: 'red', icon: 'fa-exclamation-circle', show_alert: true,
           summary: "Payment failed on #{date_failed.to_s(:short_date)}",
@@ -525,7 +538,7 @@ class Group
       else
         { color: 'green', icon: 'fa-check-circle', show_alert: false,
           alert_title: "Group is active",
-          summary: "Subscription renews #{subscription_end_date.to_s(:short_date)}" }
+          summary: "Subscription renews #{(subscription_end_date.present?) ? subscription_end_date.to_s(:short_date) : 'automatically'}" }
       end
     end
   end
@@ -1150,103 +1163,249 @@ class Group
       self.features = ALL_SUBSCRIPTION_PLANS[subscription_plan]['features']
     end
   end
-  
-  # Calls out to stripe to create new subscription for the group
-  # Set async to true to do the call asynchronously
-  # NOTE: No poller is created for this async since group callbacks already set intelligent defaults
-  def create_stripe_subscription(async = false)
-    if async
-      Group.delay(queue: 'high').create_stripe_subscription(group_id: self.id)
-    else
-      Group.create_stripe_subscription(group: self)
+
+  # Use this to generate the hash which gets set as the metadata property of the group's stripe subscription
+  # NOTE: If adding new metadata to this method, be sure to also update stripe_subscription_metadata_changed? below.
+  def stripe_subscription_metadata
+    {
+      description: "#{name} (#{url})",
+      group_id: id.to_s,
+      group_url: url,
+      group_name: name,
+      group_website: website
+    }
+  end
+
+  # Use this to see if any of the fields which contribute to the stripe_subscription_metadata have changed
+  def stripe_subscription_metadata_changed?
+    name_changed? || url_changed? || website_changed?
+  end
+
+  # This pushes a refreshed copy of the stripe_subscription_metadata to stripe (it does not touch any other aspects of the subscription)
+  def self.push_metadata_to_stripe(group_id)
+    begin
+      group = Group.find(group_id)
+
+      if group.stripe_subscription_id.present?
+        subscription = Stripe::Subscription.retrieve(group.stripe_subscription_id)
+        subscription.metadata = group.stripe_subscription_metadata
+        subscription.save
+      end
+    rescue Exception => e
+      if group
+        # Log this error
+        group.info_items.new(
+          type: 'stripe-error',
+          name: 'Problem Pushing Metadata to Stripe (Group.push_metadata_to_stripe)',
+          data: { error: e.to_s }
+        ).save
+      else
+        # No group so just throw the error
+        throw e
+      end
     end
   end
 
-  # Calls out to stripe to create new subscription for the group
-  # Accepts the following options:
-  # - group_id: Include this to have the group be queried
-  # - group: Include this to skip the query
-  # - trial_end: Manually sets the trial end date (should be unix timestamp)
-  def self.create_stripe_subscription(options = {})
-    group = options[:group] || Group.find(options[:group_id])
+  # This pushes local changes to the subscription out to stripe so that stripe matches the local settings
+  # This method will update the existing subscription if present or it will create a new subscription.
+  # If set `throw_errors` is false then errors are logged as a 'stripe-error' InfoItem, otherwise they are thrown.
+  def self.push_to_stripe(group_id, throw_errors = false)
+    begin
+      group = Group.find(group_id)
 
-    customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
-    if (customer.default_source != group.stripe_subscription_card)
-      customer.default_source = group.stripe_subscription_card
-      customer.save
+      # First we need to record that we are working on the subscription (so any incoming stripe webhooks will be ignored until we're done)
+      group.stripe_push_pending = true
+      group.save
+
+      # Get the customer from stripe and set the customer's default source to be source specified on the group
+      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
+      confirmed_source = customer.sources.data.find{ |s| s.id == group.stripe_subscription_card }
+      if confirmed_source.blank?
+        group.stripe_subscription_card = customer.default_source
+      elsif customer.default_source != confirmed_source.id
+        customer.default_source = confirmed_source.id
+        customer.save
+
+        group.owner.stripe_default_source = confirmed_source.id
+        group.owner.save
+      end
+
+      # If there is already a subscription id then we try to retrieve it from the stripe list on the customer
+      if group.stripe_subscription_id.present?
+        subscription = customer.subscriptions.data.find{ |s| s.id == group.stripe_subscription_id }
+
+        if subscription.blank?
+          # Either the id is corrupted (and we can safely discard it) or the plan is canceled (and we can safely discard it) 
+          # or it corresponds to an active subscription on another customer (and discarding is bad)
+          # Since this is a weird edge case that might never happen, for now we will record an info item and move on.
+          group.info_items.new(
+            type: 'stripe-error',
+            name: 'Stripe Subscription Id Not Found (Group.push_to_stripe)',
+            data: { group_id: group_id.to_s, group_url: group.url, group_name: group.name, 
+              stripe_subscription_id: group.stripe_subscription_id, stripe_customer_id: customer.id }
+          ).save
+
+          # With that done, we can clear the invalid id
+          group.stripe_subscription_id = nil
+        end
+      end
+
+      # Now we either create a new subscription or update the existing one
+      if subscription.blank?
+        subscription = customer.subscriptions.create(
+          items: [
+            { plan: group.subscription_plan }
+          ],
+          metadata: group.stripe_subscription_metadata
+        )
+        
+        intercom_event_name = 'stripe-subscription-create'
+        info_item_event_type = 'created'
+      else
+        if subscription.plan.id != group.subscription_plan
+          item_id = subscription.items.data[0].id
+          subscription.items = [
+            { id: item_id, plan: group.subscription_plan }
+          ]
+          subscription.prorate = true
+          subscription.save
+          
+          intercom_event_name = 'stripe-subscription-update'
+          info_item_event_type = 'changed'
+        else
+          intercom_event_name = 'stripe-subscription-card-change'
+          info_item_event_type = nil # this won't create an info item
+        end
+      end
       
-      group.owner.stripe_default_source = group.stripe_subscription_card
-      group.owner.save
-    end
+      group.stripe_subscription_id = subscription.id
+      group.stripe_subscription_status = subscription.status
+      group.stripe_subscription_details = subscription.to_hash
+      group.subscription_end_date = subscription.current_period_end
+      group.stripe_push_pending = false
+      group.save
 
-    subscription = customer.subscriptions.create(
-      plan: group.subscription_plan,
-      trial_end: options[:trial_end],
-      metadata: {
-        description: "#{group.name} (#{group.url})",
-        group_id: group.id.to_s,
-        group_url: group.url,
-        group_name: group.name,
-        group_website: group.website
-      }
-    )
-    
-    group.stripe_subscription_id = subscription.id
-    group.stripe_subscription_status = subscription.status
-    group.stripe_subscription_details = subscription.to_hash
-    group.subscription_end_date = subscription.current_period_end
-    group.save
+      # Track an info item (which can potentially be user-facing)
+      if info_item_event_type.present?
+        group.info_items.new(
+          type: "group-subscription-#{info_item_event_type}",
+          name: "Group Subscription was Successfully #{info_item_event_type.capitalize}",
+          data: { stripe_subscription_id: group.stripe_subscription_id, subscription_plan: group.subscription_plan,
+            owner_id: group.owner_id.to_s }
+        ).save
+      end
+
+      # Then log an event in intercom
+      IntercomEventWorker.perform_async({
+        'event_name' => intercom_event_name,
+        'email' => group.owner.email,
+        'created_at' => Time.now.to_i,
+        'metadata' => {
+          'group_id' => group.id.to_s,
+          'group_name' => group.name,
+          'group_url' => group.group_url,
+          'plan' => group.subscription_plan
+        }
+      })
+    rescue Exception => e
+      # Clear the push pending flag
+      if group.stripe_push_pending
+        group.stripe_push_pending = false
+        group.save
+      end
+
+      if throw_errors
+        throw e
+      else
+        # Log this error
+        group.info_items.new(
+          type: 'stripe-error',
+          name: 'Problem Pushing to Stripe (Group.push_to_stripe)',
+          data: { group_id: group_id.to_s, error: e.to_s }
+        ).save
+      end
+    end
   end
 
   # Calls out to stripe to refresh the subscription status (Called from the stripe webhook)
+  # If the stripe_push_pending boolean is true on the group, this method will only log an info item but will not do anything.
+  #
   # Accepts the following options hash members:
-  # - group: This will cause the group query to be skipped
-  # - context: This will override the default group context value
   # - payment_fail_date: This will optionally cause the payment_fail_date to be updated
   # - payment_retry_date: This will optionally cause the payment_retry_date to be updated
   # - info_item_data: This will optionally result in the insertion of an info item 
   #     with type = "stripe-event" and name = "Invoice Payment"
   # - throw_errors: Set this to true to throw errors instead of logging them
-  # - queue_send_trial_ending_email: 
-  #     Set to true to send the trial_ending email 3 days before end
-  #     Note: If this is a free group the trial_ending email will NOT be sent even if param is true
-  def self.refresh_stripe_subscription(stripe_subscription_id, options = {})
+  # - send_payment_failure_email: Set this to true to send a payment failure notification email to the group owner
+  def self.pull_from_stripe(stripe_subscription_id, options = {})
     begin
-      group = options[:group] \
-        || (Group.find_by(stripe_subscription_id: stripe_subscription_id) rescue nil)
-      group.context = options[:context]
+      group = Group.find_by(stripe_subscription_id: stripe_subscription_id)
+      group.context = 'stripe'
 
       if options[:info_item_data]
-        group.info_items.new(type: 'stripe-event', name: 'Invoice Payment', \
-          data: options[:info_item_data], user: group.owner).save
+        # Create a user-facing info_item
+        group.info_items.new(
+          type: 'stripe-event', 
+          name: 'Invoice Payment',
+          data: options[:info_item_data], 
+          user: group.owner
+        ).save
       end
 
-      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
-      begin
-        subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
-        
-        group.subscription_plan = subscription.plan.id
-        group.stripe_subscription_status = subscription.status
-        group.stripe_subscription_details = subscription.to_hash
-        group.subscription_end_date = subscription.current_period_end
-        group.stripe_payment_fail_date = options[:payment_fail_date]
-        group.stripe_payment_retry_date = options[:payment_retry_date]
-        group.save
+      if group.stripe_push_pending
+        # This is a webhook event coming in while Group.push_to_stripe is running, so we ignore it
+        group.info_items.new(
+          type: 'stripe-event-ignored', 
+          name: 'Ignored Stripe Event (Group.pull_from_stripe)',
+          data: options
+        ).save
+      else
+        begin
+          # Retrieve the subscription 
+          # Note: It's possible that somehow the customer doesn't match, not currently doing anything special if so.
+          subscription = Stripe::Subscription.retrieve(group.stripe_subscription_id)
 
-        if options[:queue_send_trial_ending_email] && subscription && subscription.plan \
-            && (subscription.plan.amount > 0)
-          # Schedule a reminder email to go out 3 days before the trial expires
-          GroupMailer.delay_until(group.subscription_end_date - 3.days, retry: 5, queue: 'low')\
-            .trial_ending(group.id)
-        end
-      rescue Exception => e
-        if subscription
-          # There was an unanticipated error, throw it
-          throw e
-        else
-          # There is no more subscription (it must've been cancelled remotely), cancel it locally
-          group.stripe_subscription_status = 'canceled'
+          # Determine whether we are going to log an info item
+          if subscription.plan.id != group.subscription_plan
+            info_item_event_type = 'changed'
+          end
+
+          group.subscription_plan = subscription.plan.id
+          group.stripe_subscription_status = subscription.status
+          group.stripe_subscription_details = subscription.to_hash
+          group.subscription_end_date = subscription.current_period_end
+          group.stripe_payment_fail_date = options[:payment_fail_date]
+          group.stripe_payment_retry_date = options[:payment_retry_date]
           group.save
+          
+          # Track an info item if needed (which can potentially be user-facing)
+          if info_item_event_type.present?
+            group.info_items.new(
+              type: "group-subscription-#{info_item_event_type}",
+              name: "Group Subscription was Successfully #{info_item_event_type.capitalize}",
+              data: { stripe_subscription_id: group.stripe_subscription_id, subscription_plan: group.subscription_plan,
+                owner_id: group.owner_id.to_s }
+            ).save
+          end
+
+          if options[:send_payment_failure_email]
+            GroupMailer.delay(retry: 5, queue: 'low').payment_failure(group.id)
+          end
+        rescue Exception => e
+          if subscription
+            # There was an unanticipated error, throw it
+            throw e
+          else
+            # The subscription couldn't be found, log the edge case (not sure how this would happen but it's important if it does)
+            group.info_items.new(
+              type: 'stripe-error', 
+              name: 'Stripe Webhook Error - Subscription Not Found (Group.pull_from_stripe)',
+              data: {
+                stripe_subscription_id: group.stripe_subscription_id,
+                options: options
+              }
+            ).save
+          end
         end
       end
     rescue Exception => e
@@ -1255,119 +1414,189 @@ class Group
       else
         # Log this error
         item = InfoItem.new
-        item.type = 'webhook-error'
-        item.name = 'Stripe Webhook Error (Group.refresh_stripe_subscription)'
+        item.type = 'stripe-error'
+        item.name = 'Stripe Webhook Error (Group.pull_from_stripe)'
         item.data = { stripe_subscription_id: stripe_subscription_id, options: options, e: e.to_s }
         item.save
       end
     end
   end
 
-  # Calls out to stripe to update stripe about local changes to the subscription
-  # Set async to true to do the call asynchronously
-  # NOTE: No poller is created for this async since its only called by callbacks
-  def update_stripe_subscription(async = false)
-    if async
-      Group.delay(queue: 'high').update_stripe_subscription(group_id: self.id)
+  # Called from the stripe webhook. This method verifies that the stripe_subscription_id can be found on a group in the database.
+  # If so, then it does nothing (which allows the invoice to be paid). If not, then it calls out to stripe to close the invoice 
+  # without payment. Either way an InfoItem is recorded.
+  # This is intended to prevent erroneous charges from inactive / duplicate subscriptions.
+  # NOTE: Invoice validation is only enabled if the 'stripe_enable_invoice_validation' environment variable is set to the string 'true'.
+  #   It is best to leave the validation disabled in staging / development unless you are actively testing it (otherwise the various dev 
+  #   environments will cancel eachother's charges).
+  def self.validate_stripe_invoice(stripe_invoice_id, stripe_subscription_id)
+    if ENV['stripe_enable_invoice_validation'] != 'true'
+      InfoItem.new(
+        type: 'stripe-invoice-validation-skipped', 
+        name: 'Skipped Validation of Invoice (Group.validate_stripe_invoice)',
+        data: { stripe_invoice_id: stripe_invoice_id, stripe_subscription_id: stripe_subscription_id }
+      ).save
     else
-      Group.update_stripe_subscription(group: self)
-    end
-  end
-  
-  # Calls out to stripe to update stripe about local changes to the subscription
-  # Accepts the following options:
-  # - group_id: Include this to have the group be queried
-  # - group: Include this to skip the query
-  # - throw_errors: Set this to true to throw errors instead of logging them
-  def self.update_stripe_subscription(options = {})
-    begin
-      group = options[:group] || Group.find(options[:group_id])
+      group = Group.find_by(stripe_subscription_id: stripe_subscription_id) rescue nil
 
-      customer = Stripe::Customer.retrieve(group.owner.stripe_customer_id)
-      if customer.default_source != group.stripe_subscription_card
-        customer.default_source = group.stripe_subscription_card
-        customer.save
-      end
-      
-      subscription = customer.subscriptions.retrieve(group.stripe_subscription_id)
-      if group.subscription_plan != subscription.plan
-        subscription.plan = group.subscription_plan
-        subscription.save
-      end
-    rescue Exception => e
-      if options[:throw_errors]
-        throw e
+      if group.present?
+        group.info_items.new(
+          type: 'stripe-invoice-validated', 
+          name: 'Verified Existence of Active Subscription (Group.validate_stripe_invoice)',
+          data: { stripe_invoice_id: stripe_invoice_id, stripe_subscription_id: stripe_subscription_id }
+        ).save
       else
-        # Log this error
-        item = InfoItem.new
-        item.type = 'callback-error'
-        item.name = 'Problem Updating Subscription (Group.update_stripe_subscription)'
-        item.data = { options: options, error: e.to_s }
+        # First close the invoice in stripe (this will prevent the customer from getting charged)
+        invoice_closing_error = nil
+        begin
+          invoice = Stripe::Invoice.retrieve(stripe_invoice_id)
+          invoice.closed = true
+          invoice.save
+        rescue Exception => e
+          invoice_closing_error = e
+        end
+
+        # Then log the error item
+        item = InfoItem.new(
+          type: 'stripe-invoice-canceled', 
+          name: 'Could Not Verify Existence of Active Subscription (Group.validate_stripe_invoice)',
+          data: {
+            stripe_invoice_id: stripe_invoice_id,
+            stripe_subscription_id: stripe_subscription_id,
+            invoice_closed_successfully: invoice_closing_error.nil?,
+            invoice_closing_error: ((invoice_closing_error.nil?) ? nil : invoice_closing_error.to_s)
+          }
+        )
         item.save
+
+        # Then send an email to Badge List admins (since this subscription needs to be reviewed and potentially canceled in stripe)
+        if invoice_closing_error.nil?
+          email_subject = "Invalid Stripe Payment Prevented - #{stripe_invoice_id}"
+          email_title = 'A pending invoice was automatically closed, please review Stripe for potential error'
+          email_body = 'The invoice validation process prevented a payment from going through. This happened because the subscription id ' \
+            + 'did not match any groups in the database. This might be an indication of an erroneous subscription which needs to be ' \
+            + 'manually canceled in Stripe. Please click the link below to investigate.'
+          color = 'blue_grey'
+        else
+          email_subject = "Invalid Stripe Payment Detected (Automatic Prevention Failed) - #{stripe_invoice_id}"
+          email_title = 'A potential erroneous charge has been detected, but could not be canceled, please review Stripe ASAP'
+          email_body = 'The invoice validation process detected an invalid payment but could not prevent it from going through.<br><br>' \
+            + '<strong>Error Message:</strong> ' + invoice_closing_error.to_s + '<br><br>The subscription id ' \
+            + 'did not match any groups in the database which is a likely indication of an erroneous subscription which needs to be ' \
+            + 'manually canceled in Stripe. Please click the link below to investigate.'
+          color = 'red'
+        end
+        if ENV['stripe_livemode'] == 'true'
+          email_link = "https://dashboard.stripe.com/invoices/#{stripe_invoice_id}"
+        else
+          email_link = "https://dashboard.stripe.com/test/invoices/#{stripe_invoice_id}"
+        end
+        SystemMailer.bl_admin_email(email_subject, email_title, email_body, 'Open invoice in stripe', email_link, color).deliver
       end
     end
   end
 
-  # Calls out to stripe to cancel subscription
-  # Set update_status to decide whether or not the status will get updated the cancellation
-  # If async is set to true then the method will return the id of a poller
-  def cancel_stripe_subscription(update_status, async = false)
-    if async
+  # Calls out to stripe to cancel subscription, returns a poller which can be used to track the progress
+  # NOTE: Do not set the stripe_subscription_status to 'canceled' directly, always use this method (or the class method below).
+  def cancel_stripe_subscription
+    if stripe_subscription_id.present?
       poller = Poller.new
       poller.save
-      group_id = (update_status) ? self.id : nil
-      Group.delay(queue: 'high', retry: false).cancel_stripe_subscription(owner.stripe_customer_id,\
-        stripe_subscription_id, poller_id: poller.id, group_id: group_id)
+      Group.delay(queue: 'high', retry: false).cancel_stripe_subscription(stripe_subscription_id, poller_id: poller.id)
       poller.id
     else
-      group = (update_status) ? self : nil
-      Group.cancel_stripe_subscription(owner.stripe_customer_id, stripe_subscription_id, \
-        group: group)
+      raise StandardError.new('This group does not have an active subscription!')
     end
   end
 
-  # Calls out to stripe to cancel subscription
+  # Calls out to stripe to cancel subscription then updates the subscription status of any group with the specified subscription id
   # Accepts the following options (leave the group fields out to skip the group updating)
-  # - group_id: Include this to have the group be queried and updated by id
-  # - group: Include this to have the group be updated without requerying
   # - poller_id: If provided this poller record will be updated with success or failure details
   # - throw_errors: Set this to true to throw errors instead of logging them
-  def self.cancel_stripe_subscription(stripe_customer_id, stripe_subscription_id, options = {})
+  # - context: Set this to 'stripe' if calling from a stripe webhook (this will skip the calls back out to stripe)
+  def self.cancel_stripe_subscription(stripe_subscription_id, options = {})
     begin
       poller = Poller.find(options[:poller_id]) rescue nil
-      customer = Stripe::Customer.retrieve(stripe_customer_id)
-      subscription = customer.subscriptions.retrieve(stripe_subscription_id)
-      subscription = subscription.delete
-      
-      group = options[:group] || Group.find(options[:group_id]) rescue nil
-      if group
-        group.stripe_subscription_status = 'canceled'
-        group.stripe_subscription_details = subscription.to_hash
+      group = Group.find_by(stripe_subscription_id: stripe_subscription_id) rescue nil
+
+      if group.present? && group.stripe_push_pending
+        # This is a webhook event coming in while Group.cancel_stripe_subscription is running, so we ignore it
+        group.info_items.new(
+          type: 'stripe-event-ignored', 
+          name: 'Ignored Stripe Event (Group.cancel_stripe_subscription)',
+          data: options
+        ).save
+      else
+        if group
+          # First we need to record that we are working on the subscription (so any incoming stripe webhooks will be ignored until we're done)
+          group.stripe_push_pending = true
+          group.save
+        end
+        
+        if options[:context] != 'stripe'
+          subscription = Stripe::Subscription.retrieve(stripe_subscription_id)
+          subscription = subscription.delete
+        end
+        
+        if group
+          group.context = options[:context]
+          group.stripe_subscription_status = 'canceled'
+          group.stripe_subscription_id = nil
+          group.stripe_subscription_card = nil
+          group.subscription_end_date = 2.weeks.from_now
+          group.stripe_subscription_details = subscription.to_hash if subscription.present?
+          group.stripe_push_pending = false
+          group.save!
+
+          # Track an info item (which can potentially be user-facing)
+          group.info_items.new(
+            type: 'group-subscription-canceled',
+            name: 'Group Subscription was Successfully Canceled',
+            data: { stripe_subscription_id: stripe_subscription_id, subscription_plan: group.subscription_plan,
+              owner_id: group.owner_id.to_s }
+          ).save
+
+          # Then log an event in intercom
+          IntercomEventWorker.perform_async({
+            'event_name' => 'stripe-subscription-cancel',
+            'email' => group.owner.email,
+            'created_at' => Time.now.to_i,
+            'metadata' => {
+              'group_id' => group.id.to_s,
+              'group_name' => group.name,
+              'group_url' => group.group_url,
+              'plan' => group.subscription_plan
+            }
+          })
+        end
+
+        if poller
+          poller.status = 'successful'
+          poller.message = 'Group subscription successfully cancelled.'
+          poller.data = subscription.to_hash if subscription.present?
+          poller.save
+        end
+      end
+    rescue Exception => e
+      if group && group.stripe_push_pending
+        group.stripe_push_pending = false
         group.save
       end
 
       if poller
-        poller.status = 'successful'
-        poller.message = 'You have successfully cancelled your subscription.'
-        poller.data = subscription.to_hash
-        poller.save
-      end
-    rescue Exception => e
-      if poller
         poller.status = 'failed'
-        poller.message = 'An error occurred while trying to cancel your subscription, ' \
+        poller.message = 'An error occurred while trying to cancel the subscription, ' \
           + "please try again. (Error message: #{e})"
         poller.save
       elsif options[:throw_errors]
         throw e
       else
         # Log this error
-        item = InfoItem.new
-        item.type = 'callback-error'
-        item.name = 'Problem Cancelling Subscription (Group.cancel_stripe_subscription)'
-        item.data = { stripe_customer_id: stripe_customer_id, options: options, error: e.to_s,
-          stripe_subscription_id: stripe_subscription_id }
-        item.save
+        InfoItem.new(
+          type: 'stripe-error',
+          name: 'Problem Cancelling Subscription (Group.cancel_stripe_subscription)',
+          data: { stripe_subscription_id: stripe_subscription_id, options: options, error: e.to_s }
+        ).save
       end
     end
   end
@@ -1519,10 +1748,7 @@ protected
         # NOTE: This callback runs AFTER process_subscription_field_updates
         if paid?
           set_flag PENDING_SUBSCRIPTION_FLAG
-          self.stripe_subscription_status = 'canceled'
-          self.stripe_subscription_id = nil
-          self.stripe_subscription_card = nil
-          self.subscription_end_date = 2.weeks.from_now
+          cancel_stripe_subscription # asyn callout to stripe which updates status when done
         end
 
         # Notify the new owner
@@ -1577,26 +1803,30 @@ protected
   # Updates flags and subscription metadata whenever the plan or status changes
   def process_subscription_field_updates
     if paid?
-      if new_subscription
+      refresh_subscription_on_revive = false
+
+      if revive_subscription # set by the group form when reviving a subscription
         if stripe_subscription_status == 'new'
           self.stripe_subscription_status = 'force-new' # forces dirty state to fire callback
         else
           self.stripe_subscription_status = 'new'
         end
-        self.new_subscription = nil
+        self.revive_subscription = nil
+        refresh_subscription_on_revive = true # manually trigger the refresh of the features and clearing of the subscription end date
+      elsif stripe_subscription_status.blank? # will be true on new group record
+        self.stripe_subscription_status = 'new'
+      elsif subscription_plan_changed? && (context != 'stripe')
+        self.stripe_subscription_status = 'pending'
       end
 
       if new_record? || stripe_subscription_status_changed?
         case stripe_subscription_status
-        when 'new', 'force-new', 'trialing', 'active', 'past_due'
+        when 'new', 'force-new', 'pending', 'trialing', 'active', 'past_due'
           clear_flag PENDING_SUBSCRIPTION_FLAG
         when 'unpaid'
           set_flag PENDING_SUBSCRIPTION_FLAG
         when 'canceled'
           set_flag PENDING_SUBSCRIPTION_FLAG
-          self.stripe_subscription_id = nil
-          self.stripe_subscription_card = nil
-          self.subscription_end_date = 2.weeks.from_now
 
           # Notify the user that their group is canceled
           GroupMailer.delay(retry: 5, queue: 'low').subscription_canceled(id)
@@ -1605,12 +1835,12 @@ protected
         end
       end
 
-      if new_record? || subscription_plan_changed?
+      if new_record? || subscription_plan_changed? || refresh_subscription_on_revive
+        self.subscription_end_date = nil if (context != 'stripe')
+
         if ALL_SUBSCRIPTION_PLANS[subscription_plan]
-          self.user_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['users']
-          self.admin_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['admins']
-          self.sub_group_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['sub_groups']
-          self.features = ALL_SUBSCRIPTION_PLANS[subscription_plan]['features']
+          refresh_subscription_limits
+          refresh_subscription_features
         else
           self.user_limit = 5
           self.admin_limit = 1
@@ -1623,62 +1853,29 @@ protected
     end
   end
 
-  # This creates the initial stripe subscription if this is a paid group
-  def create_first_subscription
-    if paid? && (stripe_subscription_status == 'new')
-      create_stripe_subscription(true) # asynchronous
-      
-      # Default to a 2 week trial (until we hear back from strip via webhook)
-      self.stripe_subscription_status = 'trialing'
-      self.subscription_end_date = 2.weeks.from_now
+  # This fires when there is a new subscription or an update to an existing subscription (including changing the payment method).
+  # This will *not* fire if context is `stripe`.
+  def push_stripe_changes
+    if paid? && (context != 'stripe') \
+        && (revive_subscription || \
+          ((stripe_subscription_status != 'canceled') \
+            && (stripe_subscription_status_changed? || subscription_plan_changed? || stripe_subscription_card_changed?)))
+      Group.delay_for(30.seconds, queue: 'high').push_to_stripe(id)
     end
   end
 
-  # This creates a new subscription when status moves to new
-  def create_another_subscription
-    if paid? && stripe_subscription_status_changed? \
-        && ((stripe_subscription_status == 'new') || (stripe_subscription_status == 'force-new'))
-      if !stripe_subscription_id.blank? 
-        # Then first we cancel the existing subscription (but don't update sub status after)
-        cancel_stripe_subscription(false, true); # asynchronous
-      end
-
-      create_stripe_subscription(true) # asynchronous
-      
-      # Default to a 2 week trial (until we hear back from strip via webhook)
-      self.stripe_subscription_status = 'trialing'
-      self.subscription_end_date = 2.weeks.from_now
-    end
-  end
-
-  # Updates core fields in stripe if they change locally 
-  # NOTE: It won't run if this callback is being fired by stripe itself
-  def update_stripe_if_needed
-    if paid? && !stripe_subscription_id.blank? && (context != 'stripe') \
-        && (subscription_plan_changed? || stripe_subscription_card_changed?)
-      update_stripe_subscription(true) # asynchronous
-
-      # Then update analytics
-      IntercomEventWorker.perform_async({
-        'event_name' => 'stripe-subscription-update',
-        'email' => owner.email,
-        'created_at' => Time.now.to_i,
-        'metadata' => {
-          'group_id' => id.to_s,
-          'group_name' => name,
-          'group_url' => group_url,
-          'group_type' => type,
-          'old_plan' => subscription_plan_was,
-          'new_plan' => subscription_plan
-        }
-      })
+  # Called after an update (not on insert) to check if stripe subscription metadata needs updating
+  # It is possible that both this and push_stripe_changes will fire in the same transaction so this purposely delays for a bit longer
+  def push_stripe_metadata_changes
+    if paid? && stripe_subscription_metadata_changed?
+      Group.delay_for(3.minutes, queue: 'low', retry: false).push_metadata_to_stripe(id)
     end
   end
 
   # Cancels the stripe subscription when destroying a paid group
   def cancel_subscription_on_destroy
-    if !stripe_subscription_id.blank?
-      cancel_stripe_subscription(false, true); # asynchronous
+    if stripe_subscription_id.present?
+      cancel_stripe_subscription # asynchronous
     end
   end
 

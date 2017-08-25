@@ -28,7 +28,7 @@ class GroupsController < ApplicationController
     :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
     :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, :feature_grant_reporting,
     :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
-    :new_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, 
+    :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, 
     :avatar_key, :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, 
     :welcome_badge_tag, :joinability]
 
@@ -339,7 +339,7 @@ class GroupsController < ApplicationController
   def cancel_subscription
     respond_to do |format|
       format.json do     
-        @poller_id = @group.cancel_stripe_subscription(true, true)
+        @poller_id = @group.cancel_stripe_subscription
         render json: { poller_id: @poller_id.to_s }
       end
     end
