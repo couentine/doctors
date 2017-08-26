@@ -10,6 +10,7 @@ module StringTools
   TWITTER_URL_REGEX = /\A\s*(https?:\/\/)?(www\.)?twitter\.com\/.*\z/i
   TWEET_ID_REGEX = \
     /\A\s*(https?:\/\/)?(www\.)?twitter\.com\/.*status\/(\d{3,})(\/\S+)*(\?\S*)?\s*\z/i
+  VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i
   
   LINKS_TO_TRANSLATE = [
     [/youtube.com.*(?:\/|v=)([^&$]+)/,
@@ -116,6 +117,10 @@ module StringTools
     end
 
     tweet_id
+  end
+
+  def is_valid_email?(email_string)
+    (VALID_EMAIL_REGEX =~ email_string.to_s.strip)
   end
 
 end

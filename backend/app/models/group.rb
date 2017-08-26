@@ -789,6 +789,47 @@ class Group
     end
   end
 
+  # This will add a validation item to the invited_member or invited_admin list for this email
+  # If the user has not yet been invited to the group they will be added as a member (an exception is raised if group is full).
+  # If an existing validation for this email and badge_url already exists for this current_user_id, it will be overwritten
+  # Returns the created/updated validation_item hash.
+  def add_invited_user_validation(current_user_id, email, badge_url, summary, body)
+    # Attempt to find an existing invitation for them and create a new one if needed
+    invited_user_item = invited_admins.detect{ |item| item['email'] == email }
+    invited_user_item ||= invited_members.detect{ |item| item['email'] == email }
+    if invited_user_item.nil?
+      if can_add_members?
+        invited_user_item = { 
+          'email' => email, 
+          'invite_date' => Time.now, 
+          'validations' => [] 
+        }
+        self.invited_members << invited_user_item
+      else
+        raise StandardError.new('Group is full')
+      end
+    end
+
+    # Now attempt to find an existing validation for this combination of current_user_id and badge_url. Create blank one if not found.
+    invited_user_item['validations'] = [] if invited_user_item['validations'].nil?
+    validation_item = invited_user_item['validations'].detect do |item|
+      (item['user'].to_s == current_user_id.to_s) && (item['badge'] == badge_url)
+    end
+    if validation_item.nil?
+      validation_item = {}
+      invited_user_item['validations'] << validation_item
+    end
+
+    # Finally we can set (or overwrite) the fields of the validation
+    validation_item['user'] = current_user_id.to_s
+    validation_item['badge'] = badge_url
+    validation_item['summary'] = summary
+    validation_item['body'] = body
+
+    # Return the item
+    validation_item
+  end
+
   # === CLONING METHODS === #
 
   # Returns an array of badge json clones for the badges with the specified URLs
