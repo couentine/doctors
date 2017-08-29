@@ -119,8 +119,8 @@ module StringTools
     tweet_id
   end
 
-  def is_valid_email?(email_string)
-    (VALID_EMAIL_REGEX =~ email_string.to_s.strip)
+  def self.is_valid_email?(email_string)
+    (VALID_EMAIL_REGEX =~ email_string.to_s.strip).present?
   end
 
 end

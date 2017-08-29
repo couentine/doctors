@@ -855,10 +855,10 @@ class Badge
     end
   end
 
-  # === BADGE INSTANCE BULK METHODS === #
+  # === BADGE BULK METHODS === #
 
   # Pass a list of validation objects with keys (*=required): email*, summary*, body
-  # Set send_emails to true if you want to send badge award emails.
+  # Set send_emails_to_new_users to true if you want to send badge award emails to non-users (users wil always get emails).
   # IF POLLER: Poller progress is kept up to date. Result list is added to `poller.data['items']`
   # If there is no poller, errors will be thrown, otherwise they will be captured on the poller.
   # This method will award the badge to all of the passed people if possible and return a result list of the same size as validations.
@@ -868,8 +868,11 @@ class Badge
   #   Possible Code Values = `new_user`, `new_member`, `new_expert`, `existing_learner`, `existing_expert`, `error`
   # - success: Boolean indicating whether this row was successfully processed. Only returns false if code is `error`.
   # - error_message: String. Contains nil if `success` is true, otherwise contains user-facing error message.
-  def bulk_award(creator_user, validations, send_emails=false, poller_id=nil)
+  def self.bulk_award(badge_id, creator_user_id, validations, send_emails_to_new_users=false, poller_id=nil)
     processed_validations = []
+    badge = Badge.find(badge_id)
+    group = badge.group
+    creator_user = User.find(creator_user_id)
     poller = Poller.find(poller_id) rescue nil if poller_id.present?
     if poller && poller.progress.nil? # initialize the progress only if it doesn't already have a value
       poller.progress = 0
@@ -895,10 +898,10 @@ class Badge
         status_code = nil
         error_message = nil
 
-        if summary.blank?
+        if validation['summary'].blank?
           status_code = 'error'
           error_message = 'Summary is blank'
-        elsif !is_valid_email?(validation['email'])
+        elsif !StringTools.is_valid_email?(validation['email'])
           status_code = 'error'
           error_message = 'Invalid email'
         elsif user_map.has_key? validation['email'].downcase
@@ -915,16 +918,16 @@ class Badge
             if user_needs_membership
               status_code = 'new_member'
               group.members << user 
-            elsif user.expert_of? self
+            elsif user.expert_of? badge
               status_code = 'existing_expert'
-            elsif user.learner_of? self
+            elsif user.learner_of? badge
               status_code = 'existing_learner'
             else
               status_code = 'new_expert'
             end
 
             # Get or create the log
-            log = add_learner(user)
+            log = badge.add_learner(user)
 
             # Add or update the validation
             entry = log.add_validation(creator_user, validation['summary'], validation['body'], true)
@@ -935,7 +938,12 @@ class Badge
           status_code = 'new_user'
           begin
             # This will raise an exception if this is a new user invitation and the group is full
-            group.add_invited_user_validation(creator_user.id, validation['email'], url, validation['summary'], validation['body'])
+            group.add_invited_user_validation(creator_user.id, validation['email'], badge.url, validation['summary'], validation['body'])
+
+            # Now send the email if needed
+            if send_emails_to_new_users && !User.get_inactive_email_list.include?(validation['email'])
+              NewUserMailer.badge_issued(validation['email'], nil, creator_user.id, group.id, badge.id).deliver
+            end
           rescue Exception => e
             status_code = 'error'
             error_message = e.to_s
@@ -962,7 +970,7 @@ class Badge
       end
 
       # Save the badge and group if needed
-      self.timeless.save if self.changed?
+      badge.timeless.save if badge.changed?
       group.timeless.save if group.changed?
 
       # Close the poller if needed and store the processed validations in the poller's data hash
