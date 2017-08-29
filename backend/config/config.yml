@@ -5,8 +5,14 @@ defaults: &defaults
   page_size_small: 12
   page_size_normal: 36
   page_size_large: 72
+  
+  # API constants
+  max_import_list_size: 500
 
-  # Subscription Features
+  # SUBSCRIPTION FEATURES
+  # Adding features here makes them appear in the subscription details panel. But when adding new features also add manual granting fields
+  # to group model (search for `feature_grant_`), group form and groups controller permitted params. Also add feature to the pricing page.
+  # You will also need to run the `refresh_group_subscription_features` rake task in production.
   feature_details:
     community:
       label: Community Badges & Wiki
@@ -14,6 +20,9 @@ defaults: &defaults
     reporting:
       label: Reporting
       description: Admins are able to export group activity to CSV
+    bulk_tools:
+      label: Bulk Tools
+      description: Allows badges to be awarded in bulk via CSV or manually built lists
     integration:
       label: Third-Party Integrations
       description: Includes access to LTI integration and all future integrations
@@ -59,7 +68,7 @@ defaults: &defaults
         statement_descriptor: Badge List Org
         icon: fa-building
         description: |
-          Unlimited admins &amp; badge awarders, reporting, integrations
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 5000
         admins: -1
         sub_groups: 5
@@ -67,6 +76,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - bulk_tools
         - integration
     k12:
       k12-teacher-1y-1:
@@ -107,7 +117,7 @@ defaults: &defaults
         statement_descriptor: Badge List K12 School
         icon: fa-building
         description: |
-          Unlimited admins &amp; badge awarders, reporting, integrations
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 5000
         admins: -1
         sub_groups: 5
@@ -115,6 +125,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - bulk_tools
         - integration
       k12-team-1y-1:
         name: K12 Team Annual
@@ -141,7 +152,7 @@ defaults: &defaults
         statement_descriptor: Badge List K12 School
         icon: fa-building
         description: |
-          Unlimited admins &amp; badge awarders, reporting, integrations
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
           (Includes discount for annual billing)
         users: 5000
         admins: -1
@@ -150,6 +161,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - bulk_tools
         - integration
     internal:
       solo-free-1:
@@ -198,6 +210,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - bulk_tools
         - integration
     test:
       test-100d-1:

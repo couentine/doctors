@@ -107,6 +107,7 @@ class Group
   field :sub_group_limit,                 type: Integer, default: 0
   field :features,                        type: Array, default: [] # use feature methods to access
   field :feature_grant_reporting,         type: Boolean
+  field :feature_grant_bulk_tools,        type: Boolean
   field :feature_grant_integration,       type: Boolean
   field :total_user_count,                type: Integer, default: 1
   field :admin_count,                     type: Integer, default: 1
@@ -379,6 +380,8 @@ class Group
     # Enable manual granting of features
     if (feature.to_s == 'reporting')
       return_value ||= (feature_grant_reporting == true)
+    elsif (feature.to_s == 'bulk_tools')
+      return_value ||= (feature_grant_bulk_tools == true)
     elsif (feature.to_s == 'integration')
       return_value ||= (feature_grant_integration == true)
     elsif (feature.to_s == 'privacy')
@@ -395,6 +398,9 @@ class Group
     
     if feature_grant_reporting && !return_list.include?('reporting')
       return_list << 'reporting'
+    end
+    if feature_grant_bulk_tools && !return_list.include?('bulk_tools')
+      return_list << 'bulk_tools'
     end
     if feature_grant_integration && !return_list.include?('integration')
       return_list << 'integration'

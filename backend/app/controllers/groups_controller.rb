@@ -7,30 +7,25 @@ class GroupsController < ApplicationController
   # Non-RESTful Actions >> :join, :leave, :update_group_settings, :destroy_user, 
   #                        :destroy_invited_user, :add_users, :create_users
 
-  prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription,
-    :join, :leave, :update_group_settings, :destroy_user, :send_invitation, :destroy_invited_user, 
-    :users, :badges, :add_users, :create_users, :clear_bounce_log, :copy_badges_form, 
-    :copy_badges_action, :review, :full_logs, :create_validations, :create_lti_key, 
-    :destroy_lti_key, :update_lti_context, :destroy_lti_context]
+  prepend_before_action :find_group, only: [:show, :edit, :update, :destroy, :cancel_subscription, :join, :leave, :update_group_settings, 
+    :destroy_user, :send_invitation, :destroy_invited_user, :users, :badges, :add_users, :create_users, :clear_bounce_log, 
+    :copy_badges_form, :copy_badges_action, :review, :full_logs, :create_validations, :create_lti_key, :destroy_lti_key, 
+    :update_lti_context, :destroy_lti_context]
   before_action :authenticate_user!, except: [:show]
-  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :badges, 
-    :review, :full_logs, :create_validations]
-  before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, 
-    :create_users, :clear_bounce_log, :create_lti_key, :destroy_lti_key, :update_lti_context, 
-    :destroy_lti_context]
+  before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :badges, :review, :full_logs, :create_validations]
+  before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, :create_users, :clear_bounce_log, 
+    :create_lti_key, :destroy_lti_key, :update_lti_context, :destroy_lti_context]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
   before_action :can_copy_badges, only: [:copy_badges_form, :copy_badges_action]
   before_action :badge_list_admin, only: [:index]
 
   # === CONSTANTS === #
 
-  PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, :color,
-    :image_url, :type, :customer_code, :validation_threshold, :new_owner_username, :user_limit, 
-    :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, :feature_grant_reporting,
-    :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
-    :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, 
-    :avatar_key, :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, 
-    :welcome_badge_tag, :joinability]
+  PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, :color, :image_url, :type, :customer_code, 
+    :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
+    :feature_grant_reporting, :feature_grant_bulk_tools, :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
+    :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, :avatar_key, :tag_assignability, 
+    :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag, :joinability]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500
