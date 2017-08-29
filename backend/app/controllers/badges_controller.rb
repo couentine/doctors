@@ -1,13 +1,13 @@
 class BadgesController < ApplicationController
   
-  prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy, 
-    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save, :move, :my_index]
-  prepend_before_action :find_all_records, only: [:edit, :update, :destroy, 
-    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save, :move]
+  prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy, :entries_index, :add_learners, :create_learners, 
+    :issue_form, :issue_save, :add_endorsements_form, :add_endorsements, :move, :my_index]
+  prepend_before_action :find_all_records, only: [:edit, :update, :destroy, :entries_index, :add_learners, :create_learners, :issue_form, 
+    :issue_save, :add_endorsements_form, :add_endorsements, :move]
   before_action :authenticate_user!, except: [:show, :entries_index]
   before_action :group_owner, only: [:move]
   before_action :group_admin, only: [:new, :create, :destroy]
-  before_action :can_award, only: [:issue_form, :issue_save]
+  before_action :can_award, only: [:issue_form, :issue_save, :add_endorsements_form, :add_endorsements]
   before_action :can_edit, only: [:edit, :update, :add_learners, :create_learners]
   before_action :set_editing_parameters, only: [:new, :edit]
   before_action :build_requirement_list, only: [:new, :edit]
@@ -15,7 +15,8 @@ class BadgesController < ApplicationController
   # === LIMIT-FOCUSED FILTERS === #
 
   before_action :can_create_badges, only: [:new, :create]
-  before_action :can_create_entries, only: [:issue_form, :issue_save]
+  before_action :can_create_entries, only: [:issue_form, :issue_save, :add_endorsements_form, :add_endorsements]
+  before_action :group_has_bulk_tools_feature, only: [:add_endorsements_form, :add_endorsements]
 
   # === CONSTANTS === #
 
@@ -428,6 +429,41 @@ class BadgesController < ApplicationController
     end
   end
 
+  # GET /group-url/badge-url/endorsements/add
+  # Displays the polymer app which displays the add endorsement UI
+  def add_endorsements_form
+    render_polymer_frontend
+  end
+
+  # POST /group-url/badge-url/endorsements
+  # JSON Only
+  # This is a json wrapper for Badge.bulk_award, which awards the badge in bulk.
+  # Accepts parameters:
+  # - validations = List of objects with following keys (*=required): email*, summary*, body
+  # - send_emails_to_new_users = Boolean (defaults to false)
+  def add_endorsements
+    @max_list_size = APP_CONFIG['max_import_list_size']
+    @validations = params[:validations]
+    @send_emails_to_new_users = (params[:send_emails_to_new_users] == 'true') || (params[:send_emails_to_new_users].to_s == '1')
+
+    respond_to do |format|
+      format.json do
+        if (@validations.class == Array) && !@validations.blank?
+          @poller = Poller.new
+          @poller.progress = 0
+          @poller.waiting_message = 'Adding endorsements...'
+          @poller.save
+
+          Badge.delay(retry: false).bulk_award(@badge.id, current_user.id, @validations, @send_emails_to_new_users, @poller.id)
+
+          render json: { poller_id: @poller.id.to_s }
+        else
+          render nothing: true, status: :bad_request
+        end
+      end
+    end
+  end
+
   # PUT /group/badge/move?badge[move_to_group_id]=abc123
   # Basically this is the same as the update function but focused on setting move to group field
   def move
@@ -537,6 +573,22 @@ private
     if @group.disabled?
       flash[:error] = "This badge cannot be awarded to new people while the group is inactive."
       redirect_to @group
+    end
+  end
+
+  def group_has_bulk_tools_feature
+    if !@group.has?(:bulk_tools)
+      @error_message = 'This group does not have the bulk tools feature.'
+
+      respond_to do |format|
+        format.json do
+          render json: { error_message: @error_message }, status: :bad_request
+        end
+        format.html do
+          flash[:error] = @error_message
+          redirect_to [@group, @badge]
+        end
+      end
     end
   end
 

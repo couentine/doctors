@@ -4,14 +4,7 @@ class HomeController < ApplicationController
   # This renders either the polymer layout if the user is logged in OR the public website
   def root
     if current_user
-      @manifest = {
-        app_root_url: ENV['root_url'],
-        polymer_root_url: @polymer_root_url,
-        csrf_token: form_authenticity_token,
-        current_user: (current_user.present?) ? current_user.json(:current_user) : nil
-      }
-      
-      render template: 'polymer/show', layout: 'polymer'
+      render_polymer_frontend
     else
       respond_to do |format|
         format.html { render template: 'home/root_external', layout: 'web' }
