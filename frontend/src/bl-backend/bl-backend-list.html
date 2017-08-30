@@ -36,6 +36,7 @@ Use this component to bind a local component property with a list endpoint in th
             observer: '_parentViewStatusChanged'
           },
 
+          /** Used to initialize `_clientActionCallbacks` once `<bl-backend-client>` is initialized. */
           backendClientInitialized: {
             type: Boolean,
             readOnly: true,
@@ -206,11 +207,16 @@ Use this component to bind a local component property with a list endpoint in th
           this.reload();
       }
 
+      /** 
+       * This method is fired via the listener setup in `connectedCallback()`. 
+       * It copies the backend client initialization status to a local variable (so that it is available for other change observers).
+       * It thus also triggers the local variable's change observer (`_backendClientInitializedChanged`) below.
+       */
       _appBackendInitializedChanged(e) {
-        // This is fired by the event listener, it copies the value to the local property, thus firing the property change observer below.
         this._setBackendClientInitialized(e.detail.value);
       }
 
+      /** Initializes `_clientActionCallbacks` once the backend client is initialized. And potentially triggers a reload. */
       _backendClientInitializedChanged(newValue, oldValue) {
         if (newValue && !oldValue) {
           // First we need to create the action callbacks
