@@ -125,7 +125,7 @@ Use this component to bind a local component property with a list endpoint in th
         Object.assign(parametersWithPage, this.parameters);
         parametersWithPage.page = (this.target.nextPage) ? this.target.nextPage : 1;
 
-        this._clientActionCallbacks.paginatedListGetter.get(parametersWithPage).then(function(response) {
+        this._clientActionCallbacks.paginatedList.get(parametersWithPage).then(function(response) {
           if (response.items && response.items.length)
             for (var i = 0; i < response.items.length; i++)
               this.push('target.items', response.items[i]);

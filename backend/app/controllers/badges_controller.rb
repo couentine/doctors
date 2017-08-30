@@ -439,26 +439,30 @@ class BadgesController < ApplicationController
   # JSON Only
   # This is a json wrapper for Badge.bulk_award, which awards the badge in bulk.
   # Accepts parameters:
-  # - validations = List of objects with following keys (*=required): email*, summary*, body
-  # - send_emails_to_new_users = Boolean (defaults to false)
+  # - request body = JSON array of endorsement objects with following keys (*=required): email*, summary*, body
+  # - send_emails_to_new_users query param = Boolean (defaults to false)
   def add_endorsements
     @max_list_size = APP_CONFIG['max_import_list_size']
-    @validations = params[:validations]
+    @validations = JSON.parse(request.body.read)
     @send_emails_to_new_users = (params[:send_emails_to_new_users] == 'true') || (params[:send_emails_to_new_users].to_s == '1')
 
     respond_to do |format|
       format.json do
         if (@validations.class == Array) && !@validations.blank?
-          @poller = Poller.new
-          @poller.progress = 0
-          @poller.waiting_message = 'Adding endorsements...'
-          @poller.save
+          if @validations.count > @max_list_size
+            render json: { error_message: "The items parameter cannot contain more than #{@max_list_size} items." }, status: :bad_request
+          else
+            @poller = Poller.new
+            @poller.progress = 0
+            @poller.waiting_message = 'Adding endorsements...'
+            @poller.save
 
-          Badge.delay(retry: false).bulk_award(@badge.id, current_user.id, @validations, @send_emails_to_new_users, @poller.id)
+            Badge.delay(retry: false).bulk_award(@badge.id, current_user.id, @validations, @send_emails_to_new_users, @poller.id)
 
-          render json: { poller_id: @poller.id.to_s }
+            render json: { poller_id: @poller.id.to_s }
+          end
         else
-          render nothing: true, status: :bad_request
+          render json: { error_message: 'The items parameter is required and must be a non-blank list.' }, status: :bad_request
         end
       end
     end

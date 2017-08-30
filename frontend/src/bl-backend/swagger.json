@@ -12,8 +12,16 @@
   "host": "www.badgelist.com",
   "tags": [
     {
-      "name": "paginatedListGetter",
+      "name": "paginatedList",
       "description": "Endpoints which accept page parameter and respond with an items array and nextPage field."
+    },
+    {
+      "name": "importList",
+      "description": "Endpoints which accept list of items to import and respond with a poller whose data contains processed items when complete."
+    },
+    {
+      "name": "recordItem",
+      "description": "Endpoints which allow retrieving and modifying single record items. These support a subset of the standard restful actions and potentially additional custom actions."
     },
     {
       "name": "myGroups",
@@ -22,6 +30,14 @@
     {
       "name": "myBadges",
       "description": "List of current user's badges in progress."
+    },
+    {
+      "name": "poller",
+      "description": "Pollers are returned by asynchronous actions. They can be queried repeatedly to track the progress of the action until it is completed."
+    },
+    {
+      "name": "badgeEndorsements",
+      "description": "Badge endorsements are positive feedback which result in the awarding of the badge when created. Badge endorsements are different from normal feedback in that they can be created by email address even if there is not yet a corresponding Badge List user."
     }
   ],
   "paths": {
@@ -29,7 +45,7 @@
       "get": {
         "tags": [
           "myGroups",
-          "paginatedListGetter"
+          "paginatedList"
         ],
         "summary": "Gets all groups for the current user",
         "operationId": "getMyGroups",
@@ -76,7 +92,7 @@
       "get": {
         "tags": [
           "myBadges",
-          "paginatedListGetter"
+          "paginatedList"
         ],
         "summary": "Gets all badges for the current user",
         "operationId": "getMyBadges",
@@ -111,6 +127,115 @@
                   }
                 }
               }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/{group_url}/{badge_url}/endorsements": {
+      "post": {
+        "tags": [
+          "badgeEndorsements",
+          "paginatedList"
+        ],
+        "summary": "Bulk awards a badge to up to 500 people at a time",
+        "operationId": "importBadgeEndorsements",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "description": "Form authenticity token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "group_url",
+            "in": "path",
+            "description": "URL of the group (case-insensitive)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "badge_url",
+            "in": "path",
+            "description": "URL of the badge (case-insensitive)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "send_emails_to_new_users",
+            "in": "query",
+            "description": "Specifies that badge awarded email notifications should be sent to email addresses which correspond to new Badge List users. Any email addresses which correspond to existing Badge List users will receive email according to their own user preferences.",
+            "required": false,
+            "default": false,
+            "type": "boolean"
+          },
+          {
+            "name": "items",
+            "in": "body",
+            "description": "The list of badge endorsements to create. The identity of the recipient is specified by email address. If the user already has a Badge List account they will be immediately awarded the badge, otherwise the endorsement is saved to the group's invited members list (the badge will then be awarded after a user creates a Badge List account with that email address).",
+            "required": true,
+            "schema": {
+              "type" : "array",
+              "maxItems": 500,
+              "items" : {
+                "$ref": "#/definitions/BadgeEndorsement"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "poller_id": {
+                  "type": "string",
+                  "format": "record_id",
+                  "description": "The id of a poller record which can be used to track the status of the asynchronous operation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/pollers/{poller_id}": {
+      "get": {
+        "tags": [
+          "poller",
+          "recordItem"
+        ],
+        "summary": "Gets a poller record by id",
+        "operationId": "getPoller",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "poller_id",
+            "in": "path",
+            "description": "The id of the poller record",
+            "required": true,
+            "type": "string",
+            "format": "record_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A poller object",
+            "schema": {
+              "$ref": "#/definitions/Poller"
             }
           },
           "401": {
@@ -297,7 +422,71 @@
         }
       },
       "xml": {
-        "name": "GroupPermissions"
+        "name": "BadgePermissions"
+      }
+    },
+    "BadgeEndorsement": {
+      "type": "object",
+      "required": ["email", "summary"],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "summary": {
+          "type": "string",
+          "description": "The summary is a short text-only message displayed on the badge portfolio.",
+          "maxLength": 140
+        },
+        "body": {
+          "type": "string",
+          "format": "html",
+          "description": "The body is a longer html message displayed on the badge portfolio."
+        }
+      },
+      "xml": {
+        "name": "BadgeEndorsement"
+      }
+    },
+    "Poller": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "The current status of the poller item",
+          "enum": [
+            "pending",
+            "successful",
+            "failed"
+          ]
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Returns true if status is `successful` or `failed`"
+        },
+        "message": {
+          "type": "string",
+          "description": "A user-facing message summarizing the status of the operation once it is completed"
+        },
+        "waiting_message": {
+          "type": "string",
+          "description": "A user-facing message that desribes the operation while it is pending"
+        },
+        "redirect_to": {
+          "type": "string",
+          "description": "A url to redirect the browser to that can optionally be set once the operation is completed"
+        },
+        "data": {
+          "type": "object",
+          "description": "Optional data package used to store relevant information once the operation is completed"
+        },
+        "progress": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Optional property used to indicate the current percentage of progress out of 100 while the operation is pending"
+        }
       }
     }
   }
