@@ -1,9 +1,10 @@
 class BadgesController < ApplicationController
   
+  prepend_before_action :find_badge_by_id, only: [:add_endorsements]
   prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy, :entries_index, :add_learners, :create_learners, 
     :issue_form, :issue_save, :add_endorsements_form, :add_endorsements, :move, :my_index]
   prepend_before_action :find_all_records, only: [:edit, :update, :destroy, :entries_index, :add_learners, :create_learners, :issue_form, 
-    :issue_save, :add_endorsements_form, :add_endorsements, :move]
+    :issue_save, :add_endorsements_form, :move]
   before_action :authenticate_user!, except: [:show, :entries_index]
   before_action :group_owner, only: [:move]
   before_action :group_admin, only: [:new, :create, :destroy]
@@ -435,7 +436,7 @@ class BadgesController < ApplicationController
     render_polymer_frontend
   end
 
-  # POST /group-url/badge-url/endorsements
+  # POST /badges/id/endorsements
   # JSON Only
   # This is a json wrapper for Badge.bulk_award, which awards the badge in bulk.
   # Accepts parameters:
@@ -486,6 +487,13 @@ class BadgesController < ApplicationController
   end
 
 private
+
+  # Used by temporary API action(s). 
+  # Note: The id parameter can either be a record id or a string of the format `group-url.badge-url`. Refer to `Badge.find()` for more info.
+  def find_badge_by_id
+    @badge = Badge.find(params[:id]) || not_found
+    @group = @badge.group
+  end
 
   def find_parent_records
     @group = Group.find(params[:group_id]) || not_found

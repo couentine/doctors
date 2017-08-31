@@ -157,7 +157,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Id of the badge record",
+            "description": "Badge identifier. This can be either the badge record id or a case-insensitive string of the form `group-url.badge-url`.",
             "required": true,
             "type": "string",
             "format": "record_id"

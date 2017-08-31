@@ -153,6 +153,24 @@ class Badge
 
   before_save :update_analytics
 
+  # === BADGE FIND METHOD === #
+
+  # `badge_identifier` can be the record id OR by a string of the format `group-url.badge-url`.
+  def self.find(badge_identifier)
+    badge = nil
+
+    if badge_identifier.to_s.include? '.'
+      badge_identifier_parts = badge_identifier.split('.')
+
+      group = Group.find_by(url: badge_identifier_parts[0].to_s.downcase) rescue nil
+      badge = group.badges.where(url: badge_identifier_parts[1].to_s.downcase).first
+    elsif badge_identifier.to_s.match /^[0-9a-fA-F]{24}$/
+      badge = super rescue nil
+    end
+
+    badge
+  end
+
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
 

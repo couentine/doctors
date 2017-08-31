@@ -67,6 +67,7 @@ BadgeList::Application.routes.draw do
 
   # === TEMPORARY API-ONLY PATHS === #
   match 'badges/my' => 'badges#my_index', via: :get
+  match 'badges/:id/endorsements' => 'badges#add_endorsements', via: :post
   match 'groups/my' => 'groups#my_index', via: :get
 
   # === MANUAL GROUP PATHS === #
@@ -131,7 +132,6 @@ BadgeList::Application.routes.draw do
   match ':group_id/:badge_id/issue' => 'badges#issue_save', via: :post
   match ':group_id/:badge_id/move' => 'badges#move', via: :put
   match ':group_id/:badge_id/endorsements/add' => 'badges#add_endorsements_form', via: :get, as: :add_endorsements_form
-  match ':group_id/:badge_id/endorsements' => 'badges#add_endorsements', via: :post
 
   # === MANUAL LOG PATHS === #
   match ':group_id/:badge_id/o/:id' => 'logs#show', via: :get, as: :open_badge_assertion,
