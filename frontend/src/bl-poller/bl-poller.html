@@ -43,6 +43,13 @@ When the poller complete `<bl-poller>` will stop refreshing.
             value: function() { return {} }
           },
 
+          /** Returns true if there is an active poller cycle running. */
+          active: {
+            type: Boolean,
+            computed: '_active(pollerStarted, pollerCompleted)',
+            value: false
+          },
+
           /** Optional. The initial polling interval in milliseconds. */
           initialInterval: {
             type: Number,
@@ -98,6 +105,12 @@ When the poller complete `<bl-poller>` will stop refreshing.
           _clientActionCallbacks: {
             type: Object,
             readOnly: true
+          },
+
+          /** Stores the id of the last timer so it can be cancelled if needed. */
+          _lastTimerId: {
+            type: Number,
+            readOnly: true
           }
 
         }
@@ -106,19 +119,84 @@ When the poller complete `<bl-poller>` will stop refreshing.
       // #=== PUBLIC ACTION METHODS ===#
 
       /** Starts a new polling cycle. Called automatically when `pollerId` changes but can also be called manually. */
-      startPolling() {
+      start() {
+        if (this._lastTimerId != null) {
+          clearTimeout(this._lastTimerId);
+          this._set_lastTimerId(null);
+        }
 
+        this._set_queryCount(0);
+        this._set_currentInterval(this.initialInterval);
+        this._setPollerStarted(Date.now());
+        this._setPollerCompleted(null);
+        this._queryAndQueue();
       }
 
       /** Ends a polling cycle. Called automatically when the poller completes but can also be called manually. */
-      stopPolling() {
-        
+      stop() {
+        if (this._lastTimerId != null) {
+          clearTimeout(this._lastTimerId);
+          this._set_lastTimerId(null);
+        }
+
+        this._setPollerCompleted(Date.now());
       }
-      
+
       // #=== PRIVATE ACTION METHODS ===#
 
-      // ...
+      /** 
+       * Queries the backend and refreshes the poller contents as needed. Triggers property notify events only for changed properties.
+       * When done querying, sets timer for next query unless there is an error or the poller is completed.
+       */
+      _queryAndQueue() {
+        this._set_lastTimerId(null);
+        this._set_queryCount(this._queryCount + 1);
 
+        this._clientActionCallbacks.recordItem.get({'id': this.pollerId})
+          .then(function(pollerResponse) {
+            this._updatePollerProperties(pollerResponse);
+
+            if (pollerResponse.completed) {
+              this.stop();
+            } else if ((Date.now() - this.pollerStarted) >= this.maxDuration) {
+              // Mock a failed poller response
+              this.set('target.status', 'failed');
+              this.set('target.message', 'The action is taking longer than expected and the poller has timed out. '
+                + 'The action has continued in the background but you will be unable to track its progress.');
+              this.set('target.completed', true);
+
+              this.stop();
+            } else {
+              // Set a timer for the next query (after doubling the interval if needed)
+              if ((this._queryCount % this.intervalDoubleRate) == 0)
+                this._set_currentInterval(Math.min(this.maxInterval, 2 * this._currentInterval));
+
+              this._set_lastTimerId(
+                setTimeout(function() {
+                  this._queryAndQueue();
+                }.bind(this), this._currentInterval)
+              );
+            }
+          }.bind(this)).catch(function(error) { 
+            var errorMessage = (error.errObj && error.errObj.message) ? error.errObj.message : error;
+            
+            // Indicate the error by mocking a failed poller response
+            this.set('target.status', 'failed');
+            this.set('target.message', errorMessage);
+            this.set('target.completed', true);
+
+            this.stop();
+          }.bind(this));
+      }
+
+      /** Accepts a newly queried poller response and triggers property change notifications for changed properties only. */
+      _updatePollerProperties(pollerResponse) {
+        var properties = Object.getOwnPropertyNames(pollerResponse);
+        for (var i = 0; i < properties.length; i++)
+          if (this.target[properties[i]] != pollerResponse[properties[i]])
+            this.set('target.' + properties[i], pollerResponse[properties[i]]);
+      }
+      
       // #=== LIFECYCLE EVENTS ===#
 
       connectedCallback() {
@@ -140,13 +218,16 @@ When the poller complete `<bl-poller>` will stop refreshing.
         }
       }
 
+      /** Automatically starts polling when `pollerId` is set or changed. */
+      _pollerIdChanged(newValue, oldValue) {
+        if (newValue) this.start();
+      }
+
       // #=== PROPERTY COMPUTER METHODS ===#
 
-      // ...
-
-      // #=== PRIVATE HELPER & UTILITY METHODS ===#
-
-      // ...
+      _active(pollerStarted, pollerCompleted) {
+        return (pollerStarted && !pollerCompleted);
+      }
 
     }
 

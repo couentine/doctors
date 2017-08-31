@@ -135,7 +135,7 @@
         }
       }
     },
-    "/{group_url}/{badge_url}/endorsements": {
+    "/badges/{id}/endorsements": {
       "post": {
         "tags": [
           "badgeEndorsements",
@@ -155,18 +155,12 @@
             "type": "string"
           },
           {
-            "name": "group_url",
+            "name": "id",
             "in": "path",
-            "description": "URL of the group (case-insensitive)",
+            "description": "Id of the badge record",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "badge_url",
-            "in": "path",
-            "description": "URL of the badge (case-insensitive)",
-            "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "record_id"
           },
           {
             "name": "send_emails_to_new_users",
@@ -210,7 +204,7 @@
         }
       }
     },
-    "/pollers/{poller_id}": {
+    "/pollers/{id}": {
       "get": {
         "tags": [
           "poller",
@@ -223,7 +217,7 @@
         ],
         "parameters": [
           {
-            "name": "poller_id",
+            "name": "id",
             "in": "path",
             "description": "The id of the poller record",
             "required": true,
