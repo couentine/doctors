@@ -880,8 +880,8 @@ class Badge
   # IF POLLER: Poller progress is kept up to date. Result list is added to `poller.data['items']`
   # If there is no poller, errors will be thrown, otherwise they will be captured on the poller.
   # This method will award the badge to all of the passed people if possible and return a result list of the same size as validations.
-  # The result list items will have the same keys as the passed validations with an additional `status` key added.
-  # The `status` key will be a hash with the following keys:
+  # The result list items will have the same keys as the passed validations with an additional `result` key added.
+  # The `result` key will be a hash with the following keys:
   # - code: String indicating the results of the processing. 
   #   Possible Code Values = `new_user`, `new_member`, `new_expert`, `existing_learner`, `existing_expert`, `error`
   # - success: Boolean indicating whether this row was successfully processed. Only returns false if code is `error`.
@@ -913,14 +913,14 @@ class Badge
 
       # Loop through the validations and process each one
       validations.each do |validation|
-        status_code = nil
+        result_code = nil
         error_message = nil
 
         if validation['summary'].blank?
-          status_code = 'error'
+          result_code = 'error'
           error_message = 'Summary is blank'
         elsif !StringTools.is_valid_email?(validation['email'])
-          status_code = 'error'
+          result_code = 'error'
           error_message = 'Invalid email'
         elsif user_map.has_key? validation['email'].downcase
           # This is an existing user so we add them to the group and badge and then create a validation.
@@ -929,19 +929,19 @@ class Badge
           user_needs_membership = !user.member_or_admin_of?(group)
           
           if user_needs_membership && !group.can_add_members?
-            status_code = 'error'
+            result_code = 'error'
             error_message = 'Group is full'
           else
-            # Add as a group member if needed and set the status code (we use the most informative status_code possible)
+            # Add as a group member if needed and set the status code (we use the most informative result_code possible)
             if user_needs_membership
-              status_code = 'new_member'
+              result_code = 'new_member'
               group.members << user 
             elsif user.expert_of? badge
-              status_code = 'existing_expert'
+              result_code = 'existing_expert'
             elsif user.learner_of? badge
-              status_code = 'existing_learner'
+              result_code = 'existing_learner'
             else
-              status_code = 'new_expert'
+              result_code = 'new_expert'
             end
 
             # Get or create the log
@@ -953,7 +953,7 @@ class Badge
         else
           # This is a new user so we just need to make sure that they are added to the invited members/admins list with a validation
 
-          status_code = 'new_user'
+          result_code = 'new_user'
           begin
             # This will raise an exception if this is a new user invitation and the group is full
             group.add_invited_user_validation(creator_user.id, validation['email'], badge.url, validation['summary'], validation['body'])
@@ -963,7 +963,7 @@ class Badge
               NewUserMailer.badge_issued(validation['email'], nil, creator_user.id, group.id, badge.id).deliver
             end
           rescue Exception => e
-            status_code = 'error'
+            result_code = 'error'
             error_message = e.to_s
           end
         end
@@ -973,9 +973,9 @@ class Badge
           'email' => validation['email'],
           'summary' => validation['summary'],
           'body' => validation['body'],
-          'status' => {
-            'code' => status_code,
-            'success' => (status_code != 'error'),
+          'result' => {
+            'code' => result_code,
+            'success' => (result_code != 'error'),
             'error_message' => error_message
           }
         }
