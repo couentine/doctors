@@ -102,7 +102,7 @@ When the poller complete `<bl-poller>` will stop refreshing.
           },
 
           /** Used to interact with `<bl-backend-client>`. */
-          _clientActionCallbacks: {
+          _backendOperations: {
             type: Object,
             readOnly: true
           },
@@ -152,7 +152,7 @@ When the poller complete `<bl-poller>` will stop refreshing.
         this._set_lastTimerId(null);
         this._set_queryCount(this._queryCount + 1);
 
-        this._clientActionCallbacks.recordItem.get({'id': this.pollerId})
+        this._backendOperations.recordItem.get.do({'id': this.pollerId})
           .then(function(pollerResponse) {
             this._updatePollerProperties(pollerResponse);
 
@@ -210,11 +210,11 @@ When the poller complete `<bl-poller>` will stop refreshing.
 
       /** 
        * This method is fired via the listener setup in `connectedCallback()`. 
-       * It builds `_clientActionCallbacks` once the backend client is initialized.
+       * It builds `_backendOperations` once the backend client is initialized.
        */
       _appBackendInitializedChanged(e) {
         if (e.detail.value) {
-          this._set_clientActionCallbacks(this.app.$.backend.buildActionCallbacks('poller'));
+          this._set_backendOperations(this.app.$.backend.operationsByTag('poller'));
         }
       }
 

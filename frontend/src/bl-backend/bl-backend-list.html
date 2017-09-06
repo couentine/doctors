@@ -36,7 +36,7 @@ Use this component to bind a local component property with a list endpoint in th
             observer: '_parentViewStatusChanged'
           },
 
-          /** Used to initialize `_clientActionCallbacks` once `<bl-backend-client>` is initialized. */
+          /** Used to initialize `_backendOperations` once `<bl-backend-client>` is initialized. */
           backendClientInitialized: {
             type: Boolean,
             readOnly: true,
@@ -86,10 +86,10 @@ Use this component to bind a local component property with a list endpoint in th
           },
 
           /** 
-           * Set using the `buildActionCallbacks` method in `<bl-backend-client>`. Used to power public action methods.
+           * Set using the `operationsByTag` method in `<bl-backend-client>`. Used to power public action methods.
            * Consuming components should not reference this object directly as it may change with future implementations.
            */
-          _clientActionCallbacks: {
+          _backendOperations: {
             type: Object,
             readOnly: true
           }
@@ -124,7 +124,7 @@ Use this component to bind a local component property with a list endpoint in th
         Object.assign(parametersWithPage, this.parameters);
         parametersWithPage.page = (this.target.nextPage) ? this.target.nextPage : 1;
 
-        this._clientActionCallbacks.paginatedList.get(parametersWithPage).then(function(response) {
+        this._backendOperations.paginatedList.get.do(parametersWithPage).then(function(response) {
           if (response.items && response.items.length)
             for (var i = 0; i < response.items.length; i++)
               this.push('target.items', response.items[i]);
@@ -214,11 +214,11 @@ Use this component to bind a local component property with a list endpoint in th
         this._setBackendClientInitialized(e.detail.value);
       }
 
-      /** Initializes `_clientActionCallbacks` once the backend client is initialized. And potentially triggers a reload. */
+      /** Initializes `_backendOperations` once the backend client is initialized. And potentially triggers a reload. */
       _backendClientInitializedChanged(newValue, oldValue) {
         if (newValue && !oldValue) {
           // First we need to create the action callbacks
-          this._set_clientActionCallbacks(this.app.$.backend.buildActionCallbacks(this.type));
+          this._set_backendOperations(this.app.$.backend.operationsByTag(this.type));
           
           // Now trigger a reload if needed
           if (!this.manualLoad && (this.parentViewStatus == 'active'))

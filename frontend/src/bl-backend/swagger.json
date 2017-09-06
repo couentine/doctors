@@ -139,7 +139,7 @@
       "post": {
         "tags": [
           "badgeEndorsements",
-          "paginatedList"
+          "importList"
         ],
         "summary": "Bulk awards a badge to up to 500 people at a time",
         "operationId": "importBadgeEndorsements",
