@@ -199,7 +199,9 @@ The home page for logged in users.
 
     <bl-backend-list id="badgeList" target="{{badges}}" type="myBadges" parent-view-status="[[status]]"></bl-backend-list>
     <bl-backend-list id="groupList" target="{{groups}}" type="myGroups" parent-view-status="[[status]]"></bl-backend-list>
-    <bl-backend-importer id="badgeEndorsementsImporter" target="{{badgeEndorsements}}" type="badgeEndorsements"></bl-backend-importer>
+    <bl-backend-importer id="badgeEndorsementsImporter" record-id="591b91ac95421f51f294b389" target="{{badgeEndorsements}}" 
+      type="badgeEndorsements" import-batch-size="2">
+    </bl-backend-importer>
 
     <!-- #=== HEADER PANEL ===# -->
 

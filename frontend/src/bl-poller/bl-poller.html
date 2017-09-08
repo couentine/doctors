@@ -160,9 +160,9 @@ When the poller complete `<bl-poller>` will stop refreshing.
               this.stop();
             } else if ((Date.now() - this.pollerStarted) >= this.maxDuration) {
               // Mock a failed poller response
-              this.set('target.status', 'failed');
               this.set('target.message', 'The action is taking longer than expected and the poller has timed out. '
                 + 'The action has continued in the background but you will be unable to track its progress.');
+              this.set('target.status', 'failed');
               this.set('target.completed', true);
 
               this.stop();
@@ -181,20 +181,19 @@ When the poller complete `<bl-poller>` will stop refreshing.
             var errorMessage = (error.errObj && error.errObj.message) ? error.errObj.message : error;
             
             // Indicate the error by mocking a failed poller response
-            this.set('target.status', 'failed');
             this.set('target.message', errorMessage);
+            this.set('target.status', 'failed');
             this.set('target.completed', true);
 
             this.stop();
           }.bind(this));
       }
 
-      /** Accepts a newly queried poller response and triggers property change notifications for changed properties only. */
+      /** Accepts a newly queried poller response and overrides the target, triggering property change notifications. */
       _updatePollerProperties(pollerResponse) {
-        var properties = Object.getOwnPropertyNames(pollerResponse);
-        for (var i = 0; i < properties.length; i++)
-          if (this.target[properties[i]] != pollerResponse[properties[i]])
-            this.set('target.' + properties[i], pollerResponse[properties[i]]);
+        this.setProperties({
+          target: pollerResponse
+        });
       }
       
       // #=== LIFECYCLE EVENTS ===#
@@ -209,7 +208,7 @@ When the poller complete `<bl-poller>` will stop refreshing.
       // #=== LISTENER & OBSERVER METHODS ===#
 
       /** 
-       * This method is fired via the listener setup in `connectedCallback()`. 
+       * This method is fired via the listener setup in `connectedCallback()`. s
        * It builds `_backendOperations` once the backend client is initialized.
        */
       _appBackendInitializedChanged(e) {

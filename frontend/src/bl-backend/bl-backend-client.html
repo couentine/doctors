@@ -51,6 +51,13 @@ The client uses the `swagger.json` file located in the component folder.
        * Example usage: `doOperation('myBadges', 'getMyBadges', { page: 2 }).then(function(response) { console.log(response) })`
        */
       doOperation(tag, operationId, parameters) {
+        // Add the CSRF token if needed
+        var operationPropertyNames = this.client[tag].operations[operationId].parameters.map(function(property) {
+          return property.name;
+        });
+        if (operationPropertyNames.includes('X-CSRF-Token'))
+          parameters['X-CSRF-Token'] = this.app.manifest.csrf_token;
+
         return new Promise(function(resolve, reject) {
           this.client[tag][operationId](parameters).then(function(responseDetails) {
             resolve(responseDetails.obj);

@@ -561,6 +561,10 @@ private
   end
 
   def can_award
+    # Manually set this if this was initialized by find_badge_by_id (and the @-booleans aren't set)
+    @can_award_badge ||= current_user.present? \
+      && (current_user.admin_of?(@group) || ((@badge.awardability == 'experts') && current_user.expert_of?(@badge)))
+
     unless @can_award_badge
       flash[:error] = "You do not have permission to award this badge."
       redirect_to [@group, @badge]
