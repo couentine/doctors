@@ -1,8 +1,11 @@
+<!-- #=== POLYMER & SHIMS ===# -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 
+<!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="../bl-styles/fonts.html">
 <link rel="import" href="../bl-styles/bl-styles.html">
 <link rel="import" href="../bl-views/bl-view-home.html">
@@ -62,10 +65,13 @@ The mixin also provides various actions for interacting with the container. (Ref
     <!-- #=== API CONNECTION TO THE BACKEND ===# -->
     <bl-backend-client id="backend"></bl-backend-client>
 
-    <!-- #=== APP VIEWS (Just one for now) ===# -->
+    <!-- #=== APP ROUTING ===# -->
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="" data="{{routeData}}"></app-route>
 
+    <!-- #=== APP VIEWS ===# -->
     <bl-view-home id="homeView"></bl-view-home>
-    
+    <bl-view-badge-endorsements-add id="addBadgeEndorsementsView"></bl-view-badge-endorsements-add>
 
     <!-- #=== TOAST CONTAINER ===# -->
     <content id="toastContainer" select="bl-toast-container"></content>

@@ -503,7 +503,6 @@ The target object provides methods for building a list of items to import either
 
       /** Monitors for completed pollers and passes the resulting processed items to `_processImportResults`. */
       _pollerCompletedChanged(pollerCompleted) {
-        console.log('Poller completed = ' + pollerCompleted);
         if (pollerCompleted)
           if (this.target.status.poller.status == 'successful')
             this._processImportResults(this.target.status.poller.data.items);
