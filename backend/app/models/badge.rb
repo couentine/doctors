@@ -29,9 +29,11 @@ class Badge
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
     group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
-    api_v1: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, :learner_count,
-      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path,
-      :current_user_permissions]
+    api_v1: {
+      everyone: [:id, :url, :url_with_caps], 
+      can_see_record: [:name, :summary, :validation_request_count, :learner_count, :image_url, :image_medium_url, :image_small_url, 
+        :full_url, :full_path, :current_user_permissions]
+    }
   }
   
   # Below are the badge-level fields included in the clone
@@ -233,15 +235,28 @@ class Badge
     end
   end
 
+  # Uses current_user_accessor
+  def current_user_can_see_badge
+    if current_user_accessor
+      (visibility == 'public') || current_user_accessor.admin || current_user_accessor.admin_of?(group_id)    \
+      || ((visibility == 'private') && current_user_accessor.member_of?(group_id))                            \
+      || ((visibility == 'hidden') && current_user_accessor.learner_or_expert_of?(id))
+    else
+      false
+    end
+  end
+
   # This is used by the API and requires that the current_user model attribute be set
   def current_user_permissions
     if current_user_accessor
       {
+        can_see_record: current_user_can_see_badge,
         is_learner: learner_user_ids.include?(current_user_accessor.id),
         is_expert: expert_user_ids.include?(current_user_accessor.id)
       }
     else
       {
+        can_see_record: current_user_can_see_badge,
         is_learner: false,
         is_expert: false
       }
