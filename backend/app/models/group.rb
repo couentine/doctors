@@ -26,7 +26,7 @@ class Group
   JSON_FIELDS = [:name, :location, :type, :member_count, :admin_count, :total_user_count]
   JSON_MOCK_FIELDS = { 'image_url' => :avatar_image_url, 'url' => :issuer_website,
     'badge_count' => :badge_count, 'slug' => :url_with_caps, 'full_url' => :group_url,
-    'badges' => :badge_urls_with_caps }
+    'badges' => :filtered_badges_array }
 
   JSON_TEMPLATES = {
     list_item: [:id, :name, :url, :url_with_caps, :location, :type, :member_count, :admin_count, 
@@ -35,8 +35,11 @@ class Group
     simple_list_item_with_tags: [:id, :name, :url, :url_with_caps, :tags_cache],
     link_info: [:id, :name, :full_url, :full_path, :avatar_image_url, 
       :avatar_image_medium_url, :avatar_image_small_url],
-    api_v1: [:id, :name, :url, :url_with_caps, :location, :type, :color, :member_count, :admin_count, :total_user_count, :avatar_image_url,
-      :avatar_image_medium_url, :avatar_image_small_url, :badge_count, :full_url, :full_path, :current_user_permissions,]
+    api_v1: {
+      everyone: [:id, :name, :url, :url_with_caps, :location, :type, :color, :member_count, :admin_count, :total_user_count, 
+        :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :badge_count, :full_url, :full_path, 
+        :current_user_permissions]
+    }
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
@@ -233,6 +236,43 @@ class Group
     else
       badges_cache.map{ |badge_id, badge_item| badge_item['url_with_caps'] }
     end
+  end
+
+  # Uses the current_user accessor.
+  # Returns the badges cache hash with entries of only the badges which the current user can see.
+  def filtered_badges_cache
+    if badges_cache.blank?
+      []
+    else
+      badges_cache.select do |badge_id, badge_item|
+        (badge_item['visibility'] == 'public') || (                                                       \
+          current_user.present? && (                                                                      \
+            current_user.admin                                                                            \
+            || has_admin?(current_user)                                                                   \
+            || ((badge_item['visibility'] == 'private') && has_member?(current_user))                     \
+            || ((badge_item['visibility'] == 'hidden') && current_user.learner_or_expert_of?(badge_id))   \
+          )                                                                                               \
+        )
+      end
+    end
+  end
+
+  # Uses the current_user accessor.
+  # Returns the badges cache hash mapped into an array with entries of only the badges which the current user can see.
+  def filtered_badges_array
+    filtered_badges_cache.map{ |badge_id, badge_item| { 'id' => badge_id }.merge badge_item }
+  end
+
+  # Uses the current_user accessor.
+  # Returns urls of badges the user can see.
+  def filtered_badge_urls
+    filtered_badges_cache.map{ |badge_id, badge_item| badge_item['url'] }
+  end
+
+  # Uses the current_user accessor.
+  # Returns urls of badges the user can see.
+  def filtered_badge_ids
+    filtered_badges_cache.keys
   end
 
   # This is used by the API and requires that the current_user model attribute be set

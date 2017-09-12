@@ -68,7 +68,9 @@ BadgeList::Application.routes.draw do
   # === TEMPORARY API-ONLY PATHS === #
   match 'badges/my' => 'badges#my_index', via: :get
   match 'badges/:id/endorsements' => 'badges#add_endorsements', via: :post
+  match 'badges/:id' => 'badges#get', via: :get
   match 'groups/my' => 'groups#my_index', via: :get
+  match 'groups/:id' => 'groups#get', via: :get
 
   # === MANUAL GROUP PATHS === #
   match ':group_id/cancel' => 'groups#cancel_subscription', via: :post, as: :cancel_subscription

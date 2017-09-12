@@ -1,11 +1,11 @@
 class BadgesController < ApplicationController
   
-  prepend_before_action :find_badge_by_id, only: [:add_endorsements]
-  prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy, :entries_index, :add_learners, :create_learners, 
-    :issue_form, :issue_save, :add_endorsements_form, :add_endorsements, :move, :my_index]
+  prepend_before_action :find_badge_by_id, only: [:get, :add_endorsements]
+  prepend_before_action :find_parent_records, except: [:get, :show, :edit, :update, :destroy, :entries_index, :add_learners, 
+    :create_learners, :issue_form, :issue_save, :add_endorsements_form, :add_endorsements, :move, :my_index]
   prepend_before_action :find_all_records, only: [:edit, :update, :destroy, :entries_index, :add_learners, :create_learners, :issue_form, 
     :issue_save, :add_endorsements_form, :move]
-  before_action :authenticate_user!, except: [:show, :entries_index]
+  before_action :authenticate_user!, except: [:get, :show, :entries_index]
   before_action :group_owner, only: [:move]
   before_action :group_admin, only: [:new, :create, :destroy]
   before_action :can_award, only: [:issue_form, :issue_save, :add_endorsements_form, :add_endorsements]
@@ -38,7 +38,7 @@ class BadgesController < ApplicationController
   ]
 
   # GET /?page=1
-  # JSON Only
+  # Returns JSON
   # This returns a list of the current user's badges in progress
   def my_index
     @page_size = APP_CONFIG['page_size_small']
@@ -53,11 +53,15 @@ class BadgesController < ApplicationController
       @next_page = nil
     end
 
-    respond_to do |format|
-      format.json do
-        render json: { next_page: @next_page, items: @badges }
-      end
-    end
+    render json: { next_page: @next_page, items: @badges }
+  end
+
+  # GET /badges/{badge_id}
+  # GET /badges/{badge_url}?parent_path={group_url}
+  # Returns JSON
+  # Returns badge API json
+  def get
+    render json: @badge.json(:api_v1, current_user: current_user)
   end
 
   # === RESTFUL ACTIONS === #
@@ -491,8 +495,13 @@ private
   # Used by temporary API action(s). 
   # Note: The id parameter can either be a record id or a string of the format `group-url.badge-url`. Refer to `Badge.find()` for more info.
   def find_badge_by_id
-    @badge = Badge.find(params[:id]) || not_found
-    @group = @badge.group
+    if (params[:parent_path])
+      @group = Group.find(params[:parent_path]) || not_found
+      @badge = @group.badges.where(url: params[:id].to_s.downcase).first || not_found
+    else
+      @badge = Badge.find(params[:id]) || not_found
+      @group = @badge.group
+    end
   end
 
   def find_parent_records

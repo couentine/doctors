@@ -32,6 +32,14 @@
       "description": "List of current user's badges in progress."
     },
     {
+      "name": "group",
+      "description": "A group represents an organization of some sort. Every badge in Badge List belongs to one specific group. Groups have admin and member users and can contain group tags."
+    },
+    {
+      "name": "badge",
+      "description": "Badges are micro-credentials which represent specific learning skills and achievements. When a user joins a badge they become a ‘badge learner’ and a ‘badge portfolio’ is created for them. Once the badge has been awarded they are referred to as a ‘badge expert’."
+    },
+    {
       "name": "poller",
       "description": "Pollers are returned by asynchronous actions. They can be queried repeatedly to track the progress of the action until it is completed."
     },
@@ -157,10 +165,15 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Badge identifier. This can be either the badge record id or a case-insensitive string of the form `group-url.badge-url`.",
+            "description": "The id or the (case-insensitive) url of the badge record. If you use the url then you must also specify the `parent_path` parameter.",
             "required": true,
-            "type": "string",
-            "format": "record_id"
+            "type": "string"
+          },
+          {
+            "name": "parent_path",
+            "in": "query",
+            "description": "The url or id of the parent group. Only specify this parameter if you are using the badge's url as the value in the `id` parameter.",
+            "type": "string"
           },
           {
             "name": "send_emails_to_new_users",
@@ -230,6 +243,78 @@
             "description": "A poller object",
             "schema": {
               "$ref": "#/definitions/Poller"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/groups/{id}": {
+      "get": {
+        "tags": [
+          "group",
+          "recordItem"
+        ],
+        "summary": "Gets a group record by id",
+        "operationId": "getGroup",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id or the (case-insensitive) url of the group record. Either are acceptable.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A group object",
+            "schema": {
+              "$ref": "#/definitions/Group"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/badges/{id}": {
+      "get": {
+        "tags": [
+          "badge",
+          "recordItem"
+        ],
+        "summary": "Gets a badge record by id",
+        "operationId": "getBadge",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id or the (case-insensitive) url of the badge record. If you use the url then you must also specify the `parent_path` parameter.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "parent_path",
+            "in": "query",
+            "description": "The url or id of the parent group. Only specify this parameter if you are using the badge's url as the value in the `id` parameter.",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A badge object",
+            "schema": {
+              "$ref": "#/definitions/Badge"
             }
           },
           "401": {
