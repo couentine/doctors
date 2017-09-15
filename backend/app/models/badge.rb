@@ -30,7 +30,7 @@ class Badge
     group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
     api_v1: {
-      everyone: [:id, :url, :url_with_caps], 
+      everyone: [:id, :record_path, :url, :url_with_caps], 
       can_see_record: [:name, :summary, :validation_request_count, :learner_count, :image_url, :image_medium_url, :image_small_url, 
         :full_url, :full_path, :current_user_permissions]
     }
@@ -175,6 +175,10 @@ class Badge
 
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
+
+  def record_path
+    "#{group_url || group.url}/#{url}"
+  end
 
   def image_as_url 
     image_url

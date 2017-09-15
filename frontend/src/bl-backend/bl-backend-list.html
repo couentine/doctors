@@ -47,7 +47,7 @@ Use this component to bind a local component property with a list endpoint in th
           /** 
            * If set to FALSE then the list 'auto loads', meaning that it gets the first page of results whenever the view goes to 
            * the 'active' state and reloads the results anytime the parameters change while the view is active.
-           * Set to TRUE to disable the auto load. Then you must manually call the `listActions` methods to load results.
+           * Set to TRUE to disable the auto load. Then you must manually call the `listOperations` methods to load results.
            */
           manualLoad: {
             type: Boolean,
@@ -74,10 +74,10 @@ Use this component to bind a local component property with a list endpoint in th
            * @property {boolean} status.isReady - No network action is pending. True whenever the status is 'ready'.
            * @property {boolean} status.isError - True if the status is 'error'.
            * @property {string} status.errorMessage - Error message from backend. Null unless `isError` is `true`.
-           * @property {object} listActions - Contains callbacks which apply list-level actions.
-           * @property {function} listActions.getNextPage() - Adds next page of items to the items list, updates nextPage and hasNextPage.
-           * @property {function} listActions.reload() - Resets the items list and gets the first page of results.
-           * @property {object} selectionActions - NOT USED YET. Contains callbacks which apply actions to the currently selected items.
+           * @property {object} listOperations - Contains callbacks which apply list-level actions.
+           * @property {function} listOperations.getNextPage() - Adds next page of items to the items list, updates nextPage and hasNextPage.
+           * @property {function} listOperations.reload() - Resets the items list and gets the first page of results.
+           * @property {object} selectionOperations - NOT USED YET. Contains callbacks which apply actions to the currently selected items.
            */
           target: {
             type: Object,
@@ -101,7 +101,7 @@ Use this component to bind a local component property with a list endpoint in th
 
       /** 
        * Clears current items and reloads first page.
-       * Typically called via binding (`target.listActions.reload()`), but ok to call directly as well.
+       * Typically called via binding (`target.listOperations.reload()`), but ok to call directly as well.
        */
       reload() {
         this.set('target.items', []);
@@ -112,7 +112,7 @@ Use this component to bind a local component property with a list endpoint in th
 
       /** 
        * Loads next items and appends them to existing items. Then updates next page properties.
-       * Typically called via binding (`target.listActions.getNextPage()`), but ok to call directly as well.
+       * Typically called via binding (`target.listOperations.getNextPage()`), but ok to call directly as well.
        */
       getNextPage() {
         var parametersWithPage;
@@ -174,11 +174,11 @@ Use this component to bind a local component property with a list endpoint in th
         this.set('target.status.errorMessage', null);
 
         // No need to notify for these ones
-        this.target.listActions = {
+        this.target.listOperations = {
           getNextPage: () => this.getNextPage(),
           reload: () => this.reload()
         }
-        this.target.selectionActions = {}
+        this.target.selectionOperations = {}
       }
 
       // #=== LIFECYCLE EVENTS ===#

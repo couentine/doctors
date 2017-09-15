@@ -331,6 +331,9 @@
         "id": {
           "type": "string"
         },
+        "record_path": {
+          "type": "string"
+        },
         "name": {
           "type": "string"
         },
@@ -422,6 +425,9 @@
     "GroupPermissions": {
       "type": "object",
       "properties": {
+        "can_see_record": {
+          "type": "boolean"
+        },
         "is_member": {
           "type": "boolean"
         },
@@ -437,6 +443,9 @@
       "type": "object",
       "properties": {
         "id": {
+          "type": "string"
+        },
+        "record_path": {
           "type": "string"
         },
         "name": {
@@ -493,6 +502,9 @@
     "BadgePermissions": {
       "type": "object",
       "properties": {
+        "can_see_record": {
+          "type": "boolean"
+        },
         "is_learner": {
           "type": "boolean"
         },

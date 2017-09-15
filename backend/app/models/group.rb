@@ -36,8 +36,8 @@ class Group
     link_info: [:id, :name, :full_url, :full_path, :avatar_image_url, 
       :avatar_image_medium_url, :avatar_image_small_url],
     api_v1: {
-      everyone: [:id, :name, :url, :url_with_caps, :location, :type, :color, :member_count, :admin_count, :total_user_count, 
-        :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :badge_count, :full_url, :full_path, 
+      everyone: [:id, { url: 'record_path' }, :name, :url, :url_with_caps, :location, :type, :color, :member_count, :admin_count, 
+        :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :badge_count, :full_url, :full_path, 
         :current_user_permissions]
     }
   }
@@ -279,11 +279,13 @@ class Group
   def current_user_permissions
     if current_user
       {
+        can_see_record: true,
         is_member: has_member?(current_user),
         is_admin: has_admin?(current_user)
       }
     else
       {
+        can_see_record: true,
         is_member: false,
         is_admin: false
       }
