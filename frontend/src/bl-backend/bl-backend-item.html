@@ -191,7 +191,7 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
        * It initializes `_backendOperations` once the backend client is initialized. And potentially triggers a get operation.
        */
       _appBackendInitializedChanged(e) {
-        if (e.detail.value) {
+        if (e.detail.value && (this.target.backend.status.code == 'uninitialized')) {
           // First we need to create the action callbacks and build out the target backend operations object
           this._set_backendOperations(this.app.$.backend.operationsByTag(this.type));
           this.target.backend.operations = Object.keys(this._backendOperations.recordItem)
@@ -200,11 +200,10 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
                 return operationCallbacks;
             }, {});
 
-          // Now either trigger a get (if one of the record identifiers is already set) or go to status ready
+          // Now go to status ready and trigger a get (if one of the record identifiers is already set)
+          this._updateStatus('ready');
           if ((this.recordId && this.recordId.length) || (this.recordPath && this.recordPath.length))
             this.doOperation('get');
-          else
-            this._updateStatus('ready');
         }
       }
 

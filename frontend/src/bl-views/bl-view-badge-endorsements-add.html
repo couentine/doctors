@@ -22,9 +22,10 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       /* === LAYOUT & BASE STYLES === */
         
         :host {
-          /*display: block;
-          position: absolute;
-          top: 0; right: 0; bottom: 0; left: 0;*/
+          display: none;
+        }
+        :host([status=active]) {
+          display: block;
         }
 
       /* === HEADER PANEL STYLES === */
@@ -102,7 +103,13 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       static get is() { return 'bl-view-badge-endorsements-add'; }
 
       static get properties() {
-        return {}
+        return {
+
+          group: Object,
+
+          badge: Object
+
+        }
       }
 
     }

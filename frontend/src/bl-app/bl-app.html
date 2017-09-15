@@ -2,14 +2,18 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!-- #=== STANDARD POLYMER COMPONENTS ===# -->
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="../bl-styles/fonts.html">
 <link rel="import" href="../bl-styles/bl-styles.html">
 <link rel="import" href="../bl-views/bl-view-home.html">
+<link rel="import" href="../bl-views/bl-view-badge-endorsements-add.html">
 <link rel="import" href="../bl-backend/bl-backend-client.html">
+<link rel="import" href="../bl-backend/bl-backend-item.html">
 
 <!--
 # Badge List App #
@@ -66,12 +70,24 @@ The mixin also provides various actions for interacting with the container. (Ref
     <bl-backend-client id="backend"></bl-backend-client>
 
     <!-- #=== APP ROUTING ===# -->
-    <app-location route="{{route}}"></app-location>
-    <app-route route="{{route}}" pattern="" data="{{routeData}}"></app-route>
+    
+    <app-location id="location" route="{{route}}" 
+      url-space-regex="(^/$)|(^/[a-zA-Z0-9_-]{3,}/[a-zA-Z0-9_-]{3,}/endorsements/add)"></app-location>
+    
+    <app-route id="homeViewRoute" active="{{homeViewActive}}" route="{{route}}" pattern="/"></app-route>
+    <app-route id="groupRoute" route="{{route}}" pattern="/:slug" data="{{groupRouteData}}" tail="{{groupSubroute}}"></app-route>
+      <app-route id="badgeRoute" route="{{groupSubroute}}" pattern="/:slug" data="{{badgeRouteData}}" tail="{{badgeSubroute}}"></app-route>
+        <app-route id="addBadgeEndorsementsViewRoute" active="{{addBadgeEndorsementsViewActive}}" route="{{badgeSubroute}}" 
+          pattern="/endorsements/add"></app-route>
+    
+    <!-- #=== APP BACKEND MODEL ITEMS ===# -->
+    <bl-backend-item id="backendGroup" target="{{group}}" type="group" record-path="{{groupRecordPath}}"></bl-backend-item>
+    <bl-backend-item id="backendBadge" target="{{badge}}" type="badge" record-path="{{badgeRecordPath}}"></bl-backend-item>
 
     <!-- #=== APP VIEWS ===# -->
-    <bl-view-home id="homeView"></bl-view-home>
-    <bl-view-badge-endorsements-add id="addBadgeEndorsementsView"></bl-view-badge-endorsements-add>
+    <bl-view-home id="homeView" active="{{homeViewActive}}"></bl-view-home>
+    <bl-view-badge-endorsements-add id="addBadgeEndorsementsView" active="{{addBadgeEndorsementsViewActive}}" group="{{group}}"
+      badge="{{badge}}"></bl-view-badge-endorsements-add>
 
     <!-- #=== TOAST CONTAINER ===# -->
     <content id="toastContainer" select="bl-toast-container"></content>
@@ -135,11 +151,26 @@ The mixin also provides various actions for interacting with the container. (Ref
             notify: true
           },
 
-          /** Set automatically based on the current route. */
-          group: Object,
+          /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
+          activeView: Object,
 
-          /** Set automatically based on the current route. */
+          /** The group object which is currently active. Null if current view does not have a corresponding group. */
+          group: Object,
+          
+          /** The group path as computed based on the current route data. */
+          groupRecordPath: {
+            type: String,
+            computed: '_groupRecordPath(groupRouteData.slug)'
+          },
+
+          /** The badge object which is currently active. Null if current view does not have a corresponding badge. */
           badge: Object,
+          
+          /** The badge path as computed based on the current route data. */
+          badgeRecordPath: {
+            type: String,
+            computed: '_badgeRecordPath(groupRouteData.slug, badgeRouteData.slug)'
+          },
 
           dialogConfirmFunction: Object,
           dialogDismissFunction: Object
@@ -211,11 +242,7 @@ The mixin also provides various actions for interacting with the container. (Ref
       ready() {
         super.ready();
 
-        // Activate the home view
-        this.$.homeView.activate();
-
         // Add Listeners
-        // FIXME: this.$.appHeaderLayout.addEventListener('paper-header-transform', e => this._appHeaderLayoutTransform(e));
         this.$.pollerDialogPoller.addEventListener('bl-poller-completed', e => this._pollerCompleted(e));
       }
 
@@ -224,6 +251,23 @@ The mixin also provides various actions for interacting with the container. (Ref
       _manifestChanged(newValue, oldValue) {
         if (newValue) this.currentUser = newValue.current_user;
       }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _groupRecordPath(groupSlug) {
+        if (groupSlug && groupSlug.length)
+          return groupSlug.toLowerCase();
+        else
+          return null;
+      }
+
+      _badgeRecordPath(groupSlug, badgeSlug) {
+        if (groupSlug && groupSlug.length && badgeSlug && badgeSlug.length)
+          return groupSlug.toLowerCase() + '/' + badgeSlug.toLowerCase();
+        else 
+          return null;
+      }
+
     }
 
     window.customElements.define(BlApp.is, BlApp);
