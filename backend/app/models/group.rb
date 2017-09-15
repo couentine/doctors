@@ -36,9 +36,9 @@ class Group
     link_info: [:id, :name, :full_url, :full_path, :avatar_image_url, 
       :avatar_image_medium_url, :avatar_image_small_url],
     api_v1: {
-      everyone: [:id, { url: 'record_path' }, :name, :url, :url_with_caps, :location, :type, :color, :member_count, :admin_count, 
-        :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :badge_count, :full_url, :full_path, 
-        :current_user_permissions]
+      everyone: [:id, { url: 'record_path' }, :parent_path, :name, { url: 'slug' }, { url_with_caps: 'slug_with_caps' }, :location, :type, 
+        :color, :member_count, :admin_count, :total_user_count, :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, 
+        :badge_count, :full_url, { full_path: 'relative_url' }, :current_user_permissions]
     }
   }
 
@@ -219,6 +219,11 @@ class Group
 
   def full_path
     "/#{url_with_caps}"
+  end
+
+  # Only needed for compatibility with recordItem spec
+  def parent_path
+    nil
   end
 
   # Returns URL of the specified version of this group's avatar

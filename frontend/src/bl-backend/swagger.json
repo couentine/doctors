@@ -165,14 +165,14 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The id or the (case-insensitive) url of the badge record. If you use the url then you must also specify the `parent_path` parameter.",
+            "description": "The id or the (case-insensitive) slug of the badge record. If you use the slug then you must also specify the `parent_path` parameter.",
             "required": true,
             "type": "string"
           },
           {
             "name": "parent_path",
             "in": "query",
-            "description": "The url or id of the parent group. Only specify this parameter if you are using the badge's url as the value in the `id` parameter.",
+            "description": "The slug or id of the parent group. Only specify this parameter if you are using the badge's slug as the value in the `id` parameter.",
             "type": "string"
           },
           {
@@ -266,7 +266,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The id or the (case-insensitive) url of the group record. Either are acceptable.",
+            "description": "The id or the (case-insensitive) slug of the group record. Either are acceptable.",
             "required": true,
             "type": "string"
           }
@@ -337,10 +337,10 @@
         "name": {
           "type": "string"
         },
-        "url": {
+        "slug": {
           "type": "string"
         },
-        "url_with_caps": {
+        "slug_with_caps": {
           "type": "string"
         },
         "location": {
@@ -411,7 +411,7 @@
           "type": "string",
           "format": "url"
         },
-        "full_path": {
+        "relative_url": {
           "type": "string"
         },
         "current_user_permissions": {
@@ -451,10 +451,10 @@
         "name": {
           "type": "string"
         },
-        "url": {
+        "slug": {
           "type": "string"
         },
-        "url_with_caps": {
+        "slug_with_caps": {
           "type": "string"
         },
         "summary": {
@@ -488,7 +488,7 @@
           "type": "string",
           "format": "url"
         },
-        "full_path": {
+        "relative_url": {
           "type": "string"
         },
         "current_user_permissions": {

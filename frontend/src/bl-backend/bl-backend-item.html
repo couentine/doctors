@@ -58,8 +58,8 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
            *
            * The `backend` object contains the following properties:
            * @property {object} status - Stores the current state of the network connection.
-           * @property {string} status.code - Equal to `uninitialized`, `waiting`, `loading`, `complete` or `error`.
-           * @property {boolean} status.isWaiting - Indicates that the client is initialized and `bl-backend-item` is waiting for a value 
+           * @property {string} status.code - Equal to `uninitialized`, `ready`, `loading`, `complete` or `error`.
+           * @property {boolean} status.isReady - Indicates that the client is initialized and `bl-backend-item` is ready for a value 
            *   to be placed in either `recordId` or `recordPath`.
            * @property {boolean} status.isLoading - A network operation is pending.
            * @property {boolean} status.isComplete - Once the initial `get` operation has completed, the status will go to `complete` and
@@ -94,7 +94,7 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
       doOperation(operationName, parameters) {
         var parametersWithIdentifier;
 
-        if (this.target.backend.status.isWaiting || this.target.backend.status.isComplete|| this.target.backend.status.isError) {
+        if (this.target.backend.status.isReady || this.target.backend.status.isComplete|| this.target.backend.status.isError) {
           this._updateStatus('loading');
 
           // Clone the parameters so we can inject the record identifier(s) without messing up the passed parameters object
@@ -126,7 +126,7 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
 
       /** Sets and notifies all of the target properties related to status. Only include `error` if statusCode is 'error'. */
       _updateStatus(statusCode, error) {
-        var isWaiting = (statusCode == 'waiting');
+        var isReady = (statusCode == 'ready');
         var isLoading = (statusCode == 'loading');
         var isComplete = (statusCode == 'complete');
         var isError = (statusCode == 'error');
@@ -134,7 +134,7 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
         this.set('target.backend.status.code', statusCode);
 
         // Only trigger a notification for the booleans if they are changing
-        if (this.target.backend.status.isWaiting != isWaiting) this.set('target.backend.status.isWaiting', isWaiting);
+        if (this.target.backend.status.isReady != isReady) this.set('target.backend.status.isReady', isReady);
         if (this.target.backend.status.isLoading != isLoading) this.set('target.backend.status.isLoading', isLoading);
         if (this.target.backend.status.isComplete != isComplete) this.set('target.backend.status.isComplete', isComplete);
         if (this.target.backend.status.isError != isError) this.set('target.backend.status.isError', isError);
@@ -150,7 +150,7 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
         this.set('target.backend', {});
         this.set('target.backend.status', {});
         this.set('target.backend.status.code', 'uninitialized');
-        this.set('target.backend.status.isWaiting', false);
+        this.set('target.backend.status.isReady', false);
         this.set('target.backend.status.isLoading', false);
         this.set('target.backend.status.isComplete', false);
         this.set('target.backend.status.isError', false);
@@ -176,13 +176,13 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
 
       _recordIdChanged(newValue, oldValue) {
         if (newValue && newValue.length
-          && (this.target.backend.status.isWaiting || this.target.backend.status.isComplete || this.target.backend.status.isError))
+          && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError))
             this.doOperation('get');
       }
 
       _recordPathChanged(newValue, oldValue) {
         if (newValue && newValue.length
-          && (this.target.backend.status.isWaiting || this.target.backend.status.isComplete || this.target.backend.status.isError))
+          && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError))
             this.doOperation('get');
       }
 
@@ -200,11 +200,11 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
                 return operationCallbacks;
             }, {});
 
-          // Now either trigger a get (if one of the record identifiers is already set) or go to status waiting
+          // Now either trigger a get (if one of the record identifiers is already set) or go to status ready
           if ((this.recordId && this.recordId.length) || (this.recordPath && this.recordPath.length))
             this.doOperation('get');
           else
-            this._updateStatus('waiting');
+            this._updateStatus('ready');
         }
       }
 

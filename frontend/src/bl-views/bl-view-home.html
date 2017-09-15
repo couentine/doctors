@@ -260,7 +260,7 @@ The home page for logged in users.
 
         <div id="badgePanel" class="page-content-spacing">
           <template is="dom-repeat" items="[[badges.items]]" id="badgeRepeat" as="badge">
-            <a href$="[[badge.full_path]]" class="item">
+            <a href$="[[badge.relative_url]]" class="item">
               <bl-badge badge="[[badge]]"></bl-badge>
             </a>
           </template>
@@ -288,7 +288,7 @@ The home page for logged in users.
 
         <div id="groupPanel" class="page-content-spacing">
           <template is="dom-repeat" items="[[groups.items]]" id="groupRepeat" as="group">
-            <a href$="[[group.full_path]]" class="item">
+            <a href$="[[group.relative_url]]" class="item">
               <bl-group group="[[group]]"></bl-group>
             </a>
           </template>
