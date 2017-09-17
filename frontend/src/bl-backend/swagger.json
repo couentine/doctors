@@ -379,6 +379,18 @@
             "blue-grey"
           ]
         },
+        "image_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "image_medium_url": {
+          "type": "string",
+          "format": "url"
+        },
+        "image_small_url": {
+          "type": "string",
+          "format": "url"
+        },
         "member_count": {
           "type": "integer",
           "format": "int64"
@@ -390,18 +402,6 @@
         "total_user_count": {
           "type": "integer",
           "format": "int64"
-        },
-        "avatar_image_url": {
-          "type": "string",
-          "format": "url"
-        },
-        "avatar_image_medium_url": {
-          "type": "string",
-          "format": "url"
-        },
-        "avatar_image_small_url": {
-          "type": "string",
-          "format": "url"
         },
         "badge_count": {
           "type": "integer",

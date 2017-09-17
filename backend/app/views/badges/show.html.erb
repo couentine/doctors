@@ -647,8 +647,13 @@
           <div class="tab-header">
             <% if @can_award_badge %>
               <% unless @badge.validation_threshold > 1 %>
-                <%= link_to '<i class="fa fa-shield"></i> Award the badge'.html_safe,
-                    badge_issue_path(@group, @badge), class: 'btn btn-small', id: 'award-badge' %>
+                <%= link_to '<i class="fa fa-shield"></i> Award the badge'.html_safe, badge_issue_path(@group, @badge), 
+                  class: 'btn btn-small', id: 'award-badge' %>
+                
+                <% if @group.has?(:bulk_tools) && @badge_list_admin %>
+                  <%= link_to '<i class="fa fa-table"></i> Bulk award'.html_safe, add_endorsements_form_path(@group, @badge), 
+                    class: 'btn btn-small', id: 'bulk-award-badge' %>
+                <% end %>
               <% end %>
             <% end %>
             

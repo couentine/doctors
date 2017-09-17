@@ -2,12 +2,16 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="bl-header-nav-left.html">
 <link rel="import" href="bl-header-nav-right.html">
 <link rel="import" href="bl-header-panel.html">
 <link rel="import" href="bl-view-mixin.html">
+<link rel="import" href="../bl-backend/bl-backend-importer.html">
 
 <!--
 # Badge List Bulk Add Badge Endorsements View #
@@ -34,63 +38,225 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           background: white;
         }
           #expandedBackground {
-            border-top: 4px solid var(--bl-orange-600);
-            background: white;
+            border-bottom: 4px solid var(--bl-purple-400);
+            background: linear-gradient(90deg, var(--bl-purple-500), var(--bl-purple-700));
           }
           #condensedBackground {
-            border-top: 4px solid var(--bl-orange-600);
-            background: white;
+            border-bottom: 4px solid var(--bl-purple-400);
+            background: linear-gradient(90deg, var(--bl-purple-500), var(--bl-purple-700));
           }
           #content {
             color: var(--bl-grey-800);
           }
+          
+          #leftNav {
+            display: block;
+            font-size: 1rem;
+            text-align: left;
+            position: absolute;
+            top: 0;
+            right: 4em;
+            bottom: 4px;
+            left: 0;
+            padding: 0.8em;
+            line-height: 1em;
+          }
+            #headerImage { 
+              height: 100%; 
+              margin-right: 0.8em;
+              float: left;
+            }
+            #headerText {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              height: 100%;
+              color: white;
+            }
+              #subtitle {
+                font-size: 1.5em;
+                line-height: 1.6em;
+                font-weight: 200;
+              }
+              #title {
+                display: block;
+                font-size: 3em;
+                line-height: 1.1em;
+                margin: 0;
+                font-weight: 600;
+              }
+
+          #rightNav {
+            display: block;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 4px;
+            width: 4em;
+            padding: 0;
+            text-align: right;
+          }
+            #rightNav a, #rightNav a:visited {
+              display: block;
+              padding: 0.8rem;
+              font-size: 2.3em;
+              color: white;
+              text-decoration: none;
+            }
+
+      /* === BETA CONTENT STYLES === */
+
+        .contentBox {
+          margin: 3em auto;
+          max-width: 40em;
+          padding: 0 2em;
+          color: var(--bl-grey-700);
+        }
+          .contentBox a, .contentBox a:visited {
+            color: var(--bl-grey-900);
+          }
+
+        #importerStatus {
+          display: flex;
+          align-items: center;
+        }
+          #importerStatus label {
+            font-weight: bold;
+            margin-right: 0.5em;
+          }
+          #importerStatus span {
+            margin-right: 0.5em;
+            text-transform: capitalize;
+          }
+          paper-spinner-lite { --paper-spinner-color: var(--bl-purple-500); }
+
+        #importerCounts li label {
+          font-weight: bold;
+          margin-right: 0.5em;
+        }
+
+        #importerError {
+          display: flex;
+          align-items: center;
+          margin-top: 0.5em;
+          color: var(--bl-red-700);
+        }
+          #importerError label {
+            margin-right: 0.5em;
+          }
+          #importerError span {
+            margin-right: 0.5em;
+            text-transform: capitalize;
+          }
 
     </style>
 
-    <!-- #=== BACKEND LINKS ===# -->
-
-    
-
     <!-- #=== HEADER PANEL ===# -->
 
-    <bl-header-panel id="headerPanel" expanded-height="9" condensed-height="6">
+    <bl-header-panel id="headerPanel" expanded-height="10" condensed-height="3.5" expanded-percentage="{{expandedPercentage}}">
       <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
       <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
 
-      <bl-header-nav-left slot="leftNav">
-        <img src$="[[rootPath]]/images/badge-list-shield-square.png">
-      </bl-header-nav-left>
+      <div id="leftNav" slot="leftNav">
+        <img id="headerImage" src$="[[badge.image_url]]">
+        <div id="headerText">
+          <div id="subtitle" style$="font-size: [[subtitleFontSizeEm]]em;">Bulk Award</div>
+          <h1 id="title" style$="font-size: [[titleFontSizeEm]]em;">[[badge.name]]</h1>
+        </div>
+      </div>
+      <div id="rightNav" slot="rightNav">
+        <a href$="[[badge.relative_url]]" style$="font-size: [[rightNavFontSizeEm]]em;">
+          <i class="icon-cross"></i>
+        </a>
+      </div>
+
+      <div id="footer" slot="footer">&nbsp;</div>
 
       <div id="content" slot="content">
         
-        <!-- #=== TEMP PLACEHOLDER CONTENT ===# -->
+        <!-- #=== BACKEND LINKS ===# -->
 
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-          cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-          proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
+        <bl-backend-importer id="importer" type="badgeEndorsements" record-id="[[badge.id]]" 
+          target="{{badgeEndorsements}}"></bl-backend-importer>
 
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-          cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-          proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
+        <!-- #=== BETA UI ===# -->
+        
+        <div id="explainerText" class="contentBox">
+          This is a beta version of the bulk awarding tool. Please contact Badge List support if you have any questions.
+          To use the tool you will need to build a CSV file with up to three columns: 
+          Email, Summary and Body. Email and summary are required, body is optional. Body can contain HTML.
+          <a href="https://s3.amazonaws.com/badgelist/templates/badge-endorsements.csv">A template file is available here</a>.
+        </div>
+        
+        <div id="importerDetails" class="contentBox">
+          <div id="importerStatus">
+            <label>Importer Status</label>
+            
+            <span hidden="[[badgeEndorsements.status.isImporting]]">[[badgeEndorsements.status.code]]</span>
+            <span hidden="[[!badgeEndorsements.status.isImporting]]">
+              Importing Batch [[badgeEndorsements.status.currentBatch]] of [[badgeEndorsements.status.batchCount]]
+              ([[badgeEndorsements.status.poller.progress]]%)
+            </span>
+            
+            <paper-spinner-lite id="spinner" active="[[badgeEndorsements.status.isImporting]]"></paper-spinner-lite>
+          </div>
+          
+          <div id="importerError" hidden="[[!badgeEndorsements.status.isError]]">
+            <label><i class="icon-warning"></i></label>
+            <span>[[badgeEndorsements.status.errorMessage]]</span>
+          </div>
+          
+          <div id="importerCounts">
+            <ul>
+              <li>
+                <label>Items Ready to Import:</label>
+                <span>[[badgeEndorsements.status.readyItemCount]]</span>
+              </li>
+              <li>
+                <label>Items Being Imported:</label>
+                <span>[[badgeEndorsements.status.importingItemCount]]</span>
+              </li>
+              <li>
+                <label>Failed Items:</label>
+                <span>[[badgeEndorsements.status.failedItemCount]]</span>
+              </li>
+              <li>
+                <label>Successfully Imported Items:</label>
+                <span>[[badgeEndorsements.status.importedItemCount]]</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <div id="importerActions" class="contentBox">
+          <paper-input id="csvFileInput" type="file" accept=".csv" on-change="_csvFileChanged" hidden></paper-input>
+          <paper-button class="orange" on-tap="selectCSVFile" hidden="[[badgeEndorsements.status.isImporting]]">
+            Import CSV File
+          </paper-button>
+        </div>
 
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-          cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-          proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
+        <div id="failedItems" class="contentBox" hidden="[[!badgeEndorsements.status.failedItemCount]]">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Summary</th>
+                <th>Body</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template is="dom-repeat" items="[[badgeEndorsements.status.failedItems]]">
+                <tr>
+                  <td>[[item.email]]</td>
+                  <td>[[item.summary]]</td>
+                  <td>[[item.body]]</td>
+                  <td>[[item.status.errorMessage]]</td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
 
       </div>
     </bl-header-panel>
@@ -107,9 +273,80 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
           group: Object,
 
-          badge: Object
+          badge: Object,
+          
+          badgeEndorsements: Object,
+
+          expandedPercentage: Number,
+
+          subtitleFontSizeEm: {
+            type: Number,
+            computed: '_subtitleFontSizeEm(expandedPercentage)'
+          },
+
+          titleFontSizeEm: {
+            type: Number,
+            computed: '_titleFontSizeEm(expandedPercentage)'
+          },
+
+          rightNavFontSizeEm: {
+            type: Number,
+            computed: '_rightNavFontSizeEm(expandedPercentage)'
+          }
 
         }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /** Triggers the hidden `csvFileInput` file input dialog. */
+      selectCSVFile() {
+        this.$.csvFileInput.inputElement.inputElement.click();
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        this.tryToHideIntercom();
+
+        this.$.importer.addEventListener('csv-parsing-complete', e => this._startImportIfNeeded());
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _csvFileChanged() {
+        if (this.$.csvFileInput.inputElement.inputElement.files.length)
+          this.badgeEndorsements.addItemsFromCSV(this.$.csvFileInput.inputElement.inputElement.files[0]);
+      }
+
+      _startImportIfNeeded() {
+        if (this.badgeEndorsements.status.readyItemCount)
+          this.badgeEndorsements.import();
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _subtitleFontSizeEm(expandedPercentage) {
+        if ((expandedPercentage == undefined) || (expandedPercentage == null))
+          return 1.5;
+        else
+          return 1.5 * expandedPercentage;
+      }
+
+      _titleFontSizeEm(expandedPercentage) {
+        if ((expandedPercentage == undefined) || (expandedPercentage == null))
+          return 3.0;
+        else
+          return 1.5 + (1.5 * expandedPercentage);
+      }
+
+      _rightNavFontSizeEm(expandedPercentage) {
+        if ((expandedPercentage == undefined) || (expandedPercentage == null))
+          return 2.3;
+        else
+          return 1.5 + (0.8 * expandedPercentage);
       }
 
     }

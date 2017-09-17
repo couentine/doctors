@@ -78,6 +78,11 @@ The target object provides methods for building a list of items to import either
            * @property {number} status.currentBatch - The number of the current import batch. From 1 to `batchCount`.
            * @property {number} status.batchCount - The total number of batches in the current import process.
            * @property {object} status.poller - Stores the poller object for the current import batch. Updated in real time.
+           * @property {number} status.readyItemCount - The total number of `itemsToImport` at status `ready`.
+           * @property {number} status.importingItemCount - The total number of `itemsToImport` at status `importing`.
+           * @property {number} status.failedItemCount - The total number of `itemsToImport` at status `failed`.
+           * @property {number} status.importedItemCount - The total size of `importedItems`.
+           * @property {object[]} status.failedItems - An array of all`itemsToImport` at status `failed`.
            * @property {function} addItem() - Shortcut to access the component method. Refer to method comments for docs.
            * @property {function} addItemsFromCSV(filePath) - Shortcut to access the component method. Refer to method comments for docs.
            * @property {function} finishMapping() - Shortcut to access the component method. Refer to method comments for docs.
@@ -243,8 +248,6 @@ The target object provides methods for building a list of items to import either
         var isImporting = (statusCode == 'importing');
         var isError = (statusCode == 'error');
 
-        this.set('target.status.code', statusCode);
-
         // Only trigger a notification for the booleans if they are changing
         if (this.target.status.isReady != isReady) this.set('target.status.isReady', isReady);
         if (this.target.status.isParsing != isParsing) this.set('target.status.isParsing', isParsing);
@@ -255,6 +258,8 @@ The target object provides methods for building a list of items to import either
         // Always trigger a notification for the error message, but ensure that it's always null if there's no error
         if (isError) this.set('target.status.errorMessage', ((error && error.message) ? error.message : error));
         else this.set('target.status.errorMessage', null);
+
+        this.set('target.status.code', statusCode);
       }
 
       /** 
@@ -269,8 +274,6 @@ The target object provides methods for building a list of items to import either
         var isImported = (statusCode == 'imported');
         var isFailed = (statusCode == 'failed');
 
-        this.set(itemPath + '.backend.status.code', statusCode);
-
         if (this.target.status.isReady != isReady) this.set(itemPath + '.backend.status.isReady', isReady);
         if (this.target.status.isImporting != isImporting) this.set(itemPath + '.backend.status.isImporting', isImporting);
         if (this.target.status.isImported != isImported) this.set(itemPath + '.backend.status.isImported', isImported);
@@ -283,6 +286,27 @@ The target object provides methods for building a list of items to import either
 
         if (result) 
           this.set(itemPath + '.backend.result', result);
+
+        this.set(itemPath + '.backend.status.code', statusCode);
+      }
+
+      /** Updates the values of all of the `target.status.___ItemCount` properties. */
+      _updateItemCounts() {
+        if (this.target.itemsToImport) {
+          this.set('target.status.readyItemCount', this.target.itemsToImport.reduce(function(count, item) {
+            return count + (item.backend.status.isReady ? 1 : 0);
+          }, 0));
+
+          this.set('target.status.importingItemCount', this.target.itemsToImport.reduce(function(count, item) {
+            return count + (item.backend.status.isImporting ? 1 : 0);
+          }, 0));
+
+          this.set('target.status.failedItems', this.target.itemsToImport.filter(function(item) { return item.backend.status.isFailed; }));
+          this.set('target.status.failedItemCount', this.target.status.failedItems.length);
+        }
+
+        if (this.target.importedItems)
+          this.set('target.status.importedItemCount', this.target.importedItems.length);
       }
       
       /** Initializes the object bound to the target property. Adds callbacks and sets initial property values. */
@@ -301,6 +325,11 @@ The target object provides methods for building a list of items to import either
         this.set('target.status.currentBatch', null);
         this.set('target.status.batchCount', null);
         this.set('target.status.poller', {});
+        this.set('target.status.readyItemCount', 0);
+        this.set('target.status.importingItemCount', 0);
+        this.set('target.status.failedItemCount', 0);
+        this.set('target.status.failedItems', []);
+        this.set('target.status.importedItemCount', 0);
         this.set('target.itemProperties', {});
         this.set('target.csvColumns', []);
         this.set('target.csvColumnMap', {});
@@ -367,7 +396,9 @@ The target object provides methods for building a list of items to import either
             for (var i = 0; i < parseResults.data.length; i++)
               this.push('target.itemsToImport', this._buildItem(parseResults.data[i]));
             
+            this._updateItemCounts();
             this._updateStatus('ready');
+            this.dispatchEvent(new CustomEvent('csv-parsing-complete', {detail: {parseResults: parseResults}}));
           }
         } catch(e) {
           throw e;
@@ -391,7 +422,8 @@ The target object provides methods for building a list of items to import either
 
         for (var i = firstIndex; i <= lastIndex; i++)
           this._updateItemStatusByIndex(i, 'importing');
-        
+        this._updateItemCounts();
+
         // Construct a temporary list of items with only keys specified it `target.itemProperties`
         currentItems = this.target.itemsToImport
           .slice(firstIndex, lastIndex + 1)
@@ -432,10 +464,12 @@ The target object provides methods for building a list of items to import either
 
         if (this.target.status.currentBatch < this.target.status.batchCount) {
           this.set('target.status.currentBatch', this.target.status.currentBatch + 1);
+          this._updateItemCounts();
           this._importCurrentBatch();
         } else {
           // We just finished the last batch
           this._moveImportedItems();
+          this._updateItemCounts();
           this._updateStatus('ready');
         }
       }
@@ -573,5 +607,12 @@ The target object provides methods for building a list of items to import either
     }
 
     window.customElements.define(BlBackendImporter.is, BlBackendImporter);
+
+    /**
+     * Fires when after the parsing and mapping process is complete and items from the csv file have been added to `itemsToImport`.
+     *
+     * @event csv-parsing-complete
+     */
+
   </script>
 </dom-module>

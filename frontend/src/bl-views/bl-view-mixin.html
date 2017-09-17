@@ -57,6 +57,23 @@ All Badge List app views components should extend this mixin. It extends the `bl
       }
 
       /** 
+       * Call this in order to attempt hiding the intercom UI. Runs recursively every 100 milliseconds waiting for the intercom container
+       * to show up.
+       *
+       * @param {number} remainingTryCount - How many attempts should be made? Defaults to 100.
+       */
+      tryToHideIntercom(remainingTryCount) {
+        if (!remainingTryCount) remainingTryCount = 100;
+
+        if (document.querySelector('#intercom-container'))
+          document.querySelector('#intercom-container').hidden = true;
+        else if (remainingTryCount > 0)
+          setTimeout(function() {
+            this.tryToHideIntercom(remainingTryCount - 1); 
+          }.bind(this), 100);
+      }
+
+      /** 
        * The `<bl-app>` component will fire this method to display the page when the route is navigated away from.
        * Override this method in order to add special logic when the page is de-activated.
        */
