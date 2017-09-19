@@ -3,6 +3,7 @@
 
 <!-- #=== STANDARD POLYMER COMPONENTS ===# -->
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
 
@@ -51,21 +52,32 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           
           #leftNav {
             display: block;
-            font-size: 1rem;
             text-align: left;
             position: absolute;
             top: 0;
             right: 4em;
             bottom: 4px;
             left: 0;
-            padding: 0.8em;
+            padding: 2em;
+            
+            font-size: 0.8rem;
             line-height: 1em;
           }
-            #headerImage { 
-              height: 100%; 
-              margin-right: 0.8em;
+          @media (min-width: 480px) {
+            #leftNav { font-size: 1rem; }
+          }
+            #headerImageWrapper {
               float: left;
+              height: 100%;
+              margin-right: 0.8em;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
             }
+              #headerImage { 
+                height: 5.7em; 
+                max-height: 100%; 
+              }
             #headerText {
               display: flex;
               flex-direction: column;
@@ -84,6 +96,10 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                 line-height: 1.1em;
                 margin: 0;
                 font-weight: 600;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                padding-bottom: 0.15em;
               }
 
           #rightNav {
@@ -130,6 +146,20 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           }
           paper-spinner-lite { --paper-spinner-color: var(--bl-purple-500); }
 
+        #importerActions paper-button {
+          display: inline-block;
+          margin: 0 1em 1em 0;
+        }
+        #importerActions paper-checkbox {
+          display: inline-block;
+          --primary-color: var(--bl-orange-600);
+          --primary-text-color: var(--bl-grey-700);
+        }
+          #importerActions paper-checkbox .subtitle {
+            display: block;
+            font-size: 0.8em;
+          }
+
         #importerCounts li label {
           font-weight: bold;
           margin-right: 0.5em;
@@ -148,8 +178,47 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             margin-right: 0.5em;
             text-transform: capitalize;
           }
+        
+        #failedItems label {
+          display: block;
+          font-weight: bold;
+          color: var(--bl-red-700);
+          margin-bottom: 1em;
+        }
+        #failedItems table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+          #failedItems table th {
+            padding: 0.5em;
+            background: var(--bl-red-300);
+            color: white;
+            border-bottom: 1px solid var(--bl-red-200);
+          }
+            #failedItems table th:first-child { border-top-left-radius: 3px; }
+            #failedItems table th:last-child { border-top-right-radius: 3px; }
+          #failedItems table td {
+            padding: 0.5em;
+            background: var(--bl-red-50);
+            text-align: center;
+          }
+            #failedItems table td.errorMessage {
+              color: var(--bl-red-300);
+              font-weight: 500;
+            }
+            #failedItems table tbody tr:last-of-type td:first-child {
+              border-bottom-left-radius: 3px;
+            }
+            #failedItems table tbody tr:last-of-type td:last-child {
+              border-bottom-right-radius: 3px;
+            }
 
     </style>
+
+    <!-- #=== BACKEND LINKS ===# -->
+
+    <bl-backend-importer id="importer" type="badgeEndorsements" record-id="[[badge.id]]" parameters="{{importerParameters}}"
+      import-batch-size="1" target="{{badgeEndorsements}}"></bl-backend-importer>
 
     <!-- #=== HEADER PANEL ===# -->
 
@@ -157,8 +226,10 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
       <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
 
-      <div id="leftNav" slot="leftNav">
-        <img id="headerImage" src$="[[badge.image_url]]">
+      <div id="leftNav" slot="leftNav" style$="padding: [[leftNavPaddingEm]]em;">
+        <div id="headerImageWrapper">
+          <img id="headerImage" src$="[[badge.image_url]]">
+        </div>
         <div id="headerText">
           <div id="subtitle" style$="font-size: [[subtitleFontSizeEm]]em;">Bulk Award</div>
           <h1 id="title" style$="font-size: [[titleFontSizeEm]]em;">[[badge.name]]</h1>
@@ -173,11 +244,6 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       <div id="footer" slot="footer">&nbsp;</div>
 
       <div id="content" slot="content">
-        
-        <!-- #=== BACKEND LINKS ===# -->
-
-        <bl-backend-importer id="importer" type="badgeEndorsements" record-id="[[badge.id]]" 
-          target="{{badgeEndorsements}}"></bl-backend-importer>
 
         <!-- #=== BETA UI ===# -->
         
@@ -228,30 +294,42 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           </div>
         </div>
         
-        <div id="importerActions" class="contentBox">
+        <div id="importerActions" class="contentBox" hidden="[[badgeEndorsements.status.isImporting]]">
           <paper-input id="csvFileInput" type="file" accept=".csv" on-change="_csvFileChanged" hidden></paper-input>
-          <paper-button class="orange" on-tap="selectCSVFile" hidden="[[badgeEndorsements.status.isImporting]]">
+          
+          <paper-button class="orange" on-tap="selectCSVFile">
             Import CSV File
           </paper-button>
+
+          <paper-checkbox checked="{{importerParameters.send_emails_to_new_users}}">
+            Send email notifications to new users
+            <span class="subtitle">
+              Existing users will always receive notifications according to their preferences.
+            </span>
+          </paper-checkbox>
         </div>
 
         <div id="failedItems" class="contentBox" hidden="[[!badgeEndorsements.status.failedItemCount]]">
+          <label>Failed Items</label>
           <table>
             <thead>
               <tr>
+                <th>Error</th>
                 <th>Email</th>
                 <th>Summary</th>
                 <th>Body</th>
-                <th>Error</th>
               </tr>
             </thead>
             <tbody>
               <template is="dom-repeat" items="[[badgeEndorsements.status.failedItems]]">
                 <tr>
+                  <td class="errorMessage">
+                    <i class="icon-warning"></i>
+                    [[item.backend.status.errorMessage]]
+                  </td>
                   <td>[[item.email]]</td>
                   <td>[[item.summary]]</td>
                   <td>[[item.body]]</td>
-                  <td>[[item.status.errorMessage]]</td>
                 </tr>
               </template>
             </tbody>
@@ -278,6 +356,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           badgeEndorsements: Object,
 
           expandedPercentage: Number,
+
+          leftNavPaddingEm: {
+            type: Number,
+            computed: '_leftNavPaddingEm(expandedPercentage)'
+          },
 
           subtitleFontSizeEm: {
             type: Number,
@@ -327,6 +410,13 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       }
 
       // #=== PROPERTY COMPUTER METHODS ===#
+
+      _leftNavPaddingEm(expandedPercentage) {
+        if ((expandedPercentage == undefined) || (expandedPercentage == null))
+          return 2.0;
+        else
+          return 0.8 + (1.2 * expandedPercentage);
+      }
 
       _subtitleFontSizeEm(expandedPercentage) {
         if ((expandedPercentage == undefined) || (expandedPercentage == null))
