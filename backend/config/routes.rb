@@ -70,6 +70,7 @@ BadgeList::Application.routes.draw do
   match 'badges/:id/endorsements' => 'badges#add_endorsements', via: :post
   match 'badges/:id' => 'badges#get', via: :get
   match 'groups/my' => 'groups#my_index', via: :get
+  match 'groups/new' => 'groups#new', via: :get # manually declare this before the one below
   match 'groups/:id' => 'groups#get', via: :get
 
   # === MANUAL GROUP PATHS === #

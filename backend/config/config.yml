@@ -38,6 +38,7 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List Solo
         icon: fa-user
+        color: blue
         description: |
           1 admin / badge awarder
         users: 5000
@@ -52,6 +53,7 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List Solo
         icon: fa-user
+        color: blue
         description: |
           1 admin / badge awarder
         users: 5000
@@ -66,6 +68,7 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List Team
         icon: fa-users
+        color: green
         description: |
           3 admins, unlimited badge awarders
         users: 5000
@@ -81,6 +84,7 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List Team
         icon: fa-users
+        color: green
         description: |
           3 admins, unlimited badge awarders
         users: 5000
@@ -96,6 +100,7 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List Org
         icon: fa-building
+        color: orange
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 5000
@@ -111,10 +116,11 @@ defaults: &defaults
         name: Org Annual
         amount: 143000
         currency: usd
-        interval: annual
+        interval: year
         trial_period_days: 0
         statement_descriptor: Badge List Org
         icon: fa-building
+        color: orange
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 5000
@@ -135,6 +141,7 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List K12 Teacher
         icon: fa-user
+        color: blue
         description: |
           1 teacher, annual billing only
         users: 5000
@@ -149,6 +156,7 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List K12 School
         icon: fa-building
+        color: orange
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 5000
@@ -168,6 +176,7 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List K12 School
         icon: fa-building
+        color: orange
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
           (Includes discount for annual billing)

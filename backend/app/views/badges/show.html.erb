@@ -329,6 +329,52 @@
 
 <% end %>
 
+<% if @can_award_badge && !@group.has?(:bulk_tools) %>
+
+  <!-- === BULK TOOLS FEATURE EXPLANATION MODAL === -->
+
+  <div id="bulk-tools" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">Bulk awarding feature not enabled</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          <% if @group.paid? %>
+            <p>
+              <%= @group.name %> is currently a paid group with a subscription plan that does
+              not include bulk awarding.
+            </p>
+          <% else %>
+            <p>
+              <%= @group.name %> is currently a free group. Bulk awarding is only 
+              available to paid groups whose subscriptions include the feature. 
+            </p>
+          <% end %>
+          <p>
+            Badge List's bulk awarding feature lets you award a badge to a large list of people at once.
+            With the bulk awarding feature, all badge awarders are able to import badge awardees from a CSV file or manually build a 
+            list by pasting in a collection of email addresses.
+          </p>
+          <p>
+            Click the button below to read more about subscription plans which include bulk awarding.
+          </p>
+       </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="/pricing" target="_blank" class="btn btn-success">
+        <i class="fa fa-list-alt"></i>
+        View plans &amp; pricing
+      </a>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+  </div>
+
+<% end %>
 
 <!-- === PAGE HEADER === -->
 
@@ -650,8 +696,11 @@
                 <%= link_to '<i class="fa fa-shield"></i> Award the badge'.html_safe, badge_issue_path(@group, @badge), 
                   class: 'btn btn-small', id: 'award-badge' %>
                 
-                <% if @group.has?(:bulk_tools) && @badge_list_admin %>
+                <% if @group.has?(:bulk_tools) %>
                   <%= link_to '<i class="fa fa-table"></i> Bulk award'.html_safe, add_endorsements_form_path(@group, @badge), 
+                    class: 'btn btn-small', id: 'bulk-award-badge' %>
+                <% else %>
+                  <%= link_to '<i class="fa fa-table"></i> Bulk award'.html_safe, '#bulk-tools', 
                     class: 'btn btn-small', id: 'bulk-award-badge' %>
                 <% end %>
               <% end %>
