@@ -30,11 +30,25 @@ defaults: &defaults
   # Subscription Plans
   subscription_plans:
     standard:
-      solo-1m-1:
+      solo-1m-2:
         name: Solo
-        amount: 500
+        amount: 1000
         currency: usd
         interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Solo
+        icon: fa-user
+        description: |
+          1 admin / badge awarder
+        users: 5000
+        admins: 1
+        sub_groups: 0
+        features: []
+      solo-1y-1:
+        name: Solo Annual
+        amount: 11000
+        currency: usd
+        interval: year
         trial_period_days: 0
         statement_descriptor: Badge List Solo
         icon: fa-user
@@ -49,6 +63,21 @@ defaults: &defaults
         amount: 3000
         currency: usd
         interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Team
+        icon: fa-users
+        description: |
+          3 admins, unlimited badge awarders
+        users: 5000
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+      team-1y-1:
+        name: Team Annual
+        amount: 33000
+        currency: usd
+        interval: year
         trial_period_days: 0
         statement_descriptor: Badge List Team
         icon: fa-users
@@ -78,6 +107,25 @@ defaults: &defaults
         - reporting
         - bulk_tools
         - integration
+      org-1y-1:
+        name: Org Annual
+        amount: 143000
+        currency: usd
+        interval: annual
+        trial_period_days: 0
+        statement_descriptor: Badge List Org
+        icon: fa-building
+        description: |
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
+        users: 5000
+        admins: -1
+        sub_groups: 5
+        sub_group_amount: 1000
+        features:
+        - community
+        - reporting
+        - bulk_tools
+        - integration
     k12:
       k12-teacher-1y-1:
         name: K12 Teacher Annual
@@ -93,21 +141,6 @@ defaults: &defaults
         admins: 1
         sub_groups: 0
         features: []
-      k12-team-1m-1:
-        name: K12 Team
-        amount: 1500
-        currency: usd
-        interval: month
-        trial_period_days: 0
-        statement_descriptor: Badge List K12 Team
-        icon: fa-users
-        description: |
-          3 admins, unlimited badge awarders
-        users: 5000
-        admins: 3
-        sub_groups: 0
-        features:
-        - community
       k12-school-1m-1:
         name: K12 School
         amount: 6500
@@ -127,25 +160,9 @@ defaults: &defaults
         - reporting
         - bulk_tools
         - integration
-      k12-team-1y-1:
-        name: K12 Team Annual
-        amount: 12000
-        currency: usd
-        interval: year
-        trial_period_days: 0
-        statement_descriptor: Badge List K12 Team
-        icon: fa-users
-        description: |
-          3 admins, unlimited badge awarders
-          (Includes discount for annual billing)
-        users: 5000
-        admins: 3
-        sub_groups: 0
-        features:
-        - community
-      k12-school-1y-1:
+      k12-school-1y-2:
         name: K12 School Annual
-        amount: 48000
+        amount: 70000
         currency: usd
         interval: year
         trial_period_days: 0
@@ -245,6 +262,71 @@ defaults: &defaults
         features:
         - community
     retired:
+      solo-1m-1:
+        name: Solo (Legacy)
+        amount: 500
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Solo
+        icon: fa-user
+        description: |
+          1 admin / badge awarder
+        users: 5000
+        admins: 1
+        sub_groups: 0
+        features: []
+      k12-team-1m-1:
+        name: K12 Team (Legacy)
+        amount: 1500
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Team
+        icon: fa-users
+        description: |
+          3 admins, unlimited badge awarders
+        users: 5000
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+      k12-team-1y-1:
+        name: K12 Team Annual (Legacy)
+        amount: 12000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Team
+        icon: fa-users
+        description: |
+          3 admins, unlimited badge awarders
+          (Includes discount for annual billing)
+        users: 5000
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+      k12-school-1y-1:
+        name: K12 School Annual (Legacy)
+        amount: 48000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 School
+        icon: fa-building
+        description: |
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
+          (Includes discount for annual billing)
+        users: 5000
+        admins: -1
+        sub_groups: 5
+        sub_group_amount: 500
+        features:
+        - community
+        - reporting
+        - bulk_tools
+        - integration
       standard-100m-1:
         name: Starter
         amount: 5000
