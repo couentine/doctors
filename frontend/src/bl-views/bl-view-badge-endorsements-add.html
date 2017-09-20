@@ -69,14 +69,14 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             #headerImageWrapper {
               float: left;
               height: 100%;
+              width: 5.7em;
               margin-right: 0.8em;
               display: flex;
               flex-direction: column;
               justify-content: center;
             }
               #headerImage { 
-                height: 5.7em; 
-                max-height: 100%; 
+                width: 100%;
               }
             #headerText {
               display: flex;
@@ -88,7 +88,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
               #subtitle {
                 font-size: 1.5em;
                 line-height: 1.6em;
-                font-weight: 200;
+                font-weight: 400;
               }
               #title {
                 display: block;
@@ -218,7 +218,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
     <!-- #=== BACKEND LINKS ===# -->
 
     <bl-backend-importer id="importer" type="badgeEndorsements" record-id="[[badge.id]]" parameters="{{importerParameters}}"
-      import-batch-size="1" target="{{badgeEndorsements}}"></bl-backend-importer>
+      target="{{badgeEndorsements}}"></bl-backend-importer>
 
     <!-- #=== HEADER PANEL ===# -->
 
@@ -227,7 +227,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
 
       <div id="leftNav" slot="leftNav" style$="padding: [[leftNavPaddingEm]]em;">
-        <div id="headerImageWrapper">
+        <div id="headerImageWrapper" style$="width: [[headerImageSizeEm]]em;">
           <img id="headerImage" src$="[[badge.image_url]]">
         </div>
         <div id="headerText">
@@ -362,6 +362,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             computed: '_leftNavPaddingEm(expandedPercentage)'
           },
 
+          headerImageSizeEm: {
+            type: Number,
+            computed: '_headerImageSizeEm(expandedPercentage)'
+          },
+
           subtitleFontSizeEm: {
             type: Number,
             computed: '_subtitleFontSizeEm(expandedPercentage)'
@@ -412,31 +417,23 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       // #=== PROPERTY COMPUTER METHODS ===#
 
       _leftNavPaddingEm(expandedPercentage) {
-        if ((expandedPercentage == undefined) || (expandedPercentage == null))
-          return 2.0;
-        else
-          return 0.8 + (1.2 * expandedPercentage);
+        return this.linearExpansionValue(2.0, 0.8, expandedPercentage);
+      }
+
+      _headerImageSizeEm(expandedPercentage) {
+        return this.linearExpansionValue(5.7, 2.0, expandedPercentage);
       }
 
       _subtitleFontSizeEm(expandedPercentage) {
-        if ((expandedPercentage == undefined) || (expandedPercentage == null))
-          return 1.5;
-        else
-          return 1.5 * expandedPercentage;
+        return this.linearExpansionValue(1.5, 0, expandedPercentage);
       }
 
       _titleFontSizeEm(expandedPercentage) {
-        if ((expandedPercentage == undefined) || (expandedPercentage == null))
-          return 3.0;
-        else
-          return 1.5 + (1.5 * expandedPercentage);
+        return this.linearExpansionValue(3.0, 1.5, expandedPercentage);
       }
 
       _rightNavFontSizeEm(expandedPercentage) {
-        if ((expandedPercentage == undefined) || (expandedPercentage == null))
-          return 2.3;
-        else
-          return 1.5 + (0.8 * expandedPercentage);
+        return this.linearExpansionValue(2.3, 1.5, expandedPercentage);
       }
 
     }

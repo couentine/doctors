@@ -18,7 +18,7 @@ The target object provides methods for building a list of items to import either
   <template>
 
     <!-- #=== POLLER TO TRACK STATUS OF CURRENT IMPORT BATCH ===# -->
-    <bl-poller id="poller" poller-id="{{_pollerId}}" target="{{target.status.poller}}"></bl-poller>
+    <bl-poller id="poller" poller-id="{{_pollerId}}" target="{{target.status.poller}}" max-duration="600000"></bl-poller>
 
   </template>
 

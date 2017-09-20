@@ -88,6 +88,21 @@ All Badge List app views components should extend this mixin. It extends the `bl
           this.activate();
       }
 
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /**
+       * Use in combination with header panel `expandedPercentage` property.
+       * When `expandedPercentage` is `1.0`, returns `expandedValue`.
+       * When `expandedPercentage` is `0.0`, returns `collapsedValue`.
+       * When `expandedPercentage` is between 1 and 0, returns value from linear distribution between `expandedValue` and `collapsedValue`.
+       */
+      linearExpansionValue(expandedValue, collapsedValue, expandedPercentage) {
+        if ((expandedPercentage == undefined) || (expandedPercentage == null))
+          return expandedValue;
+        else
+          return collapsedValue + ((expandedValue - collapsedValue) * expandedPercentage);
+      }
+
     }
   }
 
