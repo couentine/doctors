@@ -1393,14 +1393,12 @@ div.bl-form {
         padding: 5px 10px;
         margin-top: -6px;
         border-radius: 3px;
-      }
-
-      &:nth-child(1) b {
-        background-color: $tertiary-medium;
-        border-color: $tertiary-light;
-      }
-      &:nth-child(3),&:nth-child(5) {
-        b {
+        
+        &.blue {
+          background-color: $tertiary-medium;
+          border-color: $tertiary-light;
+        }
+        &.orange {
           background-color: $primary-medium;
           border-color: $primary-light;
         }

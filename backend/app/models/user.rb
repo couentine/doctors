@@ -611,16 +611,34 @@ class User
     end
   end
 
-  def member_of?(group)
-    member_of_ids.include?(group.id)
+  def member_of?(group_or_id)
+    case group_or_id.class.to_s
+    when 'Group'
+      member_of_ids.include?(group_or_id.id)
+    when 'BSON::ObjectId'
+      member_of_ids.include?(group_or_id)
+    when 'String'
+      member_of_ids.include?(BSON::ObjectId.from_string(group_or_id))
+    else
+      throw "Invalid type #{group_or_id.class.to_s} for group_or_id. (Accepted types are Group, ObjectId or String.)"
+    end
   end
 
-  def admin_of?(group)
-    admin_of_ids.include?(group.id)
+  def admin_of?(group_or_id)
+    case group_or_id.class.to_s
+    when 'Group'
+      admin_of_ids.include?(group_or_id.id)
+    when 'BSON::ObjectId'
+      admin_of_ids.include?(group_or_id)
+    when 'String'
+      admin_of_ids.include?(BSON::ObjectId.from_string(group_or_id))
+    else
+      throw "Invalid type #{group_or_id.class.to_s} for group_or_id. (Accepted types are Group, ObjectId or String.)"
+    end
   end
 
-  def member_or_admin_of?(group)
-    member_of?(group) || admin_of?(group)
+  def member_or_admin_of?(group_or_id)
+    member_of?(group_or_id) || admin_of?(group_or_id)
   end
 
   # Doesn't use any queries, returns :admin or :member or :none
@@ -657,8 +675,7 @@ class User
     when 'String'
       learner_badge_ids.include? BSON::ObjectId.from_string(badge_or_id)
     else
-      throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. " \
-        + "(Accepted types are Badge, ObjectId or String.)"
+      throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. (Accepted types are Badge, ObjectId or String.)"
     end
   end
 
@@ -672,8 +689,7 @@ class User
     when 'String'
       expert_badge_ids.include? BSON::ObjectId.from_string(badge_or_id)
     else
-      throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. " \
-        + "(Accepted types are Badge, ObjectId or String.)"
+      throw "Invalid type #{badge_or_id.class.to_s} for badge_or_id. (Accepted types are Badge, ObjectId or String.)"
     end
   end
 

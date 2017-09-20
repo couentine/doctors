@@ -1,0 +1,618 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+<link rel="import" href="../bl-poller/bl-poller.html">
+
+<!-- #=== LIBRARIES ===# -->
+<script type="text/javascript" src="../../lib/PapaParse-4.3.2/papaparse.min.js"></script>
+
+<!--
+# Badge List Backend List Importer #
+
+Use this component to bind a local component property with an import list endpoint in the Badge List backend.
+The target object provides methods for building a list of items to import either manually or by importing from a local CSV file.
+-->
+<dom-module id="bl-backend-importer">
+  <template>
+
+    <!-- #=== POLLER TO TRACK STATUS OF CURRENT IMPORT BATCH ===# -->
+    <bl-poller id="poller" poller-id="{{_pollerId}}" target="{{target.status.poller}}" max-duration="600000"></bl-poller>
+
+  </template>
+
+  <script>
+    class BlBackendImporter extends BlAppComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-backend-importer'; }
+
+      static get properties() {
+        return {
+          
+          /** 
+           * Required. The list type corresponds to a tag in swagger and determines the item properties.
+           */
+          type: String,
+
+          /** 
+           * Required. The id of the record to which this list is being imported. Passed to the `id` parameter of the backend operation.
+           */
+          recordId: String,
+
+          /** 
+           * This controls the number of items included in each import batch. It is set automatically to the `maxItems` value from the
+           * swagger spec, but it can be specified manually instead. If the manually specified value is higher than the `maxItems` value
+           * then it will be ignored.
+           */
+          importBatchSize: Number,
+
+          /** Optional. Additional parameters to pass to the import action. */
+          parameters: {
+            type: Object,
+            notify: true,
+            value: function() { return {} }
+          },
+
+          /**
+           * Required. The target object receiving the binding. The following properties and methods are added on connection.
+           * @property {object[]} itemsToImport - The items passed in the body of the import action.
+           *   You can add new items by using the `addItem` or `addItemsFromCSV` methods, but shouldn't modify the list directly.
+           *   Each item has a `backend` object added to it which will contain: 
+           *   - `status` object
+           *     - `status.code` will equal `ready`, `importing`, `imported` or `failed`
+           *     - `status.isReady`, `status.isImporting`, `status.isImported` and `status.isFailed` are boolean status checkers
+           *     - `status.errorMessage` will contain explanatory text when `failed`
+           *   - `result` object returned from the server (in case you need to reference it directly)
+           *   - `remove()` function which will remove the specified item from the list.
+           * @property {object[]} importedItems - After items are successfully imported they are removed from `itemsToImport` and added to
+           *   this list. The items in this list have all of the same properties except there is no `remove()` method.
+           * @property {object} status - Stores the current state of the import process.
+           * @property {string} status.code - Equal to `uninitialized`, `ready`, `parsing`, `mapping`, `importing` or `error`.
+           * @property {boolean} status.isReady - No network action is pending. True whenever the status is 'ready'.
+           * @property {boolean} status.isParsing - An import is in progress. True whenever the status is 'parsing'.
+           * @property {boolean} status.isMapping - An import is in progress. True whenever the status is 'mapping'.
+           * @property {boolean} status.isImporting - An import is in progress. True whenever the status is 'importing'.
+           * @property {boolean} status.isError - True if the status is 'error'.
+           * @property {string} status.errorMessage - Error message from backend. Null unless `isError` is `true`.
+           * @property {number} status.currentBatch - The number of the current import batch. From 1 to `batchCount`.
+           * @property {number} status.batchCount - The total number of batches in the current import process.
+           * @property {object} status.poller - Stores the poller object for the current import batch. Updated in real time.
+           * @property {number} status.readyItemCount - The total number of `itemsToImport` at status `ready`.
+           * @property {number} status.importingItemCount - The total number of `itemsToImport` at status `importing`.
+           * @property {number} status.failedItemCount - The total number of `itemsToImport` at status `failed`.
+           * @property {number} status.importedItemCount - The total size of `importedItems`.
+           * @property {object[]} status.failedItems - An array of all`itemsToImport` at status `failed`.
+           * @property {function} addItem() - Shortcut to access the component method. Refer to method comments for docs.
+           * @property {function} addItemsFromCSV(filePath) - Shortcut to access the component method. Refer to method comments for docs.
+           * @property {function} finishMapping() - Shortcut to access the component method. Refer to method comments for docs.
+           * @property {function} cancelParsing() - Shortcut to access the component method. Refer to method comments for docs.
+           * @property {function} clearItems() - Shortcut to access the component method. Refer to method comments for docs.
+           * @property {object[]} itemProperties - Stores a copy of the properties object of the swagger schema used for the imported items 
+           *   array. Object property names are the item keys, values are objects with properties for `type`, `description` 
+           *   and potentially `format`.
+           * @property {string[]} csvColumns - Ordered list of column headers from the CSV file. Set whenever `addItemsFromCSV` is called.
+           * @property {object} csvColumnMap - Key-value store used to match CSV column headers with item property names. 
+           *   `csvColumnMap` is automatically updated whenever `addItemsFromCSV` is called. Keys are the names of all the `itemProperties`,
+           *    values are strings corresponding to values from `csvColumns`.
+           * @property {function} import() - Initiates the import process. If `itemsToImport` has more than `importBatchSize` items then 
+           *   the process will be broken up into multiple batches.
+           */
+          target: {
+            type: Object,
+            notify: true,
+            value: function() { return {} }
+          },
+
+          /** Caches the most recently return results from Papa Parse. */
+          _lastParseResults: {
+            type: Object,
+            readOnly: true
+          },
+
+          /** The id of the poller used to track the status of the current import batch. */
+          _pollerId: {
+            type: String,
+            readOnly: true,
+            notify: true
+          },
+
+          /** 
+           * Set using the `operationsByTag` method in `<bl-backend-client>`. Used to power public action methods.
+           * Consuming components should not reference this object directly as it may change with future implementations.
+           */
+          _backendOperations: {
+            type: Object,
+            readOnly: true
+          }
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /** Adds a new blank item to the end of `target.itemsToImport` array. Returns the new item. */
+      addItem() {
+        var item = this._buildItem();
+
+        this.push('target.itemsToImport', item);
+
+        return item;
+      }
+
+      /** 
+       * Adds items from a local CSV file to the `itemsToImport` array.
+       * The CSV column headers are automatically matched with the itemProperties if possible. CSV parsing happens asynchronously.
+       * status will go to `parsing` while the parse process is running. 
+       *
+       * If CSV column headers are automatically matched or if all of the itemProperties are matched then the parsing process will complete
+       * and the status will return to `ready`. 
+       *
+       * If the automatic column matching failed to match everything then status will go to `mapping`.
+       * You can then optionally use the `csvColumnMap` property to fill in the remaining mappings, then call `finishMapping`.
+       *
+       * If an error occurs during the parsing process it will be indicated in `target.status.code` and `target.status.errorMessage`.
+       */
+      addItemsFromCSV(file) {
+        if (this.target.status.code == 'ready') {
+          this._updateStatus('parsing');
+          
+          Papa.parse(file, {
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+            complete: (parseResults) => this._processParseResults(parseResults),
+            error: (error) => this._updateStatus('error', error)
+          });
+        }
+      }
+
+      /**
+       * Finishes adding items from a CSV file when the initial call to `addItemsFromCSV` resulted in going to status `mapping`.
+       * `finishMapping` will always result in going to status `ready` unless there is an error.
+       */
+      finishMapping() {
+        if (this.target.status.code == 'mapping')
+          this._processParseResults(); // uses previously cached results
+      }
+
+      /** Aborts a pending CSV import and returns the status to `ready`. */
+      cancelParsing() {
+        if ((this.target.status.code == 'parsing') || (this.target.status.code == 'mapping'))
+          this._updateStatus('ready');
+      }
+
+      /** Removes all items from `target.itemsToImport` array. Returns the removed items. */
+      clearItems() {
+        return this.splice('target.itemsToImport', 0, this.target.itemsToImport.length);
+      }
+
+      /** 
+       * Pushes all `target.itemsToImport` to the backend in batches no larger than `importBatchSize`. `target.status.batchCount` will 
+       * indicate the number of batches needed, `target.status.currentBatch` will indicate which batch is currently being imported. 
+       * `target.status.poller` stores a continuously refreshed poller which tracks the progress of the current import batch.
+       *
+       * Each item's `status.code` is set to `importing` while it is in the active batch. Once the batch is complete, each item is removed
+       * from `target.itemsToImport` and added to `target.importedItems` if successful. If there is an error, then the item is left
+       * in `target.itemsToImport` and the item's `status.code` is set to `failed` and `status.errorMessage` contains the explanation.
+       *
+       * `target.status.code` goes to `importing` during the import and returns to `ready` when importing is complete.
+       * If a network error occurs the status goes to `error` and `target.status.errorMessage` is set.
+       */
+      import() {
+        if ((this.target.status.code == 'ready') || (this.target.status.code == 'error')) {
+          this.set('target.status.batchCount', Math.ceil(this.target.itemsToImport.length / this.importBatchSize));
+          this.set('target.status.currentBatch', null);
+          
+          if (this.target.status.batchCount > 0) {
+            this.set('target.status.currentBatch', 1);
+            this._updateStatus('importing');
+            this._importCurrentBatch();
+          }
+        }
+      }
+
+      /** Returns the index of the `target.itemsToImport` item with the specified `uniqueId` or null if not found. */
+      getItemIndex(uniqueId) {
+        var itemIndex = null;
+
+        for (var i = 0; i < this.target.itemsToImport.length; i++)
+          if (this.target.itemsToImport[i].uniqueId == uniqueId) {
+            itemIndex = i;
+            break;
+          }
+
+        return itemIndex;
+      }
+
+      /** Removes the matching item from `target.itemsToImport` array and returns the removed item (or null if no match is found). */
+      removeItemById(uniqueId) {
+        var itemIndex = this.getItemIndex(uniqueId);
+
+        if (itemIndex != null)
+          return this.splice('target.itemsToImport', itemIndex, 1)[0];
+        else
+          return null;
+      }
+
+      // #=== PRIVATE ACTION METHODS ===#
+
+      /** 
+       * Sets and notifies all of the target properties related to status. Only include error if statusCode is 'error'. 
+       * 'error' can be an error object or a string.
+       */
+      _updateStatus(statusCode, error) {
+        var isReady = (statusCode == 'ready');
+        var isParsing = (statusCode == 'parsing');
+        var isMapping = (statusCode == 'mapping');
+        var isImporting = (statusCode == 'importing');
+        var isError = (statusCode == 'error');
+
+        // Only trigger a notification for the booleans if they are changing
+        if (this.target.status.isReady != isReady) this.set('target.status.isReady', isReady);
+        if (this.target.status.isParsing != isParsing) this.set('target.status.isParsing', isParsing);
+        if (this.target.status.isMapping != isMapping) this.set('target.status.isMapping', isMapping);
+        if (this.target.status.isImporting != isImporting) this.set('target.status.isImporting', isImporting);
+        if (this.target.status.isError != isError) this.set('target.status.isError', isError);
+
+        // Always trigger a notification for the error message, but ensure that it's always null if there's no error
+        if (isError) this.set('target.status.errorMessage', ((error && error.message) ? error.message : error));
+        else this.set('target.status.errorMessage', null);
+
+        this.set('target.status.code', statusCode);
+      }
+
+      /** 
+       * Sets the status related properties of the `target.itemsToImport` item with the specified index.
+       * @param {object} result - If included this will override the existing `result` property.
+       * @param {string} errorMessage - Only include this if status is `failed`.
+       */
+      _updateItemStatusByIndex(index, statusCode, result, errorMessage) {
+        var itemPath = 'target.itemsToImport.' + index;
+        var isReady = (statusCode == 'ready');
+        var isImporting = (statusCode == 'importing');
+        var isImported = (statusCode == 'imported');
+        var isFailed = (statusCode == 'failed');
+
+        if (this.target.status.isReady != isReady) this.set(itemPath + '.backend.status.isReady', isReady);
+        if (this.target.status.isImporting != isImporting) this.set(itemPath + '.backend.status.isImporting', isImporting);
+        if (this.target.status.isImported != isImported) this.set(itemPath + '.backend.status.isImported', isImported);
+        if (this.target.status.isFailed != isFailed) this.set(itemPath + '.backend.status.isFailed', isFailed);
+
+        if (isFailed)
+          this.set(itemPath + '.backend.status.errorMessage', errorMessage);
+        else
+          this.set(itemPath + '.backend.status.errorMessage', null);
+
+        if (result) 
+          this.set(itemPath + '.backend.result', result);
+
+        this.set(itemPath + '.backend.status.code', statusCode);
+      }
+
+      /** Updates the values of all of the `target.status.___ItemCount` properties. */
+      _updateItemCounts() {
+        if (this.target.itemsToImport) {
+          this.set('target.status.readyItemCount', this.target.itemsToImport.reduce(function(count, item) {
+            return count + (item.backend.status.isReady ? 1 : 0);
+          }, 0));
+
+          this.set('target.status.importingItemCount', this.target.itemsToImport.reduce(function(count, item) {
+            return count + (item.backend.status.isImporting ? 1 : 0);
+          }, 0));
+
+          this.set('target.status.failedItems', this.target.itemsToImport.filter(function(item) { return item.backend.status.isFailed; }));
+          this.set('target.status.failedItemCount', this.target.status.failedItems.length);
+        }
+
+        if (this.target.importedItems)
+          this.set('target.status.importedItemCount', this.target.importedItems.length);
+      }
+      
+      /** Initializes the object bound to the target property. Adds callbacks and sets initial property values. */
+      _setupTargetObject() {
+        // Add to the existing target object instead of overwriting it, in case the parent element has given it extra properties
+        this.set('target.itemsToImport', []);
+        this.set('target.importedItems', []);
+        this.set('target.status', {});
+        this.set('target.status.code', 'uninitialized');
+        this.set('target.status.isReady', false);
+        this.set('target.status.isParsing', false);
+        this.set('target.status.isMapping', false);
+        this.set('target.status.isImporting', false);
+        this.set('target.status.isError', false);
+        this.set('target.status.errorMessage', null);
+        this.set('target.status.currentBatch', null);
+        this.set('target.status.batchCount', null);
+        this.set('target.status.poller', {});
+        this.set('target.status.readyItemCount', 0);
+        this.set('target.status.importingItemCount', 0);
+        this.set('target.status.failedItemCount', 0);
+        this.set('target.status.failedItems', []);
+        this.set('target.status.importedItemCount', 0);
+        this.set('target.itemProperties', {});
+        this.set('target.csvColumns', []);
+        this.set('target.csvColumnMap', {});
+
+        // No need to notify for these ones
+        this.target.addItem = () => this.addItem();
+        this.target.addItemsFromCSV = (filePath) => this.addItemsFromCSV(filePath);
+        this.target.finishMapping = () => this.finishMapping();
+        this.target.cancelParsing = () => this.cancelParsing();
+        this.target.clearItems = () => this.clearItems();
+        this.target.import = () => this.import();
+      }
+
+      /** 
+       * Processes the results of Papa Parse and moves to next status (status means `target.status.code`). 
+       * If status is `parsing` and there are unmatched fields then we move to status `mapping` to provide a chance to map more fields.
+       * If all possible fields are matched (or if we're already at status `mapping`) then we will go to status `ready` unless
+       * there is an error. (Errors always result in going to status `error`.)
+       *
+       * @param {object} parseResults - The results of `Papa.parse`. If ommitted, `this._lastParseResults` is used instead.
+       */
+      _processParseResults(parseResults) {
+        try {
+          var itemPropertyNames = Object.keys(this.target.itemProperties);
+          var matchingColumnName;
+          var allMatchedColumnNames = [];
+          var unmatchedPropertyCount = 0;
+          var unmatchedColumnCount = 0;
+
+          if (parseResults)
+            this._set_lastParseResults(parseResults);
+          else
+            parseResults = this._lastParseResults;
+
+          // Update the CSV column names, filtering out blank columns
+          this.set('target.csvColumns', parseResults.meta.fields.filter(function(columnName) {
+            return columnName && columnName.length && columnName.trim().length; 
+          }));
+
+          // Update the csvColumnMap, keeping previous matches unless they point to a column that no longer exists
+          for (var i = 0; i < itemPropertyNames.length; i++) {
+            matchingColumnName = this.target.csvColumnMap[itemPropertyNames[i]];
+
+            if (!matchingColumnName || !this.target.csvColumns.includes(matchingColumnName)) {
+              matchingColumnName = this._findMatchingCSVColumn(itemPropertyNames[i]);
+              this.target.csvColumnMap[itemPropertyNames[i]] = matchingColumnName;
+            }
+            
+            if (matchingColumnName)
+              allMatchedColumnNames.push(matchingColumnName);
+            else
+              unmatchedPropertyCount++;
+          }
+          unmatchedColumnCount = this.target.csvColumns.reduce(function(unmatchedCount, columnName) {
+            return unmatchedCount + (allMatchedColumnNames.includes(columnName) ? 0 : 1);
+          }, 0);
+
+
+          if ((this.target.status.code == 'parsing') && unmatchedPropertyCount && unmatchedColumnCount) {
+            // We only go to the mapping status if there are unmatched properties AND potential columns to match, otherwise just go ahead
+            this._updateStatus('mapping');
+          } else {
+            // Translate the parse data items into import items and add them to `target.itemsToImport`
+            for (var i = 0; i < parseResults.data.length; i++)
+              this.push('target.itemsToImport', this._buildItem(parseResults.data[i]));
+            
+            this._updateItemCounts();
+            this._updateStatus('ready');
+            this.dispatchEvent(new CustomEvent('csv-parsing-complete', {detail: {parseResults: parseResults}}));
+          }
+        } catch(e) {
+          throw e;
+          this._updateStatus('error', e);
+        }
+      }
+
+      /** 
+       * Calls out to the backend to start the import batch specified in `target.status.currentBatch`.
+       * When the asynchronous import is complete a poller is started and the results are eventually passed to `_processImportResults()`.
+       */
+      _importCurrentBatch() {
+        var itemPropertyNames = Object.keys(this.target.itemProperties);
+        var firstIndex;
+        var lastIndex;
+        var currentItems;
+        var importParameters;
+
+        firstIndex = (this.target.status.currentBatch - 1) * this.importBatchSize;
+        lastIndex = Math.min((this.target.status.currentBatch * this.importBatchSize) - 1, this.target.itemsToImport.length - 1);
+
+        for (var i = firstIndex; i <= lastIndex; i++)
+          this._updateItemStatusByIndex(i, 'importing');
+        this._updateItemCounts();
+
+        // Construct a temporary list of items with only keys specified it `target.itemProperties`
+        currentItems = this.target.itemsToImport
+          .slice(firstIndex, lastIndex + 1)
+          .map(function(item) {
+            return itemPropertyNames.reduce(function(filteredObject, propertyName) {
+              filteredObject[propertyName] = item[propertyName];
+              return filteredObject;
+            }, {})
+          });
+
+        importParameters = Object.assign({}, this.parameters); // clone the parameters in memory
+        importParameters.id = this.recordId;
+        importParameters.items = currentItems;
+        this._backendOperations.importList.import.do(importParameters).then(function(response) {
+          // Setting the `_pollerId` property automatically kicks off the polling process in `<bl-poller>`.
+          // There is a property observer on `target.status.poller.completed` which fires `_processImportResults` when the poller is done.
+          if (response && response.poller_id)
+            this._set_pollerId(response.poller_id);
+          else
+            this._logImportBatchError('There was a server error. Please try again later.');
+        }.bind(this)).catch(function(error) {
+          this._logImportBatchError(error);
+        }.bind(this));
+      }
+
+      /**
+       * Called by the poller completed observer. Finishes processing the results of the current import batch,
+       * then either starts the next batch or completes 
+       */
+      _processImportResults(items) {
+        var firstIndex = (this.target.status.currentBatch - 1) * this.importBatchSize;
+
+        for (var i = 0; i < items.length; i++)
+          if (items[i].result.success)
+            this._updateItemStatusByIndex(firstIndex + i, 'imported', items[i].result);
+          else
+            this._updateItemStatusByIndex(firstIndex + i, 'failed', items[i].result, items[i].result.error_message);
+
+        if (this.target.status.currentBatch < this.target.status.batchCount) {
+          this.set('target.status.currentBatch', this.target.status.currentBatch + 1);
+          this._updateItemCounts();
+          this._importCurrentBatch();
+        } else {
+          // We just finished the last batch
+          this._moveImportedItems();
+          this._updateItemCounts();
+          this._updateStatus('ready');
+        }
+      }
+
+      /** Moves all `target.itemsToImport` items with `status.code` == `imported` to the `target.importedItems` list. */
+      _moveImportedItems() {
+        for (var i = this.target.itemsToImport.length - 1; i >= 0; i--) // loop through backwards since we'll be modifying the list
+          if (this.target.itemsToImport[i].backend.status.isImported)
+            this.push('target.importedItems', this.splice('target.itemsToImport', i, 1)[0]);
+      }
+
+      /** Logs a network or server error which occurs during the importing of a batch. */
+      _logImportBatchError(error) {
+        var firstIndex;
+        var lastIndex;
+
+        firstIndex = (this.target.status.currentBatch - 1) * this.importBatchSize;
+        lastIndex = Math.min((this.target.status.currentBatch * this.importBatchSize) - 1, this.target.itemsToImport.length - 1);
+
+        // If there was an error we put the items back to `ready` (not `failed`) since it wasn't the fault of the item values
+        for (var i = firstIndex; i <= lastIndex; i++)
+          this._updateItemStatusByIndex(i, 'ready');
+
+        // This might have been a multi-batch process where previous batches were successful. If so, then we need to move imported items.
+        this._moveImportedItems();
+
+        this._updateStatus('error', error);
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+
+        // Add a listener for the backend client status
+        this.app.$.backend.addEventListener('initialized-changed', e => this._appBackendInitializedChanged(e));
+        
+        // Setup the target object
+        this._setupTargetObject();
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      static get observers() {
+          return [
+            '_pollerCompletedChanged(target.status.poller.completed)'
+          ]
+      }
+
+      /** This method initializes the backend related properties of the component after the backend client is initialized. */
+      _appBackendInitializedChanged(e) {
+        if (e.detail.value) {
+          this._set_backendOperations(this.app.$.backend.operationsByTag(this.type));
+          
+          var schemaMaxItems = this._backendOperations.importList.import.parameters.items.schema.maxItems;
+          if (!this.importBatchSize || (this.importBatchSize > schemaMaxItems))
+            this.importBatchSize = schemaMaxItems;
+
+          var itemModelReferenceString = this._backendOperations.importList.import.parameters.items.schema.items.$ref;
+          this.set('target.itemProperties', this.app.$.backend.modelProperties(itemModelReferenceString));
+
+          this._updateStatus('ready');
+        }
+      }
+
+      /** Monitors for completed pollers and passes the resulting processed items to `_processImportResults`. */
+      _pollerCompletedChanged(pollerCompleted) {
+        if (pollerCompleted)
+          if (this.target.status.poller.status == 'successful')
+            this._processImportResults(this.target.status.poller.data.items);
+          else
+            this._logImportBatchError(this.target.status.poller.message);
+      }
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      /** 
+       * Returns a new item ready to add to `itemsToImport` with all properties specified in `target.itemProperties`.
+       * @param {object} csvItem - Optional. A data item parsed from a csv file. If included this will be used to populate the item's
+       *   properties. The items keys will be translated using `target.csvColumnMap`.
+       */
+      _buildItem(csvItem) {
+        var item = Object.keys(this.target.itemProperties).reduce(
+          function(itemObject, propertyName) {
+            if (csvItem)
+              itemObject[propertyName] = csvItem[this.target.csvColumnMap[propertyName]];
+            else
+              itemObject[propertyName] = null;
+            
+            return itemObject;
+          }.bind(this), {}
+        );
+
+        item.uniqueId = Math.random().toString(36).slice(2); // used to identify this item later
+        item.backend = {
+          status: {
+            code: 'ready',
+            isReady: true,
+            isImporting: false,
+            isImported: false,
+            isFailed: false,
+            errorMessage: null
+          },
+          result: null,
+          remove: () => this.removeItemById(item.uniqueId)
+        };
+
+        return item;
+      }
+
+      /** Returns matching entry from `csvColumns` if found, otherwise returns null. */
+      _findMatchingCSVColumn(itemPropertyName) {
+        var matchingColumnName;
+        var simplifiedPropertyName;
+        var simplifiedColumnName;
+
+        // First build the simplified names and look for perfect matches
+        simplifiedPropertyName = itemPropertyName.toLowerCase().replace(/[^a-z]/g, '');
+        for (var i = 0; !matchingColumnName && (i < this.target.csvColumns.length); i++) {
+          simplifiedColumnName = this.target.csvColumns[i].toLowerCase().replace(/[^a-z]/g, '');
+
+          if (simplifiedColumnName == simplifiedPropertyName)
+            matchingColumnName = this.target.csvColumns[i];
+        }
+
+        // Now look for partial matches if needed
+        if (!matchingColumnName)
+          for (var i = 0; !matchingColumnName && (i < this.target.csvColumns.length); i++)
+            if (this.target.csvColumns[i].toLowerCase().includes(simplifiedPropertyName))
+              matchingColumnName = this.target.csvColumns[i];
+
+        return matchingColumnName;
+      }
+
+    }
+
+    window.customElements.define(BlBackendImporter.is, BlBackendImporter);
+
+    /**
+     * Fires when after the parsing and mapping process is complete and items from the csv file have been added to `itemsToImport`.
+     *
+     * @event csv-parsing-complete
+     */
+
+  </script>
+</dom-module>

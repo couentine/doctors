@@ -1,0 +1,214 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+
+<!--
+# Badge List Backend Record Item #
+
+Use this component to bind a local component property with a record item in the Badge List backend.
+This is a reusable way to interact with any endpoints marked with the `recordItem` tag.
+-->
+<dom-module id="bl-backend-item">
+  <template>
+  </template>
+
+  <script>
+    class BlBackendItem extends BlAppComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-backend-item'; }
+
+      static get properties() {
+        return {
+
+          /** 
+           * Required. The list type determines the model and available actions. Must match a swagger model tag (`badge`, `group`, etc).
+           */
+          type: String,
+          
+          /** 
+           * You should set either the `recordId` OR the `recordPath`, not both.
+           * Use `recordId` to retrieve the record if you have its id.
+           * Set this to the record id of the item. Setting or changing this property automatically calls the `get()` operation.
+           * After the `get()` operation completes the `recordPath` will automatically be updated.
+           */
+          recordId: {
+            type: String,
+            notify: true,
+            observer: '_recordIdChanged'
+          },
+
+          /** 
+           * You should set either the `recordId` OR the `recordPath`, not both.
+           * Use `recordPath` to retrieve the record if you do not know it's id but know the url of the record and its parents.
+           * Set this to a string of the format `{parentPath}/{recordUrl}`. Setting or changing this property automatically calls the 
+           * `get()` operation. After the `get()` operation completes the `recordId` will automatically be updated.
+           */
+          recordPath: {
+            type: String,
+            notify: true,
+            observer: '_recordPathChanged'
+          },
+
+          /**
+           * Required. The target object receiving the binding. The object will contain the direct json properties of the record returned
+           * by the backend. In additional to the record properties, an additional `backend` property object will be added to the target,
+           * providing status variables to track network state as well as functions for interacting with the backend.
+           *
+           * The `backend` object contains the following properties:
+           * @property {object} status - Stores the current state of the network connection.
+           * @property {string} status.code - Equal to `uninitialized`, `ready`, `loading`, `complete` or `error`.
+           * @property {boolean} status.isReady - Indicates that the client is initialized and `bl-backend-item` is ready for a value 
+           *   to be placed in either `recordId` or `recordPath`.
+           * @property {boolean} status.isLoading - A network operation is pending.
+           * @property {boolean} status.isComplete - Once the initial `get` operation has completed, the status will go to `complete` and
+           *   will return to `complete` whenever any additional network operations successfuly complete.
+           * @property {boolean} status.isError - True if the status is 'error'.
+           * @property {string} status.errorMessage - Error message from backend. Null unless `isError` is `true`.
+           * @property {object} operations - Contains a callback for each backend operation in the swagger spec for this `type`.
+           *   You can always count on the presence of the standard operations: `get()`, `create()` `update()` and `delete()`
+           *   NOTE: This isn't true yet, but will be once API v1 is complete.
+           */
+          target: {
+            type: Object,
+            notify: true,
+            value: function() { return {} }
+          },
+
+          /** Used to interact with `<bl-backend-client>`. */
+          _backendOperations: {
+            type: Object,
+            readOnly: true
+          }
+
+        }
+      }
+      
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /** 
+       * Executes any of the `recordItem` operations with the passed parameters and stores the response in `target`. 
+       * Note: You can only run one operation at a time. And you can only call this action after the backend client is initialized.
+       */
+      doOperation(operationName, parameters) {
+        var parametersWithIdentifier;
+
+        if (this.target.backend.status.isReady || this.target.backend.status.isComplete|| this.target.backend.status.isError) {
+          this._updateStatus('loading');
+
+          // Clone the parameters so we can inject the record identifier(s) without messing up the passed parameters object
+          parametersWithIdentifier = {};
+          Object.assign(parametersWithIdentifier, parameters);
+          if (this.recordId && this.recordId.length) {
+            parametersWithIdentifier.id = this.recordId;
+          } else if (this.recordPath && this.recordPath.length) {
+            var recordPathParts = this.recordPath.split('/');
+            parametersWithIdentifier.id = recordPathParts[recordPathParts.length - 1];
+            parametersWithIdentifier.parent_path = recordPathParts.slice(0, -1).join('/');
+          }
+
+          this._backendOperations.recordItem[operationName].do(parametersWithIdentifier).then(function(response) {
+            var newTargetObject = response;
+            newTargetObject.backend = this.target.backend; // preserve the backend property
+            this.setProperties({target: newTargetObject}); // trigger the property change notifications with a cohesive set
+
+            this.recordId = this.target.id;
+            this.recordPath = this.target.record_path;
+            this._updateStatus('complete');
+          }.bind(this)).catch(function(error) { 
+            this._updateStatus('error', error);
+          }.bind(this)); 
+        }
+      }
+      
+      // #=== PRIVATE ACTION METHODS ===#
+
+      /** Sets and notifies all of the target properties related to status. Only include `error` if statusCode is 'error'. */
+      _updateStatus(statusCode, error) {
+        var isReady = (statusCode == 'ready');
+        var isLoading = (statusCode == 'loading');
+        var isComplete = (statusCode == 'complete');
+        var isError = (statusCode == 'error');
+
+        this.set('target.backend.status.code', statusCode);
+
+        // Only trigger a notification for the booleans if they are changing
+        if (this.target.backend.status.isReady != isReady) this.set('target.backend.status.isReady', isReady);
+        if (this.target.backend.status.isLoading != isLoading) this.set('target.backend.status.isLoading', isLoading);
+        if (this.target.backend.status.isComplete != isComplete) this.set('target.backend.status.isComplete', isComplete);
+        if (this.target.backend.status.isError != isError) this.set('target.backend.status.isError', isError);
+
+        // Always trigger a notification for the error message, but ensure that it's always null if there's no error
+        if (isError) this.set('target.backend.status.errorMessage', ((error && error.message) ? error.message : error));
+        else this.set('target.backend.status.errorMessage', null);
+      }
+
+      /** Initializes the object bound to the target property. Adds callbacks and sets initial property values. */
+      _setupTargetObject() {
+        // Add to the existing target object instead of overwriting it, in case the parent element has given it extra properties
+        this.set('target.backend', {});
+        this.set('target.backend.status', {});
+        this.set('target.backend.status.code', 'uninitialized');
+        this.set('target.backend.status.isReady', false);
+        this.set('target.backend.status.isLoading', false);
+        this.set('target.backend.status.isComplete', false);
+        this.set('target.backend.status.isError', false);
+        this.set('target.backend.status.errorMessage', null);
+
+        // No need to notify for this one
+        this.target.backend.operations = {};
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+
+        // Add a listener for the backend client status
+        this.app.$.backend.addEventListener('initialized-changed', e => this._appBackendInitializedChanged(e));
+        
+        // Setup the target object
+        this._setupTargetObject();
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _recordIdChanged(newValue, oldValue) {
+        if (newValue && newValue.length
+          && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError))
+            this.doOperation('get');
+      }
+
+      _recordPathChanged(newValue, oldValue) {
+        if (newValue && newValue.length
+          && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError))
+            this.doOperation('get');
+      }
+
+      /** 
+       * This method is fired via the listener setup in `connectedCallback()`. 
+       * It initializes `_backendOperations` once the backend client is initialized. And potentially triggers a get operation.
+       */
+      _appBackendInitializedChanged(e) {
+        if (e.detail.value && (this.target.backend.status.code == 'uninitialized')) {
+          // First we need to create the action callbacks and build out the target backend operations object
+          this._set_backendOperations(this.app.$.backend.operationsByTag(this.type));
+          this.target.backend.operations = Object.keys(this._backendOperations.recordItem)
+            .reduce(function(operationCallbacks, operationName) {
+                operationCallbacks[operationName] = (parameters) => this.doOperation(operationName, parameters);
+                return operationCallbacks;
+            }, {});
+
+          // Now go to status ready and trigger a get (if one of the record identifiers is already set)
+          this._updateStatus('ready');
+          if ((this.recordId && this.recordId.length) || (this.recordPath && this.recordPath.length))
+            this.doOperation('get');
+        }
+      }
+
+    }
+
+    window.customElements.define(BlBackendItem.is, BlBackendItem);
+  </script>
+</dom-module>

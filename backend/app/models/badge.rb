@@ -29,9 +29,11 @@ class Badge
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
     group_list_item: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count,
       :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path],
-    api_v1: [:id, :name, :url, :url_with_caps, :summary, :validation_request_count, :learner_count,
-      :expert_count, :image_url, :image_medium_url, :image_small_url, :full_url, :full_path,
-      :current_user_permissions]
+    api_v1: {
+      everyone: [:id, :record_path, :parent_path, { url: 'slug' }, { url_with_caps: 'slug_with_caps' }], 
+      can_see_record: [:name, :summary, :validation_request_count, :learner_count, :image_url, :image_medium_url, :image_small_url, 
+        :full_url, { full_path: 'relative_url' }, :current_user_permissions]
+    }
   }
   
   # Below are the badge-level fields included in the clone
@@ -153,8 +155,34 @@ class Badge
 
   before_save :update_analytics
 
+  # === BADGE FIND METHOD === #
+
+  # `badge_identifier` can be the record id OR by a string of the format `group-url.badge-url`.
+  def self.find(badge_identifier)
+    badge = nil
+
+    if badge_identifier.to_s.include? '.'
+      badge_identifier_parts = badge_identifier.split('.')
+
+      group = Group.find_by(url: badge_identifier_parts[0].to_s.downcase) rescue nil
+      badge = group.badges.where(url: badge_identifier_parts[1].to_s.downcase).first
+    elsif badge_identifier.to_s.match /^[0-9a-fA-F]{24}$/
+      badge = super rescue nil
+    end
+
+    badge
+  end
+
   # === BADGE MOCK FIELD METHODS === #
   # These are used to mock the presence of certain fields in the JSON output.
+
+  def record_path
+    "#{group_url || group.url}/#{url}"
+  end
+
+  def parent_path
+    group_url || group.url
+  end
 
   def image_as_url 
     image_url
@@ -215,15 +243,28 @@ class Badge
     end
   end
 
+  # Uses current_user_accessor
+  def current_user_can_see_badge
+    if current_user_accessor
+      (visibility == 'public') || current_user_accessor.admin || current_user_accessor.admin_of?(group_id)    \
+      || ((visibility == 'private') && current_user_accessor.member_of?(group_id))                            \
+      || ((visibility == 'hidden') && current_user_accessor.learner_or_expert_of?(id))
+    else
+      false
+    end
+  end
+
   # This is used by the API and requires that the current_user model attribute be set
   def current_user_permissions
     if current_user_accessor
       {
+        can_see_record: current_user_can_see_badge,
         is_learner: learner_user_ids.include?(current_user_accessor.id),
         is_expert: expert_user_ids.include?(current_user_accessor.id)
       }
     else
       {
+        can_see_record: current_user_can_see_badge,
         is_learner: false,
         is_expert: false
       }
@@ -593,7 +634,7 @@ class Badge
   end
 
   # Adds a learner to the badge by creating or reattaching a log for them
-  # NOTE: If there is already a detached log this function will reattach it
+  # NOTE: If there is already a detached log this function will reattach it. If there is already a normal log it will not be changed.
   # Return value = the newly created/reattached log
   # OPTIONS:
   # - date_started: Defaults to nil. If set, overrides the log.date_started fields
@@ -852,6 +893,145 @@ class Badge
       end
     elsif !is_deleted # create this item
       self.json_clone['pages'] << tag_json_clone
+    end
+  end
+
+  # === BADGE BULK METHODS === #
+
+  # Pass a list of validation objects with keys (*=required): email*, summary*, body
+  # Set send_emails_to_new_users to true if you want to send badge award emails to non-users (users wil always get emails).
+  # IF POLLER: Poller progress is kept up to date. Result list is added to `poller.data['items']`
+  # If there is no poller, errors will be thrown, otherwise they will be captured on the poller.
+  # This method will award the badge to all of the passed people if possible and return a result list of the same size as validations.
+  # The result list items will have the same keys as the passed validations with an additional `result` key added.
+  # The `result` key will be a hash with the following keys:
+  # - code: String indicating the results of the processing. 
+  #   Possible Code Values = `new_user`, `new_member`, `new_expert`, `existing_learner`, `existing_expert`, `error`
+  # - success: Boolean indicating whether this row was successfully processed. Only returns false if code is `error`.
+  # - error_message: String. Contains nil if `success` is true, otherwise contains user-facing error message.
+  def self.bulk_award(badge_id, creator_user_id, validations, send_emails_to_new_users=false, poller_id=nil)
+    processed_validations = []
+    badge = Badge.find(badge_id)
+    group = badge.group
+    creator_user = User.find(creator_user_id)
+    poller = Poller.find(poller_id) rescue nil if poller_id.present?
+    if poller && poller.progress.nil? # initialize the progress only if it doesn't already have a value
+      poller.progress = 0
+      poller.save
+    end
+
+    begin
+      # First check for top-level error states
+      raise StandardError.new('Validations list is empty or invalid.') if (validations.class != Array) || (validations.count == 0)
+      validation_count = validations.count
+      processed_validation_count = 0
+
+      # Query for existing users and build a map of them by email
+      emails = validations.select{ |validation| !validation['email'].blank? }.map{ |validation| validation['email'].downcase }.uniq
+      existing_users = User.where(:email.in => emails)
+      user_map = {}
+      existing_users.each do |user|
+        user_map[user.email] = user
+      end
+
+      # Loop through the validations and process each one
+      validations.each do |validation|
+        result_code = nil
+        error_message = nil
+
+        if validation['summary'].blank?
+          result_code = 'error'
+          error_message = 'Summary is blank'
+        elsif !StringTools.is_valid_email?(validation['email'])
+          result_code = 'error'
+          error_message = 'Invalid email'
+        elsif user_map.has_key? validation['email'].downcase
+          # This is an existing user so we add them to the group and badge and then create a validation.
+
+          user = user_map[validation['email'].downcase]
+          user_needs_membership = !user.member_or_admin_of?(group)
+          
+          if user_needs_membership && !group.can_add_members?
+            result_code = 'error'
+            error_message = 'Group is full'
+          else
+            # Add as a group member if needed and set the status code (we use the most informative result_code possible)
+            if user_needs_membership
+              result_code = 'new_member'
+              group.members << user 
+            elsif user.expert_of? badge
+              result_code = 'existing_expert'
+            elsif user.learner_of? badge
+              result_code = 'existing_learner'
+            else
+              result_code = 'new_expert'
+            end
+
+            # Get or create the log
+            log = badge.add_learner(user)
+
+            # Add or update the validation
+            entry = log.add_validation(creator_user, validation['summary'], validation['body'], true)
+          end
+        else
+          # This is a new user so we just need to make sure that they are added to the invited members/admins list with a validation
+
+          result_code = 'new_user'
+          begin
+            # This will raise an exception if this is a new user invitation and the group is full
+            group.add_invited_user_validation(creator_user.id, validation['email'], badge.url, validation['summary'], validation['body'])
+
+            # Now send the email if needed
+            if send_emails_to_new_users && !User.get_inactive_email_list.include?(validation['email'])
+              NewUserMailer.badge_issued(validation['email'], nil, creator_user.id, group.id, badge.id).deliver
+            end
+          rescue Exception => e
+            result_code = 'error'
+            error_message = e.to_s
+          end
+        end
+        
+        # Add the current item to the processed list
+        processed_validations << {
+          'email' => validation['email'],
+          'summary' => validation['summary'],
+          'body' => validation['body'],
+          'result' => {
+            'code' => result_code,
+            'success' => (result_code != 'error'),
+            'error_message' => error_message
+          }
+        }
+
+        # Update the poller progress indicator if needed
+        if poller
+          poller.progress = processed_validations.count * 100 / validation_count
+          poller.save if poller.changed?
+        end
+      end
+
+      # Save the badge and group if needed
+      badge.timeless.save if badge.changed?
+      group.timeless.save if group.changed?
+
+      # Close the poller if needed and store the processed validations in the poller's data hash
+      if poller
+        poller.data = { items: processed_validations }
+        poller.progress = 100
+        poller.status = 'successful'
+        poller.save
+      end
+
+      # Return the processed validations
+      processed_validations
+    rescue Exception => e
+      if poller
+        poller.status = 'failed'
+        poller.message = e.to_s
+        poller.save
+      else
+        throw e
+      end
     end
   end
 

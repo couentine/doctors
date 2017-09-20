@@ -1,13 +1,14 @@
 class BadgesController < ApplicationController
   
-  prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy, 
-    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save, :move, :my_index]
-  prepend_before_action :find_all_records, only: [:edit, :update, :destroy, 
-    :entries_index, :add_learners, :create_learners, :issue_form, :issue_save, :move]
-  before_action :authenticate_user!, except: [:show, :entries_index]
+  prepend_before_action :find_badge_by_id, only: [:get, :add_endorsements]
+  prepend_before_action :find_parent_records, except: [:get, :show, :edit, :update, :destroy, :entries_index, :add_learners, 
+    :create_learners, :issue_form, :issue_save, :add_endorsements_form, :add_endorsements, :move, :my_index]
+  prepend_before_action :find_all_records, only: [:edit, :update, :destroy, :entries_index, :add_learners, :create_learners, :issue_form, 
+    :issue_save, :add_endorsements_form, :move]
+  before_action :authenticate_user!, except: [:get, :show, :entries_index]
   before_action :group_owner, only: [:move]
   before_action :group_admin, only: [:new, :create, :destroy]
-  before_action :can_award, only: [:issue_form, :issue_save]
+  before_action :can_award, only: [:issue_form, :issue_save, :add_endorsements_form, :add_endorsements]
   before_action :can_edit, only: [:edit, :update, :add_learners, :create_learners]
   before_action :set_editing_parameters, only: [:new, :edit]
   before_action :build_requirement_list, only: [:new, :edit]
@@ -15,7 +16,8 @@ class BadgesController < ApplicationController
   # === LIMIT-FOCUSED FILTERS === #
 
   before_action :can_create_badges, only: [:new, :create]
-  before_action :can_create_entries, only: [:issue_form, :issue_save]
+  before_action :can_create_entries, only: [:issue_form, :issue_save, :add_endorsements_form, :add_endorsements]
+  before_action :group_has_bulk_tools_feature, only: [:add_endorsements_form, :add_endorsements]
 
   # === CONSTANTS === #
 
@@ -36,7 +38,7 @@ class BadgesController < ApplicationController
   ]
 
   # GET /?page=1
-  # JSON Only
+  # Returns JSON
   # This returns a list of the current user's badges in progress
   def my_index
     @page_size = APP_CONFIG['page_size_small']
@@ -51,11 +53,15 @@ class BadgesController < ApplicationController
       @next_page = nil
     end
 
-    respond_to do |format|
-      format.json do
-        render json: { next_page: @next_page, items: @badges }
-      end
-    end
+    render json: { next_page: @next_page, items: @badges }
+  end
+
+  # GET /badges/{badge_id}
+  # GET /badges/{badge_url}?parent_path={group_url}
+  # Returns JSON
+  # Returns badge API json
+  def get
+    render json: @badge.json(:api_v1, current_user: current_user)
   end
 
   # === RESTFUL ACTIONS === #
@@ -428,6 +434,45 @@ class BadgesController < ApplicationController
     end
   end
 
+  # GET /group-url/badge-url/endorsements/add
+  # Displays the polymer app which displays the add endorsement UI
+  def add_endorsements_form
+    render_polymer_frontend
+  end
+
+  # POST /badges/id/endorsements
+  # JSON Only
+  # This is a json wrapper for Badge.bulk_award, which awards the badge in bulk.
+  # Accepts parameters:
+  # - request body = JSON array of endorsement objects with following keys (*=required): email*, summary*, body
+  # - send_emails_to_new_users query param = Boolean (defaults to false)
+  def add_endorsements
+    @max_list_size = APP_CONFIG['max_import_list_size']
+    @validations = JSON.parse(request.body.read)
+    @send_emails_to_new_users = (params[:send_emails_to_new_users] == 'true') || (params[:send_emails_to_new_users].to_s == '1')
+
+    respond_to do |format|
+      format.json do
+        if (@validations.class == Array) && !@validations.blank?
+          if @validations.count > @max_list_size
+            render json: { error_message: "The items parameter cannot contain more than #{@max_list_size} items." }, status: :bad_request
+          else
+            @poller = Poller.new
+            @poller.progress = 0
+            @poller.waiting_message = 'Adding endorsements...'
+            @poller.save
+
+            Badge.delay(retry: false).bulk_award(@badge.id, current_user.id, @validations, @send_emails_to_new_users, @poller.id)
+
+            render json: { poller_id: @poller.id.to_s }
+          end
+        else
+          render json: { error_message: 'The items parameter is required and must be a non-blank list.' }, status: :bad_request
+        end
+      end
+    end
+  end
+
   # PUT /group/badge/move?badge[move_to_group_id]=abc123
   # Basically this is the same as the update function but focused on setting move to group field
   def move
@@ -446,6 +491,18 @@ class BadgesController < ApplicationController
   end
 
 private
+
+  # Used by temporary API action(s). 
+  # Note: The id parameter can either be a record id or a string of the format `group-url.badge-url`. Refer to `Badge.find()` for more info.
+  def find_badge_by_id
+    if (params[:parent_path])
+      @group = Group.find(params[:parent_path]) || not_found
+      @badge = @group.badges.where(url: params[:id].to_s.downcase).first || not_found
+    else
+      @badge = Badge.find(params[:id]) || not_found
+      @group = @badge.group
+    end
+  end
 
   def find_parent_records
     @group = Group.find(params[:group_id]) || not_found
@@ -513,6 +570,10 @@ private
   end
 
   def can_award
+    # Manually set this if this was initialized by find_badge_by_id (and the @-booleans aren't set)
+    @can_award_badge ||= current_user.present? \
+      && (current_user.admin_of?(@group) || ((@badge.awardability == 'experts') && current_user.expert_of?(@badge)))
+
     unless @can_award_badge
       flash[:error] = "You do not have permission to award this badge."
       redirect_to [@group, @badge]
@@ -537,6 +598,22 @@ private
     if @group.disabled?
       flash[:error] = "This badge cannot be awarded to new people while the group is inactive."
       redirect_to @group
+    end
+  end
+
+  def group_has_bulk_tools_feature
+    if !@group.has?(:bulk_tools)
+      @error_message = 'This group does not have the bulk tools feature.'
+
+      respond_to do |format|
+        format.json do
+          render json: { error_message: @error_message }, status: :bad_request
+        end
+        format.html do
+          flash[:error] = @error_message
+          redirect_to [@group, @badge]
+        end
+      end
     end
   end
 

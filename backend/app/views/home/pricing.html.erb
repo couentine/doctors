@@ -93,8 +93,11 @@
               </div>
               <div class="price">
                 <span class="currency-symbol">$</span>
-                <span class="amount">5</span>
+                <span class="amount">10</span>
                 <span class="suffix">/ month</span>
+                <span class="footer">
+                  ($110 if paid annually)
+                </span>
               </div>
               <div class="feature-list">
                 <ul>
@@ -105,7 +108,7 @@
                 </ul>
               </div>
               <div class="the-button">
-                <%= link_to 'Create a group', link_path + 'solo-1m-1', class: 'btn btn-large' %>
+                <%= link_to 'Create a group', link_path + 'solo-1m-2', class: 'btn btn-large' %>
               </div>
             </div>
           </div>
@@ -121,6 +124,9 @@
                 <span class="currency-symbol">$</span>
                 <span class="amount">30</span>
                 <span class="suffix">/ month</span>
+                <span class="footer">
+                  ($330 if paid annually)
+                </span>
               </div>
               <div class="feature-list">
                 <ul>
@@ -150,6 +156,9 @@
                 <span class="currency-symbol">$</span>
                 <span class="amount">130</span>
                 <span class="suffix">/ mo</span>
+                <span class="footer">
+                  ($1,430 if paid annually)
+                </span>
               </div>
               <div class="feature-list">
                 <ul>
@@ -161,6 +170,9 @@
                   </li>
                   <li>
                     <span class="term" data-term="reporting">Reporting</span> features
+                  </li>
+                  <li>
+                    Bulk badge awarding
                   </li>
                   <li>
                     Third-party <span class="term" data-term="integration">integrations</span>
@@ -239,38 +251,6 @@
             </div>
           </div>
 
-          <!-- === TEAM PLAN === -->
-
-          <div class="span4 plan-col team">
-            <div class="inner-col">
-              <div class="title">
-                <i class="fa fa-users"></i><br>Team
-              </div>
-              <div class="price">
-                <span class="currency-symbol">$</span>
-                <span class="amount">15</span>
-                <span class="suffix">/ month</span>
-                <span class="footer">
-                  ($120 if paid annually)
-                </span>
-              </div>
-              <div class="feature-list">
-                <ul>
-                  <li>
-                    3 <span class="term" data-term="admin">admins</span>
-                  </li>
-                  <li>
-                    Unlimited 
-                    <span class="term" data-term="unlimited-badge-awarders">badge awarders</span>
-                  </li>
-                </ul>
-              </div>
-              <div class="the-button">
-                <%= link_to 'Create a group', link_path + 'k12-team-1m-1', class: 'btn btn-large' %>
-              </div>
-            </div>
-          </div>
-
           <!-- === SCHOOL PLAN === -->
 
           <div class="span4 plan-col org">
@@ -283,23 +263,24 @@
                 <span class="amount">65</span>
                 <span class="suffix">/ month</span>
                 <span class="footer">
-                  ($480 if paid annually)
+                  ($700 if paid annually)
                 </span>
               </div>
               <div class="feature-list">
                 <ul>
                   <li>
-                    <em>Everything in Team and...</em>
-                  </li>
-                  <li>
                     <span class="term" data-term="domain-privacy">Domain privacy</span>
                     for 1 domain
                   </li>
                   <li>
-                    Unlimited <span class="term" data-term="admin">admins</span>
+                    Unlimited <span class="term" data-term="admin">admins</span> &amp;
+                    <span class="term" data-term="unlimited-badge-awarders">badge awarders</span>
                   </li>
                   <li>
                     <span class="term" data-term="reporting">Reporting</span> features
+                  </li>
+                  <li>
+                    Bulk badge awarding
                   </li>
                   <li>
                     Third-party <span class="term" data-term="integration">integrations</span>

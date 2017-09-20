@@ -36,6 +36,7 @@ Use this component to bind a local component property with a list endpoint in th
             observer: '_parentViewStatusChanged'
           },
 
+          /** Used to initialize `_backendOperations` once `<bl-backend-client>` is initialized. */
           backendClientInitialized: {
             type: Boolean,
             readOnly: true,
@@ -46,7 +47,7 @@ Use this component to bind a local component property with a list endpoint in th
           /** 
            * If set to FALSE then the list 'auto loads', meaning that it gets the first page of results whenever the view goes to 
            * the 'active' state and reloads the results anytime the parameters change while the view is active.
-           * Set to TRUE to disable the auto load. Then you must manually call the `listActions` methods to load results.
+           * Set to TRUE to disable the auto load. Then you must manually call the `listOperations` methods to load results.
            */
           manualLoad: {
             type: Boolean,
@@ -64,21 +65,19 @@ Use this component to bind a local component property with a list endpoint in th
           /**
            * Required. The target object receiving the binding. The following properties and methods are added on connection.
            * @property {object[]} items - The model items returned from the server. Getting more pages appends items to the end of the list.
-           *   Each item will have a `backend` object added to it. For now this is going unused, but it will eventually be used to provide
-           *   status properties and callbacks related item selection and item actions.
            * @property {number} nextPage - The integer of the next page of results, equal to null if there are no more results.
            * @property {boolean} hasNextPage - True if nextPage is non-null.
            * @property {object} status - Stores the current state of the network connection.
-           * @property {string} status.text - Equal to 'uninitialized', 'loading', 'ready' or 'error'.
+           * @property {string} status.code - Equal to `uninitialized`, `loading`, `ready` or `error`.
            * @property {boolean} status.isInitialized - Always true once the inital loading is complete.
            * @property {boolean} status.isLoading - A network action is pending. True whenever the status is 'loading'.
            * @property {boolean} status.isReady - No network action is pending. True whenever the status is 'ready'.
            * @property {boolean} status.isError - True if the status is 'error'.
            * @property {string} status.errorMessage - Error message from backend. Null unless `isError` is `true`.
-           * @property {object} listActions - Contains callbacks which apply list-level actions.
-           * @property {function} listActions.getNextPage() - Adds next page of items to the items list, updates nextPage and hasNextPage.
-           * @property {function} listActions.reload() - Resets the items list and gets the first page of results.
-           * @property {object} selectionActions - NOT USED YET. Contains callbacks which apply actions to the currently selected items.
+           * @property {object} listOperations - Contains callbacks which apply list-level actions.
+           * @property {function} listOperations.getNextPage() - Adds next page of items to the items list, updates nextPage and hasNextPage.
+           * @property {function} listOperations.reload() - Resets the items list and gets the first page of results.
+           * @property {object} selectionOperations - NOT USED YET. Contains callbacks which apply actions to the currently selected items.
            */
           target: {
             type: Object,
@@ -87,10 +86,10 @@ Use this component to bind a local component property with a list endpoint in th
           },
 
           /** 
-           * Set using the `buildActionCallbacks` method in `<bl-backend-client>`. Used to power public action methods.
+           * Set using the `operationsByTag` method in `<bl-backend-client>`. Used to power public action methods.
            * Consuming components should not reference this object directly as it may change with future implementations.
            */
-          _clientActionCallbacks: {
+          _backendOperations: {
             type: Object,
             readOnly: true
           }
@@ -102,7 +101,7 @@ Use this component to bind a local component property with a list endpoint in th
 
       /** 
        * Clears current items and reloads first page.
-       * Typically called via binding (`target.listActions.reload()`), but ok to call directly as well.
+       * Typically called via binding (`target.listOperations.reload()`), but ok to call directly as well.
        */
       reload() {
         this.set('target.items', []);
@@ -113,7 +112,7 @@ Use this component to bind a local component property with a list endpoint in th
 
       /** 
        * Loads next items and appends them to existing items. Then updates next page properties.
-       * Typically called via binding (`target.listActions.getNextPage()`), but ok to call directly as well.
+       * Typically called via binding (`target.listOperations.getNextPage()`), but ok to call directly as well.
        */
       getNextPage() {
         var parametersWithPage;
@@ -125,7 +124,7 @@ Use this component to bind a local component property with a list endpoint in th
         Object.assign(parametersWithPage, this.parameters);
         parametersWithPage.page = (this.target.nextPage) ? this.target.nextPage : 1;
 
-        this._clientActionCallbacks.paginatedListGetter.get(parametersWithPage).then(function(response) {
+        this._backendOperations.paginatedList.get.do(parametersWithPage).then(function(response) {
           if (response.items && response.items.length)
             for (var i = 0; i < response.items.length; i++)
               this.push('target.items', response.items[i]);
@@ -140,14 +139,14 @@ Use this component to bind a local component property with a list endpoint in th
       
       // #=== PRIVATE ACTION METHODS ===#
 
-      /** Sets and notifies all of the target properties related to status. Only include errorMessage if if statusText is 'error'. */
-      _updateStatus(statusText, errorMessage) {
-        var isInitialized = this.target.status.isInitialized || (statusText == 'ready');
-        var isLoading = (statusText == 'loading');
-        var isReady = (statusText == 'ready');
-        var isError = (statusText == 'error');
+      /** Sets and notifies all of the target properties related to status. Only include errorMessage if if statusCode is 'error'. */
+      _updateStatus(statusCode, errorMessage) {
+        var isInitialized = this.target.status.isInitialized || (statusCode == 'ready');
+        var isLoading = (statusCode == 'loading');
+        var isReady = (statusCode == 'ready');
+        var isError = (statusCode == 'error');
 
-        this.set('target.status.text', statusText);
+        this.set('target.status.code', statusCode);
 
         // Only trigger a notification for the booleans if they are changing
         if (this.target.status.isInitialized != isInitialized) this.set('target.status.isInitialized', isInitialized);
@@ -167,7 +166,7 @@ Use this component to bind a local component property with a list endpoint in th
         this.set('target.nextPage', undefined);
         this.set('target.hasNextPage', undefined);
         this.set('target.status', {});
-        this.set('target.status.text', 'uninitialized');
+        this.set('target.status.code', 'uninitialized');
         this.set('target.status.isError', false);
         this.set('target.status.isInitialized', false);
         this.set('target.status.isLoading', false);
@@ -175,11 +174,11 @@ Use this component to bind a local component property with a list endpoint in th
         this.set('target.status.errorMessage', null);
 
         // No need to notify for these ones
-        this.target.listActions = {
+        this.target.listOperations = {
           getNextPage: () => this.getNextPage(),
           reload: () => this.reload()
         }
-        this.target.selectionActions = {}
+        this.target.selectionOperations = {}
       }
 
       // #=== LIFECYCLE EVENTS ===#
@@ -206,15 +205,20 @@ Use this component to bind a local component property with a list endpoint in th
           this.reload();
       }
 
+      /** 
+       * This method is fired via the listener setup in `connectedCallback()`. 
+       * It copies the backend client initialization status to a local variable (so that it is available for other change observers).
+       * It thus also triggers the local variable's change observer (`_backendClientInitializedChanged`) below.
+       */
       _appBackendInitializedChanged(e) {
-        // This is fired by the event listener, it copies the value to the local property, thus firing the property change observer below.
         this._setBackendClientInitialized(e.detail.value);
       }
 
+      /** Initializes `_backendOperations` once the backend client is initialized. And potentially triggers a reload. */
       _backendClientInitializedChanged(newValue, oldValue) {
         if (newValue && !oldValue) {
           // First we need to create the action callbacks
-          this._set_clientActionCallbacks(this.app.$.backend.buildActionCallbacks(this.type));
+          this._set_backendOperations(this.app.$.backend.operationsByTag(this.type));
           
           // Now trigger a reload if needed
           if (!this.manualLoad && (this.parentViewStatus == 'active'))

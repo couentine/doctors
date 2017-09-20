@@ -83,14 +83,14 @@ It provides a sliding header panel and holds the page content.
 
     </style>
 
-    <div id="body" style$="padding-top: [[expandedHeight]]em;">
+    <div id="body" style$="padding-top: [[expandedHeight]]rem;">
       <slot name="content"></slot>
       <slot name="footer">
         <bl-footer></bl-footer>
       </slot>
     </div>
 
-    <div id="header" style$="height: [[headerHeight]]em;" class$="[[headerStatus]]">
+    <div id="header" style$="height: [[headerHeight]]rem;" class$="[[headerStatus]]">
       <div id="headerInner">
         <div id="expandedBackgroundWrapper">
           <slot name="expandedBackground"></slot>
@@ -115,10 +115,10 @@ It provides a sliding header panel and holds the page content.
 
       static get properties() {
         return {
-          /* Header height when fully expanded. In em. */
+          /* Header height when fully expanded. In rem. */
           expandedHeight: Number,
           
-          /* Header height when fully condensed. In em. */
+          /* Header height when fully condensed. In rem. */
           condensedHeight: Number,
 
           /* Returns `expanded`, `partial` or `condensed`. */
@@ -142,7 +142,7 @@ It provides a sliding header panel and holds the page content.
             notify: true
           },
           
-          /* Current header height. In em. */
+          /* Current header height. In rem. */
           headerHeight: { 
             type: Number, 
             computed: '_headerHeight(condensedHeight, expandedHeight, condensedPercentage)',
@@ -170,16 +170,16 @@ It provides a sliding header panel and holds the page content.
 
       _recalculateScrollProperties() {
         var scrollTopEm = this._lastKnownScrollPosition / blCurrentFontSize(); // global method from bl-styles
-        var condensationDelta = this.expandedHeight - this.condensedHeight;
+        var fullyCondensedScrollTopEm = this.expandedHeight - this.condensedHeight;
         
-        if (scrollTopEm >= condensationDelta) {
+        if (scrollTopEm >= fullyCondensedScrollTopEm) {
           if (this.condensedPercentage < 1.0) {
             this.condensedPercentage = 1.0;
             this.expandedPercentage = 0.0;
             this.headerStatus = 'condensed';
           }
         } else {
-          this.condensedPercentage = scrollTopEm / condensationDelta;
+          this.condensedPercentage = scrollTopEm / fullyCondensedScrollTopEm;
           this.expandedPercentage = 1.0 - this.condensedPercentage;
 
           if (scrollTopEm == 0) this.headerStatus = 'partial'

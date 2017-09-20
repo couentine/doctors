@@ -5,8 +5,14 @@ defaults: &defaults
   page_size_small: 12
   page_size_normal: 36
   page_size_large: 72
+  
+  # API constants
+  max_import_list_size: 500
 
-  # Subscription Features
+  # SUBSCRIPTION FEATURES
+  # Adding features here makes them appear in the subscription details panel. But when adding new features also add manual granting fields
+  # to group model (search for `feature_grant_`), group form and groups controller permitted params. Also add feature to the pricing page.
+  # You will also need to run the `refresh_group_subscription_features` rake task in production.
   feature_details:
     community:
       label: Community Badges & Wiki
@@ -14,6 +20,9 @@ defaults: &defaults
     reporting:
       label: Reporting
       description: Admins are able to export group activity to CSV
+    bulk_tools:
+      label: Bulk Tools
+      description: Allows badges to be awarded in bulk via CSV or manually built lists
     integration:
       label: Third-Party Integrations
       description: Includes access to LTI integration and all future integrations
@@ -21,14 +30,30 @@ defaults: &defaults
   # Subscription Plans
   subscription_plans:
     standard:
-      solo-1m-1:
+      solo-1m-2:
         name: Solo
-        amount: 500
+        amount: 1000
         currency: usd
         interval: month
         trial_period_days: 0
         statement_descriptor: Badge List Solo
         icon: fa-user
+        color: blue
+        description: |
+          1 admin / badge awarder
+        users: 5000
+        admins: 1
+        sub_groups: 0
+        features: []
+      solo-1y-1:
+        name: Solo Annual
+        amount: 11000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List Solo
+        icon: fa-user
+        color: blue
         description: |
           1 admin / badge awarder
         users: 5000
@@ -43,6 +68,23 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List Team
         icon: fa-users
+        color: green
+        description: |
+          3 admins, unlimited badge awarders
+        users: 5000
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+      team-1y-1:
+        name: Team Annual
+        amount: 33000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List Team
+        icon: fa-users
+        color: green
         description: |
           3 admins, unlimited badge awarders
         users: 5000
@@ -58,8 +100,9 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List Org
         icon: fa-building
+        color: orange
         description: |
-          Unlimited admins &amp; badge awarders, reporting, integrations
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 5000
         admins: -1
         sub_groups: 5
@@ -67,6 +110,27 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - bulk_tools
+        - integration
+      org-1y-1:
+        name: Org Annual
+        amount: 143000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List Org
+        icon: fa-building
+        color: orange
+        description: |
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
+        users: 5000
+        admins: -1
+        sub_groups: 5
+        sub_group_amount: 1000
+        features:
+        - community
+        - reporting
+        - bulk_tools
         - integration
     k12:
       k12-teacher-1y-1:
@@ -77,27 +141,13 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List K12 Teacher
         icon: fa-user
+        color: blue
         description: |
           1 teacher, annual billing only
         users: 5000
         admins: 1
         sub_groups: 0
         features: []
-      k12-team-1m-1:
-        name: K12 Team
-        amount: 1500
-        currency: usd
-        interval: month
-        trial_period_days: 0
-        statement_descriptor: Badge List K12 Team
-        icon: fa-users
-        description: |
-          3 admins, unlimited badge awarders
-        users: 5000
-        admins: 3
-        sub_groups: 0
-        features:
-        - community
       k12-school-1m-1:
         name: K12 School
         amount: 6500
@@ -106,8 +156,9 @@ defaults: &defaults
         trial_period_days: 0
         statement_descriptor: Badge List K12 School
         icon: fa-building
+        color: orange
         description: |
-          Unlimited admins &amp; badge awarders, reporting, integrations
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 5000
         admins: -1
         sub_groups: 5
@@ -115,33 +166,19 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - bulk_tools
         - integration
-      k12-team-1y-1:
-        name: K12 Team Annual
-        amount: 12000
-        currency: usd
-        interval: year
-        trial_period_days: 0
-        statement_descriptor: Badge List K12 Team
-        icon: fa-users
-        description: |
-          3 admins, unlimited badge awarders
-          (Includes discount for annual billing)
-        users: 5000
-        admins: 3
-        sub_groups: 0
-        features:
-        - community
-      k12-school-1y-1:
+      k12-school-1y-2:
         name: K12 School Annual
-        amount: 48000
+        amount: 70000
         currency: usd
         interval: year
         trial_period_days: 0
         statement_descriptor: Badge List K12 School
         icon: fa-building
+        color: orange
         description: |
-          Unlimited admins &amp; badge awarders, reporting, integrations
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
           (Includes discount for annual billing)
         users: 5000
         admins: -1
@@ -150,6 +187,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - bulk_tools
         - integration
     internal:
       solo-free-1:
@@ -198,6 +236,7 @@ defaults: &defaults
         features:
         - community
         - reporting
+        - bulk_tools
         - integration
     test:
       test-100d-1:
@@ -232,6 +271,71 @@ defaults: &defaults
         features:
         - community
     retired:
+      solo-1m-1:
+        name: Solo (Legacy)
+        amount: 500
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Solo
+        icon: fa-user
+        description: |
+          1 admin / badge awarder
+        users: 5000
+        admins: 1
+        sub_groups: 0
+        features: []
+      k12-team-1m-1:
+        name: K12 Team (Legacy)
+        amount: 1500
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Team
+        icon: fa-users
+        description: |
+          3 admins, unlimited badge awarders
+        users: 5000
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+      k12-team-1y-1:
+        name: K12 Team Annual (Legacy)
+        amount: 12000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Team
+        icon: fa-users
+        description: |
+          3 admins, unlimited badge awarders
+          (Includes discount for annual billing)
+        users: 5000
+        admins: 3
+        sub_groups: 0
+        features:
+        - community
+      k12-school-1y-1:
+        name: K12 School Annual (Legacy)
+        amount: 48000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 School
+        icon: fa-building
+        description: |
+          Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
+          (Includes discount for annual billing)
+        users: 5000
+        admins: -1
+        sub_groups: 5
+        sub_group_amount: 500
+        features:
+        - community
+        - reporting
+        - bulk_tools
+        - integration
       standard-100m-1:
         name: Starter
         amount: 5000

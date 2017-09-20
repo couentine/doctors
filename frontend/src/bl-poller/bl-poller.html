@@ -1,0 +1,235 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+
+<!--
+# Badge List Poller #
+
+Use this component to bind a local component property with a poller in the Badge List backend.
+When the `pollerId` property is set or changed `<bl-poller>` will start refreshing the target object from the backend at decaying intervals.
+When the poller complete `<bl-poller>` will stop refreshing.
+-->
+<dom-module id="bl-poller">
+  <template>
+  </template>
+
+  <script>
+    class BlPoller extends BlAppComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-poller'; }
+
+      static get properties() {
+        return {
+          
+          /** 
+           * Set this to the id of the poller record. Setting this property automatically begins the polling process.
+           */
+          pollerId: {
+            type: String,
+            notify: true,
+            observer: '_pollerIdChanged'
+          },
+
+          /**
+           * Required. The target object receiving the poller binding. The target object properties can be used to track the status
+           * of the poller. The target object properties are only set when they change, so property change events will not necessarilly 
+           * fire every time the poller is refreshed from the server.
+           */
+          target: {
+            type: Object,
+            notify: true,
+            value: function() { return {} }
+          },
+
+          /** Returns true if there is an active poller cycle running. */
+          active: {
+            type: Boolean,
+            computed: '_active(pollerStarted, pollerCompleted)',
+            value: false
+          },
+
+          /** Optional. The initial polling interval in milliseconds. */
+          initialInterval: {
+            type: Number,
+            value: 150
+          }, 
+          
+          /** Optional. The maximum polling interval in milliseconds. */
+          maxInterval: {
+            type: Number,
+            value: 2000
+          }, 
+          
+          /** 
+           * Optional. The amount of time in milliseconds before the poller automatically fails (and stops polling) if the poller being 
+           * returned from the backend is still pending. Set this to null to run forever (not recommended).
+           */
+          maxDuration: {
+            type: Number,
+            value: 300000
+          }, 
+
+          /** Optional. The number of queries before the polling interval doubles. */
+          intervalDoubleRate: {
+            type: Number,
+            value: 2
+          },
+
+          /** The time when the most recent polling cycle began. */
+          pollerStarted: {
+            type: Date,
+            readOnly: true
+          },
+
+          /** The time when the most recent polling cycle finished. */
+          pollerCompleted: {
+            type: Date,
+            readOnly: true
+          },
+
+          /** Used internally to track the current interval in milliseconds.  */
+          _currentInterval: {
+            type: Number,
+            readOnly: true
+          },
+
+          /** Used internally to track the number of queries in the current polling cycle.  */
+          _queryCount: {
+            type: Number,
+            readOnly: true
+          },
+
+          /** Used to interact with `<bl-backend-client>`. */
+          _backendOperations: {
+            type: Object,
+            readOnly: true
+          },
+
+          /** Stores the id of the last timer so it can be cancelled if needed. */
+          _lastTimerId: {
+            type: Number,
+            readOnly: true
+          }
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /** Starts a new polling cycle. Called automatically when `pollerId` changes but can also be called manually. */
+      start() {
+        if (this._lastTimerId != null) {
+          clearTimeout(this._lastTimerId);
+          this._set_lastTimerId(null);
+        }
+
+        this._set_queryCount(0);
+        this._set_currentInterval(this.initialInterval);
+        this._setPollerStarted(Date.now());
+        this._setPollerCompleted(null);
+        this._queryAndQueue();
+      }
+
+      /** Ends a polling cycle. Called automatically when the poller completes but can also be called manually. */
+      stop() {
+        if (this._lastTimerId != null) {
+          clearTimeout(this._lastTimerId);
+          this._set_lastTimerId(null);
+        }
+
+        this._setPollerCompleted(Date.now());
+      }
+
+      // #=== PRIVATE ACTION METHODS ===#
+
+      /** 
+       * Queries the backend and refreshes the poller contents as needed. Triggers property notify events only for changed properties.
+       * When done querying, sets timer for next query unless there is an error or the poller is completed.
+       */
+      _queryAndQueue() {
+        this._set_lastTimerId(null);
+        this._set_queryCount(this._queryCount + 1);
+
+        this._backendOperations.recordItem.get.do({'id': this.pollerId})
+          .then(function(pollerResponse) {
+            this._updatePollerProperties(pollerResponse);
+
+            if (pollerResponse.completed) {
+              this.stop();
+            } else if ((Date.now() - this.pollerStarted) >= this.maxDuration) {
+              // Mock a failed poller response
+              this.set('target.message', 'The action is taking longer than expected and the poller has timed out. '
+                + 'The action has continued in the background but you will be unable to track its progress.');
+              this.set('target.status', 'failed');
+              this.set('target.completed', true);
+
+              this.stop();
+            } else {
+              // Set a timer for the next query (after doubling the interval if needed)
+              if ((this._queryCount % this.intervalDoubleRate) == 0)
+                this._set_currentInterval(Math.min(this.maxInterval, 2 * this._currentInterval));
+
+              this._set_lastTimerId(
+                setTimeout(function() {
+                  this._queryAndQueue();
+                }.bind(this), this._currentInterval)
+              );
+            }
+          }.bind(this)).catch(function(error) { 
+            var errorMessage = (error.errObj && error.errObj.message) ? error.errObj.message : error;
+            
+            // Indicate the error by mocking a failed poller response
+            this.set('target.message', errorMessage);
+            this.set('target.status', 'failed');
+            this.set('target.completed', true);
+
+            this.stop();
+          }.bind(this));
+      }
+
+      /** Accepts a newly queried poller response and overrides the target, triggering property change notifications. */
+      _updatePollerProperties(pollerResponse) {
+        this.setProperties({
+          target: pollerResponse
+        });
+      }
+      
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+
+        // Add a listener for the backend client status
+        this.app.$.backend.addEventListener('initialized-changed', e => this._appBackendInitializedChanged(e));
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      /** 
+       * This method is fired via the listener setup in `connectedCallback()`. s
+       * It builds `_backendOperations` once the backend client is initialized.
+       */
+      _appBackendInitializedChanged(e) {
+        if (e.detail.value) {
+          this._set_backendOperations(this.app.$.backend.operationsByTag('poller'));
+        }
+      }
+
+      /** Automatically starts polling when `pollerId` is set or changed. */
+      _pollerIdChanged(newValue, oldValue) {
+        if (newValue) this.start();
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _active(pollerStarted, pollerCompleted) {
+        return (pollerStarted && !pollerCompleted);
+      }
+
+    }
+
+    window.customElements.define(BlPoller.is, BlPoller);
+  </script>
+</dom-module>

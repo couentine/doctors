@@ -68,12 +68,30 @@ bl_admin_email=app-errors@badgelist.com
 
 To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. This will run both the rails app (at localhost:5000) and the polymer app (at localhost:8081). The polymer app is actually proxied via the polymer-proxy server (at localhost:8080) which exists to add CORS headers.
 
-You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). To open a rails console in your terminal, navigate to the `backend` folder and run `foreman run --env ../.env rails console`. (You have to run the foreman command from backend in order to be able to use the rails command, but you then need to explicitly pass it the path to the .env file since it is located in a different directory.)
-
 **Note:** If you are testing webhooks with external services (such as Stripe or Postmark) you will need to use `Procfile.ultrahook.dev`. That will forward `http://dev.[ultrahook_username].ultrahook.com` to `http://localhost:5000`. The ultrahook username will be the username of the account linked to the `ULTRAHOOK_API_KEY` in your `.env` file. To specify the procfile use the command below:
 
 ```
 $ foreman start -f Procfile.ultrahook.dev
+```
+
+## Running a rails console in development ##
+
+You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). You'll need to navigate to the backend folder first as well.
+
+```
+$ cd backend
+$ foreman run --env ../.env rails console
+```
+
+(You have to run the foreman command from backend in order to be able to use the rails command, but you then need to explicitly pass it the path to the .env file since it is located in a different directory.)
+
+## Running rake tasks in development ##
+
+Similar to running a rails console you need to navigate to the backend folder and then manually specify the env load path.
+
+```
+$ cd backend
+$ foreman run --env ../.env bundle exec rake db:rake_task_name
 ```
 
 ## Stripe Webhooks ##
