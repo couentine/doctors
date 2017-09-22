@@ -3,6 +3,7 @@ class User
   include Mongoid::Timestamps
   include JSONFilter
   include JSONTemplater
+  # include AsyncCallbacks
 
   # === CONSTANTS === #
   
@@ -168,6 +169,12 @@ class User
   after_update :push_stripe_field_changes
   after_destroy :clear_from_group_tags
   after_destroy :delete_from_intercom
+  
+  # === ASYNC CALLBACKS === #
+
+  ASYNC_CALLBACKS = [
+    :convert_group_invitations_on_signup
+  ]
 
   # === USER MOCK FIELD METHODS === #
 
