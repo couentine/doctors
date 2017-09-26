@@ -17,7 +17,8 @@ module AsyncCallbacks
   #
   #    def do_something_when_condition?
   #      # Remember that this will run after insert AND update so you need to explicitly check for the appropriate state
-  #      new_record? && some_field_changed? && (some_field == 'some value')
+  #      # Use _id_changed? instead of new_record?
+  #      _id_changed? && some_field_changed? && (some_field == 'some value')
   #    end
   #
   # 3. Then create an exlamation point method which will be called from an asynchronous thread if the condition is met.
