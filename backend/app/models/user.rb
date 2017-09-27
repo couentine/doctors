@@ -1318,7 +1318,7 @@ protected
         invited_item['validations'].each do |validation_item|
           badge = badge_map[validation_item['badge']]
           log = log_map[validation_item['badge']]
-          validating_user = user_map[validation_item['user']]
+          validating_user = user_map[validation_item['user'].to_s]
           summary = validation_item['summary']
           body = validation_item['body']
 
@@ -1328,6 +1328,11 @@ protected
         end
       end # if invited_item['validations'].present?
     end # groups_to_join loop
+
+    # Finally we overwrite the badge id lists, just in case they got messed up
+    self.all_badge_ids = logs.map{ |log| log.badge_id }
+    self.expert_badge_ids = expert_logs.map{ |log| log.badge_id }
+    self.learner_badge_ids = all_badge_ids - expert_badge_ids
   end
 
   def process_avatar?
