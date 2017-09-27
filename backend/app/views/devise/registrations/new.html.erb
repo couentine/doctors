@@ -98,14 +98,16 @@
 
 </script>
 
-<div class="row">
-  <div class="span6 offset3">
-    <div class="oauth-signup">
-      <%= link_to "<i class='fa fa-google'></i> Sign up with Google".html_safe,
-        user_omniauth_authorize_path(:google_oauth2), class: 'btn' %>
+<% if params[:sso_error].blank? %>
+  <div class="row">
+    <div class="span6 offset3">
+      <div class="oauth-signup">
+        <%= link_to "<i class='fa fa-google'></i> Sign up with Google".html_safe,
+          user_omniauth_authorize_path(:google_oauth2), class: 'btn' %>
+      </div>
     </div>
   </div>
-</div>
+<% end %>
 
 <div class="row">
 

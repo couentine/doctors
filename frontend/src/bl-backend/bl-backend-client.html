@@ -144,7 +144,7 @@ The client uses the `swagger.json` file located in the component folder.
             self.client = client;
             self.initialized = true;
         }).catch(function(errorMessage) {
-            self.openAlertDialog({
+            self.app.openAlertDialog({
               color: 'orange', 
               title: 'Connection problem',
               body: 'There was a problem connecting with the Badge List server. Please review the error message below '

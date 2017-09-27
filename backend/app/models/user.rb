@@ -3,6 +3,7 @@ class User
   include Mongoid::Timestamps
   include JSONFilter
   include JSONTemplater
+  include AsyncCallbacks
 
   # === CONSTANTS === #
   
@@ -17,9 +18,9 @@ class User
   JSON_MOCK_FIELDS = { :avatar_image_url => :avatar_image_url }
 
   JSON_TEMPLATES = {
-    current_user: [:id, :name, :username, :username_with_caps, :admin, :avatar_image_url, 
-      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive, :full_path,
-      :email_verification_needed, :learner_badge_count, :expert_badge_count],
+    current_user: [:id, :name, :username, :username_with_caps, :admin, :email_inactive, :full_path, :email_verification_needed,
+      :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,  :learner_badge_count, :expert_badge_count,
+      :async_callback_poller_id],
     group_list_item: [:id, :name, :username, :username_with_caps, :group_validation_request_counts,
       :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :full_path] 
   }
@@ -157,17 +158,21 @@ class User
 
   before_validation :update_caps_field
   before_validation :update_avatar_key
-  before_create :set_signup_flags
   before_create :check_for_inactive_email
-  after_create :convert_group_invitations
   before_save :update_identity_hash
   before_save :check_for_domain
-  after_save :process_avatar
   before_update :process_email_change
   after_update :update_logs
   after_update :push_stripe_field_changes
   after_destroy :clear_from_group_tags
   after_destroy :delete_from_intercom
+  
+  # === ASYNC CALLBACKS === #
+
+  ASYNC_CALLBACKS = [
+    :process_avatar,
+    :convert_group_invitations_on_signup
+  ]
 
   # === USER MOCK FIELD METHODS === #
 
@@ -873,30 +878,12 @@ class User
 
     # Then queue the log update if needed
     if settings_changed
-      # Prioritize this high since users are likey to immediately navigate to their profile and
-      # make sure that the group and badges have disappeared.
-      User.delay(queue: 'high', retry: false)\
-        .overwrite_log_visibility_settings(id, group.id, group_settings[group.id.to_s])
+      logs.where(:badge_id.in => group.badge_ids, detached_log: false).each do |log|
+        log.show_on_badge = show_on_badges
+        log.show_on_profile = show_on_profile
+        log.timeless.save if log.changed?
+      end
     end
-  end
-
-  # Overwrites the show_on_badge and show_on_profile fields for all this user's logs in this group.
-  # Call this asynchronously, it can involve a lot of queries
-  # NOTE: This will use the settings hash passed to the function NOT the settings hash in the 
-  #       database. That is so that you can trigger this before the initial commit is complete.
-  def self.overwrite_log_visibility_settings(user_id, group_id, group_settings)
-    show_on_badge = group_settings['show_on_badges']
-    show_on_profile = group_settings['show_on_profile']
-    group = Group.find(group_id)
-    logs = Log.where(user_id: user_id, :badge_id.in => group.badge_ids, detached_log: false)
-
-    logs.each do |log|
-      log.show_on_badge = show_on_badge
-      log.show_on_profile = show_on_profile
-      log.timeless.save if log.changed?
-    end
-
-    true
   end
 
   def manually_update_identity_hash
@@ -1165,6 +1152,10 @@ class User
     end
   end
 
+  def test_me!
+    convert_group_invitations_on_signup!
+  end
+
 protected
 
   def update_caps_field
@@ -1182,175 +1173,10 @@ protected
     end
   end
 
-  def process_avatar
-    if processing_avatar
-      User.delay(queue: 'high', retry: 5).do_process_avatar(id)
-    end
-  end
-
-  # Processes changes to the image from carrierwave direct key
-  def self.do_process_avatar(user_id)
-    user = User.find(user_id)
-    user.processing_avatar = false
-
-    if user.direct_avatar.present?
-      user.remote_avatar_url = user.direct_avatar.direct_fog_url(with_path: true)
-      
-      if user.save
-        # If it worked then update all of the related logs
-        User.delay(queue: 'low').update_log_user_fields(user_id)
-      else
-        # If there was an error then clear out the uploaded image and use the default
-        user.avatar_key = nil
-        user.save! # This should trigger the callback again calling a new instance of this method
-      end
-    elsif user.omniauth_google_oauth2_hash && user.omniauth_google_oauth2_hash['info'] \
-        && user.omniauth_google_oauth2_hash['info']['image'].present?
-      # Use the image from their google profile if available
-      user.remote_avatar_url = user.omniauth_google_oauth2_hash['info']['image']
-      user.save!
-    elsif user.lti_launch_hash.present? && user.lti_launch_hash['user_image'].present?
-      # Use the image from their LTI profile if available
-      user.remote_avatar_url = user.lti_launch_hash['user_image']
-      user.save!
-    else
-      # Use the default image
-      user.remote_avatar_url = user.gravatar_url
-      user.save!
-    end
-  end  
-
-  # Sets one or more of the following flags: 
-  #   invited-member, invited-admin, invited-learner, invited-expert, organic-signup
-  def set_signup_flags
-    self.flags = [] if flags.nil?
-    is_organic = true
-
-    Group.where(:invited_admins.elem_match => { :email => email }).entries.each do |group|
-      set_flag 'invited-admin'
-      is_organic = false
-
-      invited_item = group.invited_admins.detect { |u| u["email"] == (email || unconfirmed_email) }
-      set_flag 'invited-learner' unless invited_item["badges"].blank?
-      set_flag 'invited-expert' unless invited_item["validations"].blank?
-    end
-
-    Group.where(:invited_members.elem_match => { :email => email }).entries.each do |group|
-      set_flag 'invited-member'
-      is_organic = false
-
-      invited_item = group.invited_members.detect { |u| u["email"] == (email || unconfirmed_email) }
-      set_flag 'invited-learner' unless invited_item["badges"].blank?
-      set_flag 'invited-expert' unless invited_item["validations"].blank?
-    end
-
-    if is_organic
-      set_flag 'organic-signup'
-    end
-  end
-
   def check_for_inactive_email
     if User.get_inactive_email_list.include? email
       self.email_inactive = true
     end
-  end
-
-  # Finds any references to this user's email in the invited_admins/users arrays on groups.
-  # When found it upgrades the invitation to an actual relationship.
-  # PERFORMANCE NOTE: The add_leaner calls should be refactored a bit because as written
-  #   they end up firing the log.update_user method once for each badge invitation. Since that
-  #   method then calls user.update_validation_request_count_for, it's all very inefficient.
-  #   But it's only a huge performance hit if there are tons of invitations so skipping for now.
-  #   Note that it is important that this all happen synchronously (or via poller) so the user
-  #   is immediately presented with their correct memberships.
-  def convert_group_invitations
-    joined_groups, joined_group_ids = [], []
-
-    # First query for groups where we have been invited as an admin
-    Group.where(:invited_admins.elem_match => { :email => email }).entries.each do |group|
-      # First add group membership
-      group.admins << self
-      group.reload
-      self.reload
-      invited_item = group.invited_admins.detect { |u| u["email"] == (email || unconfirmed_email)}
-      group.invited_admins.delete(invited_item) if invited_item
-      group.timeless.save
-      
-      # Add this group to the joined group list for later
-      joined_groups << group
-      joined_group_ids << group.id
-
-      # Then add to any badges (as learner)
-      group.badges.where(:url.in => invited_item["badges"]).each do |badge|
-        badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE above)
-      end unless invited_item["badges"].blank?
-      
-      # Then add any validations
-      invited_item["validations"].each do |v|
-        badge = group.badges.find_by(url: v["badge"]) rescue nil
-        validating_user = User.find(v["user"]) rescue nil
-        summary, body = v["summary"], v["body"]
-
-        unless badge.nil? || validating_user.nil? || summary.blank?
-          log = badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE)
-          log.add_validation validating_user, summary, body, true
-        end
-      end unless invited_item["validations"].blank?
-    end
-    # Then query for groups where we have been invited as a normal member
-    Group.where(:invited_members.elem_match => { :email => email }).entries.each do |group|
-      # First add group membership
-      group.members << self
-      group.reload
-      self.reload
-      invited_item = group.invited_members.detect { |u| u["email"] == (email || unconfirmed_email)}
-      group.invited_members.delete(invited_item) if invited_item
-      group.timeless.save
-
-      # Add this group to the joined group list for later (only if it's not a dupe)
-      if !joined_group_ids.include?(group.id)
-        joined_groups << group
-        joined_group_ids << group.id
-      end
-
-      # Then update analytics
-      IntercomEventWorker.perform_async({
-        'event_name' => 'group-join',
-        'email' => email,
-        'created_at' => Time.now.to_i,
-        'metadata' => {
-          'group_id' => group.id.to_s,
-          'group_name' => group.name,
-          'group_url' => group.group_url,
-          'join_type' => 'invited'
-        }
-      })
-
-      # Then add to any badges (as learner)
-      group.badges.where(:url.in => invited_item["badges"]).each do |badge|
-        badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE above)
-      end unless invited_item["badges"].blank?
-
-      # Then add any validations
-      invited_item["validations"].each do |v|
-        badge = group.badges.find_by(url: v["badge"]) rescue nil
-        validating_user = User.find(v["user"]) rescue nil
-        summary, body = v["summary"], v["body"]
-
-        unless badge.nil? || validating_user.nil? || summary.blank?
-          log = badge.add_learner self # NOTE: This should be rewritten (refer to PERFORMANCE NOTE)
-          log.add_validation validating_user, summary, body, true
-        end
-      end unless invited_item["validations"].blank?
-    end
-
-    # Now we initialize the group settings for all the joined groups
-    joined_groups.each do |group|
-      initialize_group_settings_for(group)
-    end
-    self.timeless.save if self.changed?
-
-    true
   end
 
   def update_identity_hash
@@ -1408,5 +1234,136 @@ protected
   def delete_from_intercom
     User.delay(queue: 'low').delete_from_intercom(email)
   end
+
+  # === ASYNC CALLBACK METHODS === #
+
+  def convert_group_invitations_on_signup?
+    _id_changed? \
+      && (Group.any_of(
+        { :invited_members.elem_match => { :email => (email || unconfirmed_email) } },
+        { :invited_admins.elem_match => { :email => (email || unconfirmed_email) } }
+      ).count > 0)
+  end
+
+  # Finds any references to this user's email in the invited_admins/users arrays on groups and adds them.
+  # PERFORMANCE NOTE: The add_leaner calls should be refactored a bit because as written they end up firing the log.update_user method once
+  #   for each badge invitation. Since that method then calls user.update_validation_request_count_for, it's all very inefficient. But it's
+  #   only a huge performance hit if there are tons of invitations so skipping for now. Note that it is important that this all happen
+  #   synchronously (or via poller) so the user is immediately presented with their correct memberships.
+  def convert_group_invitations_on_signup!
+    badge_map = {} # badge_url => badge
+    log_map = {} # badge_url => log
+    user_map = {} # id => user
+    unqueried_user_ids = nil
+    is_admin = false
+    email_address = email || unconfirmed_email
+
+    groups_to_join = Group.any_of(
+      { :invited_members.elem_match => { :email => email_address } },
+      { :invited_admins.elem_match => { :email => email_address } }
+    )
+
+    groups_to_join.each do |group|
+      badge_map = {}
+      log_map = {}
+      is_admin = group.invited_admins.select{ |item| item['email'] == email }.present?
+
+      # Add as an admin or member and clear the invitation
+      if is_admin
+        group.admins << self
+        invited_item = group.invited_admins.detect { |u| u["email"] == email_address }
+        group.invited_admins.delete(invited_item)
+      else
+        group.members << self
+        invited_item = group.invited_members.detect { |u| u["email"] == email_address }
+        group.invited_members.delete(invited_item)
+      end
+      group.timeless.save
+      
+      initialize_group_settings_for(group)
+
+      IntercomEventWorker.perform_async({
+        'event_name' => 'group-join',
+        'email' => email_address,
+        'created_at' => Time.now.to_i,
+        'metadata' => {
+          'group_id' => group.id.to_s,
+          'group_name' => group.name,
+          'group_url' => group.group_url,
+          'join_type' => 'invited'
+        }
+      })
+
+      badge_urls_to_join = (                                                 \
+        (invited_item['badges'] || [])                                        \
+        + (invited_item['validations'] || []).map{ |item| item['badge'] }     \
+      ).uniq
+
+      if badge_urls_to_join.present?
+        group.badges.where(:url.in => badge_urls_to_join).each do |badge|
+          badge_map[badge.url] = badge
+          log = badge.add_learner(self) # NOTE: This could be rewritten (refer to PERFORMANCE NOTE above)
+          log_map[badge.url] = log
+        end
+      end
+
+      if invited_item['validations'].present?
+        unqueried_user_ids = invited_item['validations'].map{ |item| item['user'] }.uniq - user_map.keys
+        if unqueried_user_ids.present?
+          User.where(:id.in => unqueried_user_ids).each do |user|
+            user_map[user.id.to_s] = user
+          end
+        end
+
+        invited_item['validations'].each do |validation_item|
+          badge = badge_map[validation_item['badge']]
+          log = log_map[validation_item['badge']]
+          validating_user = user_map[validation_item['user']]
+          summary = validation_item['summary']
+          body = validation_item['body']
+
+          if badge.present? && log.present? && validating_user.present? && summary.present?
+            log.add_validation(validating_user, summary, body, true)
+          end
+        end
+      end # if invited_item['validations'].present?
+    end # groups_to_join loop
+  end
+
+  def process_avatar?
+    processing_avatar
+  end
+
+  # Processes changes to the image from carrierwave direct key
+  def process_avatar!
+    self.processing_avatar = false
+
+    if direct_avatar.present?
+      self.remote_avatar_url = direct_avatar.direct_fog_url(with_path: true)
+      
+      if self.save
+        # If it worked then update all of the related logs
+        if logs.count > 0
+          User.delay(queue: 'low').update_log_user_fields(id) # put this in a new thread because it's not immediately critical to the UI
+        end
+      else
+        # If there was an error then clear out the uploaded image and use the default
+        self.remote_avatar_url = gravatar_url
+        self.save!
+      end
+    elsif omniauth_google_oauth2_hash && omniauth_google_oauth2_hash['info'] && omniauth_google_oauth2_hash['info']['image'].present?
+      # Use the image from their google profile if available
+      self.remote_avatar_url = omniauth_google_oauth2_hash['info']['image']
+      self.save!
+    elsif lti_launch_hash.present? && lti_launch_hash['user_image'].present?
+      # Use the image from their LTI profile if available
+      self.remote_avatar_url = lti_launch_hash['user_image']
+      self.save!
+    else
+      # Use the default image
+      self.remote_avatar_url = gravatar_url
+      self.save!
+    end
+  end  
 
 end
