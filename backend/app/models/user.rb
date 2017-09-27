@@ -1238,17 +1238,11 @@ protected
   # === ASYNC CALLBACK METHODS === #
 
   def convert_group_invitations_on_signup?
-    return_value = _id_changed? \
+    _id_changed? \
       && (Group.any_of(
         { :invited_members.elem_match => { :email => (email || unconfirmed_email) } },
         { :invited_admins.elem_match => { :email => (email || unconfirmed_email) } }
       ).count > 0)
-    group_count = Group.any_of(
-        { :invited_members.elem_match => { :email => (email || unconfirmed_email) } },
-        { :invited_admins.elem_match => { :email => (email || unconfirmed_email) } }
-      ).count
-
-    return_value
   end
 
   # Finds any references to this user's email in the invited_admins/users arrays on groups and adds them.
