@@ -214,12 +214,15 @@ When the poller complete `<bl-poller>` will stop refreshing.
       _appBackendInitializedChanged(e) {
         if (e.detail.value) {
           this._set_backendOperations(this.app.$.backend.operationsByTag('poller'));
+          if (this.pollerId && this.pollerId.length)
+            this.start();
         }
       }
 
       /** Automatically starts polling when `pollerId` is set or changed. */
       _pollerIdChanged(newValue, oldValue) {
-        if (newValue) this.start();
+        if (newValue && this._backendOperations)
+          this.start();
       }
 
       // #=== PROPERTY COMPUTER METHODS ===#

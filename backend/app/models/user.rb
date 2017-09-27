@@ -18,9 +18,9 @@ class User
   JSON_MOCK_FIELDS = { :avatar_image_url => :avatar_image_url }
 
   JSON_TEMPLATES = {
-    current_user: [:id, :name, :username, :username_with_caps, :admin, :avatar_image_url, 
-      :avatar_image_medium_url, :avatar_image_small_url, :email_inactive, :full_path,
-      :email_verification_needed, :learner_badge_count, :expert_badge_count],
+    current_user: [:id, :name, :username, :username_with_caps, :admin, :email_inactive, :full_path, :email_verification_needed,
+      :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,  :learner_badge_count, :expert_badge_count,
+      :async_callback_poller_id],
     group_list_item: [:id, :name, :username, :username_with_caps, :group_validation_request_counts,
       :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :full_path] 
   }
