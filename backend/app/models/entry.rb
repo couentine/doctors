@@ -16,7 +16,7 @@ class Entry
   JSON_TEMPLATES = {
     log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :body, :linkified_summary, 
       :type, :format, :format_icon, :parent_tag, :body_sections, :link_url, :code_format, 
-      :link_metadata, :image_url, :image_medium_url, :image_small_url]
+      :link_metadata, :image_url, :image_medium_url, :image_small_url, :image_processing_error]
   }
   
   # === INSTANCE VARIABLES === #
@@ -57,6 +57,7 @@ class Entry
   mount_uploader :uploaded_image,         S3Uploader
   field :uploaded_image_key,              type: String
   field :processing_uploaded_image,       type: Boolean
+  field :image_processing_error,          type: Boolean
 
   # === UNIVERSAL VALIDATIONS === #
   validates :log, presence: true
@@ -183,6 +184,15 @@ class Entry
       return !user.nil? && (user.member_of?(tag.badge.group) || user.admin_of?(tag.badge.group))
     else
       return true
+    end
+  end
+
+  # Extracts the filename from the `uploaded_image_key` if present
+  def uploaded_image_filename
+    if uploaded_image_key.present? && uploaded_image_key.include?('/')
+      uploaded_image_key.split('/').last
+    else
+      nil
     end
   end
 
@@ -379,15 +389,15 @@ protected
   end
 
   def update_image_key
-    if uploaded_image_key && uploaded_image_key_changed?
+    if uploaded_image_key_changed? && uploaded_image_key.present?
       self.direct_uploaded_image.key = uploaded_image_key
       self.processing_uploaded_image = true
     end
   end
 
   def process_image
-    if processing_uploaded_image
-      Entry.delay(queue: 'high').do_process_image(id)
+    if processing_uploaded_image_changed? && processing_uploaded_image
+      Entry.delay(queue: 'high', retry: 10).do_process_image(id)
     end
   end
 
@@ -408,9 +418,20 @@ protected
   # Processes changes to the image from carrierwave direct key
   def self.do_process_image(entry_id)
     entry = Entry.find(entry_id)
+    
     entry.processing_uploaded_image = false
+    entry.image_processing_error = false
     entry.remote_uploaded_image_url = entry.direct_uploaded_image.direct_fog_url(with_path: true)
-    entry.save!
+    
+    if !entry.save
+      UserMailer.entry_invalid_image(entry.id).deliver
+      
+      # Requery the entry from scratch in order to clear the carrierwave state
+      entry = Entry.find(entry_id)
+      entry.processing_uploaded_image = false
+      entry.image_processing_error = true
+      entry.save!
+    end
   end
 
   # This method takes care of updating the log as needed.

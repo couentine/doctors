@@ -1130,6 +1130,7 @@ class GroupsController < ApplicationController
     @next_page = nil
     @full_logs_hash = []
     badge_ids, user_ids = [], []
+    badge_map = {} # badge id => badge
 
     # No need to hit the DB again unless there are badges
     if @group.badge_count > 0
@@ -1150,7 +1151,10 @@ class GroupsController < ApplicationController
       
       # Now we execute the badge query in order to confirm that the user has access
       # We'll only continue if there is something to query
-      badge_ids = badge_criteria.map{ |badge| badge.id }
+      badge_criteria.each do |badge|
+        badge_ids << badge.id
+        badge_map[badge.id.to_s] = badge
+      end
       if !badge_ids.blank?
         # Now we build the log criteria, the base criteria is the same no matter what
         log_criteria = Log.where(:badge_id.in => badge_ids, validation_status: 'requested', 
@@ -1165,6 +1169,15 @@ class GroupsController < ApplicationController
         # Finally we query the logs
         @full_logs_hash = Log.full_logs_as_json(log_criteria)
         @next_page = @page + 1 if log_criteria.count > (@page_size * @page)
+
+        # Inject the parent path into the output (Note: This is formatted according to the new polymer standard, not a traditional url path)
+        @full_logs_hash.each do |full_log_item|
+          if badge_map[full_log_item[:badge_id]].present?
+            full_log_item[:parent_path] =  badge_map[full_log_item[:badge_id]].record_path
+          else
+            full_log_item[:parent_path] = nil
+          end
+        end
       end
     end
 

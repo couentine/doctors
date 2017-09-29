@@ -28,6 +28,14 @@
     max-width: 100%;
     margin: 0.7em 0;
   }
+  .imageProcessingError {
+    border: 1px solid #bdbdbd;
+    background: #f5f5f5;
+    border-radius: 2px;
+    text-align: center;
+    padding: 1em;
+    margin-top: 0.7em;
+  }
 
   a.link-thumbnail { display: block; }
   p.link-summary { font-style: italic; }

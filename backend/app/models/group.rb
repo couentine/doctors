@@ -36,10 +36,10 @@ class Group
     link_info: [:id, :name, :full_url, :full_path, :avatar_image_url, 
       :avatar_image_medium_url, :avatar_image_small_url],
     api_v1: {
-      everyone: [:id, { url: 'record_path' }, :parent_path, :name, { url: 'slug' }, { url_with_caps: 'slug_with_caps' }, :location, :type, 
-        :color, { avatar_image_url: 'image_url' }, { avatar_image_medium_url: 'image_medium_url' }, 
-        { avatar_image_small_url: 'image_small_url' }, :member_count, :admin_count, :total_user_count, :badge_count, 
-        :full_url, { full_path: 'relative_url' }, :current_user_permissions]
+      everyone: [:id, { :url => :record_path }, :parent_path, :name, { :url => :slug }, { :url_with_caps => :slug_with_caps }, :location, :type, 
+        :color, { :avatar_image_url => :image_url }, { :avatar_image_medium_url => :image_medium_url }, 
+        { :avatar_image_small_url => :image_small_url }, :member_count, :admin_count, :total_user_count, :badge_count, 
+        :full_url, { :full_path => :relative_url }, :current_user_permissions]
     }
   }
 

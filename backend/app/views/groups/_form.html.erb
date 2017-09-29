@@ -116,6 +116,13 @@
           alert("The image you have selected is too big. The maximum supported file size is "
             + MAX_IMAGE_UPLOAD_DESCRIPTION + ".");
           $(this).val("");
+        } else if (!this.files[0].type.includes('image/')) {
+          alert("You must select an image file. (PNG, JPG, GIF, etc)");
+          $(this).val("");
+        } else if (/[%\+]/.test(this.files[0].name)) {
+          alert("The filename of the image you are trying to upload contains special characters which are not supported "
+            + "by Badge List. Please rename the file and remove any plus (+) or percent (%) signs, then try your upload again.");
+          $(this).val("");
         } else {
           $("#select-image-file").fadeOut(function() {
             $("#upload-spinner").fadeIn();

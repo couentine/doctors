@@ -1,0 +1,27 @@
+<% 
+  provide(:title, "There was a problem processing the evidence you posted for #{@badge.name}")
+  provide(:color, 'red')
+  provide(:cta_text, 'Open your badge portfolio')
+  provide(:cta_link, group_badge_log_url(@group, @badge, @log))
+%>
+
+<p>
+  You recently uploaded evidence for the <%= link_to @badge.name, group_badge_url(@group, @badge) %> badge in Badge List. 
+  The evidence was posted as an image, but the file you uploaded (&ldquo;<%= @entry.uploaded_image_filename %>&rdquo;) 
+  could not be processed as an image.
+</p>
+
+<p>
+  When you select the &ldquo;image&rdquo; evidence type, only image file types are supported (png, jpeg, gif, etc).
+  
+  <% if @group.has?(:file_uploads) %>
+    If you would prefer to upload a non-image file, use the &ldquo;file&rdquo; evidence type instead.
+  <% else %>
+    Your group does not currently support non-image file uploads. Please contact your group admins if you have any questions.
+  <% end %>
+</p>
+
+<p>
+  Click the button below to open your badge portfolio. You will probably want to delete the invalid evidence and you may wish to submit
+  a different piece of evidence in its place.
+</p>

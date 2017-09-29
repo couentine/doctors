@@ -47,6 +47,9 @@
             hidden$="{{blank(entry.image_medium_url)}}">
           <img src$="{{entry.image_medium_url}}">
         </a>
+        <div class="imageProcessingError" hidden="[[!entry.image_processing_error]]">
+          <i class="fa fa-exclamation-circle"></i> Invalid Image File
+        </div>
       </template>
 
       <template is="dom-if" if="{{isCode}}">
