@@ -14,6 +14,9 @@ defaults: &defaults
   # to group model (search for `feature_grant_`), group form and groups controller permitted params. Also add feature to the pricing page.
   # You will also need to run the `refresh_group_subscription_features` rake task in production.
   feature_details:
+    file_uploads:
+      label: File Uploads
+      description: Learners can upload files as badge evidence
     community:
       label: Community Badges & Wiki
       description: Includes unlimited badge awarders and community wiki pages
@@ -44,7 +47,8 @@ defaults: &defaults
         users: 5000
         admins: 1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
       solo-1y-1:
         name: Solo Annual
         amount: 11000
@@ -59,7 +63,8 @@ defaults: &defaults
         users: 5000
         admins: 1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
       team-1m-1:
         name: Team
         amount: 3000
@@ -75,6 +80,7 @@ defaults: &defaults
         admins: 3
         sub_groups: 0
         features:
+        - file_uploads
         - community
       team-1y-1:
         name: Team Annual
@@ -91,6 +97,7 @@ defaults: &defaults
         admins: 3
         sub_groups: 0
         features:
+        - file_uploads
         - community
       org-1m-1:
         name: Org
@@ -108,6 +115,7 @@ defaults: &defaults
         sub_groups: 5
         sub_group_amount: 1000
         features:
+        - file_uploads
         - community
         - reporting
         - bulk_tools
@@ -128,6 +136,7 @@ defaults: &defaults
         sub_groups: 5
         sub_group_amount: 1000
         features:
+        - file_uploads
         - community
         - reporting
         - bulk_tools
@@ -147,7 +156,8 @@ defaults: &defaults
         users: 5000
         admins: 1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
       k12-school-1m-1:
         name: K12 School
         amount: 6500
@@ -164,6 +174,7 @@ defaults: &defaults
         sub_groups: 5
         sub_group_amount: 500
         features:
+        - file_uploads
         - community
         - reporting
         - bulk_tools
@@ -185,6 +196,7 @@ defaults: &defaults
         sub_groups: 5
         sub_group_amount: 500
         features:
+        - file_uploads
         - community
         - reporting
         - bulk_tools
@@ -203,7 +215,8 @@ defaults: &defaults
         users: 5000
         admins: 1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
       team-free-1:
         name: Enterprise Team
         amount: 0
@@ -218,6 +231,7 @@ defaults: &defaults
         admins: 3
         sub_groups: 0
         features:
+        - file_uploads
         - community
       org-free-1:
         name: Enterprise Org
@@ -234,6 +248,7 @@ defaults: &defaults
         sub_groups: 5
         sub_group_amount: 0
         features:
+        - file_uploads
         - community
         - reporting
         - bulk_tools
@@ -253,6 +268,7 @@ defaults: &defaults
         admins: -1
         sub_groups: 0
         features:
+        - file_uploads
         - community
       test-100d-1t:
         name: Daily 100 with Trial
@@ -269,6 +285,7 @@ defaults: &defaults
         admins: -1
         sub_groups: 0
         features:
+        - file_uploads
         - community
     retired:
       solo-1m-1:
@@ -284,7 +301,8 @@ defaults: &defaults
         users: 5000
         admins: 1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
       k12-team-1m-1:
         name: K12 Team (Legacy)
         amount: 1500
@@ -299,6 +317,7 @@ defaults: &defaults
         admins: 3
         sub_groups: 0
         features:
+        - file_uploads
         - community
       k12-team-1y-1:
         name: K12 Team Annual (Legacy)
@@ -315,6 +334,7 @@ defaults: &defaults
         admins: 3
         sub_groups: 0
         features:
+        - file_uploads
         - community
       k12-school-1y-1:
         name: K12 School Annual (Legacy)
@@ -332,6 +352,7 @@ defaults: &defaults
         sub_groups: 5
         sub_group_amount: 500
         features:
+        - file_uploads
         - community
         - reporting
         - bulk_tools
@@ -346,7 +367,8 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
       standard-500m-1:
         name: Basic
         amount: 12000
@@ -357,7 +379,8 @@ defaults: &defaults
         users: 500
         admins: -1
         sub_groups: 1
-        features: []
+        features:
+          - file_uploads
       standard-1000m-1:
         name: Standard
         amount: 20000
@@ -368,7 +391,8 @@ defaults: &defaults
         users: 1000
         admins: -1
         sub_groups: 5
-        features: []
+        features:
+          - file_uploads
       standard-5000m-1:
         name: Premium
         amount: 45000
@@ -379,7 +403,8 @@ defaults: &defaults
         users: 5000
         admins: -1
         sub_groups: -1
-        features: []
+        features:
+          - file_uploads
       k12-1y-1:
         name: Single Teacher
         amount: 2500
@@ -390,7 +415,8 @@ defaults: &defaults
         users: 5000
         admins: 1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
       free-5m-1:
         name: Free Mini
         amount: 0
@@ -401,7 +427,8 @@ defaults: &defaults
         users: 5
         admins: -1
         sub_groups: -1
-        features: []
+        features:
+          - file_uploads
       free-100m-1:
         name: Free Starter
         amount: 0
@@ -412,7 +439,8 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
       free-500m-1:
         name: Free Basic
         amount: 0
@@ -423,7 +451,8 @@ defaults: &defaults
         users: 500
         admins: -1
         sub_groups: 1
-        features: []
+        features:
+          - file_uploads
       free-unlimited-1:
         name: Free Unlimited
         amount: 0
@@ -434,7 +463,8 @@ defaults: &defaults
         users: -1
         admins: -1
         sub_groups: -1
-        features: []
+        features:
+          - file_uploads
       trial-100m-1:
         name: Trial Starter
         amount: 0
@@ -445,7 +475,8 @@ defaults: &defaults
         users: 100
         admins: -1
         sub_groups: 0
-        features: []
+        features:
+          - file_uploads
 
   # This controls disallowed values for group & badge urls
   blocked_url_slugs:

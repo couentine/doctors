@@ -23,9 +23,9 @@ class GroupsController < ApplicationController
 
   PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, :color, :image_url, :type, :customer_code, 
     :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
-    :feature_grant_reporting, :feature_grant_bulk_tools, :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
-    :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, :avatar_key, :tag_assignability, 
-    :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag, :joinability]
+    :feature_grant_file_uploads, :feature_grant_reporting, :feature_grant_bulk_tools, :feature_grant_integration, :stripe_subscription_card,
+    :stripe_subscription_id, :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, :avatar_key, 
+    :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag, :joinability]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500

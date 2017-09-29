@@ -110,6 +110,7 @@ class Group
   field :admin_limit,                     type: Integer, default: 1
   field :sub_group_limit,                 type: Integer, default: 0
   field :features,                        type: Array, default: [] # use feature methods to access
+  field :feature_grant_file_uploads,      type: Boolean
   field :feature_grant_reporting,         type: Boolean
   field :feature_grant_bulk_tools,        type: Boolean
   field :feature_grant_integration,       type: Boolean
@@ -428,6 +429,8 @@ class Group
     # Enable manual granting of features
     if (feature.to_s == 'reporting')
       return_value ||= (feature_grant_reporting == true)
+    elsif (feature.to_s == 'file_uploads')
+      return_value ||= (feature_grant_file_uploads == true)
     elsif (feature.to_s == 'bulk_tools')
       return_value ||= (feature_grant_bulk_tools == true)
     elsif (feature.to_s == 'integration')
@@ -444,6 +447,9 @@ class Group
   def all_features
     return_list = features || []
     
+    if feature_grant_file_uploads && !return_list.include?('file_uploads')
+      return_list << 'file_uploads'
+    end
     if feature_grant_reporting && !return_list.include?('reporting')
       return_list << 'reporting'
     end

@@ -9,14 +9,14 @@ class Entry
   
   MAX_SUMMARY_LENGTH = 140
   TYPE_VALUES = ['post', 'validation']
-  FORMAT_VALUES = ['text', 'link', 'image', 'tweet', 'code']
+  FORMAT_VALUES = ['text', 'link', 'image', 'file', 'tweet', 'code']
   JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, 
     :body_sections, :tags, :tags_with_caps]
 
   JSON_TEMPLATES = {
-    log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :body, :linkified_summary, 
-      :type, :format, :format_icon, :parent_tag, :body_sections, :link_url, :code_format, 
-      :link_metadata, :image_url, :image_medium_url, :image_small_url, :image_processing_error]
+    log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :body, :linkified_summary, :type, :format, :format_icon, 
+      :parent_tag, :body_sections, :link_url, :code_format, :link_metadata, :image_url, :image_medium_url, :image_small_url, 
+      :image_processing_error, :file_url, :image_processing_error]
   }
   
   # === INSTANCE VARIABLES === #
@@ -59,6 +59,12 @@ class Entry
   field :processing_uploaded_image,       type: Boolean
   field :image_processing_error,          type: Boolean
 
+  mount_uploader :direct_uploaded_file,   S3DirectFileUploader
+  mount_uploader :uploaded_file,          S3FileUploader
+  field :uploaded_file_key,               type: String
+  field :processing_uploaded_file,        type: Boolean
+  field :file_processing_error,           type: Boolean
+
   # === UNIVERSAL VALIDATIONS === #
   validates :log, presence: true
   validates :creator, presence: true
@@ -72,6 +78,7 @@ class Entry
   validates :link_url, presence: true, format: { with: HTTP_URL_REGEX, \
     message: 'must be a valid link (remember the http)' }, if: :link_is_required?
   validates :uploaded_image_key, presence: true, if: :image_is_required?
+  validates :uploaded_file_key, presence: true, if: :file_is_required?
   validates :link_url, format: { with: TWITTER_URL_REGEX, message: "must be a valid Twitter url" },\
     if: :tweet_is_required?
 
@@ -92,13 +99,15 @@ class Entry
   
   # === ENTRY MOCK FIELD METHODS === #
 
-  # Returns URL of the specified version of this user's avatar (uses gravatar as a backup)
-  # Valid version values are nil (defaults to full size), :preview, :thumb
   def image_url(version = nil)
-    return_value = uploaded_image_url(version)
+    uploaded_image_url(version)
   end
   def image_medium_url; image_url(:preview); end
   def image_small_url; image_url(:thumb); end
+
+  def file_url
+    uploaded_file_url
+  end
 
 
   # === ENTRY METHODS === #
@@ -124,6 +133,10 @@ class Entry
     format == 'image'
   end
   
+  def file_is_required?
+    format == 'file'
+  end
+  
   def tweet_is_required?
     format == 'tweet'
   end
@@ -142,6 +155,8 @@ class Entry
       icon_text = 'fa-twitter'
     when 'image'
       icon_text = 'fa-camera'
+    when 'file'
+      icon_text = 'fa-file'
     when 'code'
       icon_text = 'fa-code'
     else
@@ -395,9 +410,22 @@ protected
     end
   end
 
+  def update_file_key
+    if uploaded_file_key_changed? && uploaded_file_key.present?
+      self.direct_uploaded_file.key = uploaded_file_key
+      self.processing_uploaded_file = true
+    end
+  end
+
   def process_image
     if processing_uploaded_image_changed? && processing_uploaded_image
       Entry.delay(queue: 'high', retry: 10).do_process_image(id)
+    end
+  end
+
+  def process_file
+    if processing_uploaded_file_changed? && processing_uploaded_file
+      Entry.delay(queue: 'high', retry: 10).do_process_file(id)
     end
   end
 
@@ -430,6 +458,23 @@ protected
       entry = Entry.find(entry_id)
       entry.processing_uploaded_image = false
       entry.image_processing_error = true
+      entry.save!
+    end
+  end
+
+  # Processes changes to the file from carrierwave direct key
+  def self.do_process_file(entry_id)
+    entry = Entry.find(entry_id)
+    
+    entry.processing_uploaded_file = false
+    entry.file_processing_error = false
+    entry.remote_uploaded_file_url = entry.direct_uploaded_file.direct_fog_url(with_path: true)
+    
+    if !entry.save
+      # Requery the entry from scratch in order to clear the carrierwave state
+      entry = Entry.find(entry_id)
+      entry.processing_uploaded_file = false
+      entry.file_processing_error = true
       entry.save!
     end
   end

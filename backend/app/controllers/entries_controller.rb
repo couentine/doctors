@@ -47,7 +47,7 @@ class EntriesController < ApplicationController
     else
       # Create the entry
       @parent_tag_name = params[:tag]
-      @entry = Entry.new(parent_tag: @parent_tag_name, uploaded_image_key: params[:key])
+      @entry = Entry.new(parent_tag: @parent_tag_name)
       @entry.type = 'post'
       
       # Query the parent tag if present
@@ -66,10 +66,15 @@ class EntriesController < ApplicationController
         end
       end
 
-      # Create the carrierwave direct uploader if this is an image
+      # Create the carrierwave direct uploader if this is an image or a file
       if @entry.format == 'image'
-        @uploader = Entry.new.direct_uploaded_image
-        @uploader.success_action_redirect = request.original_url
+        @entry.uploaded_image_key = params[:key]
+        @image_uploader = Entry.new.direct_uploaded_image
+        @image_uploader.success_action_redirect = request.original_url
+      elsif @entry.format == 'file'
+        @entry.uploaded_file_key = params[:key]
+        @file_uploader = Entry.new.direct_uploaded_file
+        @file_uploader.success_action_redirect = request.original_url
       end
 
       render :new
@@ -78,11 +83,15 @@ class EntriesController < ApplicationController
 
   # GET /group-url/badge-url/u/username/1/edit
   def edit
-    # Create the carrierwave direct uploader if this is an image
+    # Create the carrierwave direct uploader if this is an image or a file
     if @entry.format == 'image'
-      @uploader = Entry.new.direct_uploaded_image
-      @uploader.success_action_redirect = request.original_url
+      @image_uploader = Entry.new.direct_uploaded_image
+      @image_uploader.success_action_redirect = request.original_url
       @entry.uploaded_image_key = params[:key] if params[:key]
+    elsif @entry.format == 'file'
+      @file_uploader = Entry.new.direct_uploaded_file
+      @file_uploader.success_action_redirect = request.original_url
+      @entry.uploaded_file_key = params[:key] if params[:key]
     end
   end
 
@@ -174,8 +183,11 @@ class EntriesController < ApplicationController
           else
             # Create the carrierwave direct uploader if this is an image
             if @entry.format == 'image'
-              @uploader = @entry.direct_uploaded_image
-              @uploader.success_action_redirect = request.original_url
+              @image_uploader = @entry.direct_uploaded_image
+              @image_uploader.success_action_redirect = request.original_url
+            elsif @entry.format == 'file'
+              @file_uploader = @entry.direct_uploaded_file
+              @file_uploader.success_action_redirect = request.original_url
             end
 
             render :edit
@@ -317,7 +329,7 @@ private
 
   def entry_params
     params.require(:entry).permit(:parent_tag, :summary, :format, :log_validated, :body, :link_url,
-      :code_format, :uploaded_image_key)
+      :code_format, :uploaded_image_key, :uploaded_file_key)
   end
 
 end

@@ -89,6 +89,37 @@
 
   <% end %>
 
+<% elsif entry.format == 'file' %>
+  
+  <% if entry.processing_uploaded_file %>
+    
+    <!-- === FILE PROCESSING PENDING === -->
+    <div class="panel panel-entry-content panel-entry-content-text">
+      <h3>
+        <i class="fa fa-clock-o"></i>
+        File is being processed, refresh the page to view.
+      </h3>
+    </div>
+  
+  <% elsif !entry.uploaded_file? %>
+
+    <!-- === FILE PROCESSING ERROR === -->
+    <div class="panel panel-entry-content panel-entry-content-text">
+      <h3>
+        <i class="fa fa-exclamation-circle"></i>
+        There was a problem processing this file, please try again.
+      </h3>
+    </div>
+
+  <% else %>
+
+    <!-- === FILE === -->
+    <div class="panel panel-entry-content panel-entry-content-file">
+      <%= link_to file_tag(entry.uploaded_file_url(:full)), entry.uploaded_file_url(:full), target: '_blank' %>
+    </div>
+
+  <% end %>
+
 <% elsif entry.format == 'code' %>
 
   <!-- === CODE SNIPPET RESPONSE === -->
