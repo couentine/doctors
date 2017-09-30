@@ -85,10 +85,10 @@ class Tag
       return 'fa-link'
     when 'tweet'
       return 'fa-twitter'
-    when 'file'
-      return 'fa-file'
     when 'image'
       return 'fa-camera'
+    when 'file'
+      return 'fa-file'
     when 'code'
       return 'fa-code'
     else

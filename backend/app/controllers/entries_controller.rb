@@ -58,6 +58,10 @@ class EntriesController < ApplicationController
           @parent_tag = matched_tags.first
           if (@parent_tag.format == 'any') && Entry::FORMAT_VALUES.include?(@manual_format)
             @entry.format = @manual_format
+            if (@entry.format == 'file') && !@group.has?(:file_uploads)
+              flash[:error] = 'Oops! This group does not support file uploads.'
+              @entry.format = nil
+            end
           else
             @entry.format = @parent_tag.format
           end

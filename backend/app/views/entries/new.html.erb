@@ -1,3 +1,4 @@
+
 <% 
   provide(:title, "New Post - #{@badge.name}")
   provide(:show_subheader, true)
@@ -62,14 +63,16 @@
       <div class="form-body">
         <ul class="entry-format-selector">
           <% Entry::FORMAT_VALUES.each do |format_string| %>
-            <li>
-              <a class="btn btn-large" 
-                  href="<%= new_group_badge_log_entry_path(@group, @badge, @log, 
-                    tag: @parent_tag_name, f: format_string) %>">
-                <i class="fa <%= Tag.format_icon(format_string) %>"></i>
-                <span class="format-string"><%= format_string.capitalize %></span>
-              </a>
-            </li>
+            <% if (format_string != 'file') || @group.has?(:file_uploads) %>
+              <li>
+                <a class="btn btn-large" 
+                    href="<%= new_group_badge_log_entry_path(@group, @badge, @log, 
+                      tag: @parent_tag_name, f: format_string) %>">
+                  <i class="fa <%= Tag.format_icon(format_string) %>"></i>
+                  <span class="format-string"><%= format_string.capitalize %></span>
+                </a>
+              </li>
+            <% end %>
           <% end %>
         </ul>
       </div>

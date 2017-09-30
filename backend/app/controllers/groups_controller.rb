@@ -30,10 +30,8 @@ class GroupsController < ApplicationController
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500
   GROUP_TYPE_OPTIONS = [
-    ['<b><i class="fa fa-check-circle free-icon"></i> Free Group</b><span>'.html_safe \
-      + 'Everything is public.<br>Free forever.</span>'.html_safe, 'free'],
-    ['<b><i class="fa fa-diamond"></i> Paid Group</b><span>Privacy controls '.html_safe \
-      + 'and advanced features.<br>Plans start at $5 per month.</span>'.html_safe, 'paid']
+    ['<b><i class="fa fa-check-circle free-icon"></i> Free Group</b><span> Everything is public. Free forever.</span>'.html_safe, 'free'],
+    ['<b><i class="fa fa-diamond"></i> Paid Group</b><span>Incluce privacy controls and advanced features.</span>'.html_safe, 'paid']
   ]
   GROUP_COLOR_OPTIONS = [
     ['Red', 'red'],

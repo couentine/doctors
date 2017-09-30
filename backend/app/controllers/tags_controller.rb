@@ -301,8 +301,10 @@ private
       ['Any Format', 'any'],
       ['Free Text Response', 'text'],
       ['Web Link', 'link'],
+      ['Image Upload', 'image']
+    ] + ((@group.has?(:file_uploads)) ? [['File Upload', 'file']] : []) \
+    + [
       ['Twitter Link', 'tweet'],
-      ['Image Upload', 'image'],
       ['Code Snippet', 'code']
     ]
 
