@@ -1,4 +1,4 @@
-<div class="spinner-wrapper" id="image-upload-spinner" style="display: none;">
+<div class="spinner-wrapper" id="upload-spinner" style="display: none;">
   <div class="spinner-text large">
     <i class="fa fa-refresh fa-spin"></i> Uploading...
   </div>
@@ -199,6 +199,9 @@
       <% end %>
 
       <script type="text/javascript">
+        var MAX_IMAGE_UPLOAD_SIZE = 7000000;
+        var MAX_IMAGE_UPLOAD_DESCRIPTION = "6 megabytes";
+
         $(document).ready(function() {
 
           // Clicking the pretty button clicks on the file input element instead
@@ -210,8 +213,85 @@
           // Update the display of the button when the file input element changes
           $("#s3_direct_uploader_direct_uploaded_image").change(function() {
             if ($(this).val()) {
-              $("#image-upload-spinner").fadeIn();
-              $("#uploaded_image_form").submit();
+              if (this.files[0].size > MAX_IMAGE_UPLOAD_SIZE) {
+                alert("The image you have selected is too big. The maximum supported file size is " + MAX_IMAGE_UPLOAD_DESCRIPTION + ".");
+                $(this).val("");
+              } else if (!this.files[0].type.includes('image/')) {
+                alert("You must select an image file. (PNG, JPG, GIF, etc)");
+                $(this).val("");
+              } else if (/[%\+]/.test(this.files[0].name)) {
+                alert("The filename of the image you are trying to upload contains special characters which are not supported "
+                  + "by Badge List. Please rename the file and remove any plus (+) or percent (%) signs, then try your upload again.");
+                $(this).val("");
+              } else {
+                $("#upload-spinner").fadeIn();
+                $("#uploaded_image_form").submit();
+              }
+            }
+          });
+
+        });
+      </script>
+
+    <% elsif @entry.format == 'file' %>
+      
+      <!-- === FILE UPLOAD === -->
+
+      <%= f.input :uploaded_file_key, as: :hidden %>
+
+      <div class="control-group file_upload_button">
+        <label class="optional control-label">Upload a File</label>
+        <div class="controls">
+          <% if @entry.uploaded_file_key.blank? %> 
+            <a href="#" class="btn btn-success btn-large" id="select-file">
+              <i class="fa fa-file-o"></i>
+              Select a file
+            </a>
+          <% else %> 
+            <a href="#" class="btn btn-large disabled" id="file-uploaded">
+              <i class="fa fa-file"></i>
+              <i class='fa fa-check'></i>
+            </a><br>
+            <a href="#" class="btn btn-link" id="select-file">
+              <i class="fa fa-times-circle"></i>
+              Select a different file
+            </a>
+          <% end %> 
+        </div>
+      </div>
+
+      <% if @entry.uploaded_file_key %> 
+        <!-- Don't show this until the file is uploaded -->
+        <%= f.input :summary, as: :text, label: 'Description', 
+          input_html: { data: { :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH }, cols: '200', rows: '5' } %>
+      <% end %>
+
+      <script type="text/javascript">
+        var MAX_FILE_UPLOAD_SIZE = 20000000;
+        var MAX_FILE_UPLOAD_DESCRIPTION = "20 megabytes";
+
+        $(document).ready(function() {
+
+          // Clicking the pretty button clicks on the file input element instead
+          $("#select-file").click(function(e) {
+            $("#s3_direct_file_uploader_direct_uploaded_file").click();
+            e.preventDefault();
+          });
+          
+          // Update the display of the button when the file input element changes
+          $("#s3_direct_file_uploader_direct_uploaded_file").change(function() {
+            if ($(this).val()) {
+              if (this.files[0].size > MAX_FILE_UPLOAD_SIZE) {
+                alert("The file you have selected is too big. The maximum supported file size is " + MAX_FILE_UPLOAD_DESCRIPTION + ".");
+                $(this).val("");
+              } else if (/[%\+]/.test(this.files[0].name)) {
+                alert("The filename of the file you are trying to upload contains special characters which are not supported "
+                  + "by Badge List. Please rename the file and remove any plus (+) or percent (%) signs, then try your upload again.");
+                $(this).val("");
+              } else {
+                $("#upload-spinner").fadeIn();
+                $("#uploaded_file_form").submit();
+              }
             }
           });
 
@@ -248,9 +328,11 @@
       else
         save_button_text = (@entry.new_record?) ? 'Post evidence' : 'Update my evidence'
       end
+
+      save_button_disabled = ((@entry.format == 'image') && @entry.uploaded_image_key.blank?) \
+        || ((@entry.format == 'file') && @entry.uploaded_file_key.blank?)
     %>
-    <%= f.button :submit, save_button_text, class: 'btn btn-primary', 
-      disabled: ((@entry.format == 'image') && @entry.uploaded_image_key.blank?) %>
+    <%= f.button :submit, save_button_text, class: 'btn btn-primary', disabled: save_button_disabled %>
     <%= 
       if @entry.new_record?
         link_to "Cancel", [@group, @badge, @log], class: "btn"
@@ -262,13 +344,20 @@
 
 <% end %>
 
-<!-- === IMAGE UPLOAD (CONTINUED) - CARRIERWAVE DIRECT FORM === -->
-
 <% if @entry.format == 'image' %>
 
-  <%= direct_upload_form_for(@uploader, html: 
-      { id: 'uploaded_image_form', style: 'display: none;'} ) do |u| %>
-    <%= u.file_field :direct_uploaded_image %>
+  <!-- === CARRIERWAVE DIRECT FORM (IMAGE) === -->
+
+  <%= direct_upload_form_for(@image_uploader, html: { id: 'uploaded_image_form', style: 'display: none;'} ) do |u| %>
+    <%= u.file_field :direct_uploaded_image, accept: 'image/*' %>
+  <% end %>
+
+<% elsif @entry.format == 'file' %>
+
+<!-- === CARRIERWAVE DIRECT FORM (FILE) === -->
+
+  <%= direct_upload_form_for(@file_uploader, html: { id: 'uploaded_file_form', style: 'display: none;'} ) do |u| %>
+    <%= u.file_field :direct_uploaded_file %>
   <% end %>
 
 <% end %>

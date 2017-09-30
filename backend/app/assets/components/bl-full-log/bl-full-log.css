@@ -35,9 +35,15 @@
       padding: 0 1em;
     }
       .text h2 {
+        display: inline-block;
         font-size: 1.4em;
         margin: 0;
       }
+        .headerLink {
+          display: inline-block;
+          margin-left: 0.5em;
+          color: #9E9E9E;
+        }
       .text .details {
         font-size: 0.8em;
         color: rgb(158,158,158);

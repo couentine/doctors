@@ -3,7 +3,7 @@ module JSONTemplater
   # Include this module in an active model in order to provide multiple templates of JSON-ified field collections. To use you should add a 
   # JSON_TEMPLATES hash constant where the keys are are the templates and the values are lists of symbols representing either fields or 
   # instance methods on the model class. To use a different name, include a hash with one key (the field or instance method) 
-  # and one value (the string which should be used as the key in the json output).
+  # and one value (a symbol or string which should be used as the key in the json output).
   #
   # You can specify user-permission-based visibility within a particular template by including another level of keys underneath the main
   # template key. The `:everyone` key is used regardless of user permissions. The remaining keys should exactly match one of the symbols
@@ -15,10 +15,10 @@ module JSONTemplater
   #===[ EXAMPLE ]===#
   #
   # JSON_TEMPLATES = {
-  #   api_v1: [:id, :name, :url, { url_with_caps: 'slug' }, :another_field]
+  #   api_v1: [:id, :name, :url, { :url_with_caps => :slug }, :another_field]
   #   api_v2: {
-  #     everyone: [:id, :name, :url, { url_with_caps: 'slug' }, :another_field],
-  #     can_see_badges: [:badge_urls, {badge_ids_as_strings: 'badge_ids'}]
+  #     everyone: [:id, :name, :url, { :url_with_caps => :slug }, :another_field],
+  #     can_see_badges: [:badge_urls, { :badge_ids_as_strings => :badge_ids }]
   #   } # ==> depends on current_user_permissions method which returns hash with `:can_see_badges` boolean key
   # } 
   #

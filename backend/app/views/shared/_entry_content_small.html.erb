@@ -77,7 +77,15 @@
         <%= link_to image_tag(entry.uploaded_image_url(:preview)),
           "/#{group.to_param}/#{badge.to_param}/u/#{user.username}/#{entry.to_param}" %>
       <% else %>
-        <h3><i class="fa fa-exclamation-circle"></i></h3>
+        <h3>
+          <i class="fa fa-exclamation-circle"></i>
+          There was a problem processing this image, the file may be of an invalid format.
+        </h3>
+
+        <p>
+          <strong>Uploaded Filename:</strong>
+          <%= entry.uploaded_image_filename %>
+        </p>
       <% end %>
     </div>
 

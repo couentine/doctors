@@ -3066,6 +3066,11 @@ div.badge-card {
 .panel-entry-content-image {
   text-align: center;
 }
+.panel-entry-content-file {
+  .btn {
+    margin-top: 0.5em;
+  }
+}
 
 div.entry-card.validation .card-body-row { border-top: 4px solid $primary-light; }
 div.entry-card {

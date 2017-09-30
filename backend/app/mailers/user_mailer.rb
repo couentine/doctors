@@ -154,6 +154,22 @@ class UserMailer < ActionMailer::Base
     )
   end
 
+  def entry_invalid_image(entry_id)
+    @entry = Entry.find(entry_id)
+    @to_user = @entry.creator
+    @log = @entry.log
+    @badge = @log.badge
+    @group = @badge.group
+
+    mail(
+      :subject  => 'Oops! Your image evidence could not be posted.',
+      :to       => @to_user.email_name,
+      :from     => build_from_string,
+      :reply_to => build_from_string,
+      :tag      => 'entry_invalid_image,user_mailer'
+    )
+  end
+
   def group_new_lti_integration(to_user_id, group_id, lti_context_details)
     @to_user = User.find(to_user_id)
     @group = Group.find(group_id)

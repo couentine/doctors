@@ -934,4 +934,27 @@ namespace :db do
     puts " >> Done."
   end
 
+  # One-time task. Finds all image entries which are stuck at processing and marks them as error state.
+  task fix_images_stuck_in_processing: :environment do
+    entry_criteria = Entry.where(format: 'image', processing_uploaded_image: true, :created_at.lt => 5.minutes.ago)
+    print "Updating #{entry_criteria.count} entries"
+
+    entry_criteria.each do |entry|
+      entry.processing_uploaded_image = false
+      entry.image_processing_error = true
+
+      if entry.changed?
+        if entry.timeless.save
+          print "."
+        else
+          print "!#{entry.id}"
+        end
+      else
+        print '-'
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end
