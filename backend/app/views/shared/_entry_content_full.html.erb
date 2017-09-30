@@ -115,7 +115,8 @@
 
     <!-- === FILE === -->
     <div class="panel panel-entry-content panel-entry-content-file">
-      <%= link_to file_tag(entry.uploaded_file_url(:full)), entry.uploaded_file_url(:full), target: '_blank' %>
+      <%= link_to "<i class='fa fa-file'></i> #{entry.uploaded_file_filename}".html_safe, entry.uploaded_file_url, 
+        class: 'btn btn-large', target: '_blank' %>
     </div>
 
   <% end %>

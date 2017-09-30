@@ -134,6 +134,15 @@ class EntriesController < ApplicationController
 
     # Now do the redirect
     if @entry.errors.count > 0
+      # Create the carrierwave direct uploader if this is an image or a file
+      if @entry.format == 'image'
+        @image_uploader = Entry.new.direct_uploaded_image
+        @image_uploader.success_action_redirect = request.original_url
+      elsif @entry.format == 'file'
+        @file_uploader = Entry.new.direct_uploaded_file
+        @file_uploader.success_action_redirect = request.original_url
+      end
+
       if @entry.new_record?
         flash[:error] = "There was an error creating your #{@type}."
         render :new

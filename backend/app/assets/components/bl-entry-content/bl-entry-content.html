@@ -43,12 +43,23 @@
         <!-- === IMAGE === -->
         <div class="subtitle"><i class="fa fa-camera"></i> Uploaded Image</div>
         <h3>{{entry.summary}}</h3>
-        <a class="link-thumbnail" target="_blank" href$="{{entry.image_url}}" 
-            hidden$="{{blank(entry.image_medium_url)}}">
+        <a class="link-thumbnail" target="_blank" href$="{{entry.image_url}}" hidden$="{{blank(entry.image_medium_url)}}">
           <img src$="{{entry.image_medium_url}}">
         </a>
         <div class="imageProcessingError" hidden="[[!entry.image_processing_error]]">
           <i class="fa fa-exclamation-circle"></i> Invalid Image File
+        </div>
+      </template>
+
+      <template is="dom-if" if="{{isFile}}">
+        <!-- === FILE === -->
+        <div class="subtitle"><i class="fa fa-file"></i> Uploaded File</div>
+        <h3>{{entry.summary}}</h3>
+        <a class="link-file" target="_blank" href$="{{entry.file_url}}" hidden$="{{blank(entry.file_url)}}">
+          <i class="fa fa-download"></i> [[fileTitle]]
+        </a>
+        <div class="fileProcessingError" hidden="[[!entry.file_processing_error]]">
+          <i class="fa fa-exclamation-circle"></i> Corrupted File
         </div>
       </template>
 

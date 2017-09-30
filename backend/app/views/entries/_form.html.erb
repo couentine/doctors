@@ -262,7 +262,7 @@
 
       <% if @entry.uploaded_file_key %> 
         <!-- Don't show this until the file is uploaded -->
-        <%= f.input :summary, as: :text, label: 'Description (Optional)', 
+        <%= f.input :summary, as: :text, label: 'Description', 
           input_html: { data: { :'character-count' => true, :'max-length' => Entry::MAX_SUMMARY_LENGTH }, cols: '200', rows: '5' } %>
       <% end %>
 
@@ -328,9 +328,11 @@
       else
         save_button_text = (@entry.new_record?) ? 'Post evidence' : 'Update my evidence'
       end
+
+      save_button_disabled = ((@entry.format == 'image') && @entry.uploaded_image_key.blank?) \
+        || ((@entry.format == 'file') && @entry.uploaded_file_key.blank?)
     %>
-    <%= f.button :submit, save_button_text, class: 'btn btn-primary', 
-      disabled: ((@entry.format == 'image') && @entry.uploaded_image_key.blank?) %>
+    <%= f.button :submit, save_button_text, class: 'btn btn-primary', disabled: save_button_disabled %>
     <%= 
       if @entry.new_record?
         link_to "Cancel", [@group, @badge, @log], class: "btn"

@@ -16,7 +16,7 @@ class Entry
   JSON_TEMPLATES = {
     log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :body, :linkified_summary, :type, :format, :format_icon, 
       :parent_tag, :body_sections, :link_url, :code_format, :link_metadata, :image_url, :image_medium_url, :image_small_url, 
-      :image_processing_error, :file_url, :image_processing_error]
+      :image_processing_error, :file_url, :file_processing_error, { uploaded_file_filename: :file_filename }]
   }
   
   # === INSTANCE VARIABLES === #
@@ -86,9 +86,11 @@ class Entry
 
   before_validation :set_default_values, on: :create
   before_validation :update_image_key
+  before_validation :update_file_key
   before_save :process_parent_tag_and_content_changes
   before_save :update_body_versions # DO store the first value since it comes from the user
   after_save :process_image
+  after_save :process_file
   after_save :process_link
   after_save :process_tweet
   after_create :update_log
@@ -118,7 +120,7 @@ class Entry
 
   # Validation methods
   def summary_is_required?
-    ['text', nil, 'link', 'code'].include? format
+    ['text', nil, 'link', 'file', 'code'].include? format
   end
   
   def body_is_required?
@@ -206,6 +208,15 @@ class Entry
   def uploaded_image_filename
     if uploaded_image_key.present? && uploaded_image_key.include?('/')
       uploaded_image_key.split('/').last
+    else
+      nil
+    end
+  end
+
+  # Extracts the filename from the `uploaded_file_key` if present
+  def uploaded_file_filename
+    if uploaded_file_key.present? && uploaded_file_key.include?('/')
+      uploaded_file_key.split('/').last
     else
       nil
     end

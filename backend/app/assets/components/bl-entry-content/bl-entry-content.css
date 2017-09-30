@@ -28,7 +28,7 @@
     max-width: 100%;
     margin: 0.7em 0;
   }
-  .imageProcessingError {
+  .imageProcessingError, .fileProcessingError {
     border: 1px solid #bdbdbd;
     background: #f5f5f5;
     border-radius: 2px;
@@ -38,6 +38,18 @@
   }
 
   a.link-thumbnail { display: block; }
+  a.link-file, a.link-file:visited {
+    display: inline-block;
+    padding: 0.7em 0.9em;
+    margin: 0.5em 0;
+    
+    border-radius: 7px;
+    background: radial-gradient(circle at 60% 40%, #4caf50, #43a047);
+    color: white;
+    border: 1px solid #81c784;
+    
+    text-decoration: none;
+  }
   p.link-summary { font-style: italic; }
   div.link-content {
     background-color: #F5F5F5;
