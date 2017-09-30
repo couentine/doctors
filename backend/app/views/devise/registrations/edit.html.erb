@@ -353,7 +353,7 @@
               </h1>
               <h2>
                 <%= link_to "<i class='fa fa-shield'></i> #{@user.username_with_caps}".html_safe, 
-                  user_path(@user), title: 'View your badge profile', 
+                  (user_path(@user) rescue '#'), title: 'View your badge profile', 
                   data: { toggle: 'tooltip', placement: 'right' } %>
               </h2>
               <h3>
@@ -703,27 +703,40 @@
   </div>
 </div>
 
-<!-- === BILLING INFO === -->
+<% if !@user.errors.messages.include?(:username_with_caps) %>
+  <!-- === BILLING INFO === -->
 
-<div class="bl-inline-form" id="add-card-form" style="display: none;">
-  <%= simple_form_for @user, html: { class: 'form-horizontal', id: 'stripe-form' } do |f| %>
-    
-    <div class="spinner-wrapper" id="stripe-spinner" style="display: none;">
-      <div class="spinner large tertiary">&nbsp;</div>
-    </div>
+  <div class="bl-inline-form" id="add-card-form" style="display: none;">
+    <%= simple_form_for @user, html: { class: 'form-horizontal', id: 'stripe-form' } do |f| %>
+      
+      <div class="spinner-wrapper" id="stripe-spinner" style="display: none;">
+        <div class="spinner large tertiary">&nbsp;</div>
+      </div>
 
-    <div class="form-body">
-      <%= render 'shared/stripe_card_form_fields' %>
-    </div>
+      <div class="form-body">
+        <%= render 'shared/stripe_card_form_fields' %>
+      </div>
 
-    <div class="form-footer">
-      <%= f.button :submit, "Save new card", :class => "btn btn-info" %>
-      <a class="btn" data-toggle="custom"  data-hide="#add-card-form" 
-        data-show="#credit-card-buttons,#billing-info-row">Cancel</a>
-    </div>
+      <div class="form-footer">
+        <%= f.button :submit, "Save new card", :class => "btn btn-info" %>
+        <a class="btn" data-toggle="custom"  data-hide="#add-card-form" 
+          data-show="#credit-card-buttons,#billing-info-row">Cancel</a>
+      </div>
 
-  <% end %>
-</div>
+    <% end %>
+  </div>
+
+  <!-- === UPLOAD PROFILE IMAGE FORM === -->
+
+  <div id="upload-image-panel" style="display: none;">
+    <%= form_tag(user_update_image_path(@user), id: 'upload-image-form', method: :post, 
+        remote: true) do %>
+      
+      <input type="hidden" name="avatar_key" id="user_avatar_key">
+
+    <% end %>
+  </div>
+<% end %>
 
 <!-- === ACCOUNT DELETION === -->
 
@@ -760,14 +773,3 @@
 <% end %>
 
 <iframe id="avatar_result_frame" name="avatar_result_frame" style="display: none;"></iframe>
-
-<!-- === UPLOAD PROFILE IMAGE FORM === -->
-
-<div id="upload-image-panel" style="display: none;">
-  <%= form_tag(user_update_image_path(@user), id: 'upload-image-form', method: :post, 
-      remote: true) do %>
-    
-    <input type="hidden" name="avatar_key" id="user_avatar_key">
-
-  <% end %>
-</div>
