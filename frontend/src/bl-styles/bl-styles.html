@@ -35,109 +35,206 @@ This import contains all of the Badge List styles and needed shims.
       /* === BUTTONS & LINKS === */
 
         paper-button {
-          text-transform: none;
-          padding: 0.7em 0.9em;
-          border-radius: 7px;
+          font-size: 0.8em;
+          font-weight: 500;
+          text-align: center;
+          text-transform: uppercase;
+          padding: 0.4em 1.35em;
+          border-radius: 500em;
 
           background: radial-gradient(circle at 60% 40%, var(--bl-grey-50), var(--bl-grey-200));
-          border: 1px solid white;
-          color: var(--bl-grey-800);
+          border: 1.5px solid var(--bl-grey-600);
+          color: var(--bl-grey-600);
+
+          transition: all 0.5s;
+        }
+        paper-button:hover, paper-button:focus {
+          background: radial-gradient(circle at 60% 40%, var(--bl-grey-50), var(--bl-grey-300));
+          color: var(--bl-grey-700);
+        }
+        paper-button.icon {
+          display: block;
+        }
+        paper-button.transparent {
+          background: none !important;
+        }
+        paper-button.borderless {
+          border-color: transparent !important;
+        }
+        paper-button.white-text {
+          color: white;
         }
         paper-button.red {
           background: radial-gradient(circle at 60% 40%, var(--bl-red-500), var(--bl-red-600));
-          border: 1px solid var(--bl-red-300);
-          color: white;
+          border-color: var(--bl-red-100);
+          color: var(--bl-red-100);
         }
+          paper-button.red:hover, paper-button.red:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-red-400), var(--bl-red-700));
+            color: white;
+          }
         paper-button.pink {
           background: radial-gradient(circle at 60% 40%, var(--bl-pink-500), var(--bl-pink-600));
-          border: 1px solid var(--bl-pink-300);
-          color: white;
+          border-color: var(--bl-pink-100);
+          color: var(--bl-pink-100);
         }
+          paper-button.pink:hover, paper-button.pink:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-pink-400), var(--bl-pink-700));
+            color: white;
+          }
         paper-button.purple {
           background: radial-gradient(circle at 60% 40%, var(--bl-purple-500), var(--bl-purple-600));
-          border: 1px solid var(--bl-purple-300);
-          color: white;
+          border-color: var(--bl-purple-100);
+          color: var(--bl-purple-100);
         }
+          paper-button.purple:hover, paper-button.purple:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-purple-400), var(--bl-purple-700));
+            color: white;
+          }
         paper-button.deep-purple {
           background: radial-gradient(circle at 60% 40%, var(--bl-deep-purple-500), var(--bl-deep-purple-600));
-          border: 1px solid var(--bl-deep-purple-300);
-          color: white;
+          border-color: var(--bl-deep-purple-100);
+          color: var(--bl-deep-purple-100);
         }
+          paper-button.deep-purple:hover, paper-button.deep-purple:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-deep-purple-400), var(--bl-deep-purple-700));
+            color: white;
+          }
         paper-button.indigo {
           background: radial-gradient(circle at 60% 40%, var(--bl-indigo-500), var(--bl-indigo-600));
-          border: 1px solid var(--bl-indigo-300);
-          color: white;
+          border-color: var(--bl-indigo-100);
+          color: var(--bl-indigo-100);
         }
+          paper-button.indigo:hover, paper-button.indigo:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-indigo-400), var(--bl-indigo-700));
+            color: white;
+          }
         paper-button.blue {
           background: radial-gradient(circle at 60% 40%, var(--bl-blue-500), var(--bl-blue-600));
-          border: 1px solid var(--bl-blue-300);
-          color: white;
+          border-color: var(--bl-blue-100);
+          color: var(--bl-blue-100);
         }
+          paper-button.blue:hover, paper-button.blue:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-blue-400), var(--bl-blue-700));
+            color: white;
+          }
         paper-button.light-blue {
           background: radial-gradient(circle at 60% 40%, var(--bl-light-blue-500), var(--bl-light-blue-600));
-          border: 1px solid var(--bl-light-blue-300);
-          color: white;
+          border-color: var(--bl-light-blue-100);
+          color: var(--bl-light-blue-100);
         }
+          paper-button.light-blue:hover, paper-button.light-blue:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-light-blue-400), var(--bl-light-blue-700));
+            color: white;
+          }
         paper-button.cyan {
           background: radial-gradient(circle at 60% 40%, var(--bl-cyan-500), var(--bl-cyan-600));
-          border: 1px solid var(--bl-cyan-300);
-          color: white;
+          border-color: var(--bl-cyan-100);
+          color: var(--bl-cyan-100);
         }
+          paper-button.cyan:hover, paper-button.cyan:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-cyan-400), var(--bl-cyan-700));
+            color: white;
+          }
         paper-button.teal {
           background: radial-gradient(circle at 60% 40%, var(--bl-teal-500), var(--bl-teal-600));
-          border: 1px solid var(--bl-teal-300);
-          color: white;
+          border-color: var(--bl-teal-100);
+          color: var(--bl-teal-100);
         }
+          paper-button.teal:hover, paper-button.teal:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-teal-400), var(--bl-teal-700));
+            color: white;
+          }
         paper-button.green {
           background: radial-gradient(circle at 60% 40%, var(--bl-green-500), var(--bl-green-600));
-          border: 1px solid var(--bl-green-300);
-          color: white;
+          border-color: var(--bl-green-100);
+          color: var(--bl-green-100);
         }
+          paper-button.green:hover, paper-button.green:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-green-400), var(--bl-green-700));
+            color: white;
+          }
         paper-button.light-green {
           background: radial-gradient(circle at 60% 40%, var(--bl-light-green-500), var(--bl-light-green-600));
-          border: 1px solid var(--bl-light-green-300);
-          color: white;
+          border-color: var(--bl-light-green-100);
+          color: var(--bl-light-green-100);
         }
+          paper-button.light-green:hover, paper-button.light-green:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-light-green-400), var(--bl-light-green-700));
+            color: white;
+          }
         paper-button.lime {
           background: radial-gradient(circle at 60% 40%, var(--bl-lime-500), var(--bl-lime-600));
-          border: 1px solid var(--bl-lime-300);
-          color: white;
+          border-color: var(--bl-lime-100);
+          color: var(--bl-lime-100);
         }
+          paper-button.lime:hover, paper-button.lime:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-lime-400), var(--bl-lime-700));
+            color: white;
+          }
         paper-button.yellow {
           background: radial-gradient(circle at 60% 40%, var(--bl-yellow-500), var(--bl-yellow-600));
-          border: 1px solid var(--bl-yellow-300);
-          color: white;
+          border-color: var(--bl-yellow-100);
+          color: var(--bl-yellow-100);
         }
+          paper-button.yellow:hover, paper-button.yellow:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-yellow-400), var(--bl-yellow-700));
+            color: white;
+          }
         paper-button.amber {
           background: radial-gradient(circle at 60% 40%, var(--bl-amber-500), var(--bl-amber-600));
-          border: 1px solid var(--bl-amber-300);
-          color: white;
+          border-color: var(--bl-amber-100);
+          color: var(--bl-amber-100);
         }
+          paper-button.amber:hover, paper-button.amber:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-amber-400), var(--bl-amber-700));
+            color: white;
+          }
         paper-button.orange {
           background: radial-gradient(circle at 60% 40%, var(--bl-orange-500), var(--bl-orange-600));
-          border: 1px solid var(--bl-orange-300);
-          color: white;
+          border-color: var(--bl-orange-100);
+          color: var(--bl-orange-100);
         }
+          paper-button.orange:hover, paper-button.orange:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-orange-400), var(--bl-orange-700));
+            color: white;
+          }
         paper-button.deep-orange {
           background: radial-gradient(circle at 60% 40%, var(--bl-deep-orange-500), var(--bl-deep-orange-600));
-          border: 1px solid var(--bl-deep-orange-300);
-          color: white;
+          border-color: var(--bl-deep-orange-100);
+          color: var(--bl-deep-orange-100);
         }
+          paper-button.deep-orange:hover, paper-button.deep-orange:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-deep-orange-400), var(--bl-deep-orange-700));
+            color: white;
+          }
         paper-button.brown {
           background: radial-gradient(circle at 60% 40%, var(--bl-brown-500), var(--bl-brown-600));
-          border: 1px solid var(--bl-brown-300);
-          color: white;
+          border-color: var(--bl-brown-100);
+          color: var(--bl-brown-100);
         }
+          paper-button.brown:hover, paper-button.brown:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-brown-400), var(--bl-brown-700));
+            color: white;
+          }
         paper-button.grey {
           background: radial-gradient(circle at 60% 40%, var(--bl-grey-500), var(--bl-grey-600));
-          border: 1px solid var(--bl-grey-300);
-          color: white;
+          border-color: var(--bl-grey-100);
+          color: var(--bl-grey-100);
         }
+          paper-button.grey:hover, paper-button.grey:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-grey-400), var(--bl-grey-700));
+            color: white;
+          }
         paper-button.blue-grey {
           background: radial-gradient(circle at 60% 40%, var(--bl-blue-grey-500), var(--bl-blue-grey-600));
-          border: 1px solid var(--bl-blue-grey-300);
-          color: white;
+          border-color: var(--bl-blue-grey-100);
+          color: var(--bl-blue-grey-100);
         }
+          paper-button.blue-grey:hover, paper-button.blue-grey:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-blue-grey-400), var(--bl-blue-grey-700));
+            color: white;
+          }
 
         a.button {
           display: inline-block;

@@ -108,7 +108,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         var element = /** @type {HTMLElement} */ (node);
         var tabIndex = this._normalizedTabIndex(element);
-        var needsSort = tabIndex > 0;
+        var needsSortByTabIndex = tabIndex > 0;
         if (tabIndex >= 0) {
           result.push(element);
         }
@@ -127,7 +127,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //  </div>
         // TODO(valdrin) support ShadowDOM v1 when upgrading to Polymer v2.0.
         var children;
-        if (element.localName === 'content' || element.localName === 'slot') {
+        if (element.localName === 'content') {
           children = Polymer.dom(element).getDistributedNodes();
         } else {
           // Use shadow root if possible, will check for distributed nodes.
@@ -135,9 +135,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         for (var i = 0; i < children.length; i++) {
           // Ensure method is always invoked to collect tabbable children.
-          needsSort = this._collectTabbableNodes(children[i], result) || needsSort;
+          var needsSort = this._collectTabbableNodes(children[i], result);
+          needsSortByTabIndex = needsSortByTabIndex || needsSort;
         }
-        return needsSort;
+        return needsSortByTabIndex;
       },
 
       /**

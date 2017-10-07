@@ -20,6 +20,9 @@ The target object provides methods for building a list of items to import either
     <!-- #=== POLLER TO TRACK STATUS OF CURRENT IMPORT BATCH ===# -->
     <bl-poller id="poller" poller-id="{{_pollerId}}" target="{{target.status.poller}}" max-duration="600000"></bl-poller>
 
+    <!-- #=== ARRAY SELECTOR TO BIND SELECTED ITEM TO ITEMS TO IMPORT ARRAY ===# -->
+    <array-selector id="itemSelector" items="{{target.itemsToImport}}" selected="{{target.selectedItem}}"></array-selector>
+
   </template>
 
   <script>
@@ -64,7 +67,9 @@ The target object provides methods for building a list of items to import either
            *     - `status.isReady`, `status.isImporting`, `status.isImported` and `status.isFailed` are boolean status checkers
            *     - `status.errorMessage` will contain explanatory text when `failed`
            *   - `result` object returned from the server (in case you need to reference it directly)
+           *   - `select()` function which sets this item as the selected item.
            *   - `remove()` function which will remove the specified item from the list.
+           * @property {object} selectedItem - The item from `itemsToImport` which is currently selected.
            * @property {object[]} importedItems - After items are successfully imported they are removed from `itemsToImport` and added to
            *   this list. The items in this list have all of the same properties except there is no `remove()` method.
            * @property {object} status - Stores the current state of the import process.
@@ -131,11 +136,12 @@ The target object provides methods for building a list of items to import either
 
       // #=== PUBLIC ACTION METHODS ===#
 
-      /** Adds a new blank item to the end of `target.itemsToImport` array. Returns the new item. */
+      /** Adds a new blank item to the end of `target.itemsToImport` array. Sets the new item as selected and returns it. */
       addItem() {
         var item = this._buildItem();
 
         this.push('target.itemsToImport', item);
+        this.$.itemSelector.select(item);
 
         return item;
       }
@@ -223,6 +229,14 @@ The target object provides methods for building a list of items to import either
           }
 
         return itemIndex;
+      }
+
+      /** Sets the matching item from `target.itemsToImport` as the currently selected item. */
+      selectItemById(uniqueId) {
+        var itemIndex = this.getItemIndex(uniqueId);
+
+        if (itemIndex != null)
+          this.$.itemSelector.select(this.target.itemsToImport[itemIndex]);
       }
 
       /** Removes the matching item from `target.itemsToImport` array and returns the removed item (or null if no match is found). */
@@ -313,6 +327,7 @@ The target object provides methods for building a list of items to import either
       _setupTargetObject() {
         // Add to the existing target object instead of overwriting it, in case the parent element has given it extra properties
         this.set('target.itemsToImport', []);
+        this.set('target.selectedItem', null);
         this.set('target.importedItems', []);
         this.set('target.status', {});
         this.set('target.status.code', 'uninitialized');
@@ -574,6 +589,7 @@ The target object provides methods for building a list of items to import either
             errorMessage: null
           },
           result: null,
+          select: () => this.selectItemById(item.uniqueId),
           remove: () => this.removeItemById(item.uniqueId)
         };
 

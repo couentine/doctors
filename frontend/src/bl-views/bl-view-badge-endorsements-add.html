@@ -5,7 +5,7 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="bl-header-nav-left.html">
@@ -13,6 +13,7 @@
 <link rel="import" href="bl-header-panel.html">
 <link rel="import" href="bl-view-mixin.html">
 <link rel="import" href="../bl-backend/bl-backend-importer.html">
+<link rel="import" href="../bl-input/bl-input-text.html">
 
 <!--
 # Badge List Bulk Add Badge Endorsements View #
@@ -36,7 +37,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       /* === HEADER PANEL STYLES === */
 
         bl-header-panel {
-          background: white;
+          background: linear-gradient(205deg, var(--bl-orange-50), var(--bl-purple-50));
         }
           #expandedBackground {
             border-bottom: 4px solid var(--bl-purple-400);
@@ -120,98 +121,162 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
               text-decoration: none;
             }
 
-      /* === BETA CONTENT STYLES === */
+      /* === SHARED CONTENT STYLES === */
 
-        .contentBox {
+        .contentBlock {
           margin: 3em auto;
-          max-width: 40em;
+          max-width: 40rem;
           padding: 0 2em;
           color: var(--bl-grey-700);
         }
-          .contentBox a, .contentBox a:visited {
-            color: var(--bl-grey-900);
-          }
-
-        #importerStatus {
-          display: flex;
-          align-items: center;
-        }
-          #importerStatus label {
-            font-weight: bold;
-            margin-right: 0.5em;
-          }
-          #importerStatus span {
-            margin-right: 0.5em;
-            text-transform: capitalize;
-          }
-          paper-spinner-lite { --paper-spinner-color: var(--bl-purple-500); }
-
-        #importerActions paper-button {
-          display: inline-block;
-          margin: 0 1em 1em 0;
-        }
-        #importerActions paper-checkbox {
-          display: inline-block;
-          --primary-color: var(--bl-orange-600);
-          --primary-text-color: var(--bl-grey-700);
-        }
-          #importerActions paper-checkbox .subtitle {
-            display: block;
-            font-size: 0.8em;
-          }
-
-        #importerCounts li label {
-          font-weight: bold;
-          margin-right: 0.5em;
-        }
-
-        #importerError {
-          display: flex;
-          align-items: center;
-          margin-top: 0.5em;
-          color: var(--bl-red-700);
-        }
-          #importerError label {
-            margin-right: 0.5em;
-          }
-          #importerError span {
-            margin-right: 0.5em;
-            text-transform: capitalize;
-          }
         
-        #failedItems label {
-          display: block;
-          font-weight: bold;
-          color: var(--bl-red-700);
-          margin-bottom: 1em;
-        }
-        #failedItems table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-          #failedItems table th {
-            padding: 0.5em;
-            background: var(--bl-red-300);
-            color: white;
-            border-bottom: 1px solid var(--bl-red-200);
+          .sectionHeader {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
           }
-            #failedItems table th:first-child { border-top-left-radius: 3px; }
-            #failedItems table th:last-child { border-top-right-radius: 3px; }
-          #failedItems table td {
-            padding: 0.5em;
-            background: var(--bl-red-50);
-            text-align: center;
+
+          .optionButtons {
+            display: block;
+            margin: 0;
+            padding: 0 1px;
+            list-style: none;
+            border-radius: 9px;
+            background: var(--bl-orange-500);
+
+            @apply --bl-shadow-3;
           }
-            #failedItems table td.errorMessage {
-              color: var(--bl-red-300);
-              font-weight: 500;
+            .optionButtons>li {
+              display: block;
+              border-bottom: 1px solid var(--bl-orange-400);
             }
-            #failedItems table tbody tr:last-of-type td:first-child {
-              border-bottom-left-radius: 3px;
+            .optionButtons>li:last-child {
+              border-bottom: none;
             }
-            #failedItems table tbody tr:last-of-type td:last-child {
-              border-bottom-right-radius: 3px;
+              .optionButtons>li>a {
+                display: flex;
+                align-items: center;
+                color: var(--bl-orange-50);
+                text-decoration: none;
+                padding: 1em;
+              }
+                .optionButtons>li>a>i {
+                  font-size: 1.5em;
+                  margin-right: 0.5rem;
+                }
+                .optionButtons>li>a>span {
+                  font-size: 1.1em;
+                }
+
+      /* === FORM === */
+
+        #editItemPanel {
+          margin-top: 3em;
+        }
+          .formDialog {
+            @apply --bl-shadow-5;
+            background: white;
+            border-radius: 9px;
+            z-index: 3;
+            position: relative;
+          }
+            .formTitle {
+              color: var(--bl-grey-600);
+              padding: 1.5rem 1.5rem 0 1.5rem;
             }
+            .formTitle::after {
+              content: '';
+              display: block;
+              width: 2em;
+              height: 0.4em;
+              margin-top: 0.7em;
+              background: linear-gradient(70deg, var(--bl-purple-500), var(--bl-orange-500));
+              border-radius: 500em;
+            }
+              .formTitle h3 {
+                font-size: 1.3em;
+                padding: 0;
+                line-height: 1em;
+                margin: 0;
+                font-weight: 800;
+              }
+            .formIcon {
+              position: absolute;
+              font-size: 3em;
+              top: 1.1rem;
+              right: 1rem;
+              background: -webkit-linear-gradient(150deg, var(--bl-purple-500), var(--bl-orange-500));
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              opacity: 0.8;
+            }
+            .formBody {
+              padding: 1rem 1.5rem 3rem 1.5rem;
+            }
+            .formFooter {
+              padding: 1em;
+              display: flex;
+              justify-content: flex-end;
+              background: var(--bl-orange-400);
+              border-radius: 0 0 9px 9px;
+              border-top: 1px solid var(--bl-orange-200);
+            }
+      
+      /* === TABLE PANEL === */
+
+        #tablePanel {
+          position: absolute;
+          top: 11em;
+          right: 1em;
+          bottom: 1em;
+          left: 1em;
+        }
+          #tableMenu {
+            list-style: none;
+            margin: 0;
+            padding: 0 0 0.9em 0;
+            display: flex;
+          }
+            #tableMenu>li {
+              display: block;
+            }
+              #tableMenu>li>paper-button {
+                color: var(--bl-orange-700);
+                font-weight: 600;
+              }
+          #tableContent {
+            background: white;
+            border-radius: 9px;
+
+            @apply --bl-shadow-5;
+          }
+            #tableContent table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+              #tableContent table tr th {
+                font-size: 0.8em;
+                padding: 0.3em 0.7em;
+                border-bottom: 1.5px solid var(--bl-orange-100);
+                color: var(--bl-orange-300);
+                text-transform: uppercase;
+              }
+              #tableContent table tr td {
+                padding: 0.3em 0.7em;
+                border-bottom: 1px solid var(--bl-grey-100);
+                text-align: center;
+              }
+              #tableContent table tr.actionRow td {
+                padding: 0.5em;
+                color: var(--bl-grey-500);
+                background: var(--bl-grey-50);
+                border-radius: 0 0 9px 9px;
+                border: none;
+              }
+                #tableContent table tr.actionRow td paper-button {
+                  color: var(--bl-orange-300);
+                  padding: 0.5em
+                }
 
     </style>
 
@@ -245,95 +310,133 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       <div id="content" slot="content">
 
-        <!-- #=== BETA UI ===# -->
-        
-        <div id="explainerText" class="contentBox">
-          This is a beta version of the bulk awarding tool. Please contact Badge List support if you have any questions.
-          To use the tool you will need to build a CSV file with up to three columns: 
-          Email, Summary and Body. Email and summary are required, body is optional. Body can contain HTML.
-          <a href="https://s3.amazonaws.com/badgelist/templates/badge-endorsements.csv">A template file is available here</a>.
-        </div>
-        
-        <div id="importerDetails" class="contentBox">
-          <div id="importerStatus">
-            <label>Importer Status</label>
-            
-            <span hidden="[[badgeEndorsements.status.isImporting]]">[[badgeEndorsements.status.code]]</span>
-            <span hidden="[[!badgeEndorsements.status.isImporting]]">
-              Importing Batch [[badgeEndorsements.status.currentBatch]] of [[badgeEndorsements.status.batchCount]]
-              ([[badgeEndorsements.status.poller.progress]]%)
-            </span>
-            
-            <paper-spinner-lite id="spinner" active="[[badgeEndorsements.status.isImporting]]"></paper-spinner-lite>
+        <!-- #=== BLANK PANEL ===# -->
+
+        <div id="blankPanel" hidden="[[!activePanelIsBlank]]">
+          <div class="contentBlock">
+            The bulk award tool allows you to create badge endorsements for many people at a time, even if they are not yet a member of your 
+            Badge List group. You will need to build a list of endorsement items. Each item must have an email address and a 
+            &ldquo;summary&rdquo;, which is the text that is displayed on the badge recipient's portfolio.
+            You can optionally include an endorsement body as well.
           </div>
-          
-          <div id="importerError" hidden="[[!badgeEndorsements.status.isError]]">
-            <label><i class="icon-warning"></i></label>
-            <span>[[badgeEndorsements.status.errorMessage]]</span>
-          </div>
-          
-          <div id="importerCounts">
-            <ul>
+
+          <div class="contentBlock">
+            <div class="sectionHeader">
+              To add new endorsement items you have three options:
+            </div>
+
+            <ul class="optionButtons">
               <li>
-                <label>Items Ready to Import:</label>
-                <span>[[badgeEndorsements.status.readyItemCount]]</span>
+                <a href="#" on-tap="importCSV">
+                  <i class="icon-file-spreadsheet"></i>
+                  <span>Add items from a CSV file</span>
+                </a>
               </li>
               <li>
-                <label>Items Being Imported:</label>
-                <span>[[badgeEndorsements.status.importingItemCount]]</span>
+                <a href="#" on-tap="pasteEmails">
+                  <i class="icon-paste"></i>
+                  <span>Copy &amp; paste a list of email addresses</span>
+                </a>
               </li>
               <li>
-                <label>Failed Items:</label>
-                <span>[[badgeEndorsements.status.failedItemCount]]</span>
-              </li>
-              <li>
-                <label>Successfully Imported Items:</label>
-                <span>[[badgeEndorsements.status.importedItemCount]]</span>
+                <a href="#" on-tap="newItem">
+                  <i class="icon-edit"></i>
+                  <span>Type in items one at a time</span>
+                </a>
               </li>
             </ul>
           </div>
         </div>
-        
-        <div id="importerActions" class="contentBox" hidden="[[badgeEndorsements.status.isImporting]]">
-          <paper-input id="csvFileInput" type="file" accept=".csv" on-change="_csvFileChanged" hidden></paper-input>
-          
-          <paper-button class="orange" on-tap="selectCSVFile">
-            Import CSV File
-          </paper-button>
 
-          <paper-checkbox checked="{{importerParameters.send_emails_to_new_users}}">
-            Send email notifications to new users
-            <span class="subtitle">
-              Existing users will always receive notifications according to their preferences.
-            </span>
-          </paper-checkbox>
+        <!-- #=== ADD ITEM PANEL ===# -->
+
+        <div id="editItemPanel" hidden="[[!activePanelIsNewOrEditItem]]">
+          <div class="contentBlock">
+            <div class="formDialog">
+              <div class="formTitle">
+                <h3 hidden="[[!activePanelIsNewItem]]">Add Item</h3>
+                <h3 hidden="[[!activePanelIsEditItem]]">Edit Item</h3>
+              </div>
+              <div class="formIcon">
+                <i class="icon-certificate"></i>
+              </div>
+              
+              <div class="formBody">
+                <iron-form id="editItemForm">
+                  <form>
+                    <bl-input-text id="selectedItemEmail" label="Email" format="email" value="{{badgeEndorsements.selectedItem.email}}"
+                      class="orange">
+                    </bl-input-text>
+                    <bl-input-text id="selectedItemSummary" label="Feedback Summary" value="{{badgeEndorsements.selectedItem.summary}}"
+                      class="orange">
+                    </bl-input-text>
+                  </form>
+                </iron-form>
+              </div>
+              
+              <div class="formFooter">
+                <paper-button class="orange transparent borderless" on-tap="removeItem">
+                  <i class="icon-trash"></i>
+                  <span hidden="[[!activePanelIsNewItem]]">Discard</span>
+                  <span hidden="[[!activePanelIsEditItem]]">Delete</span>
+                </paper-button>
+                <paper-button class="orange primary" on-tap="saveItem">Save</paper-button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div id="failedItems" class="contentBox" hidden="[[!badgeEndorsements.status.failedItemCount]]">
-          <label>Failed Items</label>
-          <table>
-            <thead>
-              <tr>
-                <th>Error</th>
-                <th>Email</th>
-                <th>Summary</th>
-                <th>Body</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template is="dom-repeat" items="[[badgeEndorsements.status.failedItems]]">
+        <!-- #=== TABLE PANEL ===# -->
+
+        <div id="tablePanel" hidden="[[!activePanelIsTable]]">
+          <ul id="tableMenu">
+            <li>
+              <paper-button on-tap="importCSV" class="transparent borderless icon">
+                <i class="icon-file-spreadsheet"></i>
+                <span>Import CSV</span>
+              </paper-button>
+            </li>
+            <li>
+              <paper-button on-tap="pasteEmails" class="transparent borderless icon">
+                <i class="icon-paste"></i>
+                <span>Paste emails</span>
+              </paper-button>
+            </li>
+          </ul>
+          <div id="tableContent">
+            <table>
+              <thead>
                 <tr>
-                  <td class="errorMessage">
-                    <i class="icon-warning"></i>
-                    [[item.backend.status.errorMessage]]
-                  </td>
-                  <td>[[item.email]]</td>
-                  <td>[[item.summary]]</td>
-                  <td>[[item.body]]</td>
+                  <th>Email</th>
+                  <th>Summary</th>
+                  <th>Body</th>
+                  <th></th>
                 </tr>
-              </template>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <template is="dom-repeat" items="[[badgeEndorsements.itemsToImport]]">
+                  <tr>
+                    <td>[[item.email]]</td>
+                    <td>[[item.summary]]</td>
+                    <td>[[item.body]]</td>
+                    <td>
+                      <paper-button class="transparent borderless icon" on-tap="selectItem">
+                        <i class="icon-pencil"></i>
+                      </paper-button>
+                    </td>
+                  </tr>
+                </template>
+                <tr class="actionRow">
+                  <td colspan="4">
+                    <paper-button class="transparent borderless icon" on-tap="newItem">
+                      <i class="icon-plus"></i>
+                      Add new item
+                    </paper-button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>
@@ -354,6 +457,34 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           badge: Object,
           
           badgeEndorsements: Object,
+
+          /** Used internally to control the current display mode. */
+          activePanel: {
+            type: String,
+            value: 'blank',
+            readOnly: true
+          },
+          
+          activePanelIsBlank: {
+            type: Boolean,
+            computed: '_activePanelIsBlank(activePanel)'
+          },
+          activePanelIsNewItem: {
+            type: Boolean,
+            computed: '_activePanelIsNewItem(activePanel)'
+          },
+          activePanelIsEditItem: {
+            type: Boolean,
+            computed: '_activePanelIsEditItem(activePanel)'
+          },
+          activePanelIsNewOrEditItem: {
+            type: Boolean,
+            computed: '_activePanelIsNewOrEditItem(activePanel)'
+          },
+          activePanelIsTable: {
+            type: Boolean,
+            computed: '_activePanelIsTable(activePanel)'
+          },
 
           expandedPercentage: Number,
 
@@ -387,6 +518,36 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       // #=== PUBLIC ACTION METHODS ===#
 
+      /** Updates the display mode. Shows the add item panel. */
+      newItem() {
+        this.badgeEndorsements.addItem();
+        this._setActivePanel('newItem');
+      }
+
+      /** Selects the current item. Expects `e.detail.model.item` to point to the item. */
+      selectItem(e) {
+        if (e && e.model && e.model.item && e.model.item.backend && e.model.item.backend.select) {
+          e.model.item.backend.select();
+          this._setActivePanel('editItem');
+        }
+      }
+
+      saveItem() {
+        if (this.badgeEndorsements.itemsToImport.length)
+          this._setActivePanel('table');
+        else
+          this._setActivePanel('blank');
+      }
+
+      removeItem() {
+        this.badgeEndorsements.selectedItem.backend.remove();
+
+        if (this.badgeEndorsements.itemsToImport.length)
+          this._setActivePanel('table');
+        else
+          this._setActivePanel('blank');
+      }
+
       /** Triggers the hidden `csvFileInput` file input dialog. */
       selectCSVFile() {
         this.$.csvFileInput.inputElement.inputElement.click();
@@ -416,6 +577,27 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       // #=== PROPERTY COMPUTER METHODS ===#
 
+      _activePanelIsBlank(activePanel) {
+        return activePanel == 'blank';
+      }
+
+      _activePanelIsNewItem(activePanel) {
+        return activePanel == 'newItem';
+      }
+
+      _activePanelIsEditItem(activePanel) {
+        return activePanel == 'editItem';
+      }
+
+      _activePanelIsNewOrEditItem(activePanel) {
+        return (activePanel == 'newItem') || (activePanel == 'editItem');
+      }
+
+      _activePanelIsTable(activePanel) {
+        return activePanel == 'table';
+      }
+
+
       _leftNavPaddingEm(expandedPercentage) {
         return this.linearExpansionValue(2.0, 0.8, expandedPercentage);
       }
@@ -434,6 +616,12 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       _rightNavFontSizeEm(expandedPercentage) {
         return this.linearExpansionValue(2.3, 1.5, expandedPercentage);
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      isActivePanel(panelName) {
+        return this.activePanel == panelName;
       }
 
     }

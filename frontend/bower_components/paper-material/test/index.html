@@ -7,21 +7,18 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 --><html><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>paper-material tests</title>
+  <script src="../../web-component-tester/browser.js"></script>
+</head>
+<body>
+  <script>
+    WCT.loadSuites([
+      'paper-material.html',
+      'paper-material.html?dom=shadow'
+    ]);
+  </script>
 
-    <meta charset="utf-8">
-    <title>Tests</title>
-    <script src="../../web-component-tester/browser.js"></script>
-
-  </head>
-  <body>
-
-    <script>
-      WCT.loadSuites([
-        'basic.html?dom=shadow',
-        'basic.html?wc-shadydom=true&wc-ce=true'
-      ]);
-    </script>
-
-  
 
 </body></html>
