@@ -247,6 +247,61 @@ This import contains all of the Badge List styles and needed shims.
           margin: 0;
         }
 
+      /* === PAPER DIALOG STYLES === */
+
+        paper-dialog {
+          --paper-dialog: {
+            background: white;
+            border-radius: 9px;
+            width: var(--bl-paper-dialog-width, 30em);
+            max-width: 98%;
+          };
+          
+          --paper-dialog-title: {
+            color: var(--bl-grey-600);
+            margin: 1.5rem 1.5rem 0 1.5rem;
+            padding: 0;
+            font-size: 1.3em;
+            line-height: 1em;
+            font-weight: 800;
+          };
+
+        }
+          paper-dialog h2::after {
+            content: '';
+            display: block;
+            width: 2em;
+            height: 0.4em;
+            margin-top: 0.7em;
+            background: linear-gradient(70deg, var(--bl-purple-500), var(--bl-orange-500));
+            border-radius: 500em;
+          }
+          paper-dialog .formIcon {
+            position: absolute;
+            font-size: 3em;
+            top: 1.1rem;
+            right: 1rem;
+            background: -webkit-linear-gradient(150deg, var(--bl-purple-500), var(--bl-orange-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0.8;
+          }
+
+          paper-dialog .buttons {
+            padding: 1em;
+            display: flex;
+            justify-content: flex-end;
+            background: var(--bl-orange-400);
+            border-radius: 0 0 9px 9px;
+            border-top: 1px solid var(--bl-orange-200);
+          }
+
+          paper-dialog-scrollable {
+            --paper-dialog-scrollable: {
+              padding: 1rem 1.5rem 3rem 1.5rem;
+            };
+          }
+
       /* === ICON CLASSES === */
 
       /* 

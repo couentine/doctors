@@ -6,9 +6,9 @@ before_script:
 env:
   global:
     - secure: >-
-        eLNXQngbn6nHUirBVQAroarZUJHGZAj8sqSJaxRBqaL08//nzaOpnzuavYUeNSJ1fOnbL95jS5yZJy8+oCUW0a6BCXZUHJCrj/N6ywG4KpgPYQnUZVnpvsLdXZJuq4L4l5jYL1GsPydMePfAlrDpSu+QzEc1+C0q7sprxsbHbbQ=
+        UIeRJmuTAsjG3tImBVgRYLiN1+TJGOv+Ibq1h72Oz/zNIG8S+3BoDrlHRF8Oo21ReZmlwHG/QE83jM070PcDt/9MWmc4tp0/NVpMs9/E+unGYoTvhd4Q4tevOhUFoWDaTBfQr6y+jF+RsnMwQ0I0mwC6twOnZG5+osu50DaQacs=
     - secure: >-
-        YLIZR4/tqr25Ty+daEdTInLVXoV/lSwagZCGMfT84SgHj94UYHr9u9Te3tNDeI8I83Kq1PSUn1kKE6ptT+EjuGhTDsyLx2IboVDtNlngDIo5GTSO1RBBzIlHRIb2eMS6om9cfLiOEWM3gFS/Mos/VYO3/A3ZSLE5BcNFagij724=
+        IbgE5FZkqXAyiyakHVcCX8/PpEHUVH8+h9ADo/rU8HwJAN6j+SDy0YOH2LXjM9gIsh2SwQtb6vYA+bh9qfzi7+bkdW98ZDMgvEs0XVg1eLEEFGTbbQZZZCYmJqxVjdg0sXfd4G9LZFlke9VBm2YFBqsN+LtgffLpk94U1J0tz8c=
 node_js: stable
 addons:
   firefox: latest

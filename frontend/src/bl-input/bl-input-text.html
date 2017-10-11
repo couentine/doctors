@@ -93,6 +93,11 @@ single-line text input.
         }
       }
 
+      /** Focuses the paper input. */
+      focus() {
+        this.$.input.focus();
+      }
+
     }
 
     window.customElements.define(BlInputText.is, BlInputText);

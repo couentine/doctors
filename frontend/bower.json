@@ -25,7 +25,8 @@
     "paper-input": "PolymerElements/paper-input#^2.0.2",
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.1",
     "iron-form": "PolymerElements/iron-form#^2.0.1",
-    "polymer-quill": "arsnebula/polymer-quill#^1.2.4"
+    "polymer-quill": "arsnebula/polymer-quill#^1.2.4",
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.1.0"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0"

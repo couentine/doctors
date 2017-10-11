@@ -56,12 +56,17 @@ Custom property | Description | Default
       /* === PAPER INPUT CONTAINER STYLES === */
 
         paper-input-container {
+          --paper-input-container: {
+            padding-bottom: 1px;
+          };
+
           --paper-input-container-label: {
             padding: 0.5em;
           };
+
           --paper-input-container-label-floating: {
             padding-left: 0;
-          }
+          };
         }
 
       /* === COLORS === */
@@ -191,7 +196,7 @@ Custom property | Description | Default
       _valueChanged(newValue, oldValue) {
         if (!this._quillLocked) {
           this.quill.deleteText(0, this.quill.getLength());
-          this.quill.clipboard.dangerouslyPasteHTML(newValue);
+          if (newValue) this.quill.clipboard.dangerouslyPasteHTML(newValue);
           this.quill.history.clear();
         }
       }
