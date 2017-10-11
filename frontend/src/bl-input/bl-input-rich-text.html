@@ -1,0 +1,203 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-input/paper-input-container.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input-error.html">
+
+<!-- #=== THIRD-PARTY COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/polymer-quill/polymer-quill.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Rich Text Input Component #
+
+This is an implementation of the [Quill javascript library](https://quilljs.com) which is built using a minimal wrapper library.
+[Link here](https://github.com/arsnebula/polymer-quill).
+Use it to include a rich text editor that binds to an HTML-formatted string.
+
+## Styling ##
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--min-editor-height` | The minimum height of the editor window | 5em
+`--border-color` | Border color for top, right and left sides of editor | `--bl-grey-300`
+-->
+<dom-module id="bl-input-rich-text">
+  <template>
+
+    <style include="quill-core quill-bubble"></style>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+          padding-top: 0.5em;
+        }
+      
+      /* === EDITOR STYLES === */
+
+        #editor {
+          font-size: 1em;
+          border: 1px solid var(--border-color, var(--bl-grey-600));
+          border-bottom: none;
+        }
+          .ql-editor {
+            min-height: var(--min-editor-height, 5em);
+          }
+      
+      /* === PAPER INPUT CONTAINER STYLES === */
+
+        paper-input-container {
+          --paper-input-container-label: {
+            padding: 0.5em;
+          };
+          --paper-input-container-label-floating: {
+            padding-left: 0;
+          }
+        }
+
+      /* === COLORS === */
+
+        paper-input-container.red { --primary-color: var(--bl-red-500); }
+        paper-input-container.pink { --primary-color: var(--bl-pink-500); }
+        paper-input-container.purple { --primary-color: var(--bl-purple-500); }
+        paper-input-container.deep-purple { --primary-color: var(--bl-deep-purple-500); }
+        paper-input-container.indigo { --primary-color: var(--bl-indigo-500); }
+        paper-input-container.blue { --primary-color: var(--bl-blue-500); }
+        paper-input-container.light-blue { --primary-color: var(--bl-light-blue-500); }
+        paper-input-container.cyan { --primary-color: var(--bl-cyan-500); }
+        paper-input-container.teal { --primary-color: var(--bl-teal-500); }
+        paper-input-container.green { --primary-color: var(--bl-green-500); }
+        paper-input-container.light-green { --primary-color: var(--bl-light-green-500); }
+        paper-input-container.lime { --primary-color: var(--bl-lime-500); }
+        paper-input-container.yellow { --primary-color: var(--bl-yellow-500); }
+        paper-input-container.amber { --primary-color: var(--bl-amber-500); }
+        paper-input-container.orange { --primary-color: var(--bl-orange-500); }
+        paper-input-container.deep-orange { --primary-color: var(--bl-deep-orange-500); }
+        paper-input-container.brown { --primary-color: var(--bl-brown-500); }
+        paper-input-container.grey { --primary-color: var(--bl-grey-500); }
+        paper-input-container.blue-grey { --primary-color: var(--bl-blue-grey-500); }
+
+    </style>
+
+    <paper-input-container id="container" class$="[[class]]">
+      <label id="label" slot="label" on-tap="labelTap">[[label]]</label>
+      <div id="editor" slot="input" class="paper-input-input"></div>
+    </paper-input-container>
+
+  </template>
+
+  <script>
+    class BlInputRichText extends Polymer.Element {
+      
+      static get is() { return 'bl-input-rich-text'; }
+
+      static get properties() {
+        return {
+          
+          /** Passes through to the `value` property of `<paper-input>`. */
+          value: {
+            type: String,
+            notify: true,
+            observer: '_valueChanged'
+          },
+          
+          /** Passes through to the `label` property of `<paper-input>`. */
+          label: String,
+
+          class: String,
+
+          quill: {
+            type: Object,
+            readOnly: true
+          },
+
+          quillEditor: {
+            type: Object,
+            readOnly: true
+          },
+
+          toolbarOptions: {
+            type: Array,
+            value: [
+              [{ header: 1 }, { header: 2 }],
+              ['bold', 'italic', 'underline', 'strike', { 'color': [] }],
+              ['link', 'blockquote', 'code-block'],
+              [{ list: 'ordered' }, { list: 'bullet' }]
+            ]
+          },
+
+          /** Used internally to prevent circular firing of change events when syncing value to quill editor. */
+          _quillLocked: {
+            type: Boolean,
+            readOnly: true,
+            value: false
+          }
+
+        }
+      }
+
+      // #=== PRIVATE ACTION METHODS ===#
+
+      labelTap() {
+        this.quill.focus();
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        this._setQuill(new Quill(this.$.editor, {
+          modules: {
+            toolbar: this.toolbarOptions
+          },
+          theme: 'bubble'
+        }));
+        this._setQuillEditor(this.quill.container.querySelector('.ql-editor'));
+
+        // Detect changes in quill editor and copy them to value property
+        this.quill.on('text-change', function(delta, oldDelta, source) {
+          this._refreshValueFromQuill();
+        }.bind(this));
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      /** Sets `value` property to the currently contents of quill. */
+      _refreshValueFromQuill() {
+        this._set_quillLocked(true);
+        
+        if (this.quillEditor.innerHTML && this.quillEditor.innerHTML.length && (this.quillEditor.innerHTML != '<p><br></p>')) {
+          this.value = this.quillEditor.innerHTML;
+          this.$.container.alwaysFloatLabel = true;
+        } else {
+          this.value = null;
+          this.$.container.alwaysFloatLabel = false;
+        }
+        
+        this._set_quillLocked(false);
+      }
+
+      /** Sets contents of quill to the new copy of value (unless . */
+      _valueChanged(newValue, oldValue) {
+        if (!this._quillLocked) {
+          this.quill.deleteText(0, this.quill.getLength());
+          this.quill.clipboard.dangerouslyPasteHTML(newValue);
+          this.quill.history.clear();
+        }
+      }
+
+    }
+
+    window.customElements.define(BlInputRichText.is, BlInputRichText);
+  </script>
+</dom-module>

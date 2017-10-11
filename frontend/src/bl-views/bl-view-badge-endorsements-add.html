@@ -8,12 +8,13 @@
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-backend/bl-backend-importer.html">
+<link rel="import" href="../bl-input/bl-input-rich-text.html">
+<link rel="import" href="../bl-input/bl-input-text.html">
 <link rel="import" href="bl-header-nav-left.html">
 <link rel="import" href="bl-header-nav-right.html">
 <link rel="import" href="bl-header-panel.html">
 <link rel="import" href="bl-view-mixin.html">
-<link rel="import" href="../bl-backend/bl-backend-importer.html">
-<link rel="import" href="../bl-input/bl-input-text.html">
 
 <!--
 # Badge List Bulk Add Badge Endorsements View #
@@ -256,7 +257,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             }
               #tableContent table tr th {
                 font-size: 0.8em;
-                padding: 0.3em 0.7em;
+                padding: 1em 0.7em;
                 border-bottom: 1.5px solid var(--bl-orange-100);
                 color: var(--bl-orange-300);
                 text-transform: uppercase;
@@ -266,6 +267,18 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                 border-bottom: 1px solid var(--bl-grey-100);
                 text-align: center;
               }
+                #tableContent table tr td pre {
+                  font-family: 'Roboto Mono';
+                  font-size: 0.6em;
+                  max-width: 30em;
+                  white-space: pre-wrap;
+                  padding: 0.2em;
+                  margin: auto;
+                 
+                  border-radius: 3px;
+                  border: 1px solid var(--bl-grey-300);
+                  background: var(--bl-grey-200);
+                }
               #tableContent table tr.actionRow td {
                 padding: 0.5em;
                 color: var(--bl-grey-500);
@@ -370,6 +383,9 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                     <bl-input-text id="selectedItemSummary" label="Feedback Summary" value="{{badgeEndorsements.selectedItem.summary}}"
                       class="orange">
                     </bl-input-text>
+                    <bl-input-rich-text id="selectedItemBody" label="Feedback Body" value="{{badgeEndorsements.selectedItem.body}}"
+                      class="orange">
+                    </bl-input-rich-text>
                   </form>
                 </iron-form>
               </div>
@@ -418,7 +434,9 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                   <tr>
                     <td>[[item.email]]</td>
                     <td>[[item.summary]]</td>
-                    <td>[[item.body]]</td>
+                    <td>
+                      <pre hidden="[[!item.body]]">[[item.body]]</pre>
+                    </td>
                     <td>
                       <paper-button class="transparent borderless icon" on-tap="selectItem">
                         <i class="icon-pencil"></i>

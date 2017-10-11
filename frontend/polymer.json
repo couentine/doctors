@@ -9,12 +9,14 @@
     "bower_components/google-fonts-lato/*.ttf",
     "bower_components/google-fonts-roboto/*.ttf",
     "bower_components/google-fonts-roboto-mono/*.ttf",
-    "bower_components/google-fonts-roboto-mono/*.ttf"
+    "bower_components/google-fonts-roboto-mono/*.ttf",
+    "lib/quill-1.3.2/quill.snow.css"
   ],
   "sources": [
     "src/**/*",
     "images/**/*",
     "lib/PapaParse-4.3.2/papaparse.min.js",
+    "lib/quill-1.3.2/quill.min.js",
     "bower.json"
   ],
   "lint": {

@@ -24,7 +24,8 @@
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.5",
     "paper-input": "PolymerElements/paper-input#^2.0.2",
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.1",
-    "iron-form": "PolymerElements/iron-form#^2.0.1"
+    "iron-form": "PolymerElements/iron-form#^2.0.1",
+    "polymer-quill": "arsnebula/polymer-quill#^1.2.4"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0"
@@ -38,6 +39,7 @@
     "paper-button": "^2.0.0",
     "paper-styles": "^1.1.0",
     "iron-scroll-target-behavior": "^2.0.0",
-    "paper-icon-button": "^2.0.0"
+    "paper-icon-button": "^2.0.0",
+    "paper-dialog": "^2.0.0"
   }
 }
