@@ -23,17 +23,15 @@ class GroupsController < ApplicationController
 
   PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, :color, :image_url, :type, :customer_code, 
     :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
-    :feature_grant_reporting, :feature_grant_bulk_tools, :feature_grant_integration, :stripe_subscription_card, :stripe_subscription_id, 
-    :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, :avatar_key, :tag_assignability, 
-    :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag, :joinability]
+    :feature_grant_file_uploads, :feature_grant_reporting, :feature_grant_bulk_tools, :feature_grant_integration, :stripe_subscription_card,
+    :stripe_subscription_id, :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, :avatar_key, 
+    :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag, :joinability]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500
   GROUP_TYPE_OPTIONS = [
-    ['<b><i class="fa fa-check-circle free-icon"></i> Free Group</b><span>'.html_safe \
-      + 'Everything is public.<br>Free forever.</span>'.html_safe, 'free'],
-    ['<b><i class="fa fa-diamond"></i> Paid Group</b><span>Privacy controls '.html_safe \
-      + 'and advanced features.<br>Plans start at $5 per month.</span>'.html_safe, 'paid']
+    ['<b><i class="fa fa-check-circle free-icon"></i> Free Group</b><span> Everything is public. Free forever.</span>'.html_safe, 'free'],
+    ['<b><i class="fa fa-diamond"></i> Paid Group</b><span>Incluce privacy controls and advanced features.</span>'.html_safe, 'paid']
   ]
   GROUP_COLOR_OPTIONS = [
     ['Red', 'red'],
@@ -1130,6 +1128,7 @@ class GroupsController < ApplicationController
     @next_page = nil
     @full_logs_hash = []
     badge_ids, user_ids = [], []
+    badge_map = {} # badge id => badge
 
     # No need to hit the DB again unless there are badges
     if @group.badge_count > 0
@@ -1150,7 +1149,10 @@ class GroupsController < ApplicationController
       
       # Now we execute the badge query in order to confirm that the user has access
       # We'll only continue if there is something to query
-      badge_ids = badge_criteria.map{ |badge| badge.id }
+      badge_criteria.each do |badge|
+        badge_ids << badge.id
+        badge_map[badge.id.to_s] = badge
+      end
       if !badge_ids.blank?
         # Now we build the log criteria, the base criteria is the same no matter what
         log_criteria = Log.where(:badge_id.in => badge_ids, validation_status: 'requested', 
@@ -1165,6 +1167,15 @@ class GroupsController < ApplicationController
         # Finally we query the logs
         @full_logs_hash = Log.full_logs_as_json(log_criteria)
         @next_page = @page + 1 if log_criteria.count > (@page_size * @page)
+
+        # Inject the parent path into the output (Note: This is formatted according to the new polymer standard, not a traditional url path)
+        @full_logs_hash.each do |full_log_item|
+          if badge_map[full_log_item[:badge_id]].present?
+            full_log_item[:parent_path] =  badge_map[full_log_item[:badge_id]].record_path
+          else
+            full_log_item[:parent_path] = nil
+          end
+        end
       end
     end
 

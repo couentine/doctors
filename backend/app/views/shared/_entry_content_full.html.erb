@@ -57,7 +57,7 @@
   
   <% if entry.processing_uploaded_image %>
     
-    <!-- === IMAGE PROCESSING === -->
+    <!-- === IMAGE PROCESSING PENDING === -->
     <div class="panel panel-entry-content panel-entry-content-text">
       <h3>
         <i class="fa fa-clock-o"></i>
@@ -65,16 +65,58 @@
       </h3>
     </div>
   
+  <% elsif !entry.uploaded_image? %>
+
+    <!-- === IMAGE PROCESSING ERROR === -->
+    <div class="panel panel-entry-content panel-entry-content-text">
+      <h3>
+        <i class="fa fa-exclamation-circle"></i>
+        There was a problem processing this image, the file may be of an invalid format.
+      </h3>
+
+      <p>
+        <strong>Uploaded Filename:</strong>
+        <%= entry.uploaded_image_filename %>
+      </p>
+    </div>
+
   <% else %>
 
     <!-- === IMAGE === -->
     <div class="panel panel-entry-content panel-entry-content-image">
-      <% if entry.uploaded_image? %>
-        <%= link_to image_tag(entry.uploaded_image_url(:full)), entry.uploaded_image_url(:full),
-          target: '_blank' %>
-      <% else %>
-        <h3><i class="fa fa-exclamation-circle"></i></h3>
-      <% end %>
+      <%= link_to image_tag(entry.uploaded_image_url(:full)), entry.uploaded_image_url(:full), target: '_blank' %>
+    </div>
+
+  <% end %>
+
+<% elsif entry.format == 'file' %>
+  
+  <% if entry.processing_uploaded_file %>
+    
+    <!-- === FILE PROCESSING PENDING === -->
+    <div class="panel panel-entry-content panel-entry-content-text">
+      <h3>
+        <i class="fa fa-clock-o"></i>
+        File is being processed, refresh the page to view.
+      </h3>
+    </div>
+  
+  <% elsif !entry.uploaded_file? %>
+
+    <!-- === FILE PROCESSING ERROR === -->
+    <div class="panel panel-entry-content panel-entry-content-text">
+      <h3>
+        <i class="fa fa-exclamation-circle"></i>
+        There was a problem processing this file, please try again.
+      </h3>
+    </div>
+
+  <% else %>
+
+    <!-- === FILE === -->
+    <div class="panel panel-entry-content panel-entry-content-file">
+      <%= link_to "<i class='fa fa-file'></i> #{entry.uploaded_file_filename}".html_safe, entry.uploaded_file_url, 
+        class: 'btn btn-large', target: '_blank' %>
     </div>
 
   <% end %>

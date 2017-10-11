@@ -26,24 +26,21 @@ $(document).ready(function() {
 // TERM MESSAGE MAPPINGS
 
 var termMessages = {
-  "admin": "Only group admins are able to create new badges, manage group membership and change "
-    + "group settings.",
-  "domain-privacy": "Registering your email domain as private ensures that the profiles of all "
-    + "Badge List users registered with email addresses on your domain "
-    + "(eg: 'anyone@yourdomain.edu') are only visible to other users who are also on the "
-    + "domain (regardless of group membership).",
-  "integration": "Includes access to LTI integration and all future integrations.",
-  "lifetime-hosting": "If you ever decide to cancel your paid subscription, all of the awarded "
-    + "badges and evidence will continue to be hosted at no additional cost.",
-  "one-badge-awarder": "The Solo plan only supports badges which are awarded by the admin.",
-  "privacy-controls": "Privacy controls let admins decide between three levels of privacy for "
-    + "each badge and piece of required evidence: public, private and secret.",
-  "reporting": "Reporting enables group admins to generate reports on membership and badge "
-    + "activity. Reports can be exported to CSV.",
-  "teacher": "The Teacher plan only supports the creation and awarding of badges by a single "
-    + "teacher.",
-  "unlimited-badge-awarders": "Unlimited badge awarder plans support 2 different types of badge "
-    + "awarding: awarding by admins or awarding by badge experts."
+  'admin': 'Only group admins are able to create new badges, manage group membership and change group settings.',
+  'domain-privacy': 'Registering your email domain as private ensures that the profiles of all '
+    + 'Badge List users registered with email addresses on your domain '
+    + '(eg: \'anyone@yourdomain.edu\') are only visible to other users who are also on the domain (regardless of group membership).',
+  'file-uploads': 'Learners can upload files as badge evidence.',
+  'integration': 'Includes access to LTI integration and all future integrations.',
+  'lifetime-hosting': 'If you ever decide to cancel your paid subscription, all of the awarded badges and evidence will continue to be '
+    + 'hosted at no additional cost.',
+  'one-badge-awarder': 'The Solo plan only supports badges which are awarded by the admin.',
+  'privacy-controls': 'Privacy controls let admins decide between three levels of privacy for each badge and piece of required evidence: '
+    + 'public, private and secret.',
+  'reporting': 'Reporting enables group admins to generate reports on membership and badge activity. Reports can be exported to CSV.',
+  'teacher': 'The Teacher plan only supports the creation and awarding of badges by a single teacher.',
+  'unlimited-badge-awarders': 'Unlimited badge awarder plans support 2 different types of badge awarding: awarding by admins or awarding '
+    + 'by badge experts.'
 };
 
 function setupTermTooltips() {

@@ -633,8 +633,10 @@ private
         human_readable_format_string = format_string.capitalize
       end
 
-      @tag_format_options_string += \
-        "<option value='#{format_string}'>#{human_readable_format_string}</option>"
+      if (format_string != 'file') || @group.has?(:file_uploads)
+        @tag_format_options_string += \
+          "<option value='#{format_string}'>#{human_readable_format_string}</option>"
+      end
     end
     @tag_privacy_map = {}
     @tag_privacy_options_string = ''

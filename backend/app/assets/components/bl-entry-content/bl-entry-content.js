@@ -9,10 +9,12 @@ Polymer({
     isText: { type: Boolean, computed: "_isText(entry)" },
     isLink: { type: Boolean, computed: "_isLink(entry)" },
     isImage: { type: Boolean, computed: "_isImage(entry)" },
+    isFile: { type: Boolean, computed: "_isFile(entry)" },
     isTweet: { type: Boolean, computed: "_isTweet(entry)" },
     isCode: { type: Boolean, computed: "_isCode(entry)" },
     linkTitle: { type: String, computed: "_linkTitle(entry)" },
-    linkHasEmbed: { type: String, computed: "_linkHasEmbed(entry)" }
+    linkHasEmbed: { type: String, computed: "_linkHasEmbed(entry)" },
+    fileTitle: { type: String, computed: '_fileTitle(entry)' }
   },
 
   // Events
@@ -33,6 +35,7 @@ Polymer({
   _isText: function(entry) { return entry && (entry.format == "text"); },
   _isLink: function(entry) { return entry && (entry.format == "link"); },
   _isImage: function(entry) { return entry && (entry.format == "image"); },
+  _isFile: function(entry) { return entry && (entry.format == "file"); },
   _isTweet: function(entry) { return entry && (entry.format == "tweet"); },
   _isCode: function(entry) { return entry && (entry.format == "code"); },
   _linkTitle: function(entry) {
@@ -45,6 +48,12 @@ Polymer({
     return entry && entry.link_metadata && entry.link_metadata.html 
       && (entry.link_metadata.html.trim().length > 0)
       && ((entry.link_metadata.type == 'rich') || (entry.link_metadata.type == 'video'));
+  },
+  _fileTitle: function(entry) {
+    if (entry && entry.file_filename && entry.file_filename.length)
+      return entry.file_filename;
+    else
+      return 'Download File';
   },
 
   // Only run this if this is a code element

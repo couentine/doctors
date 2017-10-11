@@ -4,9 +4,8 @@
 
   provide(:include_metadata, true)
   provide(:metadata_title, 'Badge List Pricing')
-  provide(:metadata_description, 'Open Groups are completely free. Closed Group plans start at ' \
-    + '$5 per month and offer advanced privacy and group management features. K12 educators ' \
-    + 'receive special discounts.')
+  provide(:metadata_description, 'Free groups support unlimited users and cost nothing with all badges and evidence completely public. ' \
+    + 'Paid groups include privacy controls and advanced features. K12 educators receive special discounts.')
   provide(:metadata_image, image_url('badge-list-icon.png'))
   provide(:metadata_image_width, '500')
   provide(:metadata_image_height, '500')
@@ -105,6 +104,9 @@
                     1 <span class="term" data-term="admin">admin</span>
                     / <span class="term" data-term="one-badge-awarder">badge awarder</span>
                   </li>
+                  <li>
+                    <span class="term" data-term="file-uploads">File uploads</span>
+                  </li>
                 </ul>
               </div>
               <div class="the-button">
@@ -136,6 +138,9 @@
                   <li>
                     Unlimited 
                     <span class="term" data-term="unlimited-badge-awarders">badge awarders</span>
+                  </li>
+                  <li>
+                    <span class="term" data-term="file-uploads">File uploads</span>
                   </li>
                 </ul>
               </div>
@@ -227,7 +232,7 @@
 
           <!-- === TEACHER PLAN === -->
 
-          <div class="span4 plan-col solo">
+          <div class="span4 offset2 plan-col solo">
             <div class="inner-col">
               <div class="title">
                 <i class="fa fa-user"></i><br>Teacher
@@ -241,6 +246,9 @@
                 <ul>
                   <li>
                     1 <span class="term" data-term="teacher">teacher</span>
+                  </li>
+                  <li>
+                    <span class="term" data-term="file-uploads">File uploads</span>
                   </li>
                 </ul>
               </div>
@@ -269,12 +277,11 @@
               <div class="feature-list">
                 <ul>
                   <li>
-                    <span class="term" data-term="domain-privacy">Domain privacy</span>
-                    for 1 domain
-                  </li>
-                  <li>
                     Unlimited <span class="term" data-term="admin">admins</span> &amp;
                     <span class="term" data-term="unlimited-badge-awarders">badge awarders</span>
+                  </li>
+                  <li>
+                    <span class="term" data-term="file-uploads">File uploads</span>
                   </li>
                   <li>
                     <span class="term" data-term="reporting">Reporting</span> features
@@ -284,6 +291,10 @@
                   </li>
                   <li>
                     Third-party <span class="term" data-term="integration">integrations</span>
+                  </li>
+                  <li>
+                    <span class="term" data-term="domain-privacy">Domain privacy</span>
+                    for 1 domain
                   </li>
                 </ul>
               </div>
