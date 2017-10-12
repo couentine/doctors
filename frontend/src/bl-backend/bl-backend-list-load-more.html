@@ -28,32 +28,6 @@ When the list status is `loading`, this element displays a spinner.
           margin: 1em;
         }
 
-      /* === SPINNER STYLES === */
-
-        paper-spinner-lite {
-          margin: 0.64em; /* This ensures that the height is the same as the button so loading doesn't change page height. */
-        }
-
-        paper-spinner-lite.red { --paper-spinner-color: var(--bl-red-500); }
-        paper-spinner-lite.pink { --paper-spinner-color: var(--bl-pink-500); }
-        paper-spinner-lite.purple { --paper-spinner-color: var(--bl-purple-500); }
-        paper-spinner-lite.deep-purple { --paper-spinner-color: var(--bl-deep-purple-500); }
-        paper-spinner-lite.indigo { --paper-spinner-color: var(--bl-indigo-500); }
-        paper-spinner-lite.blue { --paper-spinner-color: var(--bl-blue-500); }
-        paper-spinner-lite.light-blue { --paper-spinner-color: var(--bl-light-blue-500); }
-        paper-spinner-lite.cyan { --paper-spinner-color: var(--bl-cyan-500); }
-        paper-spinner-lite.teal { --paper-spinner-color: var(--bl-teal-500); }
-        paper-spinner-lite.green { --paper-spinner-color: var(--bl-green-500); }
-        paper-spinner-lite.light-green { --paper-spinner-color: var(--bl-light-green-500); }
-        paper-spinner-lite.lime { --paper-spinner-color: var(--bl-lime-500); }
-        paper-spinner-lite.yellow { --paper-spinner-color: var(--bl-yellow-500); }
-        paper-spinner-lite.amber { --paper-spinner-color: var(--bl-amber-500); }
-        paper-spinner-lite.orange { --paper-spinner-color: var(--bl-orange-500); }
-        paper-spinner-lite.deep-orange { --paper-spinner-color: var(--bl-deep-orange-500); }
-        paper-spinner-lite.brown { --paper-spinner-color: var(--bl-brown-500); }
-        paper-spinner-lite.grey { --paper-spinner-color: var(--bl-grey-500); }
-        paper-spinner-lite.blue-grey { --paper-spinner-color: var(--bl-blue-grey-500); }
-
     </style>
 
     <paper-button id="button" on-tap="getNextPage" class$="[[color]]" hidden="[[!showButton]]" raised>

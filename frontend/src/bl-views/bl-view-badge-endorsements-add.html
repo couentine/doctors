@@ -173,7 +173,10 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       /* === DIALOGS === */
 
-        
+        paper-dialog {
+          --bl-dialog-gradient-color1: var(--bl-purple-500);
+          --bl-dialog-gradient-color2: var(--bl-orange-500);
+        }
       
       /* === TABLE PANEL === */
 
@@ -412,7 +415,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
     <!-- #=== EDIT ITEM DIALOG ===# -->
 
-    <paper-dialog id="editItemDialog" modal dynamic-align>
+    <paper-dialog id="editItemDialog" class="orange dialog-gradients" modal dynamic-align>
       <h2 hidden="[[!selectedItemIsNew]]">Add Item</h2>
       <h2 hidden="[[selectedItemIsNew]]">Edit Item</h2>
             
