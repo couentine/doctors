@@ -27,7 +27,7 @@ The client uses the `swagger.json` file located in the component folder.
     <style include="bl-style-classes"></style>
 
     <!-- #=== API ERROR DIALOG ===# -->
-    <paper-dialog id="connectionErrorDialog" class="red" modal dynamic-align>
+    <paper-dialog id="connectionErrorDialog" class="red no-title-bar" modal dynamic-align>
       <h2>Connection Problem</h2>
 
       <div class="formIcon">
@@ -44,7 +44,7 @@ The client uses the `swagger.json` file located in the component folder.
       </div>
 
       <div class="buttons">
-        <paper-button class="red primary" on-tap="saveItem" dialog-dismiss>
+        <paper-button class="red primary" dialog-dismiss>
           Close
         </paper-button>
       </div>

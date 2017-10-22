@@ -19,6 +19,18 @@ This import contains all of the Badge List styles and needed shims.
 
         [hidden] { display: none !important; }
 
+      /* === RESPONSIVE UTILITY CLASSES === */
+
+        @media (max-width: 479px) { 
+          .showAt480 { display: none; }
+        }
+        @media (max-width: 839px) { 
+          .showAt840 { display: none; }
+        }
+        @media (max-width: 1199px) { 
+          .showAt1200 { display: none; }
+        }
+
       /* === ANIMATION === */
 
         @keyframes spin {
@@ -47,15 +59,17 @@ This import contains all of the Badge List styles and needed shims.
       /*
         Button Classes:
         - Adding a color class (`orange`, `deep-purple`, etc) styles the background, border color and text color.
-        - `icon` forces the button to display as block so it properly supports the inclusion of icons inside the button.
+        - `block` forces the button to display as block.
         - `transparent` makes the background clear (except on hover/focus).
         - `borderless` makes the border clear (even on hover/focus).
-        - `white-text` forces the text color to pure white.
+        - `narrow` minimizes the width of the button.
+        - `whiteText` forces the text color to pure white.
 
         When wrapping `paper-button` in a link, always add the `button` class to the anchor tag.
       */
 
         paper-button {
+          display: inline-block;
           font-size: 0.8em;
           font-weight: 500;
           text-align: center;
@@ -73,7 +87,10 @@ This import contains all of the Badge List styles and needed shims.
           background: radial-gradient(circle at 60% 40%, var(--bl-grey-50), var(--bl-grey-300));
           color: var(--bl-grey-700);
         }
-        paper-button.icon {
+        paper-button[disabled] {
+          opacity: 0.25;
+        }
+        paper-button.block {
           display: block;
         }
         paper-button.transparent {
@@ -82,7 +99,12 @@ This import contains all of the Badge List styles and needed shims.
         paper-button.borderless {
           border-color: transparent !important;
         }
-        paper-button.white-text {
+        paper-button.narrow {
+          padding-left: 0.5em !important;
+          padding-right: 0.5em !important;
+          min-width: unset !important;
+        }
+        paper-button.whiteText {
           color: white !important;
         }
         paper-button.red {
@@ -302,7 +324,130 @@ This import contains all of the Badge List styles and needed shims.
           --bl-dialog-button-panel-border-color: var(--bl-grey-200);
           --bl-dialog-design-elements-color: var(--bl-grey-700);
         }
+          
+        paper-dialog:not(.no-title-bar) h2::after {
+          content: '';
+          display: block;
+          width: 2em;
+          height: 0.4em;
+          margin-top: 0.7em;
+          background: var(--bl-dialog-design-elements-color);
+          border-radius: 500em;
+        }
+        paper-dialog:not(.no-title-bar).dialog-gradients h2::after {
+          background: linear-gradient(70deg, var(--bl-dialog-gradient-color1), var(--bl-dialog-gradient-color2));
+        }
+        paper-dialog.no-title-bar h2 {
+          color: var(--bl-dialog-design-elements-color);
+        }
+
+        paper-dialog .dialogIcon {
+          position: absolute;
+          font-size: 3em;
+          top: 1.1rem;
+          right: 1rem;
+          margin: 0;
+          padding: 0;
+          color: var(--bl-dialog-design-elements-color);
+          opacity: 0.8;
+        }
+        paper-dialog.dialog-gradients .dialogIcon {
+          background: -webkit-linear-gradient(150deg, var(--bl-dialog-gradient-color1), var(--bl-dialog-gradient-color2));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
         
+        paper-dialog paper-spinner-lite {
+          position: absolute;
+          top: 1.1rem;
+          right: 1rem;
+          width: 2.2rem;
+          height: 2.2rem;
+          margin: 0;
+          padding: 0;
+          --paper-spinner-stroke-width: 0.5rem;
+        }
+
+        paper-dialog .buttons {
+          padding: 1em;
+          display: flex;
+          justify-content: flex-end;
+          border-radius: 0 0 9px 9px;
+          background: var(--bl-dialog-button-background-color);
+          border-top: 1px solid var(--bl-dialog-button-panel-border-color);
+        }
+          paper-dialog .buttons .left {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: flex-start;
+          }
+
+        paper-dialog-scrollable {
+          --paper-dialog-scrollable: {
+            padding: 1rem 1.5rem 3rem 1.5rem;
+          };
+        }
+        .dialogContent {
+          padding: 1rem 1.5rem;
+        }
+
+        paper-dialog h3 {
+          font-size: 1em;
+          margin: 1rem 0 0.5rem 0;
+          color: var(--bl-grey-700);
+        }
+        paper-dialog h3:first-child {
+          margin-top: 0;
+        }
+        paper-dialog h3:last-child {
+          margin-bottom: 0;
+        }
+
+        paper-dialog paper-checkbox {
+          margin: 0.5rem 0;
+        }
+        paper-dialog paper-checkbox:first-child {
+          margin-top: 0;
+        }
+        paper-dialog paper-checkbox:last-child {
+          margin-bottom: 0;
+        }
+
+        paper-dialog p, paper-dialog ul {
+          color: var(--bl-grey-800);
+          line-height: 1.3em;
+        }
+          paper-dialog p, paper-dialog ul>li {
+            margin: 0.5em 0;
+          }
+          paper-dialog p:first-child, paper-dialog ul>li:first-child {
+            margin-top: 0;
+          }
+          paper-dialog p:last-child, paper-dialog ul>li:last-child {
+            margin-bottom: 0;
+          }
+        paper-dialog small, paper-dialog .small {
+          font-size: 0.9em;
+          color: var(--bl-grey-600);
+        }
+        paper-dialog .small a { color: var(--bl-grey-600); }
+        paper-dialog .small a:visited { color: var(--bl-grey-500); }
+
+        paper-dialog p.error {
+          color: var(--bl-red-900);
+          display: flex;
+          align-items: center;
+          border-radius: 3px;
+          
+          border: 1px solid var(--bl-red-100);
+          background: var(--bl-red-50);
+          padding: 1em;
+        }
+          paper-dialog p.error i {
+            font-size: 1.5em;
+            margin-right: 0.5rem;
+          }
+
         paper-dialog.red {
           --bl-dialog-button-background-color: var(--bl-red-400);
           --bl-dialog-button-panel-border-color: var(--bl-red-200);
@@ -398,67 +543,72 @@ This import contains all of the Badge List styles and needed shims.
           --bl-dialog-button-panel-border-color: var(--bl-blue-grey-200);
           --bl-dialog-design-elements-color: var(--bl-blue-grey-500);
         }
-          
-          paper-dialog:not(.no-title-bar) h2::after {
-            content: '';
-            display: block;
-            width: 2em;
-            height: 0.4em;
-            margin-top: 0.7em;
-            background: var(--bl-dialog-design-elements-color);
-            border-radius: 500em;
-          }
-          paper-dialog:not(.no-title-bar).dialog-gradients h2::after {
-            background: linear-gradient(70deg, var(--bl-dialog-gradient-color1), var(--bl-dialog-gradient-color2));
-          }
-          paper-dialog.no-title-bar h2 {
-            color: var(--bl-dialog-design-elements-color);
-          }
 
-          paper-dialog .formIcon {
-            position: absolute;
-            font-size: 3em;
-            top: 1.1rem;
-            right: 1rem;
-            margin: 0;
-            padding: 0;
-            color: var(--bl-dialog-design-elements-color);
-            opacity: 0.8;
-          }
-          paper-dialog.dialog-gradients .formIcon {
-            background: -webkit-linear-gradient(150deg, var(--bl-dialog-gradient-color1), var(--bl-dialog-gradient-color2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-          }
-          
-          paper-dialog paper-spinner-lite {
-            position: absolute;
-            top: 1.1rem;
-            right: 1rem;
-            width: 2.2rem;
-            height: 2.2rem;
-            margin: 0;
-            padding: 0;
-            --paper-spinner-stroke-width: 0.5rem;
-          }
+      /* === PAPER CHECKBOX STYLES === */
 
-          paper-dialog .buttons {
-            padding: 1em;
-            display: flex;
-            justify-content: flex-end;
-            border-radius: 0 0 9px 9px;
-            background: var(--bl-dialog-button-background-color);
-            border-top: 1px solid var(--bl-dialog-button-panel-border-color);
-          }
+        paper-checkbox .subtitle {
+          display: block;
+          font-size: 0.8em;
+          margin-top: 0.3rem;
+        }
 
-          paper-dialog-scrollable {
-            --paper-dialog-scrollable: {
-              padding: 1rem 1.5rem 3rem 1.5rem;
+        paper-dialog form paper-checkbox {
+          display: inline-block;
+          --primary-text-color: var(--bl-grey-700);
+        }
+
+        paper-checkbox.red { --primary-color: var(--bl-red-500); }
+        paper-checkbox.pink { --primary-color: var(--bl-pink-500); }
+        paper-checkbox.purple { --primary-color: var(--bl-purple-500); }
+        paper-checkbox.deep-purple { --primary-color: var(--bl-deep-purple-500); }
+        paper-checkbox.indigo { --primary-color: var(--bl-indigo-500); }
+        paper-checkbox.blue { --primary-color: var(--bl-blue-500); }
+        paper-checkbox.light-blue { --primary-color: var(--bl-light-blue-500); }
+        paper-checkbox.cyan { --primary-color: var(--bl-cyan-500); }
+        paper-checkbox.teal { --primary-color: var(--bl-teal-500); }
+        paper-checkbox.green { --primary-color: var(--bl-green-500); }
+        paper-checkbox.light-green { --primary-color: var(--bl-light-green-500); }
+        paper-checkbox.lime { --primary-color: var(--bl-lime-500); }
+        paper-checkbox.yellow { --primary-color: var(--bl-yellow-500); }
+        paper-checkbox.amber { --primary-color: var(--bl-amber-500); }
+        paper-checkbox.orange { --primary-color: var(--bl-orange-500); }
+        paper-checkbox.deep-orange { --primary-color: var(--bl-deep-orange-500); }
+        paper-checkbox.brown { --primary-color: var(--bl-brown-500); }
+        paper-checkbox.grey { --primary-color: var(--bl-grey-500); }
+        paper-checkbox.blue-grey { --primary-color: var(--bl-blue-grey-500); }
+
+
+      /* === PAPER DRODOWN MENU STYLES === */
+
+        paper-dialog form paper-dropdown-menu-light {
+          display: block;
+        }
+          paper-dialog form paper-dropdown-menu-light paper-listbox {
+            --paper-listbox-background-color: var(--bl-grey-50);
+            --paper-listbox: {
+              border: 1px solid var(--bl-grey-200);
             };
           }
-          .dialogContent {
-            padding: 1rem 1.5rem;
-          }
+
+        paper-dropdown-menu-light.red { --primary-color: var(--bl-red-500); }
+        paper-dropdown-menu-light.pink { --primary-color: var(--bl-pink-500); }
+        paper-dropdown-menu-light.purple { --primary-color: var(--bl-purple-500); }
+        paper-dropdown-menu-light.deep-purple { --primary-color: var(--bl-deep-purple-500); }
+        paper-dropdown-menu-light.indigo { --primary-color: var(--bl-indigo-500); }
+        paper-dropdown-menu-light.blue { --primary-color: var(--bl-blue-500); }
+        paper-dropdown-menu-light.light-blue { --primary-color: var(--bl-light-blue-500); }
+        paper-dropdown-menu-light.cyan { --primary-color: var(--bl-cyan-500); }
+        paper-dropdown-menu-light.teal { --primary-color: var(--bl-teal-500); }
+        paper-dropdown-menu-light.green { --primary-color: var(--bl-green-500); }
+        paper-dropdown-menu-light.light-green { --primary-color: var(--bl-light-green-500); }
+        paper-dropdown-menu-light.lime { --primary-color: var(--bl-lime-500); }
+        paper-dropdown-menu-light.yellow { --primary-color: var(--bl-yellow-500); }
+        paper-dropdown-menu-light.amber { --primary-color: var(--bl-amber-500); }
+        paper-dropdown-menu-light.orange { --primary-color: var(--bl-orange-500); }
+        paper-dropdown-menu-light.deep-orange { --primary-color: var(--bl-deep-orange-500); }
+        paper-dropdown-menu-light.brown { --primary-color: var(--bl-brown-500); }
+        paper-dropdown-menu-light.grey { --primary-color: var(--bl-grey-500); }
+        paper-dropdown-menu-light.blue-grey { --primary-color: var(--bl-blue-grey-500); }
 
       /* === PAPER SPINNER STYLES === */
 
@@ -511,6 +661,26 @@ This import contains all of the Badge List styles and needed shims.
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
+
+        i.red { color: var(--bl-red-700); }
+        i.pink { color: var(--bl-pink-700); }
+        i.purple { color: var(--bl-purple-700); }
+        i.deep-purple { color: var(--bl-deep-purple-700); }
+        i.indigo { color: var(--bl-indigo-700); }
+        i.blue { color: var(--bl-blue-700); }
+        i.light-blue { color: var(--bl-light-blue-700); }
+        i.cyan { color: var(--bl-cyan-700); }
+        i.teal { color: var(--bl-teal-700); }
+        i.green { color: var(--bl-green-700); }
+        i.light-green { color: var(--bl-light-green-700); }
+        i.lime { color: var(--bl-lime-700); }
+        i.yellow { color: var(--bl-yellow-700); }
+        i.amber { color: var(--bl-amber-700); }
+        i.orange { color: var(--bl-orange-700); }
+        i.deep-orange { color: var(--bl-deep-orange-700); }
+        i.brown { color: var(--bl-brown-700); }
+        i.grey { color: var(--bl-grey-700); }
+        i.blue-grey { color: var(--bl-blue-grey-700); }
 
         .icon-android-color:before, .icon-brand-color:before {content: "\ef07"; color: #a4c639; }
         .icon-apple-color:before, .icon-brand2-color:before {content: "\ef08"; color: #999; }
