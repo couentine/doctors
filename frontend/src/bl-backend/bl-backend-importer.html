@@ -70,7 +70,8 @@ The target object provides methods for building a list of items to import either
           /**
            * Required. The target object receiving the binding. The following properties and methods are added on connection.
            * @property {object[]} itemsToImport - The items passed in the body of the import action.
-           *   You can add new items by using the `addItem` or `addItemsFromCSV` methods, but shouldn't modify the list directly.
+           *   You can add new items by using the `addItem`, `addItemsFromList` and `addItemsFromCSV` methods, but shouldn't modify the 
+           *   list directly.
            *   Each item has a `backend` object added to it which will contain: 
            *   - `status` object
            *     - `status.code` will equal `ready`, `importing`, `imported` or `failed`
@@ -101,6 +102,7 @@ The target object provides methods for building a list of items to import either
            * @property {number} status.importedItemCount - The total size of `importedItems`.
            * @property {object[]} status.failedItems - An array of all`itemsToImport` at status `failed`.
            * @property {function} addItem() - Shortcut to access the component method. Refer to method comments for docs.
+           * @property {function} addItemsFromList(items) - Shortcut to access the component method. Refer to method comments for docs.
            * @property {function} addItemsFromCSV(filePath) - Shortcut to access the component method. Refer to method comments for docs.
            * @property {function} finishMapping() - Shortcut to access the component method. Refer to method comments for docs.
            * @property {function} cancelParsing() - Shortcut to access the component method. Refer to method comments for docs.
@@ -155,6 +157,19 @@ The target object provides methods for building a list of items to import either
         this.$.itemSelector.select(item);
 
         return item;
+      }
+
+      /** 
+       * Adds an array of items from an array of item objects. Note: You can't just add items directly to the `itemsToImport` array because
+       * new items need to have the methods and id added to them in order to work properly.
+       */
+      addItemsFromList(items) {
+        var newItem;
+
+        (items || []).forEach(function(sourceItem) {
+          newItem = this._buildItem(sourceItem);
+          this.push('target.itemsToImport', newItem);
+        }.bind(this));
       }
 
       /** 
@@ -388,6 +403,7 @@ The target object provides methods for building a list of items to import either
         this.target.addItem = () => this.addItem();
         this.target.selectPreviousItem = () => this.selectPreviousItem();
         this.target.selectNextItem = () => this.selectNextItem();
+        this.target.addItemsFromList = (items) => this.addItemsFromList(items);
         this.target.addItemsFromCSV = (filePath) => this.addItemsFromCSV(filePath);
         this.target.finishMapping = () => this.finishMapping();
         this.target.cancelParsing = () => this.cancelParsing();
@@ -456,11 +472,11 @@ The target object provides methods for building a list of items to import either
           } else {
             // Translate the parse data items into import items and add them to `target.itemsToImport`
             for (var i = 0; i < parseResults.data.length; i++)
-              this.push('target.itemsToImport', this._buildItem(parseResults.data[i]));
+              this.push('target.itemsToImport', this._buildItem(parseResults.data[i], true));
             
             this._updateItemCounts();
             this._updateStatus('ready');
-            this.dispatchEvent(new CustomEvent('csv-parsing-complete', {detail: {parseResults: parseResults}}));
+            this.dispatchEvent(new CustomEvent('csv-parsing-complete', { detail: { parseResults: parseResults } }));
           }
         } catch(e) {
           throw e;
@@ -611,16 +627,25 @@ The target object provides methods for building a list of items to import either
 
       /** 
        * Returns a new item ready to add to `itemsToImport` with all properties specified in `target.itemProperties`.
-       * @param {object} csvItem - Optional. A data item parsed from a csv file. If included this will be used to populate the item's
-       *   properties. The items keys will be translated using `target.csvColumnMap`.
+       * @param {object} startingItem - Optional. A data item either parsed from a csv file or built in javascript. 
+       *   If included this will be used to populate the item's properties. 
+       * @param {boolean} convertFromCSV - Optional. If `startingItem` is included then optionally include this to indicate that the 
+       *   item's keys should be translated using `target.csvColumnMap`.
        */
-      _buildItem(csvItem) {
+      _buildItem(startingItem, convertFromCSV) {
+        var csvColumnMapItem;
+        var sourceItemProperty;
         var item = Object.keys(this.target.itemProperties).reduce(
           function(itemObject, propertyName) {
-            var csvColumnMapItem = this.target.csvColumnMap.find(function(row) { return row.property == propertyName });
+            if (convertFromCSV) {
+              csvColumnMapItem = this.target.csvColumnMap.find(function(row) { return row.property == propertyName });
+              if (csvColumnMapItem) sourceItemProperty = csvColumnMapItem.column;
+            } else {
+              sourceItemProperty = propertyName;
+            }
 
-            if (csvItem && csvColumnMapItem)
-              itemObject[propertyName] = csvItem[csvColumnMapItem.column];
+            if (startingItem && sourceItemProperty)
+              itemObject[propertyName] = startingItem[sourceItemProperty];
             else
               itemObject[propertyName] = null;
             

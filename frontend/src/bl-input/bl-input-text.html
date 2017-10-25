@@ -23,7 +23,10 @@ single-line text input.
         :host {
           display: block;
           font-size: 1rem; 
+          padding: 0.5em 0;
         }
+        :host(:first-child) { padding-top: 0; }
+        :host(:last-child) { padding-bottom: 0; }
 
       /* === COMPONENT STYLES === */
 
@@ -36,28 +39,6 @@ single-line text input.
           --secondary-text-color: var(--bl-grey-700);
           --error-color: var(--bl-red-800);
         }
-
-      /* === COLORS === */
-
-        paper-input.red { --primary-color: var(--bl-red-500); }
-        paper-input.pink { --primary-color: var(--bl-pink-500); }
-        paper-input.purple { --primary-color: var(--bl-purple-500); }
-        paper-input.deep-purple { --primary-color: var(--bl-deep-purple-500); }
-        paper-input.indigo { --primary-color: var(--bl-indigo-500); }
-        paper-input.blue { --primary-color: var(--bl-blue-500); }
-        paper-input.light-blue { --primary-color: var(--bl-light-blue-500); }
-        paper-input.cyan { --primary-color: var(--bl-cyan-500); }
-        paper-input.teal { --primary-color: var(--bl-teal-500); }
-        paper-input.green { --primary-color: var(--bl-green-500); }
-        paper-input.light-green { --primary-color: var(--bl-light-green-500); }
-        paper-input.lime { --primary-color: var(--bl-lime-500); }
-        paper-input.yellow { --primary-color: var(--bl-yellow-500); }
-        paper-input.amber { --primary-color: var(--bl-amber-500); }
-        paper-input.orange { --primary-color: var(--bl-orange-500); }
-        paper-input.deep-orange { --primary-color: var(--bl-deep-orange-500); }
-        paper-input.brown { --primary-color: var(--bl-brown-500); }
-        paper-input.grey { --primary-color: var(--bl-grey-500); }
-        paper-input.blue-grey { --primary-color: var(--bl-blue-grey-500); }
 
     </style>
 
@@ -92,6 +73,8 @@ single-line text input.
 
         }
       }
+
+      // #=== PUBLIC ACTION METHODS ===#
 
       /** Focuses the paper input. */
       focus() {

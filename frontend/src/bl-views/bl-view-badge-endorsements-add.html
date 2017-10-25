@@ -17,6 +17,7 @@
 <link rel="import" href="../bl-input/bl-fab.html">
 <link rel="import" href="../bl-input/bl-input-rich-text.html">
 <link rel="import" href="../bl-input/bl-input-text.html">
+<link rel="import" href="../bl-input/bl-input-textarea.html">
 <link rel="import" href="bl-header-nav-left.html">
 <link rel="import" href="bl-header-nav-right.html">
 <link rel="import" href="bl-header-panel.html">
@@ -54,6 +55,14 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             border-bottom: 4px solid var(--bl-purple-400);
             background: linear-gradient(90deg, var(--bl-purple-500), var(--bl-purple-700));
           }
+            .headerBackgroundImage {
+              position: absolute;
+              top: 1em; right: 1em; bottom: 0; left: 40%;
+              background-image: url('../../images/ivory-mountiain-trophy.png');
+              background-repeat: no-repeat;
+              background-position: 100% 100%; 
+              background-size: contain;
+            }
           #content {
             color: var(--bl-grey-800);
           }
@@ -108,6 +117,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 padding-bottom: 0.15em;
+                text-shadow: 0 0 2px var(--bl-grey-500); /* provides contrast against header background image */
               }
 
           #rightNav {
@@ -260,7 +270,9 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
     <!-- #=== HEADER PANEL ===# -->
 
     <bl-header-panel id="headerPanel" expanded-height="10" condensed-height="3.5" expanded-percentage="{{expandedPercentage}}">
-      <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
+      <div id="expandedBackground" slot="expandedBackground">
+        <div class="headerBackgroundImage"></div>
+      </div>
       <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
 
       <div id="leftNav" slot="leftNav" style$="padding: [[leftNavPaddingEm]]em;">
@@ -430,12 +442,52 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           </paper-button>
         </div>
 
-        <paper-button class="orange transparent borderless" on-tap="removeItem" dialog-dismiss>
-          <i class="icon-trash"></i>
-          <span hidden="[[!selectedItemIsNew]]">Discard</span>
-          <span hidden="[[selectedItemIsNew]]">Delete</span>
+        <paper-button class="orange transparent borderless" on-tap="removeItem" dialog-dismiss hidden="[[!selectedItemIsNew]]">
+          <i class="icon-cross"></i> Cancel
         </paper-button>
+        <paper-button class="orange transparent borderless" on-tap="removeItem" dialog-dismiss hidden="[[selectedItemIsNew]]">
+          <i class="icon-trash"></i> Delete
+        </paper-button>
+
         <paper-button class="orange primary" on-tap="saveItem" dialog-confirm>
+          Save
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- #=== PASTE EMAILS DIALOG ===# -->
+
+    <paper-dialog id="pasteEmailsDialog" class="orange dialog-gradients" modal dynamic-align>
+      <h2>Paste List of Emails</h2>
+            
+      <paper-dialog-scrollable>
+        <div class="dialogIcon">
+          <i class="icon-paste"></i>
+        </div>
+        
+        <iron-form id="pasteEmailsForm">
+          <form>
+            <p>
+              <strong>Paste a list of email addresses separated by commas or each on their own line.</strong>
+            </p>
+
+            <bl-input-textarea id="buildItemsEmails" label="List of Emails" value="{{buildItemsEmails}}" class="orange" autofocus
+              rows="5"></bl-input-textarea>
+            <bl-input-text id="buildItemsSummary" label="Endorsement Summary" value="{{buildItemsSummary}}"
+              class="orange">
+            </bl-input-text>
+            <bl-input-rich-text id="buildItemsBody" label="Endorsement Body" value="{{buildItemsBody}}"
+              class="orange">
+            </bl-input-rich-text>
+          </form>
+        </iron-form>
+      </paper-dialog-scrollable>
+
+      <div class="buttons">
+        <paper-button class="orange transparent borderless" dialog-dismiss>
+          <i class="icon-cross"></i> Cancel
+        </paper-button>
+        <paper-button class="orange primary" on-tap="buildItems">
           Save
         </paper-button>
       </div>
@@ -683,6 +735,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
           badge: Object,
           
+          /** Serves as the target of the `bl-backend-importer`. */
           badgeEndorsements: Object,
 
           /** Used internally to control the current display mode. */
@@ -691,6 +744,15 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             value: false,
             readOnly: true
           },
+
+          /** Used by `buildItems` action. */
+          buildItemsEmails: String,
+
+          /** Used by `buildItems` action. */
+          buildItemsSummary: String,
+
+          /** Used by `buildItems` action. */
+          buildItemsBody: String,
           
           /** Used internally to control the display of the edit item dialog. */
           selectedItemIsNew: {
@@ -757,6 +819,51 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       /** Navigates to the item after the currently selected item. */
       nextItem() {
         this.badgeEndorsements.selectNextItem();
+      }
+
+      /** Opens the paste emails dialog. */
+      pasteEmails() {
+        this.$.pasteEmailsDialog.open();
+      }
+
+      /** 
+       * Builds out a list of items using `buildItemsEmails`, `buildItemsSummary` and `buildItemsBody`, then adds the newly built items 
+       * to the import list. Note: The list of emails is split by comma, new line, pipe, semi-colon, front/back slash and less/greater than.
+       */
+      buildItems() {
+        var emails;
+
+        if (this.buildItemsEmails && this.buildItemsEmails.length && this.buildItemsEmails.includes('@'))
+          emails = this.buildItemsEmails.split(/[,;|\n><\/\\]/).map(function(item) { 
+            return item.trim().toLowerCase() 
+          }).filter(function(item) {
+            return item.length && item.includes('@') 
+          });
+        
+        if (emails && emails.length) {
+          var items = emails.map(function(email) {
+            return {
+              email: email,
+              summary: this.buildItemsSummary,
+              body: this.buildItemsBody
+            }
+          }.bind(this));
+
+          this.badgeEndorsements.addItemsFromList(items);
+          this.$.pasteEmailsDialog.close();
+          this.setProperties({
+            buildItemsEmails: null,
+            buildItemsSummary: null,
+            buildItemsBody: null
+          });
+
+          if (this.badgeEndorsements.itemsToImport.length)
+            this._setHasItems(true);
+          else
+            this._setHasItems(false);
+        } else {
+          alert('You must enter at least one email address in the list.');
+        }
       }
       
       /** Opens the CSV file dialog. */

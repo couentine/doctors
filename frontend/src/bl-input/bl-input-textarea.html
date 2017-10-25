@@ -1,0 +1,113 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-input/paper-input-container.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input-error.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Text Area #
+
+A simple multiline text input. (The standard paper-textarea was being wonky.)
+-->
+<dom-module id="bl-input-textarea">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+          padding: 0.5em 0;
+        }
+        :host(:first-child) { padding-top: 0; }
+        :host(:last-child) { padding-bottom: 0; }
+      
+      /* === TEXTAREA STYLES === */
+
+        #textarea {
+          font-size: 1em;
+          border: 1px solid var(--border-color, var(--bl-grey-600));
+          border-bottom: none;
+          padding: 0.8em;
+          box-sizing: border-box;
+        }
+      
+      /* === PAPER INPUT CONTAINER STYLES === */
+
+        paper-input-container {
+          --paper-input-container: {
+            padding-bottom: 1px;
+          };
+
+          --paper-input-container-label: {
+            padding: 0.8em;
+          };
+
+          --paper-input-container-label-floating: {
+            padding-left: 0;
+          };
+        }
+
+    </style>
+
+    <paper-input-container id="container" class$="[[class]]" attr-for-value="value">
+      <label id="label" slot="label" on-tap="focus">[[label]]</label>
+      <textarea id="textarea" slot="input" class="paper-input-input" rows="[[rows]]" value="{{value::input}}"></textarea>
+    </paper-input-container>
+
+  </template>
+
+  <script>
+    class BlInputTextarea extends Polymer.Element {
+      
+      static get is() { return 'bl-input-textarea'; }
+
+      static get properties() {
+        return {
+          
+          /** Binds to the value of the textarea. */
+          value: {
+            type: String,
+            notify: true,
+            observer: '_valueChanged'
+          },
+          
+          /** Passes through to the `label` property of `<paper-input>`. */
+          label: String,
+
+          /** Sets the height of the text area. */
+          rows: {
+            type: Number,
+            value: 1
+          },
+
+          class: String
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+      
+      /** Focuses the textarea. */
+      focus() {
+        this.$.textarea.focus();
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      /** When the bound value changes we spoof a value changed notification in order to update the input container state. */
+      _valueChanged(newValue, oldValue) {
+        this.$.textarea.dispatchEvent(new CustomEvent('value-changed', {}));
+      }
+
+    }
+
+    window.customElements.define(BlInputTextarea.is, BlInputTextarea);
+  </script>
+</dom-module>
