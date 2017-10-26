@@ -426,12 +426,19 @@ This import contains all of the Badge List styles and needed shims.
           paper-dialog p:last-child, paper-dialog ul>li:last-child {
             margin-bottom: 0;
           }
+        paper-dialog ul {
+          margin: 1em 0;
+        }
+          paper-dialog ul:first-child { margin-top: 0; }
+          paper-dialog ul:last-child { margin-bottom: 0; }
+
         paper-dialog small, paper-dialog .small {
           font-size: 0.9em;
           color: var(--bl-grey-600);
         }
         paper-dialog .small a { color: var(--bl-grey-600); }
         paper-dialog .small a:visited { color: var(--bl-grey-500); }
+
 
         paper-dialog p.error {
           color: var(--bl-red-900);

@@ -682,15 +682,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       </div>
 
       <div class="dialogContent">
-        <p hidden="[[badgeEndorsements.status.failedItemCount]]">
-          You have successfully imported [[badgeEndorsements.status.importedItemCount]] endorsement items.
-          Click the highlighted button below to return to the badge or click the other button to add more items.
+        <p>
+          <strong>Successfully Imported Items:</strong> [[badgeEndorsements.status.importedItemCount]]
         </p>
-
-        <p hidden="[[!badgeEndorsements.status.failedItemCount]]">
-          [[badgeEndorsements.status.failedItemCount]] of the endorsement items in your import failed. 
-          Click the button below to review the failures and attempt to resubmit them if needed. 
-          The remaining [[badgeEndorsements.status.importedItemCount]] items have been successfully imported.
+        <p>
+          <strong>Failed Items:</strong> [[badgeEndorsements.status.failedItemCount]]
         </p>
         
         <p class="small" hidden="[[!badgeEndorsements.status.failedItemCount]]">

@@ -113,8 +113,7 @@ class EntriesController < ApplicationController
       @log_validated = (params[:entry][:log_validated] == 'true')
 
       # Now add the validation using the standard field (thus preventing duplicates)
-      @entry = @log.add_validation current_user, params[:entry][:summary], params[:entry][:body],
-        @log_validated
+      @entry = @log.add_validation(current_user, params[:entry][:summary], params[:entry][:body], @log_validated)
     else
       @entry = Entry.new(entry_params)
       @entry.type = 'post'
@@ -177,8 +176,8 @@ class EntriesController < ApplicationController
 
     respond_to do |format|
       if @entry.type == 'validation'
-        @log.add_validation current_user, params[:entry][:summary], params[:entry][:body], 
-          (params[:entry][:log_validated] == "true")
+        @log.add_validation(current_user, params[:entry][:summary], params[:entry][:body], (params[:entry][:log_validated] == "true"),
+          true, @entry.preserve_body_html)
 
         format.html do
           redirect_to [@group, @badge, @log, @entry], notice: 'Feedback was successfully updated.'

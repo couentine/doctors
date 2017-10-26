@@ -853,7 +853,7 @@ class Group
   # If the user has not yet been invited to the group they will be added as a member (an exception is raised if group is full).
   # If an existing validation for this email and badge_url already exists for this current_user_id, it will be overwritten
   # Returns the created/updated validation_item hash.
-  def add_invited_user_validation(current_user_id, email, badge_url, summary, body)
+  def add_invited_user_validation(current_user_id, email, badge_url, summary, body, preserve_body_html = false)
     # Attempt to find an existing invitation for them and create a new one if needed
     invited_user_item = invited_admins.detect{ |item| item['email'] == email }
     invited_user_item ||= invited_members.detect{ |item| item['email'] == email }
@@ -885,6 +885,7 @@ class Group
     validation_item['badge'] = badge_url
     validation_item['summary'] = summary
     validation_item['body'] = body
+    validation_item['preserve_body_html'] = preserve_body_html
 
     # Return the item
     validation_item

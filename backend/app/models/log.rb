@@ -390,7 +390,7 @@ class Log
   # NOTE: Doesn't work for new records.
   # log_validated = Boolean
   # Set overwrite_existing=false if you do NOT want to overwrite & save a existing validation
-  def add_validation(creator_user, summary, body, log_validated, overwrite_existing = true)
+  def add_validation(creator_user, summary, body, log_validated, overwrite_existing = true, preserve_body_html = false)
     unless new_record?
       # First look for an existing validation for this creator (We're only allowed one per expert)
       entry = entries.find_by(creator: creator_user, type: 'validation') rescue nil
@@ -400,6 +400,7 @@ class Log
         entry = Entry.new
         entry.summary = summary
         entry.body = body
+        entry.preserve_body_html = preserve_body_html
         entry.log_validated = log_validated
         entry.type = 'validation'
         entry.log = self
@@ -414,7 +415,8 @@ class Log
           'entry_id' => entry.id,
           'log_validated' => log_validated,
           'summary' => summary,
-          'body' => body
+          'body' => body,
+          'preserve_body_html' => preserve_body_html
         }
 
         # Then increment the counts
@@ -448,7 +450,8 @@ class Log
           'entry_id' => entry.id,
           'log_validated' => log_validated,
           'summary' => summary,
-          'body' => body
+          'body' => body,
+          'preserve_body_html' => preserve_body_html
         }
         self.save
 
@@ -456,6 +459,7 @@ class Log
         entry.current_username = creator_user.username
         entry.summary = summary
         entry.body = body
+        entry.preserve_body_html = preserve_body_html
         entry.log_validated = log_validated
         
         entry.save if entry.changed?
