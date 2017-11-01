@@ -325,7 +325,7 @@ This is a simple FAB which displays an icon and, optionally, includes a text lab
 
     
     <div id="label" hidden="[[!hasLabel]]">[[label]]</div>
-    <div id="button" class$="[[class]]" tabindex="0" on-tap="_buttonTap" on-keyup="_buttonKeyup" 
+    <div id="button" class$="[[classString]]" tabindex="0" on-tap="_buttonTap" on-keyup="_buttonKeyup" 
         on-focus="_buttonOn" on-mouseover="_buttonOn" on-blur="_buttonOff" on-mouseout="_buttonOff">
       <paper-ripple></paper-ripple>
       <i class$="[[iconClass]]"></i>
@@ -351,6 +351,12 @@ This is a simple FAB which displays an icon and, optionally, includes a text lab
           },
 
           class: String,
+          
+          /** This is needed in order to reference it in data bindings. */
+          classString: {
+            type: String,
+            computed: '_classString(class)'
+          },
 
           /** Controls whether the fab is visible. Changing this will trigger the enter or exit animations. */
           active: {
@@ -501,6 +507,12 @@ This is a simple FAB which displays an icon and, optionally, includes a text lab
 
       _buttonOff(e) {
         this.$.label.classList.remove('visible');
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _classString(classValue) {
+        return classValue;
       }
 
     }

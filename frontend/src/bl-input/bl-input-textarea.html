@@ -56,7 +56,7 @@ A simple multiline text input. (The standard paper-textarea was being wonky.)
 
     </style>
 
-    <paper-input-container id="container" class$="[[class]]" attr-for-value="value">
+    <paper-input-container id="container" class$="[[classString]]" attr-for-value="value">
       <label id="label" slot="label" on-tap="focus">[[label]]</label>
       <textarea id="textarea" slot="input" class="paper-input-input" rows="[[rows]]" value="{{value::input}}"></textarea>
     </paper-input-container>
@@ -87,7 +87,13 @@ A simple multiline text input. (The standard paper-textarea was being wonky.)
             value: 1
           },
 
-          class: String
+          class: String,
+          
+          /** This is needed in order to reference the class value in data bindings. */
+          classString: {
+            type: String,
+            computed: '_classString(class)'
+          }
 
         }
       }
@@ -104,6 +110,12 @@ A simple multiline text input. (The standard paper-textarea was being wonky.)
       /** When the bound value changes we spoof a value changed notification in order to update the input container state. */
       _valueChanged(newValue, oldValue) {
         this.$.textarea.dispatchEvent(new CustomEvent('value-changed', {}));
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _classString(classValue) {
+        return classValue;
       }
 
     }

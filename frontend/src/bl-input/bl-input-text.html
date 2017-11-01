@@ -42,7 +42,8 @@ single-line text input.
 
     </style>
 
-    <paper-input id="input" value="{{value}}" label="[[label]]" class$="[[class]]" always-float-label="[[alwaysFloatLabel]]"></paper-input>
+    <paper-input id="input" value="{{value}}" label="[[label]]" class$="[[classString]]" always-float-label="[[alwaysFloatLabel]]">
+    </paper-input>
 
   </template>
 
@@ -69,7 +70,13 @@ single-line text input.
             value: false
           },
 
-          class: String
+          class: String,
+          
+          /** This is needed in order to reference the class value in data bindings. */
+          classString: {
+            type: String,
+            computed: '_classString(class)'
+          }
 
         }
       }
@@ -79,6 +86,12 @@ single-line text input.
       /** Focuses the paper input. */
       focus() {
         this.$.input.focus();
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _classString(classValue) {
+        return classValue;
       }
 
     }

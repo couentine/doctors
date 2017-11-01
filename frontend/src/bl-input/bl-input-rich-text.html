@@ -73,7 +73,7 @@ Custom property | Description | Default
 
     </style>
 
-    <paper-input-container id="container" class$="[[class]]">
+    <paper-input-container id="container" class$="[[classString]]">
       <label id="label" slot="label" on-tap="labelTap">[[label]]</label>
       <div id="editor" slot="input" class="paper-input-input"></div>
     </paper-input-container>
@@ -99,6 +99,12 @@ Custom property | Description | Default
           label: String,
 
           class: String,
+          
+          /** This is needed in order to reference the class value in data bindings. */
+          classString: {
+            type: String,
+            computed: '_classString(class)'
+          },
 
           quill: {
             type: Object,
@@ -183,6 +189,12 @@ Custom property | Description | Default
           if (newValue) this.quill.clipboard.dangerouslyPasteHTML(newValue);
           this.quill.history.clear();
         }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _classString(classValue) {
+        return classValue;
       }
 
     }
