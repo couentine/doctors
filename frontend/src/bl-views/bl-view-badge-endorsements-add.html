@@ -403,12 +403,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
     <paper-dialog id="editItemDialog" class="orange dialog-gradients" modal dynamic-align>
       <h2 hidden="[[!selectedItemIsNew]]">Add Item</h2>
       <h2 hidden="[[selectedItemIsNew]]">Edit Item</h2>
+      <div class="dialogIcon">
+        <i class="icon-register"></i>
+      </div>
             
       <paper-dialog-scrollable>
-        <div class="dialogIcon">
-          <i class="icon-register"></i>
-        </div>
-        
         <iron-form id="editItemForm">
           <form>
             <p hidden="[[!badgeEndorsements.selectedItem.backend.status.isFailed]]" class="error">
@@ -426,7 +425,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
               class="orange">
             </bl-input-text>
             <bl-input-rich-text id="selectedItemBody" label="Endorsement Body" value="{{badgeEndorsements.selectedItem.body}}"
-              class="orange">
+              class="orange" bounding-element="[[getElement('editItemDialog')]]">
             </bl-input-rich-text>
           </form>
         </iron-form>
@@ -459,12 +458,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
     <paper-dialog id="pasteEmailsDialog" class="orange dialog-gradients" modal dynamic-align>
       <h2>Paste List of Emails</h2>
+      <div class="dialogIcon">
+        <i class="icon-paste"></i>
+      </div>
             
       <paper-dialog-scrollable>
-        <div class="dialogIcon">
-          <i class="icon-paste"></i>
-        </div>
-        
         <iron-form id="pasteEmailsForm">
           <form>
             <p>
@@ -477,7 +475,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
               class="orange">
             </bl-input-text>
             <bl-input-rich-text id="buildItemsBody" label="Endorsement Body" value="{{buildItemsBody}}"
-              class="orange">
+              class="orange" bounding-element="[[getElement('pasteEmailsDialog')]]">
             </bl-input-rich-text>
           </form>
         </iron-form>
@@ -497,12 +495,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
     <paper-dialog id="csvFileDialog" class="orange dialog-gradients" modal dynamic-align>
       <h2>Import CSV File</h2>
+      <div class="dialogIcon">
+        <i class="icon-file-spreadsheet"></i>
+      </div>
             
       <paper-dialog-scrollable>
-        <div class="dialogIcon">
-          <i class="icon-file-spreadsheet"></i>
-        </div>
-        
         <iron-form id="csvFileForm">
           <form>
             <p>
@@ -556,12 +553,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
     <paper-dialog id="importerMappingDialog" class="purple dialog-gradients" modal dynamic-align>
       <h2>Map CSV Columns</h2>
+      <div class="dialogIcon">
+        <i class="icon-insert-right"></i>
+      </div>
             
       <paper-dialog-scrollable>
-        <div class="dialogIcon">
-          <i class="icon-insert-right"></i>
-        </div>
-        
         <iron-form id="mappingForm">
           <form>
             <p>
@@ -597,12 +593,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
     <paper-dialog id="startImportDialog" class="orange dialog-gradients" modal dynamic-align>
       <h2>Import Badge Endorsements</h2>
+      <div class="dialogIcon">
+        <i class="icon-cloud-upload"></i>
+      </div>
             
       <div class="dialogContent">
-        <div class="dialogIcon">
-          <i class="icon-cloud-upload"></i>
-        </div>
-        
         <iron-form id="startImportForm">
           <form>
             <p>
@@ -651,7 +646,6 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
     <paper-dialog id="importerErrorDialog" class="red no-title-bar" modal dynamic-align>
       <h2>Import Error</h2>
-
       <div class="dialogIcon">
         <i class="icon-shield-warning"></i>
       </div>
@@ -676,7 +670,6 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
     <paper-dialog id="importerResultsDialog" class="purple dialog-gradients" modal dynamic-align>
       <h2>Import Complete</h2>
-            
       <div class="dialogIcon">
         <i class="icon-cloud-check"></i>
       </div>
@@ -1054,6 +1047,12 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       _rightNavFontSizeEm(expandedPercentage) {
         return this.linearExpansionValue(2.3, 1.5, expandedPercentage);
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      getElement(elementId) {
+        return this.$[elementId];
       }
 
     }

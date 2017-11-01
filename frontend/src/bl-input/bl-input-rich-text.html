@@ -120,6 +120,9 @@ Custom property | Description | Default
             ]
           },
 
+          /** Optionally specify the element which should be used to contain the popup toolbar. */
+          boundingElement: Object,
+
           /** Used internally to prevent circular firing of change events when syncing value to quill editor. */
           _quillLocked: {
             type: Boolean,
@@ -145,7 +148,8 @@ Custom property | Description | Default
           modules: {
             toolbar: this.toolbarOptions
           },
-          theme: 'bubble'
+          theme: 'bubble',
+          bounds: this.boundingElement
         }));
         this._setQuillEditor(this.quill.container.querySelector('.ql-editor'));
 
