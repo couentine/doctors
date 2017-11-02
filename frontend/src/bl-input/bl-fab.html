@@ -1,0 +1,529 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Floating Action Button #
+
+This is a simple FAB which displays an icon and, optionally, includes a text label.
+-->
+<dom-module id="bl-fab">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: inline-flex;
+          align-items: center;
+
+          font-size: 1rem; 
+
+          @apply --fab-container;
+        }
+        :host(.fixed) {
+          position: fixed;
+          right: 2em;
+          bottom: 2em;
+        }
+
+      /* === COMPONENT STYLES === */
+
+        #label {
+          height: 1em;
+          background: var(--bl-grey-800);
+          color: white;
+          line-height: 1em;
+          padding: 0.3em 0.5em;
+          border-radius: 2px;
+          margin-right: 0.5em;
+
+          transition: all 0.15s;
+          opacity: 0;
+        }
+          #label.visible {
+            opacity: 0.8;
+          }
+          #label.pulsing {
+            animation: labelPulse 2s;
+          }
+        #button {
+          border-radius: 500em;
+          font-size: 1.7em;
+          padding: 0.9rem;
+
+          background: radial-gradient(
+            circle at 60% 40%, 
+            var(--fab-background-color, var(--bl-grey-50)), 
+            var(--fab-background-color-2, var(--bl-grey-200))
+          );
+          border: 1.5px solid var(--fab-border-color, --bl-grey-600);
+          color: var(--fab-icon-color, --bl-grey-600);
+
+          cursor: pointer;
+          transform: scale(0);
+          opacity: 0;
+
+          @apply --bl-shadow-5;
+        }
+        #button:hover, #button:focus {
+          transition: all 0.5s;
+          background: 
+            radial-gradient(
+              circle at 60% 40%, 
+              var(--fab-background-color, var(--bl-grey-50)), 
+              var(--fab-background-color-3, var(--bl-grey-300))
+            );
+          color: var(--fab-icon-color-2, --bl-grey-700);
+          
+          @apply --bl-shadow-7;
+        }
+        #button.showing {
+          animation: bounceIn 0.5s;
+        }
+        #button.hiding {
+          animation: bounceOut 0.5s;
+        }
+        #button.visible {
+          transform: scale(1);
+          opacity: 1;
+        }
+        #button.pulsing { 
+          animation: buttonPulse 2s;
+        }
+
+      /* === ANIMATION === */
+
+        @keyframes bounceIn {
+          0% {
+            transform: scale(0);
+            opacity: 0;
+          }
+          60% {
+            transform: scale(1.2);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        @keyframes buttonPulse {
+          0% {
+            transform: scale(1);
+            background: radial-gradient(
+              circle at 60% 40%, 
+              var(--fab-background-color, var(--bl-grey-50)), 
+              var(--fab-background-color-2, var(--bl-grey-200))
+            );
+            color: var(--fab-icon-color, --bl-grey-600);
+            
+            @apply --bl-shadow-5;
+          }
+          40% {
+            transform: scale(1.2);
+            background: 
+              radial-gradient(
+                circle at 60% 40%, 
+                var(--fab-background-color-3, var(--bl-grey-300)), 
+                var(--fab-background-color-3, var(--bl-grey-300))
+              );
+            color: var(--fab-icon-color-2, --bl-grey-700);
+
+            @apply --bl-shadow-7;
+          }
+          100% {
+            transform: scale(1);
+            background: radial-gradient(
+              circle at 60% 40%, 
+              var(--fab-background-color, var(--bl-grey-50)), 
+              var(--fab-background-color-2, var(--bl-grey-200))
+            );
+            color: var(--fab-icon-color, --bl-grey-600);
+
+            @apply --bl-shadow-5;
+          }
+        }
+        @keyframes labelPulse {
+          0% { opacity: 0; }
+          40% { opacity: 0.8; }
+          100% { opacity: 0; }
+        }
+        @keyframes bounceOut {
+          0% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(0);
+            opacity: 0;
+          }
+        }
+
+      /* === COLORS === */
+
+        #button.red { 
+          --fab-background-color: var(--bl-red-500);
+          --fab-background-color-2: var(--bl-red-600);
+          --fab-background-color-3: var(--bl-red-700);
+          --fab-border-color: var(--bl-red-100);
+          --fab-icon-color: var(--bl-red-100);
+          --fab-icon-color-2: white;
+        }
+        #button.pink { 
+          --fab-background-color: var(--bl-pink-500);
+          --fab-background-color-2: var(--bl-pink-600);
+          --fab-background-color-3: var(--bl-pink-700);
+          --fab-border-color: var(--bl-pink-100);
+          --fab-icon-color: var(--bl-pink-100);
+          --fab-icon-color-2: white;
+        }
+        #button.purple { 
+          --fab-background-color: var(--bl-purple-500);
+          --fab-background-color-2: var(--bl-purple-600);
+          --fab-background-color-3: var(--bl-purple-700);
+          --fab-border-color: var(--bl-purple-100);
+          --fab-icon-color: var(--bl-purple-100);
+          --fab-icon-color-2: white;
+        }
+        #button.deep-purple { 
+          --fab-background-color: var(--bl-deep-purple-500);
+          --fab-background-color-2: var(--bl-deep-purple-600);
+          --fab-background-color-3: var(--bl-deep-purple-700);
+          --fab-border-color: var(--bl-deep-purple-100);
+          --fab-icon-color: var(--bl-deep-purple-100);
+          --fab-icon-color-2: white;
+        }
+        #button.indigo { 
+          --fab-background-color: var(--bl-indigo-500);
+          --fab-background-color-2: var(--bl-indigo-600);
+          --fab-background-color-3: var(--bl-indigo-700);
+          --fab-border-color: var(--bl-indigo-100);
+          --fab-icon-color: var(--bl-indigo-100);
+          --fab-icon-color-2: white;
+        }
+        #button.blue { 
+          --fab-background-color: var(--bl-blue-500);
+          --fab-background-color-2: var(--bl-blue-600);
+          --fab-background-color-3: var(--bl-blue-700);
+          --fab-border-color: var(--bl-blue-100);
+          --fab-icon-color: var(--bl-blue-100);
+          --fab-icon-color-2: white;
+        }
+        #button.light-blue { 
+          --fab-background-color: var(--bl-light-blue-500);
+          --fab-background-color-2: var(--bl-light-blue-600);
+          --fab-background-color-3: var(--bl-light-blue-700);
+          --fab-border-color: var(--bl-light-blue-100);
+          --fab-icon-color: var(--bl-light-blue-100);
+          --fab-icon-color-2: white;
+        }
+        #button.cyan { 
+          --fab-background-color: var(--bl-cyan-500);
+          --fab-background-color-2: var(--bl-cyan-600);
+          --fab-background-color-3: var(--bl-cyan-700);
+          --fab-border-color: var(--bl-cyan-100);
+          --fab-icon-color: var(--bl-cyan-100);
+          --fab-icon-color-2: white;
+        }
+        #button.teal { 
+          --fab-background-color: var(--bl-teal-500);
+          --fab-background-color-2: var(--bl-teal-600);
+          --fab-background-color-3: var(--bl-teal-700);
+          --fab-border-color: var(--bl-teal-100);
+          --fab-icon-color: var(--bl-teal-100);
+          --fab-icon-color-2: white;
+        }
+        #button.green { 
+          --fab-background-color: var(--bl-green-500);
+          --fab-background-color-2: var(--bl-green-600);
+          --fab-background-color-3: var(--bl-green-700);
+          --fab-border-color: var(--bl-green-100);
+          --fab-icon-color: var(--bl-green-100);
+          --fab-icon-color-2: white;
+        }
+        #button.light-green { 
+          --fab-background-color: var(--bl-light-green-500);
+          --fab-background-color-2: var(--bl-light-green-600);
+          --fab-background-color-3: var(--bl-light-green-700);
+          --fab-border-color: var(--bl-light-green-100);
+          --fab-icon-color: var(--bl-light-green-100);
+          --fab-icon-color-2: white;
+        }
+        #button.lime { 
+          --fab-background-color: var(--bl-lime-500);
+          --fab-background-color-2: var(--bl-lime-600);
+          --fab-background-color-3: var(--bl-lime-700);
+          --fab-border-color: var(--bl-lime-100);
+          --fab-icon-color: var(--bl-lime-100);
+          --fab-icon-color-2: white;
+        }
+        #button.yellow { 
+          --fab-background-color: var(--bl-yellow-500);
+          --fab-background-color-2: var(--bl-yellow-600);
+          --fab-background-color-3: var(--bl-yellow-700);
+          --fab-border-color: var(--bl-yellow-100);
+          --fab-icon-color: var(--bl-yellow-100);
+          --fab-icon-color-2: white;
+        }
+        #button.amber { 
+          --fab-background-color: var(--bl-amber-500);
+          --fab-background-color-2: var(--bl-amber-600);
+          --fab-background-color-3: var(--bl-amber-700);
+          --fab-border-color: var(--bl-amber-100);
+          --fab-icon-color: var(--bl-amber-100);
+          --fab-icon-color-2: white;
+        }
+        #button.orange { 
+          --fab-background-color: var(--bl-orange-500);
+          --fab-background-color-2: var(--bl-orange-600);
+          --fab-background-color-3: var(--bl-orange-700);
+          --fab-border-color: var(--bl-orange-100);
+          --fab-icon-color: var(--bl-orange-100);
+          --fab-icon-color-2: white;
+        }
+        #button.deep-orange { 
+          --fab-background-color: var(--bl-deep-orange-500);
+          --fab-background-color-2: var(--bl-deep-orange-600);
+          --fab-background-color-3: var(--bl-deep-orange-700);
+          --fab-border-color: var(--bl-deep-orange-100);
+          --fab-icon-color: var(--bl-deep-orange-100);
+          --fab-icon-color-2: white;
+        }
+        #button.brown { 
+          --fab-background-color: var(--bl-brown-500);
+          --fab-background-color-2: var(--bl-brown-600);
+          --fab-background-color-3: var(--bl-brown-700);
+          --fab-border-color: var(--bl-brown-100);
+          --fab-icon-color: var(--bl-brown-100);
+          --fab-icon-color-2: white;
+        }
+        #button.grey { 
+          --fab-background-color: var(--bl-grey-500);
+          --fab-background-color-2: var(--bl-grey-600);
+          --fab-background-color-3: var(--bl-grey-700);
+          --fab-border-color: var(--bl-grey-100);
+          --fab-icon-color: var(--bl-grey-100);
+          --fab-icon-color-2: white;
+        }
+        #button.blue-grey { 
+          --fab-background-color: var(--bl-blue-grey-500);
+          --fab-background-color-2: var(--bl-blue-grey-600);
+          --fab-background-color-3: var(--bl-blue-grey-700);
+          --fab-border-color: var(--bl-blue-grey-100);
+          --fab-icon-color: var(--bl-blue-grey-100);
+          --fab-icon-color-2: white;
+        }
+
+    </style>
+
+    
+    <div id="label" hidden="[[!hasLabel]]">[[label]]</div>
+    <div id="button" class$="[[classString]]" tabindex="0" on-tap="_buttonTap" on-keyup="_buttonKeyup" 
+        on-focus="_buttonOn" on-mouseover="_buttonOn" on-blur="_buttonOff" on-mouseout="_buttonOff">
+      <paper-ripple></paper-ripple>
+      <i class$="[[iconClass]]"></i>
+    </div>
+
+  </template>
+
+  <script>
+    class BlFab extends Polymer.Element {
+      
+      static get is() { return 'bl-fab'; }
+
+      static get properties() {
+        return {
+          
+          /** The class of the included icon. Example: `icon-user` */
+          iconClass: String,
+          
+          /** Optional string to display next to the fab. */
+          label: {
+            type: String,
+            observer: '_labelChanged'
+          },
+
+          class: String,
+          
+          /** This is needed in order to reference it in data bindings. */
+          classString: {
+            type: String,
+            computed: '_classString(class)'
+          },
+
+          /** Controls whether the fab is visible. Changing this will trigger the enter or exit animations. */
+          active: {
+            type: Boolean,
+            value: false,
+            observer: '_activeChanged'
+          },
+
+          /** Set this to disable the pulsing animation which begins whenever the fab is activated. */
+          noPulse: {
+            type: Boolean,
+            value: false
+          },
+
+          /** The number of pulses per cycle. */
+          pulseCount: {
+            type: Number,
+            value: 3
+          },
+
+          /** The number of milliseconds after fab activation before the first pulse begins. */
+          initialPulseDelay: {
+            type: Number,
+            value: 2000
+          },
+
+          /** The number of milliseconds between pulses. */
+          pulseIterval: {
+            type: Number,
+            value: 10000
+          },
+          
+          /** Returns true if there is a label. */
+          hasLabel: {
+            type: Boolean,
+            readOnly: true,
+            value: false
+          },
+
+          _pulseRunning: {
+            type: Boolean,
+            readOnly: true,
+            value: false
+          },
+
+          _pulseIntervalTimer: {
+            type: Object,
+            readOnly: true
+          }
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /** Executes a single pulse animation, which pulses the button and label. */
+      pulse() {
+        this.$.button.classList.add('pulsing');
+        this.$.label.classList.add('pulsing');
+
+        setTimeout(function() {
+          this.$.button.classList.remove('pulsing');
+          this.$.label.classList.remove('pulsing');
+        }.bind(this), 2000);
+      }
+
+      /** Starts the cycle of pulses. */
+      startPulseCycle() {
+        var remainingPulseCount = this.pulseCount;
+
+        if (!this._pulseRunning && (remainingPulseCount > 0)) {
+          this.pulse();
+          remainingPulseCount--;
+
+          if (remainingPulseCount > 0) {
+            this._set_pulseRunning(true);
+            this._set_pulseIntervalTimer(setInterval(function() {
+              if (this._pulseRunning) this.pulse();
+              else remainingPulseCount = 0;
+
+              remainingPulseCount--;
+
+              if (remainingPulseCount <= 0) {
+                clearInterval(this._pulseIntervalTimer);
+                this._set_pulseIntervalTimer(null);  
+                this._set_pulseRunning(false);
+              }
+            }.bind(this), this.pulseIterval));
+          }
+        }
+      }
+
+      /** Stops the cycle of pulses if it is running. */
+      stopPulseCycle() {
+        if (this._pulseIntervalTimer) {
+          clearInterval(this._pulseIntervalTimer);
+          this._set_pulseIntervalTimer(null);
+        }
+        
+        this._set_pulseRunning(false);
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+      
+      _labelChanged(newValue, oldValue) {
+        if (newValue && newValue.length)
+          this._setHasLabel(true);
+        else
+          this._setHasLabel(false);
+      }
+
+      /** Adds animations when the active state changes. */
+      _activeChanged(newValue, oldValue) {
+        if (newValue) {
+          this.$.button.classList.add('showing', 'visible');
+          setTimeout(function() {
+            this.$.button.classList.remove('showing');
+            
+            if (!this.noPulse) {
+              setTimeout(function() {
+                this.startPulseCycle();
+              }.bind(this), this.initialPulseDelay);
+            }
+          }.bind(this), 500);
+        } else {
+          this.stopPulseCycle();
+          this.$.button.classList.add('hiding');
+          this.$.button.classList.remove('visible');
+          setTimeout(function() {
+            this.$.button.classList.remove('hiding');
+          }.bind(this), 500);
+        }
+      }
+
+      _buttonTap(e) {
+        this.dispatchEvent(new CustomEvent('button-press', { detail: e.detail }));
+      }
+
+      _buttonKeyup(e) {
+        if (e.keyCode == 13)
+          this.dispatchEvent(new CustomEvent('button-press', { detail: e.detail }));
+      }
+
+      _buttonOn(e) {
+        this.stopPulseCycle(); // stop pulsing if the user mouses over (the animations conflict with the hover state)
+        this.$.label.classList.add('visible');
+      }
+
+      _buttonOff(e) {
+        this.$.label.classList.remove('visible');
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _classString(classValue) {
+        return classValue;
+      }
+
+    }
+
+    window.customElements.define(BlFab.is, BlFab);
+
+    /**
+     * Fires when user clicks the button or presses enter while the button is selected.
+     *
+     * @event button-press
+     */
+
+  </script>
+</dom-module>

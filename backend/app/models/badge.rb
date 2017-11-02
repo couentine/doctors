@@ -899,6 +899,7 @@ class Badge
   # === BADGE BULK METHODS === #
 
   # Pass a list of validation objects with keys (*=required): email*, summary*, body
+  # The html strings in `body` are sanitized using the rails white list sanitizer.
   # Set send_emails_to_new_users to true if you want to send badge award emails to non-users (users wil always get emails).
   # IF POLLER: Poller progress is kept up to date. Result list is added to `poller.data['items']`
   # If there is no poller, errors will be thrown, otherwise they will be captured on the poller.
@@ -921,6 +922,8 @@ class Badge
     end
 
     begin
+      html_sanitizer = Rails::Html::WhiteListSanitizer.new
+
       # First check for top-level error states
       raise StandardError.new('Validations list is empty or invalid.') if (validations.class != Array) || (validations.count == 0)
       validation_count = validations.count
@@ -938,6 +941,11 @@ class Badge
       validations.each do |validation|
         result_code = nil
         error_message = nil
+
+        # First we need to sanitize the body html
+        if !validation['body'].blank?
+          validation['body'] = html_sanitizer.sanitize(validation['body'])
+        end
 
         if validation['summary'].blank?
           result_code = 'error'
@@ -971,7 +979,7 @@ class Badge
             log = badge.add_learner(user)
 
             # Add or update the validation
-            entry = log.add_validation(creator_user, validation['summary'], validation['body'], true)
+            entry = log.add_validation(creator_user, validation['summary'], validation['body'], true, true, true)
           end
         else
           # This is a new user so we just need to make sure that they are added to the invited members/admins list with a validation
@@ -979,7 +987,8 @@ class Badge
           result_code = 'new_user'
           begin
             # This will raise an exception if this is a new user invitation and the group is full
-            group.add_invited_user_validation(creator_user.id, validation['email'], badge.url, validation['summary'], validation['body'])
+            group.add_invited_user_validation(creator_user.id, validation['email'], badge.url, validation['summary'], 
+              validation['body'], true)
 
             # Now send the email if needed
             if send_emails_to_new_users && !User.get_inactive_email_list.include?(validation['email'])

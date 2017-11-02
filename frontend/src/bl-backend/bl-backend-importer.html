@@ -20,12 +20,25 @@ The target object provides methods for building a list of items to import either
     <!-- #=== POLLER TO TRACK STATUS OF CURRENT IMPORT BATCH ===# -->
     <bl-poller id="poller" poller-id="{{_pollerId}}" target="{{target.status.poller}}" max-duration="600000"></bl-poller>
 
+    <!-- #=== ARRAY SELECTOR TO BIND SELECTED ITEM TO ITEMS TO IMPORT ARRAY ===# -->
+    <array-selector id="itemSelector" items="{{target.itemsToImport}}" selected="{{target.selectedItem}}"></array-selector>
+
   </template>
 
   <script>
     class BlBackendImporter extends BlAppComponentMixin(Polymer.Element) {
       
       static get is() { return 'bl-backend-importer'; }
+
+      /**
+       * Fires when after the parsing and mapping process is complete and items from the csv file have been added to `itemsToImport`.
+       *
+       * @event csv-parsing-complete
+       *
+       * Fires when the final import batch completes.
+       *
+       * @event import-complete
+       */
 
       static get properties() {
         return {
@@ -57,14 +70,19 @@ The target object provides methods for building a list of items to import either
           /**
            * Required. The target object receiving the binding. The following properties and methods are added on connection.
            * @property {object[]} itemsToImport - The items passed in the body of the import action.
-           *   You can add new items by using the `addItem` or `addItemsFromCSV` methods, but shouldn't modify the list directly.
+           *   You can add new items by using the `addItem`, `addItemsFromList` and `addItemsFromCSV` methods, but shouldn't modify the 
+           *   list directly.
            *   Each item has a `backend` object added to it which will contain: 
            *   - `status` object
            *     - `status.code` will equal `ready`, `importing`, `imported` or `failed`
            *     - `status.isReady`, `status.isImporting`, `status.isImported` and `status.isFailed` are boolean status checkers
            *     - `status.errorMessage` will contain explanatory text when `failed`
            *   - `result` object returned from the server (in case you need to reference it directly)
+           *   - `select()` function which sets this item as the selected item.
            *   - `remove()` function which will remove the specified item from the list.
+           * @property {object} selectedItem - The item from `itemsToImport` which is currently selected.
+           * @property {function} selectPreviousItem() - Shortcut to access the component method. Refer to method comments for docs.
+           * @property {function} selectNextItem() - Shortcut to access the component method. Refer to method comments for docs.
            * @property {object[]} importedItems - After items are successfully imported they are removed from `itemsToImport` and added to
            *   this list. The items in this list have all of the same properties except there is no `remove()` method.
            * @property {object} status - Stores the current state of the import process.
@@ -84,6 +102,7 @@ The target object provides methods for building a list of items to import either
            * @property {number} status.importedItemCount - The total size of `importedItems`.
            * @property {object[]} status.failedItems - An array of all`itemsToImport` at status `failed`.
            * @property {function} addItem() - Shortcut to access the component method. Refer to method comments for docs.
+           * @property {function} addItemsFromList(items) - Shortcut to access the component method. Refer to method comments for docs.
            * @property {function} addItemsFromCSV(filePath) - Shortcut to access the component method. Refer to method comments for docs.
            * @property {function} finishMapping() - Shortcut to access the component method. Refer to method comments for docs.
            * @property {function} cancelParsing() - Shortcut to access the component method. Refer to method comments for docs.
@@ -92,9 +111,8 @@ The target object provides methods for building a list of items to import either
            *   array. Object property names are the item keys, values are objects with properties for `type`, `description` 
            *   and potentially `format`.
            * @property {string[]} csvColumns - Ordered list of column headers from the CSV file. Set whenever `addItemsFromCSV` is called.
-           * @property {object} csvColumnMap - Key-value store used to match CSV column headers with item property names. 
-           *   `csvColumnMap` is automatically updated whenever `addItemsFromCSV` is called. Keys are the names of all the `itemProperties`,
-           *    values are strings corresponding to values from `csvColumns`.
+           * @property {object[]} csvColumnMap - Array of objects with two keys: `property` and `column`.
+           *   `csvColumnMap` is automatically updated whenever `addItemsFromCSV` is called.
            * @property {function} import() - Initiates the import process. If `itemsToImport` has more than `importBatchSize` items then 
            *   the process will be broken up into multiple batches.
            */
@@ -131,13 +149,27 @@ The target object provides methods for building a list of items to import either
 
       // #=== PUBLIC ACTION METHODS ===#
 
-      /** Adds a new blank item to the end of `target.itemsToImport` array. Returns the new item. */
+      /** Adds a new blank item to the end of `target.itemsToImport` array. Sets the new item as selected and returns it. */
       addItem() {
         var item = this._buildItem();
 
         this.push('target.itemsToImport', item);
+        this.$.itemSelector.select(item);
 
         return item;
+      }
+
+      /** 
+       * Adds an array of items from an array of item objects. Note: You can't just add items directly to the `itemsToImport` array because
+       * new items need to have the methods and id added to them in order to work properly.
+       */
+      addItemsFromList(items) {
+        var newItem;
+
+        (items || []).forEach(function(sourceItem) {
+          newItem = this._buildItem(sourceItem);
+          this.push('target.itemsToImport', newItem);
+        }.bind(this));
       }
 
       /** 
@@ -164,6 +196,30 @@ The target object provides methods for building a list of items to import either
             complete: (parseResults) => this._processParseResults(parseResults),
             error: (error) => this._updateStatus('error', error)
           });
+        }
+      }
+
+      /** If there is a currently selected item, this will select the previous one from `itemsToImport`. */
+      selectPreviousItem() {
+        var newIndex;
+        
+        if (this.target.selectedItem) {
+          newIndex = this.getItemIndex(this.target.selectedItem.uniqueId) - 1;
+
+          if (newIndex >= 0)
+            this.target.itemsToImport[newIndex].backend.select();
+        }
+      }
+
+      /** If there is a currently selected item, this will select the next one from `itemsToImport`. */
+      selectNextItem() {
+        var newIndex;
+        
+        if (this.target.selectedItem) {
+          newIndex = this.getItemIndex(this.target.selectedItem.uniqueId) + 1;
+
+          if (newIndex < this.target.itemsToImport.length)
+            this.target.itemsToImport[newIndex].backend.select();
         }
       }
 
@@ -223,6 +279,14 @@ The target object provides methods for building a list of items to import either
           }
 
         return itemIndex;
+      }
+
+      /** Sets the matching item from `target.itemsToImport` as the currently selected item. */
+      selectItemById(uniqueId) {
+        var itemIndex = this.getItemIndex(uniqueId);
+
+        if (itemIndex != null)
+          this.$.itemSelector.select(this.target.itemsToImport[itemIndex]);
       }
 
       /** Removes the matching item from `target.itemsToImport` array and returns the removed item (or null if no match is found). */
@@ -313,6 +377,7 @@ The target object provides methods for building a list of items to import either
       _setupTargetObject() {
         // Add to the existing target object instead of overwriting it, in case the parent element has given it extra properties
         this.set('target.itemsToImport', []);
+        this.set('target.selectedItem', null);
         this.set('target.importedItems', []);
         this.set('target.status', {});
         this.set('target.status.code', 'uninitialized');
@@ -332,10 +397,13 @@ The target object provides methods for building a list of items to import either
         this.set('target.status.importedItemCount', 0);
         this.set('target.itemProperties', {});
         this.set('target.csvColumns', []);
-        this.set('target.csvColumnMap', {});
+        this.set('target.csvColumnMap', []);
 
         // No need to notify for these ones
         this.target.addItem = () => this.addItem();
+        this.target.selectPreviousItem = () => this.selectPreviousItem();
+        this.target.selectNextItem = () => this.selectNextItem();
+        this.target.addItemsFromList = (items) => this.addItemsFromList(items);
         this.target.addItemsFromCSV = (filePath) => this.addItemsFromCSV(filePath);
         this.target.finishMapping = () => this.finishMapping();
         this.target.cancelParsing = () => this.cancelParsing();
@@ -354,6 +422,8 @@ The target object provides methods for building a list of items to import either
       _processParseResults(parseResults) {
         try {
           var itemPropertyNames = Object.keys(this.target.itemProperties);
+          var csvColumnMapItemIndex;
+          var csvColumnMapItem;
           var matchingColumnName;
           var allMatchedColumnNames = [];
           var unmatchedPropertyCount = 0;
@@ -371,11 +441,19 @@ The target object provides methods for building a list of items to import either
 
           // Update the csvColumnMap, keeping previous matches unless they point to a column that no longer exists
           for (var i = 0; i < itemPropertyNames.length; i++) {
-            matchingColumnName = this.target.csvColumnMap[itemPropertyNames[i]];
+            csvColumnMapItemIndex = this.target.csvColumnMap.findIndex(function(row) { return row.property == itemPropertyNames[i] });
+            csvColumnMapItem = this.target.csvColumnMap[csvColumnMapItemIndex];
+
+            if (!csvColumnMapItem) {
+              csvColumnMapItem = { property: itemPropertyNames[i], column: undefined }
+              this.push('target.csvColumnMap', csvColumnMapItem);
+              csvColumnMapItemIndex = this.target.csvColumnMap.length - 1;
+            }
+            matchingColumnName = csvColumnMapItem.column;
 
             if (!matchingColumnName || !this.target.csvColumns.includes(matchingColumnName)) {
               matchingColumnName = this._findMatchingCSVColumn(itemPropertyNames[i]);
-              this.target.csvColumnMap[itemPropertyNames[i]] = matchingColumnName;
+              this.set('target.csvColumnMap.' + csvColumnMapItemIndex + '.column', matchingColumnName); // necessary to notify observers
             }
             
             if (matchingColumnName)
@@ -394,11 +472,11 @@ The target object provides methods for building a list of items to import either
           } else {
             // Translate the parse data items into import items and add them to `target.itemsToImport`
             for (var i = 0; i < parseResults.data.length; i++)
-              this.push('target.itemsToImport', this._buildItem(parseResults.data[i]));
+              this.push('target.itemsToImport', this._buildItem(parseResults.data[i], true));
             
             this._updateItemCounts();
             this._updateStatus('ready');
-            this.dispatchEvent(new CustomEvent('csv-parsing-complete', {detail: {parseResults: parseResults}}));
+            this.dispatchEvent(new CustomEvent('csv-parsing-complete', { detail: { parseResults: parseResults } }));
           }
         } catch(e) {
           throw e;
@@ -471,6 +549,7 @@ The target object provides methods for building a list of items to import either
           this._moveImportedItems();
           this._updateItemCounts();
           this._updateStatus('ready');
+          this.dispatchEvent(new CustomEvent('import-complete', {}));
         }
       }
 
@@ -548,14 +627,25 @@ The target object provides methods for building a list of items to import either
 
       /** 
        * Returns a new item ready to add to `itemsToImport` with all properties specified in `target.itemProperties`.
-       * @param {object} csvItem - Optional. A data item parsed from a csv file. If included this will be used to populate the item's
-       *   properties. The items keys will be translated using `target.csvColumnMap`.
+       * @param {object} startingItem - Optional. A data item either parsed from a csv file or built in javascript. 
+       *   If included this will be used to populate the item's properties. 
+       * @param {boolean} convertFromCSV - Optional. If `startingItem` is included then optionally include this to indicate that the 
+       *   item's keys should be translated using `target.csvColumnMap`.
        */
-      _buildItem(csvItem) {
+      _buildItem(startingItem, convertFromCSV) {
+        var csvColumnMapItem;
+        var sourceItemProperty;
         var item = Object.keys(this.target.itemProperties).reduce(
           function(itemObject, propertyName) {
-            if (csvItem)
-              itemObject[propertyName] = csvItem[this.target.csvColumnMap[propertyName]];
+            if (convertFromCSV) {
+              csvColumnMapItem = this.target.csvColumnMap.find(function(row) { return row.property == propertyName });
+              if (csvColumnMapItem) sourceItemProperty = csvColumnMapItem.column;
+            } else {
+              sourceItemProperty = propertyName;
+            }
+
+            if (startingItem && sourceItemProperty)
+              itemObject[propertyName] = startingItem[sourceItemProperty];
             else
               itemObject[propertyName] = null;
             
@@ -574,6 +664,7 @@ The target object provides methods for building a list of items to import either
             errorMessage: null
           },
           result: null,
+          select: () => this.selectItemById(item.uniqueId),
           remove: () => this.removeItemById(item.uniqueId)
         };
 
@@ -607,12 +698,5 @@ The target object provides methods for building a list of items to import either
     }
 
     window.customElements.define(BlBackendImporter.is, BlBackendImporter);
-
-    /**
-     * Fires when after the parsing and mapping process is complete and items from the csv file have been added to `itemsToImport`.
-     *
-     * @event csv-parsing-complete
-     */
-
   </script>
 </dom-module>

@@ -38,36 +38,6 @@ The mixin also provides various actions for interacting with the container. (Ref
           top: 0; right: 0; bottom: 0; left: 0;
         }
 
-      /* === STANDARD DIALOGS === */
-
-        paper-dialog.standard {
-          border-radius: 6px;
-          border: 1px solid var(--dialog-300-color, #FFB74D);
-          border-top: 5px solid var(--dialog-600-color, #FB8C00);
-          background: var(--dialog-50-color, #FFF3E0);
-          transition: top 1s linear, left 1s linear;
-        }
-          paper-dialog.standard .buttons {
-            margin-top: 2em;
-
-            background: var(--dialog-100-color, #FFE0B2);
-            color: #424242;
-            border-bottom-right-radius: 5px;
-            border-bottom-left-radius: 5px;
-
-            transition: all 0.6s;
-            max-height: 100em;
-          }
-          paper-dialog.standard .buttons.collapsed {
-            padding: 0 !important;
-            max-height: 0 !important;
-          }
-          
-          paper-dialog.standard.poller .buttons { overflow: hidden; }
-          paper-dialog.standard.waiting p { text-align: center; }
-
-          paper-dialog paper-spinner-lite { --paper-spinner-color: var(--dialog-600-color); }
-
     </style>
     
     <!-- #=== API CONNECTION TO THE BACKEND ===# -->
@@ -87,7 +57,7 @@ The mixin also provides various actions for interacting with the container. (Ref
     <!-- #=== APP BACKEND MODEL ITEMS ===# -->
     <bl-backend-item id="backendGroup" target="{{group}}" type="group" record-path="{{groupRecordPath}}"></bl-backend-item>
     <bl-backend-item id="backendBadge" target="{{badge}}" type="badge" record-path="{{badgeRecordPath}}"></bl-backend-item>
-    <bl-poller id="poller" poller-id="{{pollerId}}" target="{{poller}}"></bl-poller>
+    <bl-poller id="userPoller" poller-id="{{userPollerId}}" target="{{userPoller}}"></bl-poller>
 
     <!-- #=== APP VIEWS ===# -->
     <bl-view-home id="homeView" active="{{homeViewActive}}"></bl-view-home>
@@ -97,42 +67,17 @@ The mixin also provides various actions for interacting with the container. (Ref
     <!-- #=== TOAST CONTAINER ===# -->
     <content id="toastContainer" select="bl-toast-container"></content>
 
-    <!-- #=== STANDARD ALERT DIALOG ===# -->
-    <paper-dialog id="alertDialog" class="standard alert" modal>
-      <h2 id="alertDialogTitle"></h2>
-      <p id="alertDialogBody"></p>
-      <div class="buttons">
-        <paper-button id="alertDialogDismiss" dialog-dismiss on-tap="dialogDismiss">
-          <span id="alertDialogDismissText"></span>
-        </paper-button>
-        <paper-button id="alertDialogConfirm" dialog-confirm autofocus on-tap="dialogConfirm">
-          <span id="alertDialogConfirmText"></span>
-        </paper-button>
-      </div>
-    </paper-dialog>
-    
-    <!-- #=== STANDARD POLLER DIALOG ===# -->
-    <paper-dialog id="pollerDialog" class="standard poller" modal>
-      <h2 id="pollerDialogTitle"></h2>
-      <p>
-        <paper-spinner-lite id="pollerDialogSpinner" active="[[!poller.completed]]"></paper-spinner-lite>
-      </p>
-      <div id="pollerDialogButtons" class="buttons collapsed">
-        <paper-button id="pollerDialogDismiss" dialog-dismiss on-tap="dialogDismiss">
-          <span id="pollerDialogDismissText"></span>
-        </paper-button>
-        <paper-button id="pollerDialogConfirm" dialog-confirm autofocus on-tap="dialogConfirm">
-          <span id="pollerDialogConfirmText"></span>
-        </paper-button>
-      </div>
-    </paper-dialog>
+    <!-- #=== CURRENT USER ASYNC POLLER DIALOG ===# -->
+    <paper-dialog id="userPollerDialog" class="orange no-title-bar" modal dynamic-align>
+      <h2>Setting up Your Account...</h2>
 
-    <!-- #=== STANDARD WAITING DIALOG ===# -->
-    <paper-dialog id="waitingDialog" class="standard waiting" modal>
-      <h2 id="waitingDialogTitle"></h2>
-      <p>
-        <paper-spinner-lite id="waitingDialogSpinner" active></paper-spinner-lite>
-      </p>
+      <paper-spinner-lite active class="orange"></paper-spinner-lite>
+            
+      <div class="dialogContent">
+        <p>
+          Badge List is completing the configuration of your account, pleast wait.
+        </p>
+      </div>
     </paper-dialog>
 
   </template>
@@ -159,11 +104,11 @@ The mixin also provides various actions for interacting with the container. (Ref
           /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
           activeView: Object,
 
-          /** Used by poller dialog. */
-          pollerId: String,
+          /** Used by userPoller dialog. */
+          userPollerId: String,
 
-          /** Used by poller dialog. */
-          poller: Object,
+          /** Used by userPoller dialog. */
+          userPoller: Object,
 
           /** The group object which is currently active. Null if current view does not have a corresponding group. */
           group: Object,
@@ -181,11 +126,7 @@ The mixin also provides various actions for interacting with the container. (Ref
           badgeRecordPath: {
             type: String,
             computed: '_badgeRecordPath(groupRouteData.slug, badgeRouteData.slug)'
-          },
-
-          dialogConfirmFunction: Object,
-          dialogDismissFunction: Object,
-          pollerCompleteFunction: Object
+          }
 
         };
       }
@@ -198,194 +139,26 @@ The mixin also provides various actions for interacting with the container. (Ref
         this.$.toastContainer.addToast(text, type, autoCloseAfter);
       }
 
-      openAlertDialog(options) {
-        // Shows the standard alert dialog. The following options should be included:
-        // - color = ['orange', 'green', 'blue', 'grey', 'red']
-        // - title = The title of the dialog
-        // - body = (Optional) The body text
-        // - confirm = { text: 'Accept', action: function(){} } >> leave out property to hide button
-        // - dismiss = { text: 'Cancel', action: function(){} } >> leave out property to hide button
-
-        // First set the basic properties
-        this.$.alertDialog.noCancelOnEscKey = false; // restore this (overridden from modal default)
-        this.setDialogColor(options.color);
-        this.$.alertDialogTitle.innerHTML = options.title;
-        if (options.body) {
-          this.$.alertDialogBody.innerHTML = options.body;
-          this.$.alertDialogBody.hidden = false;
-        } else {
-          this.$.alertDialogBody.innerHTML = '';
-          this.$.alertDialogBody.hidden = true;
-        }
-
-        // Then set up the buttons
-        if (options.confirm) {
-          this.$.alertDialogConfirmText.innerHTML = options.confirm.text;
-          this.$.alertDialogConfirm.hidden = false;
-          this.dialogConfirmFunction = options.confirm.action;
-        } else {
-          this.$.alertDialogConfirmText.innerHTML = '';
-          this.$.alertDialogConfirm.hidden = true;
-          this.dialogConfirmFunction = null;
-        }
-        if (options.dismiss) {
-          this.$.alertDialogDismissText.innerHTML = options.dismiss.text;
-          this.$.alertDialogDismiss.hidden = false;
-          this.dialogDismissFunction = options.dismiss.action;
-        } else {
-          this.$.alertDialogDismissText.innerHTML = '';
-          this.$.alertDialogDismiss.hidden = true;
-          this.dialogDismissFunction = null;
-        }
-
-        this.$.alertDialog.open();
-      }
-
-      openPollerDialog(pollerId, options) {
-        // Shows the standard poller dialog. The following options should be included:
-        // - color = ['orange', 'green', 'blue', 'grey', 'red']
-        // - title = The title of the dialog
-        // - confirm = { text: 'Accept', action: function(){} } >> leave out property to hide button
-        // - dismiss = { text: 'Cancel', action: function(){} } >> leave out property to hide button
-        //   NOTE: If you leave out both confirm and dismiss then the dialog will automatically close when the poller is complete.
-        // - onComplete = function >> This will be run when the poller is completed. (The passed function will only be run once.)
-        // - showButtonsOnLoad = (Default = false) Unless set to true, the buttons are hidden until poller completes
-
-        // First set the basic properties
-        this.setDialogColor(options.color);
-        this.$.pollerDialogTitle.innerHTML = options.title;
-
-        // Then set up the buttons
-        if (options.confirm) {
-          this.$.pollerDialogConfirmText.innerHTML = options.confirm.text;
-          this.$.pollerDialogConfirm.hidden = false;
-          this.dialogConfirmFunction = options.confirm.action;
-        } else {
-          this.$.pollerDialogConfirmText.innerHTML = '';
-          this.$.pollerDialogConfirm.hidden = true;
-          this.dialogConfirmFunction = null;
-        }
-        if (options.dismiss) {
-          this.$.pollerDialogDismissText.innerHTML = options.dismiss.text;
-          this.$.pollerDialogDismiss.hidden = false;
-          this.dialogDismissFunction = options.dismiss.action;
-        } else {
-          this.$.pollerDialogDismissText.innerHTML = '';
-          this.$.pollerDialogDismiss.hidden = true;
-          this.dialogDismissFunction = null;
-        }
-        if (options.showButtonsOnLoad) this.$.pollerDialogButtons.classList.remove('collapsed');
-        else this.$.pollerDialogButtons.classList.add('collapsed');
-
-        // Setup the completion function
-        if (options.onComplete)
-          this.pollerCompleteFunction = options.onComplete;
-        else
-          this.pollerCompleteFunction = null;
-
-        this.pollerId = pollerId; // This starts the poller query
-        this.$.pollerDialog.open();
-      }
-
-      openWaitingDialog(options) {
-        // Shows the standard waiting dialog. The following options should be included:
-        // - color = ['orange', 'green', 'blue', 'grey', 'red']
-        // - title = The title of the dialog
-
-        this.setDialogColor(options.color);
-        this.$.waitingDialogTitle.innerHTML = (options.title) ? options.title : 'Waiting...';
-        this.$.waitingDialog.open();
-      }
-
-      closeWaitingDialog() {
-        this.$.waitingDialog.close();
-      }
-
-      setDialogColor(color) {
-        // This is primarily called by the standard dialog functions
-        // It sets all of the appropriate css variables to match the specified color
-        // Defaults to orange
-        if (color == 'blue') { // material light blue
-          this.updateStyles({
-            '--dialog-50-color': '#E1F5FE',
-            '--dialog-100-color': '#B3E5FC',
-            '--dialog-300-color': '#4FC3F7',
-            '--dialog-600-color': '#039BE5'
-          });
-        } else if (color == 'green') {
-          this.updateStyles({
-            '--dialog-50-color': '#F1F8E9',
-            '--dialog-100-color': '#C8E6C9',
-            '--dialog-300-color': '#AED581',
-            '--dialog-600-color': '#7CB342'
-          });
-        } else if (color == 'grey') {
-          this.updateStyles({
-            '--dialog-50-color': '#FAFAFA',
-            '--dialog-100-color': '#F5F5F5',
-            '--dialog-300-color': '#E0E0E0',
-            '--dialog-600-color': '#757575'
-          });
-        } else if (color == 'red') {
-          this.updateStyles({
-            '--dialog-50-color': '#FFEBEE',
-            '--dialog-100-color': '#FFCDD2',
-            '--dialog-300-color': '#E57373',
-            '--dialog-600-color': '#E53935'
-          });
-        } else { // default = orange
-          this.updateStyles({
-            '--dialog-50-color': '#FFF3E0',
-            '--dialog-100-color': '#FFE0B2',
-            '--dialog-300-color': '#FFB74D',
-            '--dialog-600-color': '#FB8C00'
-          });
-        }
-      }
-
-      // #=== PRIVATE ACTION METHODS ===#
-
-      _dialogConfirm() {
-        if (this.dialogConfirmFunction) this.dialogConfirmFunction();
-      }
-
-      _dialogDismiss() {
-        if (this.dialogDismissFunction) this.dialogDismissFunction();
-      }
-
       // #=== LISTENER & OBSERVER METHODS ===#
 
       static get observers() {
           return [
-            '_pollerCompletedChanged(poller.completed)',
+            '_userPollerCompletedChanged(userPoller.completed)',
             '_currentUserAsyncPollerIdChanged(currentUser.async_callback_poller_id)'
           ]
       }
 
-      _pollerCompletedChanged(pollerCompleted) {
+      _userPollerCompletedChanged(pollerCompleted) {
         if (pollerCompleted) {
-          if (this.pollerCompleteFunction) {
-            var theFunction = this.pollerCompleteFunction;
-            this.pollerCompleteFunction = null;
-            theFunction();
-          }
-
-          if (this.dialogConfirmFunction || this.dialogDismissFunction)
-            this.$.pollerDialogButtons.classList.remove('collapsed');
-          else
-            this.$.pollerDialog.close();
+          location.reload();
         }
       }
 
       _currentUserAsyncPollerIdChanged(asyncCallbackPollerId) {
-        if (asyncCallbackPollerId && asyncCallbackPollerId.length)
-          this.openPollerDialog(asyncCallbackPollerId, {
-            color: 'orange',
-            title: 'Setting up your account...',
-            onComplete: function() {
-              location.reload();
-            }
-          });
+        if (asyncCallbackPollerId && asyncCallbackPollerId.length) {
+          this.userPollerId = asyncCallbackPollerId;
+          this.$.userPollerDialog.open();
+        }
       }
 
       _manifestChanged(newValue, oldValue) {

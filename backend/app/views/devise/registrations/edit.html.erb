@@ -703,7 +703,7 @@
   </div>
 </div>
 
-<% if !@user.errors.messages.include?(:username_with_caps) %>
+<% if @user.errors.messages[:username_with_caps].blank? %>
   <!-- === BILLING INFO === -->
 
   <div class="bl-inline-form" id="add-card-form" style="display: none;">
@@ -729,8 +729,7 @@
   <!-- === UPLOAD PROFILE IMAGE FORM === -->
 
   <div id="upload-image-panel" style="display: none;">
-    <%= form_tag(user_update_image_path(@user), id: 'upload-image-form', method: :post, 
-        remote: true) do %>
+    <%= form_tag(user_update_image_path(@user), id: 'upload-image-form', method: :post, remote: true) do %>
       
       <input type="hidden" name="avatar_key" id="user_avatar_key">
 
@@ -767,8 +766,7 @@
 
 <!-- === CARRIERWAVE DIRECT FORM === -->
 
-<%= direct_upload_form_for(@uploader, html: { id: 'avatar_form', style: 'display: none;',
-    target: 'avatar_result_frame' } ) do |u| %>
+<%= direct_upload_form_for(@uploader, html: { id: 'avatar_form', style: 'display: none;', target: 'avatar_result_frame' } ) do |u| %>
   <%= u.file_field :direct_avatar, accept: 'image/*' %>
 <% end %>
 

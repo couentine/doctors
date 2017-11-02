@@ -23,6 +23,32 @@ The client uses the `swagger.json` file located in the component folder.
 -->
 <dom-module id="bl-backend-client">
   <template>
+
+    <style include="bl-style-classes"></style>
+
+    <!-- #=== API ERROR DIALOG ===# -->
+    <paper-dialog id="connectionErrorDialog" class="red no-title-bar" modal dynamic-align>
+      <h2>Connection Problem</h2>
+
+      <div class="formIcon">
+        <i class="icon-connection-warning"></i>
+      </div>
+            
+      <div class="dialogContent">
+        <p>
+          There was a problem connecting with the Badge List server. Please review the error message below and try reloading the page.
+        </p>
+        <p>
+          <strong>Error Message:</strong> [[connectionErrorMessage]]
+        </p>
+      </div>
+
+      <div class="buttons">
+        <paper-button class="red primary" dialog-dismiss>
+          Close
+        </paper-button>
+      </div>
+    </paper-dialog>
   </template>
 
   <script>
@@ -39,7 +65,9 @@ The client uses the `swagger.json` file located in the component folder.
             type: Boolean,
             value: false,
             notify: true
-          }
+          },
+
+          connectionErrorMessage: String
 
         };
       }
@@ -144,13 +172,8 @@ The client uses the `swagger.json` file located in the component folder.
             self.client = client;
             self.initialized = true;
         }).catch(function(errorMessage) {
-            self.app.openAlertDialog({
-              color: 'orange', 
-              title: 'Connection problem',
-              body: 'There was a problem connecting with the Badge List server. Please review the error message below '
-                + 'and try reloading the page.<br><br><strong>Error Message:</strong> ' + errorMessage,
-              dismiss: { text: 'Close', action: function(){} }
-            });
+            self.connectionErrorMessage = errorMessage;
+            self.$.connectionErrorDialog.open();
         });
       }
 

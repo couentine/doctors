@@ -1,0 +1,101 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Text Input Component #
+
+This is a wrapper around `<paper-input>` which incorporates Badge List styling and functionality. Use this component for all 
+single-line text input.
+-->
+<dom-module id="bl-input-text">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+          padding: 0.5em 0;
+        }
+        :host(:first-child) { padding-top: 0; }
+        :host(:last-child) { padding-bottom: 0; }
+
+      /* === COMPONENT STYLES === */
+
+        paper-input {
+          --paper-input-container-input: {
+            font-size: 1rem;
+          };
+
+          --primary-text-color: var(--bl-grey-800);
+          --secondary-text-color: var(--bl-grey-700);
+          --error-color: var(--bl-red-800);
+        }
+
+    </style>
+
+    <paper-input id="input" value="{{value}}" label="[[label]]" class$="[[classString]]" always-float-label="[[alwaysFloatLabel]]">
+    </paper-input>
+
+  </template>
+
+  <script>
+    class BlInputText extends Polymer.Element {
+      
+      static get is() { return 'bl-input-text'; }
+
+      static get properties() {
+        return {
+          
+          /** Passes through to the `value` property of `<paper-input>`. */
+          value: {
+            type: String,
+            notify: true
+          },
+          
+          /** Passes through to the `label` property of `<paper-input>`. */
+          label: String,
+          
+          /** Passes through to the `alwaysFloatLabel` property of `<paper-input>`. */
+          alwaysFloatLabel: {
+            type: String,
+            value: false
+          },
+
+          class: String,
+          
+          /** This is needed in order to reference the class value in data bindings. */
+          classString: {
+            type: String,
+            computed: '_classString(class)'
+          }
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /** Focuses the paper input. */
+      focus() {
+        this.$.input.focus();
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _classString(classValue) {
+        return classValue;
+      }
+
+    }
+
+    window.customElements.define(BlInputText.is, BlInputText);
+  </script>
+</dom-module>

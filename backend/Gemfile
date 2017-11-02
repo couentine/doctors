@@ -12,10 +12,11 @@ ruby '2.3.4'
   gem 'redis', '~> 3.2.2'
   gem 'sidekiq', '~> 4.0'
   gem 'sinatra', :require => nil
-  gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+  gem 'carrierwave-mongoid', '~> 1.0.0', :require => 'carrierwave/mongoid'
   gem 'carrierwave_direct'
   gem 'fog'
   gem 'mini_magick', '~> 4.3.6'
+  gem 'rails-html-sanitizer'
 
 #=== USERS & AUTHORIZATION ===#
 

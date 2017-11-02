@@ -10,13 +10,12 @@ class Entry
   MAX_SUMMARY_LENGTH = 140
   TYPE_VALUES = ['post', 'validation']
   FORMAT_VALUES = ['text', 'link', 'image', 'file', 'tweet', 'code']
-  JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, 
-    :body_sections, :tags, :tags_with_caps]
+  JSON_FIELDS = [:log, :creator, :parent_tag, :entry_number, :summary, :type, :log_validated, :body_sections, :tags, :tags_with_caps]
 
   JSON_TEMPLATES = {
     log_item: [:id, :entry_number, :created_at, :updated_at, :summary, :body, :linkified_summary, :type, :format, :format_icon, 
-      :parent_tag, :body_sections, :link_url, :code_format, :link_metadata, :image_url, :image_medium_url, :image_small_url, 
-      :image_processing_error, :file_url, :file_processing_error, { uploaded_file_filename: :file_filename }]
+      :parent_tag, :body_sections, :preserve_body_html, :link_url, :code_format, :link_metadata, :image_url, :image_medium_url, 
+      :image_small_url, :image_processing_error, :file_url, :file_processing_error, { uploaded_file_filename: :file_filename }]
   }
   
   # === INSTANCE VARIABLES === #
@@ -41,6 +40,7 @@ class Entry
   field :parent_tag,                      type: String
 
   field :body,                            type: String
+  field :preserve_body_html,              type: Boolean, default: false # set this to use the newer style (body is sanitized and left as is)
   field :link_url,                        type: String
   field :link_metadata,                   type: Hash, default: {}, pre_processed: true
   field :code_format,                     type: String
@@ -387,16 +387,25 @@ protected
     end
 
     if body_changed? || summary_changed? || link_url_changed?
-      # Linkify summary and body (and split body into sections)
+      # Linkify summary
       summary_result = linkify_text(summary, log.badge.group, log.badge)
       self.linkified_summary = summary_result[:text] if summary_changed?
-      body_result = linkify_text(body, log.badge.group, log.badge)
-      self.body_sections = body_result[:text].split(SECTION_DIVIDER_REGEX) if body_changed?
+      
+      # Either sanitize the body html or linkify it and split it into sections
+      if preserve_body_html
+        html_sanitizer = Rails::Html::WhiteListSanitizer.new
+        self.body = html_sanitizer.sanitize(body)
+        self.body_sections = [body]
+      else
+        body_result = linkify_text(body, log.badge.group, log.badge)
+        self.body_sections = body_result[:text].split(SECTION_DIVIDER_REGEX) if body_changed?
+      end
       
       # The entry tags should be a concatenation of the summary and body tags
-      self.tags = [body_result[:tags], summary_result[:tags]].flatten.uniq
-      self.tags_with_caps = [body_result[:tags_with_caps], summary_result[:tags_with_caps]]\
-        .flatten.uniq
+      self.tags = summary_result[:tags]
+      self.tags = (tags + body_result[:tags]).uniq if body_result.present?
+      self.tags_with_caps = summary_result[:tags_with_caps]
+      self.tags_with_caps = (tags_with_caps + body_result[:tags_with_caps]).uniq if body_result.present?
     end
   end
 

@@ -1321,9 +1321,10 @@ protected
           validating_user = user_map[validation_item['user'].to_s]
           summary = validation_item['summary']
           body = validation_item['body']
+          preserve_body_html = (validation_item['preserve_body_html'] == true)
 
           if badge.present? && log.present? && validating_user.present? && summary.present?
-            log.add_validation(validating_user, summary, body, true)
+            log.add_validation(validating_user, summary, body, true, true, preserve_body_html)
           end
         end
       end # if invited_item['validations'].present?

@@ -2,7 +2,6 @@
 
 class S3BadgeUploader < CarrierWave::Uploader::Base
   include CarrierWave::MiniMagick
-  include CarrierWave::MimeTypes
   
   storage :fog
   
@@ -22,7 +21,6 @@ class S3BadgeUploader < CarrierWave::Uploader::Base
   end
 
   # Process files as they are uploaded:
-  process :set_content_type
   process :resize_to_limit => [500, 500]
 
   version :medium do
@@ -55,4 +53,10 @@ class S3BadgeUploader < CarrierWave::Uploader::Base
     model.send(:write_attribute, mounted_as, nil)
   end
 
+  # CONTENT TYPE WORKAROUND (http://bit.ly/2yp1z4C) - Needed because carrierwave direct messes up the default content type behavior.
+  GENERIC_CONTENT_TYPES = %w[application/octet-stream binary/octet-stream]
+  process :clear_generic_content_type
+  def clear_generic_content_type
+    file.content_type = nil if GENERIC_CONTENT_TYPES.include?(file.try(:content_type))
+  end
 end
