@@ -511,7 +511,7 @@ DEPENDENCIES
   browser_details
   byebug
   capybara
-  carrierwave-mongoid
+  carrierwave-mongoid (~> 1.0.0)
   carrierwave_direct
   coffee-rails (~> 4.1)
   devise (~> 3.5)
