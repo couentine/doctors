@@ -1399,10 +1399,8 @@
           <li><b>Cost:</b> <%= @group.subscription_plan_cost %></li>
           <li>
             <b>Plan Limits:</b>
-          <%= (@group.user_limit<0) ? 'Unlimited members' : pluralize(@group.user_limit,'member') %>,
+            <%= (@group.user_limit<0) ? 'Unlimited members' : pluralize(@group.user_limit,'member') %>,
             <%=(@group.admin_limit<0) ? 'Unlimited admins' : pluralize(@group.admin_limit,'admin')%>,
-            <%= (@group.sub_group_limit<0) ? \
-              'Unlimited sub-groups' : pluralize(@group.sub_group_limit,'sub-group') %>
           </li>
         <% end %>
         <% if @group.has_features? %>

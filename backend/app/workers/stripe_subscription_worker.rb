@@ -22,7 +22,8 @@ class StripeSubscriptionWorker
           metadata: {
             users: plan_fields['users'],
             admins: plan_fields['admins'],
-            sub_groups: plan_fields['sub_groups']
+            hub_member_groups_full: plan_fields['hub_member_groups_full'],
+            hub_member_groups_limited: plan_fields['hub_member_groups_limited']
           }
         )
       end

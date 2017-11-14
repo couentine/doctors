@@ -108,16 +108,20 @@ class Group
   
   field :user_limit,                      type: Integer, default: 5
   field :admin_limit,                     type: Integer, default: 1
-  field :sub_group_limit,                 type: Integer, default: 0
+  field :hub_member_group_full_limit,     type: Integer, default: 0
+  field :hub_member_group_limited_limit,  type: Integer, default: 0
   field :features,                        type: Array, default: [] # use feature methods to access
   field :feature_grant_file_uploads,      type: Boolean
   field :feature_grant_reporting,         type: Boolean
   field :feature_grant_bulk_tools,        type: Boolean
   field :feature_grant_integration,       type: Boolean
+  field :feature_grant_hub,               type: Boolean
+  field :feature_grant_leaderboards,      type: Boolean
   field :total_user_count,                type: Integer, default: 1
   field :admin_count,                     type: Integer, default: 1
   field :member_count,                    type: Integer, default: 0
-  field :sub_group_count,                 type: Integer, default: 0
+  field :hub_member_group_full_count,     type: Integer, default: 0
+  field :hub_member_group_limited_count,  type: Integer, default: 0
   field :active_user_count,               type: Integer # RETIRED
   field :monthly_active_users,            type: Hash # RETIRED
 
@@ -418,8 +422,16 @@ class Group
     end
   end
 
-  def can_create_sub_groups?
-    free? || ((sub_group_limit < 0) || (sub_group_count < sub_group_limit))
+  def can_create_full_hub_member_groups?
+    ((hub_member_group_full_limit < 0) || (hub_member_group_full_count < hub_member_group_full_limit))
+  end
+
+  def can_create_limited_hub_member_groups?
+    ((hub_member_group_limited_limit < 0) || (hub_member_group_limited_count < hub_member_group_limited_limit))
+  end
+
+  def can_create_hub_member_groups?
+    can_create_full_hub_limited_groups? || can_create_full_hub_member_groups?
   end
 
   # Returns whether or not the features array contains the specified 'feature' or :feature
@@ -435,6 +447,10 @@ class Group
       return_value ||= (feature_grant_bulk_tools == true)
     elsif (feature.to_s == 'integration')
       return_value ||= (feature_grant_integration == true)
+    elsif (feature.to_s == 'hub')
+      return_value ||= (feature_grant_hub == true)
+    elsif (feature.to_s == 'leaderboards')
+      return_value ||= (feature_grant_leaderboards == true)
     elsif (feature.to_s == 'privacy')
       return_value ||= paid?
     end
@@ -458,6 +474,12 @@ class Group
     end
     if feature_grant_integration && !return_list.include?('integration')
       return_list << 'integration'
+    end
+    if feature_grant_hub && !return_list.include?('hub')
+      return_list << 'hub'
+    end
+    if feature_grant_leaderboards && !return_list.include?('leaderboards')
+      return_list << 'leaderboards'
     end
     if paid? && !return_list.include?('privacy')
       return_list << 'privacy'
@@ -1255,7 +1277,6 @@ class Group
     if !subscription_plan.blank? && ALL_SUBSCRIPTION_PLANS.has_key?(subscription_plan)
       self.user_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['users']
       self.admin_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['admins']
-      self.sub_group_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['sub_groups']
     end
   end
 
@@ -1946,7 +1967,6 @@ protected
         else
           self.user_limit = 5
           self.admin_limit = 1
-          self.sub_group_limit = 0
           self.features = []
         end
       end

@@ -29,6 +29,12 @@ defaults: &defaults
     integration:
       label: Third-Party Integrations
       description: Includes access to LTI integration and all future integrations
+    hub:
+      label: Hub Group
+      description: A special group type for organizations which have many groups
+    leaderboards:
+      label: Leaderboards
+      description: Leaderboards show a list of group members ranked by badges earned
 
   # Subscription Plans
   subscription_plans:
@@ -44,9 +50,10 @@ defaults: &defaults
         color: blue
         description: |
           1 admin / badge awarder
-        users: 5000
+        users: 2000
         admins: 1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       solo-1y-1:
@@ -60,14 +67,15 @@ defaults: &defaults
         color: blue
         description: |
           1 admin / badge awarder
-        users: 5000
+        users: 2000
         admins: 1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
-      team-1m-1:
+      team-1m-2:
         name: Team
-        amount: 3000
+        amount: 3500
         currency: usd
         interval: month
         trial_period_days: 0
@@ -76,15 +84,16 @@ defaults: &defaults
         color: green
         description: |
           3 admins, unlimited badge awarders
-        users: 5000
+        users: 2000
         admins: 3
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
-      team-1y-1:
+      team-1y-2:
         name: Team Annual
-        amount: 33000
+        amount: 38500
         currency: usd
         interval: year
         trial_period_days: 0
@@ -93,9 +102,10 @@ defaults: &defaults
         color: green
         description: |
           3 admins, unlimited badge awarders
-        users: 5000
+        users: 2000
         admins: 3
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -110,10 +120,10 @@ defaults: &defaults
         color: orange
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
-        users: 5000
+        users: 2000
         admins: -1
-        sub_groups: 5
-        sub_group_amount: 1000
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -131,16 +141,66 @@ defaults: &defaults
         color: orange
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
-        users: 5000
+        users: 2000
         admins: -1
-        sub_groups: 5
-        sub_group_amount: 1000
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
         - reporting
         - bulk_tools
         - integration
+      hub-1m-1:
+        name: Hub
+        amount: 47000
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Hub
+        icon: fa-cubes
+        color: purple
+        description: |
+          5 Org member groups, 50 Solo member groups, leaderboards, domain privacy
+        users: 2000
+        admins: -1
+        hub_member_groups_full: 5
+        hub_member_groups_limited: 50
+        hub_member_groups_full_plan: org-1m-1
+        hub_member_groups_limited_plan: solo-1m-2
+        features:
+        - file_uploads
+        - community
+        - reporting
+        - bulk_tools
+        - integration
+        - hub
+        - leaderboards
+      hub-1y-1:
+        name: Hub Annual
+        amount: 143000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List Hub
+        icon: fa-cubes
+        color: purple
+        description: |
+          5 Org member groups, 50 Solo member groups, leaderboards, domain privacy
+        users: 2000
+        admins: -1
+        hub_member_groups_full: 5
+        hub_member_groups_limited: 50
+        hub_member_groups_full_plan: org-1y-1
+        hub_member_groups_limited_plan: solo-1y-1
+        features:
+        - file_uploads
+        - community
+        - reporting
+        - bulk_tools
+        - integration
+        - hub
+        - leaderboards
     k12:
       k12-teacher-1y-1:
         name: K12 Teacher Annual
@@ -153,13 +213,101 @@ defaults: &defaults
         color: blue
         description: |
           1 teacher, annual billing only
-        users: 5000
+        users: 2000
         admins: 1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
+      k12-hub-1m-1:
+        name: K12 Hub
+        amount: 27000
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Hub
+        icon: fa-cubes
+        color: purple
+        description: |
+          5 Org member groups, 50 K12 Teacher member groups, leaderboards, domain privacy
+        users: 2000
+        admins: -1
+        hub_member_groups_full: 5
+        hub_member_groups_limited: 50
+        hub_member_groups_full_plan: org-1m-1
+        hub_member_groups_limited_plan: k12-teacher-1y-1
+        features:
+        - file_uploads
+        - community
+        - reporting
+        - bulk_tools
+        - integration
+        - hub
+        - leaderboards
+      k12-hub-1y-1:
+        name: K12 Hub Annual
+        amount: 297000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Hub
+        icon: fa-cubes
+        color: purple
+        description: |
+          5 Org member groups, 50 K12 Teacher member groups, leaderboards, domain privacy
+        users: 2000
+        admins: -1
+        hub_member_groups_full: 5
+        hub_member_groups_limited: 50
+        hub_member_groups_full_plan: org-1y-1
+        hub_member_groups_limited_plan: k12-teacher-1y-1
+        features:
+        - file_uploads
+        - community
+        - reporting
+        - bulk_tools
+        - integration
+        - hub
+        - leaderboards
+    internal:
+      team-1m-1:
+        name: Team (Legacy)
+        amount: 3000
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Team
+        icon: fa-users
+        color: green
+        description: |
+          3 admins, unlimited badge awarders
+        users: 2000
+        admins: 3
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
+        features:
+        - file_uploads
+        - community
+      team-1y-1:
+        name: Team Annual (Legacy)
+        amount: 33000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List Team
+        icon: fa-users
+        color: green
+        description: |
+          3 admins, unlimited badge awarders
+        users: 2000
+        admins: 3
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
+        features:
+        - file_uploads
+        - community
       k12-school-1m-1:
-        name: K12 School
+        name: K12 School (Legacy)
         amount: 6500
         currency: usd
         interval: month
@@ -169,10 +317,10 @@ defaults: &defaults
         color: orange
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
-        users: 5000
+        users: 2000
         admins: -1
-        sub_groups: 5
-        sub_group_amount: 500
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -180,7 +328,7 @@ defaults: &defaults
         - bulk_tools
         - integration
       k12-school-1y-2:
-        name: K12 School Annual
+        name: K12 School Annual (Legacy)
         amount: 70000
         currency: usd
         interval: year
@@ -191,17 +339,16 @@ defaults: &defaults
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
           (Includes discount for annual billing)
-        users: 5000
+        users: 2000
         admins: -1
-        sub_groups: 5
-        sub_group_amount: 500
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
         - reporting
         - bulk_tools
         - integration
-    internal:
       solo-free-1:
         name: Enterprise Solo
         amount: 0
@@ -212,9 +359,10 @@ defaults: &defaults
         icon: fa-star
         description: |
           Badge List Enterprise
-        users: 5000
+        users: 2000
         admins: 1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       team-free-1:
@@ -227,9 +375,10 @@ defaults: &defaults
         icon: fa-star
         description: |
           Badge List Enterprise
-        users: 5000
+        users: 2000
         admins: 3
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -243,10 +392,10 @@ defaults: &defaults
         icon: fa-star
         description: |
           Badge List Enterprise
-        users: 5000
+        users: 2000
         admins: 3
-        sub_groups: 5
-        sub_group_amount: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -266,7 +415,8 @@ defaults: &defaults
           Badge List Daily 100
         users: 100
         admins: -1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -283,7 +433,8 @@ defaults: &defaults
           Badge List Daily 100
         users: 100
         admins: -1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -298,9 +449,10 @@ defaults: &defaults
         icon: fa-user
         description: |
           1 admin / badge awarder
-        users: 5000
+        users: 2000
         admins: 1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       k12-team-1m-1:
@@ -313,9 +465,10 @@ defaults: &defaults
         icon: fa-users
         description: |
           3 admins, unlimited badge awarders
-        users: 5000
+        users: 2000
         admins: 3
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -330,9 +483,10 @@ defaults: &defaults
         description: |
           3 admins, unlimited badge awarders
           (Includes discount for annual billing)
-        users: 5000
+        users: 2000
         admins: 3
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -347,10 +501,10 @@ defaults: &defaults
         description: |
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
           (Includes discount for annual billing)
-        users: 5000
+        users: 2000
         admins: -1
-        sub_groups: 5
-        sub_group_amount: 500
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
         - file_uploads
         - community
@@ -359,14 +513,15 @@ defaults: &defaults
         - integration
       standard-100m-1:
         name: Starter
-        amount: 5000
+        amount: 2000
         currency: usd
         interval: month
         trial_period_days: 0
         statement_descriptor: Badge List Starter
         users: 100
         admins: -1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       standard-500m-1:
@@ -378,7 +533,8 @@ defaults: &defaults
         statement_descriptor: Badge List Basic
         users: 500
         admins: -1
-        sub_groups: 1
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       standard-1000m-1:
@@ -390,19 +546,21 @@ defaults: &defaults
         statement_descriptor: Badge List Standard
         users: 1000
         admins: -1
-        sub_groups: 5
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
-      standard-5000m-1:
+      standard-2000m-1:
         name: Premium
-        amount: 45000
+        amount: 42000
         currency: usd
         interval: month
         trial_period_days: 0
         statement_descriptor: Badge List Premium
-        users: 5000
+        users: 2000
         admins: -1
-        sub_groups: -1
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       k12-1y-1:
@@ -412,9 +570,10 @@ defaults: &defaults
         interval: year
         trial_period_days: 0
         statement_descriptor: Badge List K12 Teacher
-        users: 5000
+        users: 2000
         admins: 1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       free-5m-1:
@@ -426,7 +585,8 @@ defaults: &defaults
         statement_descriptor: Badge List Free
         users: 5
         admins: -1
-        sub_groups: -1
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       free-100m-1:
@@ -438,7 +598,8 @@ defaults: &defaults
         statement_descriptor: Badge List Free
         users: 100
         admins: -1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       free-500m-1:
@@ -450,7 +611,8 @@ defaults: &defaults
         statement_descriptor: Badge List Free
         users: 500
         admins: -1
-        sub_groups: 1
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       free-unlimited-1:
@@ -462,7 +624,8 @@ defaults: &defaults
         statement_descriptor: Badge List Free
         users: -1
         admins: -1
-        sub_groups: -1
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
       trial-100m-1:
@@ -474,7 +637,8 @@ defaults: &defaults
         statement_descriptor: Badge List Trial
         users: 100
         admins: -1
-        sub_groups: 0
+        hub_member_groups_full: 0
+        hub_member_groups_limited: 0
         features:
           - file_uploads
 
