@@ -858,30 +858,6 @@ namespace :db do
     puts " >> Done."
   end
 
-  # Run this is production any time you update the subscription LIMITS for existing plans
-  # in config.yml. This method will call the refresh_subscription_limits method on all groups
-  # with subscription plans.
-  # WARNING: This will revert any customized values that have been set by BL admins.
-  task refresh_group_subscription_limits: :environment do
-    print "Updating #{Group.where(:subscription_plan.ne => nil).count} groups"
-
-    Group.where(:subscription_plan.ne => nil).each do |group|
-      group.refresh_subscription_limits
-
-      if group.changed?
-        if group.timeless.save
-          print "."
-        else
-          print "!#{group.url_with_caps}"
-        end
-      else
-        print '-'
-      end
-    end
-    
-    puts " >> Done."
-  end
-
   # Run this is production any time you update the subscription FEATURES for existing plans
   # in config.yml. This method will call the refresh_subscription_features method on all groups
   # with subscription plans.

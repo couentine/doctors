@@ -88,6 +88,8 @@ IntercomRails.config do |config|
     :flags => :flags,
     :user_limit => :user_limit,
     :admin_limit => :admin_limit,
+    :full_member_group_limit => :full_member_group_limit,
+    :limited_member_group_limit => :limited_member_group_limit,
     :total_user_count => :total_user_count,
     :admin_count => :admin_count,
     :member_count => :member_count,

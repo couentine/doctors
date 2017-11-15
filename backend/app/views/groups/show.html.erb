@@ -1400,7 +1400,7 @@
           <li>
             <b>Plan Limits:</b>
             <%= (@group.user_limit<0) ? 'Unlimited members' : pluralize(@group.user_limit,'member') %>,
-            <%=(@group.admin_limit<0) ? 'Unlimited admins' : pluralize(@group.admin_limit,'admin')%>,
+            <%=(@group.admin_limit<0) ? 'Unlimited admins' : pluralize(@group.admin_limit,'admin')%>
           </li>
         <% end %>
         <% if @group.has_features? %>

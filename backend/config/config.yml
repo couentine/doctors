@@ -52,8 +52,8 @@ defaults: &defaults
           1 admin / badge awarder
         users: 2000
         admins: 1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       solo-1y-1:
@@ -69,8 +69,8 @@ defaults: &defaults
           1 admin / badge awarder
         users: 2000
         admins: 1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       team-1m-2:
@@ -86,8 +86,8 @@ defaults: &defaults
           3 admins, unlimited badge awarders
         users: 2000
         admins: 3
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -104,8 +104,8 @@ defaults: &defaults
           3 admins, unlimited badge awarders
         users: 2000
         admins: 3
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -122,8 +122,8 @@ defaults: &defaults
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 2000
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -143,8 +143,8 @@ defaults: &defaults
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 2000
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -164,10 +164,10 @@ defaults: &defaults
           5 Org member groups, 50 Solo member groups, leaderboards, domain privacy
         users: 2000
         admins: -1
-        hub_member_groups_full: 5
-        hub_member_groups_limited: 50
-        hub_member_groups_full_plan: org-1m-1
-        hub_member_groups_limited_plan: solo-1m-2
+        full_member_groups: 5
+        limited_member_groups: 50
+        full_member_groups_plan: org-1m-1
+        limited_member_groups_plan: solo-1m-2
         features:
         - file_uploads
         - community
@@ -189,10 +189,10 @@ defaults: &defaults
           5 Org member groups, 50 Solo member groups, leaderboards, domain privacy
         users: 2000
         admins: -1
-        hub_member_groups_full: 5
-        hub_member_groups_limited: 50
-        hub_member_groups_full_plan: org-1y-1
-        hub_member_groups_limited_plan: solo-1y-1
+        full_member_groups: 5
+        limited_member_groups: 50
+        full_member_groups_plan: org-1y-1
+        limited_member_groups_plan: solo-1y-1
         features:
         - file_uploads
         - community
@@ -215,8 +215,8 @@ defaults: &defaults
           1 teacher, annual billing only
         users: 2000
         admins: 1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       k12-hub-1m-1:
@@ -232,10 +232,10 @@ defaults: &defaults
           5 Org member groups, 50 K12 Teacher member groups, leaderboards, domain privacy
         users: 2000
         admins: -1
-        hub_member_groups_full: 5
-        hub_member_groups_limited: 50
-        hub_member_groups_full_plan: org-1m-1
-        hub_member_groups_limited_plan: k12-teacher-1y-1
+        full_member_groups: 5
+        limited_member_groups: 50
+        full_member_groups_plan: org-1m-1
+        limited_member_groups_plan: k12-teacher-1y-1
         features:
         - file_uploads
         - community
@@ -257,10 +257,10 @@ defaults: &defaults
           5 Org member groups, 50 K12 Teacher member groups, leaderboards, domain privacy
         users: 2000
         admins: -1
-        hub_member_groups_full: 5
-        hub_member_groups_limited: 50
-        hub_member_groups_full_plan: org-1y-1
-        hub_member_groups_limited_plan: k12-teacher-1y-1
+        full_member_groups: 5
+        limited_member_groups: 50
+        full_member_groups_plan: org-1y-1
+        limited_member_groups_plan: k12-teacher-1y-1
         features:
         - file_uploads
         - community
@@ -283,8 +283,8 @@ defaults: &defaults
           3 admins, unlimited badge awarders
         users: 2000
         admins: 3
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -301,8 +301,8 @@ defaults: &defaults
           3 admins, unlimited badge awarders
         users: 2000
         admins: 3
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -319,8 +319,8 @@ defaults: &defaults
           Unlimited admins &amp; badge awarders, reporting, bulk tools, integrations
         users: 2000
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -341,8 +341,8 @@ defaults: &defaults
           (Includes discount for annual billing)
         users: 2000
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -361,8 +361,8 @@ defaults: &defaults
           Badge List Enterprise
         users: 2000
         admins: 1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       team-free-1:
@@ -377,8 +377,8 @@ defaults: &defaults
           Badge List Enterprise
         users: 2000
         admins: 3
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -394,8 +394,8 @@ defaults: &defaults
           Badge List Enterprise
         users: 2000
         admins: 3
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -415,8 +415,8 @@ defaults: &defaults
           Badge List Daily 100
         users: 100
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -433,8 +433,8 @@ defaults: &defaults
           Badge List Daily 100
         users: 100
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -451,8 +451,8 @@ defaults: &defaults
           1 admin / badge awarder
         users: 2000
         admins: 1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       k12-team-1m-1:
@@ -467,8 +467,8 @@ defaults: &defaults
           3 admins, unlimited badge awarders
         users: 2000
         admins: 3
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -485,8 +485,8 @@ defaults: &defaults
           (Includes discount for annual billing)
         users: 2000
         admins: 3
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -503,8 +503,8 @@ defaults: &defaults
           (Includes discount for annual billing)
         users: 2000
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
         - file_uploads
         - community
@@ -520,8 +520,8 @@ defaults: &defaults
         statement_descriptor: Badge List Starter
         users: 100
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       standard-500m-1:
@@ -533,8 +533,8 @@ defaults: &defaults
         statement_descriptor: Badge List Basic
         users: 500
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       standard-1000m-1:
@@ -546,8 +546,8 @@ defaults: &defaults
         statement_descriptor: Badge List Standard
         users: 1000
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       standard-2000m-1:
@@ -559,8 +559,8 @@ defaults: &defaults
         statement_descriptor: Badge List Premium
         users: 2000
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       k12-1y-1:
@@ -572,8 +572,8 @@ defaults: &defaults
         statement_descriptor: Badge List K12 Teacher
         users: 2000
         admins: 1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       free-5m-1:
@@ -585,8 +585,8 @@ defaults: &defaults
         statement_descriptor: Badge List Free
         users: 5
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       free-100m-1:
@@ -598,8 +598,8 @@ defaults: &defaults
         statement_descriptor: Badge List Free
         users: 100
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       free-500m-1:
@@ -611,8 +611,8 @@ defaults: &defaults
         statement_descriptor: Badge List Free
         users: 500
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       free-unlimited-1:
@@ -624,8 +624,8 @@ defaults: &defaults
         statement_descriptor: Badge List Free
         users: -1
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
       trial-100m-1:
@@ -637,8 +637,8 @@ defaults: &defaults
         statement_descriptor: Badge List Trial
         users: 100
         admins: -1
-        hub_member_groups_full: 0
-        hub_member_groups_limited: 0
+        full_member_groups: 0
+        limited_member_groups: 0
         features:
           - file_uploads
 
