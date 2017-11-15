@@ -1,0 +1,7 @@
+{
+  "name": "badgelist-website",
+  "short_name": "badgelist-website",
+  "description": "A platform for awarding digital credentials and tracking learning progress.",
+  "start_url": "/",
+  "display": "standalone"
+}

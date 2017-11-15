@@ -1,0 +1,22 @@
+{
+  "name": "badgelist-website",
+  "description": "A platform for awarding digital credentials and tracking learning progress.",
+  "main": "index.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2.0.0",
+    "google-fonts-lato": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-lato?family=Lato",
+    "google-fonts-roboto": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto?family=Roboto",
+    "google-fonts-roboto-mono": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto-mono?family=Roboto+Mono",
+    "app-route": "PolymerElements/app-route#^2.0.3",
+    "paper-styles": "PolymerElements/paper-styles#^2.0.0",
+    "paper-button": "PolymerElements/paper-button#^2.0.0"
+  },
+  "devDependencies": {
+    "web-component-tester": "Polymer/web-component-tester#^6.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+  },
+  "resolutions": {
+    "polymer": "^2.0.0",
+    "webcomponentsjs": "^v1.0.2"
+  }
+}

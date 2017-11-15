@@ -1,0 +1,15 @@
+{
+  "name": "google-fonts-roboto-mono",
+  "main": [
+    "*.ttf",
+    "*.css"
+  ],
+  "_cacheHeaders": {
+    "Content-Type": "application/octet-stream",
+    "Content-Disposition": "attachment; filename=robotoMono.zip"
+  },
+  "_source": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto-mono?family=Roboto+Mono",
+  "_target": "*",
+  "_originalSource": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-roboto-mono?family=Roboto+Mono",
+  "_direct": true
+}

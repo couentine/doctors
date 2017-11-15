@@ -1,0 +1,15 @@
+{
+  "name": "google-fonts-lato",
+  "main": [
+    "*.ttf",
+    "*.css"
+  ],
+  "_cacheHeaders": {
+    "Content-Type": "application/octet-stream",
+    "Content-Disposition": "attachment; filename=lato.zip"
+  },
+  "_source": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-lato?family=Lato",
+  "_target": "*",
+  "_originalSource": "https://google-fonts.azurewebsites.net/googleFonts/google-fonts-lato?family=Lato",
+  "_direct": true
+}

@@ -716,6 +716,7 @@ defaults: &defaults
    - experts
    - group
    - groups
+   - home
    - index
    - invitation
    - invited_admins

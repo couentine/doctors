@@ -1,0 +1,24 @@
+{
+  "entryPoint": "index.html",
+  "shell": "src/bl-website/bl-website.html",
+  "fragments": [],
+  "extraDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/*.js",
+    "bower_components/webcomponentsjs/*.map",
+    "bower_components/google-fonts-lato/*.ttf",
+    "bower_components/google-fonts-roboto/*.ttf",
+    "bower_components/google-fonts-roboto-mono/*.ttf",
+    "bower_components/google-fonts-roboto-mono/*.ttf"
+  ],
+  "sources": [
+    "src/**/*",
+    "images/**/*",
+    "bower.json"
+  ],
+  "lint": {
+    "rules": [
+      "polymer-2"
+    ]
+  }
+}

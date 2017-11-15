@@ -1,0 +1,44 @@
+<!--
+# Badge List Website Component Mixin #
+  
+All Badge List website components should extend this mixin. It provides an `website` property that allows access to the 
+`bl-website` component.
+-->
+<script>
+
+  BlWebsiteComponentMixin = function(superClass) {
+    return class extends superClass {
+
+      static get properties() {
+        return {
+          
+          /** Links to the `<bl-website>` component. */
+          website: Object,
+          
+          /** The details of the logged in user provided from the backend on initial page load. Null if logged out. */
+          currentUser: Object
+
+        };
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+
+        this.website = document.querySelector('bl-website');
+
+        // Add a listener for when the current user is set
+        this.website.addEventListener('current-user-changed', e => this._websiteCurrentUserChanged(e));
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _websiteCurrentUserChanged(e) {
+        this.currentUser = this.website.currentUser;
+      }
+
+    }
+  }
+
+</script>

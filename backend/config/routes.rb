@@ -17,6 +17,7 @@ BadgeList::Application.routes.draw do
   match 'c' => 'static_pages#colors', via: :get
   match 'j/image_key' => 'static_pages#image_key', via: :get, as: :image_key
   match 'w' => 'home#root_external', via: :get, as: :root_external
+  match 'home' => 'home#root_internal', via: :get, as: :root_internal
   match 'pricing' => 'home#pricing', via: :get, as: :pricing
   match 'pricing-k12' => 'home#pricing_k12', via: :get, as: :pricing_k12
   match 'how-it-works' => 'home#how_it_works', via: :get, as: :how_it_works

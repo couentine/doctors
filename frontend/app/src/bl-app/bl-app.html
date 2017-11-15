@@ -46,9 +46,9 @@ The mixin also provides various actions for interacting with the container. (Ref
     <!-- #=== APP ROUTING ===# -->
     
     <app-location id="location" route="{{route}}" 
-      url-space-regex="(^/$)|(^/[a-zA-Z0-9_-]{3,}/[a-zA-Z0-9_-]{3,}/endorsements/add)"></app-location>
+      url-space-regex="(^/home$)|(^/[a-zA-Z0-9_-]{3,}/[a-zA-Z0-9_-]{3,}/endorsements/add)"></app-location>
     
-    <app-route id="homeViewRoute" active="{{homeViewActive}}" route="{{route}}" pattern="/"></app-route>
+    <app-route id="homeViewRoute" active="{{homeViewActive}}" route="{{route}}" pattern="/home"></app-route>
     <app-route id="groupRoute" route="{{route}}" pattern="/:slug" data="{{groupRouteData}}" tail="{{groupSubroute}}"></app-route>
       <app-route id="badgeRoute" route="{{groupSubroute}}" pattern="/:slug" data="{{badgeRouteData}}" tail="{{badgeSubroute}}"></app-route>
         <app-route id="addBadgeEndorsementsViewRoute" active="{{addBadgeEndorsementsViewActive}}" route="{{badgeSubroute}}" 

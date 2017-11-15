@@ -1,0 +1,111 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="../bl-styles/fonts.html">
+<link rel="import" href="../bl-views/bl-view-web-home.html">
+<link rel="import" href="../bl-views/bl-view-how-it-works.html">
+
+<!--
+# Badge List Website #
+-->
+<dom-module id="bl-website">
+  <template>
+
+    <style include="bl-style-classes">
+
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          @apply --bl-font-common-base;
+          
+          display: block;
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+        }
+
+    </style>
+
+    <!-- #=== APP ROUTING ===# -->
+    
+    <app-location id="location" route="{{route}}" 
+      url-space-regex="(^/$)|(^/w$)|(^/how-it-works$)"></app-location>
+    
+    <app-route id="indexRoute" active="{{indexRouteActive}}" route="{{route}}" pattern="/"></app-route>
+    <app-route id="webRoute" active="{{webRouteActive}}" route="{{route}}" pattern="/w"></app-route>
+    <app-route id="howItWorksViewRoute" active="{{howItWorksViewRouteActive}}" route="{{route}}" pattern="/how-it-works"></app-route>
+
+    <!-- #=== APP VIEWS ===# -->
+    <bl-view-web-home id="webHomeView" active="{{webHomeViewActive}}"></bl-view-web-home>
+    <bl-view-how-it-works id="howItWorksView" active="{{howItWorksViewRouteActive}}"></bl-view-how-it-works>
+    
+    <!-- #=== TOAST CONTAINER ===# -->
+    <content id="toastContainer" select="bl-toast-container"></content>
+
+  </template>
+
+  <script>
+    class BlWebsite extends Polymer.Element {
+      static get is() { return 'bl-website'; }
+
+      static get properties() {
+        return {
+          
+          /** The manifest is required from the backend. It contains details of the logged in user and a CSRF token to use for forms. */
+          manifest: {
+            type: Object,
+            observer: '_manifestChanged'
+          },
+
+          /** Automatically set to the current user from the manifest. */
+          currentUser: {
+            type: Object,
+            notify: true
+          },
+
+          /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
+          activeView: Object,
+
+          indexRouteActive: Boolean,
+          webRouteActive: Boolean,
+          webHomeViewActive: {
+            type: Boolean,
+            computed: '_webHomeViewActive(indexRouteActive, webRouteActive)'
+          }
+
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      addToast(text, type, autoCloseAfter) {
+        // Displays new toast item in the app toast container
+        // Leave type or autoCloseAfter blank to use the default
+        this.$.toastContainer.addToast(text, type, autoCloseAfter);
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _manifestChanged(newValue, oldValue) {
+        if (newValue)
+          this.setProperties({
+            currentUser: newValue.current_user
+          });
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _webHomeViewActive(indexRouteActive, webRouteActive) {
+        return indexRouteActive || webRouteActive;
+      }
+
+    }
+
+    window.customElements.define(BlWebsite.is, BlWebsite);
+  </script>
+</dom-module>

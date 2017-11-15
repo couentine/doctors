@@ -4,10 +4,10 @@ class HomeController < ApplicationController
   # This renders either the polymer layout if the user is logged in OR the public website
   def root
     if current_user
-      render_polymer_app
+      redirect_to '/home'
     else
       respond_to do |format|
-        format.html { render template: 'home/root_external', layout: 'web' }
+        format.html { render_polymer_website }
         format.any do
           # This prevents an exception from occuring when random search engines try querying
           # for other home page formats
@@ -16,12 +16,17 @@ class HomeController < ApplicationController
       end
     end
   end
+
+  # GET /home
+  def root_internal
+    render_polymer_app
+  end
   
   # GET /w
   # This allows internal users to access the external homepage.
   def root_external
     if current_user
-      render layout: 'web'
+      render_polymer_website
     else
       # This prevents the '/w' URL from being bookmarked or used when people aren't logged in
       redirect_to '/'

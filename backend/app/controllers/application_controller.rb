@@ -84,8 +84,8 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Call this from controller actions which use the new polymer frontend
-  # It sets the needed manifest variable and renders the polymer layout
+  # Call this from controller actions which use the polymer app frontend.
+  # It sets the needed manifest variable and renders the polymer layout.
   def render_polymer_app
     @manifest = {
       app_root_url: ENV['root_url'],
@@ -95,6 +95,19 @@ class ApplicationController < ActionController::Base
     }
     
     render template: 'polymer/app', layout: 'polymer_app'
+  end
+
+  # Call this from controller actions which use the polymer website frontend.
+  # It sets the needed manifest variable and renders the polymer layout.
+  def render_polymer_website
+    @manifest = {
+      app_root_url: ENV['root_url'],
+      polymer_root_url: @polymer_website_root_url,
+      csrf_token: form_authenticity_token,
+      current_user: (current_user.present?) ? current_user.json(:current_user) : nil
+    }
+    
+    render template: 'polymer/website', layout: 'polymer_website'
   end
 
 private
@@ -123,9 +136,13 @@ private
     # Set the root url of the polymer server (in dev) or the polymer asset folder (in production)
     if Rails.env.production?
       @polymer_app_root_url = "#{ENV['root_url']}/p/app"
+      @polymer_website_root_url = "#{ENV['root_url']}/p/website"
     else
-      # We're using the polymer-proxy server (on port 8100) to add CORS headers to responses from the real polymer server (on port 8500)
+      # We're using the polymer-proxy server (on port 8100) to add CORS headers to responses from the polymer app server (on port 8500)
       @polymer_app_root_url = 'http://localhost:8100/0.0.0.0:8500'
+
+      # We're using the polymer-proxy server (on port 8100) to add CORS headers to responses from the polymer website server (on port 8510)
+      @polymer_website_root_url = 'http://localhost:8100/0.0.0.0:8510'
     end
   end
 
