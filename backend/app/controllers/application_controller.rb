@@ -86,15 +86,15 @@ class ApplicationController < ActionController::Base
 
   # Call this from controller actions which use the new polymer frontend
   # It sets the needed manifest variable and renders the polymer layout
-  def render_polymer_frontend
+  def render_polymer_app
     @manifest = {
       app_root_url: ENV['root_url'],
-      polymer_root_url: @polymer_root_url,
+      polymer_root_url: @polymer_app_root_url,
       csrf_token: form_authenticity_token,
       current_user: (current_user.present?) ? current_user.json(:current_user) : nil
     }
     
-    render template: 'polymer/show', layout: 'polymer'
+    render template: 'polymer/app', layout: 'polymer'
   end
 
 private
@@ -122,11 +122,10 @@ private
 
     # Set the root url of the polymer server (in dev) or the polymer asset folder (in production)
     if Rails.env.production?
-      @polymer_root_url = "#{ENV['root_url']}/p"
+      @polymer_app_root_url = "#{ENV['root_url']}/p/app"
     else
-      # NOTE: We're using the polymer-proxy server (on port 8080) to add CORS headers to the 
-      #   responses from the standard polymer server (on port 8081).
-      @polymer_root_url = 'http://localhost:8080/0.0.0.0:8081'
+      # We're using the polymer-proxy server (on port 8100) to add CORS headers to responses from the real polymer server (on port 8500)
+      @polymer_app_root_url = 'http://localhost:8100/0.0.0.0:8500'
     end
   end
 

@@ -9,7 +9,7 @@ remotes = { # first is default
 
 # If you need to manually build here is a version to copy and paste:
 # polymer build --js-minify --css-minify --html-minify --bundle --add-service-worker --insert-prefetch-links
-polymer_build_options = [
+polymer_app_build_options = [
   '--js-minify',
   '--css-minify',
   '--html-minify',
@@ -67,13 +67,14 @@ POLYMER_REBUILD_COMMIT_MESSAGE = "Rebuilt polymer frontend."
   root_path = `git rev-parse --show-toplevel`.chomp
   backend_path = "#{root_path}/backend"
   frontend_path = "#{root_path}/frontend"
-  polymer_build_source_path = "#{frontend_path}/build/default"
-  polymer_build_target_path = "#{backend_path}/public/p"
+  polymer_app_path = "#{frontend_path}/app"
+  polymer_app_build_source_path = "#{polymer_app_path}/build/default"
+  polymer_app_build_target_path = "#{backend_path}/public/p/app"
   puts "===> Root path: #{root_path}"
   puts "===> Backend path: #{backend_path}"
   puts "===> Frontend path: #{frontend_path}"
-  puts "===> Polymer build source path: #{polymer_build_source_path}"
-  puts "===> Polymer build target path: #{polymer_build_target_path}"
+  puts "===> Polymer build source path: #{polymer_app_build_source_path}"
+  puts "===> Polymer build target path: #{polymer_app_build_target_path}"
 
   puts "--------------------------------------------------------------------------------\n\n\n"
 
@@ -158,11 +159,11 @@ POLYMER_REBUILD_COMMIT_MESSAGE = "Rebuilt polymer frontend."
   puts "--------------------------------------------------------------------------------"
   puts "===> REBUILDING POLYMER"
   system("git checkout #{selected_branch}")
-  Dir.chdir(frontend_path) do
-    system("polymer build #{polymer_build_options.join(' ')}")
+  Dir.chdir(polymer_app_path) do
+    system("polymer build #{polymer_app_build_options.join(' ')}")
   end
-  FileUtils.remove_dir(polymer_build_target_path) # clear existing build
-  FileUtils.move(polymer_build_source_path, polymer_build_target_path) # move built files
+  FileUtils.remove_dir(polymer_app_build_target_path) # clear existing build
+  FileUtils.move(polymer_app_build_source_path, polymer_app_build_target_path) # move built files
 
   # Figure out if the build changed anything and, if so, make sure we're not on master (master doesn't allow git pushes only PRs)
   puts "--------------------------------------------------------------------------------"

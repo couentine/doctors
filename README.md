@@ -66,7 +66,11 @@ bl_admin_email=app-errors@badgelist.com
 
 ## Running the app ##
 
-To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. This will run both the rails app (at localhost:5000) and the polymer app (at localhost:8081). The polymer app is actually proxied via the polymer-proxy server (at localhost:8080) which exists to add CORS headers.
+To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. This will run the following:
+- The rails app (at localhost:5000)
+- The polymer app (at localhost:8500) which powers the logged in app
+- The polymer website (at localhost:8510) which powers the public website
+- The polymer proxy server (at localhost:8100) which exists to add CORS headers
 
 **Note:** If you are testing webhooks with external services (such as Stripe or Postmark) you will need to use `Procfile.ultrahook.dev`. That will forward `http://dev.[ultrahook_username].ultrahook.com` to `http://localhost:5000`. The ultrahook username will be the username of the account linked to the `ULTRAHOOK_API_KEY` in your `.env` file. To specify the procfile use the command below:
 

@@ -402,6 +402,56 @@ defaults: &defaults
         - reporting
         - bulk_tools
         - integration
+      hub-free-1:
+        name: Enterprise Hub
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Hub
+        icon: fa-star
+        color: purple
+        description: |
+          5 Org member groups, 50 Solo member groups, leaderboards, domain privacy
+        users: 2000
+        admins: -1
+        full_member_groups: 5
+        limited_member_groups: 50
+        full_member_groups_plan: org-1y-1
+        limited_member_groups_plan: solo-1y-1
+        features:
+        - file_uploads
+        - community
+        - reporting
+        - bulk_tools
+        - integration
+        - hub
+        - leaderboards
+      k12-hub-free-1:
+        name: Enterprise K12 Hub
+        amount: 0
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Hub
+        icon: fa-star
+        color: purple
+        description: |
+          5 Org member groups, 50 K12 Teacher member groups, leaderboards, domain privacy
+        users: 2000
+        admins: -1
+        full_member_groups: 5
+        limited_member_groups: 50
+        full_member_groups_plan: org-1m-1
+        limited_member_groups_plan: k12-teacher-1y-1
+        features:
+        - file_uploads
+        - community
+        - reporting
+        - bulk_tools
+        - integration
+        - hub
+        - leaderboards
     test:
       test-100d-1:
         name: Daily 100

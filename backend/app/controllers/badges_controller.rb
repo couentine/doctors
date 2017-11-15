@@ -437,7 +437,7 @@ class BadgesController < ApplicationController
   # GET /group-url/badge-url/endorsements/add
   # Displays the polymer app which displays the add endorsement UI
   def add_endorsements_form
-    render_polymer_frontend
+    render_polymer_app
   end
 
   # POST /badges/id/endorsements

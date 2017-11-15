@@ -4,7 +4,7 @@ This is a slightly modified version of [CORS anywhere](https://github.com/Rob--W
 
 Only three files have been modified from the standard CORS Anywhere repo:
 - This readme file
-- server.js - Changed the env variable names at the top of the file. Commented out `https://github.com/Rob--W/cors-anywhere` on line 26.
+- server.js - Changed the default port on line 4. Changed the env variable names at the top of the file. Commented out `https://github.com/Rob--W/cors-anywhere` on line 26.
 - lib/cors-anywhere.js - Modified the logic at line 297 in order to enable automatic conversion of relative routes to point at the polymer server.
 
 -----
