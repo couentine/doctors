@@ -94,7 +94,7 @@ class ApplicationController < ActionController::Base
       current_user: (current_user.present?) ? current_user.json(:current_user) : nil
     }
     
-    render template: 'polymer/app', layout: 'polymer'
+    render template: 'polymer/app', layout: 'polymer_app'
   end
 
 private
