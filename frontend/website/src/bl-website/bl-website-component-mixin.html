@@ -21,6 +21,19 @@ All Badge List website components should extend this mixin. It provides an `webs
         };
       }
 
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /**
+       * Use this to get the url of a particular static asset. In produciton this returns a url pointing to the CDN.
+       * Example: `<img src$="[[assetUrl('icons/certificate.png', website.manifest)]]">`
+       */
+      assetUrl(assetKey, websiteManifest) {
+        if (websiteManifest.assets && websiteManifest.asset_base_url && websiteManifest.assets[assetKey])
+          return websiteManifest.asset_base_url + websiteManifest.assets[assetKey];
+        else
+          return undefined;
+      }
+
       // #=== LIFECYCLE EVENTS ===#
 
       connectedCallback() {

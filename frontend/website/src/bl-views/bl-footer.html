@@ -2,7 +2,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
-<link rel="import" href="../bl-app/bl-app-component-mixin.html">
+<link rel="import" href="../bl-website/bl-website-component-mixin.html">
 <link rel="import" href="../bl-styles/bl-styles.html">
 
 <!--
@@ -19,20 +19,17 @@ This is included in the footer slot of the header panel by default.
         
         :host {
           display: block;
-          padding-top: 2em;
         }
 
       /* === COMPONENT STYLES === */
 
         footer {
           display: flex;
-          padding: 0.5em 2em;
-          color: var(--bl-grey-800);
-          background-color: var(--bl-grey-200);
-          border-top: 1px solid var(--bl-grey-400);
+          padding: 2.5em 2em 1.5em 2em;
+          background: rgb(97,97,97);
+          color: white;
         }
         footer.true { color: white; background-color: transparent; border-color: white; }
-
           .left,
           .right {
             display: flex;
@@ -65,21 +62,19 @@ This is included in the footer slot of the header panel by default.
               a.legal, a:visited.legal {
                 text-decoration: none;
                 color: inherit;
-                transition: 0.2s color;
               }
               a.social:focus, a.social:hover,
-              a.legal:focus, a.legal:hover { color: var(--bl-grey-400); }
+              a.legal:focus, a.legal:hover { color: rgb(189,189,189); }
               a.social i { font-size: 1.5em; }
 
         footer.no-intercom .right { margin-right: 0; }
-
 
     </style>
 
     <footer class$="[[whiteText]]">
       <div class="left">
         <p>
-          Made with <i class="icon-heart3"></i> by Knowledgestreem in San Francisco.
+          Made with <i class="icon-heart"></i> by Knowledgestreem in San Francisco.
         </p>
         <ul class="links legal">
           <li>
@@ -95,7 +90,7 @@ This is included in the footer slot of the header panel by default.
           <li>
             <a href="http://blog.badgelist.com" target="_blank" class="social" 
                 title="Badge List Blog">
-              <i class="icon-news"></i>
+              <i class="icon-rss"></i>
             </a>
           </li>
           <li>
@@ -117,7 +112,7 @@ This is included in the footer slot of the header panel by default.
   </template>
 
   <script>
-    class BlFooter extends BlAppComponentMixin(Polymer.Element) {
+    class BlFooter extends BlWebsiteComponentMixin(Polymer.Element) {
       
       static get is() { return 'bl-footer'; }
 

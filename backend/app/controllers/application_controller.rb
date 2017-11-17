@@ -91,7 +91,11 @@ class ApplicationController < ActionController::Base
       app_root_url: ENV['root_url'],
       polymer_root_url: @polymer_app_root_url,
       csrf_token: form_authenticity_token,
-      current_user: (current_user.present?) ? current_user.json(:current_user) : nil
+      current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
+      
+      # these are initialized in `environment.rb`
+      asset_base_url: ASSET_BASE_URL,
+      assets: ASSET_PATHS
     }
     
     render template: 'polymer/app', layout: 'polymer_app'
@@ -104,7 +108,11 @@ class ApplicationController < ActionController::Base
       app_root_url: ENV['root_url'],
       polymer_root_url: @polymer_website_root_url,
       csrf_token: form_authenticity_token,
-      current_user: (current_user.present?) ? current_user.json(:current_user) : nil
+      current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
+      
+      # these are initialized in `environment.rb`
+      asset_base_url: ASSET_BASE_URL,
+      assets: ASSET_PATHS
     }
     
     render template: 'polymer/website', layout: 'polymer_website'

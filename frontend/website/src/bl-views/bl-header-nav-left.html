@@ -1,0 +1,61 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<dom-module id="bl-header-nav-left">
+  <template>
+
+    <style include="bl-style-classes">
+
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem;
+          text-align: left;
+          position: absolute;
+          top: 4px;
+          left: 0;
+          width: 2em;
+          padding: 0.5em 0.8em;
+          line-height: 1em;
+        }
+
+      /* === COMPONENT STYLES === */
+
+        a.logo { 
+          display: inline-block;
+          text-decoration: none;
+        }
+          a.logo ::slotted(img) { height: 2em; }
+          
+    </style>
+    
+    <a class="logo" title="Badge List Home" href$="[[link]]">
+      <slot></slot>
+    </a>
+
+  </template>
+
+  <script>
+    class BlHeaderNavLeft extends Polymer.Element {
+      
+      static get is() { return 'bl-header-nav-left'; }
+
+      static get properties() {
+        return {
+          /* Sets the href of the anchor tag */
+          link: {
+            type: String,
+            value: '/'
+          }
+        };
+      }
+
+    }
+
+    window.customElements.define(BlHeaderNavLeft.is, BlHeaderNavLeft);
+  </script>
+</dom-module>

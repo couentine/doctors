@@ -64,6 +64,7 @@ This import contains all of the Badge List styles and needed shims.
         - `borderless` makes the border clear (even on hover/focus).
         - `narrow` minimizes the width of the button.
         - `whiteText` forces the text color to pure white.
+        - `large` or `jumbo` will increase the size and padding.
 
         When wrapping `paper-button` in a link, always add the `button` class to the anchor tag.
       */
@@ -86,6 +87,14 @@ This import contains all of the Badge List styles and needed shims.
         paper-button:hover, paper-button:focus {
           background: radial-gradient(circle at 60% 40%, var(--bl-grey-50), var(--bl-grey-300));
           color: var(--bl-grey-700);
+        }
+        paper-button.large {
+          font-size: 0.9em;
+          padding: 0.6em 1.5em;
+        }
+        paper-button.jumbo {
+          font-size: 1em;
+          padding: 0.8em 1.8em;
         }
         paper-button[disabled] {
           opacity: 0.25;

@@ -1,0 +1,192 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-website/bl-website-component-mixin.html">
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Header Nav Right #
+
+Displays the current user dropdown menu or a link to sign in / register.
+
+## Styling ##
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--link-color` | Used for the border of the user avatar and the text color of the signin icon. | `--bl-grey-800`
+`--menu-text-color` | Used for the text color of the user dropdown menu. | `--bl-grey-800`
+-->
+<dom-module id="bl-header-nav-right">
+  <template>
+
+    <style include="bl-style-classes">
+
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          justify-content: space-between;
+          font-size: 1rem;
+          text-align: right;
+          position: absolute;
+          top: 4px;
+          right: 0;
+          width: 2em;
+          padding: 0.5em 0.8em;
+          line-height: 1em;
+        }
+
+      /* === NAVBAR STYLES === */
+        
+        a { text-decoration: none; }
+          a i { margin-right: 0.5em; }
+
+        a#sign-in-link {
+          display: block;
+          color: var(--link-color, var(--bl-grey-800));
+        }
+          a#sign-in-link i { font-size: 2em; }
+
+        #menuButtonWrapper {
+          border: 0.1em solid var(--link-color, var(--bl-grey-800));
+          border-radius: 500px;
+          overflow: hidden;
+          width: 1.8em;
+          height: 1.8em;
+        }
+          paper-menu-button {
+            padding: 0;
+            text-align: left;
+          }
+            paper-icon-button.menu-button {
+              height: 2em; /* need to leave 0.2em for the border */
+              width: 2em; /* need to leave 0.2em for the border */
+              padding: 0;
+            }
+              paper-listbox {
+                width: 12em;
+              }
+                paper-item { padding: 0; }
+                paper-item.error { background-color: rgb(239,154,154); }
+                  paper-item a, paper-item a:visited { 
+                    color: var(--menu-text-color, var(--bl-grey-800));
+                    padding: 0 16px;
+                    display: block;
+                    line-height: 3em;
+                  }
+                  paper-item.error a { color: white !important; }
+
+          
+    </style>
+    
+    <!-- #=== LOGGED OUT NAV ===# -->
+
+    <template is="dom-if" if="[[!isLoggedIn]]">
+      <a href="/users/sign_in" id="sign-in-link">
+        <i class="icon-enter"></i>
+      </a>
+      <paper-tooltip for="sign-in-link" animation-delay="50" fit-to-visible-bounds offset="5">
+        Sign in or register
+      </paper-tooltip>
+    </template>
+
+    <!-- #=== LOGGED IN NAV ===# -->
+
+    <template is="dom-if" if="[[isLoggedIn]]">
+      
+      <div id="menuButtonWrapper">
+        <paper-menu-button horizontal-align="right" no-overlap>
+          <paper-icon-button class="menu-button" src="[[website.currentUser.avatar_image_medium_url]]" slot="dropdown-trigger">
+          </paper-icon-button>
+
+          <paper-listbox slot="dropdown-content">
+            <paper-item hidden="[[!currentUser.email_inactive]]" class="error">
+              <a href="/users/edit">
+                <i class="icon-warning"></i> Email blocked
+              </a>
+            </paper-item>
+            <paper-item>
+              <a href$="/u/[[currentUser.username_with_caps]]">
+                <i class="icon-shield-user"></i> Badge profile
+              </a>
+            </paper-item>
+            <paper-item>
+              <a href="/report_results">
+                <i class="icon-file-spreadsheet"></i> Run reports
+              </a>
+            </paper-item>    
+            <paper-item>
+              <a href="/users/edit">
+                <i class="icon-user-gear"></i> Manage account
+              </a>
+            </paper-item>
+            <paper-item>
+              <a href="/users/edit#upload-image">
+                <i class="icon-portrait"></i> Change image
+              </a>
+            </paper-item> 
+            <paper-item hidden="[[!currentUser.admin]]">
+              <a href="/a">
+                <i class="icon-wrench2"></i> Admin tools
+              </a>
+            </paper-item>
+            <paper-item>
+              <a href="/users/logout" class="signout" data-method="delete">
+                <i class="icon-exit"></i> Sign out
+              </a>
+            </paper-item>
+          </paper-listbox>
+        </paper-menu-button>
+      </div>
+    
+    </template>
+
+  </template>
+
+  <script>
+    class BlHeaderNavRight extends BlWebsiteComponentMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-header-nav-right'; }
+
+      static get properties() {
+        return {
+          isLoggedIn: {
+            type: Boolean, 
+            value: false,
+            computed: '_isLoggedIn(website)'
+          }
+        };
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _isLoggedIn(website) {
+        if (true && website && website.manifest && website.manifest.current_user && website.manifest.current_user.name)
+          return true;
+        else
+          return false;
+      }
+
+    }
+
+    window.customElements.define(BlHeaderNavRight.is, BlHeaderNavRight);
+  </script>
+</dom-module>
