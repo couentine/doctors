@@ -54,7 +54,7 @@ class HomeController < ApplicationController
 
   # GET /how-it-works
   def how_it_works
-    render layout: 'web'
+    render_polymer_website
   end
 
   # GET /privacy-policy
