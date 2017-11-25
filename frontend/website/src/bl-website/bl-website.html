@@ -8,8 +8,10 @@
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="../bl-styles/bl-styles.html">
 <link rel="import" href="../bl-styles/fonts.html">
-<link rel="import" href="../bl-views/bl-view-web-home.html">
 <link rel="import" href="../bl-views/bl-view-how-it-works.html">
+<link rel="import" href="../bl-views/bl-view-privacy-policy.html">
+<link rel="import" href="../bl-views/bl-view-terms-of-service.html">
+<link rel="import" href="../bl-views/bl-view-web-home.html">
 
 <!--
 # Badge List Website #
@@ -34,15 +36,20 @@
     <!-- #=== APP ROUTING ===# -->
     
     <app-location id="location" route="{{route}}" 
-      url-space-regex="(^/$)|(^/w$)|(^/how-it-works$)"></app-location>
+      url-space-regex="(^/$)|(^/w$)|(^/how-it-works$)|(^/privacy-policy$)|(^/terms-of-service$)"></app-location>
     
     <app-route id="indexRoute" active="{{indexRouteActive}}" route="{{route}}" pattern="/"></app-route>
     <app-route id="webRoute" active="{{webRouteActive}}" route="{{route}}" pattern="/w"></app-route>
     <app-route id="howItWorksViewRoute" active="{{howItWorksViewRouteActive}}" route="{{route}}" pattern="/how-it-works"></app-route>
+    <app-route id="privacyPolicyViewRoute" active="{{privacyPolicyViewRouteActive}}" route="{{route}}" pattern="/privacy-policy"></app-route>
+    <app-route id="termsOfServiceViewRoute" active="{{termsOfServiceViewRouteActive}}" route="{{route}}" 
+      pattern="/terms-of-service"></app-route>
 
     <!-- #=== APP VIEWS ===# -->
     <bl-view-web-home id="webHomeView" active="{{webHomeViewActive}}"></bl-view-web-home>
     <bl-view-how-it-works id="howItWorksView" active="{{howItWorksViewRouteActive}}"></bl-view-how-it-works>
+    <bl-view-privacy-policy id="privacyPolicyView" active="{{privacyPolicyViewRouteActive}}"></bl-view-privacy-policy>
+    <bl-view-terms-of-service id="termsOfServiceView" active="{{termsOfServiceViewRouteActive}}"></bl-view-terms-of-service>
     
     <!-- #=== TOAST CONTAINER ===# -->
     <content id="toastContainer" select="bl-toast-container"></content>

@@ -59,12 +59,12 @@ class HomeController < ApplicationController
 
   # GET /privacy-policy
   def privacy_policy
-    render layout: 'website'
+    render_polymer_website
   end
 
   # GET /terms-of-service
   def terms_of_service
-    render layout: 'website'
+    render_polymer_website
   end
 
 end
