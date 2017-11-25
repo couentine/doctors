@@ -119,7 +119,7 @@
         <li><a href="/terms-of-service"><i class="icon-file-text"></i> Terms of Service</a></li>
       </ul>
 
-      <bl-header-nav-left slot="leftNav" link="[[websiteHomePath]]">
+      <bl-header-nav-left slot="leftNav">
         <img src$="[[rootPath]]/images/badge-list-shield-square.png">
       </bl-header-nav-left>
       
@@ -360,25 +360,7 @@
       static get is() { return 'bl-view-privacy-policy'; }
 
       static get properties() {
-        return {
-
-          /** The href of the new group button. Changes based on whether the user is logged in. */
-          websiteHomePath: {
-            type: String,
-            computed: '_websiteHomePath(currentUser)',
-            value: '/'
-          }
-
-        }
-      }
-
-      // #=== PROPERTY COMPUTER METHODS ===#
-      
-      _websiteHomePath(currentUser) {
-        if (currentUser && currentUser.username)
-          return '/w';
-        else
-          return '/';
+        return {}
       }
 
     }

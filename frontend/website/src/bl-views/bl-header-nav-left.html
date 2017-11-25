@@ -2,6 +2,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-website/bl-website-component-mixin.html">
 <link rel="import" href="../bl-styles/bl-styles.html">
 
 <dom-module id="bl-header-nav-left">
@@ -12,15 +13,16 @@
       /* === LAYOUT & BASE STYLES === */
         
         :host {
-          display: block;
+          display: flex;
           font-size: 1rem;
           text-align: left;
           position: absolute;
           top: 4px;
           left: 0;
-          width: 2em;
+          width: 4em;
           padding: 0.5em 0.8em;
           line-height: 1em;
+          align-items: center;
         }
 
       /* === COMPONENT STYLES === */
@@ -30,28 +32,103 @@
           text-decoration: none;
         }
           a.logo ::slotted(img) { height: 2em; }
+        a.appHomeLink {
+          display: none;
+          font-size: 1.5em;
+          margin-left: 0.5rem;
+          text-decoration: none;
           
+          color: var(--link-color, var(--bl-grey-800));
+        }
+          a.appHomeLink.true {
+            display: inline-block;
+          }
+
     </style>
     
-    <a class="logo" title="Badge List Home" href$="[[link]]">
+    <a class="logo" title="[[anchorTitle]]" href$="[[anchorHref]]">
       <slot></slot>
+    </a>
+
+    <a class$="appHomeLink [[isLoggedIn]]" title="Badge List App Home" href="/home">
+      <i class="icon-home2"></i>
     </a>
 
   </template>
 
   <script>
-    class BlHeaderNavLeft extends Polymer.Element {
+    class BlHeaderNavLeft extends BlWebsiteComponentMixin(Polymer.Element) {
       
       static get is() { return 'bl-header-nav-left'; }
 
       static get properties() {
         return {
-          /* Sets the href of the anchor tag */
+
+          /* Optional. Sets the href of the anchor tag. If not set, automatically points to `/` or `/w`. */
           link: {
             type: String,
+            observer: '_linkChanged'
+          },
+
+          /* Optional. Sets the title of the anchor tag. */
+          linkTitle: {
+            type: String,
+            observer: '_linkTitleChanged'
+          },
+
+          isLoggedIn: {
+            type: Boolean,
+            readOnly: true,
+            value: false
+          },
+
+          anchorHref: {
+            type: String,
+            readOnly: true,
             value: '/'
+          },
+
+          anchorTitle: {
+            type: String,
+            readOnly: true,
+            value: 'Badge List Website'
           }
+
         };
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      static get observers() {
+          return [
+            '_currentUserChanged(currentUser)'
+          ]
+      }
+      
+      _currentUserChanged(currentUser) {
+        if (currentUser && currentUser.username) {
+          this._setIsLoggedIn(true);
+          if (!this.link) this._setAnchorHref('/w');
+        } else {
+          this._setIsLoggedIn(false);
+          if (!this.link) this._setAnchorHref('/');
+        }
+      }
+
+      _linkChanged(newValue, oldValue) {
+        if (newValue)
+          this._setAnchorHref(newValue);
+        else if (currentUser && currentUser.username)
+          this._setAnchorHref('/w');
+        else
+          this._setAnchorHref('/');
+      }
+
+      _linkTitleChanged(newValue, oldValue) {
+        if (newValue)
+          this._setAnchorTitle(newValue);
+        else
+          this._setAnchorTitle('Badge List Website');
       }
 
     }

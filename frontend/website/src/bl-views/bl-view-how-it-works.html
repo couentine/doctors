@@ -52,7 +52,7 @@
           background: var(--bl-orange-600);
         }
 
-        bl-header-nav-right {
+        bl-header-nav-left, bl-header-nav-right {
           --link-color: white;
         }
 
@@ -203,7 +203,7 @@
       <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
       <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
 
-      <bl-header-nav-left slot="leftNav" link="[[websiteHomePath]]">
+      <bl-header-nav-left slot="leftNav">
         <img src$="[[rootPath]]/images/badge-list-shield-white-square.png">
       </bl-header-nav-left>
       
@@ -352,13 +352,6 @@
             type: String,
             computed: '_createGroupPath(currentUser)',
             value: '/users/sign_up'
-          },
-
-          /** The href of the new group button. Changes based on whether the user is logged in. */
-          websiteHomePath: {
-            type: String,
-            computed: '_websiteHomePath(currentUser)',
-            value: '/'
           }
 
         }
@@ -371,13 +364,6 @@
           return '/groups/new';
         else
           return '/users/sign_up';
-      }
-      
-      _websiteHomePath(currentUser) {
-        if (currentUser && currentUser.username)
-          return '/w';
-        else
-          return '/';
       }
 
     }
