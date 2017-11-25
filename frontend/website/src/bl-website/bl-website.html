@@ -38,12 +38,16 @@
     <app-location id="location" route="{{route}}" 
       url-space-regex="(^/$)|(^/w$)|(^/how-it-works$)|(^/privacy-policy$)|(^/terms-of-service$)"></app-location>
     
-    <app-route id="indexRoute" active="{{indexRouteActive}}" route="{{route}}" pattern="/"></app-route>
-    <app-route id="webRoute" active="{{webRouteActive}}" route="{{route}}" pattern="/w"></app-route>
-    <app-route id="howItWorksViewRoute" active="{{howItWorksViewRouteActive}}" route="{{route}}" pattern="/how-it-works"></app-route>
-    <app-route id="privacyPolicyViewRoute" active="{{privacyPolicyViewRouteActive}}" route="{{route}}" pattern="/privacy-policy"></app-route>
+    <app-route id="indexRoute" active="{{indexRouteActive}}" route="{{route}}" pattern="/"
+      title="Badge List - Digital credentials for educators, companies and professional development orgs"></app-route>
+    <app-route id="webRoute" active="{{webRouteActive}}" route="{{route}}" pattern="/w"
+      title="Badge List - Digital credentials for educators, companies and professional development orgs"></app-route>
+    <app-route id="howItWorksViewRoute" active="{{howItWorksViewRouteActive}}" route="{{route}}" pattern="/how-it-works"
+      title="How Badge List Works - Expert validated ePortfolios for recognizing digital learning and professional development"></app-route>
+    <app-route id="privacyPolicyViewRoute" active="{{privacyPolicyViewRouteActive}}" route="{{route}}" pattern="/privacy-policy"
+      title="Privacy Policy - Badge List"></app-route>
     <app-route id="termsOfServiceViewRoute" active="{{termsOfServiceViewRouteActive}}" route="{{route}}" 
-      pattern="/terms-of-service"></app-route>
+      pattern="/terms-of-service" title="Terms of Service - Badge List"></app-route>
 
     <!-- #=== APP VIEWS ===# -->
     <bl-view-web-home id="webHomeView" active="{{webHomeViewActive}}"></bl-view-web-home>
@@ -96,6 +100,19 @@
         this.$.toastContainer.addToast(text, type, autoCloseAfter);
       }
 
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        // Add listeners to the routes so that we can update the document title, also check for which is active so we can set initial title
+        var routeElements = this.shadowRoot.querySelectorAll('app-route');
+        routeElements.forEach(function(routeElement) {
+          routeElement.addEventListener('active-changed', e => this._activeRouteChanged(e));
+          if (routeElement.active && routeElement.title) document.title = routeElement.title;
+        }.bind(this));
+      }
+
       // #=== LISTENER & OBSERVER METHODS ===#
 
       _manifestChanged(newValue, oldValue) {
@@ -103,6 +120,13 @@
           this.setProperties({
             currentUser: newValue.current_user
           });
+      }
+
+      /** Sets the document title when the active route changes. */
+      _activeRouteChanged(event) {
+        if ((event.detail.value == true) && event.target && event.target.title) {
+          document.title = event.target.title;
+        }
       }
 
       // #=== PROPERTY COMPUTER METHODS ===#
