@@ -13,7 +13,7 @@
 
   <head>
     <% #=== PAGE TITLE, APP ICON & BASE ===# %>
-    <title>Badge List</title>
+    <title><%= @initial_document_title || 'Badge List' %></title>
     <link rel="icon" type="image/png" href="<%= image_path('badge-list-icon-32-square.png') %>"/>
     
     <% #=== SAFARI WEB APP SETTINGS ===# %>
@@ -31,6 +31,24 @@
     <meta name="description" 
       content="Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.">
     <link rel="manifest" href="<%= @polymer_website_root_url %>/manifest.json">
+
+    <% if @include_metadata %>
+      <!-- === OPEN GRAPH METADATA === -->
+      <meta property="og:type" content="Article" />
+      <meta property="og:title" content="<%= @metadata['metadata_title'] %>" />
+      <meta property="og:description" content="<%= @metadata['metadata_description'] %>" />
+      <meta property="og:image" content="<%= @metadata['metadata_image'] %>" />
+      <meta property="og:site_name" content="<%= @metadata['metadata_site_name'] %>" />
+      <meta property="og:url" content="<%= @metadata['metadata_url'] %>" />
+      
+      <!-- === TWITTER CARD METADATA === -->
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:site" content="@badgelist" />
+      <meta name="twitter:title" content="<%= @metadata['metadata_title'] %>" />
+      <meta name="twitter:description" content="<%= @metadata['metadata_description'] %>" />
+      <meta name="twitter:image" content="<%= @metadata['metadata_image'] %>" />
+      <meta name="twitter:url" content="<%= @metadata['metadata_url'] %>" />
+    <% end %>
 
     <% #=== ICONS ===# %>
     <%= stylesheet_link_tag 'shared/bl-icons/style', media: 'all' %>

@@ -86,12 +86,27 @@ class ApplicationController < ActionController::Base
 
   # Call this from controller actions which use the polymer app frontend.
   # It sets the needed manifest variable and renders the polymer layout.
-  def render_polymer_app
+  # `initial_document_title` will set the title on page load (mostly for web crawlers, since title is normally set via JS in polymer)
+  # `metadata` will cause the social media tag headers to be included
+  def render_polymer_app(initial_document_title, metadata=nil)
+    # Convert the flash hash into a toast array
+    if flash.present?
+      @toast = flash.to_h.map do |type, text|
+        { type: type, text: text }
+      end
+    else
+      @toast = nil
+    end
+
+    @initial_document_title = initial_document_title
+    @metadata = metadata
+    @include_metadata = metadata && metadata.count
     @manifest = {
       app_root_url: ENV['root_url'],
       polymer_root_url: @polymer_app_root_url,
       csrf_token: form_authenticity_token,
       current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
+      toast: @toast,
       
       # these are initialized in `environment.rb`
       asset_base_url: ASSET_BASE_URL,
@@ -103,12 +118,27 @@ class ApplicationController < ActionController::Base
 
   # Call this from controller actions which use the polymer website frontend.
   # It sets the needed manifest variable and renders the polymer layout.
-  def render_polymer_website
+  # `initial_document_title` will set the title on page load (mostly for web crawlers, since title is normally set via JS in polymer)
+  # `metadata` will cause the social media tag headers to be included
+  def render_polymer_website(initial_document_title, metadata=nil)
+    # Convert the flash hash into a toast array
+    if flash.present?
+      @toast = flash.to_h.map do |type, text|
+        { type: type, text: text }
+      end
+    else
+      @toast = nil
+    end
+
+    @initial_document_title = initial_document_title
+    @metadata = metadata
+    @include_metadata = metadata && metadata.count
     @manifest = {
       app_root_url: ENV['root_url'],
       polymer_root_url: @polymer_website_root_url,
       csrf_token: form_authenticity_token,
       current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
+      toast: @toast,
       
       # these are initialized in `environment.rb`
       asset_base_url: ASSET_BASE_URL,
@@ -116,6 +146,15 @@ class ApplicationController < ActionController::Base
     }
     
     render template: 'polymer/website', layout: 'polymer_website'
+  end
+
+  # `badge-list-shield-white` => `http://localhost:5000/assets/badge-list-shield-white-393106b772.png` (CLIPPED EXAMPLE)
+  def bl_asset_url(asset_key)
+    if ASSET_PATHS[asset_key].present?
+      ASSET_BASE_URL + '' + ASSET_PATHS[asset_key]
+    else
+      nil
+    end
   end
 
 private

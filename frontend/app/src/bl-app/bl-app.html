@@ -13,6 +13,7 @@
 <link rel="import" href="../bl-backend/bl-backend-item.html">
 <link rel="import" href="../bl-poller/bl-poller.html">
 <link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="../bl-toast/bl-toast.html">
 <link rel="import" href="../bl-styles/fonts.html">
 <link rel="import" href="../bl-views/bl-view-badge-endorsements-add.html">
 <link rel="import" href="../bl-views/bl-view-home.html">
@@ -36,6 +37,15 @@ The mixin also provides various actions for interacting with the container. (Ref
           display: block;
           position: absolute;
           top: 0; right: 0; bottom: 0; left: 0;
+        }
+
+      /* === TOAST CONTAINER === */
+
+        #toastContainer {
+          display: block;
+          position: fixed;
+          top: 2em; right: 0; left: 0;
+          z-index: 150;
         }
 
     </style>
@@ -65,7 +75,7 @@ The mixin also provides various actions for interacting with the container. (Ref
       badge="{{badge}}"></bl-view-badge-endorsements-add>
 
     <!-- #=== TOAST CONTAINER ===# -->
-    <content id="toastContainer" select="bl-toast-container"></content>
+    <div id="toastContainer"></div>
 
     <!-- #=== CURRENT USER ASYNC POLLER DIALOG ===# -->
     <paper-dialog id="userPollerDialog" class="orange no-title-bar" modal dynamic-align>
@@ -136,10 +146,13 @@ The mixin also provides various actions for interacting with the container. (Ref
 
       // #=== PUBLIC ACTION METHODS ===#
 
+      /** Displays new toast item in the app toast container. Leave type or autoCloseAfter blank to use the default. */
       addToast(text, type, autoCloseAfter) {
-        // Displays new toast item in the app toast container
-        // Leave type or autoCloseAfter blank to use the default
-        this.$.toastContainer.addToast(text, type, autoCloseAfter);
+        var newToast = document.createElement('bl-toast');
+        newToast.text = text;
+        newToast.type = type;
+        if (autoCloseAfter != undefined) newToast.autoCloseAfter = autoCloseAfter;
+        this.$.toastContainer.appendChild(newToast);
       }
 
       // #=== LIFECYCLE EVENTS ===#
@@ -192,10 +205,16 @@ The mixin also provides various actions for interacting with the container. (Ref
       }
 
       _manifestChanged(newValue, oldValue) {
-        if (newValue)
+        if (newValue) {
           this.setProperties({
             currentUser: newValue.current_user
           });
+
+          if (newValue.toast && newValue.toast.length)
+            newValue.toast.forEach(function(toastItem) {
+              this.addToast(toastItem.text, toastItem.type)
+            }.bind(this));
+        }
       }
 
       /** Sets the document title when the active route changes. */
