@@ -344,27 +344,7 @@
 
       static get is() { return 'bl-view-how-it-works'; }
 
-      static get properties() {
-        return {
-
-          /** The href of the new group button. Changes based on whether the user is logged in. */
-          createGroupPath: {
-            type: String,
-            computed: '_createGroupPath(currentUser)',
-            value: '/users/sign_up'
-          }
-
-        }
-      }
-
-      // #=== PROPERTY COMPUTER METHODS ===#
-      
-      _createGroupPath(currentUser) {
-        if (currentUser && currentUser.username)
-          return '/groups/new';
-        else
-          return '/users/sign_up';
-      }
+      static get properties() {}
 
     }
 

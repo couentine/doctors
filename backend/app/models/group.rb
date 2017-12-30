@@ -116,7 +116,8 @@ class Group
   field :feature_grant_bulk_tools,        type: Boolean
   field :feature_grant_integration,       type: Boolean
   field :feature_grant_hub,               type: Boolean
-  field :feature_grant_leaderboards,      type: Boolean
+  field :feature_grant_leaderboards_weekly,   type: Boolean
+  field :feature_grant_leaderboards_realtime, type: Boolean
   field :total_user_count,                type: Integer, default: 1
   field :admin_count,                     type: Integer, default: 1
   field :member_count,                    type: Integer, default: 0
@@ -545,8 +546,10 @@ class Group
       return_value ||= (feature_grant_integration == true)
     elsif (feature.to_s == 'hub')
       return_value ||= (feature_grant_hub == true)
-    elsif (feature.to_s == 'leaderboards')
-      return_value ||= (feature_grant_leaderboards == true)
+    elsif (feature.to_s == 'leaderboards_weekly')
+      return_value ||= (feature_grant_leaderboards_weekly == true)
+    elsif (feature.to_s == 'leaderboards_realtime')
+      return_value ||= (feature_grant_leaderboards_realtime == true)
     elsif (feature.to_s == 'privacy')
       return_value ||= paid?
     end
@@ -574,8 +577,11 @@ class Group
     if feature_grant_hub && !return_list.include?('hub')
       return_list << 'hub'
     end
-    if feature_grant_leaderboards && !return_list.include?('leaderboards')
-      return_list << 'leaderboards'
+    if feature_grant_leaderboards && !return_list.include?('leaderboards_weekly')
+      return_list << 'leaderboards_weekly'
+    end
+    if feature_grant_leaderboards && !return_list.include?('leaderboards_realtime')
+      return_list << 'leaderboards_realtime'
     end
     if paid? && !return_list.include?('privacy')
       return_list << 'privacy'

@@ -3,6 +3,8 @@
   
 All Badge List website components should extend this mixin. It provides an `website` property that allows access to the 
 `bl-website` component.
+
+If you need to use the `assetUrl` method to set css properties, overload the `assetsLoaded` event.
 -->
 <script>
 
@@ -16,7 +18,12 @@ All Badge List website components should extend this mixin. It provides an `webs
           website: Object,
           
           /** The details of the logged in user provided from the backend on initial page load. Null if logged out. */
-          currentUser: Object
+          currentUser: Object,
+
+          assetLoadingComplete: {
+            type: Boolean,
+            value: false
+          }
 
         };
       }
@@ -41,14 +48,31 @@ All Badge List website components should extend this mixin. It provides an `webs
 
         this.website = document.querySelector('bl-website');
 
-        // Add a listener for when the current user is set
+        // Add a listeners
         this.website.addEventListener('current-user-changed', e => this._websiteCurrentUserChanged(e));
+      }
+
+      /** Overload this event to run code when the assets are loaded. (Remember to run `super.assetsLoaded()`). */
+      assetsLoaded() {
+        this.assetLoadingComplete = true;
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
 
+      static get observers() {
+          return [
+            '_websiteAssetsChanged(website.manifest.assets)'
+          ]
+      }
+
       _websiteCurrentUserChanged(e) {
         this.currentUser = this.website.currentUser;
+      }
+
+      _websiteAssetsChanged(e) {
+        if (this.website.manifest.assets && !this.assetLoadingComplete) {
+          this.assetsLoaded();
+        }
       }
 
     }

@@ -34,6 +34,13 @@ All Badge List website views components should extend this mixin. It extends the
           active: {
             type: Boolean,
             observer: '_activeChanged'
+          },
+
+          /** The href of the new group button. Changes based on whether the user is logged in. */
+          createGroupPath: {
+            type: String,
+            computed: '_createGroupPath(currentUser)',
+            value: '/users/sign_up'
           }
 
         };
@@ -53,6 +60,12 @@ All Badge List website views components should extend this mixin. It extends the
           this._setStatus('active');
           if (this.website.currentView) this.website.currentView.deactivate();
           this.website.currentView = this;
+        }
+      }
+
+      showIntercom() {
+        if (Intercom) {
+          Intercom('show');
         }
       }
 
@@ -86,6 +99,15 @@ All Badge List website views components should extend this mixin. It extends the
       _activeChanged(newValue, oldValue) {
         if (newValue && !oldValue)
           this.activate();
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+      
+      _createGroupPath(currentUser) {
+        if (currentUser && currentUser.username)
+          return '/groups/new';
+        else
+          return '/users/sign_up';
       }
 
       // #=== PUBLIC HELPER & UTILITY METHODS ===#

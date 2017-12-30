@@ -16,6 +16,10 @@
       "description": "Endpoints which accept page parameter and respond with an items array and nextPage field."
     },
     {
+      "name": "fullList",
+      "description": "Endpoints which accept no page parameter but instead respond with an array of all available items."
+    },
+    {
       "name": "importList",
       "description": "Endpoints which accept list of items to import and respond with a poller whose data contains processed items when complete."
     },
@@ -46,6 +50,14 @@
     {
       "name": "badgeEndorsements",
       "description": "Badge endorsements are positive feedback which result in the awarding of the badge when created. Badge endorsements are different from normal feedback in that they can be created by email address even if there is not yet a corresponding Badge List user."
+    },
+    {
+      "name": "subscriptionPlans",
+      "description": "Every paid group belongs to a particular subscription plan. Every subscription plan has a collection of features."
+    },
+    {
+      "name": "subscriptionFeatures",
+      "description": "Subscription feature items contain explanatory language for each feature."
     }
   ],
   "paths": {
@@ -134,6 +146,62 @@
                     "$ref": "#/definitions/Badge"
                   }
                 }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/i/subscription_plans": {
+      "get": {
+        "tags": [
+          "subscriptionPlans",
+          "fullList"
+        ],
+        "summary": "Gets a list of all currently available subscription plans",
+        "operationId": "getSubscriptionPlans",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SubscriptionPlan"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/i/subscription_features": {
+      "get": {
+        "tags": [
+          "subscriptionFeatures",
+          "fullList"
+        ],
+        "summary": "Gets a complete list of all possible features for all subscription plans",
+        "operationId": "getSubscriptionFeatures",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SubscriptionFeature"
               }
             }
           },
@@ -578,6 +646,150 @@
           "maximum": 100,
           "description": "Optional property used to indicate the current percentage of progress out of 100 while the operation is pending"
         }
+      }
+    },
+    "SubscriptionPlan": {
+      "type": "object",
+      "properties": {
+        "pricing_group": {
+          "type": "string",
+          "description": "Either `standard` or `k12`",
+          "enum": [
+            "standard",
+            "k12"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this plan. Includes the type, the payment interval and an integer indicating the version number of the plan."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the plan"
+        },
+        "type": {
+          "type": "string",
+          "description": "A unique identified for the plan type. For each plan type there will be no more than one active plan at a time with the same `interval` and `pricing_group`.",
+          "enum": [
+            "solo",
+            "team",
+            "org",
+            "hub"
+          ]
+        },
+        "amount": {
+          "type": "number",
+          "description": "The price of this plan in cents per `interval`",
+          "format": "currency"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency code of the price, for now always returns `usd`"
+        },
+        "interval": {
+          "type": "string",
+          "description": "The payment interval of the plan",
+          "enum": [
+            "month",
+            "year"
+          ]
+        },
+        "trial_period_days": {
+          "type": "number",
+          "description": "The number of days in the trial period, zero if none"
+        },
+        "statement_descriptor": {
+          "type": "string",
+          "description": "How the plan is displayed on credit card statements"
+        },
+        "fa_icon": {
+          "type": "string",
+          "description": "The Font Awesome icon code of the icon representing this plan"
+        },
+        "bl_icon": {
+          "type": "string",
+          "description": "The Badge List icon code of the icon representing this plan"
+        },
+        "color": {
+          "type": "string",
+          "description": "The color which is used to represent this plan",
+          "enum": [
+            "red",
+            "pink",
+            "purple",
+            "deep-purple",
+            "indigo",
+            "blue",
+            "light-blue",
+            "cyan",
+            "teal",
+            "green",
+            "light-green",
+            "lime",
+            "yellow",
+            "amber",
+            "orange",
+            "deep-orange",
+            "brown",
+            "grey",
+            "blue-grey"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Explanatory text for this plan"
+        },
+        "users": {
+          "type": "number",
+          "description": "The number of members included in this plan, equal to `-1` if unlimited"
+        },
+        "admins": {
+          "type": "number",
+          "description": "The number of admin included in this plan, equal to `-1` if unlimited"
+        },
+        "full_member_groups": {
+          "type": "number",
+          "description": "For hub groups, the number of full member groups included"
+        },
+        "full_member_groups_plan": {
+          "type": "string",
+          "description": "For hub groups, the subscription plan id of the full member groups which are included"
+        },
+        "limited_member_groups": {
+          "type": "number",
+          "description": "For hub groups, the number of limited member groups included"
+        },
+        "limited_member_groups_plan": {
+          "type": "string",
+          "description": "For hub groups, the subscription plan id of the limited member groups which are included"
+        },
+        "features": {
+          "type": "array",
+          "description": "A list of feature ids included in this plan. Refer to the corresponding `SubscriptionFeature` for full details.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "xml": {
+        "name": "SubscriptionPlan"
+      }
+    },
+    "SubscriptionFeature": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "SubscriptionFeature"
       }
     }
   }

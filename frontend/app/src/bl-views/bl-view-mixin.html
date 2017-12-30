@@ -56,6 +56,12 @@ All Badge List app views components should extend this mixin. It extends the `bl
         }
       }
 
+      showIntercom() {
+        if (Intercom) {
+          Intercom('show');
+        }
+      }
+
       /** 
        * Call this in order to attempt hiding the intercom UI. Runs recursively every 100 milliseconds waiting for the intercom container
        * to show up.

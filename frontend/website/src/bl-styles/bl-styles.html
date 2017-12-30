@@ -31,6 +31,237 @@ This import contains all of the Badge List styles and needed shims.
           .showAt1200 { display: none; }
         }
 
+      /* === COLOR UTILITIES === */
+
+        .bl-color-vars-red {
+          --color-50: var(--bl-red-50);
+          --color-100: var(--bl-red-100);
+          --color-200: var(--bl-red-200);
+          --color-300: var(--bl-red-300);
+          --color-400: var(--bl-red-400);
+          --color-500: var(--bl-red-500);
+          --color-600: var(--bl-red-600);
+          --color-700: var(--bl-red-700);
+          --color-800: var(--bl-red-800);
+          --color-900: var(--bl-red-900);
+        }
+        .bl-color-vars-pink {
+          --color-50: var(--bl-pink-50);
+          --color-100: var(--bl-pink-100);
+          --color-200: var(--bl-pink-200);
+          --color-300: var(--bl-pink-300);
+          --color-400: var(--bl-pink-400);
+          --color-500: var(--bl-pink-500);
+          --color-600: var(--bl-pink-600);
+          --color-700: var(--bl-pink-700);
+          --color-800: var(--bl-pink-800);
+          --color-900: var(--bl-pink-900);
+        }
+        .bl-color-vars-purple {
+          --color-50: var(--bl-purple-50);
+          --color-100: var(--bl-purple-100);
+          --color-200: var(--bl-purple-200);
+          --color-300: var(--bl-purple-300);
+          --color-400: var(--bl-purple-400);
+          --color-500: var(--bl-purple-500);
+          --color-600: var(--bl-purple-600);
+          --color-700: var(--bl-purple-700);
+          --color-800: var(--bl-purple-800);
+          --color-900: var(--bl-purple-900);
+        }
+        .bl-color-vars-deep-purple {
+          --color-50: var(--bl-deep-purple-50);
+          --color-100: var(--bl-deep-purple-100);
+          --color-200: var(--bl-deep-purple-200);
+          --color-300: var(--bl-deep-purple-300);
+          --color-400: var(--bl-deep-purple-400);
+          --color-500: var(--bl-deep-purple-500);
+          --color-600: var(--bl-deep-purple-600);
+          --color-700: var(--bl-deep-purple-700);
+          --color-800: var(--bl-deep-purple-800);
+          --color-900: var(--bl-deep-purple-900);
+        }
+        .bl-color-vars-indigo {
+          --color-50: var(--bl-indigo-50);
+          --color-100: var(--bl-indigo-100);
+          --color-200: var(--bl-indigo-200);
+          --color-300: var(--bl-indigo-300);
+          --color-400: var(--bl-indigo-400);
+          --color-500: var(--bl-indigo-500);
+          --color-600: var(--bl-indigo-600);
+          --color-700: var(--bl-indigo-700);
+          --color-800: var(--bl-indigo-800);
+          --color-900: var(--bl-indigo-900);
+        }
+        .bl-color-vars-blue {
+          --color-50: var(--bl-blue-50);
+          --color-100: var(--bl-blue-100);
+          --color-200: var(--bl-blue-200);
+          --color-300: var(--bl-blue-300);
+          --color-400: var(--bl-blue-400);
+          --color-500: var(--bl-blue-500);
+          --color-600: var(--bl-blue-600);
+          --color-700: var(--bl-blue-700);
+          --color-800: var(--bl-blue-800);
+          --color-900: var(--bl-blue-900);
+        }
+        .bl-color-vars-light-blue {
+          --color-50: var(--bl-light-blue-50);
+          --color-100: var(--bl-light-blue-100);
+          --color-200: var(--bl-light-blue-200);
+          --color-300: var(--bl-light-blue-300);
+          --color-400: var(--bl-light-blue-400);
+          --color-500: var(--bl-light-blue-500);
+          --color-600: var(--bl-light-blue-600);
+          --color-700: var(--bl-light-blue-700);
+          --color-800: var(--bl-light-blue-800);
+          --color-900: var(--bl-light-blue-900);
+        }
+        .bl-color-vars-cyan {
+          --color-50: var(--bl-cyan-50);
+          --color-100: var(--bl-cyan-100);
+          --color-200: var(--bl-cyan-200);
+          --color-300: var(--bl-cyan-300);
+          --color-400: var(--bl-cyan-400);
+          --color-500: var(--bl-cyan-500);
+          --color-600: var(--bl-cyan-600);
+          --color-700: var(--bl-cyan-700);
+          --color-800: var(--bl-cyan-800);
+          --color-900: var(--bl-cyan-900);
+        }
+        .bl-color-vars-teal {
+          --color-50: var(--bl-teal-50);
+          --color-100: var(--bl-teal-100);
+          --color-200: var(--bl-teal-200);
+          --color-300: var(--bl-teal-300);
+          --color-400: var(--bl-teal-400);
+          --color-500: var(--bl-teal-500);
+          --color-600: var(--bl-teal-600);
+          --color-700: var(--bl-teal-700);
+          --color-800: var(--bl-teal-800);
+          --color-900: var(--bl-teal-900);
+        }
+        .bl-color-vars-green {
+          --color-50: var(--bl-green-50);
+          --color-100: var(--bl-green-100);
+          --color-200: var(--bl-green-200);
+          --color-300: var(--bl-green-300);
+          --color-400: var(--bl-green-400);
+          --color-500: var(--bl-green-500);
+          --color-600: var(--bl-green-600);
+          --color-700: var(--bl-green-700);
+          --color-800: var(--bl-green-800);
+          --color-900: var(--bl-green-900);
+        }
+        .bl-color-vars-light-green {
+          --color-50: var(--bl-light-green-50);
+          --color-100: var(--bl-light-green-100);
+          --color-200: var(--bl-light-green-200);
+          --color-300: var(--bl-light-green-300);
+          --color-400: var(--bl-light-green-400);
+          --color-500: var(--bl-light-green-500);
+          --color-600: var(--bl-light-green-600);
+          --color-700: var(--bl-light-green-700);
+          --color-800: var(--bl-light-green-800);
+          --color-900: var(--bl-light-green-900);
+        }
+        .bl-color-vars-lime {
+          --color-50: var(--bl-lime-50);
+          --color-100: var(--bl-lime-100);
+          --color-200: var(--bl-lime-200);
+          --color-300: var(--bl-lime-300);
+          --color-400: var(--bl-lime-400);
+          --color-500: var(--bl-lime-500);
+          --color-600: var(--bl-lime-600);
+          --color-700: var(--bl-lime-700);
+          --color-800: var(--bl-lime-800);
+          --color-900: var(--bl-lime-900);
+        }
+        .bl-color-vars-yellow {
+          --color-50: var(--bl-yellow-50);
+          --color-100: var(--bl-yellow-100);
+          --color-200: var(--bl-yellow-200);
+          --color-300: var(--bl-yellow-300);
+          --color-400: var(--bl-yellow-400);
+          --color-500: var(--bl-yellow-500);
+          --color-600: var(--bl-yellow-600);
+          --color-700: var(--bl-yellow-700);
+          --color-800: var(--bl-yellow-800);
+          --color-900: var(--bl-yellow-900);
+        }
+        .bl-color-vars-amber {
+          --color-50: var(--bl-amber-50);
+          --color-100: var(--bl-amber-100);
+          --color-200: var(--bl-amber-200);
+          --color-300: var(--bl-amber-300);
+          --color-400: var(--bl-amber-400);
+          --color-500: var(--bl-amber-500);
+          --color-600: var(--bl-amber-600);
+          --color-700: var(--bl-amber-700);
+          --color-800: var(--bl-amber-800);
+          --color-900: var(--bl-amber-900);
+        }
+        .bl-color-vars-orange {
+          --color-50: var(--bl-orange-50);
+          --color-100: var(--bl-orange-100);
+          --color-200: var(--bl-orange-200);
+          --color-300: var(--bl-orange-300);
+          --color-400: var(--bl-orange-400);
+          --color-500: var(--bl-orange-500);
+          --color-600: var(--bl-orange-600);
+          --color-700: var(--bl-orange-700);
+          --color-800: var(--bl-orange-800);
+          --color-900: var(--bl-orange-900);
+        }
+        .bl-color-vars-deep-orange {
+          --color-50: var(--bl-deep-orange-50);
+          --color-100: var(--bl-deep-orange-100);
+          --color-200: var(--bl-deep-orange-200);
+          --color-300: var(--bl-deep-orange-300);
+          --color-400: var(--bl-deep-orange-400);
+          --color-500: var(--bl-deep-orange-500);
+          --color-600: var(--bl-deep-orange-600);
+          --color-700: var(--bl-deep-orange-700);
+          --color-800: var(--bl-deep-orange-800);
+          --color-900: var(--bl-deep-orange-900);
+        }
+        .bl-color-vars-brown {
+          --color-50: var(--bl-brown-50);
+          --color-100: var(--bl-brown-100);
+          --color-200: var(--bl-brown-200);
+          --color-300: var(--bl-brown-300);
+          --color-400: var(--bl-brown-400);
+          --color-500: var(--bl-brown-500);
+          --color-600: var(--bl-brown-600);
+          --color-700: var(--bl-brown-700);
+          --color-800: var(--bl-brown-800);
+          --color-900: var(--bl-brown-900);
+        }
+        .bl-color-vars-grey {
+          --color-50: var(--bl-grey-50);
+          --color-100: var(--bl-grey-100);
+          --color-200: var(--bl-grey-200);
+          --color-300: var(--bl-grey-300);
+          --color-400: var(--bl-grey-400);
+          --color-500: var(--bl-grey-500);
+          --color-600: var(--bl-grey-600);
+          --color-700: var(--bl-grey-700);
+          --color-800: var(--bl-grey-800);
+          --color-900: var(--bl-grey-900);
+        }
+        .bl-color-vars-blue-grey {
+          --color-50: var(--bl-blue-grey-50);
+          --color-100: var(--bl-blue-grey-100);
+          --color-200: var(--bl-blue-grey-200);
+          --color-300: var(--bl-blue-grey-300);
+          --color-400: var(--bl-blue-grey-400);
+          --color-500: var(--bl-blue-grey-500);
+          --color-600: var(--bl-blue-grey-600);
+          --color-700: var(--bl-blue-grey-700);
+          --color-800: var(--bl-blue-grey-800);
+          --color-900: var(--bl-blue-grey-900);
+        }
+
       /* === ANIMATION === */
 
         @keyframes spin {
@@ -64,7 +295,7 @@ This import contains all of the Badge List styles and needed shims.
         - `borderless` makes the border clear (even on hover/focus).
         - `narrow` minimizes the width of the button.
         - `whiteText` forces the text color to pure white.
-        - `large` or `jumbo` will increase the size and padding.
+        - `small`, `large` or `jumbo` will decrease/increase the size and padding.
 
         When wrapping `paper-button` in a link, always add the `button` class to the anchor tag.
       */
@@ -87,6 +318,10 @@ This import contains all of the Badge List styles and needed shims.
         paper-button:hover, paper-button:focus {
           background: radial-gradient(circle at 60% 40%, var(--bl-grey-50), var(--bl-grey-300));
           color: var(--bl-grey-700);
+        }
+        paper-button.small {
+          font-size: 0.7em;
+          padding: 0.4em 1.1em;
         }
         paper-button.large {
           font-size: 0.9em;

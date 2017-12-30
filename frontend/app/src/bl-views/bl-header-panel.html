@@ -83,7 +83,7 @@ It provides a sliding header panel and holds the page content.
 
     </style>
 
-    <div id="body" style$="padding-top: [[expandedHeight]]rem;">
+    <div id="body" style$="padding-top: [[bodyPadding]]rem;">
       <slot name="content"></slot>
       <slot name="footer">
         <bl-footer></bl-footer>
@@ -121,6 +121,15 @@ It provides a sliding header panel and holds the page content.
           /* Header height when fully condensed. In rem. */
           condensedHeight: Number,
 
+          /**
+           * Set to `true` in order to suppress the top padding added to the body. This is useful when you want to have a background 
+           * gradient in the content panel which runs behind the header background containers.
+           */
+          fullBleedBody: {
+            type: Boolean,
+            value: false
+          },
+
           /* Returns `expanded`, `partial` or `condensed`. */
           headerStatus: {
             type: String,
@@ -147,6 +156,11 @@ It provides a sliding header panel and holds the page content.
             type: Number, 
             computed: '_headerHeight(condensedHeight, expandedHeight, condensedPercentage)',
             notify: true
+          },
+
+          bodyPadding: {
+            type: Number,
+            computed: '_bodyPadding(expandedHeight, fullBleedBody)'
           },
 
           /* Used internally to track the scroll position. */
@@ -215,6 +229,11 @@ It provides a sliding header panel and holds the page content.
           return this.condensedHeight + ((this.expandedHeight - this.condensedHeight) * (1 - condensedPercentage))
         else
           return this.expandedHeight;
+      }
+
+      _bodyPadding(expandedHeight, fullBleedBody) {
+        if (fullBleedBody) return 0;
+        else return expandedHeight;
       }
 
     }

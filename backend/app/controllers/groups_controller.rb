@@ -25,7 +25,7 @@ class GroupsController < ApplicationController
     :validation_threshold, :new_owner_username, :pricing_group, :subscription_plan, 
     :user_limit_override, :admin_limit_override, :full_member_group_override, :limited_member_group_override,
     :feature_grant_file_uploads, :feature_grant_reporting, :feature_grant_bulk_tools, :feature_grant_integration, 
-    :feature_grant_leaderboards,
+    :feature_grant_leaderboards_weekly, :feature_grant_leaderboards_realtime,
     :stripe_subscription_card, :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, 
     :join_code, :avatar_key, :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag, :joinability]
 

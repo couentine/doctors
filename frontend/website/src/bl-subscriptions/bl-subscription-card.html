@@ -1,0 +1,566 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Toast #
+
+This displays a single subscription card in the pricing view.
+-->
+<dom-module id="bl-subscription-card">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+
+          transition: 0.6s all;
+          opacity: 1;
+        }
+        :host([hide-entire-card]) {
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+          opacity: 0;
+        }
+
+      /* === CARD STYLES === */
+
+        #card {
+          background: white;
+          border-radius: 6px;
+          display: flex;
+          flex-direction: row;
+          position: relative;
+          padding: 1rem 0 1rem 1rem;
+          overflow: hidden;
+
+          transition: all 0.6s;
+          max-height: 100em;
+
+          @apply --bl-shadow-2;
+        }
+        #card.true { /* true = hideEntireCard */
+          max-height: 0;
+          padding: 0;
+          margin: 0;
+        }
+          #leftPanel {
+            font-size: 10rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+
+            position: absolute;
+            top: 0.3rem;
+            left: 0.3rem;
+            opacity: 0.06;
+
+            z-index: 2;
+          }
+            #discount { 
+              flex: 1 1 auto;
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-end;
+              font-size: 1rem;
+              width: 8em;
+
+              display: none;
+            }
+              #discount .inner {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0 0 0.7em 0.7em;
+              }
+                #discount .inner .toggle {
+                  display: flex;
+                  flex-direction: row;
+                  align-items: center;
+                }
+                  paper-toggle-button {
+                    --primary-color: var(--color-500);
+                  }
+                  #discount .inner .toggle i {
+                    font-size: 2em;
+                    margin-bottom: 0.2em;
+                    color: var(--bl-grey-500)
+                  }
+                #discount .inner label {
+                  font-size: 0.7em;
+                  color: var(--bl-grey-500)
+                }
+          @media (min-width: 480px) {
+            #leftPanel {
+              font-size: 8rem;
+              flex: 0 0 auto;
+              position: initial;
+              opacity: 1;
+              margin: 0 1rem 0 0;
+            }
+              #discount { display: flex; }
+          }
+            #leftPanel>i {
+              padding-bottom: 0.05em;
+              background: -webkit-linear-gradient(150deg, var(--color-900), var(--color-300));
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+            }
+          
+          #body {
+            flex: 1 1 auto;
+            padding: 1rem 0;
+            position: relative;
+
+            z-index: 3;
+          }
+            #bodyText {
+              margin: 0 0 0.5rem 0;
+
+              z-index: 1;
+            }
+
+              #title {
+                display: flex;
+                margin-bottom: 1rem;
+                align-items: center;
+              }
+                #name {
+                  color: var(--color-800);
+                  font-weight: bold;
+                  font-size: 2rem;
+                  line-height: 1.3em;
+                  flex: 0 0 auto;
+                  margin-right: 1rem;
+                }
+                #description.padding1 { padding-right: 1.5rem; }
+                #description.padding2 { padding-right: 2.5rem; }
+                #description.padding3 { padding-right: 3.5rem; }
+                #description.padding4 { padding-right: 4.5rem; }
+                #description.padding5 { padding-right: 5.5rem; }
+                #description.padding6 { padding-right: 6.5rem; }
+                .pricePanel {
+                  flex: 0 0 auto;
+                  display: flex;
+                  align-items: flex-start;
+                  margin-right: 1rem;
+                }
+                  #orLabel {
+                    font-size: 1.7rem;
+                    line-height: 1em;
+                    font-weight: 200;
+                    align-self: flex-start;
+                  }
+                  .price {
+                    flex: 0 0 auto;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    margin: 0 0.4rem;
+                  }
+                    .topRow {
+                      flex: 0 0 auto;
+                      display: flex;
+                      flex-direction: row;
+                      align-items: flex-start;
+                    }
+                      .currencySymbol {
+                        flex: 0 0 auto;
+                        font-weight: 900;
+                        font-size: 0.7rem;
+                        line-height: 1.3em;
+                        align-self: center;
+                        margin-right: 0.1rem;
+                      }
+                      .number {
+                        flex: 0 0 auto;
+                        font-size: 1.7rem;
+                        line-height: 1em;
+                        font-weight: 900;
+                      }
+                    .price .interval {
+                      flex: 0 0 auto;
+                      font-size: 0.7rem;
+                      line-height: 1.3em;
+                      padding-left: 0.4rem;
+                      color: var(--bl-grey-600);
+                    }
+                #buttonPanel {}
+                  #buttonPanel paper-button {
+                    z-index: 10;
+                  }
+
+          #features {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            margin: 0;
+
+            z-index: 2;
+          }
+            #featuresHeader {
+              margin: 0.5rem 0 0.8rem 0;
+              display: flex;
+              align-items: center;
+              min-height: 2em;
+            }
+              #featuresHeader .title {
+                font-weight: 600;
+                margin-right: 0.5rem;
+              }
+              #featuresHeader paper-button {
+                flex: 0 0 auto;
+                z-index: 5;
+                border-color: var(--bl-grey-400);
+                color: var(--bl-grey-500);
+              }
+            .featureGroup {
+              z-index: 2;
+            }
+            .featureGroup.margin1 { margin-right: 1rem; }
+            .featureGroup.margin2 { margin-right: 2rem; }
+            .featureGroup.margin3 { margin-right: 3rem; }
+            .featureGroup.margin4 { margin-right: 4rem; }
+            .featureGroup.margin5 { margin-right: 5rem; }
+            .featureGroup.margin6 { margin-right: 6rem; }
+              .featureDescription {
+                transition: all 0.6s;
+                max-height: 0;
+                margin: 0 0 0 1.6em;
+                overflow: hidden;
+              }
+              .featureDescription.margin0 { margin-right: 1rem; }
+              .featureDescription.margin1 { margin-right: 2rem; }
+              .featureDescription.margin2 { margin-right: 3rem; }
+              .featureDescription.margin3 { margin-right: 4rem; }
+              .featureDescription.margin4 { margin-right: 5rem; }
+              .featureDescription.margin5 { margin-right: 6rem; }
+              .featureDescription.equal.expanded, #features.expanded .featureDescription.expanded {
+                max-height: 10em;
+                margin-bottom: 0.7em;
+              }
+              .feature {
+                color: var(--color-800);
+                display: flex;
+                align-items: center;
+                margin: -1.3em 0 0.1em 0;
+
+                transition: all 0.6s;
+              }
+              .feature.equal, #features.expanded .feature {
+                margin-top: 0.1em;
+              }
+                .feature .label {
+                  flex: 0 0 auto;
+                  background: rgba(255, 255, 255, 0.9);
+                  padding: 0 0.3em;
+                  border-radius: 2px;
+                  cursor: pointer;
+                  overflow: hidden;
+
+                  z-index: 3;
+                  transition: all 0.3s;
+                  max-height: 0;
+                }
+                .feature.equal .label, #features.expanded .feature .label {
+                  max-height: 10em;
+                }
+                  .feature .label i {
+                    display: inline-block;
+                    transition: all 0.3s;
+                  }
+                  .feature .label i.rotated {
+                    transform: rotate(90deg); 
+                  }
+                .feature .connector {
+                  flex: 1 1 auto;
+                  margin: 1px 0 0 0;
+                  height: 4px;
+                  overflow: hidden;
+                  border-radius: 50em;
+                  background: linear-gradient(90deg, var(--color-50), var(--color-50) 70%, var(--color-100));
+                  border: 0px solid var(--color-100);
+
+                  transition: all 0.3s;
+                  max-height: 0;
+                }
+                .feature.equal .connector, #features.expanded .feature .connector {
+                  max-height: 10em;
+                  border-width: 1px;
+                }
+                .feature .mark {
+                  flex: 0 0 auto;
+                  position: relative;
+                  width: 1em;
+                  height: 1em;
+                  margin-left: -0.4em;
+                  cursor: pointer;
+                }
+                  .feature.equal .mark, #features.expanded .feature .mark {
+                    cursor: initial;
+                  }
+                  .feature .mark .inner {
+                    position: absolute;
+                    top: 0.1em;
+                    left: 0.1em;
+                    width: 0.8em;
+                    height: 0.8em;
+                    background: var(--color-100);
+                    border-radius: 50em;
+                  }
+
+          #bars {
+            display: flex;
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            border-radius: 0 6px 6px 0;
+            overflow: hidden;
+            
+            z-index: 1;
+          }
+            .bar {
+              width: 1rem;
+              position: relative;
+              background: transparent;
+            }
+              .bar.below {
+                background: var(--color-50);
+              }
+              .bar.equal {
+                background: var(--color-300);
+              }
+
+    </style>
+
+    <div id="card" class$="[[subscriptionCard.planType]] bl-color-vars-[[subscriptionCard.color]] [[hideEntireCard]]">
+      <div id="leftPanel">
+        <i class$="[[subscriptionCard.icon]] bl-color-vars-[[subscriptionCard.color]]"></i>
+        
+        <div id="discount" hidden="[[!subscriptionCard.hasK12]]">
+          <div class="inner">
+            <div class="toggle">
+              <paper-toggle-button id="toggleK12" checked="{{k12Mode}}"></paper-toggle-button>
+              <i class="icon-piggy-bank"></i>
+            </div>
+            <label for="toggleK12">Show K12 Discount</label>
+          </div>
+        </div>
+      </div>
+
+      <div id="body">
+        <div id="bodyText">
+          <div id="title">
+            <div id="name" class$="bl-color-vars-[[subscriptionCard.color]]">[[planName]]</div>
+            
+            <!-- === FREE PRICE PANEL === -->
+            <div id="freePrice" class="pricePanel" hidden="[[!subscriptionCard.isFree]]">
+              <div id="free" class="price">
+                <div class="topRow">
+                  <div class="currencySymbol">$</div>
+                  <div class="number">0</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- === STANDARD PRICE PANEL === -->
+            <div id="standardPrice" class="pricePanel" hidden="[[hideStandardPrice]]">
+              <div id="month" class="price" hidden="[[!subscriptionCard.prices.standard.month]]">
+                <div class="topRow">
+                  <div class="currencySymbol">$</div>
+                  <div class="number">[[subscriptionCard.prices.standard.month]]</div>
+                </div>
+                <div class="interval">monthly</div>
+              </div>
+              <div id="orLabel" hidden="[[!subscriptionCard.prices.standard.month]]">/</div>
+              <div id="year" class="price" hidden="[[!subscriptionCard.prices.standard.year]]">
+                <div class="topRow">
+                  <div class="currencySymbol">$</div>
+                  <div class="number">[[subscriptionCard.prices.standard.year]]</div>
+                </div>
+                <div class="interval">annually</div>
+              </div>
+            </div>
+            
+            <!-- === K12 PRICE PANEL === -->
+            <div id="k12Price" class="pricePanel" hidden="[[hideK12Price]]">
+              <div id="month" class="price" hidden="[[!subscriptionCard.prices.k12.month]]">
+                <div class="topRow">
+                  <div class="currencySymbol">$</div>
+                  <div class="number">[[subscriptionCard.prices.k12.month]]</div>
+                </div>
+                <div class="interval">monthly</div>
+              </div>
+              <div id="orLabel" hidden="[[!subscriptionCard.prices.k12.month]]">/</div>
+              <div id="year" class="price" hidden="[[!subscriptionCard.prices.k12.year]]">
+                <div class="topRow">
+                  <div class="currencySymbol">$</div>
+                  <div class="number">[[subscriptionCard.prices.k12.year]]</div>
+                </div>
+                <div class="interval">annually</div>
+              </div>
+            </div>
+
+            <div id="buttonPanel">
+              <a class="button" href$="[[subscriptionCard.createGroupPath.standard]]" hidden="[[k12Mode]]">
+                <paper-button class$="[[subscriptionCard.color]]" raised elevation="3">
+                  Create <span class="showAt480" hidden="[[k12Mode]]">[[subscriptionCard.name]] group</span>
+                </paper-button>
+              </a>
+              <a class="button" href$="[[subscriptionCard.createGroupPath.k12]]" hidden="[[hideK12Price]]">
+                <paper-button class$="[[subscriptionCard.color]]" raised elevation="3">
+                  Create <span class="showAt480" hidden="[[k12Mode]]">[[subscriptionCard.name]] group</span>
+                </paper-button>
+              </a>
+            </div>
+          </div>
+
+          <div id="description" class$="padding[[subscriptionCard.levelCount]]">[[subscriptionCard.description]]</div>
+        </div>
+        
+        <div id="features">
+          <div id="featuresHeader">
+            <div class="title">Included Features:</div>
+            <paper-button id="expandButton" class="small transparent" on-tap="toggleFeatures" hidden="[[!subscriptionCard.level]]">
+              <i id="expandButtonIcon" class="icon-expand-vertical"></i> 
+              <span id="expandButtonText">Expand</span>
+            </paper-button>
+          </div>
+
+          <template is="dom-repeat" items="[[subscriptionCard.featuresByLevel]]" as="featureLevel" index-as="levelNumber">
+            <div class$="featureGroup margin[[featureLevel.levelsAboveCurrent]]">
+              <template is="dom-repeat" items="[[featureLevel.levelFeatures]]" as="feature" index-as="featureIndex">
+                <div class$="feature [[featureLevel.levelStatus]] bl-color-vars-[[featureLevel.levelColor]]">
+                  <div class="label" on-tap="toggleDescription">
+                    <i id="chevronIcon" class="icon-chevron-right"></i>
+                    [[feature.label]]
+                  </div>
+                  <div class="connector"></div>
+                  <div class="mark" on-tap="expandFeatures">
+                    <div class="inner"></div>
+                  </div>
+                </div>
+                <div id="featureDescription" class$="featureDescription [[featureLevel.levelStatus]] margin[[levelNumber]]">
+                  [[feature.description]]
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div id="bars">
+        <template is="dom-repeat" items="[[subscriptionCard.featuresByLevel]]" as="featureLevel">
+          <div class$="bar [[featureLevel.levelStatus]] bl-color-vars-[[featureLevel.levelColor]]"></div>
+        </template>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlSubscriptionCard extends Polymer.Element {
+      
+      static get is() { return 'bl-subscription-card'; }
+
+      static get properties() {
+        return {
+          
+          /** Required. The subscription card object. */
+          subscriptionCard: Object,
+
+          /** Setting this to true either hides the card (if it does not have k12 pricing) or switches to k12 pricing. */
+          k12Mode: {
+            type: Boolean,
+            notify: true
+          },
+
+          planName: {
+            type: String,
+            computed: '_planName(subscriptionCard.name, subscriptionCard.hasK12, k12Mode)'
+          },
+
+          hideStandardPrice: {
+            type: Boolean,
+            computed: '_hideStandardPrice(subscriptionCard.isFree, k12Mode)'
+          },
+
+          hideK12Price: {
+            type: Boolean,
+            computed: '_hideK12Price(subscriptionCard.isFree, k12Mode)'
+          },
+
+          hideEntireCard: {
+            type: Boolean,
+            computed: '_hideEntireCard(subscriptionCard.hasK12, k12Mode)',
+            reflectToAttribute: true
+          }
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+      
+      toggleFeatures(e) {
+        if (this.$.features.classList.contains('expanded')) {
+          this.$.features.classList.remove('expanded');
+          this.$.expandButtonIcon.className = 'icon-expand-vertical';
+          this.$.expandButtonText.innerHTML = 'Expand';
+        } else {
+          this.$.features.classList.add('expanded');
+          this.$.expandButtonIcon.className = 'icon-shrink-vertical';
+          this.$.expandButtonText.innerHTML = 'Collapse';
+        }
+      }
+
+      expandFeatures(e) {
+        if (!this.$.features.classList.contains('expanded')) {
+          this.$.features.classList.add('expanded');
+          this.$.expandButtonIcon.className = 'icon-shrink-vertical';
+          this.$.expandButtonText.innerHTML = 'Collapse';
+        }
+      }
+
+      toggleDescription(e) {
+        if (e.model.root.$.featureDescription.classList.contains('expanded')) {
+          e.model.root.$.featureDescription.classList.remove('expanded');
+          e.model.root.$.chevronIcon.classList.remove('rotated');
+        } else {
+          e.model.root.$.featureDescription.classList.add('expanded');
+          e.model.root.$.chevronIcon.classList.add('rotated');
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _planName(subscriptionCardName, subscriptionCardHasK12, k12Mode) {
+        return ((subscriptionCardHasK12 && k12Mode) ? 'K12 ' : '') + subscriptionCardName;
+      }
+
+      _hideStandardPrice(subscriptionCardIsFree, k12Mode) {
+        return subscriptionCardIsFree || k12Mode;
+      }
+
+      _hideK12Price(subscriptionCardIsFree, k12Mode) {
+        return subscriptionCardIsFree || !k12Mode;
+      }
+
+      _hideEntireCard(subscriptionCardHasK12, k12Mode) {
+        return !subscriptionCardHasK12 && k12Mode;
+      }
+
+    }
+
+    window.customElements.define(BlSubscriptionCard.is, BlSubscriptionCard);
+  </script>
+</dom-module>

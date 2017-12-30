@@ -36,6 +36,12 @@ BadgeList::Application.routes.draw do
     mount Sidekiq::Web => '/a/sidekiq'
   end
   
+  # === INFO PATHS === #
+  scope '/i' do
+    resources :subscription_plans, only: [:index]
+    resources :subscription_features, only: [:index]
+  end
+
   # === WEBHOOK PATHS === #
   match 'h/lti/launch' => 'lti#launch', via: :post, as: :lti_launch
   match 'h/lti/config' => 'lti#config_xml', via: :get, as: :lti_config

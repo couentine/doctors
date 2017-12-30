@@ -66,7 +66,17 @@ class HomeController < ApplicationController
       })
     end
 
-    render layout: 'website'
+    render_polymer_website(
+      'Badge List Pricing', {
+        'include_metadata' => true,
+        'metadata_title' => 'Badge List Pricing',
+        'metadata_description' => 'Badge List offers a free forever tier and an array of paid plans for organizations of all sizes.',
+        'metadata_image' => bl_asset_url('badge-list-icon.png'),
+        'metadata_image_width' => '500',
+        'metadata_image_height' => '500',
+        'metadata_site_name' => 'Badge List',
+        'metadata_url' => request.original_url
+    })
   end
 
   # GET /pricing_k12
