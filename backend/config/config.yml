@@ -38,7 +38,7 @@ defaults: &defaults
       description: Award thousands of badges at a time by uploading a CSV file.
     integration:
       label: Third-Party Integrations
-      description: Integrate your Badge List group directly into any LTI-compliand learning management system.
+      description: Integrate your Badge List group directly into any LTI-compliant learning management system.
     hub:
       label: Unified Group Hub
       description: Build a family of groups linked together in a browsable directory with a unified member list.

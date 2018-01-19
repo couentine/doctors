@@ -96,6 +96,19 @@
           /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
           activeView: Object,
 
+          /** 
+           * Set this to change the window location hash. Observe this to be notified whenever the location hash changes. 
+           * Do not include the hash sign, just the url-safe string to be placed after the hash sign.
+           * Setting the Value: `this.website.locationHashKey = 'test-value';`
+           * Clearing the Value: `this.website.locationHashKey = '';`
+           */
+          locationHashKey: {
+            type: String,
+            notify: true,
+            observer: '_locationHashKeyChanged',
+            value: function() { return window.location.hash.replace('#', ''); }
+          },
+
           indexRouteActive: Boolean,
           webRouteActive: Boolean,
           webHomeViewActive: {
@@ -128,6 +141,9 @@
           routeElement.addEventListener('active-changed', e => this._activeRouteChanged(e));
           if (routeElement.active && routeElement.title) document.title = routeElement.title;
         }.bind(this));
+
+        // Add listener for window location hash change
+        window.addEventListener('hashchange', e => this._windowLocationHashChanged(e));
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
@@ -150,6 +166,19 @@
         if ((event.detail.value == true) && event.target && event.target.title) {
           document.title = event.target.title;
         }
+      }
+
+      /** Copies the window location hash to the locationHashKey component property. */
+      _windowLocationHashChanged(event) {
+        var newHashKey = window.location.hash.replace('#', '');
+        if (this.locationHashKey != newHashKey)
+          this.locationHashKey = newHashKey;
+      }
+
+      /** Copies the locationHashKey component property to the window location. */
+      _locationHashKeyChanged(newValue, oldValue) {
+        if (window.location.hash != newValue)
+          window.location.hash = newValue;
       }
 
       // #=== PROPERTY COMPUTER METHODS ===#

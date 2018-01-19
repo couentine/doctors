@@ -318,26 +318,35 @@
                   </span>
                 </li>
                 <li>
-                  <label>Do I need to use a credit card to create a paid group?</label>
+                  <label>How long will my badges last? Will they be deleted if I cancel my subscription?</label>
                   <span>
-                    The easiest way to sign up for a paid plan is to use a credit card, but we can accommodate just about any payment 
-                    requirements. Just reach out to us via chat or email below.
+                    Your badges will remain in Badge List unless you delete them. If you choose to cancel your subscription, 
+                    you will lose access to paid features, but your badges will remain.
                   </span>
                 </li>
                 <li>
-                  <label>What do I need to do in order to be compliant with student privacy laws?</label>
+                  <label>Do I need to use a credit card to create a paid group?</label>
                   <span>
-                    Laws vary widely from place to place, so the only way to be sure is to check with your district admins, but
-                    we offer a wide range of features to assist in privacy compliance. 
-                    Creating private badges which are only visible to group members is supported by all paid groups.
-                    Org and Hub groups also include Domain Privacy which locks down all users within an email domain.
+                    The easiest way to sign up for a paid plan is to use a credit card, but we can accommodate just about any payment 
+                    requirements. Just reach out to us via chat or email below to discuss alternate payment options.
+                  </span>
+                </li>
+                <li>
+                  <label>What do I need to do in order to comply with student privacy laws?</label>
+                  <span>
+                    Laws vary widely from place to place, so the only way to be sure is to check with your district admins, 
+                    but we offer a wide range of features to assist in privacy compliance. 
+                    The ability to create private badges that are only visible to group members is supported by all paid groups. 
+                    Org and Hub groups also include Domain Privacy, 
+                    a feature that makes user accounts invisible to those outside the email domain.
                   </span>
                 </li>
                 <li>
                   <label>Can Badge List integrate with _____?</label>
                   <span>
+                    We have an existing LTI integration which is compatible with Canvas, Blackboard, Moodle and any other LTI-compliant LMS.
                     Our team is always working to add more third-party integrations to the platform. 
-                    Completed integrations are made available to all groups at the Org level or higher for no additional cost. 
+                    Integrations are made available to all groups at the Org level or higher for no additional cost. 
                     Contact us if you'd like us to prioritize a particular integration. A fee may be involved.
                   </span>
                 </li>
@@ -415,6 +424,11 @@
 
       toggleK12() {
         this.k12Mode = !this.k12Mode;
+
+        if (this.k12Mode)
+          this.website.locationHashKey = 'k12';
+        else
+          this.website.locationHashKey = '';
       }
 
       // #=== PRIVATE ACTION METHODS ===#
@@ -598,6 +612,13 @@
 
       // #=== LIFECYCLE EVENTS ===#
 
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        // Add listeners
+        this.website.addEventListener('location-hash-key-changed', e => this._websiteLocationHashKeyChanged(e.detail.value));
+      }
+
       assetsLoaded() {
         if (super.assetsLoaded) super.assetsLoaded();
         
@@ -612,6 +633,14 @@
         if (this.subscriptionPlans && this.subscriptionFeatures) {
           this._buildSubscriptionCards();
           this.loadingPricing = false;
+        }
+      }
+
+      _websiteLocationHashKeyChanged(websiteLocationHashKey) {
+        if (websiteLocationHashKey == 'k12') {
+          if (!this.k12Mode) this.k12Mode = true;
+        } else {
+          if (this.k12Mode) this.k12Mode = false;
         }
       }
 
