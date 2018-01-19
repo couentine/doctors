@@ -245,9 +245,17 @@ This displays a single subscription card in the pricing view.
               .featureDescription.margin4 { margin-right: 5rem; }
               .featureDescription.margin5 { margin-right: 6rem; }
               .featureDescription.equal.expanded, #features.expanded .featureDescription.expanded {
-                max-height: 10em;
+                max-height: 100em;
                 margin-bottom: 0.7em;
               }
+                .featureComingSoonText {
+                  font-style: italic;
+                  font-weight: bold;
+                  background: var(--bl-grey-200);
+                  padding: 0.6em;
+                  margin: 0.5em 1em 0.5em 0;
+                  border-radius: 2px;
+                }
               .feature {
                 color: var(--color-800);
                 display: flex;
@@ -280,6 +288,14 @@ This displays a single subscription card in the pricing view.
                   }
                   .feature .label i.rotated {
                     transform: rotate(90deg); 
+                  }
+                  .featureComingSoonLabel {
+                    font-size: 0.8em;
+                    padding: 0.1em 0.3em;
+                    text-transform: uppercase;
+                    color: var(--color-200);
+                    border-radius: 2px;
+                    border: 1px solid var(--color-200);
                   }
                 .feature .connector {
                   flex: 1 1 auto;
@@ -412,16 +428,23 @@ This displays a single subscription card in the pricing view.
             </div>
 
             <div id="buttonPanel">
-              <a class="button" href$="[[subscriptionCard.createGroupPath.standard]]" hidden="[[k12Mode]]">
-                <paper-button class$="[[subscriptionCard.color]]" raised elevation="3">
-                  Create <span class="showAt480" hidden="[[k12Mode]]">[[subscriptionCard.name]] group</span>
-                </paper-button>
-              </a>
-              <a class="button" href$="[[subscriptionCard.createGroupPath.k12]]" hidden="[[hideK12Price]]">
-                <paper-button class$="[[subscriptionCard.color]]" raised elevation="3">
-                  Create <span class="showAt480" hidden="[[k12Mode]]">[[subscriptionCard.name]] group</span>
-                </paper-button>
-              </a>
+              <span hidden="[[subscriptionCard.disabled]]">
+                <a class="button" href$="[[subscriptionCard.createGroupPath.standard]]" hidden="[[k12Mode]]">
+                  <paper-button class$="[[subscriptionCard.color]]" raised elevation="3">
+                    Create <span class="showAt480" hidden="[[k12Mode]]">[[subscriptionCard.name]] group</span>
+                  </paper-button>
+                </a>
+                <a class="button" href$="[[subscriptionCard.createGroupPath.k12]]" hidden="[[hideK12Price]]">
+                  <paper-button class$="[[subscriptionCard.color]]" raised elevation="3">
+                    Create <span class="showAt480" hidden="[[k12Mode]]">[[subscriptionCard.name]] group</span>
+                  </paper-button>
+                </a>
+              </span>
+                
+              <paper-button class="transparent" hidden="[[!subscriptionCard.disabled]]" on-tap="planComingSoon">
+                <i class="icon-calendar4"></i>
+                Coming Soon!
+              </paper-button>
             </div>
           </div>
 
@@ -444,6 +467,9 @@ This displays a single subscription card in the pricing view.
                   <div class="label" on-tap="toggleDescription">
                     <i id="chevronIcon" class="icon-chevron-right"></i>
                     [[feature.label]]
+                    <span class="featureComingSoonLabel" hidden="[[feature.available]]">
+                      <span class="showAt480">Coming</span> Soon!
+                    </span>
                   </div>
                   <div class="connector"></div>
                   <div class="mark" on-tap="expandFeatures">
@@ -451,6 +477,9 @@ This displays a single subscription card in the pricing view.
                   </div>
                 </div>
                 <div id="featureDescription" class$="featureDescription [[featureLevel.levelStatus]] margin[[levelNumber]]">
+                  <div class="featureComingSoonText" hidden="[[feature.available]]">
+                    This feature is in development and has not yet been publicly released.
+                  </div>
                   [[feature.description]]
                 </div>
               </template>
@@ -539,6 +568,10 @@ This displays a single subscription card in the pricing view.
           e.model.root.$.featureDescription.classList.add('expanded');
           e.model.root.$.chevronIcon.classList.add('rotated');
         }
+      }
+
+      planComingSoon(e) {
+        alert('This plan is under development and has not yet been publicly released. Reach out to us for more info.');
       }
 
       // #=== PROPERTY COMPUTER METHODS ===#

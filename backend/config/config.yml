@@ -17,36 +17,45 @@ defaults: &defaults
     file_uploads:
       label: File Uploads
       description: In addition to posting images as evidence, paid groups support the upload of files of any type.
+      status: available
     pro_api:
       label: Pro API
       description: By using the Pro API, instead of the read-only Free API, developers have full access to all Badge List functionality.
+      status: available
     leaderboards_weekly:
       label: Weekly Leaderboard Updates
       description: |
         Group leaderboards show which group members have the most badge endorsements. 
         Groups with this plan automatically update their leaderboards at the beginning of each week.
+      staus: unreleased
     community:
       label: Community Badges & Wiki
       description: |
         Community features allow the creation of badges which can be awarded by any group member instead of just admins.
         Community also enables an interactive wiki for each badge which is perfect for storing documentation and key learning resources.
+      status: available
     reporting:
       label: Reporting
       description: Export CSV reports of group member activity and badge portfolios. Reports can be filtered by group tags.
+      status: available
     bulk_tools:
       label: Bulk Tools
       description: Award thousands of badges at a time by uploading a CSV file.
+      status: available
     integration:
       label: Third-Party Integrations
       description: Integrate your Badge List group directly into any LTI-compliant learning management system.
+      status: available
     hub:
       label: Unified Group Hub
       description: Build a family of groups linked together in a browsable directory with a unified member list.
+      staus: unreleased
     leaderboards_realtime:
       label: Realtime Leaderboard Updates
       description: |
         Group leaderboards show which group members have the most badge endorsements. 
         Groups with this plan automatically update their leaderboards in realtime.
+      staus: unreleased
 
   # Subscription Plans
   subscription_plans:
@@ -194,6 +203,7 @@ defaults: &defaults
           - bulk_tools
           - integration
       hub-1m-1:
+        disabled: true
         name: Hub
         type: hub
         amount: 45000
@@ -224,6 +234,7 @@ defaults: &defaults
           - hub
           - leaderboards_realtime
       hub-1y-1:
+        disabled: true
         name: Hub Annual
         type: hub
         amount: 495000
@@ -277,6 +288,7 @@ defaults: &defaults
           - pro_api
           - leaderboards_weekly
       k12-hub-1m-1:
+        disabled: true
         name: K12 Hub
         type: hub
         amount: 34000
@@ -307,6 +319,7 @@ defaults: &defaults
           - hub
           - leaderboards_realtime
       k12-hub-1y-1:
+        disabled: true
         name: K12 Hub Annual
         type: hub
         amount: 374000
@@ -388,7 +401,7 @@ defaults: &defaults
         description: |
           Badge List Enterprise
         users: 700
-        admins: 3
+        admins: -1
         full_member_groups: 0
         limited_member_groups: 0
         features:
@@ -400,6 +413,7 @@ defaults: &defaults
           - bulk_tools
           - integration
       hub-free-1:
+        disabled: true
         name: Enterprise Hub
         amount: 0
         currency: usd
@@ -427,6 +441,7 @@ defaults: &defaults
           - hub
           - leaderboards_realtime
       k12-hub-free-1:
+        disabled: true
         name: Enterprise K12 Hub
         amount: 0
         currency: usd

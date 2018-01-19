@@ -223,7 +223,7 @@ class GroupsController < ApplicationController
       @group.creator = @group.owner = current_user
       @group_type_options = GROUP_TYPE_OPTIONS
       @pricing_group_options = PRICING_GROUP_OPTIONS
-      @badge_list_admin = current_user && current_user.admin?
+      @badge_list_admin = current_user && current_user.admin? && (params['suppress_bl_admin'] != 'true')
       @allow_url_editing = true;
       subscription_plan = params[:plan]
 

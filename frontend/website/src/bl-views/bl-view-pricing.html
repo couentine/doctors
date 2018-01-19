@@ -442,23 +442,27 @@
         var extraFeatures = [
           { 
             id: 'x_lifetime_hosting', 
+            available: true,
             label: 'Free Lifetime Hosting', 
             description: 'All badges, portfolios and content is hosted forever for free.' 
           },
           { 
             id: 'x_evidence_collection', 
+            available: true,
             label: 'Portfolio Feedback Engine', 
             description: 'Define a list of evidence required to earn each badge then use our feedback engine to easily ' 
               + 'collect, review and endorse evidence individually or in bulk.'
           },
           { 
             id: 'x_leaderboards_monthly', 
+            available: false,
             label: 'Monthly Leaderboards', 
             description: 'Group leaderboards show which group members have the most badge endorsements. '
               + 'Groups with this plan automatically update their leaderboards at the beginning of each month.' 
           },
           { 
             id: 'x_openbadge', 
+            available: true,
             label: 'OpenBadge compatible', 
             description: 'Every badge is backed by rich metadata which is compatible with the entire ecosystem of OpenBadge apps.' 
           }
@@ -504,6 +508,9 @@
         }));
 
         // Build the feature map (first by transforming the server list of features, then by adding our extra features)
+        this.subscriptionFeatures.forEach(function(item) {
+          item.available = (item.status == 'available'); // inject availability as a boolean
+        });
         subscriptionFeatureMap = this.subscriptionFeatures.reduce(function(map, item) {
           map[item.id] = item;
           return map;
@@ -561,6 +568,7 @@
                 icon: allPlans[i].bl_icon,
                 planType: currentPlanType,
                 description: allPlans[i].description,
+                disabled: (allPlans[i].disabled == true),
                 prices: {
                   standard: {
                     month: null,
