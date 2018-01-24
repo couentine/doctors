@@ -180,17 +180,9 @@ private
     }
     @ap_json = @asset_paths.to_json
 
-    # Set the root url of the polymer server (in dev) or the polymer asset folder (in production)
-    if Rails.env.production?
-      @polymer_app_root_url = "#{ENV['root_url']}/p/app"
-      @polymer_website_root_url = "#{ENV['root_url']}/p/website"
-    else
-      # We're using the polymer-proxy server (on port 8100) to add CORS headers to responses from the polymer app server (on port 8500)
-      @polymer_app_root_url = 'http://localhost:8100/0.0.0.0:8500'
-
-      # We're using the polymer-proxy server (on port 8100) to add CORS headers to responses from the polymer website server (on port 8510)
-      @polymer_website_root_url = 'http://localhost:8100/0.0.0.0:8510'
-    end
+    # Set the root urls of the polymer servers
+    @polymer_app_root_url = "#{ENV['root_url']}/p/app"
+    @polymer_website_root_url = "#{ENV['root_url']}/p/website"
   end
 
 protected
