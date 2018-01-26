@@ -1,25 +1,23 @@
-/* 
-#==========================================================================================================================================#
-    
-    # BADGE LIST DEVELOPMENT REVERSE PROXY SERVER #
+/*========================================================================================================================================*\
 
-    This is the glue that holds the development environment together. 
+  # BADGE LIST DEVELOPMENT REVERSE PROXY SERVER #
 
-    ## The Problem ##
+  This is the glue that holds the development environment together. 
 
-    Because each of the polymer applications run on their own dev server
-    and the rails server has its own server, there are issues caused by everything running on different ports. One key issue is that the
-    service worker is unable to run at the root level and then still access the polymer apps (thus making service worker un-testable in
-    development). Another key issue is that CORS is needed to give the rails app access to run the polymer apps. Another is just that 
-    the dev environment is shaped differently than production, leading to potential errors.
+  ## The Problem ##
 
-    ## The Solution ##
+  Because each of the polymer applications run on their own dev server
+  and the rails server has its own server, there are issues caused by everything running on different ports. One key issue is that the
+  service worker is unable to run at the root level and then still access the polymer apps (thus making service worker un-testable in
+  development). Another key issue is that CORS is needed to give the rails app access to run the polymer apps. Another is just that 
+  the dev environment is shaped differently than production, leading to potential errors.
 
-    This is a simple reverse proxy server which takes the urls which correspond to the pre-built polymer files in production and maps them
-    to the polymer dev servers. All other urls are directed to the rails dev server. That's it! It irons out all of the kinks.
+  ## The Solution ##
 
-#==========================================================================================================================================# 
-*/
+  This is a simple reverse proxy server which takes the urls which correspond to the pre-built polymer files in production and maps them
+  to the polymer dev servers. All other urls are directed to the rails dev server. That's it! It irons out all of the kinks.
+
+\*========================================================================================================================================*/
 
 /* #=== CONFIGURATION ===# */
 
