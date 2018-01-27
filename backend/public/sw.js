@@ -3,12 +3,42 @@
   # BADGE LIST SERVICE WORKER #
 
   This is an implementation of workbox. It is used to cache network requests for the Badge List app and website.
+  This is the source configuration file which is used to register the various regex routes and then link them with cache settings.
+  After changing this file you will need to rebuild the sw.js file which is located in `/backend/public`. To do that you can either
+  run `/scripts/build-sw.rb` or call `npm run build` on this node project directly.
 
 \*========================================================================================================================================*/
 
-importScripts('workbox-sw.dev.v2.1.2.js');
+importScripts('workbox-sw.prod.v2.1.2.js');
+importScripts('workbox-broadcast-cache-update.prod.v2.0.3.js');
 
-const workboxSW = new WorkboxSW();
+// #=== CONSTANTS ===#
+
+const cacheFirstMaxAgeSeconds = 86400; /* 1 day */
+
+// #=== EVENT LISTENERS ===#
+
+/** Listen for skip waiting message from the service worker UI ("New version available"). */
+self.addEventListener('message', (event) => {
+  if (!event.data){
+    return;
+  }
+
+  switch (event.data) {
+    case 'skipWaiting':
+      self.skipWaiting();
+      break;
+    default:
+      // NOOP
+      break;
+  }
+});
+
+// #=== WORKBOX BOILERPLATE ===#
+
+const workboxSW = new WorkboxSW({
+  precacheChannelName: 'bl-revalidate-cache-updates'
+});
 workboxSW.precache([
   {
     "url": "p/app/bower_components/google-fonts-lato/dcGFAl2aezM9Vq_aFTQ.ttf",
@@ -120,37 +150,32 @@ workboxSW.precache([
   }
 ]);
 
-// Dev Assets
-workboxSW.router.registerRoute(/http:\/\/localhost:4000\/assets\/.*\.(?:png|gif|jpg|ttf|css|js)/,
-  workboxSW.strategies.cacheFirst({
-    cacheName: 'assets-cache',
-    cacheExpiration: {
-      maxEntries: 100,
-      maxAgeSeconds: 604800 /* 1 week */
-    },
-    cacheableResponse: {statuses: [0, 200]}
-  })
-);
+// #=== ROUTE REGISTRATION ===#
 
 // Polymer Build Files
 workboxSW.router.registerRoute(/\/p\/.*/,
   workboxSW.strategies.staleWhileRevalidate({
     cacheName: 'polymer-cache',
     cacheExpiration: {
-      maxEntries: 500
-    }
+      maxEntries: 200
+    },
+    plugins: [
+      new workbox.broadcastCacheUpdate.BroadcastCacheUpdatePlugin({channelName: 'bl-revalidate-cache-updates'})
+    ]
   })
 );
 
 // S3
 workboxSW.router.registerRoute(/https:\/\/[\w-]+\.s3.amazonaws.com\/.*/,
-  workboxSW.strategies.cacheFirst({
+  workboxSW.strategies.staleWhileRevalidate({
     cacheName: 's3-cache',
     cacheExpiration: {
-      maxEntries: 500,
-      maxAgeSeconds: 604800 /* 1 week */
+      maxEntries: 200
     },
-    cacheableResponse: {statuses: [0, 200]}
+    cacheableResponse: {statuses: [0, 200]},
+    plugins: [
+      new workbox.broadcastCacheUpdate.BroadcastCacheUpdatePlugin({channelName: 'bl-revalidate-cache-updates'})
+    ]
   })
 );
 
@@ -160,7 +185,7 @@ workboxSW.router.registerRoute(/https:\/\/(fonts\.googleapis\.com|fonts\.gstatic
     cacheName: 'fonts-cache',
     cacheExpiration: {
       maxEntries: 5,
-      maxAgeSeconds: 604800 /* 1 week */
+      maxAgeSeconds: cacheFirstMaxAgeSeconds
     }
   })
 );
@@ -170,8 +195,8 @@ workboxSW.router.registerRoute(/https:\/\/(js\.intercomcdn\.com|static\.intercom
   workboxSW.strategies.cacheFirst({
     cacheName: 'intercom-cache',
     cacheExpiration: {
-      maxEntries: 50,
-      maxAgeSeconds: 604800 /* 1 week */
+      maxEntries: 20,
+      maxAgeSeconds: cacheFirstMaxAgeSeconds
     }
   })
 );

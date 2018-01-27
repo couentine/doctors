@@ -80,6 +80,14 @@ To access the app in your browser type `http://localhost:4000`. Do not access th
 $ foreman start -f Procfile.ultrahook.dev
 ```
 
+## Updating the Service Worker ##
+
+There is a service worker that sits at the root level of the app and caches network responses. It lives in `/frontend/bl-service-worker`. To rebuilt it:
+
+```
+$ ruby scripts/build-sw.rb
+```
+
 ## Running a rails console in development ##
 
 You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). You'll need to navigate to the backend folder first as well.

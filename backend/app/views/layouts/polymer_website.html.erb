@@ -62,6 +62,9 @@
       };
     </script>
     <link rel="import" href="<%= @polymer_website_root_url %>/src/bl-website/bl-website.html">
+
+    <% #=== BADGE LIST SERVICE WORKER SCRIPT ===# %>
+    <%= render 'layouts/shared/service_worker_script' %>
   </head>
 
   <style type="text/css">
@@ -73,9 +76,9 @@
 
     <%= yield %>
 
-  </body>
+    <% #=== BADGE LIST SERVICE WORKER UI ===# %>
+    <%= render 'layouts/shared/service_worker_ui' %>
 
-  <% #=== BADGE LIST SERVICE WORKER (Source files in /dev/bl-service-worker) ===# %>
-  <%= render 'layouts/shared/service_worker' %>
+  </body>
 
 </html>

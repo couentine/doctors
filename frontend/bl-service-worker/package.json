@@ -10,7 +10,8 @@
   "author": "Hank Holiday <hank@badgelist.com>",
   "license": "ISC",
   "dependencies": {
-    "workbox-sw": "2.1"
+    "workbox-sw": "2.1",
+    "workbox-broadcast-cache-update": "2.0"
   },
   "devDependencies": {
     "workbox-cli": "2.1"
