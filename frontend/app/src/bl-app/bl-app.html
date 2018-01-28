@@ -235,7 +235,7 @@ The mixin also provides various actions for interacting with the container. (Ref
       // #=== PROPERTY COMPUTER METHODS ===#
 
       _groupRecordPath(groupSlug) {
-        if (groupSlug && groupSlug.length)
+        if (groupSlug && groupSlug.length && (groupSlug != 'home'))
           return groupSlug.toLowerCase();
         else
           return null;
