@@ -46,7 +46,16 @@
   // Shows the blswPanel, called from within the service worker registration code below
   function showRefreshUI(registration) {
     if (registration) blswRegistration = registration;
-    document.getElementById('blServiceWorkerUI').hidden = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        document.getElementById('blServiceWorkerUI').hidden = false; 
+      } catch(e) {
+        setTimeout(function() {
+          document.getElementById('blServiceWorkerUI').hidden = false; 
+        }, 5000);
+      }
+    }, false);
   };
 
   // Gets called after the service worker is loaded

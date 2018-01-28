@@ -114,7 +114,7 @@ if (inProduction) {
   },
   {
     "url": "p/app/bower.json",
-    "revision": "65ca57fc991ae1907724408288695c99"
+    "revision": "394c8dec64e861c34a445db9bbac30b0"
   },
   {
     "url": "p/app/images/badge-list-shield-square.png",
@@ -138,7 +138,7 @@ if (inProduction) {
   },
   {
     "url": "p/app/src/bl-app/bl-app.html",
-    "revision": "b7af954125ecd9fb142cfd638d2cb50c"
+    "revision": "33de616bce6c007a0aff861b3ef5af46"
   },
   {
     "url": "p/app/src/bl-app/bl-component-template.html",
@@ -146,7 +146,7 @@ if (inProduction) {
   },
   {
     "url": "p/app/src/bl-backend/swagger.json",
-    "revision": "7b0782807531e15991d73f5cb58c243d"
+    "revision": "7723e5b77e17d51534dea526ccf3431f"
   },
   {
     "url": "p/app/src/bl-user/bl-user.html",
@@ -155,6 +155,94 @@ if (inProduction) {
   {
     "url": "p/app/src/bl-user/test/bl-test-user.html",
     "revision": "e3b61c46b8cecdf0a9103145bfe7fbd0"
+  },
+  {
+    "url": "p/website/bower_components/google-fonts-lato/dcGFAl2aezM9Vq_aFTQ.ttf",
+    "revision": "d0adc93d1be5bcdb1d6430887c794aa6"
+  },
+  {
+    "url": "p/website/bower_components/google-fonts-roboto-mono/PNLsu_dywMa4C_DEpY50EAVxt0G0biEntp43Qt6E.ttf",
+    "revision": "4da5c8b173f9958256a801039a4c60d1"
+  },
+  {
+    "url": "p/website/bower_components/google-fonts-roboto/GBFwfMP4uA6AR0HCoLQ.ttf",
+    "revision": "f84c80506d15558a70e3c7752be22177"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/custom-elements-es5-adapter.js",
+    "revision": "a5043c1d0dd16d84558ee6cc2276212e"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/gulpfile.js",
+    "revision": "0366da1f0f7858c9af2daa3ef7d950ea"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-hi-ce.js",
+    "revision": "fbaa6751e3b07a33a459ebbbd24a4ede"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-hi-ce.js.map",
+    "revision": "8fe4315ebe24b527ee2a8e0142861b97"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-hi-sd-ce.js",
+    "revision": "f06beb1fba0a9020e116162370e3ef16"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-hi-sd-ce.js.map",
+    "revision": "fd5488d25baef1169a2cd23804df4b35"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-hi.js",
+    "revision": "487ac7582563f4797e9e3659a096a642"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-hi.js.map",
+    "revision": "72440787e3c9ca0204264a6f8e996d24"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-lite.js",
+    "revision": "b591b76678e2f5d584eff169fd0ff2f8"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-lite.js.map",
+    "revision": "aee6a8694425d33c8a335ed3c8aa4825"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-loader.js",
+    "revision": "f13bbbbf647b7922575a7894367ddaaf"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-sd-ce.js",
+    "revision": "e229eae539aba7a4d2400316e6603b0d"
+  },
+  {
+    "url": "p/website/bower_components/webcomponentsjs/webcomponents-sd-ce.js.map",
+    "revision": "099adab476e3ed933f271956a5cf9cf7"
+  },
+  {
+    "url": "p/website/bower.json",
+    "revision": "a974681091b584158e2e868e89047c4e"
+  },
+  {
+    "url": "p/website/images/badge-list-shield-square.png",
+    "revision": "c793c9bc656bd72e8ad4c3974bbe80e9"
+  },
+  {
+    "url": "p/website/images/badge-list-shield-white-square.png",
+    "revision": "91456268a90fc9f3b7e3313eb31f207b"
+  },
+  {
+    "url": "p/website/index.html",
+    "revision": "d554b649fd1c4b0da4e07cc8f18ad5be"
+  },
+  {
+    "url": "p/website/manifest.json",
+    "revision": "87dc70ac6fa1c4b0b961009acf7c4a0a"
+  },
+  {
+    "url": "p/website/src/bl-website/bl-website.html",
+    "revision": "2cb2ead4b63f6edf0b80ae55f92daf80"
   }
 ]);
 }
