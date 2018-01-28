@@ -20,7 +20,7 @@ BL_LAUNCH_DATE = '2014-04-01'.to_date
 # Initialize the constants which are used to pass the hashed asset paths to the polymer front end
 
 if Rails.env.production?
-  ASSET_PATHS = Rails.application.assets_manifest
+  ASSET_PATHS = Rails.application.assets_manifest.assets
 else
   # In development this is a little trickier since the manifest isn't built yet
   ASSET_PATHS = {}

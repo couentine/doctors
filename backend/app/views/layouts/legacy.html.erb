@@ -32,6 +32,8 @@
 
     <%= render 'shared/stripe' if content_for? :include_stripe %>
 
+    <link rel="manifest" href="<%= @polymer_app_root_url %>/manifest.json"> <!-- USES SAME MANIFEST AS POLYMER APP -->
+
     <% #=== BADGE LIST SERVICE WORKER SCRIPT ===# %>
     <%= render 'layouts/shared/service_worker_script' %>
 
