@@ -577,10 +577,10 @@ class Group
     if feature_grant_hub && !return_list.include?('hub')
       return_list << 'hub'
     end
-    if feature_grant_leaderboards && !return_list.include?('leaderboards_weekly')
+    if feature_grant_leaderboards_weekly && !return_list.include?('leaderboards_weekly')
       return_list << 'leaderboards_weekly'
     end
-    if feature_grant_leaderboards && !return_list.include?('leaderboards_realtime')
+    if feature_grant_leaderboards_realtime && !return_list.include?('leaderboards_realtime')
       return_list << 'leaderboards_realtime'
     end
     if paid? && !return_list.include?('privacy')

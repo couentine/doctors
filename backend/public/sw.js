@@ -9,8 +9,15 @@
 
 \*========================================================================================================================================*/
 
-importScripts('workbox-sw.prod.v2.1.2.js');
-importScripts('workbox-broadcast-cache-update.prod.v2.0.3.js');
+const inProduction = !location || !location.host || !location.host.startsWith('localhost');
+
+if (inProduction) {
+  importScripts('workbox-sw.prod.v2.1.2.js');
+  importScripts('workbox-broadcast-cache-update.prod.v2.0.3.js');
+} else {
+  importScripts('workbox-sw.dev.v2.1.2.js');
+  importScripts('workbox-broadcast-cache-update.dev.v2.0.3.js');
+}
 
 // #=== CONSTANTS ===#
 
@@ -39,7 +46,8 @@ self.addEventListener('message', (event) => {
 const workboxSW = new WorkboxSW({
   precacheChannelName: 'bl-revalidate-cache-updates'
 });
-workboxSW.precache([
+if (inProduction) {
+  workboxSW.precache([
   {
     "url": "p/app/bower_components/google-fonts-lato/dcGFAl2aezM9Vq_aFTQ.ttf",
     "revision": "d0adc93d1be5bcdb1d6430887c794aa6"
@@ -149,6 +157,7 @@ workboxSW.precache([
     "revision": "e3b61c46b8cecdf0a9103145bfe7fbd0"
   }
 ]);
+}
 
 // #=== ROUTE REGISTRATION ===#
 

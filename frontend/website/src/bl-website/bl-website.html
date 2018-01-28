@@ -146,6 +146,13 @@
         window.addEventListener('hashchange', e => this._windowLocationHashChanged(e));
       }
 
+      ready() {
+        if (super.ready) super.ready();
+
+        // Remove `loading` class from the body.
+        document.getElementsByTagName('body')[0].classList.remove('loading');
+      }
+
       // #=== LISTENER & OBSERVER METHODS ===#
 
       _manifestChanged(newValue, oldValue) {

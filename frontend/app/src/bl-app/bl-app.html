@@ -172,6 +172,13 @@ The mixin also provides various actions for interacting with the container. (Ref
         }.bind(this));
       }
 
+      ready() {
+        if (super.ready) super.ready();
+
+        // Remove `loading` class from the body.
+        document.getElementsByTagName('body')[0].classList.remove('loading');
+      }
+
       // #=== LISTENER & OBSERVER METHODS ===#
 
       static get observers() {
