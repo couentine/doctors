@@ -2,7 +2,7 @@
   "name": "Badge List",
   "short_name": "Badge List",
   "description": "A platform for awarding digital credentials and tracking learning progress.",
-  "start_url": "/",
+  "start_url": "/home",
   "background_color": "#FB8C00",
   "theme_color": "#FF9800",
   "icons": [

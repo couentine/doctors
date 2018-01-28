@@ -134,7 +134,7 @@ if (inProduction) {
   },
   {
     "url": "p/app/manifest.json",
-    "revision": "56607aebce2f49842f82682481218292"
+    "revision": "838b174cb70562b47cc73e7e01968015"
   },
   {
     "url": "p/app/src/bl-app/bl-app.html",
