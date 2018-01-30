@@ -46,9 +46,12 @@ self.addEventListener('message', (event) => {
 const workboxSW = new WorkboxSW({
   precacheChannelName: 'bl-revalidate-cache-updates'
 });
-if (inProduction) {
-  workboxSW.precache([]);
-}
+// NOTE: Not precaching for now. It's being buggy in production.
+/*
+  if (inProduction) {
+    workboxSW.precache([]);
+  }
+*/
 
 // #=== ROUTE REGISTRATION ===#
 

@@ -46,8 +46,10 @@ self.addEventListener('message', (event) => {
 const workboxSW = new WorkboxSW({
   precacheChannelName: 'bl-revalidate-cache-updates'
 });
-if (inProduction) {
-  workboxSW.precache([
+// NOTE: Not precaching for now. It's being buggy in production.
+/*
+  if (inProduction) {
+    workboxSW.precache([
   {
     "url": "p/app/bower_components/google-fonts-lato/dcGFAl2aezM9Vq_aFTQ.ttf",
     "revision": "d0adc93d1be5bcdb1d6430887c794aa6"
@@ -245,7 +247,8 @@ if (inProduction) {
     "revision": "63ce95a97ff987a12c3cf95ec8d9c981"
   }
 ]);
-}
+  }
+*/
 
 // #=== ROUTE REGISTRATION ===#
 

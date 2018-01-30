@@ -34,7 +34,7 @@ class HomeController < ApplicationController
     if current_user
       render_polymer_app('Home - Badge List')
     else
-      redirect_to '/'
+      redirect_to new_user_session_path
     end
   end
   
