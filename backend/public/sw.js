@@ -138,7 +138,7 @@ if (inProduction) {
   },
   {
     "url": "p/app/src/bl-app/bl-app.html",
-    "revision": "33de616bce6c007a0aff861b3ef5af46"
+    "revision": "9e92c54023031e63df0b80d6506674fc"
   },
   {
     "url": "p/app/src/bl-app/bl-component-template.html",
@@ -242,7 +242,7 @@ if (inProduction) {
   },
   {
     "url": "p/website/src/bl-website/bl-website.html",
-    "revision": "2cb2ead4b63f6edf0b80ae55f92daf80"
+    "revision": "63ce95a97ff987a12c3cf95ec8d9c981"
   }
 ]);
 }
