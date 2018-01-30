@@ -109,6 +109,13 @@
             value: function() { return window.location.hash.replace('#', ''); }
           },
 
+          /** True if Intercom is being used and has booted. */
+          intercomLoaded: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+
           indexRouteActive: Boolean,
           webRouteActive: Boolean,
           webHomeViewActive: {
@@ -151,6 +158,18 @@
 
         // Remove `loading` class from the body.
         document.getElementsByTagName('body')[0].classList.remove('loading');
+
+        // Wait for Intercom to load (max 30 seconds)
+        const timeout = setTimeout(() => clearInterval(interval), 30000);
+        const interval = setInterval(() => {
+          if (('Intercom' in window) && window.Intercom.booted) {
+            // Intercom is booted!
+            clearInterval(interval);
+            clearTimeout(timeout);
+
+            this.set('intercomLoaded', true);
+          }
+        }, 100);
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#

@@ -114,6 +114,12 @@ The mixin also provides various actions for interacting with the container. (Ref
           /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
           activeView: Object,
 
+          /** True if Intercom is being used and has booted. */
+          intercomLoaded: {
+            type: Boolean,
+            value: false
+          },
+
           /** Used by userPoller dialog. */
           userPollerId: String,
 
@@ -177,6 +183,18 @@ The mixin also provides various actions for interacting with the container. (Ref
 
         // Remove `loading` class from the body.
         document.getElementsByTagName('body')[0].classList.remove('loading');
+
+        // Wait for Intercom to load (max 30 seconds)
+        const timeout = setTimeout(() => clearInterval(interval), 30000);
+        const interval = setInterval(() => {
+          if (('Intercom' in window) && window.Intercom.booted) {
+            // Intercom is booted!
+            clearInterval(interval);
+            clearTimeout(timeout);
+
+            this.intercomLoaded = true;
+          }
+        }, 100);
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#

@@ -353,7 +353,7 @@
                 <li>
                   <label>We're here to help...</label>
                   <span class="buttons">
-                    <paper-button class="large" raised on-tap="showIntercom">
+                    <paper-button class="large" raised on-tap="showIntercom" hidden="[[hideChat]]">
                       <i class="icon-bubble-shiny"></i>&nbsp;
                       Chat with us
                     </paper-button>
@@ -395,6 +395,11 @@
           },
 
           loadingPricing: {
+            type: Boolean,
+            value: true
+          },
+
+          hideChat: {
             type: Boolean,
             value: true
           },
@@ -625,6 +630,7 @@
         
         // Add listeners
         this.website.addEventListener('location-hash-key-changed', e => this._websiteLocationHashKeyChanged(e.detail.value));
+        this.website.addEventListener('intercom-loaded-changed', e => this._websiteIntercomLoadedChanged(e.detail.value));
       }
 
       assetsLoaded() {
@@ -636,6 +642,12 @@
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
+
+      static get observers() {
+          return [
+            '_websiteIntercomLoadedChanged(website.intercomLoaded)',
+          ]
+      }
 
       _subscriptionPlansOrFeaturesLoaded(e) {
         if (this.subscriptionPlans && this.subscriptionFeatures) {
@@ -651,9 +663,13 @@
           if (this.k12Mode) this.k12Mode = false;
         }
       }
+      
+      _websiteIntercomLoadedChanged(websiteIntercomLoaded) {
+        this.hideChat = (websiteIntercomLoaded != true);
+      }
 
       // #=== PROPERTY COMPUTER METHODS ===#
-      
+
       _createGroupPath(currentUser) {
         if (currentUser && currentUser.username)
           return '/groups/new';

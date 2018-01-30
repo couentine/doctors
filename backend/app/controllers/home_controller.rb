@@ -31,7 +31,11 @@ class HomeController < ApplicationController
 
   # GET /home
   def root_internal
-    render_polymer_app('Home - Badge List')
+    if current_user
+      render_polymer_app('Home - Badge List')
+    else
+      redirect_to '/'
+    end
   end
   
   # GET /w
