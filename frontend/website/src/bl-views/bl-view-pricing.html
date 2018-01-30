@@ -572,7 +572,10 @@
                 color: allPlans[i].color,
                 icon: allPlans[i].bl_icon,
                 planType: currentPlanType,
-                description: allPlans[i].description,
+                description: {
+                  standard: null,
+                  k12: null
+                },
                 disabled: (allPlans[i].disabled == true),
                 prices: {
                   standard: {
@@ -613,8 +616,9 @@
             }
           }
 
-          // Now set the price (and also the hasK12 flag if needed)
+          // Now set the k12/standard specific fields (and also the hasK12 flag if needed)
           currentSubscriptionCard.prices[allPlans[i].pricing_group][allPlans[i].interval] = Math.ceil(allPlans[i].amount / 100);
+          currentSubscriptionCard.description[allPlans[i].pricing_group] = allPlans[i].description;
           if (currentSubscriptionCard.isFree)
             currentSubscriptionCard.createGroupPath[allPlans[i].pricing_group] = this.createGroupPath;
           else
