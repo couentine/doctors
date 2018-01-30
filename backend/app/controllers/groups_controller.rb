@@ -22,10 +22,12 @@ class GroupsController < ApplicationController
   # === CONSTANTS === #
 
   PERMITTED_PARAMS = [:name, :url_with_caps, :description, :location, :website, :color, :image_url, :type, :customer_code, 
-    :validation_threshold, :new_owner_username, :user_limit, :admin_limit, :sub_group_limit, :pricing_group, :subscription_plan, 
-    :feature_grant_file_uploads, :feature_grant_reporting, :feature_grant_bulk_tools, :feature_grant_integration, :stripe_subscription_card,
-    :stripe_subscription_id, :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, :join_code, :avatar_key, 
-    :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag, :joinability]
+    :validation_threshold, :new_owner_username, :pricing_group, :subscription_plan, 
+    :user_limit_override, :admin_limit_override, :full_member_group_override, :limited_member_group_override,
+    :feature_grant_file_uploads, :feature_grant_reporting, :feature_grant_bulk_tools, :feature_grant_integration, 
+    :feature_grant_leaderboards_weekly, :feature_grant_leaderboards_realtime,
+    :stripe_subscription_card, :revive_subscription, :member_visibility, :admin_visibility, :badge_copyability, 
+    :join_code, :avatar_key, :tag_assignability, :tag_creatability, :tag_visibility, :welcome_message, :welcome_badge_tag, :joinability]
 
   MAX_EMAIL_TEXT_LENGTH = 1500
   MAX_INVITATION_MESSAGE_LENGTH = 500
@@ -221,7 +223,7 @@ class GroupsController < ApplicationController
       @group.creator = @group.owner = current_user
       @group_type_options = GROUP_TYPE_OPTIONS
       @pricing_group_options = PRICING_GROUP_OPTIONS
-      @badge_list_admin = current_user && current_user.admin?
+      @badge_list_admin = current_user && current_user.admin? && (params['suppress_bl_admin'] != 'true')
       @allow_url_editing = true;
       subscription_plan = params[:plan]
 

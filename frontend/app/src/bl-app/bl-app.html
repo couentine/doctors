@@ -1,0 +1,273 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-backend/bl-backend-client.html">
+<link rel="import" href="../bl-backend/bl-backend-item.html">
+<link rel="import" href="../bl-poller/bl-poller.html">
+<link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="../bl-toast/bl-toast.html">
+<link rel="import" href="../bl-styles/fonts.html">
+<link rel="import" href="../bl-views/bl-view-badge-endorsements-add.html">
+<link rel="import" href="../bl-views/bl-view-home.html">
+
+<!--
+# Badge List App #
+
+All app components should use `BlAppComponentMixin`. That provides an `app` property which points at the container.
+The mixin also provides various actions for interacting with the container. (Refer to `bl-app-component-mixin.html` for more info.)
+-->
+<dom-module id="bl-app">
+  <template>
+
+    <style include="bl-style-classes">
+
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          @apply --bl-font-common-base;
+          
+          display: block;
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+        }
+
+      /* === TOAST CONTAINER === */
+
+        #toastContainer {
+          display: block;
+          position: fixed;
+          top: 2em; right: 0; left: 0;
+          z-index: 150;
+        }
+
+    </style>
+    
+    <!-- #=== API CONNECTION TO THE BACKEND ===# -->
+    <bl-backend-client id="backend"></bl-backend-client>
+
+    <!-- #=== APP ROUTING ===# -->
+    
+    <app-location id="location" route="{{route}}" 
+      url-space-regex="(^/home$)|(^/[a-zA-Z0-9_-]{3,}/[a-zA-Z0-9_-]{3,}/endorsements/add)"></app-location>
+    
+    <app-route id="homeViewRoute" active="{{homeViewActive}}" route="{{route}}" pattern="/home" title="Home - Badge List"></app-route>
+    <app-route id="groupRoute" route="{{route}}" pattern="/:slug" data="{{groupRouteData}}" tail="{{groupSubroute}}"></app-route>
+      <app-route id="badgeRoute" route="{{groupSubroute}}" pattern="/:slug" data="{{badgeRouteData}}" tail="{{badgeSubroute}}"></app-route>
+        <app-route id="addBadgeEndorsementsViewRoute" active="{{addBadgeEndorsementsViewActive}}" route="{{badgeSubroute}}" 
+          pattern="/endorsements/add" title="Bulk Award - [[badge.name]] - Badge List"></app-route>
+    
+    <!-- #=== APP BACKEND MODEL ITEMS ===# -->
+    <bl-backend-item id="backendGroup" target="{{group}}" type="group" record-path="{{groupRecordPath}}"></bl-backend-item>
+    <bl-backend-item id="backendBadge" target="{{badge}}" type="badge" record-path="{{badgeRecordPath}}"></bl-backend-item>
+    <bl-poller id="userPoller" poller-id="{{userPollerId}}" target="{{userPoller}}"></bl-poller>
+
+    <!-- #=== APP VIEWS ===# -->
+    <bl-view-home id="homeView" active="{{homeViewActive}}"></bl-view-home>
+    <bl-view-badge-endorsements-add id="addBadgeEndorsementsView" active="{{addBadgeEndorsementsViewActive}}" group="{{group}}"
+      badge="{{badge}}"></bl-view-badge-endorsements-add>
+
+    <!-- #=== TOAST CONTAINER ===# -->
+    <div id="toastContainer"></div>
+
+    <!-- #=== CURRENT USER ASYNC POLLER DIALOG ===# -->
+    <paper-dialog id="userPollerDialog" class="orange no-title-bar" modal dynamic-align>
+      <h2>Setting up Your Account...</h2>
+
+      <paper-spinner-lite active class="orange"></paper-spinner-lite>
+            
+      <div class="dialogContent">
+        <p>
+          Badge List is completing the configuration of your account, pleast wait.
+        </p>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    class BlApp extends Polymer.Element {
+      static get is() { return 'bl-app'; }
+
+      static get properties() {
+        return {
+          
+          /** The manifest is required from the backend. It contains details of the logged in user and a CSRF token to use for forms. */
+          manifest: {
+            type: Object,
+            observer: '_manifestChanged'
+          },
+
+          /** Automatically set to the current user from the manifest. */
+          currentUser: {
+            type: Object,
+            notify: true
+          },
+
+          /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
+          activeView: Object,
+
+          /** True if Intercom is being used and has booted. */
+          intercomLoaded: {
+            type: Boolean,
+            value: false
+          },
+
+          /** Used by userPoller dialog. */
+          userPollerId: String,
+
+          /** Used by userPoller dialog. */
+          userPoller: Object,
+
+          /** The group object which is currently active. Null if current view does not have a corresponding group. */
+          group: Object,
+          
+          /** The group path as computed based on the current route data. */
+          groupRecordPath: {
+            type: String,
+            computed: '_groupRecordPath(groupRouteData.slug)'
+          },
+
+          /** The badge object which is currently active. Null if current view does not have a corresponding badge. */
+          badge: Object,
+          
+          /** The badge path as computed based on the current route data. */
+          badgeRecordPath: {
+            type: String,
+            computed: '_badgeRecordPath(groupRouteData.slug, badgeRouteData.slug)'
+          },
+
+          /** Stores the active route which is currently being used as the source of the document title. */
+          routeTitleSource: Object
+
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /** Displays new toast item in the app toast container. Leave type or autoCloseAfter blank to use the default. */
+      addToast(text, type, autoCloseAfter) {
+        var newToast = document.createElement('bl-toast');
+        newToast.text = text;
+        newToast.type = type;
+        if (autoCloseAfter != undefined) newToast.autoCloseAfter = autoCloseAfter;
+        this.$.toastContainer.appendChild(newToast);
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        // Add listeners to the routes so that we can update the document title, also check for which is active so we can set initial title
+        var routeElements = this.shadowRoot.querySelectorAll('app-route');
+        routeElements.forEach(function(routeElement) {
+          routeElement.addEventListener('active-changed', e => this._activeRouteChanged(e));
+          
+          if (routeElement.active && routeElement.title) {
+            document.title = routeElement.title;
+            this.routeTitleSource = routeElement;
+          }
+        }.bind(this));
+      }
+
+      ready() {
+        if (super.ready) super.ready();
+
+        // Remove `loading` class from the body.
+        document.getElementsByTagName('body')[0].classList.remove('loading');
+
+        // Wait for Intercom to load (max 30 seconds)
+        const timeout = setTimeout(() => clearInterval(interval), 30000);
+        const interval = setInterval(() => {
+          if (('Intercom' in window) && window.Intercom.booted) {
+            // Intercom is booted!
+            clearInterval(interval);
+            clearTimeout(timeout);
+
+            this.intercomLoaded = true;
+          }
+        }, 100);
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      static get observers() {
+          return [
+            '_userPollerCompletedChanged(userPoller.completed)',
+            '_currentUserAsyncPollerIdChanged(currentUser.async_callback_poller_id)',
+            '_checkForTitleChange(group.name, badge.name)' /* Update the arguments whenever adding new record fields in a route title. */
+          ]
+      }
+
+      _userPollerCompletedChanged(pollerCompleted) {
+        if (pollerCompleted) {
+          location.reload();
+        }
+      }
+
+      _currentUserAsyncPollerIdChanged(asyncCallbackPollerId) {
+        if (asyncCallbackPollerId && asyncCallbackPollerId.length) {
+          this.userPollerId = asyncCallbackPollerId;
+          this.$.userPollerDialog.open();
+        }
+      }
+
+      /**
+       * This method checks whether the querying of a record has resulted in a change in the document title.
+       * Update the arguments whenever adding new record fields in a route title.
+       */
+      _checkForTitleChange(groupName, badgeName) {
+        if (this.routeTitleSource && this.routeTitleSource.title && (this.routeTitleSource.title != document.title))
+          document.title = this.routeTitleSource.title;
+      }
+
+      _manifestChanged(newValue, oldValue) {
+        if (newValue) {
+          this.setProperties({
+            currentUser: newValue.current_user
+          });
+
+          if (newValue.toast && newValue.toast.length)
+            newValue.toast.forEach(function(toastItem) {
+              this.addToast(toastItem.text, toastItem.type)
+            }.bind(this));
+        }
+      }
+
+      /** Sets the document title when the active route changes. */
+      _activeRouteChanged(event) {
+        if ((event.detail.value == true) && event.target && event.target.title) {
+          document.title = event.target.title;
+          this.routeTitleSource = event.target;
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _groupRecordPath(groupSlug) {
+        if (groupSlug && groupSlug.length && (groupSlug != 'home'))
+          return groupSlug.toLowerCase();
+        else
+          return null;
+      }
+
+      _badgeRecordPath(groupSlug, badgeSlug) {
+        if (groupSlug && groupSlug.length && badgeSlug && badgeSlug.length)
+          return groupSlug.toLowerCase() + '/' + badgeSlug.toLowerCase();
+        else 
+          return null;
+      }
+
+    }
+
+    window.customElements.define(BlApp.is, BlApp);
+  </script>
+</dom-module>

@@ -1,0 +1,129 @@
+<% 
+  #=== BADGE LIST SERVICE WORKER ===# 
+  #
+  # This should be added inside the head tag of all page layouts. It contains javascript to register the service worker.
+  #
+  # NOTE: The Service Worker source code lives in `/frontend/bl-service-worker/src/sw.js` and when it is built it is written to
+  # `/backend/public/sw.js`. Refer to the comments at the top of the source code for more details.
+%>
+
+<script>
+
+  /*
+    NOTE: This code is mostly boilerplate, taken from here: 
+    https://developers.google.com/web/tools/workbox/guides/advanced-recipes#offer_a_page_reload_for_users
+  */
+
+  var blswRegistration;
+
+  // Powers the dismiss button in the blswPanel
+  function blswDismissPanel() {
+    document.getElementById('blServiceWorkerUI').hidden = true;
+    return false;
+  }
+
+  // Powers the refresh button in the blswPanel
+  function blswRefreshServiceWorker() {
+    if (blswRegistration) {
+      // This panel was displayed due to a service worker update
+      if (!document.getElementById('blswRefreshButton').disabled) {
+        if (!blswRegistration.waiting) {
+          // Just to ensure blswRegistration.waiting is available before calling postMessage()
+          return;
+        }
+
+        document.getElementById('blswRefreshButton').disabled = true;
+        blswRegistration.waiting.postMessage('skipWaiting');
+      }
+    } else {
+      // This panel was displayed due to a stale cache revalidation update, so just reload
+    }
+
+    location.reload(); // this shouldn't be necessary but there is a bug with the `controllerchange` listener, it's not firing.
+    return false;
+  }
+
+  // Shows the blswPanel, called from within the service worker registration code below
+  function showRefreshUI(registration) {
+    if (registration) blswRegistration = registration;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        document.getElementById('blServiceWorkerUI').hidden = false; 
+      } catch(e) {
+        setTimeout(function() {
+          document.getElementById('blServiceWorkerUI').hidden = false; 
+        }, 5000);
+      }
+    }, false);
+  };
+
+  // Gets called after the service worker is loaded
+  function onNewServiceWorker(registration, callback) {
+    if (registration.waiting) {
+      // Service worker is waiting to activate. Can occur if multiple clients open and one of the clients is refreshed.
+      return callback();
+    }
+
+    function listenInstalledStateChange() {
+      registration.installing.addEventListener('statechange', function(event) {
+        if (event.target.state === 'installed') {
+          // A new service worker is available, inform the user
+          callback();
+        }
+      });
+    };
+
+    if (registration.installing) {
+      return listenInstalledStateChange();
+    }
+
+    // We are currently controlled so a new SW may be found. Add a listener in case a new SW is found,
+    registration.addEventListener('updatefound', listenInstalledStateChange);
+  }
+
+  if ('BroadcastChannel' in self) {
+    // Add a listener which listens for updates to the stale while revalidate caches
+    const revalidateCacheUpdatesChannel = new BroadcastChannel('bl-revalidate-cache-updates');
+    revalidateCacheUpdatesChannel.addEventListener('message',function(event) {
+      if (document.getElementById('blServiceWorkerUI').hidden) {
+        console.log('Cached assets have been updated.');
+        showRefreshUI();
+      }
+    });
+  }
+
+  // Waits for the page to load then registers the service worker
+  // Taken From: https://developers.google.com/web/tools/workbox/modules/workbox-broadcast-cache-update
+  if ('serviceWorker' in navigator) {
+    // Then register the service worker
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(registration) {
+        console.log('Service Worker registration successful with scope: ', registration.scope);
+
+        if (!navigator.serviceWorker.controller) {
+          // The window client isn't currently controlled so it's a new service worker that will activate immediately,
+          return;
+        }
+
+        // When the user asks to refresh the UI, we'll need to reload the window
+        var preventDevToolsReloadLoop;
+        navigator.serviceWorker.addEventListener('controllerchange', function(event) {
+          // Ensure refresh is only called once. This works around a bug in "force update on reload".
+          if (preventDevToolsReloadLoop) return;
+          preventDevToolsReloadLoop = true;
+          console.log('New Service Worker controller loaded.');
+          window.location.reload();
+        });
+
+        onNewServiceWorker(registration, function() {
+          console.log('Service Worker needs update.');
+          showRefreshUI(registration);
+        });
+      })
+      .catch(function(err) {
+        console.log('Service Worker registration failed: ', err);
+      });
+  }
+
+</script>

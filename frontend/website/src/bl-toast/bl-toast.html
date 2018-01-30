@@ -1,0 +1,127 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Toast #
+
+This is added to the bl-toast-container programmatically by calling the `addToast` method in `bl-website`.
+-->
+<dom-module id="bl-toast">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+
+          transition: 0.5s all;
+          transform: scale(1);
+        }
+        :host(.closing) {
+          transform: scale(0);
+        }
+        :host(.closed) {
+          display: none;
+        }
+
+      /* === COMPONENT STYLES === */
+
+        paper-material {
+          display: block;
+          max-width: 500px;
+          margin: 10px auto;
+          padding: 0.4em;
+          opacity: 0.9;
+          background-color: rgb(255,204,128);
+          border: 1px solid rgb(255,224,178); 
+          border-radius: 3px;
+          text-align: center;
+          text-shadow: 0px 0px 3px white;
+        }
+        paper-material.error,
+        paper-material.warning {
+          background-color: rgb(239,154,154);
+          border-color: rgb(255,205,210);
+        }
+        paper-material.success {
+          background-color: rgb(197,225,165);
+          border-color: rgb(220,237,200);
+        }
+          .dismiss-button {
+            float: right;
+            cursor: pointer;
+            margin: 0 0.5em;
+            color: inherit;
+            text-shadow: none;
+          }
+        
+    </style>
+
+    <paper-material id="container" class$="[[type]]" elevation="3">
+      <a class="dismiss-button" on-click="closeToast">
+        <i class="icon-cross"></i>
+      </a>
+
+      <span class="inner">[[text]]</span>
+    </paper-material>
+
+  </template>
+
+  <script>
+    class BlToast extends Polymer.Element {
+      
+      static get is() { return 'bl-toast'; }
+
+      static get properties() {
+        return {
+          
+          /** Required. The text displayed in the toast. */
+          text: String,
+
+          /** Optional, controls the color of the toast. Possible values include 'notice', error', 'warning' and 'success'. */
+          type: String,
+
+          /** In milliseconds, set to 0 to disable autoclose. */
+          autoCloseAfter: {
+            type: Number,
+            value: 5000 
+          }
+
+        }
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      ready() {
+        if (super.ready) super.ready();
+        
+        if (this.autoCloseAfter > 0) {
+          setTimeout(function() {
+            this.closeToast() 
+          }.bind(this), this.autoCloseAfter);
+        }
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      closeToast() {
+        this.classList.add('closing');
+        setTimeout(function() {
+          this.classList.add('closed');
+          this.classList.remove('closing');
+        }.bind(this), 500)
+      }
+
+    }
+
+    window.customElements.define(BlToast.is, BlToast);
+  </script>
+</dom-module>

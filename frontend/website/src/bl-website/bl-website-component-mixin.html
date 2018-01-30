@@ -1,0 +1,81 @@
+<!--
+# Badge List Website Component Mixin #
+  
+All Badge List website components should extend this mixin. It provides an `website` property that allows access to the 
+`bl-website` component.
+
+If you need to use the `assetUrl` method to set css properties, overload the `assetsLoaded` event.
+-->
+<script>
+
+  BlWebsiteComponentMixin = function(superClass) {
+    return class extends superClass {
+
+      static get properties() {
+        return {
+          
+          /** Links to the `<bl-website>` component. */
+          website: Object,
+          
+          /** The details of the logged in user provided from the backend on initial page load. Null if logged out. */
+          currentUser: Object,
+
+          assetLoadingComplete: {
+            type: Boolean,
+            value: false
+          }
+
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /**
+       * Use this to get the url of a particular static asset. In produciton this returns a url pointing to the CDN.
+       * Example: `<img src$="[[assetUrl('icons/certificate.png', website.manifest)]]">`
+       */
+      assetUrl(assetKey, websiteManifest) {
+        if (websiteManifest.assets && websiteManifest.asset_base_url && websiteManifest.assets[assetKey])
+          return websiteManifest.asset_base_url + websiteManifest.assets[assetKey];
+        else
+          return undefined;
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+
+        this.website = document.querySelector('bl-website');
+
+        // Add listeners
+        this.website.addEventListener('current-user-changed', e => this._websiteCurrentUserChanged(e));
+      }
+
+      /** Overload this event to run code when the assets are loaded. (Remember to run `super.assetsLoaded()`). */
+      assetsLoaded() {
+        this.assetLoadingComplete = true;
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      static get observers() {
+          return [
+            '_websiteAssetsChanged(website.manifest.assets)'
+          ]
+      }
+
+      _websiteCurrentUserChanged(e) {
+        this.currentUser = this.website.currentUser;
+      }
+
+      _websiteAssetsChanged(e) {
+        if (this.website.manifest.assets && !this.assetLoadingComplete) {
+          this.assetsLoaded();
+        }
+      }
+
+    }
+  }
+
+</script>

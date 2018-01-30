@@ -106,18 +106,23 @@ class Group
   field :tag_creatability,                type: String, default: 'members'
   field :tag_visibility,                  type: String, default: 'public'
   
-  field :user_limit,                      type: Integer, default: 5
-  field :admin_limit,                     type: Integer, default: 1
-  field :sub_group_limit,                 type: Integer, default: 0
+  field :user_limit_override,             type: Integer # manually overrides user_limit value from subscription plan
+  field :admin_limit_override,            type: Integer # manually overrides admin_limit value from subscription plan
+  field :full_member_group_override,      type: Integer # manually overrides full_member_groups value from subscription plan
+  field :limited_member_group_override,   type: Integer # manually overrides limited_member_groups value from subscription plan
   field :features,                        type: Array, default: [] # use feature methods to access
   field :feature_grant_file_uploads,      type: Boolean
   field :feature_grant_reporting,         type: Boolean
   field :feature_grant_bulk_tools,        type: Boolean
   field :feature_grant_integration,       type: Boolean
+  field :feature_grant_hub,               type: Boolean
+  field :feature_grant_leaderboards_weekly,   type: Boolean
+  field :feature_grant_leaderboards_realtime, type: Boolean
   field :total_user_count,                type: Integer, default: 1
   field :admin_count,                     type: Integer, default: 1
   field :member_count,                    type: Integer, default: 0
-  field :sub_group_count,                 type: Integer, default: 0
+  field :full_member_group_count,         type: Integer, default: 0
+  field :limited_member_group_count,      type: Integer, default: 0
   field :active_user_count,               type: Integer # RETIRED
   field :monthly_active_users,            type: Hash # RETIRED
 
@@ -337,6 +342,16 @@ class Group
     )
   end
 
+  def user_limit
+    if user_limit_override.present?
+      user_limit_override
+    elsif paid? && ALL_SUBSCRIPTION_PLANS[subscription_plan].present?
+      ALL_SUBSCRIPTION_PLANS[subscription_plan]['users']
+    else
+      -1
+    end
+  end
+
   def can_add_members?(how_many = 1)
     free? || ((user_limit < 0) || ((member_count + how_many) <= user_limit))
   end
@@ -368,6 +383,16 @@ class Group
         summary: "You are currently using more than the #{user_limit} member spots supported by " \
         + "your plan. To fix this you will need to either remove #{member_count - user_limit} " \
         + " members or upgrade to a larger plan as soon as possible." }
+    end
+  end
+
+  def admin_limit
+    if admin_limit_override.present?
+      admin_limit_override
+    elsif paid? && ALL_SUBSCRIPTION_PLANS[subscription_plan].present?
+      ALL_SUBSCRIPTION_PLANS[subscription_plan]['admins']
+    else
+      -1
     end
   end
 
@@ -418,8 +443,92 @@ class Group
     end
   end
 
-  def can_create_sub_groups?
-    free? || ((sub_group_limit < 0) || (sub_group_count < sub_group_limit))
+  def full_member_group_limit
+    if full_member_group_override.present?
+      full_member_group_override
+    elsif paid? && ALL_SUBSCRIPTION_PLANS[subscription_plan].present?
+      ALL_SUBSCRIPTION_PLANS[subscription_plan]['full_member_groups']
+    else
+      -1
+    end
+  end
+
+  def can_add_full_member_groups?(how_many = 1)
+    has?(:hub) && ((full_member_group_limit < 0) || ((full_member_group_count + how_many) <= full_member_group_limit))
+  end
+
+  def limited_member_group_limit
+    if limited_member_group_override.present?
+      limited_member_group_override
+    elsif paid? && ALL_SUBSCRIPTION_PLANS[subscription_plan].present?
+      ALL_SUBSCRIPTION_PLANS[subscription_plan]['limited_member_groups']
+    else
+      -1
+    end
+  end
+
+  def can_add_limited_member_groups?(how_many = 1)
+    has?(:hub) && ((limited_member_group_limit < 0) || ((limited_member_group_count + how_many) <= limited_member_group_limit))
+  end
+
+  def can_add_member_groups?
+    can_add_full_member_groups? || can_add_limited_member_groups?
+  end
+
+  # Returns hash = {
+  #   color: 'default' or 'red'
+  #   label: one_or_two_word_summary_of_current_status,
+  #   summary: contents_of_detail_tooltip,
+  #   requires_attention: true or false
+  # }
+  def full_member_group_limit_details
+    if !has?(:hub) || free? || full_member_group_limit.blank?
+      { color: 'default', requires_attention: false, label: 'None', 
+        summary: 'This is not a hub group.' }
+    elsif full_member_group_limit < 0
+      { color: 'default', requires_attention: false, label: 'Unlimited', 
+        summary: 'Your plan supports unlimited full hub member groups.' }
+    elsif full_member_group_count < full_member_group_limit
+      { color: 'default', requires_attention: false, label: "Using #{full_member_group_count}/#{full_member_group_limit}", 
+        summary: "You're currently using #{full_member_group_count} out of #{full_member_group_limit} available " \
+        + "full hub member groups for your plan." }
+    elsif full_member_group_count == full_member_group_limit
+      { color: 'default', requires_attention: false, label: "None Remaining", 
+        summary: "You are currently using all #{full_member_group_limit} of the available full hub member groups for your plan. " \
+        + "Please contact support if you're interested in increasing your limit." }
+    else
+      { color: 'red', requires_attention: true, label: "Over limit", 
+        summary: "You are currently using more than the #{full_member_group_limit} full hub member groups supported by your plan. " \
+        + "Please remove #{full_member_group_count - full_member_group_limit} of your full hub member groups as soon as possible."}
+    end
+  end
+
+  # Returns hash = {
+  #   color: 'default' or 'red'
+  #   label: one_or_two_word_summary_of_current_status,
+  #   summary: contents_of_detail_tooltip,
+  #   requires_attention: true or false
+  # }
+  def limited_member_group_limit_details
+    if !has?(:hub) || free? || limited_member_group_limit.blank?
+      { color: 'default', requires_attention: false, label: 'None', 
+        summary: 'This is not a hub group.' }
+    elsif limited_member_group_limit < 0
+      { color: 'default', requires_attention: false, label: 'Unlimited', 
+        summary: 'Your plan supports unlimited limited hub member groups.' }
+    elsif limited_member_group_count < limited_member_group_limit
+      { color: 'default', requires_attention: false, label: "Using #{limited_member_group_count}/#{limited_member_group_limit}", 
+        summary: "You're currently using #{limited_member_group_count} out of #{limited_member_group_limit} available " \
+        + "limited hub member groups for your plan." }
+    elsif limited_member_group_count == limited_member_group_limit
+      { color: 'default', requires_attention: false, label: "None Remaining", 
+        summary: "You are currently using all #{limited_member_group_limit} of the available limited hub member groups for your plan. " \
+        + "Please contact support if you're interested in increasing your limit." }
+    else
+      { color: 'red', requires_attention: true, label: "Over limit", 
+        summary: "You are currently using more than the #{limited_member_group_limit} limited hub member groups supported by your plan. " \
+        + "Please remove #{limited_member_group_count - limited_member_group_limit} of your limited hub member groups as soon as possible."}
+    end
   end
 
   # Returns whether or not the features array contains the specified 'feature' or :feature
@@ -435,6 +544,12 @@ class Group
       return_value ||= (feature_grant_bulk_tools == true)
     elsif (feature.to_s == 'integration')
       return_value ||= (feature_grant_integration == true)
+    elsif (feature.to_s == 'hub')
+      return_value ||= (feature_grant_hub == true)
+    elsif (feature.to_s == 'leaderboards_weekly')
+      return_value ||= (feature_grant_leaderboards_weekly == true)
+    elsif (feature.to_s == 'leaderboards_realtime')
+      return_value ||= (feature_grant_leaderboards_realtime == true)
     elsif (feature.to_s == 'privacy')
       return_value ||= paid?
     end
@@ -458,6 +573,15 @@ class Group
     end
     if feature_grant_integration && !return_list.include?('integration')
       return_list << 'integration'
+    end
+    if feature_grant_hub && !return_list.include?('hub')
+      return_list << 'hub'
+    end
+    if feature_grant_leaderboards_weekly && !return_list.include?('leaderboards_weekly')
+      return_list << 'leaderboards_weekly'
+    end
+    if feature_grant_leaderboards_realtime && !return_list.include?('leaderboards_realtime')
+      return_list << 'leaderboards_realtime'
     end
     if paid? && !return_list.include?('privacy')
       return_list << 'privacy'
@@ -1250,13 +1374,12 @@ class Group
 
   # === STRIPE RELATED METHODS === #
 
-  # This method will refresh the limits fields from the ALL_SUBSCRIPTION_PLANS configuration 
-  def refresh_subscription_limits
-    if !subscription_plan.blank? && ALL_SUBSCRIPTION_PLANS.has_key?(subscription_plan)
-      self.user_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['users']
-      self.admin_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['admins']
-      self.sub_group_limit = ALL_SUBSCRIPTION_PLANS[subscription_plan]['sub_groups']
-    end
+  # This method will clear the limit override fields (useful when changing subscription plans)
+  def clear_subscription_limit_overrides
+    self.user_limit_override = nil
+    self.admin_limit_override = nil
+    self.full_member_group_override = nil
+    self.limited_member_group_override = nil
   end
 
   # This method will refresh the features field from the ALL_SUBSCRIPTION_PLANS configuration 
@@ -1940,13 +2063,10 @@ protected
       if new_record? || subscription_plan_changed? || refresh_subscription_on_revive
         self.subscription_end_date = nil if (context != 'stripe')
 
+        clear_subscription_limit_overrides
         if ALL_SUBSCRIPTION_PLANS[subscription_plan]
-          refresh_subscription_limits
           refresh_subscription_features
         else
-          self.user_limit = 5
-          self.admin_limit = 1
-          self.sub_group_limit = 0
           self.features = []
         end
       end

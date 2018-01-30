@@ -66,12 +66,26 @@ bl_admin_email=app-errors@badgelist.com
 
 ## Running the app ##
 
-To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. This will run both the rails app (at localhost:5000) and the polymer app (at localhost:8081). The polymer app is actually proxied via the polymer-proxy server (at localhost:8080) which exists to add CORS headers.
+To launch the app just run `foreman start` in terminal (that launches the app and the worker thread using the default `Procfile`. This will run the following:
+- The Badge List Development Reverse Proxy Server (at localhost:4000) <-- Type this into your browser
+- The rails app (at localhost:5000)
+- The polymer app (at localhost:8500) which powers the logged in app
+- The polymer website (at localhost:8510) which powers the public website
+
+To access the app in your browser type `http://localhost:4000`. Do not access the rails server directly, the proxy server is needed in order to inject the polymer apps into the same host/port space.
 
 **Note:** If you are testing webhooks with external services (such as Stripe or Postmark) you will need to use `Procfile.ultrahook.dev`. That will forward `http://dev.[ultrahook_username].ultrahook.com` to `http://localhost:5000`. The ultrahook username will be the username of the account linked to the `ULTRAHOOK_API_KEY` in your `.env` file. To specify the procfile use the command below:
 
 ```
 $ foreman start -f Procfile.ultrahook.dev
+```
+
+## Updating the Service Worker ##
+
+There is a service worker that sits at the root level of the app and caches network responses. It lives in `/frontend/bl-service-worker`. To rebuilt it:
+
+```
+$ ruby scripts/build-sw.rb
 ```
 
 ## Running a rails console in development ##

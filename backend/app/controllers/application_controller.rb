@@ -84,17 +84,77 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Call this from controller actions which use the new polymer frontend
-  # It sets the needed manifest variable and renders the polymer layout
-  def render_polymer_frontend
+  # Call this from controller actions which use the polymer app frontend.
+  # It sets the needed manifest variable and renders the polymer layout.
+  # `initial_document_title` will set the title on page load (mostly for web crawlers, since title is normally set via JS in polymer)
+  # `metadata` will cause the social media tag headers to be included
+  def render_polymer_app(initial_document_title, metadata=nil)
+    # Convert the flash hash into a toast array
+    if flash.present?
+      @toast = flash.to_h.map do |type, text|
+        { type: type, text: text }
+      end
+    else
+      @toast = nil
+    end
+
+    @initial_document_title = initial_document_title
+    @metadata = metadata
+    @include_metadata = metadata && metadata.count
     @manifest = {
       app_root_url: ENV['root_url'],
-      polymer_root_url: @polymer_root_url,
+      polymer_root_url: @polymer_app_root_url,
       csrf_token: form_authenticity_token,
-      current_user: (current_user.present?) ? current_user.json(:current_user) : nil
+      current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
+      toast: @toast,
+      
+      # these are initialized in `environment.rb`
+      asset_base_url: ASSET_BASE_URL,
+      assets: ASSET_PATHS
     }
     
-    render template: 'polymer/show', layout: 'polymer'
+    render template: 'polymer/app', layout: 'polymer_app'
+  end
+
+  # Call this from controller actions which use the polymer website frontend.
+  # It sets the needed manifest variable and renders the polymer layout.
+  # `initial_document_title` will set the title on page load (mostly for web crawlers, since title is normally set via JS in polymer)
+  # `metadata` will cause the social media tag headers to be included
+  def render_polymer_website(initial_document_title, metadata=nil)
+    # Convert the flash hash into a toast array
+    if flash.present?
+      @toast = flash.to_h.map do |type, text|
+        { type: type, text: text }
+      end
+    else
+      @toast = nil
+    end
+
+    @initial_document_title = initial_document_title
+    @metadata = metadata
+    @include_metadata = metadata && metadata.count
+    @manifest = {
+      app_root_url: ENV['root_url'],
+      polymer_root_url: @polymer_website_root_url,
+      csrf_token: form_authenticity_token,
+      current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
+      toast: @toast,
+      
+      # these are initialized in `environment.rb`
+      asset_base_url: ASSET_BASE_URL,
+      assets: ASSET_PATHS
+    }
+    
+    render template: 'polymer/website', layout: 'polymer_website'
+  end
+
+  # `badge-list-shield-white` => `http://localhost:5000/assets/badge-list-shield-white-393106b772.png` (CLIPPED EXAMPLE)
+  def bl_asset_url(asset_key)
+    if ASSET_PATHS[asset_key].present?
+      ASSET_BASE_URL + '' + ASSET_PATHS[asset_key]
+    else
+      nil
+    end
   end
 
 private
@@ -120,14 +180,9 @@ private
     }
     @ap_json = @asset_paths.to_json
 
-    # Set the root url of the polymer server (in dev) or the polymer asset folder (in production)
-    if Rails.env.production?
-      @polymer_root_url = "#{ENV['root_url']}/p"
-    else
-      # NOTE: We're using the polymer-proxy server (on port 8080) to add CORS headers to the 
-      #   responses from the standard polymer server (on port 8081).
-      @polymer_root_url = 'http://localhost:8080/0.0.0.0:8081'
-    end
+    # Set the root urls of the polymer servers
+    @polymer_app_root_url = "#{ENV['root_url']}/p/app"
+    @polymer_website_root_url = "#{ENV['root_url']}/p/website"
   end
 
 protected

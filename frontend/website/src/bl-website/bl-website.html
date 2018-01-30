@@ -1,0 +1,220 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="../bl-toast/bl-toast.html">
+<link rel="import" href="../bl-styles/fonts.html">
+<link rel="import" href="../bl-views/bl-view-how-it-works.html">
+<link rel="import" href="../bl-views/bl-view-pricing.html">
+<link rel="import" href="../bl-views/bl-view-privacy-policy.html">
+<link rel="import" href="../bl-views/bl-view-terms-of-service.html">
+<link rel="import" href="../bl-views/bl-view-web-home.html">
+
+<!--
+# Badge List Website #
+-->
+<dom-module id="bl-website">
+  <template>
+
+    <style include="bl-style-classes">
+
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          @apply --bl-font-common-base;
+          
+          display: block;
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+        }
+      
+      /* === TOAST CONTAINER === */
+
+        #toastContainer {
+          display: block;
+          position: fixed;
+          top: 2em; right: 0; left: 0;
+          z-index: 150;
+        }
+
+    </style>
+
+    <!-- #=== APP ROUTING ===# -->
+    
+    <app-location id="location" route="{{route}}" 
+      url-space-regex="(^/$)|(^/w$)|(^/how-it-works$)|(^/pricing$)|(^/privacy-policy$)|(^/terms-of-service$)"></app-location>
+    
+    <app-route id="indexRoute" active="{{indexRouteActive}}" route="{{route}}" pattern="/"
+      title="Badge List - Digital credentials for educators, companies and professional development orgs"></app-route>
+    <app-route id="webRoute" active="{{webRouteActive}}" route="{{route}}" pattern="/w"
+      title="Badge List - Digital credentials for educators, companies and professional development orgs"></app-route>
+    <app-route id="howItWorksViewRoute" active="{{howItWorksViewRouteActive}}" route="{{route}}" pattern="/how-it-works"
+      title="How Badge List Works - Expert validated ePortfolios for recognizing digital learning and professional development"></app-route>
+    <app-route id="pricingViewRoute" active="{{pricingViewRouteActive}}" route="{{route}}" pattern="/pricing"
+      title="Badge List Pricing"></app-route>
+    <app-route id="privacyPolicyViewRoute" active="{{privacyPolicyViewRouteActive}}" route="{{route}}" pattern="/privacy-policy"
+      title="Privacy Policy - Badge List"></app-route>
+    <app-route id="termsOfServiceViewRoute" active="{{termsOfServiceViewRouteActive}}" route="{{route}}" 
+      pattern="/terms-of-service" title="Terms of Service - Badge List"></app-route>
+
+    <!-- #=== APP VIEWS ===# -->
+    <bl-view-web-home id="webHomeView" active="{{webHomeViewActive}}"></bl-view-web-home>
+    <bl-view-how-it-works id="howItWorksView" active="{{howItWorksViewRouteActive}}"></bl-view-how-it-works>
+    <bl-view-pricing id="pricingView" active="{{pricingViewRouteActive}}"></bl-view-pricing>
+    <bl-view-privacy-policy id="privacyPolicyView" active="{{privacyPolicyViewRouteActive}}"></bl-view-privacy-policy>
+    <bl-view-terms-of-service id="termsOfServiceView" active="{{termsOfServiceViewRouteActive}}"></bl-view-terms-of-service>
+    
+    <!-- #=== TOAST CONTAINER ===# -->
+    <div id="toastContainer"></div>
+
+  </template>
+
+  <script>
+    class BlWebsite extends Polymer.Element {
+      static get is() { return 'bl-website'; }
+
+      static get properties() {
+        return {
+          
+          /** The manifest is required from the backend. It contains details of the logged in user and a CSRF token to use for forms. */
+          manifest: {
+            type: Object,
+            observer: '_manifestChanged'
+          },
+
+          /** Automatically set to the current user from the manifest. */
+          currentUser: {
+            type: Object,
+            notify: true
+          },
+
+          /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
+          activeView: Object,
+
+          /** 
+           * Set this to change the window location hash. Observe this to be notified whenever the location hash changes. 
+           * Do not include the hash sign, just the url-safe string to be placed after the hash sign.
+           * Setting the Value: `this.website.locationHashKey = 'test-value';`
+           * Clearing the Value: `this.website.locationHashKey = '';`
+           */
+          locationHashKey: {
+            type: String,
+            notify: true,
+            observer: '_locationHashKeyChanged',
+            value: function() { return window.location.hash.replace('#', ''); }
+          },
+
+          /** True if Intercom is being used and has booted. */
+          intercomLoaded: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+
+          indexRouteActive: Boolean,
+          webRouteActive: Boolean,
+          webHomeViewActive: {
+            type: Boolean,
+            computed: '_webHomeViewActive(indexRouteActive, webRouteActive)'
+          }
+
+        };
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      /** Displays new toast item in the app toast container. Leave type or autoCloseAfter blank to use the default. */
+      addToast(text, type, autoCloseAfter) {
+        var newToast = document.createElement('bl-toast');
+        newToast.text = text;
+        newToast.type = type;
+        if (autoCloseAfter != undefined) newToast.autoCloseAfter = autoCloseAfter;
+        this.$.toastContainer.appendChild(newToast);
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        // Add listeners to the routes so that we can update the document title, also check for which is active so we can set initial title
+        var routeElements = this.shadowRoot.querySelectorAll('app-route');
+        routeElements.forEach(function(routeElement) {
+          routeElement.addEventListener('active-changed', e => this._activeRouteChanged(e));
+          if (routeElement.active && routeElement.title) document.title = routeElement.title;
+        }.bind(this));
+
+        // Add listener for window location hash change
+        window.addEventListener('hashchange', e => this._windowLocationHashChanged(e));
+      }
+
+      ready() {
+        if (super.ready) super.ready();
+
+        // Remove `loading` class from the body.
+        document.getElementsByTagName('body')[0].classList.remove('loading');
+
+        // Wait for Intercom to load (max 30 seconds)
+        const timeout = setTimeout(() => clearInterval(interval), 30000);
+        const interval = setInterval(() => {
+          if (('Intercom' in window) && window.Intercom.booted) {
+            // Intercom is booted!
+            clearInterval(interval);
+            clearTimeout(timeout);
+
+            this.set('intercomLoaded', true);
+          }
+        }, 100);
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _manifestChanged(newValue, oldValue) {
+        if (newValue) {
+          this.setProperties({
+            currentUser: newValue.current_user
+          });
+
+          if (newValue.toast && newValue.toast.length)
+            newValue.toast.forEach(function(toastItem) {
+              this.addToast(toastItem.text, toastItem.type)
+            }.bind(this));
+        }
+      }
+
+      /** Sets the document title when the active route changes. */
+      _activeRouteChanged(event) {
+        if ((event.detail.value == true) && event.target && event.target.title) {
+          document.title = event.target.title;
+        }
+      }
+
+      /** Copies the window location hash to the locationHashKey component property. */
+      _windowLocationHashChanged(event) {
+        var newHashKey = window.location.hash.replace('#', '');
+        if (this.locationHashKey != newHashKey)
+          this.locationHashKey = newHashKey;
+      }
+
+      /** Copies the locationHashKey component property to the window location. */
+      _locationHashKeyChanged(newValue, oldValue) {
+        if (window.location.hash != newValue)
+          window.location.hash = newValue;
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _webHomeViewActive(indexRouteActive, webRouteActive) {
+        return indexRouteActive || webRouteActive;
+      }
+
+    }
+
+    window.customElements.define(BlWebsite.is, BlWebsite);
+  </script>
+</dom-module>

@@ -1,0 +1,80 @@
+<% 
+  #=== BADGE LIST SERVICE WORKER UI ===# 
+  #
+  # This should be added inside the body tag of all page layouts. It contains UI component to let users reload the page when the 
+  # service worker needs to be updated.
+  #
+  # NOTE: The Service Worker source code lives in `/frontend/bl-service-worker/src/sw.js` and when it is built it is written to
+  # `/backend/public/sw.js`. Refer to the comments at the top of the source code for more details.
+%>
+
+<style type="text/css">
+
+  #blServiceWorkerUI .blswPanel {
+    font-family: 'Lato', 'Open Sans', Verdana, Arial !important;
+    font-size: 1rem;
+    line-height: 1.3em;
+  }
+    #blServiceWorkerUI .blswPanel {
+      position: fixed;
+      left: 1rem;
+      bottom: 1rem;
+      right: 1rem;
+      width: auto;
+      padding: 0.7rem 1.3rem;
+      border-radius: 2px;
+      
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      
+      background: #424242;
+      color: white;
+      box-shadow: 0 24px 38px 3px rgba(0, 0, 0, 0.14),
+                  0 9px 46px 8px rgba(0, 0, 0, 0.12),
+                  0 11px 15px -7px rgba(0, 0, 0, 0.4);
+    }
+      @media (min-width: 840px) {
+        #blServiceWorkerUI .blswPanel {
+          left: 2rem;
+          bottom: 2rem;
+          right: unset;
+        }
+      }
+      #blServiceWorkerUI .blswLabel {
+        margin-right: 1rem;
+      }
+      #blServiceWorkerUI a.blswButton,#blServiceWorkerUI a.blswButton:visited {
+        display: block;
+        margin-left: 1rem;
+        padding: 0.6em 0.7em;
+        border-radius: 2px;
+        line-height: 1em;
+        
+        text-decoration: none;
+        text-transform: uppercase;
+
+        color: #FFA726;
+        background: transparent;
+        
+        transition: background 0.3s, color 0.3s;
+      }
+      #blServiceWorkerUI a.blswButton:hover,#blServiceWorkerUI a.blswButton:focus {
+        color: white;
+        background: #616161;
+      }
+
+</style>
+
+<div id="blServiceWorkerUI" hidden>
+  <div class="blswPanel">
+    <div class="blswLabel">New version available</div>
+    
+    <a href="#" id="blswRefreshButton" class="blswButton" onclick="return blswRefreshServiceWorker();">
+      Refresh
+    </a>
+    <a href="#" id="blswDismissButton" class="blswButton" onclick="return blswDismissPanel();">
+      Dismiss
+    </a>
+  </div>
+</div>

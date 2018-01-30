@@ -1,0 +1,17 @@
+{
+  "name": "bl-dev-proxy",
+  "version": "1.0.0",
+  "description": "Badge List Development Reverse Proxy Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hank Holiday <hank@badgelist.com>",
+  "license": "ISC",
+  "dependencies": {
+    "http-proxy": "^1.16.2",
+    "http-proxy-rules": "^1.1.3",
+    "url": "^0.11.0"
+  }
+}

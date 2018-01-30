@@ -10,18 +10,20 @@ APP_CONFIG['subscription_plans'].each do |pricing_group, plans|
   subscription_options[pricing_group] = []
   plans.each do |plan_id, plan_fields|
     subscription_pricing_group[plan_id] = pricing_group
-    subscription_options[pricing_group] << [
-      "<b title='#{plan_fields['description']}' data-toggle='tooltip' class='#{plan_fields['color']}'>".html_safe \
-        + "<i class='fa #{plan_fields['icon']}'></i> #{plan_fields['name']}</b>".html_safe \
-        + "<span><em>$#{plan_fields['amount']/100} per #{plan_fields['interval']}".html_safe \
-        + "</em></span>".html_safe,
-      plan_id
-    ]
-    unless pricing_group == 'retired'
-      subscription_options['admin'] << [
-        "#{plan_fields['name']} ($#{plan_fields['amount']/100} per #{plan_fields['interval']})",
+    if plan_fields['disabled'] != true
+      subscription_options[pricing_group] << [
+        "<b title='#{plan_fields['description']}' data-toggle='tooltip' class='#{plan_fields['color']}'>".html_safe \
+          + "<i class='fa #{plan_fields['icon']}'></i> #{plan_fields['name']}</b>".html_safe \
+          + "<span><em>$#{plan_fields['amount']/100} per #{plan_fields['interval']}".html_safe \
+          + "</em></span>".html_safe,
         plan_id
       ]
+      unless pricing_group == 'retired'
+        subscription_options['admin'] << [
+          "#{plan_fields['name']} ($#{plan_fields['amount']/100} per #{plan_fields['interval']})",
+          plan_id
+        ]
+      end
     end
   end
 end

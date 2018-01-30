@@ -358,7 +358,7 @@
                   Edit Subscription
                 </a>
                 
-                <% unless @group.stripe_subscription_id.blank? %>
+                <% if @group.stripe_subscription_id.present? %>
                   <a href="#" id="cancel-subscription" class="btn btn-danger">
                     <i class="fa fa-remove"></i>
                     Cancel Subscription
@@ -496,19 +496,24 @@
       <!-- === BADGE LIST ADMIN PANEL === -->
 
       <div id="bl-admin-panel" style="display: none;">
-        <h2>Badge List Admin Panel</h2>
+        <h2>Manually Grant Features</h2>
       
-        <%= f.input :feature_grant_file_uploads, label: 'Manually Grant File Uploads Feature', as: :boolean, 
+        <%= f.input :feature_grant_file_uploads, label: 'File Uploads', as: :boolean, input_html: { class: 'input-mini' } %>
+        <%= f.input :feature_grant_reporting, label: 'Reporting', as: :boolean, input_html: { class: 'input-mini' } %>
+        <%= f.input :feature_grant_bulk_tools, label: 'Bulk Tools', as: :boolean, input_html: { class: 'input-mini' } %>
+        <%= f.input :feature_grant_integration, label: 'Integration', as: :boolean, input_html: { class: 'input-mini' } %>
+        <%= f.input :feature_grant_leaderboards_weekly, label: 'Weekly Leaderboards', as: :boolean, input_html: { class: 'input-mini' } %>
+        <%= f.input :feature_grant_leaderboards_realtime, label: 'Realtime Leaderboards', as: :boolean, 
           input_html: { class: 'input-mini' } %>
-        <%= f.input :feature_grant_reporting, label: 'Manually Grant Reporting Feature', as: :boolean, 
-          input_html: { class: 'input-mini' } %>
-        <%= f.input :feature_grant_bulk_tools, label: 'Manually Grant Bulk Tools Feature', as: :boolean, 
-          input_html: { class: 'input-mini' } %>
-        <%= f.input :feature_grant_integration, label: 'Manually Grant Integration Feature', as: :boolean, 
-          input_html: { class: 'input-mini' } %>
-        <%= f.input :admin_limit, label: 'Admin Limit', input_html: { class: 'input-mini' } %>
-        <%= f.input :sub_group_limit, label: 'Sub-Group Limit', input_html: { class: 'input-mini' } %>
-        <%= f.input :stripe_subscription_id, label: 'Stripe Subscription Id', input_html: { class: 'input-medium' } %>
+        
+        <h2>Override Subscription Plan Limits</h2>
+
+        <%= f.input :admin_limit_override, label: 'Admins', input_html: { class: 'input-mini' } %>
+        <%= f.input :user_limit_override, label: 'Total Members', input_html: { class: 'input-mini' } %>
+        <% if @group.has?(:hub) %>
+          <%= f.input :full_member_group_override, label: 'Full Hub Member Groups', input_html: { class: 'input-mini' } %>
+          <%= f.input :limited_member_group_override, label: 'Limited Hub Member Groups', input_html: { class: 'input-mini' } %>
+        <% end %>
       </div>
 
       <script type="text/javascript">

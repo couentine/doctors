@@ -4,11 +4,11 @@ ruby '2.3.4'
 #=== CORE GEMS ===#
 
   gem 'rails', '4.2.6'
-  gem 'puma', '~> 2.15'
+  gem 'puma', '~> 3.4'
 
 #=== STORAGE, MODELS & QUEUEING ===#
 
-  gem 'mongoid', '~> 5.0'
+  gem 'mongoid', '~> 5.2'
   gem 'redis', '~> 3.2.2'
   gem 'sidekiq', '~> 4.0'
   gem 'sinatra', :require => nil

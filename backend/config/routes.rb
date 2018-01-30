@@ -14,15 +14,14 @@ BadgeList::Application.routes.draw do
   root :to => 'home#root'
   resources :users, :only => [:show], path: 'u'
   match 'i' => 'badge_maker#show', via: :get, as: :badge_image
-  match 'c' => 'static_pages#colors', via: :get
   match 'j/image_key' => 'static_pages#image_key', via: :get, as: :image_key
   match 'w' => 'home#root_external', via: :get, as: :root_external
+  match 'home' => 'home#root_internal', via: :get, as: :root_internal
   match 'pricing' => 'home#pricing', via: :get, as: :pricing
   match 'pricing-k12' => 'home#pricing_k12', via: :get, as: :pricing_k12
   match 'how-it-works' => 'home#how_it_works', via: :get, as: :how_it_works
   match 'privacy-policy' => 'home#privacy_policy', via: :get, as: :privacy_policy
   match 'terms-of-service' => 'home#terms_of_service', via: :get, as: :terms_of_service
-  match 'help-staging' => 'home#help', via: :get, as: :help
 
   # === ADMIN PATHS === #
   scope '/a' do
@@ -37,6 +36,12 @@ BadgeList::Application.routes.draw do
     mount Sidekiq::Web => '/a/sidekiq'
   end
   
+  # === INFO PATHS === #
+  scope '/i' do
+    resources :subscription_plans, only: [:index]
+    resources :subscription_features, only: [:index]
+  end
+
   # === WEBHOOK PATHS === #
   match 'h/lti/launch' => 'lti#launch', via: :post, as: :lti_launch
   match 'h/lti/config' => 'lti#config_xml', via: :get, as: :lti_config

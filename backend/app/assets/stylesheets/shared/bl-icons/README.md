@@ -11,7 +11,7 @@ In order to add new icons you need to...
 2. Expand the downloaded zip file
 3. Copy the files to the right places: Fonts go in the fonts subfolder of this one, selection.json goes in this folder
 4. Do not copy the style.css file directly in. You'll need to only copy the part from the `i` class down (from the style.css in the downloaded zip to the style.css.scss file in this folder). Also... the rest of the style.css.scss file is only there because the icons admin page needs it. (This is all kind of janky and needs refactoring eventually.)
-5. Then manually diff the styles with `/frontend/src/bl-styles/bl-styles.html`
+5. Then manually diff the styles with `/frontend/app/src/bl-styles/bl-styles.html`
 6. Then manually update `icons.html.erb`
 
 OR instead of doing all that, just rebuilt a better icon demo engine that doesn't require all this jankiness. 

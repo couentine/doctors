@@ -7,19 +7,8 @@ remotes = { # first is default
   'production' => 'badgelist'
 }
 
-# If you need to manually build here is a version to copy and paste:
-# polymer build --js-minify --css-minify --html-minify --bundle --add-service-worker --insert-prefetch-links
-polymer_build_options = [
-  '--js-minify',
-  '--css-minify',
-  '--html-minify',
-  '--bundle',
-  '--add-service-worker',
-  '--insert-prefetch-links'
-]
-
 # This is the commit message used when committing the rebuilt polymer files to git (if needed)
-POLYMER_REBUILD_COMMIT_MESSAGE = "Rebuilt polymer frontend."
+FRONTEND_REBUILD_COMMIT_MESSAGE = "Rebuilt frontend."
 
 #=== SCRIPT BANNER ===#
 
@@ -67,13 +56,12 @@ POLYMER_REBUILD_COMMIT_MESSAGE = "Rebuilt polymer frontend."
   root_path = `git rev-parse --show-toplevel`.chomp
   backend_path = "#{root_path}/backend"
   frontend_path = "#{root_path}/frontend"
-  polymer_build_source_path = "#{frontend_path}/build/default"
-  polymer_build_target_path = "#{backend_path}/public/p"
+  polymer_app_path = "#{frontend_path}/app"
+  polymer_app_build_target_path = "#{backend_path}/public/p/app"
   puts "===> Root path: #{root_path}"
   puts "===> Backend path: #{backend_path}"
   puts "===> Frontend path: #{frontend_path}"
-  puts "===> Polymer build source path: #{polymer_build_source_path}"
-  puts "===> Polymer build target path: #{polymer_build_target_path}"
+  puts "===> Polymer build target path: #{polymer_app_build_target_path}"
 
   puts "--------------------------------------------------------------------------------\n\n\n"
 
@@ -153,20 +141,19 @@ POLYMER_REBUILD_COMMIT_MESSAGE = "Rebuilt polymer frontend."
     puts "5) Run this script again\n\n"
     exit
   end
-  
-  # Switch to the selected git branch, do the polymer build
-  puts "--------------------------------------------------------------------------------"
-  puts "===> REBUILDING POLYMER"
+
+  # Switch to the selected git branch
   system("git checkout #{selected_branch}")
-  Dir.chdir(frontend_path) do
-    system("polymer build #{polymer_build_options.join(' ')}")
+  
+  # Run frontend build processes
+  Dir.chdir(root_path) do
+    system("ruby scripts/build-polymer.rb")
+    system("ruby scripts/build-sw.rb")
   end
-  FileUtils.remove_dir(polymer_build_target_path) # clear existing build
-  FileUtils.move(polymer_build_source_path, polymer_build_target_path) # move built files
 
   # Figure out if the build changed anything and, if so, make sure we're not on master (master doesn't allow git pushes only PRs)
   puts "--------------------------------------------------------------------------------"
-  puts "===> COMMITTING REBUILT POLYMER AND PUSHING TO GITHUB"
+  puts "===> COMMITTING REBUILT FRONTEND AND PUSHING TO GITHUB"
   uncommitted_changes = `git status --porcelain`
   if uncommitted_changes.empty?
     puts "===> No frontend changes since last build, skipping Github push."
@@ -182,7 +169,7 @@ POLYMER_REBUILD_COMMIT_MESSAGE = "Rebuilt polymer frontend."
   else
     # Commit the changes and push them to Github
     system("git add .")
-    system("git commit -m '#{POLYMER_REBUILD_COMMIT_MESSAGE}'")
+    system("git commit -m '#{FRONTEND_REBUILD_COMMIT_MESSAGE}'")
     system("git push origin #{selected_branch}")
   end
 

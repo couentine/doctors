@@ -1,0 +1,684 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="bl-view-mixin.html">
+<link rel="import" href="../bl-subscriptions/bl-subscription-card.html">
+
+<!--
+# Badge List Website Pricing View #
+-->
+<dom-module id="bl-view-pricing">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: none;
+        }
+        :host([status=active]) {
+          display: block;
+        }
+
+      /* === TYPOGRAPHY === */
+
+        h1 {
+          font-size: 2em;
+          line-height: 1.2em;
+        }
+        h2 {
+          font-size: 1.7em;
+          line-height: 1.5em;
+          margin: 1rem 0;
+          text-align: center;
+        }
+        h3 {
+          font-size: 1.2em;
+          margin: 1em 0;
+        }
+        #content {
+          color: var(--bl-grey-700);
+          background-color: var(--bl-grey-300);
+
+          background-image: var(--pricing-view-background-image);
+          background-size: 900px 900px;
+          background-blend-mode: screen;
+
+          transition: background-color 0.6s;
+        }
+        :host([k12-mode]) #content {
+          background-color: var(--bl-green-100);
+        }
+      
+      /* === HEADER PANEL === */
+
+        #expandedBackground {
+          background: transparent;
+        }
+        #condensedBackground {
+          background: var(--bl-purple-500);
+        }
+
+        #headerBottom {
+          text-align: center;
+          color: white;
+        }
+          h1 {
+            display: inline-block;
+            margin: 0;
+            font-size: 2rem;
+            padding: 0.2em 0.6em;
+            border-radius: 50em;
+            background: radial-gradient(circle at 60% 40%, var(--bl-purple-300), var(--bl-purple-500));
+          }
+
+        bl-header-nav-left, bl-header-nav-right {
+          --link-color: white;
+        }
+
+      /* === BANNER ROW === */
+
+        #bannerRow {
+          background: radial-gradient(
+            circle at 60% 40%, 
+            var(--bl-light-blue-300) 0%, 
+            var(--bl-light-blue-500) 50%,
+            var(--bl-light-blue-800) 80%
+          );
+          color: white;
+          position: relative;
+          font-size: 1.1rem;
+          line-height: 1.4em;
+
+          height: 22rem;
+        }
+          #groupMountains {
+            position: absolute;
+            width: 102%;
+            height: 72%;
+            bottom: -28px;
+            left: -1%;
+            z-index: 4;
+          }
+            @media (min-width: 480px) {
+              #groupMountains {
+                bottom: -36px;
+              }
+            }
+
+      /* === PRICING ROW === */
+
+        #pricingRow {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 4rem 1rem 2.5rem 1rem;
+        }
+          #pricingHeader {
+            font-family: Roboto, 'Helvetica Neue', Helvetica, 'Lato';
+          }
+          #pricingSummary {
+            margin: 1.5rem 0;
+            font-size: 1.5em;
+            line-height: 1.4em;
+            font-weight: 300;
+            font-family: Roboto, 'Helvetica Neue', Helvetica, 'Lato';
+          }
+            #pricingSummary p {
+              margin: 1rem 0;
+            }
+            #pricingSummary a, #pricingSummary a:visited {
+              background: rgba(255, 255, 255, 0.5);
+              color: var(--bl-grey-800);
+              font-weight: bold;
+              padding: 0.1em 0.3em;
+              border-radius: 1px;
+
+              transition: all 0.3s;
+            }
+            #pricingSummary a:hover, #pricingSummary a:focus {
+              color: var(--bl-grey-900);
+              background: rgba(255, 255, 255, 0.8);
+            }
+          #pricingCards {
+            position: relative;
+            padding: 0;
+            overflow: hidden;
+          }
+            
+            bl-subscription-card {
+              margin: 2rem 0;
+            }
+
+      /* === QUESTION ROW === */
+
+        #questionRow {
+          background: rgba(0, 0, 0, 0.3);
+          padding: 2rem;
+          font-family: Roboto, 'Helvetica Neue', Helvetica, 'Lato';
+        }
+          #questionTitle {
+            color: white;
+          }
+          #questionPanel {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            border: 1px solid var(--bl-grey-50);
+            font-size: 1.5em;
+            line-height: 1.4em;
+            font-weight: 300;
+          }
+            #questionPanel .inner {
+              margin: 1rem;
+              padding: 2rem;
+              border-radius: 6px;
+              border: 1px solid var(--bl-grey-50);
+              background: rgba(255, 255, 255, 0.4);
+            }
+              #questionPanel ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+              }
+                #questionPanel ul li {
+                  margin-bottom: 1.5rem;
+                  padding-bottom: 1.5rem;
+                  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+                }
+                #questionPanel ul li:last-child {
+                  margin-bottom: 0;
+                  padding-bottom: 0;
+                  border-bottom: none;
+                }
+                  #questionPanel ul li label {
+                    display: block;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                  }
+                  #questionPanel ul li .buttons {
+                    text-align: center;
+                    display: block;
+                  }
+                    #questionPanel ul li .buttons paper-button {
+                      margin-top: 1rem;
+                    }
+
+    </style>
+
+    <!-- #=== BADGE LIST API LINKS ===# -->
+    <iron-ajax id="subscriptionPlans" auto url="[[website.manifest.app_root_url]]/i/subscription_plans" 
+      on-response="_subscriptionPlansOrFeaturesLoaded" last-response="{{subscriptionPlans}}"></iron-ajax>
+    <iron-ajax id="subscriptionFeatures" auto url="[[website.manifest.app_root_url]]/i/subscription_features" 
+      on-response="_subscriptionPlansOrFeaturesLoaded" last-response="{{subscriptionFeatures}}"></iron-ajax>
+
+    <bl-header-panel id="headerPanel" expanded-height="7" condensed-height="3.5" full-bleed-body 
+        expanded-percentage="{{expandedPercentage}}">
+      <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
+      <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
+      <div id="headerBottom" slot="headerBottom">
+        <h1 style$="font-size:[[linearExpansionValue(2, 1.2, expandedPercentage)]]rem; 
+            margin-bottom:[[linearExpansionValue(0, 0.7, expandedPercentage)]]rem; background: 
+            radial-gradient(circle at 60% 40%, rgba(186,104,200,[[expandedPercentage]]), rgba(142,36,170,[[expandedPercentage]]));">
+          Badge List Pricing
+        </h1>
+      </div>
+
+      <bl-header-nav-left slot="leftNav">
+        <img src$="[[rootPath]]/images/badge-list-shield-white-square.png">
+      </bl-header-nav-left>
+      
+      <bl-header-nav-right slot="rightNav" id="rightNave"></bl-header-nav-right>
+
+      <div id="content" slot="content">
+        
+        <!-- === BANNER ROW === -->
+        <div id="bannerRow">
+          <svg id="groupMountains" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 969.77 453.91">
+            <defs>
+              <linearGradient id="a" x1="488.03" x2="488.03" y1="398.76" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#E1F5FE"/>
+                <stop offset="1" stop-color="#E1F5FE" stop-opacity=".8"/>
+              </linearGradient>
+              <linearGradient id="b" x1="504.47" x2="504.47" y1="396.81" y2="37.62" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#E1F5FE"/>
+                <stop offset="1" stop-color="#E1F5FE" stop-opacity=".6"/>
+              </linearGradient>
+            </defs>
+            <g data-name="Final Renders">
+              <path fill="#E1BEE7" d="M483.74 453.91c-305 0-517.12-29.37-479.4-60.91C37 365.67 251 346.06 486 346.06S934.21 365.67 965.73 
+                393c36.38 31.53-176.98 60.91-481.99 60.91z"/>
+              <path fill="#E1F5FE" d="M482.52 449.47c-302.34 0-512.61-27.62-475.22-57.28 32.4-25.69 244.51-44.13 477.49-44.13s444.26 18.44 
+                475.51 44.13c36.07 29.66-175.44 57.28-477.78 57.28z"/>
+              <path fill="url(#a)" d="M806.12 114.3c-28.95 0-46.66 77.33-67.14 162.31-3.16 13.12-19.11 14.44-23.88
+                2-13.41-35-27.48-113.94-46.81-113.94-23.83 0-39.67 94-56.13 139.09-4.2 11.51-18.42 
+                12-23.16.74-11.47-27.19-23.53-49.66-40.07-49.66-15.74 0-27.42 20.36-38.41 45.77-5 11.62-19.92 10.54-23.47-1.76C452.9 180.69 
+                428.69 0 383.79 0c-40.26 0-63.88 145.24-92.94 260.41-4.75 18.81-28 19.49-33.52 1-20.15-67.41-39.39-134.19-68.54-134.19-58.75
+                0-77.27 271.55-144 271.55h886.52c-58.04-.01-74.13-284.47-125.19-284.47z"/>
+              <path fill="url(#b)" d="M748.52 196.59c-26 0-43.78 53.92-61.7 100.58-10.05 26.17-40.35 25-49-2C606.72 198.91 581.61 37 538.67
+                37 484.81 37 459 258.69 414.32 350.78c-10.07 20.74-34.12 21.6-45.05 1.54-32.41-59.43-54.63-154.83-96.66-154.83-61.05 0-80.29
+                201.27-149.68 201.27H886c-63.73 0-81.4-202.17-137.48-202.17z"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- === PRICING ROW === -->
+        <div id="pricingRow">
+          <div id="pricingHeader">
+            <h2 hidden="[[k12Mode]]">Standard Plans</h2>
+            <h2 hidden="[[!k12Mode]]">Discounted K12 Plans</h2>
+          </div>
+
+          <div id="pricingSummary">
+            <p hidden="[[k12Mode]]">
+              To get started with Badge List, <a href$="[[createGroupPath]]">create a new group</a> and choose one of the plans below. 
+              You can switch between the free and paid plans at any time.
+              All awarded badges are hosted forever for free, even if you decide to stop paying.
+            </p>
+            <p hidden="[[k12Mode]]">
+              We also offer <a href="#" on-tap="toggleK12">discounted plans for K12 schools and districts</a>.
+            </p>
+            <p hidden="[[!k12Mode]]">
+              The plans below are only available for use by K12 schools and districts, but K12 organizations are also able to use
+              any of our <a href="#" on-tap="toggleK12">standard plans</a>.
+            </p>
+          </div>
+
+          <div id="pricingCards">
+            <template is="dom-repeat" items="[[subscriptionCards]]">
+              <bl-subscription-card subscription-card="[[item]]" k12-mode="{{k12Mode}}"></bl-subscription-card>
+            </template>
+          </div>
+        </div>
+
+        <!-- === QUESTION ROW === -->
+        <div id="questionRow">
+          <div id="questionTitle">
+            <h2>Common Questions</h2>
+          </div>
+          <div id="questionPanel">
+            <div class="inner">
+              <ul>
+                <li>
+                  <label>What if I need more users than the standard plans support?</label>
+                  <span>
+                    We have enterprise plans available for larger organizations. Reach out via chat or email below to find out more.
+                  </span>
+                </li>
+                <li>
+                  <label>Is there a limit to the number of badges I can award?</label>
+                  <span>
+                    All of our plans include unlimited badges and badge portfolios.
+                  </span>
+                </li>
+                <li>
+                  <label>How long will my badges last? Will they be deleted if I cancel my subscription?</label>
+                  <span>
+                    Your badges will remain in Badge List unless you delete them. If you choose to cancel your subscription, 
+                    you will lose access to paid features, but your badges will remain.
+                  </span>
+                </li>
+                <li>
+                  <label>Do I need to use a credit card to create a paid group?</label>
+                  <span>
+                    The easiest way to sign up for a paid plan is to use a credit card, but we can accommodate just about any payment 
+                    requirements. Just reach out to us via chat or email below to discuss alternate payment options.
+                  </span>
+                </li>
+                <li>
+                  <label>What do I need to do in order to comply with student privacy laws?</label>
+                  <span>
+                    Laws vary widely from place to place, so the only way to be sure is to check with your district admins, 
+                    but we offer a wide range of features to assist in privacy compliance. 
+                    The ability to create private badges that are only visible to group members is supported by all paid groups. 
+                    Org and Hub groups also include Domain Privacy, 
+                    a feature that makes user accounts invisible to those outside the email domain.
+                  </span>
+                </li>
+                <li>
+                  <label>Can Badge List integrate with _____?</label>
+                  <span>
+                    We have an existing LTI integration which is compatible with Canvas, Blackboard, Moodle and any other LTI-compliant LMS.
+                    Our team is always working to add more third-party integrations to the platform. 
+                    Integrations are made available to all groups at the Org level or higher for no additional cost. 
+                    Contact us if you'd like us to prioritize a particular integration. A fee may be involved.
+                  </span>
+                </li>
+                <li>
+                  <label>We're here to help...</label>
+                  <span class="buttons">
+                    <paper-button class="large" raised on-tap="showIntercom" hidden="[[hideChat]]">
+                      <i class="icon-bubble-shiny"></i>&nbsp;
+                      Chat with us
+                    </paper-button>
+                    <a href="mailto:solutions@badgelist.com" class="button">
+                      <paper-button class="large" raised>
+                        <i class="icon-envelope"></i>&nbsp;
+                        Email us
+                      </paper-button>
+                    </a>
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- === FOOTER === -->
+        <bl-web-footer></bl-web-footer>
+
+      </div>
+
+    </bl-header-panel>
+
+  </template>
+
+  <script>
+    class BlViewPricing extends BlViewMixin(Polymer.Element) {
+
+      static get is() { return 'bl-view-pricing'; }
+
+      static get properties() {
+        return {
+
+          /** The href of the new group button. Changes based on whether the user is logged in. */
+          createGroupPath: {
+            type: String,
+            computed: '_createGroupPath(currentUser)',
+            value: '/users/sign_up'
+          },
+
+          loadingPricing: {
+            type: Boolean,
+            value: true
+          },
+
+          hideChat: {
+            type: Boolean,
+            value: true
+          },
+
+          /** Queried from the Badge List api. */
+          subscriptionPlans: Array,
+          
+          /** Queried from the Badge List api. */
+          subscriptionFeatures: Array,
+
+          /** Used to generate the bars representing the different feature levels. */
+          featureLevels: Array,
+          
+          /** Built dynamically based on `subscriptionPlans` and `subscriptionFeatures`. */
+          subscriptionCards: Array,
+
+          k12Mode: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true
+          }
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      toggleK12() {
+        this.k12Mode = !this.k12Mode;
+
+        if (this.k12Mode)
+          this.website.locationHashKey = 'k12';
+        else
+          this.website.locationHashKey = '';
+      }
+
+      // #=== PRIVATE ACTION METHODS ===#
+
+      /** 
+       * Builds out the `subscriptionCards` list based on `subscriptionPlans` and `subscriptionFeatures`. 
+       * This method essentially does a transformation of the plans returned by the server and injects an additional free plan.
+       */
+      _buildSubscriptionCards() {
+        // The extra features are added to the feature map (even though they are not returned by the server)
+        var extraFeatures = [
+          { 
+            id: 'x_lifetime_hosting', 
+            available: true,
+            label: 'Free Lifetime Hosting', 
+            description: 'All badges, portfolios and content is hosted forever for free.' 
+          },
+          { 
+            id: 'x_evidence_collection', 
+            available: true,
+            label: 'Portfolio Feedback Engine', 
+            description: 'Define a list of evidence required to earn each badge then use our feedback engine to easily ' 
+              + 'collect, review and endorse evidence individually or in bulk.'
+          },
+          { 
+            id: 'x_leaderboards_monthly', 
+            available: false,
+            label: 'Monthly Leaderboards', 
+            description: 'Group leaderboards show which group members have the most badge endorsements. '
+              + 'Groups with this plan automatically update their leaderboards at the beginning of each month.' 
+          },
+          { 
+            id: 'x_openbadge', 
+            available: true,
+            label: 'OpenBadge compatible', 
+            description: 'Every badge is backed by rich metadata which is compatible with the entire ecosystem of OpenBadge apps.' 
+          }
+        ];
+        // This is used to represent the free plan
+        var freePlan = {
+          id: 'free',
+          name: 'Free',
+          type: 'free',
+          amount: 0,
+          interval: 'month',
+          bl_icon: 'icon-gift',
+          fa_icon: 'fa-gift',
+          color: 'pink',
+          description: 'For teams/organizations of any size which don\'t need privacy controls or other advanced features. '
+            + 'Completely free forever for unlimited users and admins. '
+            + 'All badges and portfolios are publicly visible and indexed by search engines.',
+          features: [ 'x_lifetime_hosting', 'x_evidence_collection', 'x_leaderboards_monthly', 'x_openbadge'],
+          pricing_group: 'standard'
+        };
+        // These are injected into the beginning of the features array for all paid plans
+        var paidPlanExtraFeatures = [ 'x_lifetime_hosting', 'x_evidence_collection', 'x_openbadge'];
+
+        var subscriptionFeatureMap; // featureId => feature object
+        var allPlans;
+        var levelOfFeature = {}; // featureId => featureLevelNumber
+        var levelOfPlanType = {}; // planType => featureLevelNumber
+        var subscriptionCardMap = {}; // planType => subscriptionCard object
+        
+        var currentPlanType;
+        var currentLevel = -1;
+        var newFeatures;
+        var currentSubscriptionCard;
+
+        this.featureLevels = [];
+        this.subscriptionCards = [];
+
+        // Build the all plans list by starting with the free plan then concatenating the subscription plan list from the server
+        // But also add in the extra features for paid plans
+        allPlans = [freePlan].concat(this.subscriptionPlans.map(function(planItem) {
+          planItem.features = paidPlanExtraFeatures.concat(planItem.features);
+          return planItem;
+        }));
+
+        // Build the feature map (first by transforming the server list of features, then by adding our extra features)
+        this.subscriptionFeatures.forEach(function(item) {
+          item.available = (item.status == 'available'); // inject availability as a boolean
+        });
+        subscriptionFeatureMap = this.subscriptionFeatures.reduce(function(map, item) {
+          map[item.id] = item;
+          return map;
+        }, {});
+        extraFeatures.forEach(function(item) {
+          subscriptionFeatureMap[item.id] = item;
+        });
+
+        // Loop through all the plans and group the features according to levels. Each time we hit a new type we increment the level
+        // and use some of the properties of the first plan of the new type to define the new level. The plans are sorted smallest to 
+        // largest, so we rely on that semantic sorting to provide the levels.
+        for (var i = 0; i < allPlans.length; i++) {
+          // Figure out which of the current plans features have yet to be assigned to a level
+          newFeatures = [];
+          for (var j = 0; j < allPlans[i].features.length; j++)
+            if (!levelOfFeature.hasOwnProperty(allPlans[i].features[j]))
+              newFeatures.push(allPlans[i].features[j]);
+
+          // Now get the level based on the plan type. If it's a new plan type then create a new level.
+          if (allPlans[i].type != currentPlanType) {
+            if (levelOfPlanType.hasOwnProperty(allPlans[i].type)) {
+              currentPlanType = allPlans[i].type;
+              currentLevel = levelOfPlanType[currentPlanType];
+            } else {
+              currentPlanType = allPlans[i].type;
+              currentLevel++;
+              this.featureLevels[currentLevel] = {
+                color: allPlans[i].color,
+                planType: currentPlanType
+              };
+              levelOfPlanType[currentPlanType] = currentLevel;
+            }
+          }
+
+          // If there are any new features they need to be registered as being linked to the current level
+          for (var x = 0; x < newFeatures.length; x++)
+            levelOfFeature[newFeatures[x]] = currentLevel;
+        }
+
+        // Create the feature cards by looping through the plans again and creating one card for each plan type
+        currentPlanType = null;
+        for (var i = 0; i < allPlans.length; i++) {
+          // Get the card based on the plan type. If it's a new plan type then create a new card.
+          if (allPlans[i].type != currentPlanType) {
+            if (subscriptionCardMap.hasOwnProperty(allPlans[i].type)) {
+              currentPlanType = allPlans[i].type;
+              currentSubscriptionCard = subscriptionCardMap[currentPlanType];
+            } else {
+              currentPlanType = allPlans[i].type;
+              currentLevel = levelOfPlanType[currentPlanType];
+              currentSubscriptionCard = {
+                name: allPlans[i].name,
+                level: currentLevel,
+                color: allPlans[i].color,
+                icon: allPlans[i].bl_icon,
+                planType: currentPlanType,
+                description: allPlans[i].description,
+                disabled: (allPlans[i].disabled == true),
+                prices: {
+                  standard: {
+                    month: null,
+                    year: null
+                  },
+                  k12: {
+                    month: null,
+                    year: null
+                  }
+                },
+                createGroupPath: {
+                  standard: null,
+                  k12: null
+                },
+                isFree: (allPlans[i].id == 'free'),
+                hasK12: false,
+                levelCount: this.featureLevels.length,
+                featuresByLevel: this.featureLevels.map(function(featureLevel, levelNumber) {
+                  return {
+                    levelColor: featureLevel.color,
+                    levelStatus: ((levelNumber < currentLevel) ? 'below' : ((levelNumber > currentLevel) ? 'above' : 'equal')),
+                    levelStatusIsBelow: (levelNumber < currentLevel),
+                    levelStatusIsEqual: (levelNumber == currentLevel),
+                    levelStatusIsAbove: (levelNumber > currentLevel),
+                    levelsAboveCurrent: (this.featureLevels.length - levelNumber - 1),
+                    levelFeatures: allPlans[i].features.reduce(function(featuresAtCurrentLevel, featureId) {
+                      if (levelOfFeature[featureId] == levelNumber)
+                        featuresAtCurrentLevel.push(subscriptionFeatureMap[featureId]);
+
+                      return featuresAtCurrentLevel;
+                    }, [])
+                  }
+                }.bind(this))
+              };
+              this.push('subscriptionCards', currentSubscriptionCard);
+              subscriptionCardMap[currentPlanType] = currentSubscriptionCard;
+            }
+          }
+
+          // Now set the price (and also the hasK12 flag if needed)
+          currentSubscriptionCard.prices[allPlans[i].pricing_group][allPlans[i].interval] = Math.ceil(allPlans[i].amount / 100);
+          if (currentSubscriptionCard.isFree)
+            currentSubscriptionCard.createGroupPath[allPlans[i].pricing_group] = this.createGroupPath;
+          else
+            currentSubscriptionCard.createGroupPath[allPlans[i].pricing_group] = this.createGroupPath + '?plan=' + allPlans[i].id;
+          if (allPlans[i].pricing_group == 'k12') currentSubscriptionCard.hasK12 = true;
+        }
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+        
+        // Add listeners
+        this.website.addEventListener('location-hash-key-changed', e => this._websiteLocationHashKeyChanged(e.detail.value));
+        this.website.addEventListener('intercom-loaded-changed', e => this._websiteIntercomLoadedChanged(e.detail.value));
+      }
+
+      assetsLoaded() {
+        if (super.assetsLoaded) super.assetsLoaded();
+        
+        this.updateStyles({
+          '--pricing-view-background-image': 'url("' + this.assetUrl('backgrounds/topgraphic-map.png', this.website.manifest) + '")'
+        });
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      static get observers() {
+          return [
+            '_websiteIntercomLoadedChanged(website.intercomLoaded)',
+          ]
+      }
+
+      _subscriptionPlansOrFeaturesLoaded(e) {
+        if (this.subscriptionPlans && this.subscriptionFeatures) {
+          this._buildSubscriptionCards();
+          this.loadingPricing = false;
+        }
+      }
+
+      _websiteLocationHashKeyChanged(websiteLocationHashKey) {
+        if (websiteLocationHashKey == 'k12') {
+          if (!this.k12Mode) this.k12Mode = true;
+        } else {
+          if (this.k12Mode) this.k12Mode = false;
+        }
+      }
+      
+      _websiteIntercomLoadedChanged(websiteIntercomLoaded) {
+        this.hideChat = (websiteIntercomLoaded != true);
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _createGroupPath(currentUser) {
+        if (currentUser && currentUser.username)
+          return '/groups/new';
+        else
+          return '/users/sign_up';
+      }
+
+    }
+
+    window.customElements.define(BlViewPricing.is, BlViewPricing);
+  </script>
+</dom-module>

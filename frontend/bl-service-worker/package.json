@@ -1,0 +1,19 @@
+{
+  "name": "bl-service-worker",
+  "version": "1.0.0",
+  "description": "Badge List Service Worker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "workbox inject:manifest"
+  },
+  "author": "Hank Holiday <hank@badgelist.com>",
+  "license": "ISC",
+  "dependencies": {
+    "workbox-sw": "2.1",
+    "workbox-broadcast-cache-update": "2.0"
+  },
+  "devDependencies": {
+    "workbox-cli": "2.1"
+  }
+}

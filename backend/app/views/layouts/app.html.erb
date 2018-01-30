@@ -59,6 +59,12 @@
       <link rel="import" href="<%= asset_path('application', {type: :html, extname: '.html'}) %>">
       <script src="//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"> 
       </script>
+
+      <link rel="manifest" href="<%= @polymer_app_root_url %>/manifest.json"> <!-- USES SAME MANIFEST AS POLYMER APP -->
+
+    <% #=== BADGE LIST SERVICE WORKER SCRIPT ===# %>
+
+      <%= render 'layouts/shared/service_worker_script' %>
     
     <% #=== OPTIONAL INCLUSIONS ===# %>
     <% #=== [:no_index, :include_ob_issuer, :include_stripe, :include_metadata, :header] ===# %>
@@ -155,6 +161,9 @@
 
       <% end %>
 
+      <% #=== BADGE LIST SERVICE WORKER UI ===# %>
+      <%= render 'layouts/shared/service_worker_ui' %>
+      
     </template>
 
   </body>
