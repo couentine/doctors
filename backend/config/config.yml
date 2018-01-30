@@ -222,7 +222,7 @@ defaults: &defaults
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
-        full_member_groups_plan: org-1m-1
+        full_member_groups_plan: org-1m-2
         limited_member_groups_plan: solo-1m-2
         features:
           - file_uploads
@@ -253,7 +253,7 @@ defaults: &defaults
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
-        full_member_groups_plan: org-1y-1
+        full_member_groups_plan: org-1y-2
         limited_member_groups_plan: solo-1y-1
         features:
           - file_uploads
@@ -307,7 +307,7 @@ defaults: &defaults
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
-        full_member_groups_plan: org-1m-1
+        full_member_groups_plan: org-1m-2
         limited_member_groups_plan: k12-teacher-1y-1
         features:
           - file_uploads
@@ -338,7 +338,7 @@ defaults: &defaults
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
-        full_member_groups_plan: org-1y-1
+        full_member_groups_plan: org-1y-2
         limited_member_groups_plan: k12-teacher-1y-1
         features:
           - file_uploads
@@ -429,7 +429,7 @@ defaults: &defaults
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
-        full_member_groups_plan: org-1y-1
+        full_member_groups_plan: org-1y-2
         limited_member_groups_plan: solo-1y-1
         features:
           - file_uploads
@@ -457,7 +457,7 @@ defaults: &defaults
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
-        full_member_groups_plan: org-1m-1
+        full_member_groups_plan: org-1m-2
         limited_member_groups_plan: k12-teacher-1y-1
         features:
           - file_uploads
@@ -470,7 +470,7 @@ defaults: &defaults
           - leaderboards_realtime
     retired:
       org-1m-1:
-        name: Org
+        name: Org (Legacy)
         type: org
         amount: 13000
         currency: usd
@@ -495,7 +495,7 @@ defaults: &defaults
           - bulk_tools
           - integration
       org-1y-1:
-        name: Org Annual
+        name: Org Annual (Legacy)
         type: org
         amount: 143000
         currency: usd
