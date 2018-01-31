@@ -1499,19 +1499,29 @@ h2.form-header {
 }
 ul.entry-format-selector {
   display: block;
-  margin: 0 0 10px 25px;
+  margin: 0 0 40px 25px;
   list-style: none;
 
-  a.btn {
-    margin-bottom: 15px;
-    background-color: #7cccdf;
-    color: #fff;
-    border: 2px solid #4BC1DD;
-    border-radius: 500px;
-    text-shadow: none;
-    position: relative;
-    top: -4px;
+  li {
+    margin: 0.7em 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    
+    a.btn {
+      background-color: #7cccdf;
+      color: #fff;
+      border: 2px solid #4BC1DD;
+      border-radius: 500px;
+      text-shadow: none;
+    }
+    span.label {
+      font-size: 1em;
+      padding: 0.4em 0.6em;
+      margin-left: 1em;
+    }
   }
+
 }
 
 #badge-versions {
