@@ -39,7 +39,7 @@ defaults: &defaults
       description: Export CSV reports of group member activity and badge portfolios. Reports can be filtered by group tags.
       status: available
     bulk_tools:
-      label: Bulk Tools
+      label: Bulk Awarding and Feedback
       description: Award thousands of badges at a time by uploading a CSV file.
       status: available
     integration:
@@ -266,13 +266,13 @@ defaults: &defaults
           - leaderboards_realtime
     k12:
       k12-teacher-1y-1:
-        name: K12 Teacher Annual
+        name: K12 Solo Annual
         type: solo
         amount: 2500
         currency: usd
         interval: year
         trial_period_days: 0
-        statement_descriptor: Badge List K12 Teacher
+        statement_descriptor: Badge List K12 Solo
         fa_icon: fa-user
         bl_icon: icon-user
         color: blue
@@ -302,8 +302,8 @@ defaults: &defaults
         description: |
           For organizations which want to create many groups with different badges and members and link them all together under a 
           common "hub group". Hub groups support up to 5 "member groups" with the Org plan and up to 50 "member groups" with the Solo plan.
-          Hub groups support up to 2000 total unique users across all of the member groups.
-        users: 2000
+          Hub groups support up to 2500 total unique users across all of the member groups.
+        users: 2500
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
@@ -333,8 +333,8 @@ defaults: &defaults
         description: |
           For organizations which want to create many groups with different badges and members and link them all together under a 
           common "hub group". Hub groups support up to 5 "member groups" with the Org plan and up to 50 "member groups" with the Solo plan.
-          Hub groups support up to 2000 total unique users across all of the member groups.
-        users: 2000
+          Hub groups support up to 2500 total unique users across all of the member groups.
+        users: 2500
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
@@ -424,7 +424,9 @@ defaults: &defaults
         bl_icon: icon-star
         color: purple
         description: |
-          5 Org member groups, 50 Solo member groups, leaderboards, domain privacy
+          For organizations which want to create many groups with different badges and members and link them all together under a 
+          common "hub group". Hub groups support up to 5 "member groups" with the Org plan and up to 50 "member groups" with the Solo plan.
+          Hub groups support up to 2000 total unique users across all of the member groups.
         users: 2000
         admins: -1
         full_member_groups: 5
@@ -452,8 +454,10 @@ defaults: &defaults
         bl_icon: icon-star
         color: purple
         description: |
-          5 Org member groups, 50 K12 Teacher member groups, leaderboards, domain privacy
-        users: 2000
+          For organizations which want to create many groups with different badges and members and link them all together under a 
+          common "hub group". Hub groups support up to 5 "member groups" with the Org plan and up to 50 "member groups" with the Solo plan.
+          Hub groups support up to 2500 total unique users across all of the member groups.
+        users: 2500
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
