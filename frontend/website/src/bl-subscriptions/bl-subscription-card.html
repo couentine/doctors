@@ -448,7 +448,10 @@ This displays a single subscription card in the pricing view.
             </div>
           </div>
 
-          <div id="description" class$="padding[[subscriptionCard.levelCount]]">[[subscriptionCard.description]]</div>
+          <div id="description" class$="padding[[subscriptionCard.levelCount]]">
+            <span hidden="[[k12Mode]]">[[subscriptionCard.description.standard]]</span>
+            <span hidden="[[!k12Mode]]">[[subscriptionCard.description.k12]]</span>
+          </div>
         </div>
         
         <div id="features">

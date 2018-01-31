@@ -66,11 +66,21 @@
             <% if (format_string != 'file') || @group.has?(:file_uploads) %>
               <li>
                 <a class="btn btn-large" 
-                    href="<%= new_group_badge_log_entry_path(@group, @badge, @log, 
-                      tag: @parent_tag_name, f: format_string) %>">
+                    href="<%= new_group_badge_log_entry_path(@group, @badge, @log, tag: @parent_tag_name, f: format_string) %>">
                   <i class="fa <%= Tag.format_icon(format_string) %>"></i>
                   <span class="format-string"><%= format_string.capitalize %></span>
                 </a>
+              </li>
+            <% else %>
+              <li>
+                <a class="btn btn-large disabled" href="#" onclick="alert('File uploads are only allowed in paid groups.'); return false;">
+                  <i class="fa <%= Tag.format_icon(format_string) %>"></i>
+                  <span class="format-string"><%= format_string.capitalize %></span>
+                </a>
+                <span class="label">
+                  <i class="fa fa-info-circle"></i>
+                  Paid Groups Only
+                </span>
               </li>
             <% end %>
           <% end %>

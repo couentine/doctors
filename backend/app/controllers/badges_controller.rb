@@ -621,22 +621,23 @@ private
     # Initialize the badge requirement list and related info
     @tag_format_map = {}
     @tag_format_options_string = ''
+    disabled = nil
     Tag::FORMAT_VALUES.each do |format_string|
+      disabled = (format_string == 'file') && (!@group.has?(:file_uploads))
+
       @tag_format_map[format_string] = {
         icon: Tag.format_icon(format_string),
         text: format_string.capitalize,
+        disabled: disabled
       }
       
       if format_string == 'any'
-        human_readable_format_string = 'Any Format'
+        format_label = 'Any Format'
       else
-        human_readable_format_string = format_string.capitalize
+        format_label = format_string.capitalize
       end
 
-      if (format_string != 'file') || @group.has?(:file_uploads)
-        @tag_format_options_string += \
-          "<option value='#{format_string}'>#{human_readable_format_string}</option>"
-      end
+      @tag_format_options_string += "<option value='#{format_string}' #{(disabled) ? 'disabled' : ''}>#{format_label}</option>"
     end
     @tag_privacy_map = {}
     @tag_privacy_options_string = ''
