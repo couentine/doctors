@@ -495,34 +495,73 @@ class User
     end
   end
 
-  # This method accepts any string (such as 'John Doe, Ph.D.') and returns a value suitable for
-  # saving into the 'username_with_caps' field. It ensures that the username doesn't already exist.
+  # This method accepts any string (such as 'John Doe, Ph.D.') and returns a value suitable for saving into the 'username_with_caps' field. 
+  # It ensures that the username doesn't already exist and that the username isn't too long to fit in the field.
   def self.generate_unique_username_from(name_string, sep = '-')
-    # First we parameterize the string (the code below is taken from the standard rails 
-    # parameterize function except without downcasing at the end)
-    username_with_caps = ActiveSupport::Inflector::transliterate(name_string)
-    username_with_caps.gsub!(/[^a-zA-Z0-9\-_]+/, sep) # Turn unwanted chars into the separator
+    max_root_length = MAX_USERNAME_LENGTH
+
+    # First calculate a root username that fits in the full character limit and see if it is already taken
+    username = User.root_username_from_name(name_string, max_root_length, sep)
+    if User.where(username: username.downcase).count > 0
+      # It is already taken so we will try STRATEGY 1 (appending a one or two digit number).
+      # This strategy requires up to two characters of space at the end of the string so we may need to recalculate the root username.
+      root_username = username
+      max_root_length = MAX_USERNAME_LENGTH - 2
+      if root_username.length > max_root_length
+        root_username = User.root_username_from_name(name_string, max_root_length, sep)
+      end
+
+      # Now that we have at least 2 characters of space at the end, we will try the numbers from 1 to 20
+      remaining_tries = 20 # this is how many times we'll try to generate a sequential name
+      while (User.where(username: username.downcase).count > 0) && (remaining_tries > 0)
+        remaining_tries -= 1
+        username = root_username + (20 - remaining_tries).to_s
+      end
+
+      if (remaining_tries == 0) && (User.where(username: username.downcase).count > 0)
+        # If we ran out of tries didn't succeed we try STRATEGY 2 (append random five character alphanumeric string).
+        # This strategy has a 1 in 60 million chance of failure, so we assume success and do not try any more strategies.
+        # This strategy requires 5 characters of space at the end of the string so we may need to recalculate the root username.
+        max_root_length = MAX_USERNAME_LENGTH - 5
+        if root_username.length > max_root_length
+          root_username = User.root_username_from_name(name_string, max_root_length, sep)
+        end
+        username = root_username + rand(36**5).to_s(36)
+      end
+    end
+
+    return username
+  end
+
+  # Returns a root username string which fits in the defined max_root_length. Will use various strategies to pick a pleasing name.
+  def self.root_username_from_name(name_string, max_root_length, sep = '-')
+    # Remove non western characters
+    cleaned_name_string = ActiveSupport::Inflector::transliterate(name_string)
+
+    # First try to dash case
+    root_username = cleaned_name_string.gsub(/[^a-zA-Z0-9\-_]+/, sep)
     unless sep.nil? || sep.empty?
       re_sep = ::Regexp.escape(sep)
-      username_with_caps.gsub!(/#{re_sep}{2,}/, sep) # No more than one of the separator in a row.
-      username_with_caps.gsub!(/^#{re_sep}|#{re_sep}$/, '') # Remove leading/trailing separator.
+      root_username.gsub!(/#{re_sep}{2,}/, sep) # No more than one of the separator in a row.
+      root_username.gsub!(/^#{re_sep}|#{re_sep}$/, '') # Remove leading/trailing separator.
     end
 
-    # Now make sure that we have a unique username
-    root_username_with_caps = username_with_caps
-    remaining_tries = 20 # this is how many times we'll try to generate a sequential name
-    while (User.where(username: username_with_caps.downcase).count > 0) && (remaining_tries > 0)
-      remaining_tries -= 1
-      username_with_caps = root_username_with_caps + (20 - remaining_tries).to_s
+    # Now make sure we are under the character limit, if not, iterate until we are
+    while root_username.length > max_root_length
+      if root_username.include?(sep)
+        # If we're overlimit, first we try to go to camel case instead of dash case
+        root_username = cleaned_name_string.titlecase.gsub(/[^a-zA-Z]+/, '')
+      elsif root_username[/[A-Za-z][A-Z][a-z]*$/].present?
+        # If there are any extra words or initials on the end (not counting the first word) then we will clip them off
+        # NOTE that regex in the condition includes the character before the pattern we are removing in order to not erase the whole string
+        root_username.sub!(/[A-Z][a-z]*$/, '')
+      else
+        # Their first name itself is too long, so we just trim it
+        root_username = root_username.first(max_root_length)
+      end
     end
 
-    if (remaining_tries == 0) && (User.where(username: username_with_caps.downcase).count > 0)
-      # If we ran out of tries and we still couldn't find a unique name then append a random
-      # five character alphanumeric string and assume success (1 in 60 million chance of failure).
-      username_with_caps = root_username_with_caps + "#{sep}#{rand(36**5).to_s(36)}"
-    end
-
-    username_with_caps
+    return root_username
   end
 
   # === DEVISE OVERRIDE CLASS METHODS === #
