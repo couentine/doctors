@@ -26,6 +26,10 @@ ruby '2.3.4'
   gem 'omniauth'
   gem 'omniauth-google-oauth2'
 
+#=== API ===#
+
+  gem 'jsonapi-rails'
+
 #=== FRONT-END ===#
   
   gem 'sprockets-rails', '~> 3.0.1'

@@ -35,6 +35,14 @@ BadgeList::Application.routes.draw do
   authenticate :user, lambda { |u| u.admin? } do
     mount Sidekiq::Web => '/a/sidekiq'
   end
+
+  # === API PATHS === #
+  namespace :api do
+    namespace :v1 do
+      resources :groups, only: [:index, :create, :show, :update, :destroy]
+      resources :badges, only: [:index, :create, :show, :update, :destroy]
+    end
+  end
   
   # === INFO PATHS === #
   scope '/i' do
