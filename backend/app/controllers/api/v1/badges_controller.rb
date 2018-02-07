@@ -1,9 +1,5 @@
 class Api::V1::BadgesController < Api::V1::BaseController
 
-  def jsonapi_class 
-    { Badge: Api::V1::SerializableBadge }
-  end
-
   # GET /badges?page=1
   # This returns a list of the current user's badges in progress
   def index
@@ -15,7 +11,7 @@ class Api::V1::BadgesController < Api::V1::BaseController
     end
     set_calculated_pagination_variables(@badges)
 
-    render jsonapi: @badges, meta: get_pagination_variables.merge({current_user: @current_user})
+    render_json_api @badges
   end
 
 
@@ -33,9 +29,9 @@ class Api::V1::BadgesController < Api::V1::BaseController
 
     if @badge
       @badge.current_user_accessor = current_user # FIXME ==> Do this somewhere else. Anywhere else.
-      render jsonapi: @badge
+      render_json_api @badge
     else
-      not_found!
+      render_not_found
     end
   end
 

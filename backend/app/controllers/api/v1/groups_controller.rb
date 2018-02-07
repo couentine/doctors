@@ -1,9 +1,5 @@
 class Api::V1::GroupsController < Api::V1::BaseController
 
-  def jsonapi_class 
-    { Group: Api::V1::SerializableGroup }
-  end
-
   def index
     set_initial_pagination_variables
     if current_user.present?
@@ -13,7 +9,7 @@ class Api::V1::GroupsController < Api::V1::BaseController
     end
     set_calculated_pagination_variables(@groups)
 
-    render jsonapi: @groups, meta: get_pagination_variables.merge({current_user: @current_user})
+    render_json_api @groups
   end
 
   def show
@@ -21,9 +17,9 @@ class Api::V1::GroupsController < Api::V1::BaseController
 
     if @group
       @group.current_user = current_user # FIXME ==> Do this somewhere else. Anywhere else.
-      render jsonapi: @group
+      render_json_api @group
     else
-      not_found!
+      render_not_found
     end
   end
 

@@ -41,6 +41,7 @@ BadgeList::Application.routes.draw do
     namespace :v1 do
       resources :groups, only: [:index, :create, :show, :update, :destroy]
       resources :badges, only: [:index, :create, :show, :update, :destroy]
+      resources :authentication_tokens, only: [:index, :create, :show, :destroy]
     end
   end
   

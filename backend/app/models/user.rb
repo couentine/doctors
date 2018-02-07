@@ -32,6 +32,7 @@ class User
 
   # === RELATIONSHIP === #
 
+  has_many :authentication_tokens, dependent: :destroy
   has_many :created_groups, inverse_of: :creator, class_name: "Group"
   has_many :owned_groups, inverse_of: :owner, class_name: "Group"
   has_many :created_badges, inverse_of: :creator, class_name: "Badge"
@@ -116,9 +117,8 @@ class User
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, 
-    :validatable, :confirmable, :lockable, :async, :omniauthable, 
-    :omniauth_providers => [:google_oauth2]
+  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable, :confirmable, :lockable, 
+    :async, :omniauthable, :token_authenticatable, omniauth_providers: [:google_oauth2]
 
   # === STANDARD DEVISE FIELDS === #
 
