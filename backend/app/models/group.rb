@@ -63,6 +63,7 @@ class Group
 
   # === RELATIONSHIPS === #
 
+  has_one :proxy_user, inverse_of: :proxy_group, class_name: 'User'
   belongs_to :creator, inverse_of: :created_groups, class_name: 'User'
   belongs_to :owner, inverse_of: :owned_groups, class_name: 'User'
   has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: 'User'
@@ -155,17 +156,14 @@ class Group
   field :welcome_badge_tag,               type: String
 
   validates :name, presence: true, length: { within: 5..MAX_NAME_LENGTH }
-  validates :url_with_caps, presence: true, 
+  validates :url_with_caps, presence: true, length: { within: 2..MAX_URL_LENGTH }, 
     uniqueness: { message: "The '%{value}' url is already taken."}, 
-    length: { within: 2..MAX_URL_LENGTH }, format: { with: /\A[\w-]+\Z/,
-    message: "can only contain letters, numbers, dashes and underscores" },
-    exclusion: { in: APP_CONFIG['blocked_url_slugs'],
-    message: "%{value} is a specially reserved url." }
+    format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
+    exclusion: { in: APP_CONFIG['blocked_url_slugs'], message: "%{value} is a specially reserved url." }
   validates :url, presence: true, length: { within: 2..MAX_URL_LENGTH }, 
-    uniqueness: { message: "The '%{value}' url is already taken."}, format: { with: /\A[\w-]+\Z/,
-    message: "can only contain letters, numbers, dashes and underscores" },
-    exclusion: { in: APP_CONFIG['blocked_url_slugs'],
-    message: "%{value} is a specially reserved url." }
+    uniqueness: { message: "The '%{value}' url is already taken."}, 
+    format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores" },
+    exclusion: { in: APP_CONFIG['blocked_url_slugs'], message: "%{value} is a specially reserved url." }
   validates :description, length: { maximum: MAX_DESCRIPTION_LENGTH }
   validates :welcome_message, length: { maximum: MAX_WELCOME_MESSAGE_LENGTH }
   validates :location, length: { maximum: MAX_LOCATION_LENGTH }
@@ -173,20 +171,13 @@ class Group
   validates :image_url, url: true
   validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid Group Type" }
   validates :color, inclusion: { in: COLOR_VALUES, message: "%{value} is not a valid color value" }
-  validates :joinability, inclusion: { in: JOINABILITY_VALUES, 
-    message: "%{value} is not a valid joinability type" }
-  validates :member_visibility, inclusion: { in: VISIBILITY_VALUES, 
-    message: "%{value} is not a valid type of visibility" }
-  validates :admin_visibility, inclusion: { in: VISIBILITY_VALUES, 
-    message: "%{value} is not a valid type of visibility" }
-  validates :badge_copyability, inclusion: { in: COPYABILITY_VALUES, 
-    message: "%{value} is not a valid type of copyability" }
-  validates :tag_assignability, inclusion: { in: TAG_ASSIGNABILITY_VALUES, 
-    message: "%{value} is not a valid type of assignability" }
-  validates :tag_creatability, inclusion: { in: TAG_CREATABILITY_VALUES, 
-    message: "%{value} is not a valid type of creatability" }
-  validates :tag_visibility, inclusion: { in: TAG_VISIBILITY_VALUES, 
-    message: "%{value} is not a valid type of visibility" }
+  validates :joinability, inclusion: { in: JOINABILITY_VALUES, message: "%{value} is not a valid joinability type" }
+  validates :member_visibility, inclusion: { in: VISIBILITY_VALUES, message: "%{value} is not a valid type of visibility" }
+  validates :admin_visibility, inclusion: { in: VISIBILITY_VALUES, message: "%{value} is not a valid type of visibility" }
+  validates :badge_copyability, inclusion: { in: COPYABILITY_VALUES, message: "%{value} is not a valid type of copyability" }
+  validates :tag_assignability, inclusion: { in: TAG_ASSIGNABILITY_VALUES, message: "%{value} is not a valid type of assignability" }
+  validates :tag_creatability, inclusion: { in: TAG_CREATABILITY_VALUES, message: "%{value} is not a valid type of creatability" }
+  validates :tag_visibility, inclusion: { in: TAG_VISIBILITY_VALUES, message: "%{value} is not a valid type of visibility" }
   
   validate :new_owner_username_exists
   validate :subscription_fields_valid
@@ -199,6 +190,7 @@ class Group
   before_validation :update_caps_field
   after_validation :copy_errors
   before_create :add_creator_to_admins
+  after_create :create_proxy_user
   before_update :change_owner
   before_update :update_counts
   
@@ -207,7 +199,7 @@ class Group
   before_save :process_tags_cache_changes
   after_save :push_stripe_changes
   after_save :process_avatar
-  after_update :update_child_badges
+  after_update :propogate_name_changes
   after_update :push_stripe_metadata_changes
   after_destroy :cancel_subscription_on_destroy
   
@@ -1837,6 +1829,18 @@ protected
     true
   end
 
+  def create_proxy_user
+    if proxy_user.blank?
+      self.proxy_user = User.new
+      self.proxy_user.type = 'group'
+
+      self.proxy_user.skip_confirmation!
+      self.proxy_user.skip_reconfirmation!
+
+      self.proxy_user.save
+    end
+  end
+
   # This is a mongoid relation callback that fires every time a new member is added to the group.
   # It checks to see if there are any group welcome actions to do and then does them.
   def do_group_welcome(user)
@@ -1985,10 +1989,15 @@ protected
     end
   end
 
-  # Updates the cached group info on child badges if needed
-  def update_child_badges
+  # Updates the cached group info on related records
+  def propogate_name_changes
     if name_changed? || url_with_caps_changed?
       Group.delay(queue: 'low').update_child_badge_fields(self.id)
+
+      if proxy_user.present?
+        proxy_user.skip_reconfirmation! # changes to email won't require confirmation
+        proxy_user.save # this will automatically refresh the fields
+      end
     end
   end
 
