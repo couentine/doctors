@@ -39,8 +39,8 @@ BadgeList::Application.routes.draw do
   # === API PATHS === #
   namespace :api do
     namespace :v1 do
-      resources :groups, only: [:index, :create, :show, :update, :destroy]
-      resources :badges, only: [:index, :create, :show, :update, :destroy]
+      resources :groups, only: [:index, :show]
+      resources :badges, only: [:index, :show]
       resources :authentication_tokens, only: [:index, :create, :show, :destroy]
     end
   end

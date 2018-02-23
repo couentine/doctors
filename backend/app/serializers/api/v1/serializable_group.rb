@@ -7,7 +7,6 @@ class Api::V1::SerializableGroup < Api::V1::SerializableDocument
   attribute :parent_path
   attribute :slug do @object.url end
   attribute :slug_with_caps do @object.url_with_caps end
-  attribute :current_user_permissions
 
   attribute :name
   attribute :description

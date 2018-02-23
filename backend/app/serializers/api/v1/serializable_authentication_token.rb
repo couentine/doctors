@@ -5,7 +5,10 @@ class Api::V1::SerializableAuthenticationToken < Api::V1::SerializableDocument
   attribute :record_path do @object.id.to_s end
   attribute :parent_path do nil end
 
-  attribute :value do @object.user_id.to_s + @object.body.to_s end
+
+  attribute :user_id do @object.user_id.to_s end
+  attribute :permission_sets
+  attribute :value
   attribute :request_count
   attribute :last_used_at
   attribute :ip_address

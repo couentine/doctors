@@ -34,19 +34,20 @@ class User
   # === RELATIONSHIP === #
 
   belongs_to :proxy_group, inverse_of: :proxy_user, class_name: 'Group' # required if user type is `group`
-  has_many :authentication_tokens, dependent: :destroy
-  has_many :created_groups, inverse_of: :creator, class_name: "Group"
-  has_many :owned_groups, inverse_of: :owner, class_name: "Group"
-  has_many :created_badges, inverse_of: :creator, class_name: "Badge"
+  has_many :created_groups, inverse_of: :creator, class_name: 'Group'
+  has_many :owned_groups, inverse_of: :owner, class_name: 'Group'
+  has_many :created_badges, inverse_of: :creator, class_name: 'Badge'
   has_many :logs, dependent: :destroy
-  has_many :created_entries, inverse_of: :creator, class_name: "Entry"
-  has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
-  has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
+  has_many :created_entries, inverse_of: :creator, class_name: 'Entry'
+  has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: 'Group'
+  has_and_belongs_to_many :member_of, inverse_of: :members, class_name: 'Group'
   has_many :report_results, dependent: :destroy
   has_many :info_items, dependent: :destroy
-  belongs_to :domain, inverse_of: :users, class_name: "Domain" # don't ever set this manually,
-  has_many :owned_domains, inverse_of: :owner, class_name: "Domain"
+  belongs_to :domain, inverse_of: :users, class_name: 'Domain' # don't ever set this manually,
+  has_many :owned_domains, inverse_of: :owner, class_name: 'Domain'
   has_and_belongs_to_many :group_tags # DO NOT EDIT DIRECTLY: Use group_tag.add_users/remove_users
+  has_many :authentication_tokens, dependent: :destroy, inverse_of: :user, class_name: 'AuthenticationToken'
+  has_many :created_authentication_tokens, inverse_of: :creator, class_name: 'AuthenticationToken'
 
   # === CUSTOM FIELDS === #
   
@@ -686,11 +687,11 @@ class User
   def admin_of?(group_or_id)
     case group_or_id.class.to_s
     when 'Group'
-      admin_of_ids.include?(group_or_id.id)
+      (proxy_group_id == group_or_id.id) || admin_of_ids.include?(group_or_id.id)
     when 'BSON::ObjectId'
-      admin_of_ids.include?(group_or_id)
+      (proxy_group_id == group_or_id) || admin_of_ids.include?(group_or_id)
     when 'String'
-      admin_of_ids.include?(BSON::ObjectId.from_string(group_or_id))
+      (proxy_group_id.to_s == group_or_id) || admin_of_ids.include?(BSON::ObjectId.from_string(group_or_id))
     else
       throw "Invalid type #{group_or_id.class.to_s} for group_or_id. (Accepted types are Group, ObjectId or String.)"
     end

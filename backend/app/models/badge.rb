@@ -165,7 +165,7 @@ class Badge
       badge_identifier_parts = badge_identifier.split('.')
 
       group = Group.find_by(url: badge_identifier_parts[0].to_s.downcase) rescue nil
-      badge = group.badges.where(url: badge_identifier_parts[1].to_s.downcase).first
+      badge = group.badges.where(url: badge_identifier_parts[1].to_s.downcase).first if group
     elsif badge_identifier.to_s.match /^[0-9a-fA-F]{24}$/
       badge = super rescue nil
     end

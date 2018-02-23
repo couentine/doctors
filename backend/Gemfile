@@ -29,6 +29,7 @@ ruby '2.3.4'
 #=== API ===#
 
   gem 'jsonapi-rails'
+  gem 'pundit'
 
 #=== FRONT-END ===#
   

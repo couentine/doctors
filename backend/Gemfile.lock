@@ -388,6 +388,8 @@ GEM
       postmark (~> 1.10.0)
     public_suffix (3.0.1)
     puma (3.11.2)
+    pundit (1.1.0)
+      activesupport (>= 3.0.0)
     querystring (0.1.0)
     rack (1.6.8)
     rack-cors (1.0.2)
@@ -569,6 +571,7 @@ DEPENDENCIES
   polymer-rails (~> 1.2.4)
   postmark-rails (~> 0.5)
   puma (~> 3.4)
+  pundit
   rack-cors
   rack-mini-profiler
   rack-timeout
