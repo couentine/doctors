@@ -31,6 +31,7 @@ ruby '2.3.4'
   gem 'jsonapi-rails'
   gem 'pundit'
   gem 'rack-throttle'
+  gem 'rack-cors', :require => 'rack/cors'
 
 #=== FRONT-END ===#
   
@@ -47,7 +48,6 @@ ruby '2.3.4'
   # gem 'polymer-elements-rails', '~> 1.0.1'
   gem 'polymer-elements-rails', github: 'badgelist/polymer-elements-rails'
   # gem 'polymer-elements-rails', github: 'badgelist/polymer-elements-rails', branch: 'test'
-  gem 'rack-cors', :require => 'rack/cors'
 
 #=== ERRORS & DEBUGGING ===#
 
