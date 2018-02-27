@@ -9,8 +9,13 @@ require "action_mailer/railtie"
 # require "active_resource/railtie"
 require "sprockets/railtie"
 require "rails/test_unit/railtie"
+require 'redis'
 
 Bundler.require(:default, Rails.env)
+
+require_relative '../app/middleware/throttle_cache.rb'
+require_relative '../app/middleware/throttle_daily_with_client_id.rb'
+# require_relative '../app/middleware/throttle_second_with_client_id.rb'
 
 module BadgeList
   class Application < Rails::Application
@@ -70,6 +75,11 @@ module BadgeList
       'X-XSS-Protection' => '1; mode=block',
       'X-Content-Type-Options' => 'nosniff'
     }
+
+    # Enable rate-throttling via the `rack-throttle` gem, utilizing redis as the cache
+    config.middleware.use Rack::Throttle::DailyWithClientId, cache: ThrottleCache.new, max: (ENV['max_requests_per_day'] || 100000)
+    # config.middleware.use Rack::Throttle::SecondWithClientId, cache: ThrottleCache.new, max: (ENV['max_requests_per_second'] || 10)
+    # >> Disabling per-second throttling for now. This will end up breaking some of the page loads.
 
   end
 end

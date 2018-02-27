@@ -30,6 +30,7 @@ ruby '2.3.4'
 
   gem 'jsonapi-rails'
   gem 'pundit'
+  gem 'rack-throttle'
 
 #=== FRONT-END ===#
   
