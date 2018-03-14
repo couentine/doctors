@@ -32,6 +32,7 @@ ruby '2.3.4'
   gem 'pundit'
   gem 'rack-throttle'
   gem 'rack-cors', :require => 'rack/cors'
+  gem 'swagger-blocks'
 
 #=== FRONT-END ===#
   

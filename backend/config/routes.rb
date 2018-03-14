@@ -42,6 +42,10 @@ BadgeList::Application.routes.draw do
       resources :groups, only: [:index, :show]
       resources :badges, only: [:index, :show]
       resources :authentication_tokens, only: [:index, :create, :show, :destroy]
+
+      match 'swagger.json' => 'docs#external', via: :get
+      match 'openapi.json' => 'docs#external', via: :get
+      match 'internal.json' => 'docs#internal', via: :get
     end
   end
   

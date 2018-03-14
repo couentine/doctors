@@ -40,11 +40,12 @@ class Api::V1::BaseController < ApplicationController
   #=== RENDERING METHODS ===#
 
   # Use this method to render json api output. It automatically sets the metadata as appropriate.
-  def render_json_api(data, status: 200, root_meta: {}, expose: {})
+  def render_json_api(data, status: 200, root_meta: {}, expose: {}, include: [])
     render jsonapi: data, 
       status: status, 
       meta: build_root_meta_hash(root_meta), 
-      expose: expose
+      expose: expose,
+      include: include
   end
 
   def render_not_found
@@ -97,7 +98,7 @@ class Api::V1::BaseController < ApplicationController
   end
 
   def set_initial_pagination_variables
-    @page_size = (params['page_size'] || APP_CONFIG['page_size_small']).to_i
+    @page_size = (params['page[size]'] || APP_CONFIG['page_size_small']).to_i
     @page = (params[:page] || 1).to_i
     @previous_page = (@page > 1) ? (@page - 1) : nil
   end
