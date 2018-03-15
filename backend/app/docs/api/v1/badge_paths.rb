@@ -40,7 +40,7 @@ class Api::V1::BadgePaths
         key :enum, [:all, :seeker, :holder]
         key :default, :all
       end
-      define_standard_parameters
+      define_standard_parameters :badge
 
       # Responses
       define_success_response :badge

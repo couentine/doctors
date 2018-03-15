@@ -129,16 +129,23 @@ module Api::V1::SharedOperationFormats
     end
 
     # EXAMPLE USAGE:
-    # - model = :authentication_token
-    def define_standard_parameters
+    # - model = :badge
+    def define_standard_parameters(model)
+      controller_class_name = model.to_s.camelize.pluralize + 'Controller'
+      sort_fields = "Api::V1::#{controller_class_name}::SORT_FIELDS".constantize
+      default_sort_field = "Api::V1::#{controller_class_name}::DEFAULT_SORT_FIELD".constantize
+      default_sort_order = "Api::V1::#{controller_class_name}::DEFAULT_SORT_ORDER".constantize
+      default_sort_string = ((default_sort_order == :desc) ? '-' : '') + default_sort_field.to_s
+
       parameter do
         key :name, 'sort'
         key :in, :query
-        key :description, "The list can only be sorted ascending by name (`sort=name`) or descending by name (`sort=-name`). " \
-          "Default sort is ascending by name if not specified."
+        key :description, 'Accepts a comma-separated list of fields to sort by. Fields are sorted ascending by default. To sort ' \
+          'descending instead, place a hyphen (`-`) before the field name. For instance, `name,-created_at` would sort ascending by name, '\
+          'then descending by creation date time. Allowed sort fields for this operation: ' + sort_fields.keys.join(', ')
         key :required, false
         key :type, :string
-        key :default, 'name'
+        key :default, default_sort_string
       end
       parameter do
         key :name, 'page'
@@ -149,7 +156,7 @@ module Api::V1::SharedOperationFormats
         key :default, 1
       end
       parameter do
-        key :name, 'page[size]'
+        key :name, 'page_size'
         key :in, :query
         key :description, "Specifies the maximum number of items to return in each page of results"
         key :required, false
@@ -231,6 +238,14 @@ module Api::V1::SharedOperationFormats
             property :last_page do
               key :type, :integer
               key :description, 'The page number of the final page of results'
+            end
+            property :sort do
+              key :type, :string
+              key :description, 'Indicates the sort which was used to order the results'
+            end
+            property :filter do
+              key :type, :object
+              key :description, 'Indicates the filter settings which were used to filter the results'
             end
           end
 

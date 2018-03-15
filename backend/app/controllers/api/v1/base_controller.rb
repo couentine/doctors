@@ -81,11 +81,71 @@ class Api::V1::BaseController < ApplicationController
     complete_meta = { authentication_method: @authentication_method }.merge(custom_meta)
 
     complete_meta.merge!(get_pagination_variables) if @page.present?
+    complete_meta.merge!({ sort: @external_sort_string }) if @external_sort_string.present?
+    complete_meta.merge!({ filter: @filter }) if @filter.present?
 
     return complete_meta
   end
 
-  #=== PAGINATION METHODS ===#
+  #=== PARAMETER METHODS ===#
+
+  # This loads any of the 'filter[xxx]' page parameters into the @filter variable, cleanses the keys and sets defaults.
+  # NOTE: This will automatically cause the filter to be included in the response meta.
+  # This depends on the presence of a DEFAULT_FILTER constant in the subclass which should be a hash with a symbol key for each filter key 
+  # and a string value for the default if that filter key isn't present in the params.
+  def load_filter
+    filter_param = params[:filter] || {}
+    @filter = {}
+    self.class::DEFAULT_FILTER.each do |key, value|
+      if filter_param[key.to_s].present?
+        @filter[key] = filter_param[key.to_s]
+      else
+        @filter[key] = value
+      end
+    end
+  end
+
+  # Builds out @sort_string to be a string of the format `field_name ASC, other_field_name DESC`
+  # This depends on the presence of three constants in the subclass: 
+  # - SORT_FIELDS, = A field mapping hash with keys for each valid sort field that a user can enter and values for the corresponding
+  #   database field (they can be the same, but do not need to be).
+  # - DEFAULT_SORT_FIELD = The key from the SORT_FIELDS map representing the default field.
+  # - DEFAULT_SORT_ORDER = :asc or :desc
+  def build_sort_string
+    if params[:sort].present?
+      valid_sort_items = params[:sort].downcase.split(',').map do |item|
+        # Generate a hash including which parses out all core details
+        external_field = item.strip.gsub(/[^a-z_]/, '').to_sym
+        {
+          external_field: external_field, # the field name as presented to api consumers
+          internal_field: self.class::SORT_FIELDS[external_field], # the internal db field (or nil if this isn't an allowed sort field)
+          sort: (item.strip.starts_with?('-') ? 'DESC' : 'ASC') # decodes JSON API's sort order syntax (asc is default, hyphen means desc)
+        }
+      end.select do |item|
+        # Filter out any fields which aren't contained in the field mapping
+        item[:internal_field].present?
+      end.uniq do |item|
+        # Filter out duplicates of the same field
+        item[:internal_field]
+      end
+
+      # Generate the internal sort string (ready for mongoid / origin)
+      @sort_string = valid_sort_items.map do |item|
+        "#{item[:internal_field].to_s} #{item[:sort]}"
+      end.join(', ')
+      
+      # Then generate the external sort string (which will be included in the response meta)
+      @external_sort_string = valid_sort_items.map do |item|
+        ((item[:sort] == 'DESC') ? '-' : '') + item[:external_field].to_s
+      end.join(',')
+    end
+
+    if @sort_string.blank?
+      # Either there was no sort parameter or the sort parameter was invalid
+      @sort_string = self.class::SORT_FIELDS[self.class::DEFAULT_SORT_FIELD].to_s + ' ' + self.class::DEFAULT_SORT_ORDER.to_s.upcase
+      @external_sort_string = ((self.class::DEFAULT_SORT_ORDER == :desc) ? '-' : '') + self.class::DEFAULT_SORT_FIELD.to_s
+    end
+  end
 
   def get_pagination_variables
     return {
@@ -98,7 +158,7 @@ class Api::V1::BaseController < ApplicationController
   end
 
   def set_initial_pagination_variables
-    @page_size = (params['page[size]'] || APP_CONFIG['page_size_small']).to_i
+    @page_size = (params['page_size'] || APP_CONFIG['page_size_small']).to_i
     @page = (params[:page] || 1).to_i
     @previous_page = (@page > 1) ? (@page - 1) : nil
   end
