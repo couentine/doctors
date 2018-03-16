@@ -6,12 +6,16 @@ class Api::V1::DocsController < ActionController::Base
   SWAGGERED_CLASSES_EXTERNAL = [
     Api::V1::BadgePaths,
     Api::V1::BadgeSchemas,
+    Api::V1::GroupPaths,
+    Api::V1::GroupSchemas,
     self
   ].freeze
 
   SWAGGERED_CLASSES_INTERNAL = [
     Api::V1::BadgePaths,
     Api::V1::BadgeSchemas,
+    Api::V1::GroupPaths,
+    Api::V1::GroupSchemas,
     self
   ].freeze
 
@@ -33,7 +37,7 @@ class Api::V1::DocsController < ActionController::Base
     
     tag do
       key :name, 'paginatedListFormat'
-      key :description, 'Operations which accept page parameter and respond with an items array and nextPage field.'
+      key :description, 'Operations which accept page parameters and respond with paginated lists of records.'
     end
     tag do
       key :name, 'recordItemFormat'
@@ -52,7 +56,7 @@ class Api::V1::DocsController < ActionController::Base
         'referred to as a ‘badge expert’.'
     end
 
-    key :host, 'www.badgelist.com'
+    key :host, (Rails.env.production?) ? 'www.badgelist.com' : ENV['root_domain']
     key :basePath, '/api/v1'
     key :schemes, ['https']
     key :consumes, ['application/json']

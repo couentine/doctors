@@ -28,9 +28,9 @@ class BadgePolicy < ApplicationPolicy
       return true if @user.admin?
       return true if @user.admin_of?(@badge.group_id)
       return true if (@badge.editability == 'experts') && @user.expert_of?(@badge)
-    else
-      false
     end
+
+    return false
   end
   
   def award?
@@ -38,23 +38,24 @@ class BadgePolicy < ApplicationPolicy
       return true if @user.admin?
       return true if @user.admin_of?(@badge.group_id)
       return true if (@badge.awardability == 'experts') && @user.expert_of?(@badge)
-    else
-      false
     end
+
+    return false
   end
   
   #=== FILTER POLICIES ===#
   
   def show_all_fields?
     return true if @badge.visibility == 'public'
+    
     if @user.present? && @user.has?('badges:read')
       return true if @user.admin?
       return true if @user.admin_of? @badge.group_id
       return true if @user.learner_or_expert_of?(@badge)
       return true if (@badge.visibility == 'private') && @user.member_of?(@badge.group_id)
-    else
-      return false
     end
+  
+    return false
   end
 
   #=== USER-FACING METADATA ===#

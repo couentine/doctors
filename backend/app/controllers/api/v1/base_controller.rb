@@ -80,9 +80,9 @@ class Api::V1::BaseController < ApplicationController
   def build_root_meta_hash(custom_meta = {})
     complete_meta = { authentication_method: @authentication_method }.merge(custom_meta)
 
-    complete_meta.merge!(get_pagination_variables) if @page.present?
-    complete_meta.merge!({ sort: @external_sort_string }) if @external_sort_string.present?
-    complete_meta.merge!({ filter: @filter }) if @filter.present?
+    complete_meta[:page] = @page if @page.present?
+    complete_meta[:sort] = @external_sort_string if @external_sort_string.present?
+    complete_meta[:filter] = @filter if @filter.present?
 
     return complete_meta
   end
@@ -147,32 +147,27 @@ class Api::V1::BaseController < ApplicationController
     end
   end
 
-  def get_pagination_variables
-    return {
-      page: @page,
-      page_size: @page_size,
-      previous_page: @previous_page,
-      next_page: @next_page,
-      last_page: @last_page
-    }
-  end
-
   def set_initial_pagination_variables
-    @page_size = (params['page_size'] || APP_CONFIG['page_size_small']).to_i
-    @page = (params[:page] || 1).to_i
-    @previous_page = (@page > 1) ? (@page - 1) : nil
+    page_param = params[:page] || {}
+    page_number = (page_param['number'] || 1).to_i
+
+    @page = {
+      number: page_number,
+      size: (page_param['size'] || APP_CONFIG['page_size_small']).to_i,
+      prev: (page_number > 1) ? (page_number - 1) : nil
+    }
   end
   
   def set_calculated_pagination_variables(query_criteria)
     query_count = query_criteria.count
     
-    if query_count > (@page_size * @page)
-      @next_page = @page + 1
+    if query_count > (@page[:size] * @page[:number])
+      @page[:next] = @page[:number] + 1
     else
-      @next_page = nil
+      @page[:next] = nil
     end
 
-    @last_page = (query_count / (@page_size.to_f)).ceil
+    @page[:last] = (query_count / (@page[:size].to_f)).ceil
   end
 
   #=== PRIVATE METHODS ===#

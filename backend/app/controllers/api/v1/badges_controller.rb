@@ -3,9 +3,9 @@ class Api::V1::BadgesController < Api::V1::BaseController
   #=== CONSTANTS ===#
 
   SORT_FIELDS = {
-    name: :name, 
     created_at: :created_at,
-    feedback_request_count: :validation_request_count
+    feedback_request_count: :validation_request_count,
+    name: :name
   }
   DEFAULT_SORT_FIELD = :name
   DEFAULT_SORT_ORDER = :asc
@@ -34,7 +34,7 @@ class Api::V1::BadgesController < Api::V1::BaseController
     set_initial_pagination_variables
 
     # Generate the final query and then generate the calculated pagination variables
-    @badges = badge_criteria.order_by(@sort_string).page(@page).per(@page_size)
+    @badges = badge_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
     set_calculated_pagination_variables(@badges)
 
     @policy = Pundit.policy(@current_user, @badges)

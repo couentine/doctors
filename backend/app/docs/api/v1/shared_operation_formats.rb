@@ -48,7 +48,8 @@ module Api::V1::SharedOperationFormats
 
     # EXAMPLE USAGE:
     # - model = :authentication_token
-    def define_success_response(model)
+    # - include = [:relationships] >> Controls rendering of optional template pieces
+    def define_success_response(model, include: [])
       camelized_model = model.to_s.camelize
       spaced_model = model.to_s.gsub('_', ' ')
 
@@ -72,8 +73,10 @@ module Api::V1::SharedOperationFormats
             end
 
             # Item Relationships
-            property :relationships do
-              key :'$ref', "#{camelized_model}Relationships"
+            if (include.include? :relationships)
+              property :relationships do
+                key :'$ref', "#{camelized_model}Relationships"
+              end
             end
 
             # Item Links
@@ -148,7 +151,7 @@ module Api::V1::SharedOperationFormats
         key :default, default_sort_string
       end
       parameter do
-        key :name, 'page'
+        key :name, 'page[number]'
         key :in, :query
         key :description, "Specifies which page of results to return"
         key :required, false
@@ -156,7 +159,7 @@ module Api::V1::SharedOperationFormats
         key :default, 1
       end
       parameter do
-        key :name, 'page_size'
+        key :name, 'page[size]'
         key :in, :query
         key :description, "Specifies the maximum number of items to return in each page of results"
         key :required, false
@@ -167,7 +170,8 @@ module Api::V1::SharedOperationFormats
 
     # EXAMPLE USAGE:
     # - model = :authentication_token
-    def define_success_response(model)
+    # - include = [:relationships] >> Controls rendering of optional template pieces
+    def define_success_response(model, include: [])
       camelized_model = model.to_s.camelize
       spaced_model = model.to_s.gsub('_', ' ')
       pluralized_spaced_model = spaced_model.pluralize
@@ -195,8 +199,10 @@ module Api::V1::SharedOperationFormats
               end
 
               # Item Relationships
-              property :relationships do
-                key :'$ref', "#{camelized_model}Relationships"
+              if (include.include? :relationships)
+                property :relationships do
+                  key :'$ref', "#{camelized_model}Relationships"
+                end
               end
 
               # Item Links
@@ -220,24 +226,28 @@ module Api::V1::SharedOperationFormats
             property :authentication_method, type: :string, enum: [:token, :session, :none]
 
             property :page do
-              key :type, :integer
-              key :description, 'The current page of results'
-            end
-            property :page_size do
-              key :type, :integer
-              key :description, 'The maximum number of items per page of results'
-            end
-            property :previous_page do
-              key :type, :integer
-              key :description, 'The page number of the previous page of results if there is one'
-            end
-            property :next_page do
-              key :type, :integer
-              key :description, 'The page number of the next page of results if there is one'
-            end
-            property :last_page do
-              key :type, :integer
-              key :description, 'The page number of the final page of results'
+              key :type, :object
+              
+              property :number do
+                key :type, :integer
+                key :description, 'The current page of results'
+              end
+              property :size do
+                key :type, :integer
+                key :description, 'The maximum number of items per page of results'
+              end
+              property :prev do
+                key :type, :integer
+                key :description, 'The page number of the previous page of results if there is one'
+              end
+              property :next do
+                key :type, :integer
+                key :description, 'The page number of the next page of results if there is one'
+              end
+              property :last do
+                key :type, :integer
+                key :description, 'The page number of the final page of results'
+              end
             end
             property :sort do
               key :type, :string

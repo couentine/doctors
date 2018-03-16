@@ -15,7 +15,7 @@ class Api::V1::BadgePaths
       define_standard_parameters :badge, :group
 
       # Responses
-      define_success_response :badge
+      define_success_response :badge, include: [:relationships]
     end
 
   end
@@ -43,7 +43,7 @@ class Api::V1::BadgePaths
       define_standard_parameters :badge
 
       # Responses
-      define_success_response :badge
+      define_success_response :badge, include: [:relationships]
     end
 
   end

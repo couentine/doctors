@@ -22,6 +22,15 @@ class GroupPolicy < ApplicationPolicy
     true # All groups and fields are shown, but relationships are conditionally displayed based on filters below
   end
 
+  def edit?
+    if @user.present? && @user.has?('groups:write')
+      return true if @user.admin?
+      return true if @user.id == @group.owner_id
+    end
+    
+    return false
+  end
+
   #=== FILTER POLICIES ===#
   
   def show_members?
@@ -30,9 +39,9 @@ class GroupPolicy < ApplicationPolicy
       return true if @user.admin?
       return true if @user.admin_of?(@group)
       return true if (@group.member_visibility == 'private') && @user.member_of?(@group)
-    else
-      return false
     end
+    
+    return false
   end
   
   def show_admins?
@@ -41,9 +50,9 @@ class GroupPolicy < ApplicationPolicy
       return true if @user.admin?
       return true if @user.admin_of?(@group)
       return true if (@group.admin_visibility == 'private') && @user.member_of?(@group)
-    else
-      return false
     end
+    
+    return false
   end
   
   def show_group_tags?
@@ -52,9 +61,9 @@ class GroupPolicy < ApplicationPolicy
       return true if @user.admin?
       return true if @user.admin_of?(@group)
       return true if (@group.tag_visibility == 'members') && @user.member_of?(@group)
-    else
-      return false
     end
+
+    return false
   end
 
   #=== RELATIONSHIP ACTION POLICIES ===#
@@ -65,9 +74,9 @@ class GroupPolicy < ApplicationPolicy
       return true if @user.admin?
       return true if @user.admin_of?(@group)
       return true if (@group.badge_copyability == 'members') && @user.member_of?(@group)
-    else
-      return false
     end
+
+    return false
   end
 
   def assign_group_tags?
@@ -75,9 +84,9 @@ class GroupPolicy < ApplicationPolicy
       return true if @user.admin?
       return true if @user.admin_of?(@group)
       return true if (@group.tag_assignability == 'members') && @user.member_of?(@group)
-    else
-      return false
     end
+    
+    return false
   end
 
   def create_group_tags?
@@ -85,9 +94,9 @@ class GroupPolicy < ApplicationPolicy
       return true if @user.admin?
       return true if @user.admin_of?(@group)
       return true if (@group.tag_creatability == 'members') && @user.member_of?(@group)
-    else
-      return false
     end
+    
+    return false
   end
 
   #=== USER-FACING METADATA ===#
@@ -96,6 +105,7 @@ class GroupPolicy < ApplicationPolicy
     return {
       current_user: {
         can_see_record: show?,
+        can_edit_record: edit?,
         can_see_members: show_members?,
         can_see_admins: show_admins?,
         can_see_group_tags: show_group_tags?,
