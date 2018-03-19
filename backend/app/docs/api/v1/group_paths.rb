@@ -6,16 +6,18 @@ class Api::V1::GroupPaths
     #=== GET BADGE ===#
 
     operation :get do
+      extend Api::V1::SharedOperationFormats::Base
       extend Api::V1::SharedOperationFormats::RecordItem
 
       # Basic Info
-      define_basic_info :group
+      define_basic_info :group, :get
 
       # Parameters
-      define_standard_parameters :group
+      define_id_parameters :group
 
       # Responses
-      define_success_response :group
+      define_success_response :group, 200
+      define_unauthorized_response
     end
 
   end
@@ -25,6 +27,7 @@ class Api::V1::GroupPaths
     #=== BADGE INDEX ===#
 
     operation :get do
+      extend Api::V1::SharedOperationFormats::Base
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
@@ -40,10 +43,11 @@ class Api::V1::GroupPaths
         key :enum, [:all, :member, :admin]
         key :default, :all
       end
-      define_standard_parameters :group
+      define_index_parameters :group
 
       # Responses
       define_success_response :group
+      define_unauthorized_response
     end
 
   end

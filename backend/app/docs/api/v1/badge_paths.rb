@@ -6,16 +6,18 @@ class Api::V1::BadgePaths
     #=== GET BADGE ===#
 
     operation :get do
+      extend Api::V1::SharedOperationFormats::Base
       extend Api::V1::SharedOperationFormats::RecordItem
 
       # Basic Info
-      define_basic_info :badge
+      define_basic_info :badge, :get
 
       # Parameters
-      define_standard_parameters :badge, :group
+      define_id_parameters :badge, :group
 
       # Responses
-      define_success_response :badge, include: [:relationships]
+      define_success_response :badge, 200, include: [:relationships]
+      define_unauthorized_response
     end
 
   end
@@ -25,6 +27,7 @@ class Api::V1::BadgePaths
     #=== BADGE INDEX ===#
 
     operation :get do
+      extend Api::V1::SharedOperationFormats::Base
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
@@ -40,10 +43,11 @@ class Api::V1::BadgePaths
         key :enum, [:all, :seeker, :holder]
         key :default, :all
       end
-      define_standard_parameters :badge
+      define_index_parameters :badge
 
       # Responses
       define_success_response :badge, include: [:relationships]
+      define_unauthorized_response
     end
 
   end

@@ -1,17 +1,71 @@
 module Api::V1::SharedOperationFormats
 
+  #=== COMMON TEMPLATES ===#
+
+  module Base
+
+    def define_error_response(status_code, error_object_schema, description_text)
+      response status_code do
+        key :description, description_text
+
+        schema do
+          key :type, :object
+          
+          # Errors Key
+          property :errors do
+            key :type, :array
+
+            items do
+              key :'$ref', error_object_schema
+            end
+          end
+
+          # JSON API Key
+          property :jsonapi do
+            key :type, :object
+
+            property :version do
+              key :type, :string
+              key :enum, ['1.0']
+            end
+          end
+        end # schema tag 
+      end # response block
+    end
+
+    # Adds a standard 403 response
+    def define_unauthorized_response
+      define_error_response 403, :GenericErrorObject, 'Authentication details are incorrect or missing. ' \
+        'Or the authenticated user does not have access to the requested operation.'
+    end
+    
+  end
+  
   #=== RECORD ITEM FORMAT ===#
 
   module RecordItem
+
     # EXAMPLE USAGE:
     # - model = :authentication_token
-    def define_basic_info(model)
+    # - verb = one of >> [:get, :create, :update, :delete]
+    def define_basic_info(model, verb)
       camelized_model = model.to_s.camelize
       uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
       spaced_model = model.to_s.gsub('_', ' ')
 
-      key :operationId, "get#{camelized_model}"
-      key :summary, "Gets a #{spaced_model} record by id"
+      key :operationId, "#{verb.to_s}#{camelized_model}"
+      
+      case verb
+      when :get
+        key :summary, "Gets a #{spaced_model} record by id"
+      when :create
+        key :summary, "Creates a new #{spaced_model} record"
+      when :update
+        key :summary, "Updates an existing #{spaced_model} record by id"
+      when :delete
+        key :summary, "Deletes an existing #{spaced_model} record by id"
+      end
+        
       key :tags, [
         'recordItemFormat',
         "#{uncapitalized_camelized_model}Model"
@@ -21,8 +75,9 @@ module Api::V1::SharedOperationFormats
     # EXAMPLE USAGE:
     # - item_model = :badge
     # - parent_model = :group (If parent model is left out then no parent_path parameter is included)
-    def define_standard_parameters(item_model, parent_model = nil)
-      description_text = "The id or the (case-insensitive) slug of the #{item_model} record."
+    def define_id_parameters(item_model, parent_model = nil)
+      spaced_item_model = item_model.to_s.gsub('_', ' ')
+      description_text = "The id or the (case-insensitive) slug of the #{spaced_item_model} record."
       if parent_model.present?
         description_text += " If you use the slug then you must also specify the `parent_path` parameter."
       end
@@ -47,13 +102,46 @@ module Api::V1::SharedOperationFormats
     end
 
     # EXAMPLE USAGE:
-    # - model = :authentication_token
-    # - include = [:relationships] >> Controls rendering of optional template pieces
-    def define_success_response(model, include: [])
+    # - model = :badge
+    def define_post_parameters(model)
       camelized_model = model.to_s.camelize
       spaced_model = model.to_s.gsub('_', ' ')
 
-      response 200 do
+      parameter do
+
+        key :name, model
+        key :in, :body
+        key :description, "The JSON API formatted details of the new #{spaced_model.to_s} record"
+        key :required, true
+        
+        schema do
+          key :type, :object
+
+          # Data Key
+          property :data do
+            key :type, :object
+
+            # Item Type
+            property :type, type: :string, enum: [model], description: "Must always be equal to `#{model.to_s}`"
+
+            # Item Attributes
+            property :attributes do
+              key :'$ref', "#{camelized_model}InputAttributes"
+            end
+          end
+        end
+
+      end
+    end
+
+    # EXAMPLE USAGE:
+    # - model = :authentication_token
+    # - include = [:relationships] >> Controls rendering of optional template pieces
+    def define_success_response(model, response_code, include: [])
+      camelized_model = model.to_s.camelize
+      spaced_model = model.to_s.gsub('_', ' ')
+
+      response response_code do
         key :description, "Returns #{spaced_model} details in JSON API format."
 
         schema do
@@ -69,7 +157,7 @@ module Api::V1::SharedOperationFormats
 
             # Item Attributes
             property :attributes do
-              key :'$ref', "#{camelized_model}Attributes"
+              key :'$ref', "#{camelized_model}OutputAttributes"
             end
 
             # Item Relationships
@@ -111,11 +199,18 @@ module Api::V1::SharedOperationFormats
         end
       end
     end
+
+    # Adds a standard 403 response
+    def define_field_error_response
+      define_error_response 400, :FieldErrorObject, 'One or more field values in the request body were invalid.'
+    end
+    
   end
 
   #=== PAGINATED LIST FORMAT ===#
 
   module PaginatedList
+
     # EXAMPLE USAGE:
     # - model = :badge
     # - summary = 'Gets a list of all badges the current user has joined'
@@ -133,7 +228,7 @@ module Api::V1::SharedOperationFormats
 
     # EXAMPLE USAGE:
     # - model = :badge
-    def define_standard_parameters(model)
+    def define_index_parameters(model)
       controller_class_name = model.to_s.camelize.pluralize + 'Controller'
       sort_fields = "Api::V1::#{controller_class_name}::SORT_FIELDS".constantize
       default_sort_field = "Api::V1::#{controller_class_name}::DEFAULT_SORT_FIELD".constantize
@@ -195,7 +290,7 @@ module Api::V1::SharedOperationFormats
 
               # Item Attributes
               property :attributes do
-                key :'$ref', "#{camelized_model}Attributes"
+                key :'$ref', "#{camelized_model}OutputAttributes"
               end
 
               # Item Relationships

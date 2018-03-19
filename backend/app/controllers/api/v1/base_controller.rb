@@ -61,7 +61,7 @@ class Api::V1::BaseController < ApplicationController
   end
 
   # This renders a JSON API formatted error message from a single string.
-  # For rendering a list of active model errors use `render jsonapi_errors: @object.errors`
+  # For rendering a list of active model errors use the `render_field_errors` method below
   def render_single_error(status: 500, title: 'Server error', detail: nil)
     render json: {
       errors: [
@@ -70,7 +70,29 @@ class Api::V1::BaseController < ApplicationController
           title: title,
           detail: detail
         }
-      ]
+      ],
+      jsonapi: {
+        version: '1.0'
+      }
+    }, status: status
+  end
+
+  # This renders a JSON API formatted error message from an instance of ActiveModel::Errors
+  # Example Usage: `render_field_errors @object.errors, status: 400`
+  def render_field_errors(active_model_errors, status: 400)
+    render json: {
+      errors: active_model_errors.to_hash.map do |field_key, error_messages|
+        {
+          title: "Invalid #{field_key}",
+          detail: error_messages.join('. '),
+          source: {
+            pointer: "/data/attributes/#{field_key}"
+          }
+        }
+      end,
+      jsonapi: {
+        version: '1.0'
+      }
     }, status: status
   end
 

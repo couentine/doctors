@@ -1,21 +1,29 @@
 class Api::V1::AuthenticationTokensController < Api::V1::BaseController
 
-  #=== API ACCESS MAP ===#
+  #=== CONSTANTS ===#
 
-  @accessible_actions = {
-    internal_user: [:index, :show, :create, :destroy],
-    external_user: [],
-    group_user: [:index, :show, :create, :destroy],
-    public: [:index, :show, :create, :destroy]
+  SORT_FIELDS = {
+    created_at: :created_at,
+    last_used_at: :last_used_at,
+    request_count: :request_count
   }
+  DEFAULT_SORT_FIELD = :last_used_at
+  DEFAULT_SORT_ORDER = :desc
 
   #=== ACTIONS ===#
 
   def index
     authorize :authentication_token
 
+    # Build the core criteria (note: there are no filters for authentication tokens)
+    authentication_token_criteria = @current_user.authentication_tokens
+
+    # Generate @sort_string from the sort parameter and load the pagination variables
+    build_sort_string
     set_initial_pagination_variables
-    @authentication_tokens = @current_user.authentication_tokens.desc(:last_used_at).page(@page).per(@page_size)
+
+    # Generate the final query and then generate the calculated pagination variables
+    @authentication_tokens = authentication_token_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
     set_calculated_pagination_variables(@authentication_tokens)
 
     @policy = Pundit.policy(@current_user, @authentication_tokens)
@@ -48,7 +56,7 @@ class Api::V1::AuthenticationTokensController < Api::V1::BaseController
       @policy = Pundit.policy(@current_user, @authentication_token)
       render_json_api @authentication_token, status: 201, expose: { meta: @policy.meta }
     else
-      render jsonapi_errors: @authentication_token.errors, status: 400
+      render_field_errors @authentication_token.errors, status: 400
     end
   end
 
@@ -61,7 +69,7 @@ class Api::V1::AuthenticationTokensController < Api::V1::BaseController
       if @authentication_token.destroy
         render_json_api nil, status: 204 # no content
       else
-        render jsonapi_errors: @authentication_token.errors, status: 400
+        render_field_errors @authentication_token.errors, status: 400
       end
     else
       render_not_found

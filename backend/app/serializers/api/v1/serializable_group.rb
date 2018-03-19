@@ -3,8 +3,7 @@ class Api::V1::SerializableGroup < Api::V1::SerializableDocument
 
   type 'group'
 
-  attribute :slug do @object.url end
-  attribute :slug_with_caps do @object.url_with_caps end
+  attribute :slug do @object.url_with_caps end
 
   attribute :name
   attribute :description

@@ -1,11 +1,16 @@
 class Api::V1::GroupSchemas
   include Swagger::Blocks
 
-  #=== GROUP ATTRIBUTES ===#
+  #=== GROUP OUTPUT ATTRIBUTES ===#
 
-  swagger_schema :GroupAttributes do
+  swagger_schema :GroupOutputAttributes do
     extend Api::V1::SharedSchemas::CommonDocumentFields
     
+    property :slug do
+      key :type, :string
+      key :format, :slug
+      key :description, 'The url-safe string used to represent this group in urls and other external-facing contexts. Case insensitive.'
+    end
     property :name do
       key :type, :string
       key :description, 'Display name of the group'

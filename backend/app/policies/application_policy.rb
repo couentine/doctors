@@ -8,14 +8,14 @@ class ApplicationPolicy
   # External users (accessing via an authentication token) are granted only the permission sets specified on their token record.
 
   PERMISSION_SETS = {
-    'account:read'                  => { api_access: [:internal, :external] },
-    'account:write'                 => { api_access: [:internal] },
-    'authentication_tokens:read'    => { api_access: [:internal] },
-    'authentication_tokens:write'   => { api_access: [:internal] },
+    'authentication_tokens:read'    => { api_access: [:internal] }, # web UI only
+    'authentication_tokens:write'   => { api_access: [:internal] }, # web UI only
+    'current_user:read'             => { api_access: [:internal, :external] },
+    'current_user:write'            => { api_access: [:internal] }, # web UI only
     'badges:read'                   => { api_access: [:internal, :external] },
     'badges:write'                  => { api_access: [:internal, :external] },
     'domains:read'                  => { api_access: [:internal, :external] },
-    'domains:write'                 => { api_access: [:internal] },
+    'domains:write'                 => { api_access: [:internal] }, # admin only
     'entries:read'                  => { api_access: [:internal, :external] },
     'entries:write'                 => { api_access: [:internal, :external] },
     'group_tags:read'               => { api_access: [:internal, :external] },
@@ -30,7 +30,9 @@ class ApplicationPolicy
     'portfolios:write'              => { api_access: [:internal, :external] },
     'reports:read'                  => { api_access: [:internal, :external] },
     'reports:write'                 => { api_access: [:internal, :external] },
-    'users:invite'                  => { api_access: [:internal, :external] },
+    'users:read'                    => { api_access: [:internal, :external] },
+    'users:write'                   => { api_access: [:internal] }, # admin only
+    'users:register'                => { api_access: [:internal, :external] },
     'wikis:read'                    => { api_access: [:internal, :external] },
     'wikis:write'                   => { api_access: [:internal, :external] }
   }

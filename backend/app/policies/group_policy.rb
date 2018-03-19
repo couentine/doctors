@@ -19,7 +19,8 @@ class GroupPolicy < ApplicationPolicy
   end
 
   def show?
-    true # All groups and fields are shown, but relationships are conditionally displayed based on filters below
+    # All groups and fields are shown, but relationships are conditionally displayed based on filters below
+    return @user.has?('groups:read')
   end
 
   def edit?

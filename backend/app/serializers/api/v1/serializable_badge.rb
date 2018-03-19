@@ -3,8 +3,7 @@ class Api::V1::SerializableBadge < Api::V1::SerializableDocument
 
   type 'badge'
 
-  attribute :slug do @object.url end
-  attribute :slug_with_caps do @object.url_with_caps end
+  attribute :slug do @object.url_with_caps end
   
   attribute :name,                        if: -> { @show_all_fields }
   attribute :summary,                     if: -> { @show_all_fields }

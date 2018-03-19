@@ -1,11 +1,16 @@
 class Api::V1::BadgeSchemas
   include Swagger::Blocks
 
-  #=== BADGE ATTRIBUTES ===#
+  #=== BADGE OUTPUT ATTRIBUTES ===#
 
-  swagger_schema :BadgeAttributes do
+  swagger_schema :BadgeOutputAttributes do
     extend Api::V1::SharedSchemas::CommonDocumentFields
     
+    property :slug do
+      key :type, :string
+      key :format, :slug
+      key :description, 'The url-safe string used to represent this badge in urls and other external-facing contexts. Case insensitive.'
+    end
     property :name do
       key :type, :string
       key :description, 'Display name of the badge'
@@ -14,6 +19,7 @@ class Api::V1::BadgeSchemas
       key :type, :string
       key :description, 'Short summary of the badge and what badge holders have done to earn the badge'
     end
+
     property :feedback_request_count do
       key :type, :integer
       key :format, :int64

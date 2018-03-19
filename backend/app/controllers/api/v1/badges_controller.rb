@@ -48,6 +48,7 @@ class Api::V1::BadgesController < Api::V1::BaseController
       @badge = Badge.find(params[:id])
     end
 
+    # NOTE: This is currently undocumented. Also we need to check that the authentication token has permission to read groups.
     if params[:include] == 'group'
       @include = [:group]
     else

@@ -4,18 +4,6 @@ module Api::V1::SharedSchemas
 
   module CommonDocumentFields
     def self.extended(base)
-      base.property :slug do
-        key :type, :string
-        key :format, :slug
-        key :description, 'The url-safe string used to represent this record in urls and other external-facing contexts, ' \
-          'all lowercase'
-      end
-      base.property :slug_with_caps do
-        key :type, :string
-        key :format, :slug
-        key :description, 'The url-safe string used to represent this record in urls and other external-facing contexts, ' \
-          'includes capitalization as specified by the creating user'
-      end
       base.property :created_at do
         key :type, :string
         key :format, 'date-time'
