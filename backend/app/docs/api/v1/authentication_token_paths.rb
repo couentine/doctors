@@ -31,7 +31,7 @@ class Api::V1::AuthenticationTokenPaths
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
-      define_basic_info :authentication_token, 'Gets a list of all authentication_tokens lnked to the current user'
+      define_basic_info :authentication_token, 'Get list of all authentication_tokens lnked to the current user'
       
       # Parameters
       define_index_parameters :authentication_token

@@ -31,7 +31,7 @@ class Api::V1::GroupPaths
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
-      define_basic_info :group, 'Gets a list of all groups the current user belongs to'
+      define_basic_info :group, 'Get list of all groups the current user belongs to'
       
       # Parameters
       parameter do

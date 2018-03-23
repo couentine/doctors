@@ -26,6 +26,11 @@ class Api::V1::BaseController < ApplicationController
   rescue_from Api::V1::DeserializationError, with: :render_bad_request
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
   
+  #=== CONSTANTS ===#
+
+  MIN_PAGE_SIZE = 1
+  MAX_PAGE_SIZE = 200
+  
   #=== JSON API RB ===#
 
   def jsonapi_class 
@@ -175,7 +180,7 @@ class Api::V1::BaseController < ApplicationController
 
     @page = {
       number: page_number,
-      size: (page_param['size'] || APP_CONFIG['page_size_small']).to_i,
+      size: [[(page_param['size'] || APP_CONFIG['page_size_small']).to_i, MAX_PAGE_SIZE].min, MIN_PAGE_SIZE].max,
       prev: (page_number > 1) ? (page_number - 1) : nil
     }
   end

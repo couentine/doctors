@@ -31,7 +31,7 @@ class Api::V1::BadgePaths
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
-      define_basic_info :badge, 'Gets a list of all badges the current user has joined'
+      define_basic_info :badge, 'Get list of all badges the current user has joined'
       
       # Parameters
       parameter do

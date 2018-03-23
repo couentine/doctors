@@ -5,6 +5,8 @@ class Api::V1::AuthenticationTokenSchemas
 
   swagger_schema :AuthenticationTokenOutputAttributes do
     extend Api::V1::SharedSchemas::CommonDocumentFields
+
+    key :type, :object
     
     property :value do
       key :type, :string
@@ -43,6 +45,8 @@ class Api::V1::AuthenticationTokenSchemas
   #=== AUTHENTICATION TOKEN OUTPUT ATTRIBUTES ===#
 
   swagger_schema :AuthenticationTokenInputAttributes do
+    key :type, :object
+
     property :user_id do
       key :type, :string
       key :format, :id
@@ -63,6 +67,8 @@ class Api::V1::AuthenticationTokenSchemas
   #=== AUTHENTICATION TOKEN META ===#
   
   swagger_schema :AuthenticationTokenMeta do
+    key :type, :object
+
     property :current_user do
       key :type, :object
       
@@ -81,6 +87,8 @@ class Api::V1::AuthenticationTokenSchemas
 
   swagger_schema :AuthenticationTokenRelationships do
     extend Api::V1::SharedSchemas::RelationshipsList
+
+    key :type, :object
 
     define_relationship_property :user, 'The authenticating user account to which the token is linked'
     define_relationship_property :creator, 'The user account which created the token'

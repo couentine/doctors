@@ -57,13 +57,13 @@ module Api::V1::SharedOperationFormats
       
       case verb
       when :get
-        key :summary, "Gets a #{spaced_model} record by id"
+        key :summary, "Get a #{spaced_model} record by id"
       when :create
-        key :summary, "Creates a new #{spaced_model} record"
+        key :summary, "Create a new #{spaced_model} record"
       when :update
-        key :summary, "Updates an existing #{spaced_model} record by id"
+        key :summary, "Update an existing #{spaced_model} record by id"
       when :delete
-        key :summary, "Deletes an existing #{spaced_model} record by id"
+        key :summary, "Delete an existing #{spaced_model} record by id"
       end
         
       key :tags, [
@@ -84,6 +84,7 @@ module Api::V1::SharedOperationFormats
 
       parameter do
         key :name, :id
+        key :format, :id
         key :in, :path
         key :description, description_text
         key :required, true
@@ -152,8 +153,17 @@ module Api::V1::SharedOperationFormats
             key :type, :object
 
             # Item Id & Type
-            property :id, type: :string, description: 'The unique identifier of this record'
-            property :type, type: :string, enum: [model], description: "Will always be equal to `#{model.to_s}`"
+            property :id do
+              key :type, :string
+              key :format, :id
+              key :description, 'The unique identifier of this record'
+              key :example, '841b90e775421f5205bf70a0'
+            end
+            property :type do
+              key :type, :string
+              key :enum, [model]
+              key :description, "Will always be equal to `#{model.to_s}`"
+            end
 
             # Item Attributes
             property :attributes do
@@ -257,6 +267,8 @@ module Api::V1::SharedOperationFormats
         key :name, 'page[size]'
         key :in, :query
         key :description, "Specifies the maximum number of items to return in each page of results"
+        key :minimum, Api::V1::BaseController::MIN_PAGE_SIZE
+        key :maximum, Api::V1::BaseController::MAX_PAGE_SIZE
         key :required, false
         key :type, :integer
         key :default, APP_CONFIG['page_size_small']
@@ -285,8 +297,17 @@ module Api::V1::SharedOperationFormats
               key :type, :object
 
               # Item Id & Type
-              property :id, type: :string, description: 'The unique identifier of this record'
-              property :type, type: :string, enum: [model], description: "Will always be equal to `#{model.to_s}`"
+              property :id do
+                key :type, :string
+                key :format, :id
+                key :description, 'The unique identifier of this record'
+                key :example, '841b90e775421f5205bf70a0'
+              end
+              property :type do
+                key :type, :string
+                key :enum, [model]
+                key :description, "Will always be equal to `#{model.to_s}`"
+              end
 
               # Item Attributes
               property :attributes do

@@ -5,29 +5,37 @@ class Api::V1::GroupSchemas
 
   swagger_schema :GroupOutputAttributes do
     extend Api::V1::SharedSchemas::CommonDocumentFields
+
+    key :type, :object
     
     property :slug do
       key :type, :string
       key :format, :slug
       key :description, 'The url-safe string used to represent this group in urls and other external-facing contexts. Case insensitive.'
+      key :example, 'NASA-Training'
     end
     property :name do
       key :type, :string
       key :description, 'Display name of the group'
+      key :example, 'NASA Astronaut Corps'
     end
     property :description do
       key :type, :string
       key :description, 'Short summary text describing the group and its purpose'
+      key :example, 'The Astronaut Corps is dedicated selecting the best and brightest, then training them as crew members for US and ' \
+        'international space missions.'
     end
     
     property :location do
       key :type, :string
       key :description, 'Free text field which is intended to describe the location of the group'
+      key :example, 'Lyndon B. Johnson Space Center, Houston, Texas'
     end
     property :type do
       key :type, :string
       key :enum, [:free, :paid]
       key :description, 'Indicates whether or not this is a paid group'
+      key :example, 'paid'
     end
     property :color do
       key :type, :string
@@ -35,39 +43,47 @@ class Api::V1::GroupSchemas
         :amber, :orange, :deep_orange, :brown, :grey, :blue_grey]
       key :description, 'The primary color used for the visual styling of the group. The actual colors used come from the ' \
         'Google Material Design Color Palette.'
+      key :example, 'indigo'
     end
     
     property :member_count do
       key :type, :integer
       key :description, 'The number of group members'
+      key :example, 2187
     end
     property :admin_count do
       key :type, :integer
       key :description, 'The number of group admins'
+      key :example, 7
     end
     property :total_user_count do
       key :type, :integer
       key :description, 'The number of total users in the group (including both members and admins)'
+      key :example, 2194
     end
     property :badge_count do
       key :type, :integer
       key :description, 'The number of badges in the group'
+      key :example, 102
     end
 
     property :image_url do
       key :type, :string
       key :format, :url
       key :description, 'URL of the full-sized group image, 500 pixels wide and/or long'
+      key :example, 'https://badgelist.s3.amazonaws.com/u/group/52f41faac56ca3af4a000008/NASA_Logo.png'
     end
     property :image_medium_url do
       key :type, :string
       key :format, :url
       key :description, 'URL of the resized group image, 200 pixels wide and/or long'
+      key :example, 'https://badgelist.s3.amazonaws.com/u/group/52f41faac56ca3af4a000008/medium_NASA_Logo.png'
     end
     property :image_small_url do
       key :type, :string
       key :format, :url
       key :description, 'URL of the resized group image, 50 pixels wide and/or long'
+      key :example, 'https://badgelist.s3.amazonaws.com/u/group/52f41faac56ca3af4a000008/small_NASA_Logo.png'
     end
 
   end
@@ -75,6 +91,8 @@ class Api::V1::GroupSchemas
   #=== GROUP META ===#
   
   swagger_schema :GroupMeta do
+    key :type, :object
+
     property :current_user do
       key :type, :object
 
