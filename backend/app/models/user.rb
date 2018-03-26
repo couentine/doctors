@@ -7,6 +7,7 @@ class User
 
   # === CONSTANTS === #
   
+  TYPE_VALUES = ['individual', 'group']
   MIN_PASSWORD_LENGTH = 6 # Note: This is just for use in tests & not actually tied to anything
   MAX_NAME_LENGTH = 200
   MAX_USERNAME_LENGTH = 15
@@ -32,21 +33,25 @@ class User
 
   # === RELATIONSHIP === #
 
-  has_many :created_groups, inverse_of: :creator, class_name: "Group"
-  has_many :owned_groups, inverse_of: :owner, class_name: "Group"
-  has_many :created_badges, inverse_of: :creator, class_name: "Badge"
+  belongs_to :proxy_group, inverse_of: :proxy_user, class_name: 'Group' # required if user type is `group`
+  has_many :created_groups, inverse_of: :creator, class_name: 'Group'
+  has_many :owned_groups, inverse_of: :owner, class_name: 'Group'
+  has_many :created_badges, inverse_of: :creator, class_name: 'Badge'
   has_many :logs, dependent: :destroy
-  has_many :created_entries, inverse_of: :creator, class_name: "Entry"
-  has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: "Group"
-  has_and_belongs_to_many :member_of, inverse_of: :members, class_name: "Group"
+  has_many :created_entries, inverse_of: :creator, class_name: 'Entry'
+  has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: 'Group'
+  has_and_belongs_to_many :member_of, inverse_of: :members, class_name: 'Group'
   has_many :report_results, dependent: :destroy
   has_many :info_items, dependent: :destroy
-  belongs_to :domain, inverse_of: :users, class_name: "Domain" # don't ever set this manually,
-  has_many :owned_domains, inverse_of: :owner, class_name: "Domain"
+  belongs_to :domain, inverse_of: :users, class_name: 'Domain' # don't ever set this manually,
+  has_many :owned_domains, inverse_of: :owner, class_name: 'Domain'
   has_and_belongs_to_many :group_tags # DO NOT EDIT DIRECTLY: Use group_tag.add_users/remove_users
+  has_many :authentication_tokens, dependent: :destroy, inverse_of: :user, class_name: 'AuthenticationToken'
+  has_many :created_authentication_tokens, inverse_of: :creator, class_name: 'AuthenticationToken'
 
-  # === CUSTOM FIELDS & VALIDATIONS === #
+  # === CUSTOM FIELDS === #
   
+  field :type,                              type: String, default: 'individual'
   field :name,                              type: String
   field :username,                          type: String
   field :username_with_caps,                type: String
@@ -99,26 +104,31 @@ class User
   # LTI Fields
   field :lti_launch_hash,                   type: Hash # stores the most recent LTI launch params
 
+  # === UNIVERSAL FIELD VALIDATIONS === #
+
+  validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid User Type" }
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
-  validates :username_with_caps, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
-    uniqueness:true, format: { with: /\A[\w-]+\Z/, 
-      message: "can only contain letters, numbers, dashes and underscores." }
-  validates :username, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
-    format: { with: /\A[\w-]+\Z/, 
-      message: "can only contain letters, numbers, dashes and underscores." }
   validates :job_title, length: { maximum: MAX_JOB_TITLE_LENGTH }
   validates :organization_name, length: { maximum: MAX_ORGANIZATION_NAME_LENGTH }
   validates :bio, length: { maximum: MAX_BIO_LENGTH }
   validates :website, url: true, length: { maximum: MAX_WEBSITE_LENGTH }
+  
+  # === CONDITIONAL FIELD VALIDATIONS === #
 
+  validates :proxy_group, if: :proxy_group_is_required?, presence: true
+  validates :username_with_caps, unless: :username_is_required?, presence: false
+  validates :username_with_caps, if: :username_is_required?, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
+    uniqueness:true, format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores." }
+  validates :username, unless: :username_is_required?, presence: false
+  validates :username, if: :username_is_required?, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, uniqueness:true,
+    format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores." }
   
   # === DEVISE SETTINGS === #
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, 
-    :validatable, :confirmable, :lockable, :async, :omniauthable, 
-    :omniauth_providers => [:google_oauth2]
+  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable, :confirmable, :lockable, 
+    :async, :omniauthable, omniauth_providers: [:google_oauth2]
 
   # === STANDARD DEVISE FIELDS === #
 
@@ -151,13 +161,9 @@ class User
   field :unlock_token,    type: String # Only if unlock strategy is :email or :both
   field :locked_at,       type: Time
 
-  ## Token authenticatable
-  # field :authentication_token, :type => String
-
   # === CALLBACKS === #
 
-  before_validation :update_caps_field
-  before_validation :update_avatar_key
+  before_validation :update_user_fields
   before_create :check_for_inactive_email
   before_save :update_identity_hash
   before_save :check_for_domain
@@ -173,6 +179,16 @@ class User
     :process_avatar,
     :convert_group_invitations_on_signup
   ]
+
+  # === VALIDATION METHODS === #
+
+  def proxy_group_is_required?
+    return type == 'group'
+  end
+
+  def username_is_required?
+    return type == 'individual'
+  end
 
   # === USER MOCK FIELD METHODS === #
 
@@ -581,7 +597,7 @@ class User
   # === INSTANCE METHODS === #
 
   def to_param
-    username_with_caps
+    username_with_caps || id.to_s
   end
 
   # Returns full URL to this user's profile based on current root URL
@@ -671,11 +687,11 @@ class User
   def admin_of?(group_or_id)
     case group_or_id.class.to_s
     when 'Group'
-      admin_of_ids.include?(group_or_id.id)
+      (proxy_group_id == group_or_id.id) || admin_of_ids.include?(group_or_id.id)
     when 'BSON::ObjectId'
-      admin_of_ids.include?(group_or_id)
+      (proxy_group_id == group_or_id) || admin_of_ids.include?(group_or_id)
     when 'String'
-      admin_of_ids.include?(BSON::ObjectId.from_string(group_or_id))
+      (proxy_group_id.to_s == group_or_id) || admin_of_ids.include?(BSON::ObjectId.from_string(group_or_id))
     else
       throw "Invalid type #{group_or_id.class.to_s} for group_or_id. (Accepted types are Group, ObjectId or String.)"
     end
@@ -1191,24 +1207,25 @@ class User
     end
   end
 
-  def test_me!
-    convert_group_invitations_on_signup!
-  end
-
 protected
 
-  def update_caps_field
+  def update_user_fields
     if username_with_caps.nil?
       self.username = nil
     else
       self.username = username_with_caps.downcase
     end
-  end
 
-  def update_avatar_key
     if new_record? || avatar_key_changed?
       self.direct_avatar.key = avatar_key
       self.processing_avatar = true
+    end
+
+    if (type == 'group') & proxy_group_id.present?
+      self.email = "#{proxy_group.url}@groups.badgelist.com"
+      self.password = Devise.friendly_token(40) # randomize the password every time the record is touched, it should never be used
+      self.user_defined_password = false
+      self.name = proxy_group.name
     end
   end
 

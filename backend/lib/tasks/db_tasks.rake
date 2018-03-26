@@ -933,4 +933,50 @@ namespace :db do
     puts " >> Done."
   end
 
+  # This is safe to run in production. It just instantiates users and checks to see if they have changed (usually due to a new field 
+  # which has been created with a default value) and then timeless saves if so.
+  task save_all_users: :environment do
+    print "Saving all users if needed (#{User.count} users total)"
+    
+    User.each do |user|
+      if user.changed?
+        if user.timeless.save
+          print "."
+        else
+          print "!"
+        end
+      else
+        print "-"
+      end
+    end
+
+    puts " >> Done."
+  end
+
+  # This creates a proxy user for any groups missing proxy users. Safe to run in production, but shouldn't be needed unless something goes
+  # wrong and a proxy user errors out on save. Or is somehow deleted. (Not sure how that would be possible.)
+  task create_missing_group_proxy_users: :environment do
+    print "Checking for groups with missing proxy users (#{Group.count} groups total)"
+
+    Group.each do |group|
+      if group.proxy_user.blank?
+        group.proxy_user = User.new
+        group.proxy_user.type = 'group'
+
+        group.proxy_user.skip_confirmation!
+        group.proxy_user.skip_reconfirmation!
+
+        if group.proxy_user.save
+          print "."
+        else
+          print "!"
+        end
+      else
+        print "-"
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end

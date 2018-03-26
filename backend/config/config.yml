@@ -4,7 +4,7 @@ defaults: &defaults
   # Page sizes should be evenly divisible by 2 and 3 (4 is nice but not required)
   page_size_small: 12
   page_size_normal: 36
-  page_size_large: 72
+  page_size_large: 60
   
   # API constants
   max_import_list_size: 500
