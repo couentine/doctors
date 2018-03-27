@@ -179,6 +179,10 @@ The home page for logged in users.
             flex-wrap: wrap;
             justify-content: center;
           }
+            #groupPanel bl-backend-list-placeholder p {
+              max-width: 30em;
+              margin: 1em auto;
+            }
             #groupPanel a.item {
               margin: 1em;
               flex: 1 1 10em;
@@ -266,9 +270,11 @@ The home page for logged in users.
             </a>
           </template>
           <bl-backend-list-placeholder target-list="[[badges]]" icon-class="icon-shield">
-            <p><b>You aren't working on any badges.</b></p> 
             <p>
-              Maybe check out the <a class="placeholder-link" href="/community">Badge List Community</a>?
+              <strong>Want to earn a badge?</strong>
+            </p>
+            <p>
+              Join the <a class="placeholder-link" href="/community">Badge List Community</a>!
             </p>
           </bl-backend-list-placeholder>
         </div>
@@ -294,9 +300,19 @@ The home page for logged in users.
             </a>
           </template>
           <bl-backend-list-placeholder target-list="[[groups]]" icon-class="icon-group">
-            <p><b>You aren't working on any groups.</b></p> 
             <p>
-              Maybe check out the <a class="placeholder-link" href="/community">Badge List Community</a>?
+              <strong>Looking for a specific group?</strong>
+            </p>
+            <p>
+              Ask your group admin for the group's URL.
+            </p>
+            <p>
+              <strong>Do you want to start issuing badges yourself?</strong>
+            </p>
+            <p>
+              Click the blue "New Group" button to create your first group! 
+              We've got a <a href="https://www.youtube.com/watch?v=cXjP7qXRqxo&t=1s" target="_blank">2 minute video tutorial</a>
+              to help you get started.
             </p>
           </bl-backend-list-placeholder>
         </div>
