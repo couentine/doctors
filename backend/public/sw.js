@@ -140,7 +140,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/app/src/bl-app/bl-app.html",
-    "revision": "9e92c54023031e63df0b80d6506674fc"
+    "revision": "2b47773750bb270088b7f92841c57ca1"
   },
   {
     "url": "p/app/src/bl-app/bl-component-template.html",
@@ -244,7 +244,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/website/src/bl-website/bl-website.html",
-    "revision": "d7cb785b964fe79ced5aa73569331817"
+    "revision": "663d0aab7025fa3ac3266cebee973e12"
   }
 ]);
   }

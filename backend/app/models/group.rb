@@ -1977,7 +1977,10 @@ protected
         # NOTE: This callback runs AFTER process_subscription_field_updates
         if paid?
           set_flag PENDING_SUBSCRIPTION_FLAG
-          cancel_stripe_subscription # asyn callout to stripe which updates status when done
+          
+          if stripe_subscription_id.present?
+            cancel_stripe_subscription # asyn callout to stripe which updates status when done
+          end
         end
 
         # Notify the new owner

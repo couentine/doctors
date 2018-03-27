@@ -145,6 +145,26 @@
               color: var(--bl-grey-900);
               background: rgba(255, 255, 255, 0.8);
             }
+          #enterpriseSummary {
+            margin: 1.5rem 0;
+            font-size: 1.5em;
+            line-height: 1.4em;
+            font-weight: 300;
+            font-family: Roboto, 'Helvetica Neue', Helvetica, 'Lato';
+            border: 1px solid var(--bl-purple-900);
+            border-radius: 9px;
+            color: var(--bl-purple-900);
+          }
+            #enterpriseSummary p {
+              margin: 1.5rem;
+            }
+            #enterpriseSummary a,#enterpriseSummary a:visited {
+              color: var(--bl-purple-900);
+              transition: color 0.3s;
+            }
+            #enterpriseSummary a:hover,#enterpriseSummary a:focus {
+              color: var(--bl-purple-700);
+            }
           #pricingCards {
             position: relative;
             padding: 0;
@@ -287,6 +307,12 @@
             <p hidden="[[!k12Mode]]">
               The plans below are only available for use by K12 schools and districts, but K12 organizations are also able to use
               any of our <a href="#" on-tap="toggleK12">standard plans</a>.
+            </p>
+          </div>
+          <div id="enterpriseSummary">
+            <p>
+              Have more than 2000 users? 
+              <a href="mailto:solutions@badgelist.com">Contact us</a> to discuss our enterprise pricing plans.
             </p>
           </div>
 
