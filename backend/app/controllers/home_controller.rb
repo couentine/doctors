@@ -66,6 +66,7 @@ class HomeController < ApplicationController
       IntercomEventWorker.perform_async({
         'event_name' => 'viewed-pricing',
         'email' => current_user.email,
+        'user_id' => current_user.id.to_s,
         'created_at' => Time.now.to_i
       })
     end

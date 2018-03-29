@@ -40,7 +40,11 @@ class Group
         :color, { :avatar_image_url => :image_url }, { :avatar_image_medium_url => :image_medium_url }, 
         { :avatar_image_small_url => :image_small_url }, :member_count, :admin_count, :total_user_count, :badge_count, 
         :full_url, { :full_path => :relative_url }, :current_user_permissions]
-    }
+    },
+    intercom_company: [:id, :name, :created_at, { subscription_plan: :plan }, :group_url, :location, :website, :type, :flags, :user_limit, 
+      :admin_limit, :full_member_group_limit, :limited_member_group_limit, :total_user_count, :admin_count, :member_count, :pricing_group, 
+      :subscription_plan, { subscription_end_date_string: :subscription_end_date }, :stripe_subscription_id, :stripe_subscription_status, 
+      :badge_count]
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
@@ -239,6 +243,14 @@ class Group
       []
     else
       badges_cache.map{ |badge_id, badge_item| badge_item['url_with_caps'] }
+    end
+  end
+
+  def subscription_end_date_string(format = :full_date)
+    if subscription_end_date
+      return subscription_end_date.to_s(format)
+    else
+      return nil
     end
   end
 
@@ -1516,6 +1528,7 @@ class Group
       IntercomEventWorker.perform_async({
         'event_name' => intercom_event_name,
         'email' => group.owner.email,
+        'user_id' => group.owner.id.to_s,
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => group.id.to_s,
@@ -1777,6 +1790,7 @@ class Group
           IntercomEventWorker.perform_async({
             'event_name' => 'stripe-subscription-cancel',
             'email' => group.owner.email,
+            'user_id' => group.owner.id.to_s,
             'created_at' => Time.now.to_i,
             'metadata' => {
               'group_id' => group.id.to_s,
@@ -2120,6 +2134,7 @@ protected
       IntercomEventWorker.perform_async({
         'event_name' => 'group-create',
         'email' => ((creator.present?) ? creator.email : nil),
+        'user_id' => ((creator.present?) ? creator.id.to_s : nil),
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => id.to_s,

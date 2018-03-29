@@ -542,6 +542,7 @@ protected
       IntercomEventWorker.perform_async({
         'event_name' => (type == 'validation') ? 'validation-create' : 'post-create',
         'email' => creator.email,
+        'user_id' => creator.id.to_s,
         'created_at' => Time.now.to_i
       })
     end

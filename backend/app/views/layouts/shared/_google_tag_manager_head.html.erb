@@ -1,0 +1,13 @@
+<!-- === GOOGLE TAG MANAGER === -->
+  <script>
+    dataLayer = [{
+      current_user: <%= raw(current_user.json(:google_tag_manager).to_json) %>,
+      current_user_persona: "<%= @current_user_persona %>"
+    }];
+  </script>
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','<%= ENV['google_tag_manager_container_id'] %>');</script>
+<!-- === END GOOGLE TAG MANAGER === -->

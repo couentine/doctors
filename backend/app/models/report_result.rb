@@ -600,6 +600,7 @@ protected
     IntercomEventWorker.perform_async({
       'event_name' => 'report-result-create',
       'email' => user.email,
+      'user_id' => user.id.to_s,
       'created_at' => Time.now.to_i,
       'metadata' => {
         'group_id' => group_id,

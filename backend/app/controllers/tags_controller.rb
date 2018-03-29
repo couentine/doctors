@@ -136,6 +136,7 @@ class TagsController < ApplicationController
             IntercomEventWorker.perform_async({
               'event_name' => 'wiki-create',
               'email' => current_user.email,
+              'user_id' => current_user.id.to_s,
               'created_at' => Time.now.to_i,
               'metadata' => {
                 'group_id' => @group.id.to_s,

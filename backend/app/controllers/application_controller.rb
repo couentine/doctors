@@ -183,6 +183,34 @@ private
     # Set the root urls of the polymer servers
     @polymer_app_root_url = "#{ENV['root_url']}/p/app"
     @polymer_website_root_url = "#{ENV['root_url']}/p/website"
+
+    # Determine the user's persona and calculate the intercom settings
+    @current_user_persona = 'visitor'
+    if current_user.present?
+      if current_user.admin_of_ids.present?
+        @current_user_persona = 'admin'
+      elsif current_user.expert_badge_ids.present?
+        @current_user_persona = 'holder'
+      elsif current_user.learner_badge_ids.present?
+        @current_user_persona = 'seeker'
+      end
+
+      @intercom_settings = {
+        app_id: ENV['INTERCOM_APP_ID'],
+        user_hash: OpenSSL::HMAC.hexdigest('sha256', ENV['INTERCOM_USER_HASH_SECRET_KEY'], current_user.id.to_s),
+        persona: @current_user_persona
+      }.merge(current_user.json(:intercom_user))
+          
+      if @group && current_user.admin_of?(@group)
+        @intercom_settings.merge!({
+          company: @group.json(:intercom_company)
+        })
+      end
+    else
+      @intercom_settings = {
+        app_id: ENV['INTERCOM_APP_ID']
+      }
+    end
   end
 
 protected

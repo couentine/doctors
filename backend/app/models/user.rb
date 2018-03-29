@@ -23,7 +23,11 @@ class User
       :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url,  :learner_badge_count, :expert_badge_count,
       :async_callback_poller_id],
     group_list_item: [:id, :name, :username, :username_with_caps, :group_validation_request_counts,
-      :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :full_path] 
+      :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :full_path],
+    intercom_user: [:name, { id: :user_id }, :email, :created_at, { username_with_caps: :username }, :profile_url, :flags, :admin, 
+      :job_title, :organization_name, :website, :bio, :admin_group_count, :member_group_count, :learner_badge_count, :expert_badge_count],
+    google_tag_manager: [:id, :name, { username_with_caps: :username }, :admin, :learner_badge_count, :expert_badge_count, 
+      :member_group_count, :admin_group_count, :job_title, :organization_name ]
   }
 
   INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'
@@ -218,6 +222,14 @@ class User
 
   def email_verification_needed
     !self.confirmed? || self.pending_reconfirmation?
+  end
+
+  def admin_group_count
+    (admin_of_ids || []).count
+  end
+
+  def member_group_count
+    (member_of_ids || []).count
   end
 
   def learner_badge_count
@@ -1111,6 +1123,7 @@ class User
         IntercomEventWorker.perform_async({
           'event_name' => 'stripe-card-add',
           'email' => user.email,
+          'user_id' => user.id.to_s,
           'created_at' => Time.now.to_i
         })
       else
@@ -1118,6 +1131,7 @@ class User
         IntercomEventWorker.perform_async({
           'event_name' => 'stripe-card-rejected',
           'email' => user.email,
+          'user_id' => user.id.to_s,
           'created_at' => Time.now.to_i
         })
 
@@ -1190,6 +1204,7 @@ class User
         IntercomEventWorker.perform_async({
           'event_name' => 'stripe-card-delete',
           'email' => user.email,
+          'user_id' => user.id.to_s,
           'created_at' => Time.now.to_i
         })
       else
@@ -1341,6 +1356,7 @@ protected
       IntercomEventWorker.perform_async({
         'event_name' => 'group-join',
         'email' => email_address,
+        'user_id' => id.to_s,
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => group.id.to_s,

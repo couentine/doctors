@@ -8,7 +8,6 @@
       <title><%= full_title(yield(:title)).html_safe %></title>
     <% end %>
 
-    <%= render 'layouts/shared/analytics.html.erb' if Rails.env.production? %>
     <%= render 'layouts/shared/fonts.html.erb' %>
     <%= stylesheet_link_tag "embed", media: "all" %>
     <%= javascript_include_tag "embed" %>

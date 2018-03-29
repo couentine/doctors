@@ -33,6 +33,9 @@
 %>
 
   <head>
+    <% #=== GOOGLE TAG MANAGER (Loads Google Analytics, Intercom, etc.) - TAG 1 OF 2 ===# %>
+    <%= render 'layouts/shared/google_tag_manager_head' %>
+
     <% #=== PAGE TITLE, APP ICON & BASE ===# %>
       
       <% if content_for? :full_title %>
@@ -44,7 +47,6 @@
     
     <% #=== ANALYTICS, FONTS, ICONS, SHIM, ETC. ===# %>
       
-      <%= render 'layouts/shared/analytics' if Rails.env.production? %>
       <%= render 'layouts/shared/fonts' %>
       <link rel="stylesheet" 
         href="//fonts.googleapis.com/icon?family=Material+Icons">
@@ -104,12 +106,16 @@
         <meta name="twitter:image" content="<%= yield(:metadata_image) %>" />
         <meta name="twitter:url" content="<%= yield(:metadata_url) %>" />
       <% end %>
-  
+    
+    <% #=== INTERCOM ===# %>
+    <%= render 'layouts/shared/intercom' %>
   </head>
 
   <% #=== PAGE BODY ===# %>
 
   <body unresolved>
+    <% #=== GOOGLE TAG MANAGER (Loads Google Analytics, Intercom, etc.) - TAG 2 OF 2 ===# %>
+    <%= render 'layouts/shared/google_tag_manager_body' %>
 
     <template is="dom-bind" id="appLayout">
 
