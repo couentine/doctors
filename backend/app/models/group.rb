@@ -40,7 +40,11 @@ class Group
         :color, { :avatar_image_url => :image_url }, { :avatar_image_medium_url => :image_medium_url }, 
         { :avatar_image_small_url => :image_small_url }, :member_count, :admin_count, :total_user_count, :badge_count, 
         :full_url, { :full_path => :relative_url }, :current_user_permissions]
-    }
+    },
+    intercom_company: [:id, :name, :created_at, { subscription_plan: :plan }, :group_url, :location, :website, :type, :flags, :user_limit, 
+      :admin_limit, :full_member_group_limit, :limited_member_group_limit, :total_user_count, :admin_count, :member_count, :pricing_group, 
+      :subscription_plan, :subscription_end_date, :stripe_payment_fail_date, :stripe_payment_retry_date, :stripe_subscription_card, 
+      :stripe_subscription_id, :stripe_subscription_status, :badge_count]
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
