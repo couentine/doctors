@@ -979,4 +979,28 @@ namespace :db do
     puts " >> Done."
   end
 
+  # This looks for any users which are missing from intercom and creates them. It shouldn't normally be necessary to run this.
+  # NOTE: It only checks for users who have been active in the last 45 days
+  task backpopulate_intercom_users: :environment do
+    user_criteria = User.where(:last_active.gte => 45.days.ago)
+    intercom = Intercom::Client.new(token: ENV['INTERCOM_TOKEN'])
+
+    puts "===CHECKING FOR 45 DAY ACTIVE USERS WHO ARE MISSING FROM INTERCOM==="
+    puts "===> ACTIVE USER COUNT: #{user_criteria.count}"
+    print "===> Running..."
+
+    user_criteria.each do |user|
+      intercom_user = intercom.users.find(user_id: user.id) rescue nil
+
+      if intercom_user.blank?
+        intercom_user = intercom.users.create(email: user.email, name: user.name, user_id: user.id.to_s, signed_up_at: user.created_at.to_i)
+        print '+'
+      else
+        print '.'
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end
