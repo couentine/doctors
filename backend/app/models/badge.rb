@@ -1220,6 +1220,7 @@ protected
       IntercomEventWorker.perform_async({
         'event_name' => 'badge-create',
         'email' => creator.email,
+        'user_id' => creator.id.to_s,
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => group.id.to_s,

@@ -1516,6 +1516,7 @@ class Group
       IntercomEventWorker.perform_async({
         'event_name' => intercom_event_name,
         'email' => group.owner.email,
+        'user_id' => group.owner.id.to_s,
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => group.id.to_s,
@@ -1777,6 +1778,7 @@ class Group
           IntercomEventWorker.perform_async({
             'event_name' => 'stripe-subscription-cancel',
             'email' => group.owner.email,
+            'user_id' => group.owner.id.to_s,
             'created_at' => Time.now.to_i,
             'metadata' => {
               'group_id' => group.id.to_s,
@@ -2120,6 +2122,7 @@ protected
       IntercomEventWorker.perform_async({
         'event_name' => 'group-create',
         'email' => ((creator.present?) ? creator.email : nil),
+        'user_id' => ((creator.present?) ? creator.id.to_s : nil),
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => id.to_s,

@@ -223,6 +223,7 @@ class Log
       IntercomEventWorker.perform_async({
         'event_name' => 'log-bulk-validation',
         'email' => creator_user.email,
+        'user_id' => creator_user.id.to_s,
         'created_at' => Time.now.to_i,
         'metadata' => { 'log_count' => logs.count }
       })
@@ -804,6 +805,7 @@ protected
         IntercomEventWorker.perform_async({
           'event_name' => 'badge-retracted',
           'email' => user.email,
+          'user_id' => user.id.to_s,
           'created_at' => Time.now.to_i,
           'metadata' => {
             'badge_id' => badge.id.to_s,

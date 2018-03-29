@@ -422,6 +422,7 @@ class BadgesController < ApplicationController
         IntercomEventWorker.perform_async({
           'event_name' => 'group-join',
           'email' => user.email,
+          'user_id' => user.id.to_s,
           'created_at' => Time.now.to_i,
           'metadata' => {
             'group_id' => @group.id.to_s,

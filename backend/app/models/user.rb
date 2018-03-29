@@ -1111,6 +1111,7 @@ class User
         IntercomEventWorker.perform_async({
           'event_name' => 'stripe-card-add',
           'email' => user.email,
+          'user_id' => user.id.to_s,
           'created_at' => Time.now.to_i
         })
       else
@@ -1118,6 +1119,7 @@ class User
         IntercomEventWorker.perform_async({
           'event_name' => 'stripe-card-rejected',
           'email' => user.email,
+          'user_id' => user.id.to_s,
           'created_at' => Time.now.to_i
         })
 
@@ -1190,6 +1192,7 @@ class User
         IntercomEventWorker.perform_async({
           'event_name' => 'stripe-card-delete',
           'email' => user.email,
+          'user_id' => user.id.to_s,
           'created_at' => Time.now.to_i
         })
       else
@@ -1341,6 +1344,7 @@ protected
       IntercomEventWorker.perform_async({
         'event_name' => 'group-join',
         'email' => email_address,
+        'user_id' => id.to_s,
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => group.id.to_s,

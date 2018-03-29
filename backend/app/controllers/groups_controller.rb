@@ -373,6 +373,7 @@ class GroupsController < ApplicationController
         IntercomEventWorker.perform_async({
           'event_name' => 'group-join',
           'email' => current_user.email,
+          'user_id' => current_user.id.to_s,
           'created_at' => Time.now.to_i,
           'metadata' => {
             'group_id' => @group.id.to_s,
@@ -410,6 +411,7 @@ class GroupsController < ApplicationController
     IntercomEventWorker.perform_async({
       'event_name' => 'group-depart',
       'email' => current_user.email,
+      'user_id' => current_user.id.to_s,
       'created_at' => Time.now.to_i,
       'metadata' => {
         'group_id' => @group.id.to_s,
@@ -475,6 +477,7 @@ class GroupsController < ApplicationController
       IntercomEventWorker.perform_async({
         'event_name' => 'group-depart',
         'email' => @user.email,
+        'user_id' => @user.id.to_s,
         'created_at' => Time.now.to_i,
         'metadata' => {
           'group_id' => @group.id.to_s,
@@ -737,6 +740,7 @@ class GroupsController < ApplicationController
           IntercomEventWorker.perform_async({
             'event_name' => (@type == :admin) ? 'group-admins-invite' : 'group-members-invite',
             'email' => current_user.email,
+            'user_id' => current_user.id.to_s,
             'created_at' => Time.now.to_i,
             'metadata' => {
               'group_id' => @group.id.to_s,
@@ -807,6 +811,7 @@ class GroupsController < ApplicationController
                   IntercomEventWorker.perform_async({
                     'event_name' => 'group-join',
                     'email' => user.email,
+                    'user_id' => user.id.to_s,
                     'created_at' => Time.now.to_i,
                     'metadata' => {
                       'group_id' => @group.id.to_s,
@@ -967,6 +972,7 @@ class GroupsController < ApplicationController
           IntercomEventWorker.perform_async({
             'event_name' => 'copy-badges',
             'email' => current_user.email,
+            'user_id' => current_user.id.to_s,
             'created_at' => Time.now.to_i,
             'metadata' => {
               'from_group_id' => @group.id.to_s,
