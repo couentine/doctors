@@ -25,7 +25,9 @@ class User
     group_list_item: [:id, :name, :username, :username_with_caps, :group_validation_request_counts,
       :avatar_image_url, :avatar_image_medium_url, :avatar_image_small_url, :full_path],
     intercom_user: [:name, { id: :user_id }, :email, :created_at, { username_with_caps: :username }, :profile_url, :flags, :admin, 
-      :job_title, :organization_name, :website, :bio, :admin_group_count, :member_group_count, :learner_badge_count, :expert_badge_count]
+      :job_title, :organization_name, :website, :bio, :admin_group_count, :member_group_count, :learner_badge_count, :expert_badge_count],
+    google_tag_manager: [:id, :name, { username_with_caps: :username }, :admin, :learner_badge_count, :expert_badge_count, 
+      :member_group_count, :admin_group_count, :job_title, :organization_name ]
   }
 
   INACTIVE_EMAIL_LIST_KEY = 'postmark-inactive-emails'

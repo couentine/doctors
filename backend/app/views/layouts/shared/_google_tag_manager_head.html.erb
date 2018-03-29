@@ -1,7 +1,7 @@
 <!-- === GOOGLE TAG MANAGER === -->
   <script>
     dataLayer = [{
-      current_user: <%= raw(@current_user_json) %>,
+      current_user: <%= raw(current_user.json(:google_tag_manager).to_json) %>,
       current_user_persona: "<%= @current_user_persona %>"
     }];
   </script>

@@ -43,8 +43,8 @@ class Group
     },
     intercom_company: [:id, :name, :created_at, { subscription_plan: :plan }, :group_url, :location, :website, :type, :flags, :user_limit, 
       :admin_limit, :full_member_group_limit, :limited_member_group_limit, :total_user_count, :admin_count, :member_count, :pricing_group, 
-      :subscription_plan, :subscription_end_date, :stripe_payment_fail_date, :stripe_payment_retry_date, :stripe_subscription_card, 
-      :stripe_subscription_id, :stripe_subscription_status, :badge_count]
+      :subscription_plan, { subscription_end_date_string: :subscription_end_date }, :stripe_subscription_id, :stripe_subscription_status, 
+      :badge_count]
   }
 
   PENDING_TRANSFER_FLAG = 'pending_transfer'
@@ -243,6 +243,14 @@ class Group
       []
     else
       badges_cache.map{ |badge_id, badge_item| badge_item['url_with_caps'] }
+    end
+  end
+
+  def subscription_end_date_string(format = :full_date)
+    if subscription_end_date
+      return subscription_end_date.to_s(format)
+    else
+      return nil
     end
   end
 
