@@ -2,6 +2,9 @@
 <html>
 
   <head>
+    <% #=== GOOGLE TAG MANAGER (Loads Google Analytics, Intercom, etc.) - TAG 1 OF 2 ===# %>
+    <%= render 'layouts/shared/google_tag_manager_head' %>
+
     <% if content_for? :full_title %>
       <title><%= yield(:full_title) %></title>
     <% else %>
@@ -19,7 +22,6 @@
       </script>
     <% end %>
 
-    <%= render 'layouts/shared/analytics' if Rails.env.production? %>
     <%= render 'layouts/shared/fonts' %>
     <%= stylesheet_link_tag "legacy", media: "all" %>
     <%= javascript_include_tag "legacy" %>
@@ -64,10 +66,15 @@
     <% if content_for? :include_bl_icons %>
       <%= stylesheet_link_tag "shared/bl-icons/style.css", media: "all" %>
     <% end %>
+    
+    <% #=== INTERCOM ===# %>
+    <%= render 'layouts/shared/intercom' %>
   </head>
 
-  <body class="<%= "with-subheader" if content_for?(:show_subheader) \
-    %> <%= yield(:body_class) if content_for?(:body_class) %>" >
+  <body class="<%= "with-subheader" if content_for?(:show_subheader) %> <%= yield(:body_class) if content_for?(:body_class) %>" >
+    <% #=== GOOGLE TAG MANAGER (Loads Google Analytics, Intercom, etc.) - TAG 2 OF 2 ===# %>
+    <%= render 'layouts/shared/google_tag_manager_body' %>
+
     <%= render 'layouts/legacy/header' %>
     <div class="container">
       <% flash.each do |key, value| %>

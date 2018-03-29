@@ -47,7 +47,8 @@ twitter_access_token=abc123
 twitter_access_secret=abc123
 ULTRAHOOK_API_KEY=abc123
 INTERCOM_APP_ID=abc123
-INTERCOM_API_KEY=abc123
+INTERCOM_TOKEN=abc123
+INTERCOM_USER_HASH_SECRET_KEY=abc123
 WEB_CONCURRENCY=1
 MIN_THREADS=1
 MAX_THREADS=1
@@ -62,6 +63,7 @@ lti_app_name=Badge List Dev
 lti_app_description=Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.
 lti_unique_tool_id=badgelist-dev
 bl_admin_email=app-errors@badgelist.com
+google_tag_manager_container_id=GTM-ABC123
 ```
 
 ## Running the app ##

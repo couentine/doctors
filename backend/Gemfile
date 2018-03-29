@@ -59,8 +59,7 @@ ruby '2.3.4'
 #=== EXTERNAL WEB SERVICES ===#
 
   gem 'stripe', '~> 1.33'
-  gem 'intercom', '~> 3.0'
-  gem 'intercom-rails'
+  gem 'intercom', '~> 3.5'
   gem 'postmark-rails', '~> 0.5'
   gem 'twitter'
   gem 'embedly'

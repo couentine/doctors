@@ -12,6 +12,9 @@
 %>
 
   <head>
+    <% #=== GOOGLE TAG MANAGER (Loads Google Analytics, Intercom, etc.) - TAG 1 OF 2 ===# %>
+    <%= render 'layouts/shared/google_tag_manager_head' %>
+
     <% #=== PAGE TITLE, APP ICON & BASE ===# %>
     <title>Badge List</title>
     <link rel="icon" type="image/png" href="<%= image_path('badge-list-icon-32-square.png') %>"/>
@@ -21,9 +24,6 @@
     <meta name="apple-mobile-web-app-title" content="Badge List">
     <link rel="apple-touch-icon" href="https://badgelist.s3.amazonaws.com/images/badge-list-icon.png">
     <meta name="apple-mobile-web-app-status-bar-style" content="#FF9800">
-    
-    <% #=== ANALYTICS ===# %>
-    <%= render 'layouts/shared/analytics' if Rails.env.production? %>
 
     <% #=== METADATA ===# %>
     <meta charset="utf-8">
@@ -50,6 +50,9 @@
 
     <% #=== BADGE LIST SERVICE WORKER SCRIPT ===# %>
     <%= render 'layouts/shared/service_worker_script' %>
+    
+    <% #=== INTERCOM ===# %>
+    <%= render 'layouts/shared/intercom' %>
   </head>
 
   <style type="text/css">
@@ -90,6 +93,8 @@
 
   <% #=== PAGE BODY ===# %>
   <body class="loading">
+    <% #=== GOOGLE TAG MANAGER (Loads Google Analytics, Intercom, etc.) - TAG 2 OF 2 ===# %>
+    <%= render 'layouts/shared/google_tag_manager_body' %>
 
     <%= yield %>
 
