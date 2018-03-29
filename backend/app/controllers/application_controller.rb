@@ -166,6 +166,7 @@ private
   def set_app_variables
     # Set the current user json var
     @current_user_json = (current_user) ? current_user.json(:current_user).to_json : '{}'
+    @current_user_gtm_json = (current_user) ? current_user.json(:google_tag_manager).to_json : '{}'
 
     # The @asset_paths variable is passed into bl-app-container.assetPaths and is used to provide
     # the paths of the various asset paths to the Polymer front end.
