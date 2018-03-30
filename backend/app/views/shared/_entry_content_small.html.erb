@@ -103,7 +103,7 @@
   <!-- === FREE TEXT RESPONSE === -->
   <div class="panel panel-entry-content panel-entry-content-text">
     <% entry.body_sections.each do |section_text| %>
-      <div class="section-container"><%= section_text.html_safe %></div>
+      <div class="section-container"><%= section_text.to_s.html_safe %></div>
     <% end unless entry.body_sections.blank? %>
   </div>
 
