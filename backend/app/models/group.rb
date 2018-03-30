@@ -872,7 +872,7 @@ class Group
   # Returns an empty array if there are no tags or if none have been attached to users.
   # Set [first] to an integer get the top [first] items
   def top_user_tags(first = nil)
-    return_list = top_user_tags_cache.select{ |tag_item| tag_item['user_magnitude'] > 0 }
+    return_list = top_user_tags_cache.select{ |tag_item| (tag_item['user_magnitude'] || tag_item[:user_magnitude] || 0) > 0 }
     if !first.blank?
       return_list = return_list.first(first)
     end
@@ -884,7 +884,7 @@ class Group
   # Returns an empty array if there are no tags or if none have been attached to badges.
   # Set [first] to an integer get the top [first] items
   def top_badge_tags(first = nil)
-    return_list = top_badge_tags_cache.select{ |tag_item| tag_item['badge_magnitude'] > 0 }
+    return_list = top_badge_tags_cache.select{ |tag_item| (tag_item['badge_magnitude'] || tag_item[:badge_magnitude] || 0) > 0 }
     if !first.blank?
       return_list = return_list.first(first)
     end
