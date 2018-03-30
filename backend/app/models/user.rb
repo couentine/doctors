@@ -413,7 +413,7 @@ class User
   end
 
   def self.delete_from_intercom(email)
-    intercom = Intercom::Client.new
+    intercom = Intercom::Client.new(token: ENV['INTERCOM_TOKEN'])
     intercom_user = intercom.users.find(email: email)
     intercom_user.delete if intercom_user
   end

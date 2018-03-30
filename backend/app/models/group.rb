@@ -942,27 +942,13 @@ class Group
   end
 
   # Adds or updates the specified tag in tags_cache w/o querying the tag
-  def update_tags_cache(tag_json)
-    self.tags_cache[tag_json['_id'].to_s] = tag_json
-  end
-  
-  # Same as above but for async calls
-  def self.update_tags_cache(group_id, tag_json)
-    group = Group.find(group_id)
-    group.update_tags_cache tag_json
-    group.timeless.save
+  def update_tags_cache(group_tag)
+    self.tags_cache[group_tag.id.to_s] = group_tag.as_json(only: GroupTag::GROUP_CACHE_FIELDS)
   end
 
   # Removes the specified tag_id from tags_cache w/o querying the tag
   def remove_tag_from_cache(tag_id)
     self.tags_cache.delete tag_id.to_s
-  end
-
-  # Same as above but for async calls
-  def self.remove_tag_from_cache(group_id, tag_id)
-    group = Group.find(group_id)
-    group.remove_tag_from_cache tag_id
-    group.timeless.save
   end
 
   # Queries for all group_tags related to any of the specified user_ids and then removes the users

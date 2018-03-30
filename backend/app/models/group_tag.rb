@@ -618,12 +618,14 @@ protected
     changed_cache_field_names = changed & cache_field_names
 
     unless changed_cache_field_names.blank? # this should always be true when it's a new record
-      Group.delay(queue: 'low').update_tags_cache(group_id, self.as_json(only: GROUP_CACHE_FIELDS))
+      group.update_tags_cache(self)
+      group.timeless.save
     end
   end
 
   def remove_from_group_cache_before_destroy
-    Group.delay(queue: 'low').remove_tag_from_cache(group_id, id)
+    group.remove_tag_from_cache(id)
+    group.timeless.save
   end
 
 end
