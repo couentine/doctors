@@ -2009,11 +2009,11 @@ protected
     if tags_cache_changed?
       self.top_user_tags_cache = tags_cache.values.sort_by do |tag_item| 
         # Sort first by the magnitude descending, then by name ascending
-        [tag_item['user_magnitude']*-1, tag_item['name']]
+        [(tag_item['user_magnitude'] || tag_item[:user_magnitude] || 0)*-1, tag_item['name']]
       end
       self.top_badge_tags_cache = tags_cache.values.sort_by do |tag_item|
         # Sort first by the magnitude descending, then by name ascending
-        [tag_item['badge_magnitude']*-1, tag_item['name']]
+        [(tag_item['badge_magnitude'] || tag_item[:badge_magnitude] || 0)*-1, tag_item['name']]
       end
     end
   end
