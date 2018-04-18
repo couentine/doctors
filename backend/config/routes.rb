@@ -39,8 +39,14 @@ BadgeList::Application.routes.draw do
   # === API PATHS === #
   namespace :api do
     namespace :v1 do
-      resources :groups, only: [:index, :show]
+      resources :groups, only: [:index, :show] do
+        resources :badges, only: [:index]
+        resources :users, only: [:index]
+      end
       resources :badges, only: [:index, :show]
+      resources :users, only: [:show] do
+        resources :groups, only: [:index]
+      end
       resources :authentication_tokens, only: [:index, :create, :show, :destroy]
 
       match 'swagger.json' => 'docs#external', via: :get

@@ -1,8 +1,8 @@
 class AuthenticationTokenPolicy < ApplicationPolicy
-  attr_reader :user, :authentication_token, :authentication_tokens
+  attr_reader :current_user, :authentication_token, :authentication_tokens
 
-  def initialize(user, token_or_tokens)
-    @user = user
+  def initialize(current_user, token_or_tokens)
+    @current_user = current_user
     if (token_or_tokens.class == Mongoid::Criteria)
       @authentication_tokens = token_or_tokens
       @records = token_or_tokens
@@ -15,19 +15,19 @@ class AuthenticationTokenPolicy < ApplicationPolicy
   #=== ACTION POLICIES ===#
 
   def index?
-    return @user.present? && @user.has?('authentication_tokens:read')
+    return @current_user.present? && @current_user.has?('authentication_tokens:read')
   end
 
   def show?
-    return @user.present? && @user.has?('authentication_tokens:read') && user_can_manage_token?
+    return @current_user.present? && @current_user.has?('authentication_tokens:read') && user_can_manage_token?
   end
 
   def create?
-    return @user.present? && @user.has?('authentication_tokens:write')
+    return @current_user.present? && @current_user.has?('authentication_tokens:write')
   end
 
   def destroy?
-    return @user.present? && @user.has?('authentication_tokens:write') && user_can_manage_token?
+    return @current_user.present? && @current_user.has?('authentication_tokens:write') && user_can_manage_token?
   end
 
   #=== USER-FACING METADATA ===#
@@ -45,7 +45,7 @@ class AuthenticationTokenPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if @user.present?
+      if @current_user.present?
         scope.where(user_id: @user.id)
       else
         nil

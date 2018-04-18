@@ -75,11 +75,11 @@ module Api::V1::SharedOperationFormats
     # EXAMPLE USAGE:
     # - item_model = :badge
     # - parent_model = :group (If parent model is left out then no parent_path parameter is included)
-    def define_id_parameters(item_model, parent_model = nil)
+    def define_id_parameters(item_model, parent_model = nil, slug_parameter = :slug)
       spaced_item_model = item_model.to_s.gsub('_', ' ')
-      description_text = "The id or the (case-insensitive) slug of the #{spaced_item_model} record."
+      description_text = "The id or the (case-insensitive) #{slug_parameter.to_s} of the #{spaced_item_model} record."
       if parent_model.present?
-        description_text += " If you use the slug then you must also specify the `parent_path` parameter."
+        description_text += " If you use the #{slug_parameter.to_s} then you must also specify the `parent_path` parameter."
       end
 
       parameter do
@@ -94,8 +94,8 @@ module Api::V1::SharedOperationFormats
         parameter do
           key :name, :parent_path
           key :in, :query
-          key :description, "The slug or id of the parent #{parent_model} record. " \
-            "Only specify this parameter if you are using the slug as the value in the `id` parameter."
+          key :description, "The #{slug_parameter.to_s} or id of the parent #{parent_model} record. " \
+            "Only specify this parameter if you are using the #{slug_parameter.to_s} as the value in the `id` parameter."
           key :type, :string
           key :required, false
         end
@@ -224,16 +224,29 @@ module Api::V1::SharedOperationFormats
     # EXAMPLE USAGE:
     # - model = :badge
     # - summary = 'Gets a list of all badges the current user has joined'
-    def define_basic_info(model, summary)
+    def define_basic_info(model, summary, parent_model = nil)
       camelized_model = model.to_s.camelize
       uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
 
-      key :operationId, "#{uncapitalized_camelized_model}Index"
-      key :summary, summary
-      key :tags, [
-        'paginatedListFormat',
-        "#{uncapitalized_camelized_model}Model"
-      ]
+      if parent_model.present?
+        camelized_parent_model = parent_model.to_s.camelize
+        uncapitalized_camelized_parent_model = camelized_parent_model[0, 1].downcase + camelized_parent_model[1..-1]
+        
+        key :operationId, "#{uncapitalized_camelized_parent_model}#{camelized_model}List"
+        key :summary, summary
+        key :tags, [
+          'paginatedListFormat',
+          "#{uncapitalized_camelized_parent_model}Model",
+          "#{uncapitalized_camelized_model}Model"
+        ]
+      else
+        key :operationId, "#{uncapitalized_camelized_model}List"
+        key :summary, summary
+        key :tags, [
+          'paginatedListFormat',
+          "#{uncapitalized_camelized_model}Model"
+        ]
+      end
     end
 
     # EXAMPLE USAGE:

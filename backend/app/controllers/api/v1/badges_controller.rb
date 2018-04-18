@@ -11,22 +11,57 @@ class Api::V1::BadgesController < Api::V1::BaseController
   DEFAULT_SORT_ORDER = :asc
 
   DEFAULT_FILTER = {
-    status: 'all'
+    status: 'all',
+    visibility: 'all'
   }
 
   #=== ACTIONS ===#
 
+  # This can be accessed via the my badges index (only available to logged in users) or via the group badges index (available to anyone who
+  # can see that group).
   def index
-    authorize :badge # rejects if current user is blank
+    # Determine mode we are in (group badge index or my badge index), then authorize the appropriate policy
+    if params[:group_id].present?
+      @group = Group.find(params[:group_id]) rescue nil
+      if @group
+        authorize @group, :badges_index?
+      else
+        skip_authorization
 
-    # Build the core criteria based on the filter
-    load_filter
-    if @filter[:status] == 'seeker'
-      badge_criteria = Badge.where(:id.in => @current_user.learner_badge_ids)
-    elsif @filter[:status] == 'holder'
-      badge_criteria = Badge.where(:id.in => @current_user.expert_badge_ids)
+        return render_not_found
+      end
     else
-      badge_criteria = Badge.where(:id.in => @current_user.all_badge_ids)
+      authorize :badge
+    end
+
+    # Build the core criteria based on the filter and on the current users permission (if relevant)
+    load_filter
+    if @group
+      if (@filter[:visibility] == 'all') 
+        allowed_visibility_values = [:public, :private, :hidden]
+      else 
+        allowed_visibility_values = [@filter[:visibility]]
+      end
+      badge_criteria = @group.badges.where(:visibility.in => allowed_visibility_values)
+
+      if @current_user.present? && (@current_user.admin || @current_user.admin_of?(@group))
+        badge_criteria = badge_criteria
+      elsif @current_user.present? && @current_user.member_of?(@group)
+        badge_criteria = badge_criteria.any_of(
+          {:visibility.ne => 'hidden'}, 
+          {:id.in => @current_user.all_badge_ids}
+        )
+      else
+        badge_criteria = badge_criteria.where(visibility: 'public')
+      end
+    else
+      if @filter[:status] == 'seeker'
+        badge_criteria = Badge.where(:id.in => @current_user.learner_badge_ids)
+      elsif @filter[:status] == 'holder'
+        badge_criteria = Badge.where(:id.in => @current_user.expert_badge_ids)
+      else
+        badge_criteria = Badge.where(:id.in => @current_user.all_badge_ids)
+      end
     end
     
     # Generate @sort_string from the sort parameter and load the pagination variables

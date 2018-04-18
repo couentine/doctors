@@ -9,6 +9,8 @@ class Api::V1::DocsController < ActionController::Base
     Api::V1::ErrorSchemas,
     Api::V1::GroupPaths,
     Api::V1::GroupSchemas,
+    Api::V1::UserPaths,
+    Api::V1::UserSchemas,
     self
   ].freeze
 
@@ -20,6 +22,8 @@ class Api::V1::DocsController < ActionController::Base
     Api::V1::BadgeSchemas,
     Api::V1::GroupPaths,
     Api::V1::GroupSchemas,
+    Api::V1::UserPaths,
+    Api::V1::UserSchemas,
     self
   ].freeze
 
@@ -47,10 +51,10 @@ class Api::V1::DocsController < ActionController::Base
         "[OpenAPI/Swagger specification](https://swagger.io/docs/specification/2-0/basic-structure/).\n\n" \
         "If you have any questions you can contact us at team@badgelist.com.\n\n" \
         \
-        "## Release Notes (March 2018) ##\n" \
-        "We have just released v1 of the Badge List API. The initial release only contains endpoints for groups and " \
-        "badges. We are actively working to release new endpoints, so check back here often to get the latest. " \
-        "Next up: Users, portfolios and group tags. After that we will work through the remaining objects and actions until we achieve " \
+        "## Release Notes (April 2018) ##\n" \
+        "We have just released v1 of the Badge List API. The initial release only contains endpoints for groups, badges, users " \
+        "and portfolios. We are actively working to release new endpoints, so check back here often to get the latest. " \
+        "Next up: Group tags. After that we will work through the remaining objects and actions until we achieve " \
         "full parity with the web UI.\n\n" \
         \
         "## Data Model ##\n" \
@@ -107,6 +111,14 @@ class Api::V1::DocsController < ActionController::Base
         'badge they become a "badge seeker" (aka "badge learner") and a "badge portfolio" is created for them. ' \
         'Once the badge has been awarded the user is referred to as a "badge holder" (aka "badge expert").'
     end
+    tag do
+      key :name, 'userModel'
+      key :'x-displayName', 'Users'
+      key :description, 'Every authenticated user of the system has a corresponding user record. There are two types of users. ' \
+        'Individual users are normal users created or invited through the standard process. Group users (also referred to as ' \
+        'group proxy users) are API-only user accounts which are linked to a specific group and operate with admin permissions for ' \
+        'their proxied group.'
+    end
 
     #=== OPERATION FORMAT TAGS ===#
     
@@ -140,7 +152,7 @@ class Api::V1::DocsController < ActionController::Base
     key :'x-tagGroups', [
       {
         name: 'Models',
-        tags: [:groupModel, :badgeModel]
+        tags: [:groupModel, :badgeModel, :userModel]
       },
       {
         name: 'Operation Formats',

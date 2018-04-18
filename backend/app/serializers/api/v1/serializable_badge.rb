@@ -7,6 +7,7 @@ class Api::V1::SerializableBadge < Api::V1::SerializableDocument
   
   attribute :name,                        if: -> { @show_all_fields }
   attribute :summary,                     if: -> { @show_all_fields }
+  attribute :visibility,                  if: -> { @show_all_fields }
 
   attribute :feedback_request_count,      if: -> { @show_all_fields } do 
     @object.validation_request_count

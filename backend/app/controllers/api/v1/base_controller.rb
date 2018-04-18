@@ -22,6 +22,7 @@ class Api::V1::BaseController < ApplicationController
   protect_from_forgery with: :null_session
 
   rescue_from Mongoid::Errors::DocumentNotFound, with: :render_not_found
+  rescue_from ActionController::RoutingError, with: :render_not_found
   rescue_from Pundit::NotAuthorizedError, with: :render_not_authorized
   rescue_from Api::V1::DeserializationError, with: :render_bad_request
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
@@ -38,6 +39,7 @@ class Api::V1::BaseController < ApplicationController
       AuthenticationToken: Api::V1::SerializableAuthenticationToken,
       Group: Api::V1::SerializableGroup,
       Badge: Api::V1::SerializableBadge,
+      User: Api::V1::SerializableUser,
       String: Api::V1::SerializableString
     }
   end

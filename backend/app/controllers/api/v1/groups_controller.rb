@@ -21,17 +21,42 @@ class Api::V1::GroupsController < Api::V1::BaseController
 
   #=== ACTIONS ===#
 
+  # This can be accessed via the groups index (only available to logged in users) or via the user groups index (available to anyone who
+  # can see that user).
   def index
-    authorize :group # rejects if current user is blank
+    # Determine mode we are in (user group index or my group index), then authorize the appropriate policy
+    if params[:user_id].present?
+      @user = User.find(params[:user_id]) rescue nil
+      @public_only = true
+      if @user
+        authorize @user, :groups_index? # authorizes the groups index on this specific user
+      else
+        skip_authorization
+
+        return render_not_found
+      end
+    else
+      @user = @current_user
+      @public_only = false
+      authorize :group # authorizes the "my groups" index for the current user
+    end
 
     # Build the core criteria based on the filter
     load_filter
     if @filter[:status] == 'member'
-      group_criteria = @current_user.member_of
+      if @public_only
+        group_criteria = @user.member_of.where(member_visibility: 'public')
+      else
+        group_criteria = @user.member_of
+      end
     elsif @filter[:status] == 'admin'
-      group_criteria = @current_user.admin_of
+      if @public_only
+        group_criteria = @user.admin_of.where(admin_visibility: 'public')
+      else
+        group_criteria = @user.admin_of
+      end
     else
-      group_criteria = @current_user.groups(false) # public_only = false
+      group_criteria = @user.groups(@public_only)
     end
     
     # Generate @sort_string from the sort parameter and load the pagination variables

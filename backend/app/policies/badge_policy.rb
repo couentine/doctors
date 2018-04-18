@@ -1,8 +1,8 @@
 class BadgePolicy < ApplicationPolicy
-  attr_reader :user, :badge, :badges
+  attr_reader :current_user, :badge, :badges
 
-  def initialize(user, badge_or_badges)
-    @user = user
+  def initialize(current_user, badge_or_badges)
+    @current_user = current_user
     if (badge_or_badges.class == Mongoid::Criteria)
       @badges = badge_or_badges
       @records = badge_or_badges
@@ -15,7 +15,7 @@ class BadgePolicy < ApplicationPolicy
   #=== ACTION POLICIES ===#
 
   def index?
-    return @user.present? && @user.has?('badges:read')
+    return @current_user.present? && @current_user.has?('badges:read')
   end
 
   def show?
@@ -24,20 +24,20 @@ class BadgePolicy < ApplicationPolicy
   end
 
   def edit?
-    if @user.present? && @user.has?('badges:write')
-      return true if @user.admin?
-      return true if @user.admin_of?(@badge.group_id)
-      return true if (@badge.editability == 'experts') && @user.expert_of?(@badge)
+    if @current_user.present? && @current_user.has?('badges:write')
+      return true if @current_user.admin?
+      return true if @current_user.admin_of?(@badge.group_id)
+      return true if (@badge.editability == 'experts') && @current_user.expert_of?(@badge)
     end
 
     return false
   end
   
   def award?
-    if @user.present? && @user.has?('portfolios:review')
-      return true if @user.admin?
-      return true if @user.admin_of?(@badge.group_id)
-      return true if (@badge.awardability == 'experts') && @user.expert_of?(@badge)
+    if @current_user.present? && @current_user.has?('portfolios:review')
+      return true if @current_user.admin?
+      return true if @current_user.admin_of?(@badge.group_id)
+      return true if (@badge.awardability == 'experts') && @current_user.expert_of?(@badge)
     end
 
     return false
@@ -48,11 +48,11 @@ class BadgePolicy < ApplicationPolicy
   def show_all_fields?
     return true if @badge.visibility == 'public'
     
-    if @user.present? && @user.has?('badges:read')
-      return true if @user.admin?
-      return true if @user.admin_of? @badge.group_id
-      return true if @user.learner_or_expert_of?(@badge)
-      return true if (@badge.visibility == 'private') && @user.member_of?(@badge.group_id)
+    if @current_user.present? && @current_user.has?('badges:read')
+      return true if @current_user.admin?
+      return true if @current_user.admin_of? @badge.group_id
+      return true if @current_user.learner_or_expert_of?(@badge)
+      return true if (@badge.visibility == 'private') && @current_user.member_of?(@badge.group_id)
     end
   
     return false
@@ -66,8 +66,8 @@ class BadgePolicy < ApplicationPolicy
         can_see_record: show_all_fields?,
         can_edit_record: edit?,
         can_award_record: award?,
-        is_seeker: @user.present? && @user.learner_of?(@badge),
-        is_holder: @user.present? && @user.expert_of?(@badge)
+        is_seeker: @current_user.present? && @current_user.learner_of?(@badge),
+        is_holder: @current_user.present? && @current_user.expert_of?(@badge)
       }
     }
   end
