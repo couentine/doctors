@@ -4,26 +4,26 @@ class Api::V1::DocsController < ActionController::Base
   #=== CONSTANTS ===#
 
   SWAGGERED_CLASSES_EXTERNAL = [
+    Api::V1::UserPaths,
+    Api::V1::UserSchemas,
+    Api::V1::GroupPaths,
+    Api::V1::GroupSchemas,
     Api::V1::BadgePaths,
     Api::V1::BadgeSchemas,
     Api::V1::ErrorSchemas,
-    Api::V1::GroupPaths,
-    Api::V1::GroupSchemas,
-    Api::V1::UserPaths,
-    Api::V1::UserSchemas,
     self
   ].freeze
 
   SWAGGERED_CLASSES_INTERNAL = [
-    Api::V1::AuthenticationTokenPaths, # web UI only
-    Api::V1::AuthenticationTokenSchemas, # web UI only
-    Api::V1::ErrorSchemas,
-    Api::V1::BadgePaths,
-    Api::V1::BadgeSchemas,
-    Api::V1::GroupPaths,
-    Api::V1::GroupSchemas,
     Api::V1::UserPaths,
     Api::V1::UserSchemas,
+    Api::V1::GroupPaths,
+    Api::V1::GroupSchemas,
+    Api::V1::BadgePaths,
+    Api::V1::BadgeSchemas,
+    Api::V1::ErrorSchemas,
+    Api::V1::AuthenticationTokenPaths, # web UI only
+    Api::V1::AuthenticationTokenSchemas, # web UI only
     self
   ].freeze
 
@@ -97,6 +97,14 @@ class Api::V1::DocsController < ActionController::Base
 
     # NOTE: We'll leave out the `authenticationTokenModel` tag for now since that is a hidden, internal-only tag.
     tag do
+      key :name, 'userModel'
+      key :'x-displayName', 'Users'
+      key :description, 'Every authenticated user of the system has a corresponding user record. There are two types of users. ' \
+        'Individual users are normal users created or invited through the standard process. Group users (also referred to as ' \
+        'group proxy users) are API-only user accounts which are linked to a specific group and operate with admin permissions for ' \
+        'their proxied group.'
+    end
+    tag do
       key :name, 'groupModel'
       key :'x-displayName', 'Groups'
       key :description, 'A group represents an organization of some sort (a company, a school, a district, an online community, etc). ' \
@@ -110,14 +118,6 @@ class Api::V1::DocsController < ActionController::Base
       key :description, 'Badges are digital credentials which represent specific learning skills and achievements. When a user joins a ' \
         'badge they become a "badge seeker" (aka "badge learner") and a "badge portfolio" is created for them. ' \
         'Once the badge has been awarded the user is referred to as a "badge holder" (aka "badge expert").'
-    end
-    tag do
-      key :name, 'userModel'
-      key :'x-displayName', 'Users'
-      key :description, 'Every authenticated user of the system has a corresponding user record. There are two types of users. ' \
-        'Individual users are normal users created or invited through the standard process. Group users (also referred to as ' \
-        'group proxy users) are API-only user accounts which are linked to a specific group and operate with admin permissions for ' \
-        'their proxied group.'
     end
 
     #=== OPERATION FORMAT TAGS ===#
@@ -152,7 +152,7 @@ class Api::V1::DocsController < ActionController::Base
     key :'x-tagGroups', [
       {
         name: 'Models',
-        tags: [:groupModel, :badgeModel, :userModel]
+        tags: [:userModel, :groupModel, :badgeModel]
       },
       {
         name: 'Operation Formats',
