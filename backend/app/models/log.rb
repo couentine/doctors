@@ -126,6 +126,31 @@ class Log
     validations_cache.keys
   end
 
+  # This is a unified portfolio status field. It is used by the API. It transforms the values of the validation_status field.
+  def status
+    if validation_status == 'requested'
+      return 'requested'
+    elsif validation_status == 'withdrawn'
+      return 'draft'
+    elsif validation_status == 'validated'
+      return 'endorsed'
+    else
+      return 'draft'
+    end
+  end
+
+  # Converts status to validation status for the purposes of queries and filtering
+  # Note: Some status values map to multiple validation status values, so this will return an array of strings.
+  def self.status_to_validation_stati(status)
+    if status == 'requested'
+      return ['requested']
+    elsif status == 'endorsed'
+      return ['validated']
+    else
+      return ['incomplete', 'withdrawn']
+    end
+  end
+
   # === LOG CLASS METHODS === #
 
   # Returns hash of the passed logs with their child posts injected as an 'posts' hash list.

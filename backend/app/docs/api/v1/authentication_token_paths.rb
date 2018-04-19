@@ -13,11 +13,46 @@ class Api::V1::AuthenticationTokenPaths
       define_basic_info :authentication_token, :get
 
       # Parameters
-      define_id_parameters :authentication_token
+      parameter do
+        key :name, :id
+        key :format, :id
+        key :in, :path
+        key :description, 'The id of the authentication token record'
+        key :required, true
+        key :type, :string
+      end
 
       # Responses
       define_success_response :authentication_token, 200, include: [:relationships]
       define_unauthorized_response
+      define_not_found_response
+    end
+
+    #=== DELETE AUTHENTICATION TOKEN ===#
+
+    operation :delete do
+      extend Api::V1::SharedOperationFormats::Base
+      extend Api::V1::SharedOperationFormats::RecordItem
+
+      # Basic Info
+      define_basic_info :authentication_token, :delete
+      
+      # Parameters
+      parameter do
+        key :name, :id
+        key :format, :id
+        key :in, :path
+        key :description, 'The id of the authentication token record'
+        key :required, true
+        key :type, :string
+      end
+
+      # Responses
+      response 204 do
+        key :description, 'The authentication token was successfully deleted'
+      end
+      define_unauthorized_response
+      define_not_found_response
     end
 
   end
@@ -31,7 +66,7 @@ class Api::V1::AuthenticationTokenPaths
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
-      define_basic_info :authentication_token, 'Get list of all authentication_tokens lnked to the current user'
+      define_basic_info :authentication_token, 'Get list of authentication_tokens for current user'
       
       # Parameters
       define_index_parameters :authentication_token
@@ -56,25 +91,6 @@ class Api::V1::AuthenticationTokenPaths
       # Responses
       define_success_response :authentication_token, 201, include: [:relationships]
       define_field_error_response
-      define_unauthorized_response
-    end
-
-    #=== DELETE AUTHENTICATION TOKEN ===#
-
-    operation :delete do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::RecordItem
-
-      # Basic Info
-      define_basic_info :authentication_token, :delete
-      
-      # Parameters
-      define_id_parameters :authentication_token
-
-      # Responses
-      response 204 do
-        key :description, 'The authentication token was successfully deleted'
-      end
       define_unauthorized_response
     end
 

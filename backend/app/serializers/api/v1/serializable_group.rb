@@ -20,6 +20,13 @@ class Api::V1::SerializableGroup < Api::V1::SerializableDocument
   attribute :total_user_count
   attribute :badge_count
 
-  link :self do; "/#{@object.url_with_caps}" end
+  link :self do "/api/v1/groups/#{@object.id.to_s}" end
+
+  has_many :badges do
+    link :self do "/api/v1/groups/#{@object.id.to_s}/badges" end
+  end
+  has_many :users do
+    link :self do "/api/v1/groups/#{@object.id.to_s}/users" end
+  end
 
 end

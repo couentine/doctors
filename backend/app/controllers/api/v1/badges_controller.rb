@@ -10,23 +10,41 @@ class Api::V1::BadgesController < Api::V1::BaseController
   DEFAULT_SORT_FIELD = :name
   DEFAULT_SORT_ORDER = :asc
 
-  DEFAULT_FILTER = {
+  MY_BADGES_INDEX_FILTER = {
     status: 'all'
   }
 
   #=== ACTIONS ===#
 
+  # This can be accessed via the my badges index (only available to logged in users) or via the group badges index (available to anyone who
+  # can see that group).
   def index
-    authorize :badge # rejects if current user is blank
+    # Determine mode we are in (group badge index or my badge index), then authorize the appropriate policy
+    if params[:group_id].present?
+      @group = Group.find(params[:group_id]) rescue nil
+      if @group
+        authorize @group, :badges_index?
+      else
+        skip_authorization
 
-    # Build the core criteria based on the filter
-    load_filter
-    if @filter[:status] == 'seeker'
-      badge_criteria = Badge.where(:id.in => @current_user.learner_badge_ids)
-    elsif @filter[:status] == 'holder'
-      badge_criteria = Badge.where(:id.in => @current_user.expert_badge_ids)
+        return render_not_found
+      end
     else
-      badge_criteria = Badge.where(:id.in => @current_user.all_badge_ids)
+      authorize :badge
+    end
+
+    # Build the core criteria based on the filter and on the current users permission (if relevant)
+    if @group
+      badge_criteria = BadgePolicy::GroupScope.new(@current_user, @group.badges, @group).resolve
+    else
+      load_filter MY_BADGES_INDEX_FILTER
+      if @filter[:status] == 'seeker'
+        badge_criteria = Badge.where(:id.in => @current_user.learner_badge_ids)
+      elsif @filter[:status] == 'holder'
+        badge_criteria = Badge.where(:id.in => @current_user.expert_badge_ids)
+      else
+        badge_criteria = Badge.where(:id.in => @current_user.all_badge_ids)
+      end
     end
     
     # Generate @sort_string from the sort parameter and load the pagination variables
@@ -42,24 +60,13 @@ class Api::V1::BadgesController < Api::V1::BaseController
   end
 
   def show
-    if params[:parent_path].present?
-      @badge = Badge.find(params[:parent_path] + '.' + params[:id])
-    else
-      @badge = Badge.find(params[:id])
-    end
-
-    # NOTE: This is currently undocumented. Also we need to check that the authentication token has permission to read groups.
-    if params[:include] == 'group'
-      @include = [:group]
-    else
-      @include = nil
-    end
+    @badge = Badge.find(params[:id])
 
     if @badge
       authorize @badge # always returns true, fields are filtered in the serializer
       
       @policy = Pundit.policy(@current_user, @badge)
-      render_json_api @badge, expose: { show_all_fields: @policy.show_all_fields?, meta: @policy.meta }, include: @include
+      render_json_api @badge, expose: { show_all_fields: @policy.show_all_fields?, meta: @policy.meta }
     else
       skip_authorization
 

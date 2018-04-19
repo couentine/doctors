@@ -272,11 +272,13 @@ class User
 
   # === CLASS METHODS === #
 
-  # This will find by ObjectId OR by username
+  # This will find by email OR by ObjectId OR by username
   def self.find(input)
     user = nil
 
-    if input.to_s.match /^[0-9a-fA-F]{24}$/
+    if input.to_s.include? '@'
+      user = User.find_by(email: input.downcase) rescue nil
+    elsif input.to_s.match /^[0-9a-fA-F]{24}$/
       user = super rescue nil
     end
 

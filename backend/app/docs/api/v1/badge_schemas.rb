@@ -24,6 +24,12 @@ class Api::V1::BadgeSchemas
       key :description, 'Short summary of the badge and what badge holders have done to earn the badge'
       key :example, 'Demonstrated understanding of orbital and launch mechanics. Acceleration, braking, orbital velocity calculations.'
     end
+    property :visibility do
+      key :type, :string
+      key :enum, [:public, :private, :hidden]
+      key :description, 'Specifies who can see this badge: Everyone on the public internet (`public`), only group members (`private`) or ' \
+        'only badge members (`hidden`)'
+    end
 
     property :feedback_request_count do
       key :type, :integer
@@ -103,6 +109,7 @@ class Api::V1::BadgeSchemas
     key :type, :object
 
     define_relationship_property :group, 'The parent group to which the badge belongs'
+    define_relationship_property :portfolios, 'The list of portfolios for this badge'
   end
 
 end

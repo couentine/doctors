@@ -141,6 +141,13 @@ class Api::V1::GroupSchemas
 
   #=== GROUP RELATIONSHIPS ===#
 
-  # NONE YET (These will be added later once there is a user serializer)
+  swagger_schema :GroupRelationships do
+    extend Api::V1::SharedSchemas::RelationshipsList
+
+    key :type, :object
+
+    define_relationship_property :badges, 'The badges contained in this group'
+    define_relationship_property :users, 'The members and admins of this group'
+  end
 
 end

@@ -39,10 +39,10 @@ class ApplicationPolicy
 
   #=== PUNDIT POLICY DEFINITION ===#
 
-  attr_reader :user, :record, :records
+  attr_reader :current_user, :record, :records
 
-  def initialize(user, record_or_records)
-    @user = user
+  def initialize(current_user, record_or_records)
+    @current_user = current_user
     if (record_or_records.class == Mongoid::Criteria)
       @records = record_or_records
     else
@@ -79,30 +79,26 @@ class ApplicationPolicy
   end
 
   def scope
-    Pundit.policy_scope!(user, record.class)
+    Pundit.policy_scope!(current_user, record.class)
   end
 
   # Call this only when instantiating with a list of records.
   # Returns a hash with keys being the record id strings and values being the meta for each item in the list.
   def meta_index
-    if @records.blank?
-      return {}
-    else
-      meta_index_hash = {}
+    meta_index_hash = {}
 
-      @records.each do |record|
-        meta_index_hash[record.id.to_s] = Pundit.policy(@user, record).meta
-      end
-
-      return meta_index_hash
+    @records.each do |record|
+      meta_index_hash[record.id.to_s] = self.class.new(@current_user, record).meta
     end
+
+    return meta_index_hash
   end
 
   class Scope
-    attr_reader :user, :scope
+    attr_reader :current_user, :scope
 
-    def initialize(user, scope)
-      @user = user
+    def initialize(current_user, scope)
+      @current_user = current_user
       @scope = scope
     end
 
