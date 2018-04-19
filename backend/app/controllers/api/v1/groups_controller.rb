@@ -25,8 +25,8 @@ class Api::V1::GroupsController < Api::V1::BaseController
   # can see that user).
   def index
     # Determine mode we are in (user group index or my group index), then authorize the appropriate policy
-    if params[:user_id].present?
-      @user = User.find(params[:user_id]) rescue nil
+    if params[:user_id].present? || params[:email].present?
+      @user = User.find(params[:user_id] || params[:email])
       if @user
         authorize @user, :groups_index? # authorizes the groups index on this specific user
       else

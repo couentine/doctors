@@ -43,6 +43,7 @@ BadgeList::Application.routes.draw do
         resources :groups, only: [:index]
         resources :portfolios, only: [:index]
         match ':email/portfolios' => 'portfolios#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        match ':email/groups' => 'groups#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
         match ':email' => 'users#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
       end
       resources :groups, only: [:index, :show] do
