@@ -20,17 +20,23 @@ class UserPolicy < ApplicationPolicy
     # All users and fields are shown, but relationships are conditionally displayed based on filters below
     return @current_user.has?('users:read')
   end
-  
-  def groups_index?
-    return @current_user.has?('users:read') && @current_user.has?('groups:read') && show_all_fields?
-  end
 
   #=== FILTER POLICIES ===#
   
   def show_all_fields?
     return true if !@user.has_private_domain
-    return false if @current_user.blank?
     return @user.profile_visible_to(@current_user)
+  end
+
+  #=== RELATIONSHIP POLICIES ===#
+  
+  def groups_index?
+    return @current_user.has?('users:read') && @current_user.has?('groups:read') && show_all_fields?
+  end
+
+  def portfolios_index?
+    return false if !@current_user.has?('users:read') || !@current_user.has?('portfolios:read')
+    return show_all_fields?
   end
 
   #=== USER-FACING METADATA ===#

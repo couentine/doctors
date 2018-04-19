@@ -39,6 +39,7 @@ class Api::V1::BaseController < ApplicationController
       AuthenticationToken: Api::V1::SerializableAuthenticationToken,
       Group: Api::V1::SerializableGroup,
       Badge: Api::V1::SerializableBadge,
+      Log: Api::V1::SerializablePortfolio,
       User: Api::V1::SerializableUser,
       String: Api::V1::SerializableString
     }
@@ -122,10 +123,12 @@ class Api::V1::BaseController < ApplicationController
   # NOTE: This will automatically cause the filter to be included in the response meta.
   # This depends on the presence of a DEFAULT_FILTER constant in the subclass which should be a hash with a symbol key for each filter key 
   # and a string value for the default if that filter key isn't present in the params.
-  def load_filter
+  # You can optionally pass a default filter hash to avoid using the default constant.
+  def load_filter(filter_hash = nil)
     filter_param = params[:filter] || {}
     @filter = {}
-    self.class::DEFAULT_FILTER.each do |key, value|
+    filter_hash ||= self.class::DEFAULT_FILTER
+    filter_hash.each do |key, value|
       if filter_param[key.to_s].present?
         @filter[key] = filter_param[key.to_s]
       else
@@ -188,7 +191,7 @@ class Api::V1::BaseController < ApplicationController
   end
   
   def set_calculated_pagination_variables(query_criteria)
-    query_count = query_criteria.count
+    query_count = query_criteria.size
     
     if query_count > (@page[:size] * @page[:number])
       @page[:next] = @page[:number] + 1

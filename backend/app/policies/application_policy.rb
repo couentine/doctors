@@ -85,17 +85,13 @@ class ApplicationPolicy
   # Call this only when instantiating with a list of records.
   # Returns a hash with keys being the record id strings and values being the meta for each item in the list.
   def meta_index
-    if @records.blank?
-      return {}
-    else
-      meta_index_hash = {}
+    meta_index_hash = {}
 
-      @records.each do |record|
-        meta_index_hash[record.id.to_s] = Pundit.policy(@current_user, record).meta
-      end
-
-      return meta_index_hash
+    @records.each do |record|
+      meta_index_hash[record.id.to_s] = self.class.new(@current_user, record).meta
     end
+
+    return meta_index_hash
   end
 
   class Scope

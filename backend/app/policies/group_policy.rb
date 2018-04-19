@@ -14,6 +14,7 @@ class GroupPolicy < ApplicationPolicy
 
   #=== ACTION POLICIES ===#
 
+  # Only available to authenticated users
   def index?
     return @current_user.present? && @current_user.has?('groups:read')
   end
@@ -36,7 +37,7 @@ class GroupPolicy < ApplicationPolicy
   
   def show_members?
     return true if @group.member_visibility == 'public'
-    if @current_user.present? && @current_user.has?('groups:read')
+    if @current_user.present?
       return true if @current_user.admin?
       return true if @current_user.admin_of?(@group)
       return true if (@group.member_visibility == 'private') && @current_user.member_of?(@group)
@@ -47,7 +48,7 @@ class GroupPolicy < ApplicationPolicy
   
   def show_admins?
     return true if @group.admin_visibility == 'public'
-    if @current_user.present? && @current_user.has?('groups:read')
+    if @current_user.present?
       return true if @current_user.admin?
       return true if @current_user.admin_of?(@group)
       return true if (@group.admin_visibility == 'private') && @current_user.member_of?(@group)
@@ -58,7 +59,7 @@ class GroupPolicy < ApplicationPolicy
   
   def show_group_tags?
     return true if @group.tag_visibility == 'public'
-    if @current_user.present? && @current_user.has?('groups:read')
+    if @current_user.present?
       return true if @current_user.admin?
       return true if @current_user.admin_of?(@group)
       return true if (@group.tag_visibility == 'members') && @current_user.member_of?(@group)
@@ -67,7 +68,7 @@ class GroupPolicy < ApplicationPolicy
     return false
   end
 
-  #=== RELATIONSHIP ACTION POLICIES ===#
+  #=== RELATIONSHIP POLICIES ===#
 
   def badges_index?
     # There is no action-level restriction on the badges index. The individual badges are filtered by visibility.
@@ -141,9 +142,91 @@ class GroupPolicy < ApplicationPolicy
 
   #=== SCOPES ===#
 
-  class Scope < ApplicationPolicy::Scope
+  # Builds a scope criteria which includes all of the groups for a particular target user which the current user can see.
+  # This scope incorporates the target user's group settings (show_on_profile) for each group and cross-references the current user's
+  # memberships with the member / admin visibilities of each group.
+  # NOTE: Instead of passing a mongoid criteria as a scope, pass a string which is equal to `member`, `admin` or `all`. This scope class
+  #   will build the scope from scratch.
+  class UserScope < ApplicationPolicy::Scope
+    attr_reader :current_user, :scope, :target_user
+
+    # scope = `member`, `admin` or `all`
+    def initialize(current_user, scope, target_user)
+      @current_user = current_user
+      @scope = scope
+      @target_user = target_user
+    end
+
     def resolve
-      scope.all
+      # First build a list of the groups which have been hidden on the user's profile (only needed if this isn't the current user)
+      # NOTE: The group settings list is NOT populated for all groups and it defaults to showing the group, so it's best to build a list
+      #   of hidden groups rather than trying to build a list of visible groups (otherwise we'll be missing the groups which aren't in the 
+      #   group settings).
+      if @current_user != @target_user
+        hidden_group_ids = @target_user.group_settings.map do |group_id, group_settings| 
+          group_settings['show_on_profile'] ? nil : group_id
+        end.select do |group_id| 
+          group_id.present?
+        end
+      end
+
+      # Then move forward with buidling the scopes
+      if @current_user == @target_user
+        if @scope == 'admin'
+          return @target_user.admin_of
+        elsif @scope == 'member'
+          return @target_user.member_of
+        else
+          return Group.where(:id.in => (@target_user.admin_of_ids + @target_user.member_of_ids))
+        end
+      elsif @current_user.present?
+        if @scope == 'admin'
+          non_hidden_admin_ids = @target_user.admin_of_ids.map(&:to_s) - hidden_group_ids
+          shared_group_ids = non_hidden_admin_ids & (@current_user.admin_of_ids.map(&:to_s) + @current_user.member_of_ids.map(&:to_s))
+
+          return Group.any_of(
+            {:id.in => shared_group_ids},
+            {:id.in => non_hidden_admin_ids, admin_visibility: 'public'}
+          )
+        elsif @scope == 'member'
+          non_hidden_member_ids = @target_user.member_of_ids.map(&:to_s) - hidden_group_ids
+          shared_group_ids = non_hidden_member_ids & (@current_user.admin_of_ids.map(&:to_s) + @current_user.member_of_ids.map(&:to_s))
+
+          return Group.any_of(
+            {:id.in => shared_group_ids},
+            {:id.in => non_hidden_member_ids, member_visibility: 'public'}
+          )
+        else
+          non_hidden_admin_ids = @target_user.admin_of_ids.map(&:to_s) - hidden_group_ids
+          non_hidden_member_ids = @target_user.member_of_ids.map(&:to_s) - hidden_group_ids
+          all_non_hidden_group_ids = non_hidden_admin_ids + non_hidden_member_ids
+          shared_group_ids = all_non_hidden_group_ids & (@current_user.admin_of_ids.map(&:to_s) + @current_user.member_of_ids.map(&:to_s))
+          
+          return Group.any_of(
+            {:id.in => shared_group_ids},
+            {:id.in => non_hidden_admin_ids, admin_visibility: 'public'},
+            {:id.in => non_hidden_member_ids, member_visibility: 'public'}
+          )
+        end
+      else
+        if @scope == 'admin'
+          non_hidden_admin_ids = @target_user.admin_of_ids.map(&:to_s) - hidden_group_ids
+
+          return Group.where(:id.in => non_hidden_admin_ids, admin_visibility: 'public')
+        elsif @scope == 'member'
+          non_hidden_member_ids = @target_user.member_of_ids.map(&:to_s) - hidden_group_ids
+          
+          return Group.where(:id.in => non_hidden_member_ids, member_visibility: 'public')
+        else
+          non_hidden_admin_ids = @target_user.admin_of_ids.map(&:to_s) - hidden_group_ids
+          non_hidden_member_ids = @target_user.member_of_ids.map(&:to_s) - hidden_group_ids
+
+          return Group.any_of(
+            {:id.in => non_hidden_admin_ids, admin_visibility: 'public'},
+            {:id.in => non_hidden_member_ids, member_visibility: 'public'}
+          )
+        end
+      end
     end
   end
 

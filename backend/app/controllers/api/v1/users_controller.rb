@@ -53,20 +53,13 @@ class Api::V1::UsersController < Api::V1::BaseController
   end
 
   def show
-    @user = User.find(params[:id])
-
-    # NOTE: This is currently undocumented. Also we need to check that the authentication token has permission to read groups.
-    if params[:include] == 'proxy_group'
-      @include = [:proxy_group]
-    else
-      @include = nil
-    end
+    @user = User.find(params[:id] || params[:email])
 
     if @user
       authorize @user # always returns true, fields are filtered in the serializer
       
       @policy = Pundit.policy(@current_user, @user)
-      render_json_api @user, expose: { show_all_fields: @policy.show_all_fields?, meta: @policy.meta }, include: @include
+      render_json_api @user, expose: { show_all_fields: @policy.show_all_fields?, meta: @policy.meta }
     else
       skip_authorization
 

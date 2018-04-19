@@ -1,7 +1,7 @@
 class Api::V1::GroupPaths
   include Swagger::Blocks
 
-  swagger_path '/groups/{id}' do
+  swagger_path '/groups/{key}' do
     
     #=== GET GROUP ===#
 
@@ -10,14 +10,23 @@ class Api::V1::GroupPaths
       extend Api::V1::SharedOperationFormats::RecordItem
 
       # Basic Info
-      define_basic_info :group, :get
+      define_basic_info :group, :get, 'Get group by id or slug'
 
       # Parameters
-      define_id_parameters :group
+      parameter do
+        key :name, :key
+        key :in, :path
+        key :description, "You can query group records using any of the following keys:\n" \
+          "- Record id\n" \
+          "- Group slug (case insensitive)"
+        key :required, true
+        key :type, :string
+      end
 
       # Responses
-      define_success_response :group, 200
+      define_success_response :group, 200, include: [:relationships]
       define_unauthorized_response
+      define_not_found_response
     end
 
   end
@@ -31,7 +40,7 @@ class Api::V1::GroupPaths
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
-      define_basic_info :group, 'Get list of all groups the current user belongs to'
+      define_basic_info :group, 'Get list of groups current user belongs to'
       
       # Parameters
       parameter do
@@ -46,13 +55,13 @@ class Api::V1::GroupPaths
       define_index_parameters :group
 
       # Responses
-      define_success_response :group
+      define_success_response :group, include: [:relationships]
       define_unauthorized_response
     end
 
   end
   
-  swagger_path '/groups/{id}/badges' do
+  swagger_path '/groups/{key}/badges' do
     
     #=== GROUP BADGE INDEX ===#
 
@@ -61,28 +70,29 @@ class Api::V1::GroupPaths
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
-      define_basic_info :badge, 'Get list of all badges in this group', :group
+      define_basic_info :badge, 'Get list of badges in specified group', :group
       
       # Parameters
       parameter do
-        key :name, 'filter[visibility]'
-        key :in, :query
-        key :description, 'Optional filter based on the badge visibility'
-        key :required, false
+        key :name, :key
+        key :in, :path
+        key :description, "You can query group records using any of the following keys:\n" \
+          "- Record id\n" \
+          "- Group slug (case insensitive)"
+        key :required, true
         key :type, :string
-        key :enum, [:all, :public, :private, :hidden]
-        key :default, :all
       end
       define_index_parameters :badge
 
       # Responses
-      define_success_response :badge
+      define_success_response :badge, include: [:relationships]
       define_unauthorized_response
+      define_not_found_response
     end
 
   end
   
-  swagger_path '/groups/{id}/users' do
+  swagger_path '/groups/{key}/users' do
     
     #=== GROUP USER INDEX ===#
 
@@ -91,9 +101,18 @@ class Api::V1::GroupPaths
       extend Api::V1::SharedOperationFormats::PaginatedList
 
       # Basic Info
-      define_basic_info :user, 'Get list of all users in this group', :group
+      define_basic_info :user, 'Get list of users in specified group', :group
       
       # Parameters
+      parameter do
+        key :name, :key
+        key :in, :path
+        key :description, "You can query group records using any of the following keys:\n" \
+          "- Record id\n" \
+          "- Group slug (case insensitive)"
+        key :required, true
+        key :type, :string
+      end
       parameter do
         key :name, 'filter[status]'
         key :in, :query
@@ -106,8 +125,9 @@ class Api::V1::GroupPaths
       define_index_parameters :user
 
       # Responses
-      define_success_response :user
+      define_success_response :user, include: [:relationships]
       define_unauthorized_response
+      define_not_found_response
     end
 
   end

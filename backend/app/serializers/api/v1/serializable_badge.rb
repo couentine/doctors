@@ -27,5 +27,8 @@ class Api::V1::SerializableBadge < Api::V1::SerializableDocument
   belongs_to :group do
     link :self do "/api/v1/groups/#{@object.group_id.to_s}" end
   end
+  has_many :portfolios do
+    link :self do "/api/v1/badges/#{@object.id.to_s}/portfolios" end
+  end
 
 end

@@ -38,6 +38,11 @@ module Api::V1::SharedOperationFormats
       define_error_response 403, :GenericErrorObject, 'Authentication details are incorrect or missing. ' \
         'Or the authenticated user does not have access to the requested operation.'
     end
+
+    # Adds a standard 404 response
+    def define_not_found_response
+      define_error_response 404, :GenericErrorObject, 'The specified record could not be found.'
+    end
     
   end
   
@@ -48,58 +53,41 @@ module Api::V1::SharedOperationFormats
     # EXAMPLE USAGE:
     # - model = :authentication_token
     # - verb = one of >> [:get, :create, :update, :delete]
-    def define_basic_info(model, verb)
+    def define_basic_info(model, verb, summary = nil, parent_model = nil)
       camelized_model = model.to_s.camelize
       uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
       spaced_model = model.to_s.gsub('_', ' ')
 
-      key :operationId, "#{verb.to_s}#{camelized_model}"
+      if parent_model.present?
+        camelized_parent_model = parent_model.to_s.camelize
+        uncapitalized_camelized_parent_model = camelized_parent_model[0, 1].downcase + camelized_parent_model[1..-1]
+      end
+
+      if parent_model.present?
+        key :operationId, "#{verb.to_s}#{camelized_parent_model}#{camelized_model}"
+      else
+        key :operationId, "#{verb.to_s}#{camelized_model}"
+      end
       
-      case verb
-      when :get
-        key :summary, "Get a #{spaced_model} record by id"
-      when :create
-        key :summary, "Create a new #{spaced_model} record"
-      when :update
-        key :summary, "Update an existing #{spaced_model} record by id"
-      when :delete
-        key :summary, "Delete an existing #{spaced_model} record by id"
+      if summary.blank?
+        case verb
+        when :get
+          key :summary, "Get #{spaced_model} by id"
+        when :create
+          key :summary, "Create a new #{spaced_model} record"
+        when :update
+          key :summary, "Update an existing #{spaced_model} record by id"
+        when :delete
+          key :summary, "Delete an existing #{spaced_model} record by id"
+        end
+      else
+        key :summary, summary
       end
         
-      key :tags, [
+      key :tags, ([
         'recordItemFormat',
         "#{uncapitalized_camelized_model}Model"
-      ]
-    end
-
-    # EXAMPLE USAGE:
-    # - item_model = :badge
-    # - parent_model = :group (If parent model is left out then no parent_path parameter is included)
-    def define_id_parameters(item_model, parent_model = nil, slug_parameter = :slug)
-      spaced_item_model = item_model.to_s.gsub('_', ' ')
-      description_text = "The id or the (case-insensitive) #{slug_parameter.to_s} of the #{spaced_item_model} record."
-      if parent_model.present?
-        description_text += " If you use the #{slug_parameter.to_s} then you must also specify the `parent_path` parameter."
-      end
-
-      parameter do
-        key :name, :id
-        key :format, :id
-        key :in, :path
-        key :description, description_text
-        key :required, true
-        key :type, :string
-      end
-      if parent_model.present?
-        parameter do
-          key :name, :parent_path
-          key :in, :query
-          key :description, "The #{slug_parameter.to_s} or id of the parent #{parent_model} record. " \
-            "Only specify this parameter if you are using the #{slug_parameter.to_s} as the value in the `id` parameter."
-          key :type, :string
-          key :required, false
-        end
-      end
+      ] + (parent_model.present? ? ["#{uncapitalized_camelized_parent_model}Model"] : []))
     end
 
     # EXAMPLE USAGE:

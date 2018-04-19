@@ -46,7 +46,7 @@ class AuthenticationTokenPolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
       if @current_user.present?
-        scope.where(user_id: @user.id)
+        scope.where(user_id: @current_user.id)
       else
         nil
       end
@@ -55,7 +55,7 @@ class AuthenticationTokenPolicy < ApplicationPolicy
   
   #=== UTILITY METHODS ===#
 
-  # Returns true if the @user has permission to manage the @authentication_token
+  # Returns true if the @current_user has permission to manage the @authentication_token
   def user_can_manage_token?
     raise ArgumentError.new('Record must be an instantiated AuthenticationToken') if !@authentication_token.is_a?(AuthenticationToken)
 
@@ -64,10 +64,10 @@ class AuthenticationTokenPolicy < ApplicationPolicy
     if @authentication_token_user
       if @authentication_token_user.type == 'individual'
         # Tokens for individual users can only be created by the users themselves
-        return true if @user.id == @authentication_token_user.id
+        return true if @current_user.id == @authentication_token_user.id
       elsif (@authentication_token_user.type == 'group') && @authentication_token_user.proxy_group
         # Tokens for group users can only be created by group admins
-        return true if @user.admin_of?(@authentication_token_user.proxy_group)
+        return true if @current_user.admin_of?(@authentication_token_user.proxy_group)
       end
     else
       return false

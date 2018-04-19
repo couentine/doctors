@@ -39,14 +39,22 @@ BadgeList::Application.routes.draw do
   # === API PATHS === #
   namespace :api do
     namespace :v1 do
+      resources :users, only: [:show] do
+        resources :groups, only: [:index]
+        resources :portfolios, only: [:index]
+        match ':email/portfolios' => 'portfolios#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        match ':email' => 'users#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+      end
       resources :groups, only: [:index, :show] do
         resources :badges, only: [:index]
         resources :users, only: [:index]
       end
-      resources :badges, only: [:index, :show]
-      resources :users, only: [:show] do
-        resources :groups, only: [:index]
+      resources :badges, only: [:index, :show] do
+        resources :portfolios, only: [:index, :show] do
+          match ':email' => 'portfolios#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        end
       end
+      resources :portfolios, only: [:show]
       resources :authentication_tokens, only: [:index, :create, :show, :destroy]
 
       match 'swagger.json' => 'docs#external', via: :get

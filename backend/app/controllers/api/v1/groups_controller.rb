@@ -27,7 +27,6 @@ class Api::V1::GroupsController < Api::V1::BaseController
     # Determine mode we are in (user group index or my group index), then authorize the appropriate policy
     if params[:user_id].present?
       @user = User.find(params[:user_id]) rescue nil
-      @public_only = true
       if @user
         authorize @user, :groups_index? # authorizes the groups index on this specific user
       else
@@ -37,27 +36,12 @@ class Api::V1::GroupsController < Api::V1::BaseController
       end
     else
       @user = @current_user
-      @public_only = false
       authorize :group # authorizes the "my groups" index for the current user
     end
 
     # Build the core criteria based on the filter
     load_filter
-    if @filter[:status] == 'member'
-      if @public_only
-        group_criteria = @user.member_of.where(member_visibility: 'public')
-      else
-        group_criteria = @user.member_of
-      end
-    elsif @filter[:status] == 'admin'
-      if @public_only
-        group_criteria = @user.admin_of.where(admin_visibility: 'public')
-      else
-        group_criteria = @user.admin_of
-      end
-    else
-      group_criteria = @user.groups(@public_only)
-    end
+    group_criteria = GroupPolicy::UserScope.new(@current_user, @filter[:status], @user).resolve
     
     # Generate @sort_string from the sort parameter and load the pagination variables
     build_sort_string

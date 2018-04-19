@@ -10,6 +10,8 @@ class Api::V1::DocsController < ActionController::Base
     Api::V1::GroupSchemas,
     Api::V1::BadgePaths,
     Api::V1::BadgeSchemas,
+    Api::V1::PortfolioPaths,
+    Api::V1::PortfolioSchemas,
     Api::V1::ErrorSchemas,
     self
   ].freeze
@@ -21,6 +23,8 @@ class Api::V1::DocsController < ActionController::Base
     Api::V1::GroupSchemas,
     Api::V1::BadgePaths,
     Api::V1::BadgeSchemas,
+    Api::V1::PortfolioPaths,
+    Api::V1::PortfolioSchemas,
     Api::V1::ErrorSchemas,
     Api::V1::AuthenticationTokenPaths, # web UI only
     Api::V1::AuthenticationTokenSchemas, # web UI only
@@ -119,6 +123,13 @@ class Api::V1::DocsController < ActionController::Base
         'badge they become a "badge seeker" (aka "badge learner") and a "badge portfolio" is created for them. ' \
         'Once the badge has been awarded the user is referred to as a "badge holder" (aka "badge expert").'
     end
+    tag do
+      key :name, 'portfolioModel'
+      key :'x-displayName', 'Portfolios'
+      key :description, 'Every time a user joins a badge, a portfolio is created. The portfolio acts as a container for the evidence ' \
+        'items which get posted (as entries). The portfolio also has a `status` which keeps track of where the user is in the feedback ' \
+        'process.'
+    end
 
     #=== OPERATION FORMAT TAGS ===#
     
@@ -152,7 +163,7 @@ class Api::V1::DocsController < ActionController::Base
     key :'x-tagGroups', [
       {
         name: 'Models',
-        tags: [:userModel, :groupModel, :badgeModel]
+        tags: [:userModel, :groupModel, :badgeModel, :portfolioModel]
       },
       {
         name: 'Operation Formats',

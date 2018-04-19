@@ -109,6 +109,7 @@ class Api::V1::BadgeSchemas
     key :type, :object
 
     define_relationship_property :group, 'The parent group to which the badge belongs'
+    define_relationship_property :portfolios, 'The list of portfolios for this badge'
   end
 
 end

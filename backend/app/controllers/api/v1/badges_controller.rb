@@ -10,9 +10,8 @@ class Api::V1::BadgesController < Api::V1::BaseController
   DEFAULT_SORT_FIELD = :name
   DEFAULT_SORT_ORDER = :asc
 
-  DEFAULT_FILTER = {
-    status: 'all',
-    visibility: 'all'
+  MY_BADGES_INDEX_FILTER = {
+    status: 'all'
   }
 
   #=== ACTIONS ===#
@@ -35,26 +34,10 @@ class Api::V1::BadgesController < Api::V1::BaseController
     end
 
     # Build the core criteria based on the filter and on the current users permission (if relevant)
-    load_filter
     if @group
-      if (@filter[:visibility] == 'all') 
-        allowed_visibility_values = [:public, :private, :hidden]
-      else 
-        allowed_visibility_values = [@filter[:visibility]]
-      end
-      badge_criteria = @group.badges.where(:visibility.in => allowed_visibility_values)
-
-      if @current_user.present? && (@current_user.admin || @current_user.admin_of?(@group))
-        badge_criteria = badge_criteria
-      elsif @current_user.present? && @current_user.member_of?(@group)
-        badge_criteria = badge_criteria.any_of(
-          {:visibility.ne => 'hidden'}, 
-          {:id.in => @current_user.all_badge_ids}
-        )
-      else
-        badge_criteria = badge_criteria.where(visibility: 'public')
-      end
+      badge_criteria = BadgePolicy::GroupScope.new(@current_user, @group.badges, @group).resolve
     else
+      load_filter MY_BADGES_INDEX_FILTER
       if @filter[:status] == 'seeker'
         badge_criteria = Badge.where(:id.in => @current_user.learner_badge_ids)
       elsif @filter[:status] == 'holder'
@@ -77,24 +60,13 @@ class Api::V1::BadgesController < Api::V1::BaseController
   end
 
   def show
-    if params[:parent_path].present?
-      @badge = Badge.find(params[:parent_path] + '.' + params[:id])
-    else
-      @badge = Badge.find(params[:id])
-    end
-
-    # NOTE: This is currently undocumented. Also we need to check that the authentication token has permission to read groups.
-    if params[:include] == 'group'
-      @include = [:group]
-    else
-      @include = nil
-    end
+    @badge = Badge.find(params[:id])
 
     if @badge
       authorize @badge # always returns true, fields are filtered in the serializer
       
       @policy = Pundit.policy(@current_user, @badge)
-      render_json_api @badge, expose: { show_all_fields: @policy.show_all_fields?, meta: @policy.meta }, include: @include
+      render_json_api @badge, expose: { show_all_fields: @policy.show_all_fields?, meta: @policy.meta }
     else
       skip_authorization
 

@@ -4,6 +4,14 @@
 # 
 # Use this to create all new authentication tokens. It verifies that the fields on the authentication token match all policies.
 # 
+# Example Usage from Console:
+# ```
+# params = ActionController::Parameters.new({ 
+#   data: { type: 'authentication_token',  attributes: { user_id: user.id, permission_sets: ApplicationPolicy::PERMISSION_SETS.keys } } })
+# service = AuthenticationTokenCreationService.new(1, user, params)
+# service.perform
+# ```
+# 
 #==========================================================================================================================================#
 
 class AuthenticationTokenCreationService
