@@ -128,7 +128,7 @@ This displays a standard badge card.
 
     <div class="image">
       <template is="dom-if" if="[[hasBadge]]">
-        <img src$="[[badge.image_medium_url]]">
+        <img src$="[[badge.attributes.image_medium_url]]">
       </template>
       
       <template is="dom-if" if="[[!hasBadge]]">
@@ -141,11 +141,11 @@ This displays a standard badge card.
         <ul class="metric-list" hidden="[[!showMetricList]]">
           <li hidden$="[[!showExpertCount]]" class="expert-count">
             <i class="icon-shield-user"></i>
-            <span class="metric">[[badge.expert_count]]</span>
+            <span class="metric">[[badge.attributes.holder_count]]</span>
           </li>
           <li hidden="[[!showRequestCount]]" class="request-count">
             <i class="icon-flag"></i>
-            <span class="metric">[[badge.validation_request_count]]</span>
+            <span class="metric">[[badge.attributes.feedback_request_count]]</span>
           </li>
         </ul>
       </div>
@@ -226,7 +226,7 @@ This displays a standard badge card.
         if (this.badge) this.hasBadge = true;
         else this.hasBadge = false;
 
-        if (this.badge && this.badge.name) this.badgeName = this.badge.name;
+        if (this.badge && this.badge.attributes.name) this.badgeName = this.badge.attributes.name;
         else this.badgeName = this.blankBadgeText;
       }
 

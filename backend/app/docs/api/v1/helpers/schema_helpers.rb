@@ -1,4 +1,4 @@
-module Api::V1::SharedSchemas
+module Api::V1::Helpers::SchemaHelpers
 
   #=== COMMON DOCUMENT FIELDS ===#
 

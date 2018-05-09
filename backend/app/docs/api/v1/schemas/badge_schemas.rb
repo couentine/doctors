@@ -1,10 +1,10 @@
-class Api::V1::BadgeSchemas
+class Api::V1::Schemas::BadgeSchemas
   include Swagger::Blocks
 
   #=== BADGE OUTPUT ATTRIBUTES ===#
 
   swagger_schema :BadgeOutputAttributes do
-    extend Api::V1::SharedSchemas::CommonDocumentFields
+    extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
 
     key :type, :object
     
@@ -104,7 +104,7 @@ class Api::V1::BadgeSchemas
   #=== BADGE RELATIONSHIPS ===#
 
   swagger_schema :BadgeRelationships do
-    extend Api::V1::SharedSchemas::RelationshipsList
+    extend Api::V1::Helpers::SchemaHelpers::RelationshipsList
 
     key :type, :object
 

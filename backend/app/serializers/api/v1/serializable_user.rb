@@ -25,6 +25,7 @@ class Api::V1::SerializableUser < Api::V1::SerializableDocument
   end
 
   link :self do "/api/v1/users/#{@object.id.to_s}" end
+  link :self_web do @object.full_url end
 
   belongs_to :proxy_group,          if: -> { @object.proxy_group_id.present? } do
     link :self do "/api/v1/groups/#{@object.proxy_group_id.to_s}" end

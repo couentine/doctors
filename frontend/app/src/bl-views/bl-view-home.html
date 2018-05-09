@@ -200,8 +200,8 @@ The home page for logged in users.
 
     <!-- #=== BACKEND LINKS ===# -->
 
-    <bl-backend-list id="badgeList" target="{{badges}}" type="myBadges" parent-view-status="[[status]]"></bl-backend-list>
-    <bl-backend-list id="groupList" target="{{groups}}" type="myGroups" parent-view-status="[[status]]"></bl-backend-list>
+    <bl-backend-list id="badgeList" target="{{badges}}" model="badge" parent-view-status="[[status]]"></bl-backend-list>
+    <bl-backend-list id="groupList" target="{{groups}}" model="group" parent-view-status="[[status]]"></bl-backend-list>
 
     <!-- #=== HEADER PANEL ===# -->
 
@@ -265,7 +265,7 @@ The home page for logged in users.
 
         <div id="badgePanel" class="page-content-spacing">
           <template is="dom-repeat" items="[[badges.items]]" id="badgeRepeat" as="badge">
-            <a href$="[[badge.relative_url]]" class="item">
+            <a href$="[[badge.links.self_web]]" class="item">
               <bl-badge badge="[[badge]]"></bl-badge>
             </a>
           </template>
@@ -295,7 +295,7 @@ The home page for logged in users.
 
         <div id="groupPanel" class="page-content-spacing">
           <template is="dom-repeat" items="[[groups.items]]" id="groupRepeat" as="group">
-            <a href$="[[group.relative_url]]" class="item">
+            <a href$="[[group.links.self_web]]" class="item">
               <bl-group group="[[group]]"></bl-group>
             </a>
           </template>

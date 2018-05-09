@@ -48,12 +48,19 @@ class Api::V1::AuthenticationTokensController < Api::V1::BaseController
   def create
     authorize :authentication_token
 
-    creation_service = AuthenticationTokenCreationService.new(1, @current_user, params)
-    creation_service.perform
-    @authentication_token = creation_service.authentication_token
-    
-    if creation_service.save_successful
-      @policy = Pundit.policy(@current_user, @authentication_token)
+    # Deserialize the authentication token
+    deserializer = Api::V1::DeserializableAuthenticationToken.new(params)
+    @authentication_token = deserializer.authentication_token
+
+    # Now validate that this user has permission to create a token for this user
+    @authentication_token.creator = @current_user
+    @policy = Pundit.policy(@current_user, @authentication_token)
+    if !@policy.user_can_manage_token?
+      @authentication_token.errors.add(:user_id, 'You do not have permission to create authentication tokens on behalf of this user')
+    end
+
+    # Then do the save / render any errors
+    if @authentication_token.errors.empty? && @authentication_token.save
       render_json_api @authentication_token, status: 201, expose: { meta: @policy.meta }
     else
       render_field_errors @authentication_token.errors, status: 400

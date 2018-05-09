@@ -1,25 +1,28 @@
 class UserPermissionsDecorator < SimpleDelegator
 
-  attr_accessor :available_permission_sets
+  attr_accessor :available_permission_sets, :access_method
 
-  def initialize(user, authentication_token = nil)
-    @authentication_token = authentication_token
+  def initialize(user, authentication_token = nil, access_method = nil)
+    self.access_method = access_method
+    unfiltered_permission_sets = ApplicationPolicy::PERMISSION_SETS.keys
+    availability_filter = nil
     
-    if @authentication_token.blank?
-      # The user is logged into the web UI, grant all internal permission sets
-      self.available_permission_sets = ApplicationPolicy::PERMISSION_SETS.select do |key, permission_set| 
-        permission_set[:api_access].include?(:internal)
-      end.keys
+    if authentication_token.present?
+      # This request comes from an api user so start with the permission sets from their token.
+      unfiltered_permission_sets = authentication_token.permission_sets
+      availability_filter = :api_user
+    elsif user.present?
+      availability_filter = :web_user
+    elsif access_method == :web
+      availability_filter = :web_visitor
     else
-      # The user is using the API, grant only permission sets from their token and filter out any which shouldn't be available externally
-      externally_allowed_permission_sets = ApplicationPolicy::PERMISSION_SETS.select do |key, permission_set| 
-        permission_set[:api_access].include?(:external)
-      end.keys
-      self.available_permission_sets = @authentication_token.permission_sets.select do |permission_set|
-        externally_allowed_permission_sets.include?(permission_set)
-      end
+      availability_filter = :api_visitor
     end
 
+    # Now filter the permission sets by only those which are available based on the current authentication type / access method combo
+    self.available_permission_sets = unfiltered_permission_sets & (ApplicationPolicy::PERMISSION_SETS.select do |permission_set, settings|
+      settings[:available_to].include? availability_filter
+    end.keys)
     super(user)
   end
 

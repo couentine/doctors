@@ -101,12 +101,6 @@ When the poller complete `<bl-poller>` will stop refreshing.
             readOnly: true
           },
 
-          /** Used to interact with `<bl-backend-client>`. */
-          _backendOperations: {
-            type: Object,
-            readOnly: true
-          },
-
           /** Stores the id of the last timer so it can be cancelled if needed. */
           _lastTimerId: {
             type: Number,
@@ -152,11 +146,14 @@ When the poller complete `<bl-poller>` will stop refreshing.
         this._set_lastTimerId(null);
         this._set_queryCount(this._queryCount + 1);
 
-        this._backendOperations.recordItem.get.do({'id': this.pollerId})
-          .then(function(pollerResponse) {
+        this.app.$.backend.doOperation({
+          formatTag: 'recordItemFormat',
+          verb: 'get',
+          model: 'poller'
+        }, { id: this.pollerId }).then(function(pollerResponse) {
             this._updatePollerProperties(pollerResponse);
 
-            if (pollerResponse.completed) {
+            if (pollerResponse.data.attributes.completed) {
               this.stop();
             } else if ((Date.now() - this.pollerStarted) >= this.maxDuration) {
               // Mock a failed poller response
@@ -192,7 +189,7 @@ When the poller complete `<bl-poller>` will stop refreshing.
       /** Accepts a newly queried poller response and overrides the target, triggering property change notifications. */
       _updatePollerProperties(pollerResponse) {
         this.setProperties({
-          target: pollerResponse
+          target: pollerResponse.data
         });
       }
       
@@ -208,12 +205,10 @@ When the poller complete `<bl-poller>` will stop refreshing.
       // #=== LISTENER & OBSERVER METHODS ===#
 
       /** 
-       * This method is fired via the listener setup in `connectedCallback()`. s
-       * It builds `_backendOperations` once the backend client is initialized.
+       * This method is fired via the listener setup in `connectedCallback()`.
        */
       _appBackendInitializedChanged(e) {
         if (e.detail.value) {
-          this._set_backendOperations(this.app.$.backend.operationsByTag('poller'));
           if (this.pollerId && this.pollerId.length)
             this.start();
         }
@@ -221,7 +216,7 @@ When the poller complete `<bl-poller>` will stop refreshing.
 
       /** Automatically starts polling when `pollerId` is set or changed. */
       _pollerIdChanged(newValue, oldValue) {
-        if (newValue && this._backendOperations)
+        if (newValue && this.app.$.backend.initialized)
           this.start();
       }
 

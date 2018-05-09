@@ -1,4 +1,4 @@
-class Api::V1::PortfolioPaths
+class Api::V1::Paths::PortfolioPaths
   include Swagger::Blocks
 
   swagger_path '/portfolios/{id}' do
@@ -6,8 +6,8 @@ class Api::V1::PortfolioPaths
     #=== GET PORTFOLIO ===#
 
     operation :get do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::RecordItem
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
 
       # Basic Info
       define_basic_info :portfolio, :get

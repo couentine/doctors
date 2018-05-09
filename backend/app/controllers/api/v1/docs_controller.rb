@@ -4,30 +4,38 @@ class Api::V1::DocsController < ActionController::Base
   #=== CONSTANTS ===#
 
   SWAGGERED_CLASSES_EXTERNAL = [
-    Api::V1::UserPaths,
-    Api::V1::UserSchemas,
-    Api::V1::GroupPaths,
-    Api::V1::GroupSchemas,
-    Api::V1::BadgePaths,
-    Api::V1::BadgeSchemas,
-    Api::V1::PortfolioPaths,
-    Api::V1::PortfolioSchemas,
-    Api::V1::ErrorSchemas,
+    Api::V1::Paths::UserPaths,
+    Api::V1::Schemas::UserSchemas,
+    Api::V1::Paths::GroupPaths,
+    Api::V1::Schemas::GroupSchemas,
+    Api::V1::Paths::BadgePaths,
+    Api::V1::Schemas::BadgeSchemas,
+    Api::V1::Schemas::EndorsementSchemas,
+    Api::V1::Paths::PollerPaths,
+    Api::V1::Schemas::PollerSchemas,
+    Api::V1::Paths::PortfolioPaths,
+    Api::V1::Schemas::PortfolioSchemas,
+    Api::V1::Schemas::SharedSchemas,
+    Api::V1::Schemas::ErrorSchemas,
     self
   ].freeze
 
   SWAGGERED_CLASSES_INTERNAL = [
-    Api::V1::UserPaths,
-    Api::V1::UserSchemas,
-    Api::V1::GroupPaths,
-    Api::V1::GroupSchemas,
-    Api::V1::BadgePaths,
-    Api::V1::BadgeSchemas,
-    Api::V1::PortfolioPaths,
-    Api::V1::PortfolioSchemas,
-    Api::V1::ErrorSchemas,
-    Api::V1::AuthenticationTokenPaths, # web UI only
-    Api::V1::AuthenticationTokenSchemas, # web UI only
+    Api::V1::Paths::UserPaths,
+    Api::V1::Schemas::UserSchemas,
+    Api::V1::Paths::GroupPaths,
+    Api::V1::Schemas::GroupSchemas,
+    Api::V1::Paths::BadgePaths,
+    Api::V1::Schemas::BadgeSchemas,
+    Api::V1::Schemas::EndorsementSchemas,
+    Api::V1::Paths::PollerPaths,
+    Api::V1::Schemas::PollerSchemas,
+    Api::V1::Paths::PortfolioPaths,
+    Api::V1::Schemas::PortfolioSchemas,
+    Api::V1::Schemas::SharedSchemas,
+    Api::V1::Schemas::ErrorSchemas,
+    Api::V1::Paths::AuthenticationTokenPaths, # web UI only
+    Api::V1::Schemas::AuthenticationTokenSchemas, # web UI only
     self
   ].freeze
 
@@ -55,11 +63,9 @@ class Api::V1::DocsController < ActionController::Base
         "[OpenAPI/Swagger specification](https://swagger.io/docs/specification/2-0/basic-structure/).\n\n" \
         "If you have any questions you can contact us at team@badgelist.com.\n\n" \
         \
-        "## Release Notes (April 2018) ##\n" \
-        "We have just released v1 of the Badge List API. The initial release only contains endpoints for groups, badges, users " \
-        "and portfolios. We are actively working to release new endpoints, so check back here often to get the latest. " \
-        "Next up: Group tags. After that we will work through the remaining objects and actions until we achieve " \
-        "full parity with the web UI.\n\n" \
+        "## Release Notes (May 2018) ##\n" \
+        "The Badge List API is currently being actively expanded. No breaking changes will be made to v1, but we are adding new " \
+        "features and operations frequently. Work will continue until we achieve full parity with the web UI.\n\n" \
         \
         "## Data Model ##\n" \
         "Here is an overview of the Badge List data model. " \
@@ -103,6 +109,7 @@ class Api::V1::DocsController < ActionController::Base
     tag do
       key :name, 'userModel'
       key :'x-displayName', 'Users'
+      key :'x-blType', 'model'
       key :description, 'Every authenticated user of the system has a corresponding user record. There are two types of users. ' \
         'Individual users are normal users created or invited through the standard process. Group users (also referred to as ' \
         'group proxy users) are API-only user accounts which are linked to a specific group and operate with admin permissions for ' \
@@ -111,6 +118,7 @@ class Api::V1::DocsController < ActionController::Base
     tag do
       key :name, 'groupModel'
       key :'x-displayName', 'Groups'
+      key :'x-blType', 'model'
       key :description, 'A group represents an organization of some sort (a company, a school, a district, an online community, etc). ' \
         'Every badge in Badge List belongs to one specific group. Groups also have admin users, member users and group tags. ' \
         'There are "free groups" and "paid groups". Paid groups have a specific "subscription plan" which ' \
@@ -119,16 +127,52 @@ class Api::V1::DocsController < ActionController::Base
     tag do
       key :name, 'badgeModel'
       key :'x-displayName', 'Badges'
+      key :'x-blType', 'model'
       key :description, 'Badges are digital credentials which represent specific learning skills and achievements. When a user joins a ' \
         'badge they become a "badge seeker" (aka "badge learner") and a "badge portfolio" is created for them. ' \
         'Once the badge has been awarded the user is referred to as a "badge holder" (aka "badge expert").'
     end
     tag do
+      key :name, 'endorsementModel'
+      key :'x-displayName', 'Endorsements'
+      key :'x-blType', 'model'
+      key :description, "Endorsements are a mock model within the API. An endorsement is usually a type of feedback on a " \
+        "from a badge awarder on a portfolio which results in the badge being awarded. The endorsement API operations make it easier to " \
+        "award badges to people who may not yet have created badge portfolios (or who may not even have Badge List user accounts).\n\n" \
+        \
+        "The endorsement operations enable one-step awarding of a badge by providing an email address as the unique identifier of " \
+        "the intended recipient. Note that this method of badge awarding can result in a badge holder portfolio which has no evidence " \
+        "other than the endorsement itself. It is therefore recommended to use other techniques which result in the creation of a more " \
+        "robust evidence profile.\n\n" \
+        \
+        "When a badge is awarded via pre-emptive endorsement there are several possible outcomes:\n" \
+        "- **New User Invitation:** If the email address does not correspond to an existing Badge List user account, the user will be " \
+        "invited to sign up and will be added to the group's list of 'Invited Members'. The badge endorsement will be stored along with " \
+        "the new member's group invitation, but it will not be applied until the person creates their user account. This means that " \
+        "the new badge holder will not immediately show up in the list of Badge Experts / Holders.\n" \
+        "- **New Member:** If the email address corresponds to an existing Badge List user who is not yet a member of the group, " \
+        "they will auomatically be added as a group member, an empty badge portfolio will be created for them and the badge will be " \
+        "awarded immediately.\n" \
+        "- **Existing Seeker:** If the email address corresponds to an existing badge seeker, then the endorsement will be applied to " \
+        "the already created portfolio and the badge will be awarded immediately. If the current user has already provided feedback on " \
+        "this portfolio it will be *overwritten* with the new feedback.\n" \
+        "- **Existing Holder:** If the email address corresponds to an existing badge holder, then the endorsement will be applied to " \
+        "the list of endorsements on the existing portfolio. If the current user has already provided feedback on this portfolio it " \
+        "will be *overwritten* with the new feedback.\n"
+    end
+    tag do
       key :name, 'portfolioModel'
       key :'x-displayName', 'Portfolios'
+      key :'x-blType', 'model'
       key :description, 'Every time a user joins a badge, a portfolio is created. The portfolio acts as a container for the evidence ' \
         'items which get posted (as entries). The portfolio also has a `status` which keeps track of where the user is in the feedback ' \
         'process.'
+    end
+    tag do
+      key :name, 'pollerModel'
+      key :'x-displayName', 'Pollers'
+      key :description, "Pollers are used to track the progress of asynchronous actions. They are automatically deleted " \
+        "#{Poller::DELETE_AFTER / 60} minutes after the poller completes."
     end
 
     #=== OPERATION FORMAT TAGS ===#
@@ -136,26 +180,49 @@ class Api::V1::DocsController < ActionController::Base
     tag do
       key :name, 'recordItemFormat'
       key :'x-displayName', 'Record Item Format'
+      key :'x-blType', 'itemFormat'
       key :'x-traitTag', true
       key :description, "All operations tagged with `recordItemFormat` are built to retrieve and modify single record items.\n\n" \
+        \
         "- All record item format operations for a particular model tag will collectively support the four primary REST verbs: " \
-        "  GET = getRecord / recordIndex, POST = newRecord, PUT = updateRecord, DELETE = deleteRecord. " \
-        "  Additional custom retrieving actions may be present using the GET verb. " \
-        "  Additional custom modifying actions may be present using the POST or PUT verbs.\n" \
+          "GET = getRecord / recordIndex, POST = newRecord, PUT = updateRecord, DELETE = deleteRecord. " \
+          "Additional custom retrieving actions may be present using the GET verb. " \
+          "Additional custom modifying actions may be present using the POST or PUT verbs.\n" \
         "- All outputted records for a particular model tag will contain the same record output attributes. " \
-        "  All creation and update operations for a particular model tag will accept the same record input attributes."
+          "All creation and update operations for a particular model tag will accept the same record input attributes."
     end
     tag do
       key :name, 'paginatedListFormat'
       key :'x-displayName', 'Paginated List Format'
+      key :'x-blType', 'listFormat'
       key :'x-traitTag', true
       key :description, "All operations tagged with `paginatedListFormat` are built to retrieve paginated lists of record items.\n\n" \
+        \
         "- All paginated list format operations utilize the GET verb.\n" \
         "- Paginated list format responses all accept the same `page[...]` parameters.\n" \
         "- Paginated list format responses utilize the `sort` parameter for sorting the returned record items. " \
-        "  All paginated list format responses for a particular model tag will accept the same set of sort fields. \n" \
+          "All paginated list format responses for a particular model tag will accept the same set of sort fields. \n" \
         "- Paginated list format responses utilize the `filter[...]` parameters for filtering the returned record items. " \
-        "  All paginated list format responses for a particular model tag will accept the same set of filter keys."
+          "All paginated list format responses for a particular model tag will accept the same set of filter keys."
+    end
+    tag do
+      key :name, 'batchOperationFormat'
+      key :'x-displayName', 'Batch Operation Format'
+      key :'x-blType', 'listFormat'
+      key :'x-traitTag', true
+      key :description, "All operations tagged with `batchOperationFormat` are built to accept batches of up to " \
+        "#{APP_CONFIG['max_import_list_size']} items, process them in an asynchronous manner and then respond with a corresponding list " \
+        "result items indicating the outcome of each operation.\n\n" \
+        \
+        "- All batch operations utilize the POST verb.\n" \
+        "- Batch operations require that the `data` parameter in the body be an array of data objects.\n" \
+        "- Batch operations respond with `202 accepted` and a poller record in the response body. The poller record can be used to " \
+          "track the progress of the asynchronous job until it is complete.\n" \
+        "- When batch operations are complete their results are stored in the `results` field on the poller record. There will be one " \
+          "result item for each data item in the request, at the exact same index in the array.\n" \
+        "- **Note:** Most batch operations also have a corresponding 'single mode' operation which operates at the same endpoint " \
+          "and also via the POST verb, but accepts a `data` parameter in the body which is a single object rather than an array " \
+          "and which returns a synchronous result instead of a poller."
     end
 
     #=== TAG GROUPS (USED BY REDOC) ===#
@@ -163,11 +230,11 @@ class Api::V1::DocsController < ActionController::Base
     key :'x-tagGroups', [
       {
         name: 'Models',
-        tags: [:userModel, :groupModel, :badgeModel, :portfolioModel]
+        tags: [:userModel, :groupModel, :badgeModel, :endorsementModel, :portfolioModel, :pollerModel]
       },
       {
         name: 'Operation Formats',
-        tags: [:recordItemFormat, :paginatedListFormat]
+        tags: [:recordItemFormat, :paginatedListFormat, :batchOperationFormat]
       }
     ]
 
@@ -199,8 +266,15 @@ class Api::V1::DocsController < ActionController::Base
         "```"
       key :in, :query
     end
+    security_definition :csrf_token do
+      key :type, :apiKey
+      key :name, :'X-CSRF-Token'
+      key :description, "Only used by internal API."
+      key :in, :header
+    end
     security do
       key :authentication_token, []
+      key :csrf_token, []
     end
   end
 

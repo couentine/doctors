@@ -1,10 +1,10 @@
-class Api::V1::AuthenticationTokenSchemas
+class Api::V1::Schemas::AuthenticationTokenSchemas
   include Swagger::Blocks
 
   #=== AUTHENTICATION TOKEN ATTRIBUTES ===#
 
   swagger_schema :AuthenticationTokenOutputAttributes do
-    extend Api::V1::SharedSchemas::CommonDocumentFields
+    extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
 
     key :type, :object
     
@@ -86,7 +86,7 @@ class Api::V1::AuthenticationTokenSchemas
   #=== AUTHENTICATION TOKEN RELATIONSHIPS ===#
 
   swagger_schema :AuthenticationTokenRelationships do
-    extend Api::V1::SharedSchemas::RelationshipsList
+    extend Api::V1::Helpers::SchemaHelpers::RelationshipsList
 
     key :type, :object
 

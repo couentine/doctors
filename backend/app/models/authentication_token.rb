@@ -2,7 +2,7 @@
 # 
 # AUTHENTICATION TOKEN MODEL
 # 
-# To create a new authentication token use `AuthenticationTokenCreationService`.
+# When creating a new authentication token, always use `AuthenticationTokenValidationService` before saving.
 # 
 #==========================================================================================================================================#
 
@@ -36,7 +36,7 @@ class AuthenticationToken
   # === CALLBACK === #
 
   before_create :generate_body
-  before_save :remove_invalid_permission_sets
+  before_save :clean_permission_sets
 
   # === INSTANCE METHODS === #
 
@@ -76,10 +76,16 @@ class AuthenticationToken
     end
   end
 
-  def remove_invalid_permission_sets
+  # Forces the inclusion of the `all_users` permission sets. Removes any invalid permission sets.
+  def clean_permission_sets
+    self.permission_sets = ApplicationPolicy::PERMISSION_SETS.select do |permission_set, settings| 
+      settings[:all_users]
+    end.keys + permission_sets
+    self.permission_sets.uniq!
+
     if permission_sets.present?
       permission_sets.each do |permission_set|
-        if !ApplicationPolicy::PERMISSION_SETS.keys.include?(permission_set)
+        if !ApplicationPolicy::PERMISSION_SETS.has_key?(permission_set)
           self.permission_sets.delete permission_set
         end
       end

@@ -1,10 +1,10 @@
-class Api::V1::GroupSchemas
+class Api::V1::Schemas::GroupSchemas
   include Swagger::Blocks
 
   #=== GROUP OUTPUT ATTRIBUTES ===#
 
   swagger_schema :GroupOutputAttributes do
-    extend Api::V1::SharedSchemas::CommonDocumentFields
+    extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
 
     key :type, :object
     
@@ -142,7 +142,7 @@ class Api::V1::GroupSchemas
   #=== GROUP RELATIONSHIPS ===#
 
   swagger_schema :GroupRelationships do
-    extend Api::V1::SharedSchemas::RelationshipsList
+    extend Api::V1::Helpers::SchemaHelpers::RelationshipsList
 
     key :type, :object
 

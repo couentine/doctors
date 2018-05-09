@@ -1,10 +1,10 @@
-class Api::V1::PortfolioSchemas
+class Api::V1::Schemas::PortfolioSchemas
   include Swagger::Blocks
 
   #=== PORTFOLIO OUTPUT ATTRIBUTES ===#
 
   swagger_schema :PortfolioOutputAttributes do
-    extend Api::V1::SharedSchemas::CommonDocumentFields
+    extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
 
     key :type, :object
     
@@ -102,7 +102,7 @@ class Api::V1::PortfolioSchemas
   #=== PORTFOLIO RELATIONSHIPS ===#
 
   swagger_schema :PortfolioRelationships do
-    extend Api::V1::SharedSchemas::RelationshipsList
+    extend Api::V1::Helpers::SchemaHelpers::RelationshipsList
 
     key :type, :object
 

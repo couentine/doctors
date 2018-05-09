@@ -1,4 +1,4 @@
-class Api::V1::AuthenticationTokenPaths
+class Api::V1::Paths::AuthenticationTokenPaths
   include Swagger::Blocks
 
   swagger_path '/authentication_tokens/{id}' do
@@ -6,8 +6,8 @@ class Api::V1::AuthenticationTokenPaths
     #=== GET AUTHENTICATION TOKEN ===#
 
     operation :get do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::RecordItem
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
 
       # Basic Info
       define_basic_info :authentication_token, :get
@@ -31,8 +31,8 @@ class Api::V1::AuthenticationTokenPaths
     #=== DELETE AUTHENTICATION TOKEN ===#
 
     operation :delete do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::RecordItem
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
 
       # Basic Info
       define_basic_info :authentication_token, :delete
@@ -62,8 +62,8 @@ class Api::V1::AuthenticationTokenPaths
     #=== AUTHENTICATION TOKEN INDEX ===#
 
     operation :get do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::PaginatedList
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::PaginatedList
 
       # Basic Info
       define_basic_info :authentication_token, 'Get list of authentication_tokens for current user'
@@ -79,8 +79,8 @@ class Api::V1::AuthenticationTokenPaths
     #=== CREATE AUTHENTICATION TOKEN ===#
 
     operation :post do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::RecordItem
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
 
       # Basic Info
       define_basic_info :authentication_token, :create

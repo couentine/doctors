@@ -196,6 +196,7 @@ class User
 
   # === USER MOCK FIELD METHODS === #
 
+  def full_url; user_url; end
   def user_url
     "#{ENV['root_url'] || 'https://www.badgelist.com'}/u/#{username_with_caps}"
   end

@@ -15,7 +15,7 @@ class AuthenticationTokenPolicy < ApplicationPolicy
   #=== ACTION POLICIES ===#
 
   def index?
-    return @current_user.present? && @current_user.has?('authentication_tokens:read')
+    return @current_user.present? && @current_user.has?('all:index') && @current_user.has?('authentication_tokens:read')
   end
 
   def show?

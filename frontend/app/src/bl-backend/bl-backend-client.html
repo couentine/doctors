@@ -74,66 +74,110 @@ The client uses the `swagger.json` file located in the component folder.
 
       // #=== PUBLIC ACTION METHODS ===#
 
-      /** 
-       * Fires the specified operation and returns a promise with either the response object OR an error. Parameters is optional.
-       * Example usage: `doOperation('myBadges', 'getMyBadges', { page: 2 }).then(function(response) { console.log(response) })`
+      /**
+       * Finds the swagger client function corresponding to an operation within the API and executes it with the passed parameters.
+       * Returns a promise with either the response object OR an error. Errors are passed as a promise rejection either with the 
+       * response object as the parameter or with a simple string parameter. That means that the list of errors themselves will be 
+       * available in `response.errors` unless no response was received.
+       * 
+       * @param {string} options.formatTag - The format tag (ex: `recordItemFormat`) of the operation in swagger.
+       * @param {string} options.verb - The verb (get, create, delete, update, search, etc) of this operation.
+       * @param {string} options.model - The model name, without the word model (ex: `badge`) of the primary model.
+       * @param {string} options.parentModel - The parent model name, w/o the word model (ex: `group`) of the secondary model if needed.
+       * @param {string} parameters - The parameters object which should be passed to the operation. 
+       *   A NOTE ABOUT RECORD ID / KEY: Any parameters called `key` or `parentKey` will automatically be renamed according to the accepted
+       *   parameters for the specified operation. For instance: `key` might become `id`, or `parentKey` might become `group_key`.
        */
-      doOperation(tag, operationId, parameters) {
-        // Add the CSRF token if needed
-        var operationPropertyNames = this.client[tag].operations[operationId].parameters.map(function(property) {
-          return property.name;
-        });
-        if (operationPropertyNames.includes('X-CSRF-Token'))
-          parameters['X-CSRF-Token'] = this.app.manifest.csrf_token;
+      doOperation(options, parameters) {
+        // First get the operation details (displays the network error dialog if they can't be located)
+        var operationId = this.getOperationId(options);
+        var operationFunction = this.getOperationFunction(options.formatTag, operationId);
+        var operationParameters = this.getOperationParameters(options.formatTag, operationId);
+        var operationParameterNames = operationParameters.map(function(parameter) { return parameter.name });
+
+        // Now setup the parameters then determine if we need to change the name of the key / parent key
+        if (parameters == null) parameters = {};
+        if (parameters.hasOwnProperty('key') && operationParameterNames.includes('id')) {
+          // There is either an id or a key or nothing, so we only need to act if they specified key but it's supposed to be id
+          parameters.id = parameters.key;
+          delete parameters.key;
+        }
+        if (parameters.hasOwnProperty('parentKey')) {
+          // `parentKey` is never an option so we need to figure out what the appropriate parameter name is and move it over
+          if (operationParameterNames.includes(options.parentModel + '_id')) {
+            parameters[options.parentModel + '_id'] = parameters.parentKey;
+            delete parameters.parentKey;
+          } else if (operationParameterNames.includes(options.parentModel + '_key')) {
+            parameters[options.parentModel + '_key'] = parameters.parentKey;
+            delete parameters.parentKey;
+          } else {
+            this.showErrorDialog('Could not find a parent key parameter for this operation');
+            console.log(operationId);
+            console.log(operationParameterNames);
+            console.log(parameters);
+          }
+        }
 
         return new Promise(function(resolve, reject) {
-          this.client[tag][operationId](parameters).then(function(responseDetails) {
+          operationFunction(parameters).then(function(responseDetails) {
             resolve(responseDetails.obj);
           }).catch(function(error) {
-            reject(error);
-          });
+            if (error && error.obj && error.obj.errors) {
+              reject(error.obj);
+            } else {
+              reject('There was a problem communicating with the server. Please try again later.');
+            }
+          }.bind(this));
         }.bind(this));
       }
 
       /**
-       * Returns an object organized with a key for each tag and subkey for each operation. Each operation key has a `do` function and 
-       * a `parameters` object which stores details of the parameters and their schemas.
-       * The root object keys are organized by tag such that there will be one key for each additional tag present in the operations.
-       * Each key then contains an object with subkeys for the stripped down action names (ex: `get`, `delete`).
-       * Each subkey's `do` function is a callback accepting a single `parameters` argument, returning a promise generated by `doOperation`.
-       * Each subkey's `parameters` object is a copy of the swagger `parameters` array mapped by parameter name.
-       */ 
-      operationsByTag(tag) {
-        var returnObject = {};
-        var operationTags; var operationIds; var operationId;
-        var callbackFunction; var actionName;
+       * Finds a specific operation in the API and returns the operation id.
+       * 
+       * @param {string} options.formatTag - The format tag (ex: `recordItemFormat`) of the operation in swagger.
+       * @param {string} options.verb - The verb (get, create, delete, update, search, etc) of this operation.
+       * @param {string} options.model - The model name, without the word model (ex: `badge`) of the primary model.
+       * @param {string} options.parentModel - The parent model name, w/o the word model (ex: `group`) of the secondary model if needed.
+       */
+      getOperationId(options) {
+        var pluralizeModel = this.client.apis[options.formatTag].vendorExtensions['x-blType'].toLowerCase().includes('list');
+        var expectedOperationId = options.verb
+          + (options.parentModel ? options.parentModel : '')
+          + options.model
+          + (pluralizeModel ? 's' : '');
+        var matchingOperationIds = Object.keys(this.client[options.formatTag].operations)
+          .filter(function(operationId) {
+            return operationId.toLowerCase() == expectedOperationId.toLowerCase();
+          });
 
-        operationIds = Object.getOwnPropertyNames(this.client[tag].operations);
-        for (var i = 0; i < operationIds.length; i++) {
-          // Build the callback for this operation, which should accept a parameters argument from the consumertext itself)
-          operationId = operationIds[i]; // need to flatten in order to get closure to work
-          callbackFunction = (parameters) => this.doOperation(tag, operationId, parameters);
-
-          // The action name is the same as the operationId w/o the tag text (ex: `getMyBadges` => `get')
-          actionName = operationId.replace(new RegExp(tag, 'i'), '');
-
-          // Loop through operation tags and add a copy of this action for each tag we find that isn't the original tag
-          operationTags = this.client[tag].operations[operationIds[i]].operation.tags;
-          for (var j = 0; j < operationTags.length; j++)
-            if (operationTags[j] != tag) {
-              if (!returnObject[operationTags[j]]) returnObject[operationTags[j]] = {};
-              returnObject[operationTags[j]][actionName] = {
-                do: callbackFunction,
-                parameters: this.client[tag].operations[operationId].parameters.reduce(
-                  function(parametersObject, parametersItem) {
-                    parametersObject[parametersItem.name] = parametersItem;
-                    return parametersObject; 
-                  }, {})
-              };
-            }
+        if ((matchingOperationIds == null) || (matchingOperationIds.length == 0)) {
+          this.showErrorDialog('There were no matching operations');
+          console.log('Expected operation id = ' + expectedOperationId);
+          console.log(options);
+        } else if (matchingOperationIds.length > 1) {
+          this.showErrorDialog('There were multiple matching operations');
+          console.log('Expected operation id = ' + expectedOperationId);
+          console.log(options);
+          console.log(matchingOperationIds);
+        } else {
+          return matchingOperationIds[0];
         }
+      }
 
-        return returnObject;
+      /**
+       * Returns the execution function for the specified API operation. 
+       * Note: You can use `getOperationId` to figure out the operation id if you don't know it.
+       */
+      getOperationFunction(formatTag, operationId) {
+        return this.client[formatTag][operationId];
+      }
+
+      /**
+       * Returns the list of parameters for the specified API operation. 
+       * Note: You can use `getOperationId` to figure out the operation id if you don't know it.
+       */
+      getOperationParameters(formatTag, operationId) {
+        return this.client[formatTag].operations[operationId].parameters;
       }
 
       /**
@@ -149,7 +193,13 @@ The client uses the `swagger.json` file located in the component folder.
         else
           modelName = modelReferenceString;
 
-        return this.client.models[modelName].definition.properties;
+        return this.client.definitions[modelName].properties;
+      }
+
+      /** Opens the network error dialog with the specified error message.  */
+      showErrorDialog(errorMessage) {
+        this.connectionErrorMessage = errorMessage;
+        this.$.connectionErrorDialog.open();
       }
 
       // #=== LIFECYCLE EVENTS ===#
@@ -162,18 +212,17 @@ The client uses the `swagger.json` file located in the component folder.
 
         // Initialize the swagger client
         this.client = new SwaggerClient({
-          url: Polymer.rootPath + "/src/bl-backend/swagger.json",
-          usePromise: true
+          url: '/api/v1/internal.json',
+          usePromise: true,
         }).then(function(client) {
-            // We need to override the host if we are in a non-production environment
-            if (client.host != apiHost)
-              client.setHost(apiHost);
-            
-            self.client = client;
-            self.initialized = true;
+          // We need to override the host if we are in a non-production environment
+          if (client.host != apiHost)
+            client.setHost(apiHost);
+          
+          self.client = client;
+          self.initialized = true;
         }).catch(function(errorMessage) {
-            self.connectionErrorMessage = errorMessage;
-            self.$.connectionErrorDialog.open();
+          self.showErrorDialog(errorMessage);
         });
       }
 

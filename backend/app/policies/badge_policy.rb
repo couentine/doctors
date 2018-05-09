@@ -16,7 +16,7 @@ class BadgePolicy < ApplicationPolicy
 
   # Only available to authenticated users
   def index?
-    return @current_user.present? && @current_user.has?('badges:read')
+    return @current_user.present? && @current_user.has?('all:index') && @current_user.has?('badges:read')
   end
 
   def show?
@@ -36,6 +36,10 @@ class BadgePolicy < ApplicationPolicy
   
   def award?
     return @current_user.has?('portfolios:review') && is_awarder?
+  end
+  
+  def bulk_award?
+    return award? && @badge.group.has?(:bulk_tools)
   end
   
   #=== FILTER POLICIES ===#
@@ -77,8 +81,10 @@ class BadgePolicy < ApplicationPolicy
   #=== RELATIONSHIP POLICIES ===#
 
   def portfolios_index?
-    return false if !@current_user.has?('badges:read') || !@current_user.has?('portfolios:read')
-    return show_people?
+    return @current_user.has?('all:index') \
+      && @current_user.has?('badges:read') \
+      && @current_user.has?('portfolios:read') \
+      && show_people?
   end
 
   #=== USER-FACING METADATA ===#

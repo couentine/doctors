@@ -39,6 +39,8 @@ BadgeList::Application.routes.draw do
   # === API PATHS === #
   namespace :api do
     namespace :v1 do
+      resources :pollers, only: [:show]
+
       resources :users, only: [:show] do
         resources :groups, only: [:index]
         resources :portfolios, only: [:index]
@@ -47,13 +49,14 @@ BadgeList::Application.routes.draw do
         match ':email' => 'users#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
       end
       resources :groups, only: [:index, :show] do
-        resources :badges, only: [:index]
+        resources :badges, only: [:index, :show]
         resources :users, only: [:index]
       end
       resources :badges, only: [:index, :show] do
         resources :portfolios, only: [:index, :show] do
           match ':email' => 'portfolios#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
         end
+        resources :endorsements, only: [:create]
       end
       resources :portfolios, only: [:show]
       resources :authentication_tokens, only: [:index, :create, :show, :destroy]

@@ -140,8 +140,8 @@ This displays a standard group card.
 
     <paper-ripple></paper-ripple>
 
-    <div id="bannerWrapper" class$="[[group.color]]">
-      <div id="banner" class$="[[group.color]]">
+    <div id="bannerWrapper" class$="[[group.attributes.color]]">
+      <div id="banner" class$="[[group.attributes.color]]">
         <!-- #=== BACKGROUND IMAGES DEPENDENT ON BADGE COUNT ===# -->
         <template is="dom-if" if="[[isSmallGroup]]">
           <svg xmlns="http://www.w3.org/2000/svg" class="background" preserveAspectRatio="none" viewBox="0 0 1068.3 554.3">
@@ -193,13 +193,13 @@ This displays a standard group card.
         </template>
 
         <div id="logo">
-          <img src$="[[group.image_url]]">
+          <img src$="[[group.attributes.image_url]]">
         </div>
       </div>
     </div>
 
     <div id="text">
-      [[group.name]]
+      [[group.attributes.name]]
     </div>
 
   </template>
@@ -217,19 +217,19 @@ This displays a standard group card.
           /** A group is small if it has from 1 to 9 badges. */
           isSmallGroup: {
             type: Boolean,
-            computed: '_isSmallGroup(group.badge_count)'
+            computed: '_isSmallGroup(group.attributes.badge_count)'
           },
 
           /** A group is medium if it has from 10 to 49 badges. */
           isMediumGroup: {
             type: Boolean,
-            computed: '_isMediumGroup(group.badge_count)'
+            computed: '_isMediumGroup(group.attributes.badge_count)'
           },
 
           /** A group is large if it has from over 50 badges. */
           isLargeGroup: {
             type: Boolean,
-            computed: '_isLargeGroup(group.badge_count)'
+            computed: '_isLargeGroup(group.attributes.badge_count)'
           }
 
         }

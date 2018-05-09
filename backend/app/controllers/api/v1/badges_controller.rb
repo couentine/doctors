@@ -59,8 +59,13 @@ class Api::V1::BadgesController < Api::V1::BaseController
     render_json_api @badges, expose: { show_all_fields: true, meta_index: @policy.meta_index }
   end
 
+  # Accessible via either getBadge or getGroupBadge
   def show
-    @badge = Badge.find(params[:id])
+    if params[:group_id].present?
+      @badge = Badge.find(params[:group_id] + '.' + params[:id])
+    else
+      @badge = Badge.find(params[:id])
+    end
 
     if @badge
       authorize @badge # always returns true, fields are filtered in the serializer

@@ -1,10 +1,10 @@
-class Api::V1::UserSchemas
+class Api::V1::Schemas::UserSchemas
   include Swagger::Blocks
 
   #=== USER OUTPUT ATTRIBUTES ===#
 
   swagger_schema :UserOutputAttributes do
-    extend Api::V1::SharedSchemas::CommonDocumentFields
+    extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
 
     key :type, :object
     
@@ -112,7 +112,7 @@ class Api::V1::UserSchemas
   #=== USER RELATIONSHIPS ===#
 
   swagger_schema :UserRelationships do
-    extend Api::V1::SharedSchemas::RelationshipsList
+    extend Api::V1::Helpers::SchemaHelpers::RelationshipsList
 
     key :type, :object
 

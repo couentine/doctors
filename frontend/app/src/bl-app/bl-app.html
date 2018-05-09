@@ -54,7 +54,6 @@ The mixin also provides various actions for interacting with the container. (Ref
     <bl-backend-client id="backend"></bl-backend-client>
 
     <!-- #=== APP ROUTING ===# -->
-    
     <app-location id="location" route="{{route}}" 
       url-space-regex="(^/home$)|(^/[a-zA-Z0-9_-]{3,}/[a-zA-Z0-9_-]{3,}/endorsements/add)"></app-location>
     
@@ -65,8 +64,9 @@ The mixin also provides various actions for interacting with the container. (Ref
           pattern="/endorsements/add" title="Bulk Award - [[badge.name]] - Badge List"></app-route>
     
     <!-- #=== APP BACKEND MODEL ITEMS ===# -->
-    <bl-backend-item id="backendGroup" target="{{group}}" type="group" record-path="{{groupRecordPath}}"></bl-backend-item>
-    <bl-backend-item id="backendBadge" target="{{badge}}" type="badge" record-path="{{badgeRecordPath}}"></bl-backend-item>
+    <bl-backend-item id="backendGroup" target="{{group}}" model="group" key="[[filteredGroupKey]]"></bl-backend-item>
+    <bl-backend-item id="backendBadge" target="{{badge}}" model="badge" key="[[badgeRouteData.slug]]" parent-model="group"
+      parent-key="[[filteredGroupKey]]"></bl-backend-item>
     <bl-poller id="userPoller" poller-id="{{userPollerId}}" target="{{userPoller}}"></bl-poller>
 
     <!-- #=== APP VIEWS ===# -->
@@ -85,7 +85,7 @@ The mixin also provides various actions for interacting with the container. (Ref
             
       <div class="dialogContent">
         <p>
-          Badge List is completing the configuration of your account, pleast wait.
+          Badge List is completing the configuration of your account, please wait.
         </p>
       </div>
     </paper-dialog>
@@ -130,19 +130,13 @@ The mixin also provides various actions for interacting with the container. (Ref
           group: Object,
           
           /** The group path as computed based on the current route data. */
-          groupRecordPath: {
+          filteredGroupKey: {
             type: String,
-            computed: '_groupRecordPath(groupRouteData.slug)'
+            computed: '_filteredGroupKey(groupRouteData.slug)'
           },
 
           /** The badge object which is currently active. Null if current view does not have a corresponding badge. */
           badge: Object,
-          
-          /** The badge path as computed based on the current route data. */
-          badgeRecordPath: {
-            type: String,
-            computed: '_badgeRecordPath(groupRouteData.slug, badgeRouteData.slug)'
-          },
 
           /** Stores the active route which is currently being used as the source of the document title. */
           routeTitleSource: Object
@@ -201,7 +195,7 @@ The mixin also provides various actions for interacting with the container. (Ref
 
       static get observers() {
           return [
-            '_userPollerCompletedChanged(userPoller.completed)',
+            '_userPollerCompletedChanged(userPoller.attributes.completed)',
             '_currentUserAsyncPollerIdChanged(currentUser.async_callback_poller_id)',
             '_checkForTitleChange(group.name, badge.name)' /* Update the arguments whenever adding new record fields in a route title. */
           ]
@@ -252,17 +246,10 @@ The mixin also provides various actions for interacting with the container. (Ref
 
       // #=== PROPERTY COMPUTER METHODS ===#
 
-      _groupRecordPath(groupSlug) {
+      _filteredGroupKey(groupSlug) {
         if (groupSlug && groupSlug.length && (groupSlug != 'home'))
           return groupSlug.toLowerCase();
         else
-          return null;
-      }
-
-      _badgeRecordPath(groupSlug, badgeSlug) {
-        if (groupSlug && groupSlug.length && badgeSlug && badgeSlug.length)
-          return groupSlug.toLowerCase() + '/' + badgeSlug.toLowerCase();
-        else 
           return null;
       }
 

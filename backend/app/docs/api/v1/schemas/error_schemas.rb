@@ -1,4 +1,4 @@
-class Api::V1::ErrorSchemas
+class Api::V1::Schemas::ErrorSchemas
   include Swagger::Blocks
 
   #=== GENERIC ERROR OBJECT ===#
@@ -32,10 +32,12 @@ class Api::V1::ErrorSchemas
     property :title do
       key :type, :string
       key :description, 'Error title'
+      key :example, 'Name is too long'
     end
     property :detail do
       key :type, :string
       key :description, 'Error detail'
+      key :example, 'The name cannot be more than 100 characters long'
     end
     property :source do
       key :type, :object
@@ -44,7 +46,8 @@ class Api::V1::ErrorSchemas
         key :type, :string
         key :format, :pointer
         key :description, 'A JSON pointer (in accordance with the RFC6901 specification) to the part of the request document which was ' \
-          'in error. Example: `/data/attributes/name`'
+          'in error.'
+        key :example, '/data/attributes/name'
       end
     end
 

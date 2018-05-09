@@ -1,4 +1,4 @@
-class Api::V1::UserPaths
+class Api::V1::Paths::UserPaths
   include Swagger::Blocks
 
   swagger_path '/users/{key}' do
@@ -6,8 +6,8 @@ class Api::V1::UserPaths
     #=== GET USER ===#
 
     operation :get do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::RecordItem
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
 
       # Basic Info
       define_basic_info :user, :get, 'Get user by id, username or email'
@@ -32,20 +32,20 @@ class Api::V1::UserPaths
 
   end
   
-  swagger_path '/users/{key}/groups' do
+  swagger_path '/users/{user_key}/groups' do
     
     #=== USER GROUP INDEX ===#
 
     operation :get do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::PaginatedList
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::PaginatedList
 
       # Basic Info
       define_basic_info :group, 'Get list of groups specified user belongs to', :user
       
       # Parameters
       parameter do
-        key :name, :key
+        key :name, :user_key
         key :in, :path
         key :description, "You can query user records using any of the following keys:\n" \
           "- Record id\n" \
@@ -73,20 +73,20 @@ class Api::V1::UserPaths
 
   end
   
-  swagger_path '/users/{key}/portfolios' do
+  swagger_path '/users/{user_key}/portfolios' do
     
     #=== USER GROUP INDEX ===#
 
     operation :get do
-      extend Api::V1::SharedOperationFormats::Base
-      extend Api::V1::SharedOperationFormats::PaginatedList
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::PaginatedList
 
       # Basic Info
       define_basic_info :portfolio, 'Get list of portfolios for selected user', :user
       
       # Parameters
       parameter do
-        key :name, :key
+        key :name, :user_key
         key :in, :path
         key :description, "You can query user records using any of the following keys:\n" \
           "- Record id\n" \
