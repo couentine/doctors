@@ -390,7 +390,7 @@ class User
           postmark_client = Postmark::ApiClient.new(ENV['POSTMARK_API_KEY'])
           postmark_client.activate_bounce(user.inactive_email_bounce_id)
           user.inactive_email_bounce_id = nil
-        rescue Exception => e
+        rescue => e
           logger.error "#=== User.unblock_email: Error unblocking #{email}. Error Msg: '#{e}'. ===#"
         end
       end
@@ -1051,7 +1051,7 @@ class User
         customer.metadata = user.stripe_customer_metadata
         customer.save
       end
-    rescue Exception => e
+    rescue => e
       if user
         # Log this error
         user.info_items.new(
@@ -1140,7 +1140,7 @@ class User
 
         throw "Card was rejected."
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to add the credit card, ' \
@@ -1213,7 +1213,7 @@ class User
       else
         throw "There was a problem removing the card, please try again."
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to remove the credit card, ' \

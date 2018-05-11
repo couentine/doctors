@@ -249,7 +249,7 @@ class GroupTag
         poller.data = { user_ids: user_ids }
         poller.save
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.data = { user_ids: user_ids }
@@ -327,7 +327,7 @@ class GroupTag
         poller.data = subscription.to_hash
         poller.save
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to remove users from this tag, ' \
@@ -444,7 +444,7 @@ class GroupTag
         poller.data = { badge_ids: badge_ids }
         poller.save
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.data = { badge_ids: badge_ids }
@@ -522,7 +522,7 @@ class GroupTag
         poller.data = subscription.to_hash
         poller.save
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to remove badges from this tag, ' \

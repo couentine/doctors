@@ -12,7 +12,7 @@ class IntercomEventWorker
     )
     begin
       intercom.events.create(options)
-    rescue Exception => e
+    rescue => e
       if options['user_id'].present?
         intercom_user = intercom.users.find(user_id: options['user_id']) rescue nil
         user = User.find(options['user_id']) rescue nil

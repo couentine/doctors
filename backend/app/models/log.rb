@@ -262,7 +262,7 @@ class Log
         end
         poller.save
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to post feedback, ' \

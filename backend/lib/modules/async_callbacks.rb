@@ -61,7 +61,7 @@ module AsyncCallbacks
         callbacks_to_execute.each do |callback_name|
           begin
             record.send(callback_name.to_s + '!')
-          rescue Exception => e
+          rescue => e
             record.async_callback_errors << e.to_s
           end
         end

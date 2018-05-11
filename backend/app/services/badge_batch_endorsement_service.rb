@@ -196,7 +196,7 @@ class BadgeBatchEndorsementService
             if send_emails_to_new_users && !User.get_inactive_email_list.include?(validation['email'])
               NewUserMailer.badge_issued(validation['email'], nil, @creator_user.id, @group.id, @badge.id).deliver
             end
-          rescue Exception => e
+          rescue => e
             result_type = 'error'
             error_message = e.to_s
           end
@@ -230,7 +230,7 @@ class BadgeBatchEndorsementService
       end
 
       return @result_items
-    rescue Exception => e
+    rescue => e
       if @poller
         @poller.status = 'failed'
         @poller.message = e.to_s

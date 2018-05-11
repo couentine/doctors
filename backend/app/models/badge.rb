@@ -377,7 +377,7 @@ class Badge
       # Finally save the badge json add the json clone to the result
       badge.save!
       result['json_clone'] = badge.json_clone
-    rescue Exception => e
+    rescue => e
       result['success'] = false
       result['error_message'] = "Error creating badge: #{e}"
       result['badge'] = badge
@@ -434,7 +434,7 @@ class Badge
         poller.data = { badge_id: badge.id.to_s }
         poller.save
       end
-    # rescue Exception => e
+    # rescue => e
     #   if poller
     #     poller.status = 'failed'
     #     poller.message = 'An error occurred while trying to create the badge, ' \
@@ -487,7 +487,7 @@ class Badge
         poller.data = { badge_id: badge.id.to_s }
         poller.save
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to update the badge, ' \

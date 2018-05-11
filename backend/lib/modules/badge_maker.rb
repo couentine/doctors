@@ -237,7 +237,7 @@ class BadgeMaker
       else
         return_value
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to build the badge image. ' \
@@ -371,7 +371,7 @@ class BadgeMaker
             new_icon_index[key] = config_row
           end
         end
-      rescue Exception => e
+      rescue => e
         status = :error
         puts "#{icon_folder} >> ERROR = #{e.message}"
       end

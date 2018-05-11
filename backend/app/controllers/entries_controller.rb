@@ -124,7 +124,7 @@ class EntriesController < ApplicationController
       
       @entry.save # This commits the save to S3 for images and thus can error out
       # begin
-      # rescue Exception => e
+      # rescue => e
       #   @entry.errors[:base] << "There was an error saving your #{@type}. Please try again later."
 
       #   # Create the carrierwave direct uploader if this is an image

@@ -19,7 +19,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
         ).save
         is_error = true
       end
-    rescue Exception => e
+    rescue => e
       InfoItem.new(
         type: 'google-oauth2-error', 
         name: 'Google SSO Problem (Error Thrown)',

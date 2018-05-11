@@ -1120,7 +1120,7 @@ class Group
         end
         poller.save
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to copy the badges, ' \
@@ -1406,7 +1406,7 @@ class Group
         subscription.metadata = group.stripe_subscription_metadata
         subscription.save
       end
-    rescue Exception => e
+    rescue => e
       if group
         # Log this error
         group.info_items.new(
@@ -1523,7 +1523,7 @@ class Group
           'plan' => group.subscription_plan
         }
       })
-    rescue Exception => e
+    rescue => e
       # Clear the push pending flag
       if group.stripe_push_pending
         group.stripe_push_pending = false
@@ -1607,7 +1607,7 @@ class Group
           if options[:send_payment_failure_email]
             GroupMailer.delay(retry: 5, queue: 'low').payment_failure(group.id)
           end
-        rescue Exception => e
+        rescue => e
           if subscription
             # There was an unanticipated error, throw it
             throw e
@@ -1624,7 +1624,7 @@ class Group
           end
         end
       end
-    rescue Exception => e
+    rescue => e
       if options[:throw_errors]
         throw e
       else
@@ -1668,7 +1668,7 @@ class Group
           invoice = Stripe::Invoice.retrieve(stripe_invoice_id)
           invoice.closed = true
           invoice.save
-        rescue Exception => e
+        rescue => e
           invoice_closing_error = e
         end
 
@@ -1794,7 +1794,7 @@ class Group
           poller.save
         end
       end
-    rescue Exception => e
+    rescue => e
       if group && group.stripe_push_pending
         group.stripe_push_pending = false
         group.save
