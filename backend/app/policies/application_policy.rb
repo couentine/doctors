@@ -9,16 +9,18 @@ class ApplicationPolicy
   API_ACCESS_TYPES = ATYPES = {
     only_bl_admins: [:web_user], # same as web only (from a permission sets perspective)
     only_web_users: [:web_user],
-    all_authenticated_users: [:web_user, :api_user],
-    public_no_bots: [:web_user, :web_visitor, :api_user],
-    public_and_bots: [:web_user, :web_visitor, :api_user, :api_visitor]
+    only_individual_users: [:web_user, :api_user],
+    only_group_users: [:api_group], # note that there is no web_group since group tokens are api only
+    all_authenticated_users: [:web_user, :api_user, :api_group],
+    public_no_bots: [:web_user, :web_visitor, :api_user, :api_group],
+    public_and_bots: [:web_user, :web_visitor, :api_user, :api_group, :api_visitor],
   }
   PERMISSION_SETS = {
     'all:index'                     => { available_to: ATYPES[:public_no_bots], all_users: true },
     'all:search'                    => { available_to: ATYPES[:public_no_bots], all_users: true },
     'authentication_tokens:read'    => { available_to: ATYPES[:only_web_users] },
     'authentication_tokens:write'   => { available_to: ATYPES[:only_web_users] },
-    'current_user:read'             => { available_to: ATYPES[:all_authenticated_users] },
+    'current_user:read'             => { available_to: ATYPES[:only_individual_users] },
     'current_user:write'            => { available_to: ATYPES[:only_web_users] },
     'badges:read'                   => { available_to: ATYPES[:public_and_bots] },
     'badges:write'                  => { available_to: ATYPES[:all_authenticated_users] },
@@ -42,7 +44,7 @@ class ApplicationPolicy
     'users:write'                   => { available_to: ATYPES[:only_web_users] },
     'users:register'                => { available_to: ATYPES[:all_authenticated_users] },
     'wikis:read'                    => { available_to: ATYPES[:public_no_bots] },
-    'wikis:write'                   => { available_to: ATYPES[:all_authenticated_users] }
+    'wikis:write'                   => { available_to: ATYPES[:all_authenticated_users] },
   }
 
   #=== PUNDIT POLICY DEFINITION ===#
