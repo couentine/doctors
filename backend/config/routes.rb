@@ -66,6 +66,20 @@ BadgeList::Application.routes.draw do
       match 'internal.json' => 'docs#internal', via: :get
     end
   end
+
+  namespace :docs do
+    namespace :api do
+      namespace :v1 do
+        match 'user' => 'user_api_docs#show_html', via: :get
+        match 'group' => 'group_api_docs#show_html', via: :get
+        match 'internal' => 'internal_api_docs#show_html', via: :get
+
+        match 'user_api.json' => 'user_api_docs#show_json', via: :get, as: :user_json
+        match 'group_api.json' => 'group_api_docs#show_json', via: :get, as: :group_json
+        match 'internal_api.json' => 'internal_api_docs#show_json', via: :get, as: :internal_json
+      end
+    end
+  end
   
   # === INFO PATHS === #
   scope '/i' do
@@ -85,10 +99,6 @@ BadgeList::Application.routes.draw do
   # === RESTFUL PATHS TO PRELOAD === #
   resources :domains
   resources :report_results, :only => [:index, :show, :new, :create]
-
-  # === MANUAL FORM PATHS === #
-  match 'f/talk-with-us' => 'forms#user_discussion', via: :post
-  # match 'f/contact-us' => 'forms#contact_us', via: :post
 
   # === MANUAL USER PATHS === #
   match 'users/cards' => 'users#add_card', via: :post, as: :add_card

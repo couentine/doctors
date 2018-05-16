@@ -30,7 +30,7 @@ The client uses the `swagger.json` file located in the component folder.
     <paper-dialog id="connectionErrorDialog" class="red no-title-bar" modal dynamic-align>
       <h2>Connection Problem</h2>
 
-      <div class="formIcon">
+      <div class="dialogIcon">
         <i class="icon-connection-warning"></i>
       </div>
             
@@ -212,7 +212,7 @@ The client uses the `swagger.json` file located in the component folder.
 
         // Initialize the swagger client
         this.client = new SwaggerClient({
-          url: '/api/v1/internal.json',
+          url: '/docs/api/v1/internal_api.json',
           usePromise: true,
         }).then(function(client) {
           // We need to override the host if we are in a non-production environment
