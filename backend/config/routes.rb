@@ -68,6 +68,8 @@ BadgeList::Application.routes.draw do
   end
 
   namespace :docs do
+    root to: 'doc_pages#index'
+
     namespace :api do
       namespace :v1 do
         match 'user' => 'user_api_docs#show_html', via: :get

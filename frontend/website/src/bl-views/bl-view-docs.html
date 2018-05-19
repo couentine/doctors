@@ -1,0 +1,193 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="bl-view-mixin.html">
+
+<!--
+# Badge List Privacy Policy #
+-->
+<dom-module id="bl-view-docs">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: none;
+        }
+        :host([status=active]) {
+          display: block;
+        }
+
+      /* === TYPOGRAPHY === */
+
+        h1 {
+          font-size: 2.5em;
+          line-height: 1.2em;
+        }
+        h2 {
+          font-size: 1.4em;
+          margin: 1em 0;
+        }
+        h3 {
+          font-size: 1.2em;
+          margin: 1em 0;
+          font-style: italic;
+          font-weight: normal;
+        }
+        #content {
+          color: var(--bl-grey-700);
+        }
+      
+      /* === HEADER PANEL STYLES === */
+
+        bl-header-panel {
+          background: var(--bl-grey-50);
+        }
+          #expandedBackground {
+            border-top: 4px solid var(--bl-orange-600);
+            background: white;
+            border-bottom: 1px solid var(--bl-grey-200);
+          }
+          #condensedBackground {
+            border-top: 4px solid var(--bl-orange-600);
+            background: white;
+            border-bottom: 1px solid var(--bl-grey-200);
+          }
+          #headerBottomLinks {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+
+            @apply --bl-font-subhead;
+          }
+            #headerBottomLinks>li {
+              flex: 0 0 auto;
+              margin: 0.5em;
+            }
+              #headerBottomLinks>li>a, #headerBottomLinks>li>a:visited {
+                color: var(--bl-grey-700);
+                text-decoration: none;
+              }
+          #content {
+            color: var(--bl-grey-800);
+          }
+            #content > .inner {
+              max-width: 800px;
+              margin: 0 auto;
+            }
+
+      /* === SHARED ROW STYLES === */
+
+        .row {
+          display: flex;
+          flex-direction: column;
+          margin: 1em 2em;
+        }
+          .row ul {
+            margin: 0;
+          }
+            .row ul li {
+              margin-bottom: 0.5em;
+            }
+      
+      /* === ROW CONTENT STYLES === */
+
+        .banner-row {
+          text-align: center;
+        }
+
+    </style>
+
+    <bl-header-panel id="headerPanel" expanded-height="6" condensed-height="3.2">
+      <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
+      <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
+
+      <bl-header-nav-left slot="leftNav">
+        <img src$="[[rootPath]]/images/badge-list-shield-square.png">
+      </bl-header-nav-left>
+      
+      <bl-header-nav-right slot="rightNav" id="rightNave"></bl-header-nav-right>
+
+      <div id="content" slot="content">
+
+        <div class="inner">
+        
+          <div class="row banner-row">
+            <h1>Badge List Learning Resources</h1>
+          </div>
+
+          <div class="row text-row">
+            <p>
+              Follow the links below to access Badge List's help documentation. If you have any questions you can
+              <a href="#" onclick="return false" on-tap="showIntercom">chat with us</a>
+              or send an email to 
+              <a href="mailto:help@badgelist.com">help@badgelist.com</a>.
+            </p>
+            
+            <h2>User / Admin Documentation</h2>
+            
+            <ul>
+              <li>
+                The <a href="/help/docs">Badge List Help Docs Badge</a> 
+                is the main place to go to read about how to use the Badge List platform.
+              </li>
+              <li>
+                <a href="https://www.youtube.com/channel/UC2mO9v0tUswYPdi98LhYuHQ" target="_blank">Ben's YouTube Channel</a> 
+                is a great resource for tutorial and overview videos.
+              </li>
+            </ul>
+            
+            <h2>Developer Documentation</h2>
+
+            <p>
+              For API documentation, follow the links below.
+            </p>
+
+            <ul>
+              <li>
+                <a href="/docs/api/v1/user">User API Docs</a>
+              </li>
+              <li>
+                <a href="/docs/api/v1/group">Group API Docs</a>
+              </li>
+            </ul>
+
+            <p>
+              <em>
+                To get a free API token contact us via 
+                <a href="mailto:help@badgelist.com">email</a>
+                or
+                <a href="#" onclick="return false" on-tap="showIntercom">chat</a>.
+              </em>
+            </p>
+
+          </div>
+        
+        </div>
+
+      </div>
+
+    </bl-header-panel>
+
+  </template>
+
+  <script>
+    class BlViewDocs extends BlViewMixin(Polymer.Element) {
+
+      static get is() { return 'bl-view-docs'; }
+
+      static get properties() {
+        return {}
+      }
+
+    }
+
+    window.customElements.define(BlViewDocs.is, BlViewDocs);
+  </script>
+</dom-module>
