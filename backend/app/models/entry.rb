@@ -242,7 +242,7 @@ class Entry
       else
         entry.save!
       end
-    rescue Exception => e
+    rescue => e
       # Save the error in the link meta data
       entry.link_metadata = {
         'embedly_exception' => e.to_s
@@ -273,7 +273,7 @@ class Entry
     entry_batch.each do |entry|
       begin
         Entry.refresh_link(entry.id, true) # timeless_save = true
-      rescue Exception => e
+      rescue => e
         error_count += 1
         last_error = e
       end
@@ -333,7 +333,7 @@ class Entry
 
       # Save it inside of the rescue block just in case another error creeps in
       entry.save!
-    rescue Exception => e
+    rescue => e
       # Nothing found so rather than throw an error we'll just set the summary to an error value.
       entry.summary = "No tweet found! Please check the link and try again." 
       entry.link_metadata = {

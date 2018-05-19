@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  include ApplicationHelper
+  
   layout 'legacy' # Default to legacy layout for now
   protect_from_forgery
   before_action :configure_permitted_parameters, if: :devise_controller?
@@ -161,57 +163,6 @@ private
 
   def log_activity
     current_user.log_activity if current_user
-  end
-
-  def set_app_variables
-    # Set the current user json var
-    @current_user_json = (current_user) ? current_user.json(:current_user).to_json : '{}'
-    @current_user_gtm_json = (current_user) ? current_user.json(:google_tag_manager).to_json : '{}'
-
-    # The @asset_paths variable is passed into bl-app-container.assetPaths and is used to provide
-    # the paths of the various asset paths to the Polymer front end.
-    url = ActionController::Base.helpers
-    url.request = request
-    @asset_paths = {
-      'rootURL' => ENV['root_url'],
-      'badgeListShieldSquare' \
-        => url.asset_url('badge-list-shield-square.png'),
-      'badgeListShieldWhiteSquare' \
-        => url.asset_url('badge-list-shield-white-square.png')
-    }
-    @ap_json = @asset_paths.to_json
-
-    # Set the root urls of the polymer servers
-    @polymer_app_root_url = "#{ENV['root_url']}/p/app"
-    @polymer_website_root_url = "#{ENV['root_url']}/p/website"
-
-    # Determine the user's persona and calculate the intercom settings
-    @current_user_persona = 'visitor'
-    if current_user.present?
-      if current_user.admin_of_ids.present?
-        @current_user_persona = 'admin'
-      elsif current_user.expert_badge_ids.present?
-        @current_user_persona = 'holder'
-      elsif current_user.learner_badge_ids.present?
-        @current_user_persona = 'seeker'
-      end
-
-      @intercom_settings = {
-        app_id: ENV['INTERCOM_APP_ID'],
-        user_hash: OpenSSL::HMAC.hexdigest('sha256', ENV['INTERCOM_USER_HASH_SECRET_KEY'], current_user.id.to_s),
-        persona: @current_user_persona
-      }.merge(current_user.json(:intercom_user))
-          
-      if @group && current_user.admin_of?(@group)
-        @intercom_settings.merge!({
-          company: @group.json(:intercom_company)
-        })
-      end
-    else
-      @intercom_settings = {
-        app_id: ENV['INTERCOM_APP_ID']
-      }
-    end
   end
 
 protected

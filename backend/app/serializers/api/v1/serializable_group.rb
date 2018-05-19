@@ -21,6 +21,7 @@ class Api::V1::SerializableGroup < Api::V1::SerializableDocument
   attribute :badge_count
 
   link :self do "/api/v1/groups/#{@object.id.to_s}" end
+  link :self_web do @object.full_url end
 
   has_many :badges do
     link :self do "/api/v1/groups/#{@object.id.to_s}/badges" end

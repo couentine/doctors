@@ -27,6 +27,9 @@ class Api::V1::SerializablePortfolio < Api::V1::SerializableDocument
   attribute :date_originally_issued
   
   link :self do "/api/v1/portfolios/#{@object.id.to_s}" end
+  link :self_web do 
+    @object.full_url(@group || @object.badge.group, @badge || @object.badge, @user || @object.user)
+  end
 
   belongs_to :badge do
     link :self do "/api/v1/badges/#{@object.badge_id.to_s}" end

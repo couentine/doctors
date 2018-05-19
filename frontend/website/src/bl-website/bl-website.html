@@ -7,8 +7,9 @@
 
 <!-- #=== BADGE LIST COMPONENTS ===# -->
 <link rel="import" href="../bl-styles/bl-styles.html">
-<link rel="import" href="../bl-toast/bl-toast.html">
 <link rel="import" href="../bl-styles/fonts.html">
+<link rel="import" href="../bl-toast/bl-toast.html">
+<link rel="import" href="../bl-views/bl-view-docs.html">
 <link rel="import" href="../bl-views/bl-view-how-it-works.html">
 <link rel="import" href="../bl-views/bl-view-pricing.html">
 <link rel="import" href="../bl-views/bl-view-privacy-policy.html">
@@ -57,6 +58,8 @@
       title="How Badge List Works - Expert validated ePortfolios for recognizing digital learning and professional development"></app-route>
     <app-route id="pricingViewRoute" active="{{pricingViewRouteActive}}" route="{{route}}" pattern="/pricing"
       title="Badge List Pricing"></app-route>
+    <app-route id="docsViewRoute" active="{{docsViewRouteActive}}" route="{{route}}" pattern="/docs"
+      title="Badge List Help Documentation"></app-route>
     <app-route id="privacyPolicyViewRoute" active="{{privacyPolicyViewRouteActive}}" route="{{route}}" pattern="/privacy-policy"
       title="Privacy Policy - Badge List"></app-route>
     <app-route id="termsOfServiceViewRoute" active="{{termsOfServiceViewRouteActive}}" route="{{route}}" 
@@ -66,6 +69,7 @@
     <bl-view-web-home id="webHomeView" active="{{webHomeViewActive}}"></bl-view-web-home>
     <bl-view-how-it-works id="howItWorksView" active="{{howItWorksViewRouteActive}}"></bl-view-how-it-works>
     <bl-view-pricing id="pricingView" active="{{pricingViewRouteActive}}"></bl-view-pricing>
+    <bl-view-docs id="docsView" active="{{docsViewRouteActive}}"></bl-view-docs>
     <bl-view-privacy-policy id="privacyPolicyView" active="{{privacyPolicyViewRouteActive}}"></bl-view-privacy-policy>
     <bl-view-terms-of-service id="termsOfServiceView" active="{{termsOfServiceViewRouteActive}}"></bl-view-terms-of-service>
     

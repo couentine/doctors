@@ -44,10 +44,12 @@ class Api::V1::PortfoliosController < Api::V1::BaseController
     end
     
     # Build the core criteria based on the filter and the policy scope
+    # NOTE: The full_url method which is included in the serializable portfolio definition needs the group, user AND badge
+    #   so we include what we can, then expose the rest in the render_json call.
     if @badge.present?
-      portfolio_criteria = PortfolioPolicy::BadgeScope.new(@current_user, @badge.logs, @badge).resolve
+      portfolio_criteria = PortfolioPolicy::BadgeScope.new(@current_user, @badge.logs, @badge).resolve.includes(:user)
     else # must be user mode
-      portfolio_criteria = PortfolioPolicy::UserScope.new(@current_user, @user.logs, @user).resolve
+      portfolio_criteria = PortfolioPolicy::UserScope.new(@current_user, @user.logs, @user).resolve.includes(badge: :group)
     end
     load_filter
     if @filter[:status] != 'all'
@@ -63,7 +65,11 @@ class Api::V1::PortfoliosController < Api::V1::BaseController
     set_calculated_pagination_variables(@portfolios)
 
     @policy = PortfolioPolicy.new(@current_user, @portfolios)
-    render_json_api @portfolios, expose: { meta_index: @policy.meta_index }
+    if @badge.present?
+      render_json_api @portfolios, expose: { meta_index: @policy.meta_index, badge: @badge, group: @badge.group }
+    else
+      render_json_api @portfolios, expose: { meta_index: @policy.meta_index, user: @user }
+    end
   end
 
   # This can be accessed either via the get portfolio path or via the get badge portfolio path

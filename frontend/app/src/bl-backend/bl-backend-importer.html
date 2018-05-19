@@ -44,14 +44,19 @@ The target object provides methods for building a list of items to import either
         return {
           
           /** 
-           * Required. The list type corresponds to a tag in swagger and determines the item properties.
+           * Required. The model tag of the records to be imported.
            */
-          type: String,
+          model: String,
 
           /** 
-           * Required. The id of the record to which this list is being imported. Passed to the `id` parameter of the backend operation.
+           * Optional. The model tag of the parent model.
            */
-          recordId: String,
+          parentModel: String,
+
+          /** 
+           * Optional. If parentModel is set then this is the key for the parent record.
+           */
+          parentKey: String,
 
           /** 
            * This controls the number of items included in each import batch. It is set automatically to the `maxItems` value from the
@@ -60,8 +65,8 @@ The target object provides methods for building a list of items to import either
            */
           importBatchSize: Number,
 
-          /** Optional. Additional parameters to pass to the import action. */
-          parameters: {
+          /** Optional. Additional parameters to pass into the meta hash. */
+          meta: {
             type: Object,
             notify: true,
             value: function() { return {} }
@@ -134,15 +139,6 @@ The target object provides methods for building a list of items to import either
             readOnly: true,
             notify: true
           },
-
-          /** 
-           * Set using the `operationsByTag` method in `<bl-backend-client>`. Used to power public action methods.
-           * Consuming components should not reference this object directly as it may change with future implementations.
-           */
-          _backendOperations: {
-            type: Object,
-            readOnly: true
-          }
 
         }
       }
@@ -493,7 +489,6 @@ The target object provides methods for building a list of items to import either
         var firstIndex;
         var lastIndex;
         var currentItems;
-        var importParameters;
 
         firstIndex = (this.target.status.currentBatch - 1) * this.importBatchSize;
         lastIndex = Math.min((this.target.status.currentBatch * this.importBatchSize) - 1, this.target.itemsToImport.length - 1);
@@ -502,28 +497,45 @@ The target object provides methods for building a list of items to import either
           this._updateItemStatusByIndex(i, 'importing');
         this._updateItemCounts();
 
-        // Construct a temporary list of items with only keys specified it `target.itemProperties`
+        // Construct a temporary list of items with only keys specified in `target.itemProperties`
         currentItems = this.target.itemsToImport
           .slice(firstIndex, lastIndex + 1)
           .map(function(item) {
-            return itemPropertyNames.reduce(function(filteredObject, propertyName) {
-              filteredObject[propertyName] = item[propertyName];
-              return filteredObject;
-            }, {})
+            return {
+              type: item.type,
+              attributes: itemPropertyNames.reduce(function(filteredObject, propertyName) {
+                filteredObject[propertyName] = item.attributes[propertyName];
+                return filteredObject;
+              }, {}),
+            };
           });
 
-        importParameters = Object.assign({}, this.parameters); // clone the parameters in memory
-        importParameters.id = this.recordId;
-        importParameters.items = currentItems;
-        this._backendOperations.importList.import.do(importParameters).then(function(response) {
+        var parameters = {
+          body: {
+            data: currentItems
+          }
+        };
+        if (this.parentModel && this.parentModel.length) parameters.parentKey = this.parentKey;
+        if (this.meta) parameters.body.meta = this.meta;
+
+        var options = {
+          formatTag: 'batchOperationFormat',
+          verb: 'create',
+          model: this.model,
+        };
+        if (this.parentModel && this.parentModel.length) options.parentModel = this.parentModel;
+
+        this.app.$.backend.doOperation(options, parameters).then(function(response) {
           // Setting the `_pollerId` property automatically kicks off the polling process in `<bl-poller>`.
-          // There is a property observer on `target.status.poller.completed` which fires `_processImportResults` when the poller is done.
-          if (response && response.poller_id)
-            this._set_pollerId(response.poller_id);
-          else
+          // There is a property observer on `target.status.poller.attributes.completed` which fires `_processImportResults` 
+          // when the poller is done.
+          if (response && response.data && (response.data.type == 'poller')) {
+            this._set_pollerId(response.data.id);
+          } else {
             this._logImportBatchError('There was a server error. Please try again later.');
-        }.bind(this)).catch(function(error) {
-          this._logImportBatchError(error);
+          }
+        }.bind(this)).catch(function(response) {
+          this._logImportBatchError(response);
         }.bind(this));
       }
 
@@ -531,14 +543,14 @@ The target object provides methods for building a list of items to import either
        * Called by the poller completed observer. Finishes processing the results of the current import batch,
        * then either starts the next batch or completes 
        */
-      _processImportResults(items) {
+      _processImportResults(results) {
         var firstIndex = (this.target.status.currentBatch - 1) * this.importBatchSize;
 
-        for (var i = 0; i < items.length; i++)
-          if (items[i].result.success)
-            this._updateItemStatusByIndex(firstIndex + i, 'imported', items[i].result);
+        for (var i = 0; i < results.length; i++)
+          if (results[i].success)
+            this._updateItemStatusByIndex(firstIndex + i, 'imported', results[i]);
           else
-            this._updateItemStatusByIndex(firstIndex + i, 'failed', items[i].result, items[i].result.error_message);
+            this._updateItemStatusByIndex(firstIndex + i, 'failed', results[i], results[i].error_message);
 
         if (this.target.status.currentBatch < this.target.status.batchCount) {
           this.set('target.status.currentBatch', this.target.status.currentBatch + 1);
@@ -560,8 +572,11 @@ The target object provides methods for building a list of items to import either
             this.push('target.importedItems', this.splice('target.itemsToImport', i, 1)[0]);
       }
 
-      /** Logs a network or server error which occurs during the importing of a batch. */
-      _logImportBatchError(error) {
+      /** 
+        * Logs a network or server error which occurs during the importing of a batch. 
+        * Pass either a string error message or an API response with an array of errors.
+        */
+      _logImportBatchError(errorStringOrRespose) {
         var firstIndex;
         var lastIndex;
 
@@ -575,7 +590,15 @@ The target object provides methods for building a list of items to import either
         // This might have been a multi-batch process where previous batches were successful. If so, then we need to move imported items.
         this._moveImportedItems();
 
-        this._updateStatus('error', error);
+        if ((typeof errorStringOrRespose) == 'string') {
+          this._updateStatus('error', errorStringOrRespose); 
+        } else if (errorStringOrRespose && errorStringOrRespose.errors) {
+          this._updateStatus('error', errorStringOrRespose.errors.map(function(errorItem) {
+            return (errorItem.detail) ? errorItem.detail : errorItem.title
+          }).join('. ') + '.');
+        } else {
+          this._updateStatus('error', 'An error has occurred. Please try again later.'); 
+        }
       }
 
       // #=== LIFECYCLE EVENTS ===#
@@ -594,21 +617,37 @@ The target object provides methods for building a list of items to import either
 
       static get observers() {
           return [
-            '_pollerCompletedChanged(target.status.poller.completed)'
+            '_pollerCompletedChanged(target.status.poller.attributes.completed)'
           ]
       }
 
       /** This method initializes the backend related properties of the component after the backend client is initialized. */
       _appBackendInitializedChanged(e) {
         if (e.detail.value) {
-          this._set_backendOperations(this.app.$.backend.operationsByTag(this.type));
+          // First we need to parse out specs which define the format of the request body, the data array and the items themselves.
+          var backend = this.app.$.backend; // shortcut
+          var operationId = backend.getOperationId({
+            formatTag: 'batchOperationFormat',
+            verb: 'create',
+            model: this.model,
+            parentModel: this.parentModel,
+          });
+          var operationParameterMap = backend.getOperationParameters('batchOperationFormat', operationId)
+            .reduce(function (operationParameterMap, parameter) {
+              operationParameterMap[parameter.name] = parameter;
+              return operationParameterMap;
+            }, {});
+          var requestBodyModel = operationParameterMap.body.schema.$ref;
+          var modelProperties = backend.modelProperties(requestBodyModel);
+          var maxItemsPerBatch = modelProperties.data.maxItems;
+          var itemModel = modelProperties.data.items.properties.attributes.$ref;
+          var itemProperties = backend.modelProperties(itemModel);
           
-          var schemaMaxItems = this._backendOperations.importList.import.parameters.items.schema.maxItems;
-          if (!this.importBatchSize || (this.importBatchSize > schemaMaxItems))
-            this.importBatchSize = schemaMaxItems;
-
-          var itemModelReferenceString = this._backendOperations.importList.import.parameters.items.schema.items.$ref;
-          this.set('target.itemProperties', this.app.$.backend.modelProperties(itemModelReferenceString));
+          // Now we can make sure the batch size isn't more than allowed and we can set the item properties
+          if (!this.importBatchSize || (this.importBatchSize > maxItemsPerBatch)) {
+            this.importBatchSize = maxItemsPerBatch;
+          }
+          this.set('target.itemProperties', itemProperties);
 
           this._updateStatus('ready');
         }
@@ -617,10 +656,10 @@ The target object provides methods for building a list of items to import either
       /** Monitors for completed pollers and passes the resulting processed items to `_processImportResults`. */
       _pollerCompletedChanged(pollerCompleted) {
         if (pollerCompleted)
-          if (this.target.status.poller.status == 'successful')
-            this._processImportResults(this.target.status.poller.data.items);
+          if (this.target.status.poller.attributes.status == 'successful')
+            this._processImportResults(this.target.status.poller.attributes.results);
           else
-            this._logImportBatchError(this.target.status.poller.message);
+            this._logImportBatchError(this.target.status.poller.attributes.completed_message);
       }
 
       // #=== PRIVATE HELPER & UTILITY METHODS ===#
@@ -635,7 +674,10 @@ The target object provides methods for building a list of items to import either
       _buildItem(startingItem, convertFromCSV) {
         var csvColumnMapItem;
         var sourceItemProperty;
-        var item = Object.keys(this.target.itemProperties).reduce(
+        var item = {};
+        
+        item.type = this.model;
+        item.attributes = Object.keys(this.target.itemProperties).reduce(
           function(itemObject, propertyName) {
             if (convertFromCSV) {
               csvColumnMapItem = this.target.csvColumnMap.find(function(row) { return row.property == propertyName });
@@ -652,7 +694,6 @@ The target object provides methods for building a list of items to import either
             return itemObject;
           }.bind(this), {}
         );
-
         item.uniqueId = Math.random().toString(36).slice(2); // used to identify this item later
         item.backend = {
           status: {

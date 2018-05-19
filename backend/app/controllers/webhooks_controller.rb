@@ -49,7 +49,7 @@ class WebhooksController < ApplicationController
       item.save
 
       render nothing: true, status: :ok
-    rescue Exception => e
+    rescue => e
       render nothing: true, status: :internal_server_error
     end
 
@@ -84,7 +84,7 @@ class WebhooksController < ApplicationController
         render nothing: true, status: :forbidden
       end
       
-    rescue Exception => e
+    rescue => e
       render nothing: true, status: :internal_server_error
     end
 

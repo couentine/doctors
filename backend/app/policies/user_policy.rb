@@ -31,12 +31,17 @@ class UserPolicy < ApplicationPolicy
   #=== RELATIONSHIP POLICIES ===#
   
   def groups_index?
-    return @current_user.has?('users:read') && @current_user.has?('groups:read') && show_all_fields?
+    return @current_user.has?('all:index') \
+      && @current_user.has?('users:read') \
+      && @current_user.has?('groups:read') \
+      && show_all_fields?
   end
 
   def portfolios_index?
-    return false if !@current_user.has?('users:read') || !@current_user.has?('portfolios:read')
-    return show_all_fields?
+    return @current_user.has?('all:index') \
+      && @current_user.has?('users:read') \
+      && @current_user.has?('portfolios:read') \
+      && show_all_fields?
   end
 
   #=== USER-FACING METADATA ===#

@@ -8,7 +8,7 @@
 # Badge List Backend Record Item #
 
 Use this component to bind a local component property with a record item in the Badge List backend.
-This is a reusable way to interact with any endpoints marked with the `recordItem` tag.
+This is a reusable way to interact with any endpoints marked with the `recordItemFormat` tag.
 -->
 <dom-module id="bl-backend-item">
   <template>
@@ -23,32 +23,32 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
         return {
 
           /** 
-           * Required. The list type determines the model and available actions. Must match a swagger model tag (`badge`, `group`, etc).
+           * Required. The swagger model name.
            */
-          type: String,
-          
-          /** 
-           * You should set either the `recordId` OR the `recordPath`, not both.
-           * Use `recordId` to retrieve the record if you have its id.
-           * Set this to the record id of the item. Setting or changing this property automatically calls the `get()` operation.
-           * After the `get()` operation completes the `recordPath` will automatically be updated.
-           */
-          recordId: {
-            type: String,
-            notify: true,
-            observer: '_recordIdChanged'
-          },
+          model: String,
 
           /** 
-           * You should set either the `recordId` OR the `recordPath`, not both.
-           * Use `recordPath` to retrieve the record if you do not know it's id but know the url of the record and its parents.
-           * Set this to a string of the format `{parentPath}/{recordUrl}`. Setting or changing this property automatically calls the 
-           * `get()` operation. After the `get()` operation completes the `recordId` will automatically be updated.
+           * Optional. The model name of the parent model. This will change the way that the querying process works. If parentModel is 
+           * blank then this component will query as soon as `key` is set, otherwise it will wait until both `key` and `parentKey` are set.
            */
-          recordPath: {
+          parentModel: String,
+          
+          /** 
+           * You must use a key which is acceptible by the API. If there is no parent model that means you can only use the record id
+           * or (for root level objects like group and user), the slug. The there *is* a parent model then you should normally be able
+           * to use the slug, but the record will not query until the `parentKey` is set.
+           */
+          key: {
             type: String,
             notify: true,
-            observer: '_recordPathChanged'
+            observer: '_keyChanged'
+          },
+
+          /** This is only used if `parentModel` is non-blank. If so then the record will not be queried until this is non-blank. */
+          parentKey: {
+            type: String,
+            notify: true,
+            observer: '_parentKeyChanged'
           },
 
           /**
@@ -60,15 +60,13 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
            * @property {object} status - Stores the current state of the network connection.
            * @property {string} status.code - Equal to `uninitialized`, `ready`, `loading`, `complete` or `error`.
            * @property {boolean} status.isReady - Indicates that the client is initialized and `bl-backend-item` is ready for a value 
-           *   to be placed in either `recordId` or `recordPath`.
+           *   to be placed in either `key` or `parentKey`.
            * @property {boolean} status.isLoading - A network operation is pending.
            * @property {boolean} status.isComplete - Once the initial `get` operation has completed, the status will go to `complete` and
            *   will return to `complete` whenever any additional network operations successfuly complete.
            * @property {boolean} status.isError - True if the status is 'error'.
            * @property {string} status.errorMessage - Error message from backend. Null unless `isError` is `true`.
-           * @property {object} operations - Contains a callback for each backend operation in the swagger spec for this `type`.
-           *   You can always count on the presence of the standard operations: `get()`, `create()` `update()` and `delete()`
-           *   NOTE: This isn't true yet, but will be once API v1 is complete.
+           * @property {object} doOperation - Contains a callback to run an operation by verb.
            */
           target: {
             type: Object,
@@ -76,46 +74,45 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
             value: function() { return {} }
           },
 
-          /** Used to interact with `<bl-backend-client>`. */
-          _backendOperations: {
-            type: Object,
-            readOnly: true
-          }
-
         }
       }
       
       // #=== PUBLIC ACTION METHODS ===#
 
       /** 
-       * Executes any of the `recordItem` operations with the passed parameters and stores the response in `target`. 
+       * Executes any of the `recordItemFormat` operations with the passed parameters and stores the response in `target`. 
        * Note: You can only run one operation at a time. And you can only call this action after the backend client is initialized.
        */
-      doOperation(operationName, parameters) {
-        var parametersWithIdentifier;
-
+      doOperation(verb, parameters) {
         if (this.target.backend.status.isReady || this.target.backend.status.isComplete|| this.target.backend.status.isError) {
           this._updateStatus('loading');
 
-          // Clone the parameters so we can inject the record identifier(s) without messing up the passed parameters object
-          parametersWithIdentifier = {};
-          Object.assign(parametersWithIdentifier, parameters);
-          if (this.recordId && this.recordId.length) {
-            parametersWithIdentifier.id = this.recordId;
-          } else if (this.recordPath && this.recordPath.length) {
-            var recordPathParts = this.recordPath.split('/');
-            parametersWithIdentifier.id = recordPathParts[recordPathParts.length - 1];
-            parametersWithIdentifier.parent_path = recordPathParts.slice(0, -1).join('/');
-          }
+          // Clone the parameters so we can inject the record keys without messing up the passed parameters object
+          var parametersWithKeys = {
+            key: this.key
+          };
+          if (this.parentModel && this.parentModel.length) parametersWithKeys.parentKey = this.parentKey;
+          Object.assign(parametersWithKeys, parameters);
 
-          this._backendOperations.recordItem[operationName].do(parametersWithIdentifier).then(function(response) {
-            var newTargetObject = response;
-            newTargetObject.backend = this.target.backend; // preserve the backend property
-            this.setProperties({target: newTargetObject}); // trigger the property change notifications with a cohesive set
-
-            this.recordId = this.target.id;
-            this.recordPath = this.target.record_path;
-            this._updateStatus('complete');
+          // Build the query options
+          var options = {
+            formatTag: 'recordItemFormat',
+            verb: 'get',
+            model: this.model
+          };
+          if (this.parentModel && this.parentModel.length) options.parentModel = this.parentModel;
+          
+          // Do the query
+          this.app.$.backend.doOperation(options, parametersWithKeys).then(function(response) {
+            if (response && response.data) {
+              var newTargetObject = response.data;
+              newTargetObject.backend = this.target.backend; // preserve the backend property
+              this.setProperties({target: newTargetObject}); // trigger the property change notifications with a cohesive set
+              
+              this._updateStatus('complete');
+            } else {
+              this._updateStatus('error', 'The data which was returned from the server is corrupted');
+            }
           }.bind(this)).catch(function(error) { 
             this._updateStatus('error', error);
           }.bind(this)); 
@@ -157,7 +154,7 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
         this.set('target.backend.status.errorMessage', null);
 
         // No need to notify for this one
-        this.target.backend.operations = {};
+        this.target.backend.doOperation = (verb, parameters) => this.doOperation(verb, parameters);
       }
 
       // #=== LIFECYCLE EVENTS ===#
@@ -174,36 +171,33 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
 
       // #=== LISTENER & OBSERVER METHODS ===#
 
-      _recordIdChanged(newValue, oldValue) {
-        if (newValue && newValue.length
-          && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError))
-            this.doOperation('get');
+      _keyChanged(newValue, oldValue) {
+        if (newValue && newValue.length 
+            && (!this.parentModel || (this.parentKey && this.parentKey.length))
+            && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError)) {
+          this.doOperation('get');
+        }
       }
 
-      _recordPathChanged(newValue, oldValue) {
+      _parentKeyChanged(newValue, oldValue) {
         if (newValue && newValue.length
-          && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError))
-            this.doOperation('get');
+            && this.key && this.key.length
+            && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError)) {
+          this.doOperation('get');
+        }
       }
 
       /** 
        * This method is fired via the listener setup in `connectedCallback()`. 
-       * It initializes `_backendOperations` once the backend client is initialized. And potentially triggers a get operation.
+       * It potentially triggers a get operation.
        */
       _appBackendInitializedChanged(e) {
         if (e.detail.value && (this.target.backend.status.code == 'uninitialized')) {
-          // First we need to create the action callbacks and build out the target backend operations object
-          this._set_backendOperations(this.app.$.backend.operationsByTag(this.type));
-          this.target.backend.operations = Object.keys(this._backendOperations.recordItem)
-            .reduce(function(operationCallbacks, operationName) {
-                operationCallbacks[operationName] = (parameters) => this.doOperation(operationName, parameters);
-                return operationCallbacks;
-            }, {});
-
-          // Now go to status ready and trigger a get (if one of the record identifiers is already set)
+          // Set status ready and trigger a get (if one of the record identifiers is already set)
           this._updateStatus('ready');
-          if ((this.recordId && this.recordId.length) || (this.recordPath && this.recordPath.length))
+          if (this.key && this.key.length && this.parentKey && this.parentKey.length) {
             this.doOperation('get');
+          }
         }
       }
 

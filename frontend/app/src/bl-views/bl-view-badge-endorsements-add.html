@@ -45,7 +45,10 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       /* === HEADER PANEL STYLES === */
 
         bl-header-panel {
-          background: var(--bl-orange-50);
+          background: var(--bl-purple-50);
+        }
+        bl-header-panel.hasItems_true {
+          background: white;
         }
           #expandedBackground {
             border-bottom: 4px solid var(--bl-purple-400);
@@ -65,6 +68,9 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             }
           #content {
             color: var(--bl-grey-800);
+          }
+          #footer {
+            background: transparent;
           }
           
           #leftNav {
@@ -195,14 +201,70 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       /* === TABLE PANEL === */
 
         #tablePanel {
-          padding: 2em;
+          padding: 0;
+          background: white;
         }
-          #tableContent {
-            background: white;
-            border-radius: 9px;
-            overflow-x: scroll;
 
-            @apply --bl-shadow-5;
+          #tableFooter {
+            position: fixed;
+            
+            right:   0;
+            bottom:  0;
+            left:    0;
+
+            color:          var(--bl-grey-500);
+            background:     var(--bl-grey-200);
+            border:         none;
+
+            z-index: 100;
+            overflow: hidden;
+            @apply --bl-shadow-4;
+          }
+            #tableFooter > .divider {
+              height: 0.2rem;
+              border-bottom: 1px solid var(--bl-grey-300);
+            }
+            #tableFooter > .ring {
+              position: absolute;
+              border-radius: 100%;
+            }
+            #tableFooter > .ring.inner {
+              height: 6rem;
+              width: 6rem;
+
+              top: -4.1rem;
+              right: -0.1rem;
+
+              background: var(--bl-orange-100);
+              border: 1rem solid var(--bl-orange-200);
+              opacity: 0.3;
+              z-index: 2;
+            }
+            #tableFooter > .ring.divider {
+              width: 10rem;
+              top: 0;
+              right: 0;
+
+              background: transparent;
+              border-bottom: 1px solid var(--bl-grey-300);
+              border-radius: 0;
+              z-index: 3;
+            }
+            #tableActions {
+              list-style: none;
+              margin: 0;
+              padding: 0;
+              display: flex;
+              justify-content: center;
+            }
+              #tableActions>li {
+                display: block;
+                margin: 0.5em;
+              }
+
+          #tableContent {
+            padding-bottom: 5rem;
+            overflow-x: scroll;
           }
             #tableContent table {
               width: 100%;
@@ -211,14 +273,19 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
               #tableContent table tr th {
                 font-size: 0.8em;
                 padding: 1em 0.7em;
-                border-bottom: 1.5px solid var(--bl-orange-100);
-                color: var(--bl-orange-300);
+                
                 text-transform: uppercase;
+
+                color: var(--bl-purple-800);
+                background: var(--bl-purple-50);
+                border-top: 1.5px solid var(--bl-purple-100);
+                border-bottom: 1.5px solid var(--bl-purple-100);
               }
               #tableContent table tr td {
                 padding: 0.3em 0.7em;
-                border-bottom: 1px solid var(--bl-grey-100);
                 text-align: center;
+                border-bottom: 1px solid var(--bl-grey-100);
+                background: white;
               }
               #tableContent table tr td.firstColumn {
                 text-align: left;
@@ -229,47 +296,35 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                   max-width: 30em;
                   white-space: pre-wrap;
                   padding: 0.2em;
-                  margin: auto;
+                  margin: 0.5rem auto;
                  
                   border-radius: 3px;
-                  border: 1px solid var(--bl-grey-300);
-                  background: var(--bl-grey-200);
+                  border: 1px solid var(--bl-grey-200);
+                  background: var(--bl-grey-50);
+                  box-shadow: inset -1px 0px 2px rgba(0,0,0,0.05);
+
+                  max-height: 10.4em;
+                  overflow-y: hidden;
+                  transition: 0.5s all;
                 }
-              #tableContent table tr.actionRow td {
-                padding: 0;
-                color: var(--bl-grey-500);
-                background: var(--bl-grey-50);
-                border-radius: 0 0 9px 9px;
-                border: none;
-              }
+                #tableContent table tr td pre:hover, #tableContent table tr td pre:focus {
+                  max-height: 30em;
+                }
               #tableContent table tr.failed td {
                 background: var(--bl-red-50);
               }
-                #tableActions {
-                  list-style: none;
-                  margin: 0;
-                  padding: 0;
-                  display: flex;
-                  justify-content: center;
-                }
-                  #tableActions>li {
-                    display: block;
-                    margin: 0.5em;
-                  }
-                    #tableActions>li>paper-button {
-                      
-                    }
 
     </style>
 
     <!-- #=== BACKEND LINKS ===# -->
 
-    <bl-backend-importer id="importer" type="badgeEndorsements" record-id="[[badge.id]]" parameters="{{importerParameters}}"
-      target="{{badgeEndorsements}}"></bl-backend-importer>
+    <bl-backend-importer id="importer" model="endorsement" parent-model="badge" parent-key="[[badge.id]]" target="{{endorsements}}"
+      parameters="{{importerParameters}}" ></bl-backend-importer>
 
     <!-- #=== HEADER PANEL ===# -->
 
-    <bl-header-panel id="headerPanel" expanded-height="10" condensed-height="3.5" expanded-percentage="{{expandedPercentage}}">
+    <bl-header-panel id="headerPanel" expanded-height="10" condensed-height="3.5" expanded-percentage="{{expandedPercentage}}"
+        class$="hasItems_[[hasItems]]">
       <div id="expandedBackground" slot="expandedBackground">
         <div class="headerBackgroundImage"></div>
       </div>
@@ -277,15 +332,15 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       <div id="leftNav" slot="leftNav" style$="padding: [[leftNavPaddingEm]]em;">
         <div id="headerImageWrapper" style$="width: [[headerImageSizeEm]]em;">
-          <img id="headerImage" src$="[[badge.image_url]]">
+          <img id="headerImage" src$="[[badge.attributes.image_url]]">
         </div>
         <div id="headerText">
           <div id="subtitle" style$="font-size: [[subtitleFontSizeEm]]em;">Bulk Award</div>
-          <h1 id="title" style$="font-size: [[titleFontSizeEm]]em;">[[badge.name]]</h1>
+          <h1 id="title" style$="font-size: [[titleFontSizeEm]]em;">[[badge.attributes.name]]</h1>
         </div>
       </div>
       <div id="rightNav" slot="rightNav">
-        <a href$="[[badge.relative_url]]" style$="font-size: [[rightNavFontSizeEm]]em;">
+        <a href$="[[badge.links.self_web]]" style$="font-size: [[rightNavFontSizeEm]]em;">
           <i class="icon-cross"></i>
         </a>
       </div>
@@ -335,6 +390,40 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
         <!-- #=== TABLE PANEL ===# -->
 
         <div id="tablePanel" hidden="[[!hasItems]]">
+          <div id="tableFooter">
+            <div class="divider">&nbsp;</div>
+            <div class="ring inner">&nbsp;</div>
+            <div class="ring divider">&nbsp;</div>
+
+            <ul id="tableActions">
+              <li>
+                <paper-button on-tap="loadCSV" class="transparent">
+                  <i class="icon-file-spreadsheet"></i>
+                  <span>
+                    <span class="showAt840">Load</span> 
+                    <span class="showAt480">CSV</span>
+                  </span>
+                </paper-button>
+              </li>
+              <li>
+                <paper-button on-tap="pasteEmails" class="transparent">
+                  <i class="icon-paste"></i>
+                  <span>
+                    <span class="showAt480">Paste</span>
+                    <span class="showAt840">Emails</span>
+                  </span>
+                </paper-button>
+              </li>
+              <li>
+                <paper-button class="transparent" on-tap="newItem">
+                  <i class="icon-plus"></i>
+                  <span class="showAt480">Type</span>
+                  <span class="showAt840">New Item</span>
+                </paper-button>
+              </li>
+            </ul>
+          </div>
+
           <div id="tableContent">
             <table>
               <thead>
@@ -346,7 +435,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                 </tr>
               </thead>
               <tbody>
-                <template is="dom-repeat" items="[[badgeEndorsements.itemsToImport]]">
+                <template is="dom-repeat" items="[[endorsements.itemsToImport]]">
                   <tr class$="[[item.backend.status.code]]">
                     <td class="firstColumn">
                       <paper-button class="transparent borderless narrow" on-tap="selectItem">
@@ -354,37 +443,13 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                         <i class="icon-pencil"></i>
                       </paper-button>
                     </td>
-                    <td>[[item.email]]</td>
-                    <td>[[item.summary]]</td>
+                    <td>[[item.attributes.email]]</td>
+                    <td>[[item.attributes.summary]]</td>
                     <td class="showAt480">
-                      <pre hidden="[[!item.body]]">[[item.body]]</pre>
+                      <pre hidden="[[!item.attributes.body]]">[[item.attributes.body]]</pre>
                     </td>
                   </tr>
                 </template>
-                <tr class="actionRow">
-                  <td colspan="4">
-                    <ul id="tableActions">
-                      <li>
-                        <paper-button on-tap="loadCSV" class="transparent">
-                          <i class="icon-file-spreadsheet"></i>
-                          <span>Load CSV</span>
-                        </paper-button>
-                      </li>
-                      <li>
-                        <paper-button on-tap="pasteEmails" class="transparent">
-                          <i class="icon-paste"></i>
-                          <span>Paste emails</span>
-                        </paper-button>
-                      </li>
-                      <li>
-                        <paper-button class="transparent" on-tap="newItem">
-                          <i class="icon-plus"></i>
-                          Type new item
-                        </paper-button>
-                      </li>
-                    </ul>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -410,21 +475,21 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       <paper-dialog-scrollable>
         <iron-form id="editItemForm">
           <form>
-            <p hidden="[[!badgeEndorsements.selectedItem.backend.status.isFailed]]" class="error">
+            <p hidden="[[!endorsements.selectedItem.backend.status.isFailed]]" class="error">
               <i class="icon-warning-circle"></i>
               <span>
                 This item could not be saved in the last import. 
-                Error Message: [[badgeEndorsements.selectedItem.backend.status.errorMessage]].
+                Error Message: [[endorsements.selectedItem.backend.status.errorMessage]].
               </span>
             </p>
 
-            <bl-input-text id="selectedItemEmail" label="Email" format="email" value="{{badgeEndorsements.selectedItem.email}}"
+            <bl-input-text id="selectedItemEmail" label="Email" format="email" value="{{endorsements.selectedItem.attributes.email}}"
               class="orange" autofocus>
             </bl-input-text>
-            <bl-input-text id="selectedItemSummary" label="Endorsement Summary" value="{{badgeEndorsements.selectedItem.summary}}"
+            <bl-input-text id="selectedItemSummary" label="Endorsement Summary" value="{{endorsements.selectedItem.attributes.summary}}"
               class="orange">
             </bl-input-text>
-            <bl-input-rich-text id="selectedItemBody" label="Endorsement Body" value="{{badgeEndorsements.selectedItem.body}}"
+            <bl-input-rich-text id="selectedItemBody" label="Endorsement Body" value="{{endorsements.selectedItem.attributes.body}}"
               class="orange" bounding-element="[[getElement('editItemDialog')]]">
             </bl-input-rich-text>
           </form>
@@ -564,12 +629,12 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
               Please select which column headers from your CSV file contain which of the endorsement item fields.
             </p>
 
-            <template is="dom-repeat" items="{{badgeEndorsements.csvColumnMap}}" as="csvColumnMapItem">
+            <template is="dom-repeat" items="{{endorsements.csvColumnMap}}" as="csvColumnMapItem">
               <paper-dropdown-menu-light class="purple" label="[[csvColumnMapItem.property]]">
                 <paper-listbox slot="dropdown-content" id$="[[csvColumnMapItem.property]]-listbox" attr-for-selected="value" 
                     selected="{{csvColumnMapItem.column}}">
                   <paper-item value="">[None]</paper-item>
-                  <template is="dom-repeat" items="[[badgeEndorsements.csvColumns]]" as="columnName">
+                  <template is="dom-repeat" items="[[endorsements.csvColumns]]" as="columnName">
                     <paper-item value="[[columnName]]">[[columnName]]</paper-item>
                   </template>
                 </paper-listbox>
@@ -636,8 +701,8 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             
       <div class="dialogContent">
         <p>
-          Importing Batch [[badgeEndorsements.status.currentBatch]] of [[badgeEndorsements.status.batchCount]]
-          ([[badgeEndorsements.status.poller.progress]]%)
+          Importing Batch [[endorsements.status.currentBatch]] of [[endorsements.status.batchCount]]
+          ([[endorsements.status.poller.progress]]%)
         </p>
       </div>
     </paper-dialog>
@@ -655,7 +720,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           There was a problem importing your items. Please review the error message below and try again.
         </p>
         <p>
-          <strong>Error Message:</strong> [[badgeEndorsements.status.errorMessage]]
+          <strong>Error Message:</strong> [[endorsements.status.errorMessage]]
         </p>
       </div>
 
@@ -676,13 +741,13 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       <div class="dialogContent">
         <p>
-          <strong>Successfully Imported Items:</strong> [[badgeEndorsements.status.importedItemCount]]
+          <strong>Successfully Imported Items:</strong> [[endorsements.status.importedItemCount]]
         </p>
         <p>
-          <strong>Failed Items:</strong> [[badgeEndorsements.status.failedItemCount]]
+          <strong>Failed Items:</strong> [[endorsements.status.failedItemCount]]
         </p>
         
-        <p class="small" hidden="[[!badgeEndorsements.status.failedItemCount]]">
+        <p class="small" hidden="[[!endorsements.status.failedItemCount]]">
           <strong>Note:</strong> 
           If you use the bulk awarding tool to award the same badge multiple times to the same person it will <em>not</em> cause any 
           problems. The second endorsement will simply overwrite the first one. 
@@ -691,11 +756,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       </div>
 
       <!-- #=== BUTTON PANEL IF THERE ARE NO FAILED ITEMS ===# -->
-      <div class="buttons" hidden="[[badgeEndorsements.status.failedItemCount]]">
+      <div class="buttons" hidden="[[endorsements.status.failedItemCount]]">
         <paper-button class="purple transparent borderless" dialog-dismiss>
           <i class="icon-arrow-left"></i> Add More Items
         </paper-button>
-        <a class="button" href$="[[badge.relative_url]]">
+        <a class="button" href$="[[badge.links.self_web]]">
           <paper-button class="purple primary" dialog-confirm>
             <i class="icon-arrow-right"></i> Return to Badge
           </paper-button>
@@ -703,7 +768,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       </div>
       
       <!-- #=== BUTTON PANEL IF THERE ARE FAILED ITEMS ===# -->
-      <div class="buttons" hidden="[[!badgeEndorsements.status.failedItemCount]]">
+      <div class="buttons" hidden="[[!endorsements.status.failedItemCount]]">
         <paper-button class="purple primary" dialog-dismiss>
           <i class="icon-arrow-left"></i> View Errors
         </paper-button>
@@ -725,7 +790,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           badge: Object,
           
           /** Serves as the target of the `bl-backend-importer`. */
-          badgeEndorsements: Object,
+          endorsements: Object,
 
           /** Used internally to control the current display mode. */
           hasItems: {
@@ -751,12 +816,12 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           
           selectedItemIsFirst: {
             type: Boolean,
-            computed: '_selectedItemIsFirst(badgeEndorsements.selectedItem.uniqueId)'
+            computed: '_selectedItemIsFirst(endorsements.selectedItem.uniqueId)'
           },
           
           selectedItemIsLast: {
             type: Boolean,
-            computed: '_selectedItemIsLast(badgeEndorsements.selectedItem.uniqueId)'
+            computed: '_selectedItemIsLast(endorsements.selectedItem.uniqueId)'
           },
 
           expandedPercentage: Number,
@@ -795,19 +860,19 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       /** Adds a new item to the list and shows the edit item dialog. */
       newItem() {
-        this.badgeEndorsements.addItem();
+        this.endorsements.addItem();
         this._setSelectedItemIsNew(true);
         this.$.editItemDialog.open();
       }
 
       /** Navigates to the item before the currently selected item. */
       previousItem() {
-        this.badgeEndorsements.selectPreviousItem();
+        this.endorsements.selectPreviousItem();
       }
 
       /** Navigates to the item after the currently selected item. */
       nextItem() {
-        this.badgeEndorsements.selectNextItem();
+        this.endorsements.selectNextItem();
       }
 
       /** Opens the paste emails dialog. */
@@ -838,7 +903,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             }
           }.bind(this));
 
-          this.badgeEndorsements.addItemsFromList(items);
+          this.endorsements.addItemsFromList(items);
           this.$.pasteEmailsDialog.close();
           this.setProperties({
             buildItemsEmails: null,
@@ -846,7 +911,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             buildItemsBody: null
           });
 
-          if (this.badgeEndorsements.itemsToImport.length)
+          if (this.endorsements.itemsToImport.length)
             this._setHasItems(true);
           else
             this._setHasItems(false);
@@ -871,7 +936,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       /** Closes the edit item dialog. */
       saveItem() {
-        if (this.badgeEndorsements.itemsToImport.length)
+        if (this.endorsements.itemsToImport.length)
           this._setHasItems(true);
         else
           this._setHasItems(false);
@@ -881,9 +946,9 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       /** Deletes the currently selected item and closes the edit item dialog. */
       removeItem() {
-        this.badgeEndorsements.selectedItem.backend.remove();
+        this.endorsements.selectedItem.backend.remove();
 
-        if (this.badgeEndorsements.itemsToImport.length)
+        if (this.endorsements.itemsToImport.length)
           this._setHasItems(true);
         else
           this._setHasItems(false);
@@ -898,21 +963,21 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       /** Cancels the parsing process from the mapping dialog. */
       cancelMapping() {
-        this.badgeEndorsements.cancelParsing();
+        this.endorsements.cancelParsing();
       }
 
       /** Continues the import process after mapping. */
       finishMapping() {
-        if (this.badgeEndorsements.status.isMapping) {
+        if (this.endorsements.status.isMapping) {
           // Workaround for issue with dropdown menus not binding properly
-          for (var i = 0; i < this.badgeEndorsements.csvColumnMap.length; i++)
-            if (!this.badgeEndorsements.csvColumnMap[i].column) {
-              var element = this.$.mappingForm.querySelector('#' + this.badgeEndorsements.csvColumnMap[i].property + '-listbox');
+          for (var i = 0; i < this.endorsements.csvColumnMap.length; i++)
+            if (!this.endorsements.csvColumnMap[i].column) {
+              var element = this.$.mappingForm.querySelector('#' + this.endorsements.csvColumnMap[i].property + '-listbox');
               if (element && element.selected)
-                this.set('badgeEndorsements.csvColumnMap.' + i + '.column', element.selected);
+                this.set('endorsements.csvColumnMap.' + i + '.column', element.selected);
             }
 
-          this.badgeEndorsements.finishMapping();
+          this.endorsements.finishMapping();
         }
       }
 
@@ -922,7 +987,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       /** Starts the import of the current batch of itemsToImport. */
       startImport() {
-        this.badgeEndorsements.import();
+        this.endorsements.import();
       }
 
       // #=== LIFECYCLE EVENTS ===#
@@ -942,29 +1007,29 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       static get observers() {
           return [
-            '_badgeEndorsementsStatusIsErrorChanged(badgeEndorsements.status.isError)',
-            '_badgeEndorsementsStatusIsParsingChanged(badgeEndorsements.status.isParsing)',
-            '_badgeEndorsementsStatusIsMappingChanged(badgeEndorsements.status.isMapping)',
-            '_badgeEndorsementsStatusIsImportingChanged(badgeEndorsements.status.isImporting)'
+            '_endorsementsStatusIsErrorChanged(endorsements.status.isError)',
+            '_endorsementsStatusIsParsingChanged(endorsements.status.isParsing)',
+            '_endorsementsStatusIsMappingChanged(endorsements.status.isMapping)',
+            '_endorsementsStatusIsImportingChanged(endorsements.status.isImporting)'
           ]
       }
 
-      _badgeEndorsementsStatusIsErrorChanged(badgeEndorsementsStatusIsError) {
-        if (badgeEndorsementsStatusIsError)
+      _endorsementsStatusIsErrorChanged(endorsementsStatusIsError) {
+        if (endorsementsStatusIsError)
           this.$.importerErrorDialog.open();
       }
 
-      _badgeEndorsementsStatusIsParsingChanged(badgeEndorsementsStatusIsParsing) {
-        if (badgeEndorsementsStatusIsParsing)
+      _endorsementsStatusIsParsingChanged(endorsementsStatusIsParsing) {
+        if (endorsementsStatusIsParsing)
           this.$.importerParsingDialog.open();
         else
           this.$.importerParsingDialog.close();
       }
 
-      _badgeEndorsementsStatusIsMappingChanged(badgeEndorsementsStatusIsMapping) {
-        if (badgeEndorsementsStatusIsMapping){
+      _endorsementsStatusIsMappingChanged(endorsementsStatusIsMapping) {
+        if (endorsementsStatusIsMapping){
           // The listbox is losing the initial selections when the dialog opens, so as a workaround we will back them up and restore them.
-          this._csvColumnMapBackup = this.badgeEndorsements.csvColumnMap.map(function(item) {
+          this._csvColumnMapBackup = this.endorsements.csvColumnMap.map(function(item) {
             return Object.assign({}, item)
           }, {});
 
@@ -975,8 +1040,8 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           this.$.importerMappingDialog.close();
       }
 
-      _badgeEndorsementsStatusIsImportingChanged(badgeEndorsementsStatusIsImporting) {
-        if (badgeEndorsementsStatusIsImporting)
+      _endorsementsStatusIsImportingChanged(endorsementsStatusIsImporting) {
+        if (endorsementsStatusIsImporting)
           this.$.importerImportingDialog.open();
         else
           this.$.importerImportingDialog.close();
@@ -984,11 +1049,11 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       _csvFileChanged() {
         if (this.$.csvFileInput.files.length)
-          this.badgeEndorsements.addItemsFromCSV(this.$.csvFileInput.files[0]);
+          this.endorsements.addItemsFromCSV(this.$.csvFileInput.files[0]);
       }
 
       _csvParsingComplete() {
-        if (this.badgeEndorsements.itemsToImport.length) {
+        if (this.endorsements.itemsToImport.length) {
           this._setHasItems(true);
           this.$.csvFileInput.value = ""; // allows the same file to be selected again
         } else
@@ -998,7 +1063,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       _importComplete() {
         this.$.importerResultsDialog.open();
 
-        if (this.badgeEndorsements.itemsToImport.length)
+        if (this.endorsements.itemsToImport.length)
           this._setHasItems(true);
         else
           this._setHasItems(false);
@@ -1007,23 +1072,23 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
       _importerMappingDialogOpened() {
         // Workaround to fix bug where the listbox loses the initial mapping values.
         this._csvColumnMapBackup.forEach(function(item, index) {
-          this.set('badgeEndorsements.csvColumnMap.' + index + '.column', item.column)
+          this.set('endorsements.csvColumnMap.' + index + '.column', item.column)
         }.bind(this));
       }
 
       // #=== PROPERTY COMPUTER METHODS ===#
 
       _selectedItemIsFirst(selectedItemUniqueId) {
-        if (selectedItemUniqueId && this.badgeEndorsements.itemsToImport.length) {
-          return (selectedItemUniqueId == this.badgeEndorsements.itemsToImport[0].uniqueId);
+        if (selectedItemUniqueId && this.endorsements.itemsToImport.length) {
+          return (selectedItemUniqueId == this.endorsements.itemsToImport[0].uniqueId);
         } else {
           return undefined;
         }
       }
 
       _selectedItemIsLast(selectedItemUniqueId) {
-        if (selectedItemUniqueId && this.badgeEndorsements.itemsToImport.length) {
-          return (selectedItemUniqueId == this.badgeEndorsements.itemsToImport[this.badgeEndorsements.itemsToImport.length - 1].uniqueId);
+        if (selectedItemUniqueId && this.endorsements.itemsToImport.length) {
+          return (selectedItemUniqueId == this.endorsements.itemsToImport[this.endorsements.itemsToImport.length - 1].uniqueId);
         } else {
           return undefined;
         }

@@ -240,7 +240,7 @@ class UsersController < ApplicationController
       @user.save!
       @success = true
       @notice = "User's password changed to '#{@password}'."
-    rescue Exception => e
+    rescue => e
       @success = false
       @notice = "Error: #{e}"
     end
@@ -268,7 +268,7 @@ class UsersController < ApplicationController
         @success = true
         @notice = "Account confirmed."
       end
-    rescue Exception => e
+    rescue => e
       @success = false
       @notice = "Error: #{e}"
     end
@@ -300,7 +300,7 @@ class UsersController < ApplicationController
         @notice = "Email isn't blocked!"
         @success = true
       end
-    rescue Exception => e
+    rescue => e
       @success = false
       @notice = "Error: #{e}"
     end

@@ -16,7 +16,7 @@ class GroupPolicy < ApplicationPolicy
 
   # Only available to authenticated users
   def index?
-    return @current_user.present? && @current_user.has?('groups:read')
+    return @current_user.present? && @current_user.has?('all:index') && @current_user.has?('groups:read')
   end
 
   def show?
@@ -72,22 +72,34 @@ class GroupPolicy < ApplicationPolicy
 
   def badges_index?
     # There is no action-level restriction on the badges index. The individual badges are filtered by visibility.
-    return @current_user.has?('groups:read') && @current_user.has?('badges:read')
+    return @current_user.has?('all:index') \
+      && @current_user.has?('groups:read') \
+      && @current_user.has?('badges:read')
   end
 
   # This authorizes whether the user can see a list of users who are members
   def members_index?
-    return @current_user.has?('groups:read') && @current_user.has?('users:read') && show_members?
+    return @current_user.has?('all:index') \
+      && @current_user.has?('groups:read') \
+      && @current_user.has?('users:read') \
+      && show_members?
   end
 
   # This authorizes whether the user can see a list of users who are admins
   def admins_index?
-    return @current_user.has?('groups:read') && @current_user.has?('users:read') && show_admins?
+    return @current_user.has?('all:index') \
+      && @current_user.has?('groups:read') \
+      && @current_user.has?('users:read') \
+      && show_admins?
   end
 
   # This authorizes whether the user can see a list of users who are members AND admins
   def members_and_admins_index?
-    return @current_user.has?('groups:read') && @current_user.has?('users:read') && show_members? && show_admins?
+    return @current_user.has?('all:index') \
+      && @current_user.has?('groups:read') \
+      && @current_user.has?('users:read') \
+      && show_members? \
+      && show_admins?
   end
 
   def copy_badges?

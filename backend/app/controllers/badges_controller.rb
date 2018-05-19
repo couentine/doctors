@@ -37,33 +37,6 @@ class BadgesController < ApplicationController
       + '&amp; Group Admins'.html_safe, 'hidden']
   ]
 
-  # GET /?page=1
-  # Returns JSON
-  # This returns a list of the current user's badges in progress
-  def my_index
-    @page_size = APP_CONFIG['page_size_small']
-    
-    @page = (params[:page] || 1).to_i
-    @badges = Badge.array_json(Badge.where(:id.in => current_user.learner_badge_ids).asc(:name)\
-      .page(@page).per(@page_size), :api_v1, current_user: current_user, stringify_ids: true)
-    
-    if Badge.where(:id.in => current_user.learner_badge_ids).count > (@page_size*@page)
-      @next_page = @page + 1
-    else
-      @next_page = nil
-    end
-
-    render json: { next_page: @next_page, items: @badges }
-  end
-
-  # GET /badges/{badge_id}
-  # GET /badges/{badge_url}?parent_path={group_url}
-  # Returns JSON
-  # Returns badge API json
-  def get
-    render json: @badge.json(:api_v1, current_user: current_user)
-  end
-
   # === RESTFUL ACTIONS === #
   # GET /group-url/badge-url
   # GET /group-url/badge-url.json
@@ -439,39 +412,6 @@ class BadgesController < ApplicationController
   # Displays the polymer app which displays the add endorsement UI
   def add_endorsements_form
     render_polymer_app("Bulk Award - #{@badge.name} - Badge List")
-  end
-
-  # POST /badges/id/endorsements
-  # JSON Only
-  # This is a json wrapper for Badge.bulk_award, which awards the badge in bulk.
-  # Accepts parameters:
-  # - request body = JSON array of endorsement objects with following keys (*=required): email*, summary*, body
-  # - send_emails_to_new_users query param = Boolean (defaults to false)
-  def add_endorsements
-    @max_list_size = APP_CONFIG['max_import_list_size']
-    @validations = JSON.parse(request.body.read)
-    @send_emails_to_new_users = (params[:send_emails_to_new_users] == 'true') || (params[:send_emails_to_new_users].to_s == '1')
-
-    respond_to do |format|
-      format.json do
-        if (@validations.class == Array) && !@validations.blank?
-          if @validations.count > @max_list_size
-            render json: { error_message: "The items parameter cannot contain more than #{@max_list_size} items." }, status: :bad_request
-          else
-            @poller = Poller.new
-            @poller.progress = 0
-            @poller.waiting_message = 'Adding endorsements...'
-            @poller.save
-
-            Badge.delay(retry: false).bulk_award(@badge.id, current_user.id, @validations, @send_emails_to_new_users, @poller.id)
-
-            render json: { poller_id: @poller.id.to_s }
-          end
-        else
-          render json: { error_message: 'The items parameter is required and must be a non-blank list.' }, status: :bad_request
-        end
-      end
-    end
   end
 
   # PUT /group/badge/move?badge[move_to_group_id]=abc123

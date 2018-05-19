@@ -11,7 +11,7 @@ class Poller
   INITIAL_POLLING_INTERVAL = 150 # in milliseconds
   POLLING_INTERVAL_DOUBLE_RATE = 2 # the polling rate will double every X tries
   POLLING_MAX_TRIES = 13 # given 150 & 2 this will yield a last try at around 28.5 seconds
-  DELETE_AFTER = 2.minutes # old pollers are automatically deleted after they complete
+  DELETE_AFTER = 10.minutes # old pollers are automatically deleted after they complete
 
   # === FIELDS & VALIDATIONS === #
 
@@ -21,6 +21,7 @@ class Poller
   field :waiting_message,   type: String
   field :redirect_to,       type: String
   field :data,              type: Hash
+  field :results,           type: Array
   field :progress,          type: Integer # set 0 to 100 or leave nil
   
   validates :status, inclusion: { in: STATUS_VALUES, message: "%{value} is not a valid status" }

@@ -108,8 +108,9 @@ class Log
     "#{ENV['root_url']}/#{the_group.url}/#{the_badge.url}/o/#{the_user.username}.json"
   end
   def evidence_url(the_group=badge.group, the_badge=badge, the_user=user)
-    "#{ENV['root_url']}/#{the_group.url}/#{the_badge.url}/u/#{the_user.username}"
+    "#{ENV['root_url']}/#{the_group.url_with_caps}/#{the_badge.url_with_caps}/u/#{the_user.username_with_caps}"
   end
+  alias_method :full_url, :evidence_url
   def embed_url(the_group=badge.group, the_badge=badge, the_user=user)
     evidence_url(the_group, the_badge, the_user) + '.embed'
   end
@@ -261,7 +262,7 @@ class Log
         end
         poller.save
       end
-    rescue Exception => e
+    rescue => e
       if poller
         poller.status = 'failed'
         poller.message = 'An error occurred while trying to post feedback, ' \

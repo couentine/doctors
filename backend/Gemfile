@@ -52,7 +52,7 @@ ruby '2.3.4'
 
 #=== ERRORS & DEBUGGING ===#
 
-  gem 'rack-timeout'
+  gem 'rack-timeout', '~> 0.5.0'
   gem 'browser_details'
   gem 'exception_notification'
 

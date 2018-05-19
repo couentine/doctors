@@ -38,7 +38,7 @@ class LtiController < ApplicationController
               # Also send out the notification to admins
               Group.delay(queue: 'low').send_new_lti_notifications(@group.id, 
                 @lti_context_details[:context_id])
-            rescue Exception => e
+            rescue => e
               @error_title = 'There was an error registering your LTI integration'
               @error_message = "<p><strong>Error Details:</strong> #{e.message}</p>"
               render 'errors/error_no_container', layout: 'app'
@@ -88,7 +88,7 @@ class LtiController < ApplicationController
                 raise StandardError.new('A user record could not be created due to a system ' \
                   + 'error. Please try again later.')
               end
-            rescue Exception => e
+            rescue => e
               @error_title = 'There was an error logging you in'
               @error_message = "<p><strong>Error Details:</strong> #{e.message}</p>"
               render 'errors/error_no_container', layout: 'app'
@@ -116,7 +116,7 @@ class LtiController < ApplicationController
         @error_message = "<p>#{@lti_status[:error_message]}</p>"
         render 'errors/error_no_container', layout: 'app'
       end
-    rescue Exception => e
+    rescue => e
       @error_title = 'LTI Integration Error'
       @error_message = '<p>Badge List encountered an error trying to load your group. ' \
         + 'There may be a problem with the LTI configuration. ' \

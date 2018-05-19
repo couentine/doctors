@@ -140,15 +140,11 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/app/src/bl-app/bl-app.html",
-    "revision": "2b47773750bb270088b7f92841c57ca1"
+    "revision": "ee0b3a4e6aba90d6e2b5d3f3f83c1a78"
   },
   {
     "url": "p/app/src/bl-app/bl-component-template.html",
     "revision": "a5a37c812856197f849db3ab2e1b3231"
-  },
-  {
-    "url": "p/app/src/bl-backend/swagger.json",
-    "revision": "7723e5b77e17d51534dea526ccf3431f"
   },
   {
     "url": "p/app/src/bl-user/bl-user.html",
@@ -244,7 +240,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/website/src/bl-website/bl-website.html",
-    "revision": "663d0aab7025fa3ac3266cebee973e12"
+    "revision": "3bd8923658913a1d31e8560247ecc717"
   }
 ]);
   }

@@ -39,6 +39,8 @@ BadgeList::Application.routes.draw do
   # === API PATHS === #
   namespace :api do
     namespace :v1 do
+      resources :pollers, only: [:show]
+
       resources :users, only: [:show] do
         resources :groups, only: [:index]
         resources :portfolios, only: [:index]
@@ -47,13 +49,14 @@ BadgeList::Application.routes.draw do
         match ':email' => 'users#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
       end
       resources :groups, only: [:index, :show] do
-        resources :badges, only: [:index]
+        resources :badges, only: [:index, :show]
         resources :users, only: [:index]
       end
       resources :badges, only: [:index, :show] do
         resources :portfolios, only: [:index, :show] do
           match ':email' => 'portfolios#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
         end
+        resources :endorsements, only: [:create]
       end
       resources :portfolios, only: [:show]
       resources :authentication_tokens, only: [:index, :create, :show, :destroy]
@@ -61,6 +64,22 @@ BadgeList::Application.routes.draw do
       match 'swagger.json' => 'docs#external', via: :get
       match 'openapi.json' => 'docs#external', via: :get
       match 'internal.json' => 'docs#internal', via: :get
+    end
+  end
+
+  namespace :docs do
+    root to: 'doc_pages#index'
+
+    namespace :api do
+      namespace :v1 do
+        match 'user' => 'user_api_docs#show_html', via: :get
+        match 'group' => 'group_api_docs#show_html', via: :get
+        match 'internal' => 'internal_api_docs#show_html', via: :get
+
+        match 'user_api.json' => 'user_api_docs#show_json', via: :get, as: :user_json
+        match 'group_api.json' => 'group_api_docs#show_json', via: :get, as: :group_json
+        match 'internal_api.json' => 'internal_api_docs#show_json', via: :get, as: :internal_json
+      end
     end
   end
   
@@ -83,10 +102,6 @@ BadgeList::Application.routes.draw do
   resources :domains
   resources :report_results, :only => [:index, :show, :new, :create]
 
-  # === MANUAL FORM PATHS === #
-  match 'f/talk-with-us' => 'forms#user_discussion', via: :post
-  # match 'f/contact-us' => 'forms#contact_us', via: :post
-
   # === MANUAL USER PATHS === #
   match 'users/cards' => 'users#add_card', via: :post, as: :add_card
   match 'users/cards' => 'users#refresh_cards', via: :get, as: :refresh_cards
@@ -97,14 +112,6 @@ BadgeList::Application.routes.draw do
   match 'u/:id/unblock_email' => 'users#unblock_email', via: :post, as: :user_unblock
   match 'u/:id/update_image' => 'users#update_image', via: :post, as: :user_update_image
   match 'u/:id/add_password' => 'users#add_password', via: :post, as: :user_add_password
-
-  # === TEMPORARY API-ONLY PATHS === #
-  match 'badges/my' => 'badges#my_index', via: :get
-  match 'badges/:id/endorsements' => 'badges#add_endorsements', via: :post
-  match 'badges/:id' => 'badges#get', via: :get
-  match 'groups/my' => 'groups#my_index', via: :get
-  match 'groups/new' => 'groups#new', via: :get # manually declare this before the one below
-  match 'groups/:id' => 'groups#get', via: :get
 
   # === MANUAL GROUP PATHS === #
   match ':group_id/cancel' => 'groups#cancel_subscription', via: :post, as: :cancel_subscription

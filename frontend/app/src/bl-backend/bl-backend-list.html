@@ -22,10 +22,9 @@ Use this component to bind a local component property with a list endpoint in th
         return {
           
           /** 
-           * Required. The list type determines the model and available actions.
-           * Currently this only supports 'myGroups' and 'myBadges'.
+           * Required. Set this to the camel lower case model name of the list. (badge, groupTag, etc)
            */
-          type: String,
+          model: String,
           
           /** 
            * Required. Bind this to the `status` property of the parent view.
@@ -83,15 +82,6 @@ Use this component to bind a local component property with a list endpoint in th
             type: Object,
             notify: true,
             value: function() { return {} }
-          },
-
-          /** 
-           * Set using the `operationsByTag` method in `<bl-backend-client>`. Used to power public action methods.
-           * Consuming components should not reference this object directly as it may change with future implementations.
-           */
-          _backendOperations: {
-            type: Object,
-            readOnly: true
           }
 
         }
@@ -122,15 +112,19 @@ Use this component to bind a local component property with a list endpoint in th
         // Clone the parameters so we can inject the page without messing up the bound parameters property
         parametersWithPage = {};
         Object.assign(parametersWithPage, this.parameters);
-        parametersWithPage.page = (this.target.nextPage) ? this.target.nextPage : 1;
+        parametersWithPage['page[number]'] = (this.target.nextPage) ? this.target.nextPage : 1;
 
-        this._backendOperations.paginatedList.get.do(parametersWithPage).then(function(response) {
-          if (response.items && response.items.length)
-            for (var i = 0; i < response.items.length; i++)
-              this.push('target.items', response.items[i]);
+        this.app.$.backend.doOperation({
+          formatTag: 'paginatedListFormat',
+          verb: 'get',
+          model: this.model
+        }, parametersWithPage).then(function(response) {
+          if (response.data && response.data.length)
+            for (var i = 0; i < response.data.length; i++)
+              this.push('target.items', response.data[i]);
 
-          this.set('target.nextPage', response.next_page);
-          this.set('target.hasNextPage', (response.next_page != null) && !isNaN(response.next_page));
+          this.set('target.nextPage', response.meta.page.next);
+          this.set('target.hasNextPage', (response.meta.page.next != null) && !isNaN(response.meta.page.next));
           this._updateStatus('ready');
         }.bind(this)).catch(function(error) { 
           this._updateStatus('error', (error.errObj && error.errObj.message) ? error.errObj.message : error);
@@ -217,10 +211,7 @@ Use this component to bind a local component property with a list endpoint in th
       /** Initializes `_backendOperations` once the backend client is initialized. And potentially triggers a reload. */
       _backendClientInitializedChanged(newValue, oldValue) {
         if (newValue && !oldValue) {
-          // First we need to create the action callbacks
-          this._set_backendOperations(this.app.$.backend.operationsByTag(this.type));
-          
-          // Now trigger a reload if needed
+          // Trigger a reload if needed
           if (!this.manualLoad && (this.parentViewStatus == 'active'))
             this.reload();
         }

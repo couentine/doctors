@@ -13,6 +13,7 @@ class Api::V1::SerializableAuthenticationToken < Api::V1::SerializableDocument
   attribute :user_agent
 
   link :self do "/api/v1/authentication_tokens/#{@object.id.to_s}" end
+  # link :self_web do @object.full_url end
 
   belongs_to :user do
     link :self do "/api/v1/users/#{@object.user_id.to_s}" end

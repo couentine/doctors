@@ -14,18 +14,19 @@ class Api::V1::BaseController < ApplicationController
 
   #=== FILTERS ===#
   
+  protect_from_forgery with: :exception # CSRF protection is needed for web app requests (authenticated via session cookie)
   before_filter :process_authentication
   after_action :verify_authorized # Enforces the use of Pundit policies by throwing an error if they weren't used on an action
   
   #=== OTHER SETTINGS ===#
 
-  protect_from_forgery with: :null_session
-
-  rescue_from Mongoid::Errors::DocumentNotFound, with: :render_not_found
+  rescue_from StandardError, with: :render_bad_request # comment this out in dev to see exceptions rendered in the response
+  rescue_from ArgumentError, with: :render_bad_request
   rescue_from ActionController::RoutingError, with: :render_not_found
-  rescue_from Pundit::NotAuthorizedError, with: :render_not_authorized
-  rescue_from Api::V1::DeserializationError, with: :render_bad_request
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
+  rescue_from Mongoid::Errors::DocumentNotFound, with: :render_not_found
+  rescue_from Pundit::NotAuthorizedError, with: :render_not_authorized
+  rescue_from Api::V1::DeserializationError, with: :render_deserialization_error
   
   #=== CONSTANTS ===#
 
@@ -40,8 +41,10 @@ class Api::V1::BaseController < ApplicationController
       Group: Api::V1::SerializableGroup,
       Badge: Api::V1::SerializableBadge,
       Log: Api::V1::SerializablePortfolio,
+      Poller: Api::V1::SerializablePoller,
       User: Api::V1::SerializableUser,
-      String: Api::V1::SerializableString
+      String: Api::V1::SerializableString,
+      BatchResult: Api::V1::SerializableBatchResult
     }
   end
 
@@ -57,20 +60,47 @@ class Api::V1::BaseController < ApplicationController
   end
 
   def render_not_found
-    return render_single_error(status: 404, title: 'Not found', detail: 'The specified record could not be found.')
+    return render_single_error(
+      status: 404, 
+      title: 'Not found', 
+      detail: 'The specified record could not be found'
+    )
+  end
+
+  # Overrides the standard csrf failure method
+  def handle_unverified_request
+    process_authentication # must set the auth details since the error happens before this is run
+
+    # CSRF is only required if we're accessing via a session. 
+    # If accessing via an API token we do nothing (thus continuing w/ the request).
+    if @access_method == :web
+      return render_single_error(
+        status: 403, 
+        title: 'Unauthorized', 
+        detail: 'You do not have access to this operation, CSRF token is missing or invalid'
+      )
+    end
   end
 
   def render_not_authorized
-    return render_single_error(status: 403, title: 'Unauthorized', detail: 'You do not have access to this operation.')
+    return render_single_error(
+      status: 403, 
+      title: 'Unauthorized', 
+      detail: 'You do not have access to this operation'
+    )
   end
 
   def render_bad_request(e)
-    return render_single_error(status: 400, title: 'Bad request', detail: e.to_s)
+    return render_single_error(
+      status: 400, 
+      title: 'Bad request', 
+      detail: e.to_s
+    )
   end
 
   # This renders a JSON API formatted error message from a single string.
   # For rendering a list of active model errors use the `render_field_errors` method below
-  def render_single_error(status: 500, title: 'Server error', detail: nil)
+  def render_single_error(status: 500, title: 'Server error', detail: nil, meta: nil)
     render json: {
       errors: [
         {
@@ -79,10 +109,18 @@ class Api::V1::BaseController < ApplicationController
           detail: detail
         }
       ],
+      meta: build_root_meta_hash(permission_sets: @current_user.available_permission_sets),
       jsonapi: {
         version: '1.0'
       }
     }, status: status
+  end
+
+  # This renders a JSON API formatted error message from an instance of Api::V1::DeserializationError
+  def render_deserialization_error(deserialization_error, status: 400)
+    render json: deserialization_error.to_json_api.merge({
+      meta: build_root_meta_hash,
+    }), status: status
   end
 
   # This renders a JSON API formatted error message from an instance of ActiveModel::Errors
@@ -98,9 +136,10 @@ class Api::V1::BaseController < ApplicationController
           }
         }
       end,
+      meta: build_root_meta_hash,
       jsonapi: {
         version: '1.0'
-      }
+      },
     }, status: status
   end
 
@@ -108,7 +147,10 @@ class Api::V1::BaseController < ApplicationController
 
   # This adds in pagination variables and information about the current user as relevant.
   def build_root_meta_hash(custom_meta = {})
-    complete_meta = { authentication_method: @authentication_method }.merge(custom_meta)
+    complete_meta = {
+      authentication_method: @authentication_method,
+      access_method: @access_method,
+    }.merge(custom_meta)
 
     complete_meta[:page] = @page if @page.present?
     complete_meta[:sort] = @external_sort_string if @external_sort_string.present?
@@ -206,11 +248,16 @@ class Api::V1::BaseController < ApplicationController
 
   private
   
-  # Authenticates the user if possible and sets controller variables: @current_user, @current_authentication_token, @authentication_method
+  # Authenticates the user if possible and sets controller variables: 
+  # - @current_user = The current user (only for session authenticated folks)
+  # - @current_authentication_token = The auth token (only valid for token authenticated folks)
+  # - @authentication_method = :session, :token or :null
+  # - @access_method = :web or :api
   def process_authentication
     if @current_user.present?
       @current_authentication_token = nil
       @authentication_method = :session
+      @access_method = :web
     else
       user = nil
       matched_authentication_token = nil
@@ -218,6 +265,8 @@ class Api::V1::BaseController < ApplicationController
       @authentication_method = :none
 
       if token && (token.length == (AuthenticationToken::MONGO_ID_LENGTH + AuthenticationToken::BODY_LENGTH))
+        @access_method = :api
+
         provided_user_id = token.first(AuthenticationToken::MONGO_ID_LENGTH)
         provided_token_body = token.last(AuthenticationToken::BODY_LENGTH)
         
@@ -240,11 +289,16 @@ class Api::V1::BaseController < ApplicationController
           @current_authentication_token = matched_authentication_token
           @authentication_method = :token
         end
+      elsif request.session.present?
+        @access_method = :web
+      else
+        @access_method = :api
       end
     end
 
     # Decorate the current user with permissions (required for Pundit policies to function)
-    @current_user = current_user = UserPermissionsDecorator.new(@current_user, @current_authentication_token)
+    @current_user = UserPermissionsDecorator.new(@current_user, @current_authentication_token, @access_method)
+    current_user = @current_user
   end
 
 end

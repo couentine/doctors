@@ -187,7 +187,7 @@ class ReportResult
     begin
       params = ActionController::Parameters.new(attributes)
       ReportResult.create!(params.permit(ReportResult.permitted_params))
-    rescue Exception => e
+    rescue => e
       poller = Poller.find(attributes[:poller_id] || attributes['poller_id']) rescue nil
 
       if poller
@@ -483,7 +483,7 @@ protected
           row_map[log.user_id][:group_log_summary]['validated_log_count'] += 1
         end
       end
-    rescue Exception => e
+    rescue => e
       self.error_message = e
       throw e
     end
@@ -581,7 +581,7 @@ protected
           row[:badge] = badge
         end
       end      
-    rescue Exception => e
+    rescue => e
       self.error_message = e
     end
 
@@ -660,7 +660,7 @@ protected
           poller.data['remaining_times_to_run'] = times_to_run
           poller.save
         end
-      rescue Exception => e
+      rescue => e
         if poller
           poller.status = 'failed'
           poller.message = error_message

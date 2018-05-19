@@ -23,6 +23,7 @@ class Api::V1::SerializableBadge < Api::V1::SerializableDocument
   attribute :image_small_url,             if: -> { @show_all_fields }
 
   link :self do "/api/v1/badges/#{@object.id.to_s}" end
+  link :self_web do @object.full_url end
 
   belongs_to :group do
     link :self do "/api/v1/groups/#{@object.group_id.to_s}" end

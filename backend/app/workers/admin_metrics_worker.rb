@@ -216,7 +216,7 @@ class AdminMetricsWorker
       poller.redirect_to = "/a/metrics?poller=#{poller.id.to_s}"
       poller.status = 'successful'
       poller.save
-    rescue Exception => e
+    rescue => e
       poller.status = 'failed'
       poller.message = e.to_s
       poller.save

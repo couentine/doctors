@@ -45,7 +45,7 @@ class GroupTagBadgesController < ApplicationController
           @group_tag.remove_badges([@badge.id], current_user.id)
           @success = true
           @error_message = nil
-        rescue Exception => e
+        rescue => e
           @success = false
           @error_message = e.to_s
         end
