@@ -1023,25 +1023,6 @@ namespace :db do
     puts " >> Done."
   end
 
-  # OK to run in production... doesn't modify database, just spits out a list of group validation errors
-  task list_invalid_groups: :environment do
-    puts "#=== FINDING ALL GROUP VALIDATION ERRORS ===#"
-    puts ''
-
-    invalid_group_count = 0
-    
-    Group.each do |group|
-      if !group.valid?
-        puts "#{group.url_with_caps} (#{group.id.to_s}) => #{group.errors.full_messages.join('. ')}."
-        invalid_group_count += 1
-      end
-    end
-
-    puts ''
-    puts "#=== COMPLETE ===#"
-    puts "#===> Invalid Group Count = #{invalid_group_count}"
-  end
-
   # OK to run in production
   task update_group_badge_counts: :environment do
     print "Updating #{Group.count} groups"
@@ -1067,6 +1048,44 @@ namespace :db do
     end
     
     puts " >> Done."
+  end
+
+  # OK to run in production... doesn't modify database, just spits out a list of group validation errors
+  task list_invalid_groups: :environment do
+    puts "#=== FINDING ALL GROUP VALIDATION ERRORS ===#"
+    puts ''
+
+    invalid_group_count = 0
+    
+    Group.each do |group|
+      if !group.valid?
+        puts "#{group.url_with_caps} (#{group.id.to_s}) => #{group.errors.full_messages.join('. ')}."
+        invalid_group_count += 1
+      end
+    end
+
+    puts ''
+    puts "#=== COMPLETE ===#"
+    puts "#===> Invalid Group Count = #{invalid_group_count}"
+  end
+
+  # OK to run in production... doesn't modify database, just spits out a list of badge validation errors
+  task list_invalid_badges: :environment do
+    puts "#=== FINDING ALL BADGE VALIDATION ERRORS ===#"
+    puts ''
+
+    invalid_badge_count = 0
+    
+    Badge.each do |badge|
+      if !badge.valid?
+        puts "#{badge.record_path} (#{badge.id.to_s}) => #{badge.errors.full_messages.join('. ')}."
+        invalid_badge_count += 1
+      end
+    end
+
+    puts ''
+    puts "#=== COMPLETE ===#"
+    puts "#===> Invalid Badge Count = #{invalid_badge_count}"
   end
 
 end
