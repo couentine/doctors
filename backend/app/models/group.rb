@@ -151,6 +151,10 @@ class Group
   field :stripe_push_pending,             type: Boolean, default: false # used to freeze webhook updates while pushing changes to stripe
 
   field :badges_cache,                    type: Hash, default: {} # key=badge_id, value=key_fields
+  field :public_badge_count,              type: Integer, default: 0
+  field :private_badge_count,             type: Integer, default: 0
+  field :hidden_badge_count,              type: Integer, default: 0
+  field :all_badge_count,                 type: Integer, default: 0
 
   field :tags_cache,                      type: Hash, default: {} # key=gtag_id, value=key_fields
   field :top_user_tags_cache,             type: Array, default: []
@@ -237,7 +241,6 @@ class Group
   def avatar_image_medium_url; avatar_url(:medium); end
   def avatar_image_small_url; avatar_url(:small); end
 
-  def badge_count; badges_cache.count; end
   def badge_urls_with_caps
     if badges_cache.blank?
       []
@@ -1879,6 +1882,18 @@ protected
       self.member_count = current_member_count
       self.admin_count = current_admin_count
       self.total_user_count = current_member_count + current_admin_count
+    end
+
+    if badges_cache_changed?
+      badge_counts = badges_cache.values.reduce({}) do |counts, badge_item|
+        counts[badge_item['visibility']] = (counts[badge_item['visibility']] || 0) + 1
+        counts
+      end
+
+      self.public_badge_count = badge_counts['public'] || 0
+      self.private_badge_count = badge_counts['private'] || 0
+      self.hidden_badge_count = badge_counts['hidden'] || 0
+      self.all_badge_count = badges_cache.count
     end
   end
 

@@ -100,6 +100,8 @@ class Badge
   field :learner_user_ids,                type: Array, default: []
   field :all_user_ids,                    type: Array, default: []
   field :validation_request_count,        type: Integer, default: 0
+  field :expert_count,                    type: Integer, default: 0
+  field :learner_count,                   type: Integer, default: 0
 
   field :group_name,                      type: String # local cache of group info
   field :group_url,                       type: String # local cache of group info
@@ -147,8 +149,9 @@ class Badge
   before_save :update_info_sections
   before_save :update_info_versions, on: :update # Don't store the first (default) value
   before_save :update_terms
-  before_update :move_badge_if_needed
-  before_save :update_json_clone_badge_fields_if_needed
+  before_update :update_counts
+  self.before_update :move_badge_if_needed
+  self.before_save :update_json_clone_badge_fields_if_needed
   after_save :update_requirement_editability
   before_destroy :remove_from_group_and_user_cache
   after_destroy :clear_from_group_tags
@@ -602,14 +605,6 @@ class Badge
     end
   end
 
-  def learner_count
-    learner_user_ids.count
-  end
-
-  def expert_count
-    expert_user_ids.count
-  end
-
   # Returns all non-validated logs, sorted by user name
   def learner_logs
     logs.where(:validation_status.ne => 'validated', detached_log: false).asc(:user_name)
@@ -1000,6 +995,11 @@ protected
     end
 
     true
+  end
+
+  def update_counts
+    self.expert_count = expert_user_ids.count if expert_user_ids && expert_user_ids_changed?
+    self.learner_count = learner_user_ids.count if learner_user_ids && learner_user_ids_changed?
   end
 
   def update_json_clone_badge_fields_if_needed
