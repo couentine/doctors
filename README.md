@@ -64,6 +64,7 @@ lti_app_description=Badge List is a platform for awarding digital credentials co
 lti_unique_tool_id=badgelist-dev
 bl_admin_email=app-errors@badgelist.com
 google_tag_manager_container_id=GTM-ABC123
+RACK_TIMEOUT_SERVICE_TIMEOUT=300
 ```
 
 ## Running the app ##

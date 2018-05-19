@@ -400,7 +400,7 @@ GEM
     rack-throttle (0.5.0)
       bundler (>= 1.0.0)
       rack (>= 1.0.0)
-    rack-timeout (0.4.2)
+    rack-timeout (0.5.0)
     rails (4.2.6)
       actionmailer (= 4.2.6)
       actionpack (= 4.2.6)
@@ -576,7 +576,7 @@ DEPENDENCIES
   rack-cors
   rack-mini-profiler
   rack-throttle
-  rack-timeout
+  rack-timeout (~> 0.5.0)
   rails (= 4.2.6)
   rails-html-sanitizer
   rails_12factor (~> 0.0.3)
