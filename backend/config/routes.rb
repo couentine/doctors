@@ -111,14 +111,6 @@ BadgeList::Application.routes.draw do
   match 'u/:id/update_image' => 'users#update_image', via: :post, as: :user_update_image
   match 'u/:id/add_password' => 'users#add_password', via: :post, as: :user_add_password
 
-  # === TEMPORARY API-ONLY PATHS === #
-  match 'badges/my' => 'badges#my_index', via: :get
-  match 'badges/:id/endorsements' => 'badges#add_endorsements', via: :post
-  match 'badges/:id' => 'badges#get', via: :get
-  match 'groups/my' => 'groups#my_index', via: :get
-  match 'groups/new' => 'groups#new', via: :get # manually declare this before the one below
-  match 'groups/:id' => 'groups#get', via: :get
-
   # === MANUAL GROUP PATHS === #
   match ':group_id/cancel' => 'groups#cancel_subscription', via: :post, as: :cancel_subscription
   match ':group_id/join' => 'groups#join', via: :post, as: :join_group

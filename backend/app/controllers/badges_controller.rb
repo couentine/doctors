@@ -37,33 +37,6 @@ class BadgesController < ApplicationController
       + '&amp; Group Admins'.html_safe, 'hidden']
   ]
 
-  # GET /?page=1
-  # Returns JSON
-  # This returns a list of the current user's badges in progress
-  def my_index
-    @page_size = APP_CONFIG['page_size_small']
-    
-    @page = (params[:page] || 1).to_i
-    @badges = Badge.array_json(Badge.where(:id.in => current_user.learner_badge_ids).asc(:name)\
-      .page(@page).per(@page_size), :api_v1, current_user: current_user, stringify_ids: true)
-    
-    if Badge.where(:id.in => current_user.learner_badge_ids).count > (@page_size*@page)
-      @next_page = @page + 1
-    else
-      @next_page = nil
-    end
-
-    render json: { next_page: @next_page, items: @badges }
-  end
-
-  # GET /badges/{badge_id}
-  # GET /badges/{badge_url}?parent_path={group_url}
-  # Returns JSON
-  # Returns badge API json
-  def get
-    render json: @badge.json(:api_v1, current_user: current_user)
-  end
-
   # === RESTFUL ACTIONS === #
   # GET /group-url/badge-url
   # GET /group-url/badge-url.json

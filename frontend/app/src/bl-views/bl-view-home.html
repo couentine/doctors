@@ -200,7 +200,8 @@ The home page for logged in users.
 
     <!-- #=== BACKEND LINKS ===# -->
 
-    <bl-backend-list id="badgeList" target="{{badges}}" model="badge" parent-view-status="[[status]]"></bl-backend-list>
+    <bl-backend-list id="badgeList" target="{{badges}}" model="badge" parent-view-status="[[status]]"
+      parameters='{"filter[status]": "seeker"}'></bl-backend-list>
     <bl-backend-list id="groupList" target="{{groups}}" model="group" parent-view-status="[[status]]"></bl-backend-list>
 
     <!-- #=== HEADER PANEL ===# -->

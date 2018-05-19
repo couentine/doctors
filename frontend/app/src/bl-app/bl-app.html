@@ -61,7 +61,7 @@ The mixin also provides various actions for interacting with the container. (Ref
     <app-route id="groupRoute" route="{{route}}" pattern="/:slug" data="{{groupRouteData}}" tail="{{groupSubroute}}"></app-route>
       <app-route id="badgeRoute" route="{{groupSubroute}}" pattern="/:slug" data="{{badgeRouteData}}" tail="{{badgeSubroute}}"></app-route>
         <app-route id="addBadgeEndorsementsViewRoute" active="{{addBadgeEndorsementsViewActive}}" route="{{badgeSubroute}}" 
-          pattern="/endorsements/add" title="Bulk Award - [[badge.name]] - Badge List"></app-route>
+          pattern="/endorsements/add" title="Bulk Award - [[badge.attributes.name]] - Badge List"></app-route>
     
     <!-- #=== APP BACKEND MODEL ITEMS ===# -->
     <bl-backend-item id="backendGroup" target="{{group}}" model="group" key="[[filteredGroupKey]]"></bl-backend-item>
