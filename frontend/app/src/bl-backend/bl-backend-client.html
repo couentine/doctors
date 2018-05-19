@@ -118,8 +118,15 @@ The client uses the `swagger.json` file located in the component folder.
           }
         }
 
+        // Add the csrf token if needed
+        var authOptions = (options.verb == 'get') ? null : { 
+          clientAuthorizations: {
+            csrf_token: new SwaggerClient.ApiKeyAuthorization('X-CSRF-Token', this.app.manifest.csrf_token, 'header')
+          }
+        };
+
         return new Promise(function(resolve, reject) {
-          operationFunction(parameters).then(function(responseDetails) {
+          operationFunction(parameters, authOptions).then(function(responseDetails) {
             resolve(responseDetails.obj);
           }).catch(function(error) {
             if (error && error.obj && error.obj.errors) {

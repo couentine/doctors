@@ -14,7 +14,7 @@ class Api::V1::BaseController < ApplicationController
 
   #=== FILTERS ===#
   
-  skip_before_action :verify_authenticity_token
+  protect_from_forgery with: :exception # CSRF protection is needed for web app requests (authenticated via session cookie)
   before_filter :process_authentication
   after_action :verify_authorized # Enforces the use of Pundit policies by throwing an error if they weren't used on an action
   
@@ -60,15 +60,42 @@ class Api::V1::BaseController < ApplicationController
   end
 
   def render_not_found
-    return render_single_error(status: 404, title: 'Not found', detail: 'The specified record could not be found.')
+    return render_single_error(
+      status: 404, 
+      title: 'Not found', 
+      detail: 'The specified record could not be found'
+    )
+  end
+
+  # Overrides the standard csrf failure method
+  def handle_unverified_request
+    process_authentication # must set the auth details since the error happens before this is run
+
+    # CSRF is only required if we're accessing via a session. 
+    # If accessing via an API token we do nothing (thus continuing w/ the request).
+    if @access_method == :web
+      return render_single_error(
+        status: 403, 
+        title: 'Unauthorized', 
+        detail: 'You do not have access to this operation, CSRF token is missing or invalid'
+      )
+    end
   end
 
   def render_not_authorized
-    return render_single_error(status: 403, title: 'Unauthorized', detail: 'You do not have access to this operation.')
+    return render_single_error(
+      status: 403, 
+      title: 'Unauthorized', 
+      detail: 'You do not have access to this operation'
+    )
   end
 
   def render_bad_request(e)
-    return render_single_error(status: 400, title: 'Bad request', detail: e.to_s)
+    return render_single_error(
+      status: 400, 
+      title: 'Bad request', 
+      detail: e.to_s
+    )
   end
 
   # This renders a JSON API formatted error message from a single string.

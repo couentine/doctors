@@ -102,7 +102,7 @@ class UserMailer < ActionMailer::Base
       from_string = build_from_string
       reply_to_string = no_reply_to_string
     else
-      subject = "You've beed added to a badge"
+      subject = "You've been added to a badge"
       from_string = build_from_string(@from_user)
       reply_to_string = @from_user.email_name
     end

@@ -85,7 +85,7 @@ class Api::V1::EndorsementsController < Api::V1::BaseController
         creator_user: current_user, 
         validation_items: @endorsements, 
         send_emails_to_new_users: @send_emails_to_new_users)
-      render_json_api @poller, status: 202, root_meta: { endorsements: @endorsements }
+      render_json_api @poller, status: 202
     end
   end
 
