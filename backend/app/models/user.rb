@@ -7,7 +7,7 @@ class User
 
   # === CONSTANTS === #
   
-  TYPE_VALUES = ['individual', 'group']
+  TYPE_VALUES = ['individual', 'group', 'app']
   MIN_PASSWORD_LENGTH = 6 # Note: This is just for use in tests & not actually tied to anything
   MAX_NAME_LENGTH = 200
   MAX_USERNAME_LENGTH = 15
@@ -37,80 +37,87 @@ class User
 
   # === RELATIONSHIP === #
 
-  belongs_to :proxy_group, inverse_of: :proxy_user, class_name: 'Group' # required if user type is `group`
-  has_many :created_groups, inverse_of: :creator, class_name: 'Group'
-  has_many :owned_groups, inverse_of: :owner, class_name: 'Group'
-  has_many :created_badges, inverse_of: :creator, class_name: 'Badge'
-  has_many :logs, dependent: :destroy
-  has_many :created_entries, inverse_of: :creator, class_name: 'Entry'
-  has_and_belongs_to_many :admin_of, inverse_of: :admins, class_name: 'Group'
-  has_and_belongs_to_many :member_of, inverse_of: :members, class_name: 'Group'
-  has_many :report_results, dependent: :destroy
-  has_many :info_items, dependent: :destroy
-  belongs_to :domain, inverse_of: :users, class_name: 'Domain' # don't ever set this manually,
-  has_many :owned_domains, inverse_of: :owner, class_name: 'Domain'
-  has_and_belongs_to_many :group_tags # DO NOT EDIT DIRECTLY: Use group_tag.add_users/remove_users
-  has_many :authentication_tokens, dependent: :destroy, inverse_of: :user, class_name: 'AuthenticationToken'
-  has_many :created_authentication_tokens, inverse_of: :creator, class_name: 'AuthenticationToken'
+  belongs_to :proxy_group,                inverse_of: :proxy_user,  class_name: 'Group' # required if user type is `group`
+  belongs_to :proxy_app,                  inverse_of: :proxy_user,  class_name: 'App' # required if user type is `app`
+  belongs_to :domain,                     inverse_of: :users,       class_name: 'Domain' # don't ever set this manually,
+  has_many :info_items,                   dependent: :destroy
+  
+  has_many :logs,                         dependent: :destroy
+  has_many :report_results,               dependent: :destroy
+  has_many :authentication_tokens,        inverse_of: :user,        class_name: 'AuthenticationToken',  dependent: :destroy
+
+  has_and_belongs_to_many :admin_of,      inverse_of: :admins,      class_name: 'Group'
+  has_and_belongs_to_many :member_of,     inverse_of: :members,     class_name: 'Group'
+  has_and_belongs_to_many :group_tags
+  has_many :app_memberships,              dependent: :delete_all,   class_name: 'AppUserMembership'
+
+  has_many :created_groups,               inverse_of: :creator,     class_name: 'Group'
+  has_many :owned_groups,                 inverse_of: :owner,       class_name: 'Group'
+  has_many :owned_apps,                   inverse_of: :owner,       class_name: 'App'
+  has_many :created_badges,               inverse_of: :creator,     class_name: 'Badge'
+  has_many :created_entries,              inverse_of: :creator,     class_name: 'Entry'
+  has_many :owned_domains,                inverse_of: :owner,       class_name: 'Domain'
+  has_many :created_authentication_tokens,inverse_of: :creator,     class_name: 'AuthenticationToken'
+  
 
   # === CUSTOM FIELDS === #
   
-  field :type,                              type: String, default: 'individual'
-  field :name,                              type: String
-  field :username,                          type: String
-  field :username_with_caps,                type: String
-  field :job_title,                         type: String
-  field :organization_name,                 type: String
-  field :website,                           type: String
-  field :bio,                               type: String
+  field :type,                            type: String, default: 'individual'
+  field :name,                            type: String
+  field :username,                        type: String
+  field :username_with_caps,              type: String
+  field :job_title,                       type: String
+  field :organization_name,               type: String
+  field :website,                         type: String
+  field :bio,                             type: String
 
-  field :has_private_domain,                type: Boolean, default: false
-  field :is_non_private_domain_user,        type: Boolean, default: false
-  field :visible_to_domain_urls,            type: Array
-  field :flags,                             type: Array, default: [], pre_processed: true
-  field :admin,                             type: Boolean, default: false
-  field :form_submissions,                  type: Array
-  field :last_active,                       type: Date
-  field :last_active_at,                    type: Time # RETIRED
-  field :active_months,                     type: Array # RETIRED
-  field :page_views,                        type: Hash # RETIRED
-  field :email_inactive,                    type: Boolean, default: false
-  field :email_bounces,                     type: Integer, default: 0
-  field :last_email_bounce_at,              type: Time
-  field :inactive_email_bounce_id,          type: Integer
+  field :has_private_domain,              type: Boolean, default: false
+  field :is_non_private_domain_user,      type: Boolean, default: false
+  field :visible_to_domain_urls,          type: Array
+  field :flags,                           type: Array, default: [], pre_processed: true
+  field :admin,                           type: Boolean, default: false
+  field :form_submissions,                type: Array
+  field :last_active,                     type: Date
+  field :last_active_at,                  type: Time # RETIRED
+  field :active_months,                   type: Array # RETIRED
+  field :page_views,                      type: Hash # RETIRED
+  field :email_inactive,                  type: Boolean, default: false
+  field :email_bounces,                   type: Integer, default: 0
+  field :last_email_bounce_at,            type: Time
+  field :inactive_email_bounce_id,        type: Integer
 
-  mount_uploader :direct_avatar,            S3DirectUploader
-  mount_uploader :avatar,                   S3AvatarUploader
-  field :avatar_key,                        type: String
-  field :processing_avatar,                 type: Boolean
+  mount_uploader :direct_avatar,          S3DirectUploader
+  mount_uploader :avatar,                 S3AvatarUploader
+  field :avatar_key,                      type: String
+  field :processing_avatar,               type: Boolean
 
-  field :identity_hash,                     type: String
-  field :identity_salt,                     type: String
+  field :identity_hash,                   type: String
+  field :identity_salt,                   type: String
 
-  field :stripe_customer_id,                type: String
-  field :stripe_default_source,             type: String
-  field :stripe_cards,                      type: Array, default: []
+  field :stripe_customer_id,              type: String
+  field :stripe_default_source,           type: String
+  field :stripe_cards,                    type: Array, default: []
 
-  field :all_badge_ids,                     type: Array, default: []
-  field :learner_badge_ids,                 type: Array, default: []
-  field :requested_badge_ids,               type: Array, default: []
-  field :expert_badge_ids,                  type: Array, default: []
-  field :group_validation_request_counts,   type: Hash, default: {} # key=group_id, value=count
-  field :group_settings,                    type: Hash, default: {} # key=group_id, val=setting hash
+  field :all_badge_ids,                   type: Array, default: []
+  field :learner_badge_ids,               type: Array, default: []
+  field :requested_badge_ids,             type: Array, default: []
+  field :expert_badge_ids,                type: Array, default: []
+  field :group_validation_request_counts, type: Hash, default: {} # key=group_id, value=count
+  field :group_settings,                  type: Hash, default: {} # key=group_id, val=setting hash
 
   # OmniAuth Fields
-  field :user_defined_password,             type: Boolean, default: true
-  field :auto_username_needs_review,        type: Boolean, default: false
-  field :omniauth_last_provider,            type: String
-  field :omniauth_google_oauth2_uid,        type: String
-  field :omniauth_google_oauth2_hash,       type: Hash # stores the full auth hash
+  field :user_defined_password,           type: Boolean, default: true
+  field :auto_username_needs_review,      type: Boolean, default: false
+  field :omniauth_last_provider,          type: String
+  field :omniauth_google_oauth2_uid,      type: String
+  field :omniauth_google_oauth2_hash,     type: Hash # stores the full auth hash
   
   # LTI Fields
-  field :lti_launch_hash,                   type: Hash # stores the most recent LTI launch params
+  field :lti_launch_hash,                 type: Hash # stores the most recent LTI launch params
 
   # === UNIVERSAL FIELD VALIDATIONS === #
 
-  validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid User Type" }
+  validates :type, inclusion: { in: TYPE_VALUES, message: "%{value} is not a valid user type" }
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validates :job_title, length: { maximum: MAX_JOB_TITLE_LENGTH }
   validates :organization_name, length: { maximum: MAX_ORGANIZATION_NAME_LENGTH }

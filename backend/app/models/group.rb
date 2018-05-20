@@ -67,15 +67,16 @@ class Group
 
   # === RELATIONSHIPS === #
 
-  has_one :proxy_user, inverse_of: :proxy_group, class_name: 'User'
-  belongs_to :creator, inverse_of: :created_groups, class_name: 'User'
-  belongs_to :owner, inverse_of: :owned_groups, class_name: 'User'
-  has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: 'User'
-  has_and_belongs_to_many :members, inverse_of: :member_of, class_name: 'User',
-    after_add: :do_group_welcome
-  has_many :badges, dependent: :restrict # You have to delete all the badges FIRST
-  has_many :info_items, dependent: :destroy
-  has_many :tags, dependent: :destroy, class_name: 'GroupTag'
+  has_one :proxy_user,              inverse_of: :proxy_group,     class_name: 'User'
+  belongs_to :creator,              inverse_of: :created_groups,  class_name: 'User'
+  belongs_to :owner,                inverse_of: :owned_groups,    class_name: 'User'
+
+  has_and_belongs_to_many :admins,  inverse_of: :admin_of,        class_name: 'User'
+  has_and_belongs_to_many :members, inverse_of: :member_of,       class_name: 'User', after_add: :do_group_welcome
+  
+  has_many :badges,                 dependent: :restrict
+  has_many :tags,                   dependent: :destroy,          class_name: 'GroupTag'
+  has_many :info_items,             dependent: :destroy
 
   # === FIELDS & VALIDATIONS === #
 
