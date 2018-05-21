@@ -2,7 +2,7 @@
 # 
 # APP GROUP MEMBERSHIP MODEL
 # 
-# Use the services in `/services/app` to create and modify app memberships.
+# FIXME >> Add notes on how to update.
 # 
 #==========================================================================================================================================#
 

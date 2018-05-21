@@ -37,27 +37,33 @@ class User
 
   # === RELATIONSHIP === #
 
-  belongs_to :proxy_group,                inverse_of: :proxy_user,  class_name: 'Group' # required if user type is `group`
-  belongs_to :proxy_app,                  inverse_of: :proxy_user,  class_name: 'App' # required if user type is `app`
-  belongs_to :domain,                     inverse_of: :users,       class_name: 'Domain' # don't ever set this manually,
+  belongs_to :proxy_group,                inverse_of: :proxy_user,      class_name: 'Group' # required if user type is `group`
+  belongs_to :proxy_app,                  inverse_of: :proxy_user,      class_name: 'App' # required if user type is `app`
+  belongs_to :domain,                     inverse_of: :users,           class_name: 'Domain' # don't ever set this manually,
   has_many :info_items,                   dependent: :destroy
   
   has_many :logs,                         dependent: :destroy
   has_many :report_results,               dependent: :destroy
-  has_many :authentication_tokens,        inverse_of: :user,        class_name: 'AuthenticationToken',  dependent: :destroy
+  has_many :authentication_tokens,        inverse_of: :user,            class_name: 'AuthenticationToken',  dependent: :destroy
 
-  has_and_belongs_to_many :admin_of,      inverse_of: :admins,      class_name: 'Group'
-  has_and_belongs_to_many :member_of,     inverse_of: :members,     class_name: 'Group'
+  has_and_belongs_to_many :admin_of,      inverse_of: :admins,          class_name: 'Group'
+  has_and_belongs_to_many :member_of,     inverse_of: :members,         class_name: 'Group'
   has_and_belongs_to_many :group_tags
-  has_many :app_memberships,              dependent: :delete_all,   class_name: 'AppUserMembership'
+  has_many :app_memberships,              dependent: :delete_all,       class_name: 'AppUserMembership'
+  has_and_belongs_to_many :apps
+  has_and_belongs_to_many :pending_apps,  inverse_of: :pending_users,   class_name: 'App'
+  has_and_belongs_to_many :member_of_apps,inverse_of: :member_users,    class_name: 'App'
+  has_and_belongs_to_many :admin_of_apps, inverse_of: :admin_users,     class_name: 'App'
+  has_and_belongs_to_many :disabled_apps, inverse_of: :disabled_users,  class_name: 'App'
 
-  has_many :created_groups,               inverse_of: :creator,     class_name: 'Group'
-  has_many :owned_groups,                 inverse_of: :owner,       class_name: 'Group'
-  has_many :owned_apps,                   inverse_of: :owner,       class_name: 'App'
-  has_many :created_badges,               inverse_of: :creator,     class_name: 'Badge'
-  has_many :created_entries,              inverse_of: :creator,     class_name: 'Entry'
-  has_many :owned_domains,                inverse_of: :owner,       class_name: 'Domain'
-  has_many :created_authentication_tokens,inverse_of: :creator,     class_name: 'AuthenticationToken'
+  has_many :created_groups,               inverse_of: :creator,         class_name: 'Group'
+  has_many :owned_groups,                 inverse_of: :owner,           class_name: 'Group'
+  has_many :owned_apps,                   inverse_of: :owner,           class_name: 'App'
+  has_many :created_badges,               inverse_of: :creator,         class_name: 'Badge'
+  has_many :created_entries,              inverse_of: :creator,         class_name: 'Entry'
+  has_many :owned_domains,                inverse_of: :owner,           class_name: 'Domain'
+  has_many :created_authentication_tokens,inverse_of: :creator,         class_name: 'AuthenticationToken'
+  has_many :created_app_user_memberships, inverse_of: :creator,         class_name: 'AppUserMembership'
   
 
   # === CUSTOM FIELDS === #
@@ -127,6 +133,7 @@ class User
   # === CONDITIONAL FIELD VALIDATIONS === #
 
   validates :proxy_group, if: :proxy_group_is_required?, presence: true
+  validates :proxy_app, if: :proxy_app_is_required?, presence: true
   validates :username_with_caps, unless: :username_is_required?, presence: false
   validates :username_with_caps, if: :username_is_required?, presence: true, length: { within: 2..MAX_USERNAME_LENGTH }, 
     uniqueness:true, format: { with: /\A[\w-]+\Z/, message: "can only contain letters, numbers, dashes and underscores." }
@@ -195,6 +202,10 @@ class User
 
   def proxy_group_is_required?
     return type == 'group'
+  end
+  
+  def proxy_app_is_required?
+    return type == 'app'
   end
 
   def username_is_required?
@@ -1246,11 +1257,16 @@ protected
       self.processing_avatar = true
     end
 
-    if (type == 'group') & proxy_group_id.present?
+    if ((type == 'group') && proxy_group_id.present?)
       self.email = "#{proxy_group.url}@groups.badgelist.com"
       self.password = Devise.friendly_token(40) # randomize the password every time the record is touched, it should never be used
       self.user_defined_password = false
       self.name = proxy_group.name
+    elsif ((type == 'app') && proxy_app_id.present?)
+      self.email = "#{proxy_app.slug}@apps.badgelist.com"
+      self.password = Devise.friendly_token(40) # randomize the password every time the record is touched, it should never be used
+      self.user_defined_password = false
+      self.name = proxy_app.name
     end
   end
 
