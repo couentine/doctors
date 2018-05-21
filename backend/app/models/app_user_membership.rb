@@ -2,7 +2,7 @@
 # 
 # APP USER MEMBERSHIP MODEL
 # 
-# Use AppMembershipDecorator to manage members.
+# Use AppUserMembershipDecorator to manage members.
 # 
 #==========================================================================================================================================#
 

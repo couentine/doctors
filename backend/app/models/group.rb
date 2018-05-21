@@ -73,12 +73,16 @@ class Group
 
   has_and_belongs_to_many :admins,        inverse_of: :admin_of,        class_name: 'User'
   has_and_belongs_to_many :members,       inverse_of: :member_of,       class_name: 'User',                 after_add: :do_group_welcome
-  has_many :app_memberships,              inverse_of: :group,           class_name: 'AppGroupMembership',   dependent: :destroy
-  
+
   has_many :badges,                       dependent: :restrict
   has_many :tags,                         dependent: :destroy,          class_name: 'GroupTag'
   has_many :info_items,                   dependent: :destroy
 
+  has_many :app_memberships,              inverse_of: :group,           class_name: 'AppGroupMembership',   dependent: :destroy
+  has_and_belongs_to_many :apps,          inverse_of: :groups,          class_name: 'App'
+  has_and_belongs_to_many :pending_apps,  inverse_of: :pending_groups,  class_name: 'App'
+  has_and_belongs_to_many :disabled_apps, inverse_of: :disabled_groups, class_name: 'App'
+  
   # === FIELDS & VALIDATIONS === #
 
   field :name,                            type: String

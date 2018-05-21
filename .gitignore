@@ -29,3 +29,5 @@
 # Ignore sublime-related files
 *.sublime-project
 *.sublime-workspace
+
+/temp

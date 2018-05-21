@@ -15,6 +15,7 @@
 # ```
 # 
 #==========================================================================================================================================#
+
 class AppChangeDecorator < SimpleDelegator
 
   # In addition to the normal validations, you must set `owner` in order to use this method.
@@ -53,10 +54,10 @@ class AppChangeDecorator < SimpleDelegator
 
     # Add the owner as an admin member if needed
     # Try to avoid hitting the database unless it's necessary
-    decorated_app = AppMembershipDecorator.new(self)
+    decorated_app = AppUserMembershipDecorator.new(self)
     if !decorated_app.has_user_membership?(owner, :any)
       # There's no membership record at all, create one
-      decorated_user_membership = decorated_app.create_user_membership(owner, owner, type: 'admin') # rescue nil
+      decorated_user_membership = decorated_app.create_user_membership(owner, owner, type: 'admin') rescue nil
 
       if !decorated_user_membership || !decorated_user_membership.errors.blank?
         self.errors.add(:base, 'Owner user membership could not be created')

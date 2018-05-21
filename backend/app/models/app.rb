@@ -4,7 +4,8 @@
 # 
 # Do not manage apps directly from the model, use the following decorators:
 # - Use AppChangeDecorator to create, modify and delete an app.
-# - Use AppMembershipDecorator to manage member users and groups.
+# - Use AppUserMembershipDecorator to manage member users.
+# - Use AppGroupMembershipDecorator to manage member groups.
 # 
 #==========================================================================================================================================#
 
@@ -27,14 +28,16 @@ class App
   has_one :proxy_user,                    inverse_of: :proxy_app,             class_name: 'User',   dependent: :destroy
   
   has_many :user_memberships,             class_name: 'AppUserMembership',    dependent: :destroy
-  has_and_belongs_to_many :users
+  has_and_belongs_to_many :users,         inverse_of: :apps,                  class_name: 'User'
   has_and_belongs_to_many :pending_users, inverse_of: :pending_apps,          class_name: 'User'
   has_and_belongs_to_many :member_users,  inverse_of: :member_of_apps,        class_name: 'User'
   has_and_belongs_to_many :admin_users,   inverse_of: :admin_of_apps,         class_name: 'User'
   has_and_belongs_to_many :disabled_users,inverse_of: :disabled_apps,         class_name: 'User'
  
   has_many :group_memberships,            class_name: 'AppGroupMembership',   dependent: :destroy
-  has_and_belongs_to_many :groups
+  has_and_belongs_to_many :groups,        inverse_of: :apps,                  class_name: 'Group'
+  has_and_belongs_to_many :pending_groups,inverse_of: :pending_apps,          class_name: 'Group'
+  has_and_belongs_to_many :disabled_groups,inverse_of: :disabled_apps,        class_name: 'Group'
 
   # === FIELDS === #
 

@@ -1,13 +1,13 @@
 #==========================================================================================================================================#
 # 
-# APP CHANGE DECORATOR
+# APP USER MEMBERSHIP DECORATOR
 # 
-# Use this decorator to add / remove / manage member users and groups.
+# Use this decorator to add / remove / manage member users.
 # 
 # ## Example Usage ##
 # 
 # ```
-# app = AppChangeDecorator.new(App.find('example-app'))
+# app = AppUserMembershipDecorator.new(App.find('example-app'))
 # 
 # if !app.has_user_membership? new_member_user, :any
 #   new_user_membership = app.create_user_membership(new_member_user, creator_user)
@@ -15,9 +15,12 @@
 # ```
 # 
 #==========================================================================================================================================#
-class AppMembershipDecorator < SimpleDelegator
 
-  # Returns true if there is a membership record for the specified group or user.
+class AppUserMembershipDecorator < SimpleDelegator
+
+  #=== INSTANCE METHODS ===#
+
+  # Returns true if there is a membership record for the specified group.
   # In the case of users, this only checks for the membership, not the membership type.
   # Will always return false if there is no membership record, even if the user is the proxy_user or owner.
   # 
@@ -57,7 +60,7 @@ class AppMembershipDecorator < SimpleDelegator
   # NOTE: Differs from `has_user_membership?` because it returns true even if there is no membership record for the user.
   # 
   # Accepted item types: user, user id/string
-  def is_admin?(item)
+  def has_admin?(item)
     case item.class.to_s
     when 'User'
       this_user_id = item.id
@@ -108,7 +111,7 @@ class AppMembershipDecorator < SimpleDelegator
     )
 
     # Scenarios to keep in mind: Initial adding of the owner, admin-adding of a new member, membership request from non-admin
-    if is_admin? creator_user
+    if has_admin? creator_user
       decorated_user_membership.app_approval_status = 'approved'
     end
     if creator_user == member_user
@@ -120,9 +123,15 @@ class AppMembershipDecorator < SimpleDelegator
     return decorated_user_membership
   end
 
-  # Pass a newly created or updated user membership and this method updates: users, admin_users and member_users
+  # Pass a newly created or updated user membership and this method updates the user relations which mirror the memberships.
   def update_user_relations_with(user_membership)
     user = user_membership.user # shortcut
+
+    if user_membership.active?
+      self.users << user unless users.include?(user)
+    else
+      self.users.delete(user) if users.include?(user)
+    end
 
     if user_membership.pending?
       self.pending_users << user unless pending_users.include?(user)

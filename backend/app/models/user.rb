@@ -49,8 +49,9 @@ class User
   has_and_belongs_to_many :admin_of,      inverse_of: :admins,          class_name: 'Group'
   has_and_belongs_to_many :member_of,     inverse_of: :members,         class_name: 'Group'
   has_and_belongs_to_many :group_tags
+  
   has_many :app_memberships,              inverse_of: :user,            class_name: 'AppUserMembership',    dependent: :destroy
-  has_and_belongs_to_many :apps
+  has_and_belongs_to_many :apps,          inverse_of: :users,           class_name: 'App'
   has_and_belongs_to_many :pending_apps,  inverse_of: :pending_users,   class_name: 'App'
   has_and_belongs_to_many :member_of_apps,inverse_of: :member_users,    class_name: 'App'
   has_and_belongs_to_many :admin_of_apps, inverse_of: :admin_users,     class_name: 'App'
@@ -64,6 +65,7 @@ class User
   has_many :owned_domains,                inverse_of: :owner,           class_name: 'Domain'
   has_many :created_authentication_tokens,inverse_of: :creator,         class_name: 'AuthenticationToken'
   has_many :created_app_user_memberships, inverse_of: :creator,         class_name: 'AppUserMembership'
+  has_many :created_app_group_memberships,inverse_of: :creator,         class_name: 'AppGroupMembership'
   
 
   # === CUSTOM FIELDS === #
