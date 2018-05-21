@@ -19,8 +19,8 @@ class AppUserMembership
   # === RELATIONSHIPS === #
 
   belongs_to :app
-  belongs_to :user
-  has_one :creator,                       inverse_of: :created_app_user_memberships,  class_name: 'User'
+  belongs_to :user,                       inverse_of: :app_memberships,               class_name: 'User'
+  belongs_to :creator,                    inverse_of: :created_app_user_memberships,  class_name: 'User'
 
   # === EDITABLE FIELDS === #
 

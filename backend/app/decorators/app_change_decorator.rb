@@ -8,23 +8,24 @@
 # 
 # ```
 # app = AppChangeDecorator.new(App.new(owner: user1))
-# app.save
+# app.save_as(current_user)
 # app.owner = user2
-# app.save
+# app.save_as(current_user)
+# app.destroy
 # ```
 # 
 #==========================================================================================================================================#
 class AppChangeDecorator < SimpleDelegator
 
   # In addition to the normal validations, you must set `owner` in order to use this method.
-  def save
+  def save_as(current_user)
     was_new_record = self.new_record?
     proxy_user_needs_update = name_changed? || slug_changed?
 
     if owner.nil?
       self.errors.add(:owner_id, 'cannot be blank')
       return false
-    elsif !super
+    elsif !super(current_user)
       return false
     end
     
@@ -55,20 +56,32 @@ class AppChangeDecorator < SimpleDelegator
     decorated_app = AppMembershipDecorator.new(self)
     if !decorated_app.has_user_membership?(owner, :any)
       # There's no membership record at all, create one
-      successful &&= decorated_app.create_user_membership(owner, creator, type: 'admin').errors.blank?
+      decorated_user_membership = decorated_app.create_user_membership(owner, owner, type: 'admin') # rescue nil
+
+      if !decorated_user_membership || !decorated_user_membership.errors.blank?
+        self.errors.add(:base, 'Owner user membership could not be created')
+        self.delete if was_new_record && !self.new_record?
+        return false
+      end
     elsif !decorated_app.has_user_membership?(owner, :admin)
       # There *is* a membership record but it isn't an admin one, so upgrade it
       decorated_user_membership = decorated_app.get_user_membership(owner)
       decorated_user_membership.type = 'admin'
       
       if !decorated_user_membership.save
-        self.errors.add(:base, 'Owner user membership could not be created')
+        self.errors.add(:base, 'Existing owner user membership could not be upgraded to admin')
         self.delete if was_new_record && !self.new_record?
         return false
       end
     end
 
     true
+  end
+
+  def destroy
+    super
+
+    # For now there's nothing else to do, but eventually there may be
   end
 
 end

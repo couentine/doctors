@@ -18,7 +18,7 @@ class AppGroupMembership
   # === RELATIONSHIPS === #
 
   belongs_to :app
-  belongs_to :group
+  belongs_to :group,                      inverse_of: :app_memberships,               class_name: 'Group'
 
   # === FIELDS === #
 

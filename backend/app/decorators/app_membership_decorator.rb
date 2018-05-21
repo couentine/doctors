@@ -69,7 +69,7 @@ class AppMembershipDecorator < SimpleDelegator
       raise ArgumentError.new("Invalid type #{item.class.to_s} for item. (Accepted types are User, ObjectId or String.)")
     end
     
-    return (proxy_user_id == this_user_id) || (owner_id == this_user_id) || admin_user_ids.include?(this_user_id)
+    return (proxy_user.id == this_user_id) || (owner_id == this_user_id) || admin_user_ids.include?(this_user_id)
   end
 
   # Returns the user membership of the specified user or nil if none is present
@@ -120,36 +120,6 @@ class AppMembershipDecorator < SimpleDelegator
     return decorated_user_membership
   end
 
-  # === USER MEMBERSHIP DECORATOR INNER CLASS === #
-
-  class UserMembershipDecorator < SimpleDelegator
-
-    attr_accessor :parent_app
-
-    def initialize(user_membership, decorated_parent_app)
-      super(user_membership)
-      
-      @parent_app = decorated_parent_app
-    end
-
-    def save
-      return false if !super
-
-      @parent_app.update_user_relations_with self
-    end
-
-    def save!
-      super
-
-      @parent_app.update_user_relations_with self
-    end
-
-  end
-
-  # === PROTECTED METHODS === #
-
-  protected
-
   # Pass a newly created or updated user membership and this method updates: users, admin_users and member_users
   def update_user_relations_with(user_membership)
     user = user_membership.user # shortcut
@@ -180,6 +150,32 @@ class AppMembershipDecorator < SimpleDelegator
 
     self.save if self.changed?
     true
+  end
+
+  # === USER MEMBERSHIP DECORATOR INNER CLASS === #
+
+  class UserMembershipDecorator < SimpleDelegator
+
+    attr_accessor :parent_app
+
+    def initialize(user_membership, decorated_parent_app)
+      super(user_membership)
+      
+      @parent_app = decorated_parent_app
+    end
+
+    def save
+      return false if !super
+
+      @parent_app.update_user_relations_with self
+    end
+
+    def save!
+      super
+
+      @parent_app.update_user_relations_with self
+    end
+
   end
 
 end

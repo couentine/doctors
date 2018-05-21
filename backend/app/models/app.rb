@@ -11,6 +11,7 @@
 class App
   include Mongoid::Document
   include Mongoid::Timestamps
+  include FieldHistory
   
   # === CONSTANTS === #
 
@@ -23,34 +24,34 @@ class App
   # === RELATIONSHIPS === #
 
   belongs_to :owner,                      inverse_of: :owned_apps,            class_name: 'User'
-  has_one :proxy_user,                    inverse_of: :proxy_app,             class_name: 'User'
+  has_one :proxy_user,                    inverse_of: :proxy_app,             class_name: 'User',   dependent: :destroy
   
-  has_many :user_memberships,             class_name: 'AppUserMembership',    dependent: :delete
+  has_many :user_memberships,             class_name: 'AppUserMembership',    dependent: :destroy
   has_and_belongs_to_many :users
   has_and_belongs_to_many :pending_users, inverse_of: :pending_apps,          class_name: 'User'
   has_and_belongs_to_many :member_users,  inverse_of: :member_of_apps,        class_name: 'User'
   has_and_belongs_to_many :admin_users,   inverse_of: :admin_of_apps,         class_name: 'User'
   has_and_belongs_to_many :disabled_users,inverse_of: :disabled_apps,         class_name: 'User'
  
-  has_many :group_memberships,            class_name: 'AppGroupMembership',   dependent: :delete
+  has_many :group_memberships,            class_name: 'AppGroupMembership',   dependent: :destroy
   has_and_belongs_to_many :groups
 
   # === FIELDS === #
 
-  field :status,                          type: String, default: 'active'
-  field :review_status,                   type: String, default: 'approved'
-  field :name,                            type: String
-  field :slug,                            type: String
-  field :type,                            type: String
+  field :status,                          type: String, default: 'active',    metadata: { history_of: :values }
+  field :review_status,                   type: String, default: 'approved',  metadata: { history_of: :values }
+  field :name,                            type: String,                       metadata: { history_of: :values }
+  field :slug,                            type: String,                       metadata: { history_of: :values }
+  field :type,                            type: String,                       metadata: { history_of: :values }
 
-  field :summary,                         type: String
-  field :description,                     type: String
-  field :organization,                    type: String
-  field :website,                         type: String
-  field :email,                           type: String
+  field :summary,                         type: String,                       metadata: { history_of: :values }
+  field :description,                     type: String,                       metadata: { history_of: :values }
+  field :organization,                    type: String,                       metadata: { history_of: :values }
+  field :website,                         type: String,                       metadata: { history_of: :values }
+  field :email,                           type: String,                       metadata: { history_of: :values }
 
   mount_uploader :direct_image,           S3DirectUploader
-  mount_uploader :image,                  S3BadgeUploader
+  mount_uploader :image,                  S3BadgeUploader,                    metadata: { history_of: :times }
   field :image_key,                       type: String
   field :processing_image,                type: Boolean
   
