@@ -46,14 +46,10 @@ class AppGroupMembership
   validates :app_user_access, inclusion: { in: USER_ACCESS_VALUES, message: "%{value} is not a valid user access level" }
   validates :group_user_access, inclusion: { in: USER_ACCESS_VALUES, message: "%{value} is not a valid user access level" }
 
-  # === CALLBACK === #
+  # === CALLBACKS === #
 
   after_validation :update_calculated_fields
   before_save :enforce_field_limitations
-
-  # === INSTANCE METHODS === #
-
-  # None Yet
 
   # === PROTECTED METHODS === #
 

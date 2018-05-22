@@ -44,7 +44,7 @@ class AppUserMembership
   validates :app_approval_status, inclusion: { in: APPROVAL_STATUS_VALUES, message: "%{value} is not a valid approval status" }
   validates :user_approval_status, inclusion: { in: APPROVAL_STATUS_VALUES, message: "%{value} is not a valid approval status" }
 
-  # === CALLBACK === #
+  # === CALLBACKS === #
 
   after_validation :update_calculated_fields
 

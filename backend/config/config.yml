@@ -5,6 +5,8 @@ defaults: &defaults
   page_size_small: 12
   page_size_normal: 36
   page_size_large: 60
+
+  default_app_image_url: https://s3.amazonaws.com/badgelist/images/default_app_image.png
   
   # API constants
   max_import_list_size: 500

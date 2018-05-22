@@ -4,7 +4,7 @@
 # --------------------
 # 
 # NOTE: This module superscedes `audit_history.rb` as of May 2018.
-# Add this to a model to keep a field history as embedded instances of `HistoryItem` records.
+# Add this to a model to keep a field history as embedded instances of `FieldHistoryItem` records.
 # 
 # ## How to Add Field History to a Model Class ##
 # 
@@ -19,6 +19,11 @@
 #     It will throw an error if you try and create or save a record without setting `field_history_user`.
 #     Going forward you will have to set the `field_history_user` accessor on each model item every single time you save it!
 #   - You can also use the `model_instance.save_as(current_user)` method to set the field history user in a single command.
+#   - You can also use the `model_instance.save_without_history` method to skip the field history altogether.
+#     WARNING: Be careful about saving without history. As long as you're not changing tracked fields you're fine, but if you change 
+#     tracked fields then you will end up ruining the audit history in a way that is confusing and impossible to programmatically resolve.
+#     If you need to change watched fields in a rake task or something, it's best to use an actual user and track the history. You can use 
+#     `ENV['bl_admin_account_email']` to get the email address of the standard admin account which is ok to use for this sort of thing.
 #   - A `field_history_revision` field is added to the model to track the current revision number.
 #   - An embedded `field_history_items` relation is added to the model to store the items
 # 
@@ -33,8 +38,13 @@ module FieldHistory
     # It sets the user on the created field history items.
     attr_accessor :field_history_user
 
+    # Set this to true to suppress the field history for one save.
+    # You can also use the `save_without_history` method.
+    attr_accessor :skip_field_history
+
     # This is used internally, do not modify it directly
     attr_accessor :field_history_is_running
+
     
     # === RELATIONS === #
     
@@ -67,17 +77,25 @@ module FieldHistory
     self.save!
   end
 
+  def save_without_history
+    self.skip_field_history = true
+    return_value = self.save
+    self.skip_field_history = nil
+
+    return return_value
+  end
+
   # === PROTECTED METHODS === #
 
   protected
     
   # This checkes the standard rails field dirty methods to see what has changed on self, then if so it increments the 
   # field_history_revision so that an additional save is not required to commit it to the db.
-  # Raises an ArgumentError if the `field_history_user` accessor is unset.
+  # Raises an ArgumentError if the `field_history_user` accessor is unset (unless skip_field_history is set).
   def increment_field_history_revision
-    raise ArgumentError.new('Value missing for field_history_user accessor') if field_history_user.blank?
+    raise ArgumentError.new('Value missing for field_history_user accessor') if field_history_user.blank? && !skip_field_history
     
-    if !field_history_is_running && get_changed_fields.present?
+    if !field_history_is_running && !skip_field_history && get_changed_fields.present?
       # Only update the field history revision if it hasn't been updated already.
       # There could've been an error in prior before_save, or the consuming model could want to specify a manual revision number.
       if !field_history_revision_changed?
@@ -88,7 +106,7 @@ module FieldHistory
 
   # This checkes the standard rails field dirty methods to see what has changed on self, then builds the field history items.
   def build_field_history_items
-    if !field_history_is_running
+    if !field_history_is_running && !skip_field_history
       changed_fields = get_changed_fields
 
       if changed_fields.present?

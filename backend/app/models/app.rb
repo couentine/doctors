@@ -13,6 +13,7 @@ class App
   include Mongoid::Document
   include Mongoid::Timestamps
   include FieldHistory
+  include AsyncCallbacks
   
   # === CONSTANTS === #
 
@@ -53,9 +54,8 @@ class App
   field :website,                         type: String,                       metadata: { history_of: :values }
   field :email,                           type: String,                       metadata: { history_of: :values }
 
-  mount_uploader :direct_image,           S3DirectUploader
-  mount_uploader :image,                  S3BadgeUploader,                    metadata: { history_of: :times }
-  field :image_key,                       type: String
+  mount_uploader :image,                  S3BadgeUploader
+  field :new_image_url,                   type: String,                     metadata: { history_of: :times }
   field :processing_image,                type: Boolean
   
   # === VALIDATIONS === #
@@ -88,17 +88,53 @@ class App
       message: "must be dash case (only lowercase letters, numbers and dashes)"
     }
 
-  # === CALLBACK === #
+  # === CALLBACKS === #
 
+  after_validation :update_calculated_fields
   before_save :enforce_field_limitations
+
+  # === ASYNC CALLBACKS === #
+
+  ASYNC_CALLBACKS = [
+    :process_image
+  ]
 
   # === INSTANCE METHODS === #
 
   # None Yet
 
-  # === PROTECTED METHODS === #
+  # === CLASS METHODS === #
+
+  # This will find by id or slug
+  def self.find(input)
+    app = nil
+
+    if input.to_s.match /^[0-9a-fA-F]{24}$/
+      app = super rescue nil
+    end
+
+    if app.nil?
+      app = App.where(slug: input.to_s.downcase).first
+
+      # If this is a standard app which hasn't been created then we create it right now
+      # NOTE: This is a weird place to put this works for now and prevents any failure of finding the standard apps.
+      if app.nil? && STANDARD_APPS.include?(input.to_s.downcase)
+        StandardAppInitService.new.perform
+        app = App.where(slug: input.to_s.downcase).first # this should now return the app
+      end
+    end
+
+    app
+  end
 
   protected
+
+  # === SYNCHRONOUS CALLBACK METHODS === #
+
+  def update_calculated_fields
+    self.new_image_url = APP_CONFIG['default_app_image_url'] if new_image_url.blank?
+    self.processing_image = new_record? || new_image_url_changed?
+  end
 
   def enforce_field_limitations
     # Slug: Replace multiple dashes with a single dash. Remove leading and trailing dashes.
@@ -106,5 +142,18 @@ class App
       self.slug = slug.gsub(/-{2,}/, '-').gsub(/\A-|-\Z/, '')
     end
   end
+
+  # === ASYNC CALLBACK METHODS === #
+
+  def process_image?
+    processing_image
+  end
+
+  # Processes changes to the image from carrierwave direct key
+  def process_image!
+    self.processing_image = false
+    self.remote_image_url = new_image_url
+    self.save!
+  end  
 
 end
