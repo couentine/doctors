@@ -474,7 +474,7 @@ class User
       user.save if user.changed?
     else
       # Then create a new user
-      user = User.new
+      user = UserChangeDecorator.new(User.new)
       user.name = name
       user.email = email
       user.username_with_caps = User.generate_unique_username_from(name)
@@ -517,7 +517,7 @@ class User
         user.save if user.changed?
       else
         # Then create a new user
-        user = User.new
+        user = UserChangeDecorator.new(User.new)
         user.name = name
         user.email = email
         user.username_with_caps = User.generate_unique_username_from(name)

@@ -39,33 +39,30 @@ class RegistrationsController < Devise::RegistrationsController
 
   # POST /users
   def create
-    # Copied from Devise source code (commit #2024fca): http://bit.ly/1d8FqHm
+    # Adapted from Devise source code (commit #2024fca): http://bit.ly/1d8FqHm
     # This is copied so that we add custom image upload related logic.
 
-    build_resource(sign_up_params)
+    @user = UserChangeDecorator.new(User.new_with_session(devise_parameter_sanitizer.sanitize(:sign_up), session))
 
-    resource.save
-    yield resource if block_given?
-    if resource.persisted?
-      if resource.active_for_authentication?
+    if @user.save
+      if @user.active_for_authentication?
         set_flash_message :notice, :signed_up if is_flashing_format?
-        sign_up(resource_name, resource)
-        respond_with resource, location: after_sign_up_path_for(resource)
+        sign_in :user, @user
+        respond_with @user, location: after_sign_up_path_for(@user)
       else
-        set_flash_message :notice, :"signed_up_but_#{resource.inactive_message}" if is_flashing_format?
+        set_flash_message :notice, :"signed_up_but_#{@user.inactive_message}" if is_flashing_format?
         expire_data_after_sign_in!
-        respond_with resource, location: after_inactive_sign_up_path_for(resource)
+        respond_with @user, location: after_inactive_sign_up_path_for(@user)
       end
     else
       # Create the carrierwave direct uploader
-      @uploader = resource.direct_avatar
+      @uploader = @user.direct_avatar
       @uploader.success_action_redirect = image_key_url
       @manual_user_image_path = "#{ENV['s3_asset_url']}/#{ENV['s3_bucket_name']}/" \
-        + resource.direct_avatar.key
+        + @user.direct_avatar.key
 
-      clean_up_passwords resource
-      # set_minimum_password_length # >> Triggers an error, ignoring for now.
-      respond_with resource
+      @user.password = @user.password_confirmation = nil
+      respond_with @user
     end
   end
 

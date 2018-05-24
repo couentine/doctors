@@ -237,7 +237,7 @@ class GroupsController < ApplicationController
   # POST /groups
   # POST /groups.json
   def create
-    @group = Group.new(group_params)
+    @group = GroupChangeDecorator.new(Group.new(group_params))
     @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
     @pricing_group_options = PRICING_GROUP_OPTIONS

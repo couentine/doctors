@@ -193,7 +193,7 @@ class UsersController < ApplicationController
 
   # PUT /a/users/username
   def create
-    @user = User.new(user_params)
+    @user = UserChangeDecorator.new(User.new(user_params))
 
     if @user.save
       flash[:notice] = 'User was successfully created.'

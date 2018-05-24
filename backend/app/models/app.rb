@@ -101,7 +101,13 @@ class App
 
   # === INSTANCE METHODS === #
 
-  # None Yet
+  def standard?
+    return STANDARD_APPS.include? slug
+  end
+
+  def mandatory?
+    return MANDATORY_APPS.include? slug
+  end
 
   # === CLASS METHODS === #
 

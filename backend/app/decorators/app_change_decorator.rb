@@ -2,7 +2,10 @@
 # 
 # APP CHANGE DECORATOR
 # 
-# Use this decorator to create or update apps. It ensures that other related records are maintained.
+# This is default decorator to try whenever you need to modify an app. (Create, update or destroy.)
+# It detects any changes which will effect other records in the database.
+# If those changes are basic (and easy to detect without lots of queries and CPU cycles), then this decorator will do them right away. 
+# If those changes are more involved then this decorator will raise an error with instructions on which other decorator to use.
 # 
 # ## Example Usage ##
 # 
@@ -69,7 +72,7 @@ class AppChangeDecorator < SimpleDelegator
       decorated_user_membership = decorated_app.get_user_membership(owner)
       decorated_user_membership.type = 'admin'
       
-      if !decorated_user_membership.save
+      if !decorated_user_membership.save_as(current_user)
         self.errors.add(:base, 'Existing owner user membership could not be upgraded to admin')
         self.delete if was_new_record && !self.new_record?
         return false

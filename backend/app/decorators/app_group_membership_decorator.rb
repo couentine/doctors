@@ -22,13 +22,13 @@ class AppGroupMembershipDecorator < SimpleDelegator
 
   # Returns true if there is a membership record for the specified group.
   # 
-  # Accepted item types: group, group id/string
+  # Accepted item types: group, group change decorator, group id/string
   # Accepted membership_status values: :active, :pending, :disabled, :any
   def has_group_membership?(item, membership_status = :active)
     item = BSON::ObjectId.from_string(item) if item.class.to_s == String
 
     case item.class.to_s
-    when 'Group'
+    when 'Group', 'GroupChangeDecorator'
       this_group_id = item.id
     when 'BSON::ObjectId'
       this_group_id = item
@@ -70,6 +70,7 @@ class AppGroupMembershipDecorator < SimpleDelegator
   # 
   # If `creator_user` is an admin of `member_group` then `group_approval_status` is set to approved.
   # If `creator_user` is an admin of the app, then `app_approval_status` is set to approved.
+  # If this is a MANDATORY_APP then both approval stati are set to approved.
   # 
   # Returns decorated version of the app group membership record which has an overridden `save` method.
   def create_group_membership(member_group, creator_user)
@@ -85,20 +86,20 @@ class AppGroupMembershipDecorator < SimpleDelegator
     )
 
     decorated_app = AppUserMembershipDecorator.new(self)
-    if decorated_app.has_admin? creator_user
+    if mandatory? || decorated_app.has_admin?(creator_user)
       decorated_group_membership.app_approval_status = 'approved'
     end
-    if member_group.has_admin? creator_user
+    if mandatory? || member_group.has_admin?(creator_user)
       decorated_group_membership.group_approval_status = 'approved'
     end
     
-    decorated_group_membership.save
+    decorated_group_membership.save_as(creator_user)
 
     return decorated_group_membership
   end
 
   # Pass a newly created or updated group membership and this method updates the group relations which mirror the memberships.
-  def update_group_relations_with(group_membership)
+  def update_group_relations_with(group_membership, current_user)
     group = group_membership.group # shortcut
 
     if group_membership.active?
@@ -119,7 +120,7 @@ class AppGroupMembershipDecorator < SimpleDelegator
       self.disabled_groups.delete(group) if disabled_groups.include?(group)
     end
 
-    self.save if self.changed?
+    self.save_as(current_user) if self.changed?
     true
   end
 
@@ -135,16 +136,16 @@ class AppGroupMembershipDecorator < SimpleDelegator
       @parent_app = decorated_parent_app
     end
 
-    def save
-      return false if !super
+    def save_as(current_user)
+      return false if !self.save
 
-      @parent_app.update_group_relations_with self
+      @parent_app.update_group_relations_with self, current_user
     end
 
-    def save!
-      super
+    def save_as!(current_user)
+      self.save!
 
-      @parent_app.update_group_relations_with self
+      @parent_app.update_group_relations_with self, current_user
     end
 
   end

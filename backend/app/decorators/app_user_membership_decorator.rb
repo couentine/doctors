@@ -24,13 +24,13 @@ class AppUserMembershipDecorator < SimpleDelegator
   # In the case of users, this only checks for the membership, not the membership type.
   # Will always return false if there is no membership record, even if the user is the proxy_user or owner.
   # 
-  # Accepted item types: user, user id/string
+  # Accepted item types: user, user change decorator, user id/string
   # Accepted membership_status values: :active, :pending, :disabled, :admin, :member, :any
   def has_user_membership?(item, membership_status = :active)
     item = BSON::ObjectId.from_string(item) if item.class.to_s == String
 
     case item.class.to_s
-    when 'User'
+    when 'User', 'UserChangeDecorator'
       this_user_id = item.id
     when 'BSON::ObjectId'
       this_user_id = item
@@ -95,6 +95,7 @@ class AppUserMembershipDecorator < SimpleDelegator
   # 
   # If `creator_user` is same as `member_user` then `user_approval_status` is set to approved.
   # If `creator_user` is an admin of the app, then `app_approval_status` is set to approved.
+  # If this is a MANDATORY_APP then both approval stati are set to approved.
   # 
   # Returns decorated version of the app user membership record which has an overridden `save` method.
   def create_user_membership(member_user, creator_user, type: 'member')
@@ -111,20 +112,20 @@ class AppUserMembershipDecorator < SimpleDelegator
     )
 
     # Scenarios to keep in mind: Initial adding of the owner, admin-adding of a new member, membership request from non-admin
-    if has_admin? creator_user
+    if mandatory? || has_admin?(creator_user)
       decorated_user_membership.app_approval_status = 'approved'
     end
-    if creator_user == member_user
+    if mandatory? || (creator_user == member_user)
       decorated_user_membership.user_approval_status = 'approved'
     end
     
-    decorated_user_membership.save
+    decorated_user_membership.save_as(creator_user)
 
     return decorated_user_membership
   end
 
   # Pass a newly created or updated user membership and this method updates the user relations which mirror the memberships.
-  def update_user_relations_with(user_membership)
+  def update_user_relations_with(user_membership, current_user)
     user = user_membership.user # shortcut
 
     if user_membership.active?
@@ -157,7 +158,7 @@ class AppUserMembershipDecorator < SimpleDelegator
       self.disabled_users.delete(user) if disabled_users.include?(user)
     end
 
-    self.save if self.changed?
+    self.save_as(current_user) if self.changed?
     true
   end
 
@@ -173,16 +174,16 @@ class AppUserMembershipDecorator < SimpleDelegator
       @parent_app = decorated_parent_app
     end
 
-    def save
-      return false if !super
+    def save_as(current_user)
+      return false if !self.save
 
-      @parent_app.update_user_relations_with self
+      @parent_app.update_user_relations_with self, current_user
     end
 
-    def save!
-      super
+    def save_as!(current_user)
+      self.save!
 
-      @parent_app.update_user_relations_with self
+      @parent_app.update_user_relations_with self, current_user
     end
 
   end
