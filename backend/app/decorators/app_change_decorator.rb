@@ -57,22 +57,22 @@ class AppChangeDecorator < SimpleDelegator
 
     # Add the owner as an admin member if needed
     # Try to avoid hitting the database unless it's necessary
-    decorated_app = AppUserMembershipDecorator.new(self)
-    if !decorated_app.has_user_membership?(owner, :any)
+    app = AppUserMembershipDecorator.new(self)
+    if !app.has_user_membership?(owner, :any)
       # There's no membership record at all, create one
-      decorated_user_membership = decorated_app.create_user_membership(owner, owner, type: 'admin') rescue nil
+      user_membership = app.create_user_membership(owner, owner, type: 'admin') rescue nil
 
-      if !decorated_user_membership || !decorated_user_membership.errors.blank?
+      if !user_membership || !user_membership.errors.blank?
         self.errors.add(:base, 'Owner user membership could not be created')
         self.delete if was_new_record && !self.new_record?
         return false
       end
-    elsif !decorated_app.has_user_membership?(owner, :admin)
+    elsif !app.has_user_membership?(owner, :admin)
       # There *is* a membership record but it isn't an admin one, so upgrade it
-      decorated_user_membership = decorated_app.get_user_membership(owner)
-      decorated_user_membership.type = 'admin'
+      user_membership = app.get_user_membership(owner)
+      user_membership.type = 'admin'
       
-      if !decorated_user_membership.save_as(current_user)
+      if !user_membership.save_as(current_user)
         self.errors.add(:base, 'Existing owner user membership could not be upgraded to admin')
         self.delete if was_new_record && !self.new_record?
         return false

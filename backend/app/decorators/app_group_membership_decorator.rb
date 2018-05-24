@@ -76,7 +76,7 @@ class AppGroupMembershipDecorator < SimpleDelegator
   def create_group_membership(member_group, creator_user)
     raise ArgumentError.new('Membership record already exists for that group') if has_group_membership? member_group, :any
     
-    decorated_group_membership = GroupMembershipDecorator.new(
+    group_membership = GroupMembershipDecorator.new(
       AppGroupMembership.new(
         app: self, 
         group: member_group, 
@@ -85,17 +85,17 @@ class AppGroupMembershipDecorator < SimpleDelegator
       self
     )
 
-    decorated_app = AppUserMembershipDecorator.new(self)
-    if mandatory? || decorated_app.has_admin?(creator_user)
-      decorated_group_membership.app_approval_status = 'approved'
+    app = AppUserMembershipDecorator.new(self)
+    if mandatory? || app.has_admin?(creator_user)
+      group_membership.app_approval_status = 'approved'
     end
     if mandatory? || member_group.has_admin?(creator_user)
-      decorated_group_membership.group_approval_status = 'approved'
+      group_membership.group_approval_status = 'approved'
     end
     
-    decorated_group_membership.save_as(creator_user)
+    group_membership.save_as(creator_user)
 
-    return decorated_group_membership
+    return group_membership
   end
 
   # Pass a newly created or updated group membership and this method updates the group relations which mirror the memberships.
@@ -137,13 +137,13 @@ class AppGroupMembershipDecorator < SimpleDelegator
     end
 
     def save_as(current_user)
-      return false if !self.save
+      return false if !super(current_user)
 
       @parent_app.update_group_relations_with self, current_user
     end
 
     def save_as!(current_user)
-      self.save!
+      super(current_user)!
 
       @parent_app.update_group_relations_with self, current_user
     end

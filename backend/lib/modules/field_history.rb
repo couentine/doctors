@@ -10,6 +10,8 @@
 # 
 # 1. Add `include FieldHistory` to the top of the class.
 # 2. Add a metadata hash to the fields you want to track. It should contain a `:history_of` key equal to either `:values` or `:times`.
+#   NOTE: For now it seems best to only track the history of editable fields (not calculated fields which are set by callbacks or other
+#   automated processes). Otherwise it becomes more difficult to "restore" a previous revision.
 #   ```
 #   field :name,          type: String,               metadata: { history_of: :values }   # tracks update time, old value and new value
 #   field :fancy_pants,   type: SuperComplexObject,   metadata: { history_of: :times }    # tracks only the upate time

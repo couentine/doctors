@@ -9,6 +9,7 @@
 class AppUserMembership
   include Mongoid::Document
   include Mongoid::Timestamps
+  include FieldHistory
   
   # === CONSTANTS === #
 
@@ -24,10 +25,10 @@ class AppUserMembership
 
   # === EDITABLE FIELDS === #
 
-  field :type,                            type: String, default: 'member'
+  field :type,                            type: String, default: 'member',        metadata: { history_of: :values }
 
-  field :app_approval_status,             type: String, default: 'requested'
-  field :user_approval_status,            type: String, default: 'requested'
+  field :app_approval_status,             type: String, default: 'requested',     metadata: { history_of: :values }
+  field :user_approval_status,            type: String, default: 'requested',     metadata: { history_of: :values }
   
   # === CALCULATED FIELDS === #
   

@@ -55,7 +55,7 @@ class App
   field :email,                           type: String,                       metadata: { history_of: :values }
 
   mount_uploader :image,                  S3BadgeUploader
-  field :new_image_url,                   type: String,                     metadata: { history_of: :times }
+  field :new_image_url,                   type: String,                       metadata: { history_of: :times }
   field :processing_image,                type: Boolean
   
   # === VALIDATIONS === #

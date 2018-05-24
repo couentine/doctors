@@ -101,7 +101,7 @@ class AppUserMembershipDecorator < SimpleDelegator
   def create_user_membership(member_user, creator_user, type: 'member')
     raise ArgumentError.new('Membership record already exists for that user') if has_user_membership? member_user, :any
     
-    decorated_user_membership = UserMembershipDecorator.new(
+    user_membership = UserMembershipDecorator.new(
       AppUserMembership.new(
         app: self, 
         user: member_user, 
@@ -113,15 +113,15 @@ class AppUserMembershipDecorator < SimpleDelegator
 
     # Scenarios to keep in mind: Initial adding of the owner, admin-adding of a new member, membership request from non-admin
     if mandatory? || has_admin?(creator_user)
-      decorated_user_membership.app_approval_status = 'approved'
+      user_membership.app_approval_status = 'approved'
     end
     if mandatory? || (creator_user == member_user)
-      decorated_user_membership.user_approval_status = 'approved'
+      user_membership.user_approval_status = 'approved'
     end
     
-    decorated_user_membership.save_as(creator_user)
+    user_membership.save_as(creator_user)
 
-    return decorated_user_membership
+    return user_membership
   end
 
   # Pass a newly created or updated user membership and this method updates the user relations which mirror the memberships.
@@ -175,13 +175,13 @@ class AppUserMembershipDecorator < SimpleDelegator
     end
 
     def save_as(current_user)
-      return false if !self.save
+      return false if !super(current_user)
 
       @parent_app.update_user_relations_with self, current_user
     end
 
     def save_as!(current_user)
-      self.save!
+      super(current_user)
 
       @parent_app.update_user_relations_with self, current_user
     end
