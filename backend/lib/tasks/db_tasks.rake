@@ -1088,4 +1088,48 @@ namespace :db do
     puts "#===> Invalid Badge Count = #{invalid_badge_count}"
   end
 
+  # OK to run in production
+  task join_all_users_to_badgelist_app: :environment do
+    print "Verifying that all #{User.where(type: 'individual').count} individual users are joined to the 'badgelist' app"
+
+    app = AppUserMembershipDecorator.find('badgelist')
+
+    User.where(type: 'individual').each do |user|
+      if app.has_user_membership? user, :any
+        print "-"
+      else
+        begin
+          app.create_user_membership user, app.proxy_user
+          print "."
+        rescue => e
+          print "!#{user.username || user.id.to_s}"
+        end
+      end
+    end
+    
+    puts " >> Done."
+  end
+
+  # OK to run in production
+  task join_all_groups_to_badgelist_app: :environment do
+    print "Verifying that all #{Group.count} groups are joined to the 'badgelist' app"
+
+    app = AppGroupMembershipDecorator.find('badgelist')
+
+    Group.each do |group|
+      if app.has_group_membership? group, :any
+        print "-"
+      else
+        begin
+          app.create_group_membership group, app.proxy_user
+          print "."
+        rescue => e
+          print "!#{group.url_with_caps}"
+        end
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end

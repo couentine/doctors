@@ -21,6 +21,14 @@
 
 class AppChangeDecorator < SimpleDelegator
 
+  #=== CLASS METHODS ===#
+
+  def self.find(params)
+    return self.new(App.find(params))
+  end
+  
+  #=== INSTANCE METHODS ===#
+
   # In addition to the normal validations, you must set `owner` in order to use this method.
   def save_as(current_user)
     was_new_record = self.new_record?

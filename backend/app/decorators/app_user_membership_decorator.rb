@@ -18,6 +18,12 @@
 
 class AppUserMembershipDecorator < SimpleDelegator
 
+  #=== CLASS METHODS ===#
+
+  def self.find(params)
+    return self.new(App.find(params))
+  end
+
   #=== INSTANCE METHODS ===#
 
   # Returns true if there is a membership record for the specified group.

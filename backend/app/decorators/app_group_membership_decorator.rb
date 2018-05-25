@@ -18,6 +18,12 @@
 
 class AppGroupMembershipDecorator < SimpleDelegator
 
+  #=== CLASS METHODS ===#
+
+  def self.find(params)
+    return self.new(App.find(params))
+  end
+
   #=== INSTANCE METHODS ===#
 
   # Returns true if there is a membership record for the specified group.
@@ -143,7 +149,7 @@ class AppGroupMembershipDecorator < SimpleDelegator
     end
 
     def save_as!(current_user)
-      super(current_user)!
+      super(current_user)
 
       @parent_app.update_group_relations_with self, current_user
     end
