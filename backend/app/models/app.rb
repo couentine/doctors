@@ -17,8 +17,8 @@ class App
   
   # === CONSTANTS === #
 
-  STATUS_VALUES = ['active', 'inactive']
-  REVIEW_STATUS_VALUES = ['pending', 'approved', 'disabled']
+  STATUS_VALUES = ['pending', 'active', 'disabled']
+  REVIEW_STATUS_VALUES = ['requested', 'approved', 'denied']
   TYPE_VALUES = ['free', 'paid', 'private']
   MAX_NAME_LENGTH = 50
   MAX_SLUG_LENGTH = 30
@@ -40,10 +40,9 @@ class App
   has_and_belongs_to_many :pending_groups,inverse_of: :pending_apps,          class_name: 'Group'
   has_and_belongs_to_many :disabled_groups,inverse_of: :disabled_apps,        class_name: 'Group'
 
-  # === FIELDS === #
+  # === EDITABLE FIELDS === #
 
-  field :status,                          type: String, default: 'active',    metadata: { history_of: :values }
-  field :review_status,                   type: String, default: 'approved',  metadata: { history_of: :values }
+  field :review_status,                   type: String, default: 'requested', metadata: { history_of: :values }
   field :name,                            type: String,                       metadata: { history_of: :values }
   field :slug,                            type: String,                       metadata: { history_of: :values }
   field :type,                            type: String,                       metadata: { history_of: :values }
@@ -53,9 +52,18 @@ class App
   field :organization,                    type: String,                       metadata: { history_of: :values }
   field :website,                         type: String,                       metadata: { history_of: :values }
   field :email,                           type: String,                       metadata: { history_of: :values }
+  
+  field :new_image_url,                   type: String,                       metadata: { history_of: :times }
+
+  # === CALCULATED FIELDS === #
+
+  field :status,                          type: String, default: 'pending'
+
+  field :pending,                         type: Boolean, default: true
+  field :active,                          type: Boolean, default: false
+  field :disabled,                        type: Boolean, default: false
 
   mount_uploader :image,                  S3BadgeUploader
-  field :new_image_url,                   type: String,                       metadata: { history_of: :times }
   field :processing_image,                type: Boolean
   
   # === VALIDATIONS === #
@@ -140,6 +148,18 @@ class App
   def update_calculated_fields
     self.new_image_url = APP_CONFIG['default_app_image_url'] if new_image_url.blank?
     self.processing_image = new_record? || new_image_url_changed?
+
+    if review_status == 'denied'
+      self.status = 'disabled'
+    elsif review_status == 'approved'
+      self.status = 'active'
+    else
+      self.status = 'pending'
+    end
+
+    self.pending = status == 'pending'
+    self.active = status == 'active'
+    self.disabled = status == 'disabled'
   end
 
   def enforce_field_limitations

@@ -45,6 +45,8 @@ class StandardAppInitService
         decorated_app = AppChangeDecorator.new(
           App.new(
             owner:          @bl_admin_account,
+            review_status:  'approved',
+            
             name:           app_fields['name'],
             slug:           app_slug,
             type:           app_fields['type'],

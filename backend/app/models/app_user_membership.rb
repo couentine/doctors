@@ -27,12 +27,12 @@ class AppUserMembership
 
   field :type,                            type: String, default: 'member',        metadata: { history_of: :values }
 
-  field :app_approval_status,             type: String, default: 'requested',     metadata: { history_of: :values }
-  field :user_approval_status,            type: String, default: 'requested',     metadata: { history_of: :values }
+  field :app_approval_status,             type: String, default: 'approved',      metadata: { history_of: :values }
+  field :user_approval_status,            type: String, default: 'approved',      metadata: { history_of: :values }
   
   # === CALCULATED FIELDS === #
   
-  field :status,                          type: String, default: 'pending'
+  field :status,                          type: String, default: 'active'
 
   field :pending,                         type: Boolean, default: true
   field :active,                          type: Boolean, default: false

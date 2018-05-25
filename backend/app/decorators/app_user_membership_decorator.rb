@@ -93,10 +93,6 @@ class AppUserMembershipDecorator < SimpleDelegator
   # Creates a new membership for the specified `member_user` if one does not already exist.
   # Raises an ArgumentError if there is already a membership.
   # 
-  # If `creator_user` is same as `member_user` then `user_approval_status` is set to approved.
-  # If `creator_user` is an admin of the app, then `app_approval_status` is set to approved.
-  # If this is a MANDATORY_APP then both approval stati are set to approved.
-  # 
   # Returns decorated version of the app user membership record which has an overridden `save` method.
   def create_user_membership(member_user, creator_user, type: 'member')
     raise ArgumentError.new('Membership record already exists for that user') if has_user_membership? member_user, :any
@@ -110,14 +106,6 @@ class AppUserMembershipDecorator < SimpleDelegator
       ),
       self
     )
-
-    # Scenarios to keep in mind: Initial adding of the owner, admin-adding of a new member, membership request from non-admin
-    if mandatory? || has_admin?(creator_user)
-      user_membership.app_approval_status = 'approved'
-    end
-    if mandatory? || (creator_user == member_user)
-      user_membership.user_approval_status = 'approved'
-    end
     
     user_membership.save_as(creator_user)
 
