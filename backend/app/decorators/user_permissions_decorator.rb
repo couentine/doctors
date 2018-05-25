@@ -10,7 +10,14 @@ class UserPermissionsDecorator < SimpleDelegator
     if authentication_token.present?
       # This request comes from an api user so start with the permission sets from their token.
       unfiltered_permission_sets = authentication_token.permission_sets
-      availability_filter = (user.type == 'group') ? :api_group : :api_user
+      
+      if user.type == 'group'
+        availability_filter = :api_group
+      elsif user.type == 'app'
+        availability_filter = :api_app
+      else
+        availability_filter = :api_user
+      end
     elsif user.present?
       availability_filter = :web_user
     elsif access_method == :web

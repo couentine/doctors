@@ -76,10 +76,10 @@ class AuthenticationToken
     end
   end
 
-  # Forces the inclusion of the `all_users` permission sets. Removes any invalid permission sets.
+  # Forces the inclusion of the `mandatory` permission sets. Removes any invalid permission sets.
   def clean_permission_sets
     self.permission_sets = ApplicationPolicy::PERMISSION_SETS.select do |permission_set, settings| 
-      settings[:all_users]
+      settings[:mandatory]
     end.keys + permission_sets
     self.permission_sets.uniq!
 

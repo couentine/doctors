@@ -64,10 +64,13 @@ class AuthenticationTokenPolicy < ApplicationPolicy
     if @authentication_token_user
       if @authentication_token_user.type == 'individual'
         # Tokens for individual users can only be created by the users themselves
-        return true if @current_user.id == @authentication_token_user.id
+        return @current_user.id == @authentication_token_user.id
       elsif (@authentication_token_user.type == 'group') && @authentication_token_user.proxy_group
         # Tokens for group users can only be created by group admins
-        return true if @current_user.admin_of?(@authentication_token_user.proxy_group)
+        return @current_user.admin_of?(@authentication_token_user.proxy_group)
+      elsif (@authentication_token_user.type == 'app') && @authentication_token_user.proxy_app
+        # Tokens for app users can only be created by app admins
+        return AppUserMembershipDecorator.new(@authentication_token_user.proxy_app).has_admin? @current_user
       end
     else
       return false

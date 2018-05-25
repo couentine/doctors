@@ -4,47 +4,49 @@ class ApplicationPolicy
   #
   # These permission sets are used to filter access to specific actions throughout the API based on the permissions granted to the 
   # particular API token being used. Permissions are also granted based on whether the user is authenticated or not (user vs. visitor).
-  # Any permission sets marked with the `all_users` option are non-optional and automatically granted to all users / tokens.
+  # Any permission sets marked with the `mandatory` option are non-optional and automatically granted to all users / tokens.
 
   API_ACCESS_TYPES = ATYPES = {
     only_bl_admins: [:web_user], # same as web only (from a permission sets perspective)
     only_web_users: [:web_user],
     only_individual_users: [:web_user, :api_user],
     only_group_users: [:api_group], # note that there is no web_group since group tokens are api only
-    all_authenticated_users: [:web_user, :api_user, :api_group],
-    public_no_bots: [:web_user, :web_visitor, :api_user, :api_group],
-    public_and_bots: [:web_user, :web_visitor, :api_user, :api_group, :api_visitor],
+    only_app_users: [:api_app], # note that there is no web_app since app tokens are api only
+    all_users_no_apps: [:web_user, :api_user, :api_group],
+    all_users: [:web_user, :api_user, :api_group, :api_app],
+    public_no_bots: [:web_user, :web_visitor, :api_user, :api_group, :api_app],
+    public_and_bots: [:web_user, :web_visitor, :api_user, :api_group, :api_app, :api_visitor],
   }
   PERMISSION_SETS = {
-    'all:index'                     => { available_to: ATYPES[:public_no_bots], all_users: true },
-    'all:search'                    => { available_to: ATYPES[:public_no_bots], all_users: true },
+    'all:index'                     => { available_to: ATYPES[:public_no_bots], mandatory: true },
+    'all:search'                    => { available_to: ATYPES[:public_no_bots], mandatory: true },
     'authentication_tokens:read'    => { available_to: ATYPES[:only_web_users] },
     'authentication_tokens:write'   => { available_to: ATYPES[:only_web_users] },
     'current_user:read'             => { available_to: ATYPES[:only_individual_users] },
     'current_user:write'            => { available_to: ATYPES[:only_web_users] },
     'badges:read'                   => { available_to: ATYPES[:public_and_bots] },
-    'badges:write'                  => { available_to: ATYPES[:all_authenticated_users] },
+    'badges:write'                  => { available_to: ATYPES[:all_users_no_apps] },
     'domains:read'                  => { available_to: ATYPES[:public_no_bots] },
     'domains:write'                 => { available_to: ATYPES[:only_bl_admins] },
     'entries:read'                  => { available_to: ATYPES[:public_no_bots] },
-    'entries:write'                 => { available_to: ATYPES[:all_authenticated_users] },
+    'entries:write'                 => { available_to: ATYPES[:all_users_no_apps] },
     'group_tags:read'               => { available_to: ATYPES[:public_no_bots] },
-    'group_tags:write'              => { available_to: ATYPES[:all_authenticated_users] },
+    'group_tags:write'              => { available_to: ATYPES[:all_users_no_apps] },
     'groups:read'                   => { available_to: ATYPES[:public_and_bots] },
-    'groups:manage'                 => { available_to: ATYPES[:all_authenticated_users] },
-    'groups:write'                  => { available_to: ATYPES[:all_authenticated_users] },
-    'info_items:read'               => { available_to: ATYPES[:all_authenticated_users] },
-    'pollers:read'                  => { available_to: ATYPES[:all_authenticated_users] },
+    'groups:manage'                 => { available_to: ATYPES[:all_users_no_apps] },
+    'groups:write'                  => { available_to: ATYPES[:all_users_no_apps] },
+    'info_items:read'               => { available_to: ATYPES[:all_users] },
+    'pollers:read'                  => { available_to: ATYPES[:all_users] },
     'portfolios:read'               => { available_to: ATYPES[:public_and_bots] },
-    'portfolios:review'             => { available_to: ATYPES[:all_authenticated_users] },
-    'portfolios:write'              => { available_to: ATYPES[:all_authenticated_users] },
-    'reports:read'                  => { available_to: ATYPES[:all_authenticated_users] },
-    'reports:write'                 => { available_to: ATYPES[:all_authenticated_users] },
+    'portfolios:review'             => { available_to: ATYPES[:all_users_no_apps] },
+    'portfolios:write'              => { available_to: ATYPES[:all_users_no_apps] },
+    'reports:read'                  => { available_to: ATYPES[:all_users_no_apps] },
+    'reports:write'                 => { available_to: ATYPES[:all_users_no_apps] },
     'users:read'                    => { available_to: ATYPES[:public_and_bots] },
     'users:write'                   => { available_to: ATYPES[:only_web_users] },
-    'users:register'                => { available_to: ATYPES[:all_authenticated_users] },
+    'users:register'                => { available_to: ATYPES[:all_users] },
     'wikis:read'                    => { available_to: ATYPES[:public_no_bots] },
-    'wikis:write'                   => { available_to: ATYPES[:all_authenticated_users] },
+    'wikis:write'                   => { available_to: ATYPES[:all_users_no_apps] },
   }
 
   #=== PUNDIT POLICY DEFINITION ===#
