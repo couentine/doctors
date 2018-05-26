@@ -60,10 +60,6 @@ BadgeList::Application.routes.draw do
       end
       resources :portfolios, only: [:show]
       resources :authentication_tokens, only: [:index, :create, :show, :destroy]
-
-      match 'swagger.json' => 'docs#external', via: :get
-      match 'openapi.json' => 'docs#external', via: :get
-      match 'internal.json' => 'docs#internal', via: :get
     end
   end
 
@@ -72,12 +68,11 @@ BadgeList::Application.routes.draw do
 
     namespace :api do
       namespace :v1 do
-        match 'user' => 'user_api_docs#show_html', via: :get
-        match 'group' => 'group_api_docs#show_html', via: :get
+        root to: 'external_api_docs#show_html'
         match 'internal' => 'internal_api_docs#show_html', via: :get
 
-        match 'user_api.json' => 'user_api_docs#show_json', via: :get, as: :user_json
-        match 'group_api.json' => 'group_api_docs#show_json', via: :get, as: :group_json
+        match 'swagger.json' => 'external_api_docs#show_json', via: :get, as: :external_json
+        match 'openapi.json' => 'external_api_docs#show_json', via: :get
         match 'internal_api.json' => 'internal_api_docs#show_json', via: :get, as: :internal_json
       end
     end

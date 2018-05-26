@@ -39,7 +39,7 @@ class Api::V1::Paths::BadgePaths
       extend Api::V1::Helpers::OperationFormat::PaginatedList
 
       # Basic Info
-      define_basic_info :badge, 'Get list of badges current user has joined'
+      define_basic_info :badge, 'Get list of badges current user has joined', nil, 'current_user:read'
       
       # Parameters
       parameter do
@@ -69,8 +69,8 @@ class Api::V1::Paths::BadgePaths
       extend Api::V1::Helpers::OperationFormat::BatchOperation
 
       # Basic Info
-      define_basic_info :endorsement, :create, 'Batch award a badge', :badge
-      key :description, "Batch operation for creating up to #{APP_CONFIG['max_import_list_size']} endorsements with a single request. " \
+      define_basic_info :endorsement, :create, 'Batch award a badge', :badge, ['portfolios:review'],
+        "Batch operation for creating up to #{APP_CONFIG['max_import_list_size']} endorsements with a single request. " \
         "single request. Creating an endorsement automatically awards the badge.\n\nIn order to use this operation you must specify the " \
         "badge awardees by email address. They will automatically be added to the group if they are not yet members. They will " \
         "automatically be invited to create Badge List accounts if they are not yet users.\n" \
@@ -163,8 +163,8 @@ class Api::V1::Paths::BadgePaths
       extend Api::V1::Helpers::OperationFormat::RecordItem
 
       # Basic Info
-      define_basic_info :portfolio, :get, 'Get portfolio by badge id and user id/username/email', :badge
-      key :description, 'This operation allows you to quickly check if a known person holds a specific badge. ' \
+      define_basic_info :portfolio, :get, 'Get portfolio by badge id and user id/username/email', :badge,
+        'This operation allows you to quickly check if a known person holds a specific badge. ' \
         'You must provide the badge id along with a user\'s username, id or email address. ' \
         'If the specified user does not exist in the system or if there is no badge portfolio for them yet you will get a 404 response.'
 

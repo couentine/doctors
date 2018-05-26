@@ -1,10 +1,11 @@
 module Api::V1::Helpers::OperationFormat::BatchOperation
 
   # - verb = one of >> [:get, :create, :update, :delete]
-  def define_basic_info(model, verb, summary = nil, parent_model = nil)
+  def define_basic_info(model, verb, summary = nil, parent_model = nil, permissions_needed = nil, description = nil)
     camelized_model = model.to_s.camelize
     uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
     spaced_model = model.to_s.gsub('_', ' ')
+    permissions = permissions_needed.map{ |permission_name| "- `#{permission_name}`" } if permissions_needed.present?
 
     if parent_model.present?
       camelized_parent_model = parent_model.to_s.camelize
@@ -18,6 +19,13 @@ module Api::V1::Helpers::OperationFormat::BatchOperation
     end
     key :summary, summary
     key :tags, ['batchOperationFormat', "#{uncapitalized_camelized_model}Model"]
+
+    key :description, "#{description}\n" \
+      "\n" \
+      "-----\n" \
+      "**Required Permissions:**\n" \
+      + permissions.join("\n") + "\n" \
+      "-----"
   end
 
   # Optionally include a hash of meta_properties with keys equal to the meta properties and values equal 

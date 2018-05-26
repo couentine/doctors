@@ -2,7 +2,7 @@ module Api::V1::Helpers::RootHelpers
 
   #=== BASE API INFO / MARKDOWN DESCRIPTION ===#
 
-  def define_info(api_noun: :user, title: nil, description: nil, logo_url: 'https://s3.amazonaws.com/badgelist/images/badge-list-icon.png', 
+  def define_info(title: nil, description: nil, logo_url: 'https://s3.amazonaws.com/badgelist/images/badge-list-icon.png', 
       background_color: COLORS['orange'][600])
     info do
       key :version, '1.0'
@@ -11,72 +11,7 @@ module Api::V1::Helpers::RootHelpers
         url: logo_url,
         backgroundColor: background_color,
       }
-      if description.present?
-        key :description, description
-      else
-        key :description, \
-          "This is the documentation for the **Badge List #{api_noun.to_s.capitalize} API**. " \
-          "Badge List has two different APIs which operate " \
-          "at the same base URL but which include different operations. Which API you are accessing is controlled by the type of " \
-          "authentication token provided in the request.\n " \
-          "- **The User API** is accessed whenever you provide a User API Token. User API Tokens are always " \
-          "  linked to a single Badge List user account. The User API includes access to most of the group-related operations as well as " \
-          "  access to the user-related operations. All operations are scoped to the access privileges of the linked user. " \
-          "  [User API Documentation lives here](user).\n" \
-          "- **The Group API** is accessed whenever you provide a Group API Token. Group API Tokens are always " \
-          "  linked to a single Badge List group. The Group API only includes access to group-related operations. " \
-          "  All operations are scoped with administrative permissions within the linked group. " \
-          "  [Group API Documentation lives here](group).\n" \
-          "\n" \
-          "All of Badge List's APIs are free to use, but certain operations are restricted based on the context of the request. " \
-          "Some operations, for instance, will only work within a group with a particular feature or subscription plan." \
-          "\n" \
-          "## Introduction ##\n" \
-          "The Badge List API is organized around REST and follows v1.0 of the [JSON API specification](http://jsonapi.org/format/). " \
-          "The API is documented using v2 of the " \
-          "[OpenAPI/Swagger specification](https://swagger.io/docs/specification/2-0/basic-structure/).\n\n" \
-          "If you have any questions you can contact us at team@badgelist.com.\n" \
-          "\n"\
-          "## Release Notes (May 2018) ##\n" \
-          "The Badge List API is currently being actively expanded. No breaking changes will be made to v1, but we are adding new " \
-          "features and operations frequently. Work will continue until we achieve full parity with the web UI.\n" \
-          "\n"\
-          "## Data Model ##\n" \
-          "Here is an overview of the Badge List data model. " \
-          "([Downloadable PDF available here](https://s3.amazonaws.com/badgelist/files/bl-api-data-model-v1.pdf).) " \
-          "The API is generally organized as a series of RESTful operations with these core objects, " \
-          "with a few extra verbs included here and there.\n\n" \
-          "![Badge List Data Model](https://s3.amazonaws.com/badgelist/files/bl-api-data-model-v1.png)\n\n"\
-          \
-          "## API Structure ##\n" \
-          "The Badge List OpenAPI specification utilizes " \
-          "[swagger tags](https://swagger.io/docs/specification/2-0/grouping-operations-with-tags/) " \
-          "as a principal organizational tool. This frees consumers of the API to expect standardized " \
-          "behavior across the various endpoints. This also makes the API easier to navigate when using " \
-          "[third party swager clients](https://swagger.io/open-source-integrations/).\n\n" \
-          "Every operation has two tags:\n" \
-          "- **A model tag** describes the principal data model entity being transmitted. For example, all operations tagged with " \
-          "  `badgeModel` will transmit badge records, will contain the same attributes in their data items and will respond to the " \
-          "  same set of filters and sort fields when applicable.\n" \
-          "- **An operation format tag** describes the operational structure of the endpoint. For example, all operations tagged with " \
-          "  `paginatedListFormat` will respond with sized lists of items, will accept the same pagination- and list-related parameters " \
-          "  and will respond with identical metadata.\n" \
-          "\n"\
-          "## API Access ## \n" \
-          "In order to use the API you will need an authentication token. There are two basic types of tokens:\n"\
-          "- **User API Tokens** are linked to a single user account. They are authorized to take actions based on the permissions "\
-          "  of the linked user.\n"\
-          "- **Group API Tokens** are linked to a single group. They are authorized with administrative permissions within the group and " \
-          "  are generally allowed to do whatever a group administrator user would be able to do. \n" \
-          "\n" \
-          "**Note:** To request an API authentication token please email team@badgelist.com.\n" \
-          "\n" \
-          "## Usage Terms ## \n" \
-          "\n" \
-          "All usage of Badge List APIs is subject to our [Terms of Service](https://www.badgelist.com/terms-of-service) and " \
-          "[Privacy Policy](https://www.badgelist.com/privacy-policy). Usage of the API in any form constitutes acceptance of these " \
-          "policies. \n"
-      end
+      key :description, description
       key :termsOfService, 'https://www.badgelist.com/terms-of-service'
       contact do
         key :name, 'Badge List Support Team'

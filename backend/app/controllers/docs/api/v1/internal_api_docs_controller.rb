@@ -33,7 +33,6 @@ class Docs::Api::V1::InternalApiDocsController < ActionController::Base
     #=== BASE API INFO / MARKDOWN DESCRIPTION ===#
 
     define_info(
-      api_noun: :internal,
       title: 'Badge List Internal API',
       logo_url: 'https://s3.amazonaws.com/badgelist/images/badge-list-icon-blue-grey.png',
       background_color: COLORS['blue_grey'][600],
@@ -42,7 +41,7 @@ class Docs::Api::V1::InternalApiDocsController < ActionController::Base
         "The Badge List Internal API is used by the Badge List website itself. It is only able to be accessed from pages rendered by " \
         "the Badge List server and via requests authenticated via the normal user login flow.\n" \
         "\n" \
-        "For the publicly-available APIs refer to the [User API Docs](user) or the [Group API Docs](group)." \
+        "For the publicly-available API refer to the [Badge List API Docs](../v1)." \
         "\n" \
         "## Usage Restrictions ##\n" \
         "Permission to access to the Badge List Internal API by developers outside of Knowledgestreem must be granted in writing " \

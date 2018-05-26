@@ -40,7 +40,7 @@ class Api::V1::Paths::GroupPaths
       extend Api::V1::Helpers::OperationFormat::PaginatedList
 
       # Basic Info
-      define_basic_info :group, 'Get list of groups current user belongs to'
+      define_basic_info :group, 'Get list of groups current user belongs to', nil, 'current_user:read'
       
       # Parameters
       parameter do

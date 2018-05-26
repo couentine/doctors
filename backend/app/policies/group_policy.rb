@@ -16,7 +16,10 @@ class GroupPolicy < ApplicationPolicy
 
   # Only available to authenticated users
   def index?
-    return @current_user.present? && @current_user.has?('all:index') && @current_user.has?('groups:read')
+    return @current_user.present? \
+      && @current_user.has?('all:index') \
+      && @current_user.has?('groups:read') \
+      && @current_user.has?('current_user:read')
   end
 
   def show?

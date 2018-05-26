@@ -3,10 +3,13 @@ module Api::V1::Helpers::OperationFormat::RecordItem
   # EXAMPLE USAGE:
   # - model = :authentication_token
   # - verb = one of >> [:get, :create, :update, :delete]
-  def define_basic_info(model, verb, summary = nil, parent_model = nil)
+  def define_basic_info(model, verb, summary = nil, parent_model = nil, description = nil)
     camelized_model = model.to_s.camelize
     uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
     spaced_model = model.to_s.gsub('_', ' ')
+    permission_type = (verb == :get) ? 'read' : 'write'
+    permissions = ["- `#{model.to_s.pluralize}:#{permission_type}`"]
+    permissions << "- `#{parent_model.to_s.pluralize}:read`" if parent_model.present?
 
     if parent_model.present?
       camelized_parent_model = parent_model.to_s.camelize
@@ -35,6 +38,11 @@ module Api::V1::Helpers::OperationFormat::RecordItem
     end
       
     key :tags, ['recordItemFormat', "#{uncapitalized_camelized_model}Model"]
+
+    key :description, (description.present? ? "#{description}\n\n" : '') + "-----\n" \
+      "**Required Permissions:**\n" \
+      + permissions.join("\n") + "\n" \
+      "-----"
   end
 
   # EXAMPLE USAGE:

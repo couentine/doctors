@@ -3,9 +3,12 @@ module Api::V1::Helpers::OperationFormat::PaginatedList
   # EXAMPLE USAGE:
   # - model = :badge
   # - summary = 'Gets a list of all badges the current user has joined'
-  def define_basic_info(model, summary, parent_model = nil)
+  def define_basic_info(model, summary, parent_model = nil, extra_permission = nil)
     camelized_model = model.to_s.camelize
     uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
+    permissions = ["- `all:index`", "- `#{model.to_s.pluralize}:read`"]
+    permissions << "- `#{parent_model.to_s.pluralize}:read`" if parent_model.present?
+    permissions << "- `#{extra_permission}`" if extra_permission.present?
 
     if parent_model.present?
       camelized_parent_model = parent_model.to_s.camelize
@@ -20,6 +23,11 @@ module Api::V1::Helpers::OperationFormat::PaginatedList
       'paginatedListFormat',
       "#{uncapitalized_camelized_model}Model"
     ]
+
+    key :description, "-----\n" \
+      "**Required Permissions:**\n" \
+      + permissions.join("\n") + "\n" \
+      "-----"
   end
 
   # EXAMPLE USAGE:
