@@ -19,12 +19,18 @@ class App
 
   STATUS_VALUES = ['pending', 'active', 'disabled']
   REVIEW_STATUS_VALUES = ['requested', 'approved', 'denied']
-  TYPE_VALUES = ['free', 'paid', 'private']
+  JOINABILITY_VALUES = ['open', 'by_request', 'closed']
   MAX_NAME_LENGTH = 50
   MAX_SLUG_LENGTH = 30
+  MAX_SUMMARY_LENGTH = 140
+  MAX_DESCRIPTION_LENGTH = 3000
+  MAX_ORGANIZATION_LENGTH = 300
+  MAX_WEBSITE_LENGTH = 200
+  MAX_EMAIL_LENGTH = 100
 
   # === RELATIONSHIPS === #
 
+  belongs_to :creator,                    inverse_of: :created_apps,          class_name: 'User'
   belongs_to :owner,                      inverse_of: :owned_apps,            class_name: 'User'
   has_one :proxy_user,                    inverse_of: :proxy_app,             class_name: 'User',   dependent: :destroy
   
@@ -45,7 +51,8 @@ class App
   field :review_status,                   type: String, default: 'requested', metadata: { history_of: :values }
   field :name,                            type: String,                       metadata: { history_of: :values }
   field :slug,                            type: String,                       metadata: { history_of: :values }
-  field :type,                            type: String,                       metadata: { history_of: :values }
+  field :user_joinability,                type: String, default: 'open',      metadata: { history_of: :values }
+  field :group_joinability,               type: String, default: 'open',      metadata: { history_of: :values }
 
   field :summary,                         type: String,                       metadata: { history_of: :values }
   field :description,                     type: String,                       metadata: { history_of: :values }
@@ -63,6 +70,9 @@ class App
   field :active,                          type: Boolean, default: false
   field :disabled,                        type: Boolean, default: false
 
+  field :user_count,                      type: Integer, default: 0
+  field :group_count,                     type: Integer, default: 0
+
   mount_uploader :image,                  S3BadgeUploader
   field :processing_image,                type: Boolean
   
@@ -78,10 +88,15 @@ class App
       in: REVIEW_STATUS_VALUES,
       message: "%{value} is not a valid review status"
     }
-  validates :type,
+  validates :user_joinability,
     inclusion: {
-      in: TYPE_VALUES,
-      message: "%{value} is not a valid type"
+      in: JOINABILITY_VALUES,
+      message: "%{value} is not a valid joinability value"
+    }
+  validates :group_joinability,
+    inclusion: {
+      in: JOINABILITY_VALUES,
+      message: "%{value} is not a valid joinability value"
     }
 
   validates :name,
@@ -95,10 +110,15 @@ class App
       with: /\A[a-z0-9-]+\Z/, 
       message: "must be dash case (only lowercase letters, numbers and dashes)"
     }
+  validates :summary,                     length: { maximum: MAX_SUMMARY_LENGTH }
+  validates :description,                 length: { maximum: MAX_DESCRIPTION_LENGTH }
+  validates :organization,                length: { maximum: MAX_ORGANIZATION_LENGTH }
+  validates :website,                     length: { maximum: MAX_WEBSITE_LENGTH }
+  validates :email,                       length: { maximum: MAX_EMAIL_LENGTH }
 
   # === CALLBACKS === #
 
-  after_validation :update_calculated_fields
+  before_validation :update_calculated_fields
   before_save :enforce_field_limitations
 
   # === ASYNC CALLBACKS === #
@@ -115,6 +135,10 @@ class App
 
   def mandatory?
     return MANDATORY_APPS.include? slug
+  end
+
+  def full_url
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}/apps/#{slug}"
   end
 
   # === CLASS METHODS === #
@@ -146,20 +170,27 @@ class App
   # === SYNCHRONOUS CALLBACK METHODS === #
 
   def update_calculated_fields
-    self.new_image_url = APP_CONFIG['default_app_image_url'] if new_image_url.blank?
-    self.processing_image = new_record? || new_image_url_changed?
+    if !destroyed?
+      self.new_image_url = APP_CONFIG['default_app_image_url'] if new_image_url.blank?
+      self.processing_image = new_record? || new_image_url_changed?
 
-    if review_status == 'denied'
-      self.status = 'disabled'
-    elsif review_status == 'approved'
-      self.status = 'active'
-    else
-      self.status = 'pending'
+      if review_status == 'denied'
+        self.status = 'disabled'
+      elsif review_status == 'approved'
+        self.status = 'active'
+      else
+        self.status = 'pending'
+      end
+
+      self.pending = status == 'pending'
+      self.active = status == 'active'
+      self.disabled = status == 'disabled'
+
+      self.user_count = user_ids.count
+      self.group_count = group_ids.count
     end
 
-    self.pending = status == 'pending'
-    self.active = status == 'active'
-    self.disabled = status == 'disabled'
+    true
   end
 
   def enforce_field_limitations

@@ -1,23 +1,21 @@
 class PollerPolicy < ApplicationPolicy
 
-  def initialize(current_user, poller_or_pollers)
-    # NOTE: All pollers are public, there is no index
-
-    true
-  end
-
   #=== ACTION POLICIES ===#
 
-  def show?
-    true
-  end
+  standard_actions :app,
+    show_roles: :everyone,
+    update_roles: [:bl_admin],
+    destroy_roles: [:bl_admin]
 
-  #=== SCOPES ===#
+  #=== FIELD POLICIES ===#
 
-  class Scope < ApplicationPolicy::Scope
-    def resolve
-      nil
-    end
-  end
+  READONLY_FIELD = { visible_to: :everyone, editable_by: :nobody }
+
+  field :status,              READONLY_FIELD
+  field :progress,            READONLY_FIELD
+  field :completed,           READONLY_FIELD
+  field :waiting_message,     READONLY_FIELD
+  field :message,             READONLY_FIELD
+  field :results,             READONLY_FIELD
 
 end

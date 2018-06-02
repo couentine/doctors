@@ -18,14 +18,16 @@ class Api::V1::BaseController < ApplicationController
   before_filter :process_authentication
   after_action :verify_authorized # Enforces the use of Pundit policies by throwing an error if they weren't used on an action
   
-  #=== OTHER SETTINGS ===#
+  #=== RENDERING EXCEPTIONS ===#
 
-  rescue_from StandardError, with: :render_bad_request # comment this out in dev to see exceptions rendered in the response
-  rescue_from ArgumentError, with: :render_bad_request
   rescue_from ActionController::RoutingError, with: :render_not_found
-  rescue_from ActionController::ParameterMissing, with: :render_bad_request
   rescue_from Mongoid::Errors::DocumentNotFound, with: :render_not_found
+  rescue_from ActionController::UnknownController, with: :render_not_found
+  
+  rescue_from ActionController::ParameterMissing, with: :render_bad_request
+
   rescue_from Pundit::NotAuthorizedError, with: :render_not_authorized
+  
   rescue_from Api::V1::DeserializationError, with: :render_deserialization_error
   
   #=== CONSTANTS ===#
@@ -37,14 +39,20 @@ class Api::V1::BaseController < ApplicationController
 
   def jsonapi_class 
     { 
+      App: Api::V1::SerializableApp,
+      AppChangeDecorator: Api::V1::SerializableApp,
+      AppGroupMembership: Api::V1::SerializableAppGroupMembership,
+      :'AppGroupMembershipDecorator::GroupMembershipDecorator' => Api::V1::SerializableAppGroupMembership,
+      AppUserMembership: Api::V1::SerializableAppUserMembership,
+      :'AppUserMembershipDecorator::UserMembershipDecorator' => Api::V1::SerializableAppUserMembership,
       AuthenticationToken: Api::V1::SerializableAuthenticationToken,
-      Group: Api::V1::SerializableGroup,
       Badge: Api::V1::SerializableBadge,
+      BatchResult: Api::V1::SerializableBatchResult,
+      Group: Api::V1::SerializableGroup,
       Log: Api::V1::SerializablePortfolio,
       Poller: Api::V1::SerializablePoller,
-      User: Api::V1::SerializableUser,
       String: Api::V1::SerializableString,
-      BatchResult: Api::V1::SerializableBatchResult
+      User: Api::V1::SerializableUser,
     }
   end
 
@@ -63,7 +71,7 @@ class Api::V1::BaseController < ApplicationController
     return render_single_error(
       status: 404, 
       title: 'Not found', 
-      detail: 'The specified record could not be found'
+      detail: 'The specified path could not be found'
     )
   end
 
@@ -109,7 +117,7 @@ class Api::V1::BaseController < ApplicationController
           detail: detail
         }
       ],
-      meta: build_root_meta_hash(permission_sets: @current_user.available_permission_sets),
+      meta: build_root_meta_hash(permissions: @current_user.api_permissions),
       jsonapi: {
         version: '1.0'
       }
@@ -129,11 +137,11 @@ class Api::V1::BaseController < ApplicationController
     render json: {
       errors: active_model_errors.to_hash.map do |field_key, error_messages|
         {
-          title: "Invalid #{field_key}",
+          title: ((field_key == :base) ? "Error processing this record" : "Invalid #{field_key}"),
           detail: error_messages.join('. '),
           source: {
-            pointer: "/data/attributes/#{field_key}"
-          }
+            pointer: ((field_key == :base) ? "/data" : "/data/attributes/#{field_key}"),
+          },
         }
       end,
       meta: build_root_meta_hash,
@@ -251,22 +259,20 @@ class Api::V1::BaseController < ApplicationController
   # Authenticates the user if possible and sets controller variables: 
   # - @current_user = The current user (only for session authenticated folks)
   # - @current_authentication_token = The auth token (only valid for token authenticated folks)
-  # - @authentication_method = :session, :token or :null
+  # - @authentication_method = :session, :token or :none
   # - @access_method = :web or :api
   def process_authentication
-    if @current_user.present?
-      @current_authentication_token = nil
-      @authentication_method = :session
-      @access_method = :web
-    else
+    token = request.headers['token'] || params[:token]
+    @current_authentication_token = nil
+
+    if token.present?
       user = nil
       matched_authentication_token = nil
-      token = params[:token]
+      @access_method = :api
       @authentication_method = :none
+      @current_user = current_user = nil
 
       if token && (token.length == (AuthenticationToken::MONGO_ID_LENGTH + AuthenticationToken::BODY_LENGTH))
-        @access_method = :api
-
         provided_user_id = token.first(AuthenticationToken::MONGO_ID_LENGTH)
         provided_token_body = token.last(AuthenticationToken::BODY_LENGTH)
         
@@ -282,18 +288,23 @@ class Api::V1::BaseController < ApplicationController
         end
 
         if matched_authentication_token
-          sign_in user, store: false
-          matched_authentication_token.track_request!(request)
+          @current_user = current_user = user
+          @current_user.log_activity
           
-          @current_user = current_user
+          matched_authentication_token.track_request!(request)
           @current_authentication_token = matched_authentication_token
           @authentication_method = :token
         end
-      elsif request.session.present?
-        @access_method = :web
-      else
-        @access_method = :api
       end
+    elsif @current_user.present?
+      @access_method = :web
+      @authentication_method = :session
+    elsif request.session.present?
+      @access_method = :web
+      @authentication_method = :none
+    else
+      @access_method = :api
+      @authentication_method = :none
     end
 
     # Decorate the current user with permissions (required for Pundit policies to function)

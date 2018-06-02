@@ -3,7 +3,7 @@ class HomeController < ApplicationController
   # GET /
   # This renders either the polymer layout if the user is logged in OR the public website
   def root
-    if current_user
+    if current_user.present?
       redirect_to '/home'
     else
       respond_to do |format|
@@ -31,7 +31,7 @@ class HomeController < ApplicationController
 
   # GET /home
   def root_internal
-    if current_user
+    if current_user.present?
       render_polymer_app('Home - Badge List')
     else
       redirect_to new_user_session_path
@@ -41,7 +41,7 @@ class HomeController < ApplicationController
   # GET /w
   # This allows internal users to access the external homepage.
   def root_external
-    if current_user
+    if current_user.present?
       render_polymer_website('Badge List - Digital credentials for educators, companies and professional development orgs', {
         'include_metadata' => true,
         'metadata_title' => 'Badge List',
@@ -62,7 +62,7 @@ class HomeController < ApplicationController
   # GET /pricing
   def pricing
     # Update analytics if logged in
-    if current_user
+    if current_user.present?
       IntercomEventWorker.perform_async({
         'event_name' => 'viewed-pricing',
         'email' => current_user.email,

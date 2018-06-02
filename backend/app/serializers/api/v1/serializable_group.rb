@@ -1,33 +1,43 @@
 class Api::V1::SerializableGroup < Api::V1::SerializableDocument
-  extend JSONAPI::Serializable::Resource::ConditionalFields
+  type :group
 
-  type 'group'
+  #=== FIELDS ===#
 
-  attribute :slug do @object.url_with_caps end
+  field :slug,                          from: :url_with_caps
 
-  attribute :name
-  attribute :description
-  attribute :location
-  attribute :type
-  attribute :color
+  field :name
+  field :summary,                       from: :description
+  field :location
+  field :type
+  field :color
 
-  attribute :image_url do @object.avatar_image_url end
-  attribute :image_medium_url do @object.avatar_image_medium_url end
-  attribute :image_small_url do @object.avatar_image_small_url end
+  field :image_url,                     from: :avatar_image_url
+  field :image_medium_url,              from: :avatar_image_medium_url
+  field :image_small_url,               from: :avatar_image_small_url
   
-  attribute :member_count
-  attribute :admin_count
-  attribute :total_user_count
-  attribute :badge_count
+  field :member_count
+  field :admin_count
+  field :total_user_count
+  field :badge_count
 
-  link :self do "/api/v1/groups/#{@object.id.to_s}" end
-  link :self_web do @object.full_url end
+  field :member_visibility
+  field :admin_visibility
+  field :badge_copyability
 
-  has_many :badges do
-    link :self do "/api/v1/groups/#{@object.id.to_s}/badges" end
-  end
-  has_many :users do
-    link :self do "/api/v1/groups/#{@object.id.to_s}/users" end
-  end
+  field :owner_id
+  field :creator_id
 
+  #=== LINKS ===#
+  
+  self_links
+  
+  #=== RELATIONSHIPS ===#
+  
+  relationships \
+    :badges,
+    :users,
+    :apps,
+    :app_group_memberships,
+    [:owner, :user, :owner_id], 
+    [:creator, :user, :creator_id]
 end

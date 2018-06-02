@@ -21,28 +21,31 @@ class Api::V1::GroupsController < Api::V1::BaseController
 
   #=== ACTIONS ===#
 
-  # This can be accessed via the groups index (only available to logged in users) or via the user groups index (available to anyone who
-  # can see that user).
+  # This can be accessed via the groups index, the user groups index and the app groups index.
   def index
-    # Determine mode we are in (user group index or my group index), then authorize the appropriate policy
-    if params[:user_id].present? || params[:email].present?
-      @user = User.find(params[:user_id] || params[:email])
-      if @user
-        authorize @user, :groups_index? # authorizes the groups index on this specific user
-      else
-        skip_authorization
+    skip_authorization
 
-        return render_not_found
-      end
+    if params[:app_id].present?
+      @app = App.find(params[:app_id]) rescue nil
+      return render_not_found if @app.blank?
+      return render_not_authorized if !Pundit.policy(@current_user, @app).can_see_groups?
+
+      group_criteria = @app.groups
     else
-      @user = @current_user
-      authorize :group # authorizes the "my groups" index for the current user
+      if params[:user_id].present? || params[:email].present?
+        @user = User.find(params[:user_id] || params[:email])
+        return render_not_found if @user.blank?
+        return render_not_authorized if !Pundit.policy(@current_user, @user).can_see_groups?
+      else
+        @user = @current_user
+        return render_not_authorized if !Pundit.policy(@current_user, :group).index?
+      end
+
+      # Build the core criteria based on the filter (filters are only for user mode)
+      load_filter
+      group_criteria = GroupPolicy::UserScope.new(@current_user, @filter[:status], @user).resolve
     end
 
-    # Build the core criteria based on the filter
-    load_filter
-    group_criteria = GroupPolicy::UserScope.new(@current_user, @filter[:status], @user).resolve
-    
     # Generate @sort_string from the sort parameter and load the pagination variables
     build_sort_string
     set_initial_pagination_variables
@@ -52,22 +55,18 @@ class Api::V1::GroupsController < Api::V1::BaseController
     set_calculated_pagination_variables(@groups)
 
     @policy = Pundit.policy(@current_user, @groups)
-    render_json_api @groups, expose: { meta_index: @policy.meta_index }
+    render_json_api @groups, expose: { policy_index: @policy.policy_index }
   end
 
   def show
-    @group = Group.find(params[:id]) rescue nil
+    skip_authorization
+    @group = Group.find(params[:id])
+    return render_not_found if @group.blank?
 
-    if @group
-      authorize @group
-
-      @policy = Pundit.policy(@current_user, @group)
-      render_json_api @group, expose: { meta: @policy.meta }
-    else
-      skip_authorization
-
-      render_not_found
-    end
+    @policy = Pundit.policy(@current_user, @group)
+    return render_not_authorized if !@policy.show?
+    
+    render_json_api @group, expose: { policy: @policy }
   end
 
 end

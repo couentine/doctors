@@ -3,6 +3,8 @@ class Api::V1::Schemas::PollerSchemas
 
   #=== POLLER OUTPUT ATTRIBUTES ===#
 
+  # NOTE: This schema is a one-off for now. It has a minimal serializer.
+
   swagger_schema :PollerOutputAttributes do
     extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
 

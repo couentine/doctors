@@ -79,6 +79,16 @@ module FieldHistory
     self.save!
   end
 
+  def destroy_as(current_user)
+    self.field_history_user = current_user
+    self.destroy
+  end
+  
+  def destroy_as!(current_user)
+    self.field_history_user = current_user
+    self.destroy!
+  end
+
   def save_without_history
     self.skip_field_history = true
     return_value = self.save

@@ -1,6 +1,6 @@
 class Api::V1::Paths::UserPaths
   include Swagger::Blocks
-
+   
   swagger_path '/users/{key}' do
     
     #=== GET USER ===#
@@ -13,16 +13,7 @@ class Api::V1::Paths::UserPaths
       define_basic_info :user, :get, 'Get user by id, username or email'
 
       # Parameters
-      parameter do
-        key :name, :key
-        key :in, :path
-        key :description, "You can query user records using any of the following keys:\n" \
-          "- Record id\n" \
-          "- Username (case insensitive)\n" \
-          "- Email address (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
+      parameter :user_key
 
       # Responses
       define_success_response :user, 200, include: [:relationships]
@@ -34,36 +25,21 @@ class Api::V1::Paths::UserPaths
   
   swagger_path '/users/{user_key}/groups' do
     
-    #=== USER GROUP INDEX ===#
+    #=== USER GROUPS INDEX ===#
 
     operation :get do
       extend Api::V1::Helpers::OperationFormat::Base
       extend Api::V1::Helpers::OperationFormat::PaginatedList
 
       # Basic Info
-      define_basic_info :group, 'Get list of groups specified user belongs to', :user
+      define_basic_info :group, 'Get list of groups selected user belongs to', :user
       
       # Parameters
-      parameter do
-        key :name, :user_key
-        key :in, :path
-        key :description, "You can query user records using any of the following keys:\n" \
-          "- Record id\n" \
-          "- Username (case insensitive)\n" \
-          "- Email address (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
-      parameter do
-        key :name, 'filter[status]'
-        key :in, :query
-        key :description, 'Includes only groups where the specified user is a member (`member`) or an admin (`admin`)'
-        key :required, false
-        key :type, :string
-        key :enum, [:all, :member, :admin]
-        key :default, :all
-      end
-      define_index_parameters :group
+      parameter :user_user_key
+      parameter :group_membership_status
+      parameter :group_sort
+      parameter :page_number
+      parameter :page_size
 
       # Responses
       define_success_response :group, include: [:relationships]
@@ -75,7 +51,7 @@ class Api::V1::Paths::UserPaths
   
   swagger_path '/users/{user_key}/portfolios' do
     
-    #=== USER GROUP INDEX ===#
+    #=== USER PORTFOLIOS INDEX ===#
 
     operation :get do
       extend Api::V1::Helpers::OperationFormat::Base
@@ -85,26 +61,11 @@ class Api::V1::Paths::UserPaths
       define_basic_info :portfolio, 'Get list of portfolios for selected user', :user
       
       # Parameters
-      parameter do
-        key :name, :user_key
-        key :in, :path
-        key :description, "You can query user records using any of the following keys:\n" \
-          "- Record id\n" \
-          "- Username (case insensitive)\n" \
-          "- Email address (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
-      parameter do
-        key :name, 'filter[status]'
-        key :in, :query
-        key :description, 'Includes only portfolios with the specified status'
-        key :required, false
-        key :type, :string
-        key :enum, [:all, :draft, :requested, :endorsed]
-        key :default, :all
-      end
-      define_index_parameters :portfolio
+      parameter :user_user_key
+      parameter :portfolio_status
+      parameter :portfolio_sort
+      parameter :page_number
+      parameter :page_size
 
       # Responses
       define_success_response :portfolio, include: [:relationships]
@@ -112,6 +73,130 @@ class Api::V1::Paths::UserPaths
       define_not_found_response
     end
 
+  end
+  
+  swagger_path '/users/{user_key}/apps' do
+    
+    #=== USER APPS INDEX ===#
+
+    operation :get do
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::PaginatedList
+
+      # Basic Info
+      define_basic_info :app, 'Get list of active apps for selected user', :user
+      
+      # Parameters
+      parameter :user_user_key
+      parameter :app_user_joinability
+      parameter :app_group_joinability
+      parameter :app_status
+      parameter :app_sort
+      parameter :page_number
+      parameter :page_size
+
+      # Responses
+      define_success_response :app, include: [:relationships]
+      define_unauthorized_response
+      define_not_found_response
+    end
+
+  end
+
+  swagger_path '/users/{user_key}/app_user_memberships' do
+
+    #=== USER APP USER MEMBERSHIPS INDEX ===#
+
+    operation :get do
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::PaginatedList
+
+      # Basic Info
+      define_basic_info :app_user_membership, 'Get list of app memberships for selected user', :user
+      
+      # Parameters
+      parameter :user_user_key
+      parameter :app_user_membership_status
+      parameter :app_user_membership_type
+      parameter :app_user_membership_app_approval_status
+      parameter :app_user_membership_user_approval_status
+      parameter :app_user_membership_sort
+      parameter :page_number
+      parameter :page_size
+
+      # Responses
+      define_success_response :app_user_membership, include: [:relationships]
+      define_unauthorized_response
+    end
+
+    #=== CREATE USER APP USER MEMBERSHIP ===#
+
+    operation :post do
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
+
+      # Basic Info
+      define_basic_info :app_user_membership, :create, 'Create new app membership for selected user', :user
+      
+      # Parameters
+      parameter :user_user_key
+      define_post_parameters :app_user_membership
+
+      # Responses
+      define_success_response :app_user_membership, 201, include: [:relationships]
+      define_field_error_response
+      define_unauthorized_response
+    end
+
+  end
+
+  #=== INTERNAL-ONLY USER PATHS ===#
+
+  class Internal < Api::V1::Paths::UserPaths
+
+    swagger_path '/users/{user_key}/authentication_tokens' do
+
+      #=== AUTHENTICATION TOKEN INDEX ===#
+
+      operation :get do
+        extend Api::V1::Helpers::OperationFormat::Base
+        extend Api::V1::Helpers::OperationFormat::PaginatedList
+
+        # Basic Info
+        define_basic_info :authentication_token, 'Get list of authentication_tokens for selected user', :user
+        
+        # Parameters
+        parameter :user_user_key
+        parameter :authentication_token_sort
+        parameter :page_number
+        parameter :page_size
+
+        # Responses
+        define_success_response :authentication_token, include: [:relationships]
+        define_unauthorized_response
+      end
+
+      #=== CREATE AUTHENTICATION TOKEN ===#
+
+      operation :post do
+        extend Api::V1::Helpers::OperationFormat::Base
+        extend Api::V1::Helpers::OperationFormat::RecordItem
+
+        # Basic Info
+        define_basic_info :authentication_token, :create, 'Create new authentication token for selected user', :user
+        
+        # Parameters
+        parameter :user_user_key
+        define_post_parameters :authentication_token
+
+        # Responses
+        define_success_response :authentication_token, 201, include: [:relationships]
+        define_field_error_response
+        define_unauthorized_response
+      end
+    
+    end
+   
   end
 
 end

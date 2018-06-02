@@ -44,14 +44,32 @@ BadgeList::Application.routes.draw do
       resources :users, only: [:show] do
         resources :groups, only: [:index]
         resources :portfolios, only: [:index]
+        
+        resources :apps, only: [:index]
+        resources :app_user_memberships, only: [:index, :create]
+        resources :authentication_tokens, only: [:index, :create]
+        
         match ':email/portfolios' => 'portfolios#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
         match ':email/groups' => 'groups#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        match ':email/app_user_memberships' => 'app_user_memberships#index', 
+          constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        match ':email/app_user_memberships' => 'app_user_memberships#create',
+          constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :post
+        match ':email/apps' => 'apps#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        match ':email/authentication_tokens' => 'authentication_tokens#index', 
+          constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
         match ':email' => 'users#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
       end
+      resources :authentication_tokens, only: [:index, :update, :show, :destroy]
+
       resources :groups, only: [:index, :show] do
         resources :badges, only: [:index, :show]
         resources :users, only: [:index]
+        
+        resources :apps, only: [:index]
+        resources :app_group_memberships, only: [:index, :create]
       end
+      
       resources :badges, only: [:index, :show] do
         resources :portfolios, only: [:index, :show] do
           match ':email' => 'portfolios#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
@@ -59,7 +77,16 @@ BadgeList::Application.routes.draw do
         resources :endorsements, only: [:create]
       end
       resources :portfolios, only: [:show]
-      resources :authentication_tokens, only: [:index, :create, :show, :destroy]
+
+      resources :apps, only: [:index, :create, :update, :show, :destroy] do
+        resources :app_user_memberships, only: [:index, :create]
+        resources :app_group_memberships, only: [:index, :create]
+
+        resources :users, only: [:index]
+        resources :groups, only: [:index]
+      end
+      resources :app_user_memberships, only: [:index, :update, :show, :destroy]
+      resources :app_group_memberships, only: [:update, :show, :destroy]
     end
   end
 

@@ -5,19 +5,28 @@ class Docs::Api::V1::ExternalApiDocsController < ActionController::Base
   #=== CONSTANTS ===#
 
   SWAGGERED_CLASSES = [
-    ::Api::V1::Paths::UserPaths,
-    ::Api::V1::Schemas::UserSchemas,
-    ::Api::V1::Paths::GroupPaths,
-    ::Api::V1::Schemas::GroupSchemas,
+
+    ::Api::V1::Paths::AppGroupMembershipPaths,
+    ::Api::V1::Paths::AppPaths,
+    ::Api::V1::Paths::AppUserMembershipPaths,
     ::Api::V1::Paths::BadgePaths,
+    ::Api::V1::Paths::GroupPaths,
+    ::Api::V1::Paths::PollerPaths,
+    ::Api::V1::Paths::PortfolioPaths,
+    ::Api::V1::Paths::UserPaths,
+    
+    ::Api::V1::Schemas::AppGroupMembershipSchemas,
+    ::Api::V1::Schemas::AppSchemas,
+    ::Api::V1::Schemas::AppUserMembershipSchemas,
     ::Api::V1::Schemas::BadgeSchemas,
     ::Api::V1::Schemas::EndorsementSchemas,
-    ::Api::V1::Paths::PollerPaths,
+    ::Api::V1::Schemas::ErrorSchemas,
+    ::Api::V1::Schemas::GroupSchemas,
     ::Api::V1::Schemas::PollerSchemas,
-    ::Api::V1::Paths::PortfolioPaths,
     ::Api::V1::Schemas::PortfolioSchemas,
     ::Api::V1::Schemas::SharedSchemas,
-    ::Api::V1::Schemas::ErrorSchemas,
+    ::Api::V1::Schemas::UserSchemas,
+
     self
   ].freeze
 
@@ -46,16 +55,18 @@ class Docs::Api::V1::ExternalApiDocsController < ActionController::Base
         "[OpenAPI/Swagger specification](https://swagger.io/docs/specification/2-0/basic-structure/).\n\n" \
         "If you have any questions you can contact us at team@badgelist.com.\n" \
         "\n"\
-        "## Release Notes (May 2018) ##\n" \
-        "The Badge List API is currently being actively expanded. No breaking changes will be made to v1, but we are adding new " \
-        "features and operations frequently. Work will continue until we achieve full parity with the web UI.\n" \
+        "## Release Notes (June 2018) ##\n" \
+        "The Badge List API is currently being actively expanded. Some key aspects of the API are still under active development. " \
+        "We won't be making any breaking changes to the basic functionality, but some small breaking changes may occur as we work to " \
+        "achieve full parity with the web UI. If you're building a mission-critical app on top of the API, please reach out to us " \
+        "so we can keep apprissed of the progress.\n" \
         "\n"\
         "## Data Model ##\n" \
         "Here is an overview of the Badge List data model. " \
-        "([Downloadable PDF available here](https://s3.amazonaws.com/badgelist/files/bl-api-data-model-v1.pdf).) " \
+        "([Downloadable PDF available here](https://s3.amazonaws.com/badgelist/files/bl-api-data-model-v1-rev2.pdf).) " \
         "The API is generally organized as a series of RESTful operations with these core objects, " \
         "with a few extra verbs included here and there.\n\n" \
-        "![Badge List Data Model](https://s3.amazonaws.com/badgelist/files/bl-api-data-model-v1.png)\n\n"\
+        "![Badge List Data Model](https://s3.amazonaws.com/badgelist/files/bl-api-data-model-v1-rev2.png)\n\n"\
         \
         "## API Structure ##\n" \
         "The Badge List OpenAPI specification utilizes " \
@@ -102,7 +113,7 @@ class Docs::Api::V1::ExternalApiDocsController < ActionController::Base
         "Permission Name | User API? | Group API? | App API? | Public API?\n" \
         "--------------- | --------- | ---------- | -------- | ----------\n" \
         + ( # We filter out the items which are only available to the internal API, then do a simple mapping into a markdown table
-          ApplicationPolicy::PERMISSION_SETS.select do |permission_name, options|
+          ApplicationPolicy::API_PERMISSIONS.select do |permission_name, options|
             options[:available_to] != [:web_user]
           end.map do |permission_name, options|
             "`#{permission_name}` | " + [:api_user, :api_group, :api_app, :api_visitor].map do |access_type|
@@ -120,9 +131,13 @@ class Docs::Api::V1::ExternalApiDocsController < ActionController::Base
         "policies. \n"
     )
     
+    #=== PARAMETERS ===#
+
+    define_shared_parameters :user, :group, :badge, :endorsement, :portfolio, :app, :app_user_membership, :app_group_membership, :poller
+    
     #=== MODEL TAGS ===#
 
-    define_model_tags :user, :group, :badge, :endorsement, :portfolio, :poller
+    define_model_tags :user, :group, :badge, :endorsement, :portfolio, :app, :app_user_membership, :app_group_membership, :poller
 
     #=== OPERATION FORMAT TAGS ===#
     
@@ -130,7 +145,7 @@ class Docs::Api::V1::ExternalApiDocsController < ActionController::Base
 
     #=== TAG GROUPS (USED BY REDOC) ===#
     
-    define_tag_groups :user, :group, :badge, :endorsement, :portfolio, :poller
+    define_tag_groups :user, :group, :badge, :endorsement, :portfolio, :app, :app_user_membership, :app_group_membership, :poller
 
     #=== SECURITY ===#
 

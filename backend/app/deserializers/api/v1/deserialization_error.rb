@@ -45,4 +45,8 @@ class Api::V1::DeserializationError < StandardError
       },
     }
   end
+
+  def to_s
+    to_json_api.to_s
+  end
 end

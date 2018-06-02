@@ -1,57 +1,87 @@
 class UserPolicy < ApplicationPolicy
-  attr_reader :current_user, :user, :users
-
-  # NOTE: This policy uses different names than other policies because of a naming colision with the `user` variable.
-  # In this policy, `current_user` refers to the authenticated user and `user` or `users` refer to the displayed records.
-  def initialize(current_user, user_or_users)
-    @current_user = current_user
-    if (user_or_users.class == Mongoid::Criteria)
-      @users = user_or_users
-      @records = user_or_users
-    else
-      @user = user_or_users
-      @record = user_or_users
-    end
-  end
 
   #=== ACTION POLICIES ===#
 
-  def show?
-    # All users and fields are shown, but relationships are conditionally displayed based on filters below
-    return @current_user.has?('users:read')
-  end
-
-  #=== FILTER POLICIES ===#
-  
-  def show_all_fields?
-    return true if !@user.has_private_domain
-    return @user.profile_visible_to(@current_user)
-  end
+  standard_actions :user,
+    show_roles: :everyone,
+    update_roles: [:self],
+    destroy_roles: [:self]
 
   #=== RELATIONSHIP POLICIES ===#
-  
-  def groups_index?
-    return @current_user.has?('all:index') \
-      && @current_user.has?('users:read') \
-      && @current_user.has?('groups:read') \
-      && show_all_fields?
-  end
 
-  def portfolios_index?
-    return @current_user.has?('all:index') \
-      && @current_user.has?('users:read') \
-      && @current_user.has?('portfolios:read') \
-      && show_all_fields?
-  end
+  belongs_to :proxy_app,
+    via: :proxy_app_id,
+    policy_model: :app,
+    visible_to: :everyone,
+    read_only: true
 
-  #=== USER-FACING METADATA ===#
+  belongs_to :proxy_group,
+    via: :proxy_group_id,
+    policy_model: :group,
+    visible_to: :everyone,
+    read_only: true
+
+  has_many :app_user_memberships,
+    visible_to: [:self, :proxy_admin],
+    creatable_by: [:self, :proxy_admin]
+
+  has_many :authentication_tokens,
+    visible_to: [:self, :proxy_admin],
+    creatable_by: [:self, :proxy_admin]
+
+  has_many :portfolios,
+    visible_to: :all_roles,
+    creatable_by: [:self]
+
+  has_and_belongs_to_many :apps,
+    visible_to: [:self]
+
+  has_and_belongs_to_many :groups,
+    visible_to: [:self]
+
+  #=== FIELD POLICIES ===#
+
+  SELF_FIELD = { visible_to: :all_roles, editable_by: [:self] }
+  READ_ONLY_FIELD = { visible_to: :all_roles, editable_by: :nobody }
+
+  field :username_with_caps,            SELF_FIELD
+  field :avatar_image_url,              SELF_FIELD
+  field :name,                          SELF_FIELD
+  field :job_title,                     SELF_FIELD
+  field :organization_name,             SELF_FIELD
+  field :website,                       SELF_FIELD
+  field :bio,                           SELF_FIELD
+  field :email,                         SELF_FIELD
+  field :password,                      SELF_FIELD
   
-  def meta
-    return {
-      current_user: {
-        can_see_record: show_all_fields?
-      }
-    }
+  field :is_private,                    READ_ONLY_FIELD
+  field :identity_hash,                 READ_ONLY_FIELD
+  field :identity_salt,                 READ_ONLY_FIELD
+  field :avatar_image_medium_url,       READ_ONLY_FIELD
+  field :avatar_image_small_url,        READ_ONLY_FIELD
+  field :type,                          READ_ONLY_FIELD
+  field :last_active,                   READ_ONLY_FIELD
+
+  #=== ROLE DEFINITIONS ===#
+
+  role :viewer do |current_user, user|
+    !user.has_private_domain || user.profile_visible_to(current_user)
+  end
+  
+  role :self do |current_user, user|
+    current_user.present? && (current_user.id == user.id)
+  end
+  
+  role :proxy_admin do |current_user, user|
+    next false if user.type == 'individual'
+
+    if (user.type == 'group') && user.proxy_group
+      next current_user.admin_of?(user.proxy_group)
+    elsif (user.type == 'app') && user.proxy_app
+      next AppUserMembershipDecorator.new(user.proxy_app).has_admin?(current_user)
+    else
+      next false
+    end
   end
 
   #=== SCOPES ===#

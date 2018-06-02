@@ -1,40 +1,42 @@
 class Api::V1::SerializableUser < Api::V1::SerializableDocument
-  extend JSONAPI::Serializable::Resource::ConditionalFields
+  type :user
 
-  type 'user'
+  #=== FIELDS ===#
 
-  attribute :username do @object.username_with_caps end
-  attribute :is_private
-  attribute :email_hash do @object.identity_hash end
-  attribute :email_salt do @object.identity_salt end
+  field :username,                      from: :username_with_caps
+  field :is_private
+  field :email_hash,                    from: :identity_hash
+  field :email_salt,                    from: :identity_salt
 
-  attribute :image_url do @object.avatar_image_url end
-  attribute :image_medium_url do @object.avatar_image_medium_url end
-  attribute :image_small_url do @object.avatar_image_small_url end
+  field :image_url,                     from: :avatar_image_url
+  field :image_medium_url,              from: :avatar_image_medium_url
+  field :image_small_url,               from: :avatar_image_small_url
 
-  attribute :type,                  if: -> { @show_all_fields }
-  attribute :name,                  if: -> { @show_all_fields }
+  field :type
+  field :name
   
-  attribute :job_title,             if: -> { @show_all_fields }
-  attribute :organization_name,     if: -> { @show_all_fields }
-  attribute :website,               if: -> { @show_all_fields }
-  attribute :bio,                   if: -> { @show_all_fields }
+  field :job_title
+  field :organization_name
+  field :website
+  field :bio
   
-  attribute :last_active,           if: -> { @show_all_fields } do
-    @object.last_active.iso8601 if @object.last_active
-  end
+  field :last_active,                   convert: :iso8601
 
-  link :self do "/api/v1/users/#{@object.id.to_s}" end
-  link :self_web do @object.full_url end
+  field :proxy_app_id
+  field :proxy_group_id
 
-  belongs_to :proxy_group,          if: -> { @object.proxy_group_id.present? } do
-    link :self do "/api/v1/groups/#{@object.proxy_group_id.to_s}" end
-  end
-  has_many :groups do
-    link :self do "/api/v1/users/#{@object.id.to_s}/groups" end
-  end
-  has_many :portfolios do
-    link :self do "/api/v1/users/#{@object.id.to_s}/portfolios" end
-  end
-
+  #=== LINKS ===#
+  
+  self_links
+  
+  #=== RELATIONSHIPS ===#
+  
+  relationships \
+    :proxy_group,
+    :proxy_app,
+    :groups,
+    :portfolios,
+    :apps,
+    :app_user_memberships,
+    :authentication_tokens
 end

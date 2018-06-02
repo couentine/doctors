@@ -21,6 +21,8 @@ class Rack::Throttle::DailyWithClientId < Rack::Throttle::Daily
     # Attempt to get a unique id that is better than the ip address
     if request.session.present?
       unique_id = request.session.id
+    elsif request.headers['token'].present?
+      unique_id = request.headers['token']
     elsif request.params['token'].present?
       unique_id = request.params['token']
     elsif (request.content_type == 'application/json') && request.body.present?

@@ -1,20 +1,20 @@
 module Api::V1::Helpers::OperationFormat::BatchOperation
 
   # - verb = one of >> [:get, :create, :update, :delete]
-  def define_basic_info(model, verb, summary = nil, parent_model = nil, permissions_needed = nil, description = nil)
+  def define_basic_info(model, verb, summary = nil, parent_model = nil, description = nil)
     camelized_model = model.to_s.camelize
     uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
     spaced_model = model.to_s.gsub('_', ' ')
-    permissions = permissions_needed.map{ |permission_name| "- `#{permission_name}`" } if permissions_needed.present?
 
     if parent_model.present?
       camelized_parent_model = parent_model.to_s.camelize
       uncapitalized_camelized_parent_model = camelized_parent_model[0, 1].downcase + camelized_parent_model[1..-1]
-    end
+      permissions = ApplicationPolicy.get_action_permissions(parent_model, model, :create).map{ |item| "- `#{item}`" }
 
-    if parent_model.present?
       key :operationId, "#{verb.to_s}#{camelized_parent_model}#{camelized_model.pluralize}"
     else
+      permissions = ApplicationPolicy.get_action_permissions(model, :create).map{ |item| "- `#{item}`" }
+
       key :operationId, "#{verb.to_s}#{camelized_model.pluralize}"
     end
     key :summary, summary

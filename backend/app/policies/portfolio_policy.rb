@@ -1,34 +1,71 @@
 class PortfolioPolicy < ApplicationPolicy
-  attr_reader :current_user, :log, :logs
-
-  def initialize(current_user, log_or_logs)
-    @current_user = current_user
-    if (log_or_logs.class == Mongoid::Criteria)
-      @logs = log_or_logs
-      @records = log_or_logs
-    else
-      @log = log_or_logs
-      @record = log_or_logs
-    end
-  end
 
   #=== ACTION POLICIES ===#
 
-  def show?
-    return false if !@current_user.has?('portfolios:read')
+  standard_actions :portfolio,
+    show_roles: :all_roles,
+    update_roles: [:owner, :admin],
+    destroy_roles: [:owner]  
 
-    # If the user can see the badge then they can see the portfolio container
-    return Pundit.policy(@current_user, @log.badge).show_all_fields?
+  #=== RELATIONSHIP POLICIES ===#
+
+  belongs_to :user,
+    via: :user_id,
+    visible_to: :all_roles,
+    creation_role: :owner
+
+  belongs_to :badge,
+    via: :badge_id,
+    visible_to: :all_roles,
+    creation_role: :viewer
+
+  #=== FIELD POLICIES ===#
+
+  ADMIN_FIELD = { visible_to: :everyone, editable_by: [:admin] }
+  OWNER_FIELD = { visible_to: :all_roles, editable_by: [:owner] }
+  READ_ONLY_FIELD = { visible_to: :all_roles, editable_by: :nobody }
+
+  field :retracted,                               ADMIN_FIELD
+
+  field :wiki,                                    OWNER_FIELD
+  field :show_on_badge,                           OWNER_FIELD
+  field :show_on_profile,                         OWNER_FIELD
+  field :receive_validation_request_emails,       OWNER_FIELD
+
+  field :status,                                  READ_ONLY_FIELD
+  field :user_name,                               READ_ONLY_FIELD
+  field :user_username_with_caps,                 READ_ONLY_FIELD
+  field :date_started,                            READ_ONLY_FIELD
+  field :date_requested,                          READ_ONLY_FIELD
+  field :date_withdrawn,                          READ_ONLY_FIELD
+  field :date_issued,                             READ_ONLY_FIELD
+  field :date_retracted,                          READ_ONLY_FIELD
+  field :date_originally_issued,                  READ_ONLY_FIELD
+
+  #=== ROLE DEFINITIONS ===#
+
+  # If the user can see the badge then they can see the portfolio container
+  role :viewer do |current_user, log, policy|
+    badge = policy.expose[:badge] || log.badge
+
+    next true if badge.visibility == 'public'
+
+    if current_user.present?
+      next true if current_user.learner_or_expert_of? log.badge_id
+      next true if (badge.visibility == 'private') && current_user.member_of?(badge.group_id)
+    end
+    
+    next false
   end
-
-  #=== USER-FACING METADATA ===#
   
-  def meta
-    return {
-      current_user: {
-        can_see_record: true # calling show here results in lots of queries in the portfolios index
-      }
-    }
+  role :owner do |current_user, log|
+    current_user.present? && (current_user.id == log.user_id)
+  end
+  
+  role :admin do |current_user, log, policy|
+    badge = policy.expose[:badge] || log.badge
+
+    current_user.present? && current_user.admin_of?(badge.group_id)
   end
 
   #=== SCOPES ===#
@@ -47,7 +84,7 @@ class PortfolioPolicy < ApplicationPolicy
     def resolve
       @badge_policy = Pundit.policy(@current_user, @badge)
 
-      raise StandardError.new('You do not have permission to see the portfolios for this badge') if (!@badge_policy.portfolios_index?)
+      raise StandardError.new('You do not have permission to see the portfolios for this badge') if (!@badge_policy.can_see_portfolios?)
 
       if @badge_policy.is_awarder?
         return @scope.all
@@ -78,7 +115,7 @@ class PortfolioPolicy < ApplicationPolicy
     def resolve
       @target_user_policy = Pundit.policy(@current_user, @target_user)
 
-      if (!@target_user_policy.portfolios_index?)
+      if (!@target_user_policy.can_see_portfolios?)
         raise StandardError.new('You do not have permission to see the portfolios for this target_user') 
       end
 

@@ -37,30 +37,69 @@ class AppGroupMembership
   
   # === VALIDATIONS === #
 
-  validates :status, inclusion: { in: STATUS_VALUES, message: "%{value} is not a valid membership status" }
-  validates :app_approval_status, inclusion: { in: APPROVAL_STATUS_VALUES, message: "%{value} is not a valid approval status" }
-  validates :group_approval_status, inclusion: { in: APPROVAL_STATUS_VALUES, message: "%{value} is not a valid approval status" }
+  validates :app,
+    presence: true
+  validates :group,
+    presence: true,
+    uniqueness: {
+      scope: :app,
+      message: "group with id '%{value}' already has a membership for this app"
+    }
+
+  validates :status,
+    inclusion: {
+      in: STATUS_VALUES,
+      message: "%{value} is not a valid membership status"
+    }
+  validates :app_approval_status,
+    inclusion: {
+      in: APPROVAL_STATUS_VALUES,
+      message: "%{value} is not a valid approval status"
+    }
+  validates :group_approval_status,
+    inclusion: {
+      in: APPROVAL_STATUS_VALUES,
+      message: "%{value} is not a valid approval status"
+    }
 
   # === CALLBACKS === #
 
-  after_validation :update_calculated_fields
+  validate :no_reparenting
+  before_validation :update_calculated_fields
+
+  # === INSTANCE METHODS === #
+
+  def full_url
+    "#{ENV['root_url'] || 'https://www.badgelist.com'}/apps/#{app.slug}/group_memberships/#{id.to_s}"
+  end
 
   # === PROTECTED METHODS === #
 
   protected
 
+  def no_reparenting
+    if persisted? 
+      errors.add(:app_id, 'cannot be changed after the membership is created') if app_id_changed? && app_id.present?
+      errors.add(:group_id, 'cannot be changed after the membership is created') if group_id_changed? && group_id.present?
+    end
+  end
+
   def update_calculated_fields
-    if (app_approval_status == 'denied') || (group_approval_status == 'denied')
-      self.status = 'disabled'
-    elsif (app_approval_status == 'approved') && (group_approval_status == 'approved')
-      self.status = 'active'
-    else
-      self.status = 'pending'
+    if !destroyed?
+      if (app_approval_status == 'denied') || (group_approval_status == 'denied')
+        self.status = 'disabled'
+      elsif (app_approval_status == 'approved') && (group_approval_status == 'approved')
+        self.status = 'active'
+      else
+        self.status = 'pending'
+      end
+
+      self.pending = status == 'pending'
+      self.active = status == 'active'
+      self.disabled = status == 'disabled'
     end
 
-    self.pending = status == 'pending'
-    self.active = status == 'active'
-    self.disabled = status == 'disabled'
+    true
   end
 
 end

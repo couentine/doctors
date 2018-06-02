@@ -18,7 +18,7 @@ module Api::V1::Helpers::OperationFormat::Base
 
         # Root Meta Key
         property :meta do
-          key :'$ref', 'RootMetaObjectWithPermissionSets'
+          key :'$ref', 'RootMetaObjectWithPermissions'
         end
 
         # JSON API Key

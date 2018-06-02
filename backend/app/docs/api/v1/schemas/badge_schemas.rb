@@ -1,115 +1,72 @@
-class Api::V1::Schemas::BadgeSchemas
-  include Swagger::Blocks
-
-  #=== BADGE OUTPUT ATTRIBUTES ===#
-
-  swagger_schema :BadgeOutputAttributes do
-    extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
-
-    key :type, :object
-    
-    property :slug do
-      key :type, :string
-      key :format, :slug
-      key :description, 'The url-safe string used to represent this badge in urls and other external-facing contexts. Case insensitive.'
-      key :example, 'Orbital-Mechanics'
-    end
-    property :name do
-      key :type, :string
-      key :description, 'Display name of the badge'
-      key :example, 'Orbital Mechanics'
-    end
-    property :summary do
-      key :type, :string
-      key :description, 'Short summary of the badge and what badge holders have done to earn the badge'
-      key :example, 'Demonstrated understanding of orbital and launch mechanics. Acceleration, braking, orbital velocity calculations.'
-    end
-    property :visibility do
-      key :type, :string
-      key :enum, [:public, :private, :hidden]
-      key :description, 'Specifies who can see this badge: Everyone on the public internet (`public`), only group members (`private`) or ' \
-        'only badge members (`hidden`)'
-    end
-
-    property :feedback_request_count do
-      key :type, :integer
-      key :format, :int64
-      key :description, 'The number of badge portfolios currently requesting feedback'
-      key :example, 3
-    end
-    property :seeker_count do
-      key :type, :integer
-      key :format, :int64
-      key :description, 'The number of badge portfolios which have not yet been endorsed, also referred to as learner count'
-      key :example, 12
-    end
-    property :holder_count do
-      key :type, :integer
-      key :format, :int64
-      key :description, 'The number of badge portfolios which have been endorsed, also referred to as expert count'
-      key :example, 80
-    end
-    property :image_url do
-      key :type, :string
-      key :format, :url
-      key :description, 'URL of the full-sized badge image PNG, 500 pixels by 500 pixels'
-      key :example, 'https://badgelist.s3.amazonaws.com/u/badge/52f434f0ef83df7c9200000f/designed_image/badge.png'
-    end
-    property :image_medium_url do
-      key :type, :string
-      key :format, :url
-      key :description, 'URL of the resized badge image PNG, 200 pixels by 200 pixels'
-      key :example, 'https://badgelist.s3.amazonaws.com/u/badge/52f434f0ef83df7c9200000f/designed_image/medium_badge.png'
-    end
-    property :image_small_url do
-      key :type, :string
-      key :format, :url
-      key :description, 'URL of the resized badge image PNG, 50 pixels by 50 pixels'
-      key :example, 'https://badgelist.s3.amazonaws.com/u/badge/52f434f0ef83df7c9200000f/designed_image/small_badge.png'
-    end
-
-  end
-
-  #=== BADGE META ===#
+class Api::V1::Schemas::BadgeSchemas < Api::V1::Schemas::ApiSchema
   
-  swagger_schema :BadgeMeta do
-    key :type, :object
+  model :badge
+  
+  #=== FIELDS ===#
 
-    property :current_user do
-      key :type, :object
-      
-      property :can_see_record do
-        key :type, :boolean
-        key :description, 'True if the current user is able to see the full contents of the badge'
-      end
-      property :can_edit_record do
-        key :type, :boolean
-        key :description, 'True if the current user is able to edit the badge'
-      end
-      property :can_award_record do
-        key :type, :boolean
-        key :description, 'True if the current user is able to award the badge'
-      end
-      property :is_seeker do
-        key :type, :boolean
-        key :description, 'True if the current user has joined but not yet earned the badge'
-      end
-      property :is_holder do
-        key :type, :boolean
-        key :description, 'True if the current user has earned the badge'
-      end
-    end
-  end
+  field :creator_id, [:string, :id],
+    description: "The user id of the group's creator"
+    
+  field :slug, [:string, :slug],
+    description: 'The url-safe string used to represent this badge in urls and other external-facing contexts. Case insensitive.',
+    max_from: :url,
+    example: 'Orbital-Mechanics'
 
-  #=== BADGE RELATIONSHIPS ===#
+  field :name, :string,
+    description: 'Display name of the badge',
+    max_from: :name,
+    example: 'Orbital Mechanics'
 
-  swagger_schema :BadgeRelationships do
-    extend Api::V1::Helpers::SchemaHelpers::RelationshipsList
+  field :summary, :string,
+    description: 'Short summary of the badge and what badge holders have done to earn the badge',
+    max_from: :summary,
+    example: 'Demonstrated understanding of orbital and launch mechanics. Acceleration, braking, orbital velocity calculations.'
 
-    key :type, :object
+  field :visibility, :string,
+    description: 'Specifies who can see this badge: Everyone on the public internet (`public`), only group members (`private`) or ' \
+      'only badge members (`hidden`)',
+    enum_from: :visibility
 
-    define_relationship_property :group, 'The parent group to which the badge belongs'
-    define_relationship_property :portfolios, 'The list of portfolios for this badge'
-  end
+
+  field :feedback_request_count, [:integer, :int64],
+    description: 'The number of badge portfolios currently requesting feedback',
+    example: 3
+
+  field :seeker_count, [:integer, :int64],
+    description: 'The number of badge portfolios which have not yet been endorsed, also referred to as learner count',
+    example: 12
+
+  field :holder_count, [:integer, :int64],
+    description: 'The number of badge portfolios which have been endorsed, also referred to as expert count',
+    example: 80
+
+  field :image_url, [:string, :url],
+    description: 'URL of the full-sized badge image PNG, 500 pixels by 500 pixels',
+    example: 'https://badgelist.s3.amazonaws.com/u/badge/52f434f0ef83df7c9200000f/designed_image/badge.png'
+
+  field :image_medium_url, [:string, :url],
+    description: 'URL of the resized badge image PNG, 200 pixels by 200 pixels',
+    example: 'https://badgelist.s3.amazonaws.com/u/badge/52f434f0ef83df7c9200000f/designed_image/medium_badge.png'
+
+  field :image_small_url, [:string, :url],
+    description: 'URL of the resized badge image PNG, 50 pixels by 50 pixels',
+    example: 'https://badgelist.s3.amazonaws.com/u/badge/52f434f0ef83df7c9200000f/designed_image/small_badge.png'
+
+  field :group_id, [:string, :id],
+    description: "The id of the group record"
+
+  field :creator_id, [:string, :id],
+    description: "The user id of the badge's creator"
+  
+  #=== SCHEMAS ===#
+
+  attributes_schema :output
+  
+  meta_schema :creator
+
+  relationship_schemas \
+    group: 'The parent group to which the badge belongs',
+    portfolios: 'The list of portfolios for this badge',
+    creator: 'The original creator user of the badge'
 
 end

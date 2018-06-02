@@ -13,13 +13,7 @@ class Api::V1::Paths::PollerPaths
       define_basic_info :poller, :get, 'Get poller by id'
 
       # Parameters
-      parameter do
-        key :name, :id
-        key :in, :path
-        key :description, "The id of the poller record"
-        key :required, true
-        key :type, :string
-      end
+      parameter :poller_id
 
       # Responses
       define_success_response :poller, 200, exclude: [:meta]

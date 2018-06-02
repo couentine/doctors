@@ -4,6 +4,8 @@ class Api::V1::SerializableBatchResult < JSONAPI::Serializable::Resource
 
   type { @type }
 
+  #=== FIELDS ===#
+
   attribute :index
   attribute :type
   attribute :success

@@ -263,7 +263,7 @@ private
     if @current_user_is_log_owner || @badge_list_admin
       @show_sharing = (@log.issue_status == 'issued')
     end
-    if current_user
+    if current_user.present?
       @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil
       @validation = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
     end

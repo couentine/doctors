@@ -302,7 +302,7 @@ class Group
 
   # This is used by the API and requires that the current_user model attribute be set
   def current_user_permissions
-    if current_user
+    if current_user.present?
       {
         can_see_record: true,
         is_member: has_member?(current_user),

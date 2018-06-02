@@ -1,126 +1,93 @@
-class Api::V1::Schemas::UserSchemas
-  include Swagger::Blocks
+class Api::V1::Schemas::UserSchemas < Api::V1::Schemas::ApiSchema
 
-  #=== USER OUTPUT ATTRIBUTES ===#
+  model :user
 
-  swagger_schema :UserOutputAttributes do
-    extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
+  #=== FIELDS ===#
 
-    key :type, :object
-    
-    property :username do
-      key :type, :string
-      key :description, 'The url-safe string used to represent this user in urls and other external-facing contexts. Case insensitive.'
-      key :example, 'NielArmstrong69'
-    end
-    property :is_private do
-      key :type, :boolean
-      key :description, 'True if this user is part of a private email domain. Private email domains restrict the visibility of users ' \
-        'with certain email addresses to only other users on their email domain. If this is a private user account, then only the id, ' \
-        'username, email hash and image will be visible to users without access to see the domain.'
-      key :example, false
-    end
-    property :email_hash do
-      key :type, :string
-      key :description, 'A hashed version of the user\'s email address'
-      key :example, 'sha256$5c30dbe2195a1a8aa6e2575e8bf33f5a1860370df5b7f07096baffbe26f21e29'
-    end
-    property :email_salt do
-      key :type, :string
-      key :description, 'The salt which is appended to the user\'s email address before hashing.'
-      key :example, '53304184752c3625a7ce92a2e5de7653'
-    end
+  field :username, :string,
+    description: 'The url-safe string used to represent this user in urls and other external-facing contexts. Case insensitive.',
+    max_from: :username,
+    example: 'NielArmstrong69'
 
-    property :image_url do
-      key :type, :string
-      key :format, :url
-      key :description, 'URL of this user\'s full-sized avatar image, 500 pixels by 500 pixels'
-      key :example, 'https://badgelist.s3.amazonaws.com/u/user/52e20f4c00485d4de3000001/f264877aeb8f8d9afebba9958fe260b7.jpeg'
-    end
-    property :image_medium_url do
-      key :type, :string
-      key :format, :url
-      key :description, 'URL of this user\'s medium-sized avatar image, 200 pixels by 200 pixels'
-      key :example, 'https://badgelist.s3.amazonaws.com/u/user/52e20f4c00485d4de3000001/medium_f264877aeb8f8d9afebba9958fe260b7.jpeg'
-    end
-    property :image_small_url do
-      key :type, :string
-      key :format, :url
-      key :description, 'URL of this user\'s small-sized avatar image, 50 pixels by 50 pixels'
-      key :example, 'https://badgelist.s3.amazonaws.com/u/user/52e20f4c00485d4de3000001/small_f264877aeb8f8d9afebba9958fe260b7.jpeg'
-    end
+  field :is_private, :boolean,
+    description: 'True if this user is part of a private email domain. Private email domains restrict the visibility of users ' \
+      'with certain email addresses to only other users on their email domain. If this is a private user account, then only the id, ' \
+      'username, email hash and image will be visible to users without access to see the domain.',
+    example: false
 
-    property :type do
-      key :type, :string
-      key :enum, [:individual, :group]
-      key :description, 'Indicates whether this is an individual user or a group user. Individual users are user accounts which were ' \
-        'created using the normal registration process and represent individuals. Group users are proxy users created automatically by ' \
-        'the system which represent groups and are used to interact with the API.'
-    end
-    property :name do
-      key :type, :string
-      key :description, 'The full name of this user'
-      key :example, 'Niel Armstrong'
-    end
-    
-    property :job_title do
-      key :type, :string
-      key :description, 'Optional profile field indicating the user\'s job title'
-      key :example, 'Retired Astronaut'
-    end
-    property :organization_name do
-      key :type, :string
-      key :description, 'Optional profile field indicating the user\'s organizational affiliation'
-      key :example, 'NASA'
-    end
-    property :website do
-      key :type, :string
-      key :description, 'Optional profile field indicating the website of the user or the user\'s organization'
-      key :example, 'https://www.nasa.gov'
-    end
-    property :bio do
-      key :type, :string
-      key :description, 'Optional profile field indicating biographic details about the user'
-      key :example, 'An American astronaut and aeronautical engineer. First person to walk on the Moon.'
-    end
-    
-    property :last_active do
-      key :type, :string
-      key :format, 'date'
-      key :description, 'The date on which this user was last active'
-    end
+  field :email_hash, :string,
+    description: "A hashed version of the user's email address",
+    example: 'sha256$5c30dbe2195a1a8aa6e2575e8bf33f5a1860370df5b7f07096baffbe26f21e29'
 
-    # property :admin >> FOR NOW THIS IS AN UNDOCUMENTED INTERNAL FIELD
+  field :email_salt, :string,
+    description: "The salt which is appended to the user's email address before hashing.",
+    example: '53304184752c3625a7ce92a2e5de7653'
 
-  end
+  field :proxy_group_id, [:string, :id],
+    description: 'If type is `group` this indicates the group for which this user is a proxy.'
 
-  #=== USER META ===#
-  
-  swagger_schema :UserMeta do
-    key :type, :object
+  field :proxy_app_id, [:string, :id],
+    description: 'If type is `app` this indicates the app for which this user is a proxy.'
 
-    property :current_user do
-      key :type, :object
-      
-      property :can_see_record do
-        key :type, :boolean
-        key :description, 'True if the current user is able to see the full contents of the user'
-      end
-    end
-  end
+  field :image_url, [:string, :url],
+    description: "URL of this user's full-sized avatar image, 500 pixels by 500 pixels",
+    example: 'https://badgelist.s3.amazonaws.com/u/user/52e20f4c00485d4de3000001/f264877aeb8f8d9afebba9958fe260b7.jpeg'
 
-  #=== USER RELATIONSHIPS ===#
+  field :image_medium_url, [:string, :url],
+    description: "URL of this user's medium-sized avatar image, 200 pixels by 200 pixels",
+    example: 'https://badgelist.s3.amazonaws.com/u/user/52e20f4c00485d4de3000001/medium_f264877aeb8f8d9afebba9958fe260b7.jpeg'
 
-  swagger_schema :UserRelationships do
-    extend Api::V1::Helpers::SchemaHelpers::RelationshipsList
+  field :image_small_url, [:string, :url],
+    description: "URL of this user's small-sized avatar image, 50 pixels by 50 pixels",
+    example: 'https://badgelist.s3.amazonaws.com/u/user/52e20f4c00485d4de3000001/small_f264877aeb8f8d9afebba9958fe260b7.jpeg'
 
-    key :type, :object
+  field :type, :string,
+    description: 'Indicates whether this is an individual user or a group user. Individual users are user accounts which were ' \
+      'created using the normal registration process and represent individuals. Group users are proxy users created automatically by ' \
+      'the system which represent groups and are used to interact with the API.',
+    enum_from: :type
 
-    define_relationship_property :proxy_group, 'If type is `group` then this relationship indicates the group for which this user is ' \
-      'a proxy.'
-    
-    define_relationship_property :groups, 'The groups to which this user belongs, either as a member or as an admin'
-    define_relationship_property :portfolios, 'The badge portfolios which this user has created'
-  end
+  field :name, :string,
+    description: 'The full name of this user',
+    max_from: :name,
+    example: 'Niel Armstrong'
+
+  field :job_title, :string,
+    description: "Optional profile field indicating the user's job title",
+    max_from: :job_title,
+    example: 'Retired Astronaut'
+
+  field :organization_name, :string,
+    description: "Optional profile field indicating the user's organizational affiliation",
+    max_from: :organization_name,
+    example: 'NASA'
+
+  field :website, :string,
+    description: "Optional profile field indicating the website of the user or the user's organization",
+    max_from: :website,
+    example: 'https://www.nasa.gov'
+
+  field :bio, :string,
+    description: 'Optional profile field indicating biographic details about the user',
+    max_from: :website,
+    example: 'An American astronaut and aeronautical engineer. First person to walk on the Moon.'
+
+  field :last_active, [:string, :date],
+    description: 'The date on which this user was last active'
+
+  #=== SCHEMAS ===#
+
+  attributes_schema :output
+
+  meta_schema :self
+
+  relationship_schemas \
+    proxy_group: 'If type is `group` this indicates the group for which this user is a proxy.',
+    proxy_app: 'If type is `app` this indicates the app for which this user is a proxy.',
+    groups: 'The groups to which this user belongs, either as a member or as an admin',
+    portfolios: 'The badge portfolios which this user has created',
+    apps: 'All apps for which this user is currently an active member',
+    app_user_memberships: 'All app memberships for this user, including inactive ones'
+    # authentication_tokens: '' #==> Not including this for now
 
 end

@@ -13,14 +13,7 @@ class Api::V1::Paths::BadgePaths
       define_basic_info :badge, :get
 
       # Parameters
-      parameter do
-        key :name, :id
-        key :format, :id
-        key :in, :path
-        key :description, 'The id of the badge record'
-        key :required, true
-        key :type, :string
-      end
+      parameter :badge_id
 
       # Responses
       define_success_response :badge, 200, include: [:relationships]
@@ -42,16 +35,10 @@ class Api::V1::Paths::BadgePaths
       define_basic_info :badge, 'Get list of badges current user has joined', nil, 'current_user:read'
       
       # Parameters
-      parameter do
-        key :name, 'filter[status]'
-        key :in, :query
-        key :description, 'Includes only badges that current user has earned (`holder`) or not earned (`seeker`)'
-        key :required, false
-        key :type, :string
-        key :enum, [:all, :seeker, :holder]
-        key :default, :all
-      end
-      define_index_parameters :badge
+      parameter :badge_membership_status
+      parameter :badge_sort
+      parameter :page_number
+      parameter :page_size
 
       # Responses
       define_success_response :badge, include: [:relationships]
@@ -69,7 +56,7 @@ class Api::V1::Paths::BadgePaths
       extend Api::V1::Helpers::OperationFormat::BatchOperation
 
       # Basic Info
-      define_basic_info :endorsement, :create, 'Batch award a badge', :badge, ['portfolios:review'],
+      define_basic_info :endorsement, :create, 'Batch award a badge', :badge,
         "Batch operation for creating up to #{APP_CONFIG['max_import_list_size']} endorsements with a single request. " \
         "single request. Creating an endorsement automatically awards the badge.\n\nIn order to use this operation you must specify the " \
         "badge awardees by email address. They will automatically be added to the group if they are not yet members. They will " \
@@ -86,14 +73,7 @@ class Api::V1::Paths::BadgePaths
         "For details on the possible result types refer to the response examples or the `EndorsementResultAttributes` schema definition."
       
       # Parameters
-      parameter do
-        key :name, :badge_id
-        key :format, :id
-        key :in, :path
-        key :description, 'The id of the badge record'
-        key :required, true
-        key :type, :string
-      end
+      parameter :badge_badge_id
       define_post_parameters model: :endorsement, meta_properties: {
         send_emails_to_new_users: { 
           type: :boolean, 
@@ -127,24 +107,11 @@ class Api::V1::Paths::BadgePaths
       define_basic_info :portfolio, 'Get list of portfolios for selected badge', :badge
       
       # Parameters
-      parameter do
-        key :name, :badge_id
-        key :format, :id
-        key :in, :path
-        key :description, 'The id of the badge record'
-        key :required, true
-        key :type, :string
-      end
-      parameter do
-        key :name, 'filter[status]'
-        key :in, :query
-        key :description, 'Includes only portfolios with the specified status'
-        key :required, false
-        key :type, :string
-        key :enum, [:all, :draft, :requested, :endorsed]
-        key :default, :all
-      end
-      define_index_parameters :portfolio
+      parameter :badge_badge_id
+      parameter :portfolio_status
+      parameter :portfolio_sort
+      parameter :page_number
+      parameter :page_size
 
       # Responses
       define_success_response :portfolio, include: [:relationships]
@@ -169,24 +136,8 @@ class Api::V1::Paths::BadgePaths
         'If the specified user does not exist in the system or if there is no badge portfolio for them yet you will get a 404 response.'
 
       # Parameters
-      parameter do
-        key :name, :badge_id
-        key :format, :id
-        key :in, :path
-        key :description, 'The id of the badge record'
-        key :required, true
-        key :type, :string
-      end
-      parameter do
-        key :name, :key
-        key :in, :path
-        key :description, "You can query user records using any of the following keys:\n" \
-          "- Record id\n" \
-          "- Username (case insensitive)\n" \
-          "- Email address (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
+      parameter :badge_badge_id
+      parameter :user_key
 
       # Responses
       define_success_response :portfolio, 200, include: [:relationships]

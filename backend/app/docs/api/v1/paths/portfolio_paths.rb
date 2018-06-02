@@ -13,14 +13,7 @@ class Api::V1::Paths::PortfolioPaths
       define_basic_info :portfolio, :get
 
       # Parameters
-      parameter do
-        key :name, :id
-        key :format, :id
-        key :in, :path
-        key :description, 'The id of the portfolio record'
-        key :required, true
-        key :type, :string
-      end
+      parameter :portfolio_id
 
       # Responses
       define_success_response :portfolio, 200, include: [:relationships]

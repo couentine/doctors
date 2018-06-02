@@ -7,19 +7,20 @@ module Api::V1::Helpers::OperationFormat::RecordItem
     camelized_model = model.to_s.camelize
     uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
     spaced_model = model.to_s.gsub('_', ' ')
-    permission_type = (verb == :get) ? 'read' : 'write'
-    permissions = ["- `#{model.to_s.pluralize}:#{permission_type}`"]
-    permissions << "- `#{parent_model.to_s.pluralize}:read`" if parent_model.present?
 
     if parent_model.present?
       camelized_parent_model = parent_model.to_s.camelize
       uncapitalized_camelized_parent_model = camelized_parent_model[0, 1].downcase + camelized_parent_model[1..-1]
-    end
 
-    if parent_model.present?
       key :operationId, "#{verb.to_s}#{camelized_parent_model}#{camelized_model}"
     else
       key :operationId, "#{verb.to_s}#{camelized_model}"
+    end
+    
+    if parent_model.present? && (verb == :create)
+      permissions = ApplicationPolicy.get_action_permissions(parent_model, model, verb).map{ |item| "- `#{item}`" }
+    else
+      permissions = ApplicationPolicy.get_action_permissions(model, verb).map{ |item| "- `#{item}`" }
     end
     
     if summary.blank?
@@ -27,11 +28,11 @@ module Api::V1::Helpers::OperationFormat::RecordItem
       when :get
         key :summary, "Get #{spaced_model} by id"
       when :create
-        key :summary, "Create a new #{spaced_model} record"
+        key :summary, "Create a new #{spaced_model}"
       when :update
-        key :summary, "Update an existing #{spaced_model} record by id"
+        key :summary, "Update an existing #{spaced_model} by id"
       when :delete
-        key :summary, "Delete an existing #{spaced_model} record by id"
+        key :summary, "Delete an existing #{spaced_model} by id"
       end
     else
       key :summary, summary
@@ -75,6 +76,12 @@ module Api::V1::Helpers::OperationFormat::RecordItem
         end
       end
 
+    end
+  end
+
+  def define_successfully_deleted_response(model, response_code: 204)
+    response response_code do
+      key :description, "The #{model.to_s} was successfully deleted"
     end
   end
 

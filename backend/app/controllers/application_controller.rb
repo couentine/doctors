@@ -21,12 +21,37 @@ class ApplicationController < ActionController::Base
   end
 
   def render_404(exception)
+    if request.path.starts_with?('/api/')
+      return render_single_error_json_api(
+        status: 404, 
+        title: 'Not found', 
+        detail: 'The specified path could not be found'
+      )
+    end
+    
     @not_found_path = exception.message
     respond_to do |format|
       format.html { render template: 'errors/not_found', layout: 'layouts/legacy', 
         status: 404 }
       format.all { render nothing: true, status: 404 }
     end
+  end
+
+  # This renders a JSON API formatted error message from a single string.
+  # For rendering a list of active model errors use the `render_field_errors` method below
+  def render_single_error_json_api(status: 500, title: 'Server error', detail: nil, meta: nil)
+    render json: {
+      errors: [
+        {
+          status: status,
+          title: title,
+          detail: detail
+        }
+      ],
+      jsonapi: {
+        version: '1.0'
+      }
+    }, status: status
   end
  
   def render_500(exception)
@@ -162,7 +187,7 @@ class ApplicationController < ActionController::Base
 private
 
   def log_activity
-    current_user.log_activity if current_user
+    current_user.log_activity if current_user.present?
   end
 
 protected

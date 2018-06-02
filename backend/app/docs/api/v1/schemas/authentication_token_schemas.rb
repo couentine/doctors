@@ -1,97 +1,49 @@
-class Api::V1::Schemas::AuthenticationTokenSchemas
-  include Swagger::Blocks
+class Api::V1::Schemas::AuthenticationTokenSchemas < Api::V1::Schemas::ApiSchema
 
-  #=== AUTHENTICATION TOKEN ATTRIBUTES ===#
+  model :authentication_token
 
-  swagger_schema :AuthenticationTokenOutputAttributes do
-    extend Api::V1::Helpers::SchemaHelpers::CommonDocumentFields
+  #=== FIELDS ===#
 
-    key :type, :object
-    
-    property :value do
-      key :type, :string
-      key :description, 'The authentication token value which should be passed to the api'
-    end
-    
-    property :permission_sets do
-      key :type, :array
-      key :description, 'List of permissions which have been granted for this authentication token'
+  field :user_id, [:string, :id],
+    description: 'The id of the authenticating user account to which the token is linked'
 
-      items do
-        key :type, :string
-        key :enum, ApplicationPolicy::PERMISSION_SETS.keys
-      end
-    end
+  field :name, :string, 
+    description: 'User-specified name which helps to differentiate tokens',
+    max_from: :name,
+    example: 'LMS Integration'
 
-    property :request_count do
-      key :type, :integer
-      key :description, 'The total number of API requests which have been authenticated with this token'
-    end
-    property :last_used_at do
-      key :type, :string
-      key :format, 'date-time'
-      key :description, 'Timestamp of the last request authenticated with this token'
-    end
-    property :ip_address do
-      key :type, :string
-      key :description, 'IP address of the last request authenticated with this token'
-    end
-    property :user_agent do
-      key :type, :string
-      key :description, 'HTTP user agent value of the last request authenticated with this token'
-    end
-  end
+  field :value, :string,
+    description: 'The authentication token value which should be passed to the api'
 
-  #=== AUTHENTICATION TOKEN OUTPUT ATTRIBUTES ===#
+  field :permissions, :array,
+    description: 'List of permissions which have been granted for this authentication token',
+    enum: ApplicationPolicy::API_PERMISSIONS.keys
 
-  swagger_schema :AuthenticationTokenInputAttributes do
-    key :type, :object
+  field :request_count, :integer,
+    description: 'The total number of API requests which have been authenticated with this token'
 
-    property :user_id do
-      key :type, :string
-      key :format, :id
-      key :description, 'The id of the user record to which this token should authenticate. Must be either the current user or a group ' \
-        'user for a group which the current user is an admin of.'
-    end
-    property :permission_sets do
-      key :type, :array
-      key :description, 'List of permissions which have been granted for this authentication token'
+  field :last_used_at, [:string, :'date-time'],
+    description: 'Timestamp of the last request authenticated with this token'
 
-      items do
-        key :type, :string
-        key :enum, ApplicationPolicy::PERMISSION_SETS.keys
-      end
-    end
-  end
+  field :ip_address, :string,
+    description: 'IP address of the last request authenticated with this token'
 
-  #=== AUTHENTICATION TOKEN META ===#
+  field :user_agent, :string,
+    description: 'HTTP user agent value of the last request authenticated with this token'
   
-  swagger_schema :AuthenticationTokenMeta do
-    key :type, :object
+  field :creator_id, [:string, :id],
+    description: "The user id of the token's creator"
 
-    property :current_user do
-      key :type, :object
-      
-      property :can_see_record do
-        key :type, :boolean
-        key :description, 'True if the current user is able to see the authentication token'
-      end
-      property :can_delete_record do
-        key :type, :boolean
-        key :description, 'True if the current user is able to delete the authentication token'
-      end
-    end
-  end
+  #=== SCHEMAS ===#
 
-  #=== AUTHENTICATION TOKEN RELATIONSHIPS ===#
+  attributes_schema :output
+  
+  attributes_schema :input
+  
+  meta_schema :creator
 
-  swagger_schema :AuthenticationTokenRelationships do
-    extend Api::V1::Helpers::SchemaHelpers::RelationshipsList
-
-    key :type, :object
-
-    define_relationship_property :user, 'The authenticating user account to which the token is linked'
-    define_relationship_property :creator, 'The user account which created the token'
-  end
+  relationship_schemas \
+    user: 'The authenticating user account to which the token is linked',
+    creator: 'The user account which created the token'
 
 end

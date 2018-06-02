@@ -26,6 +26,30 @@ module Api::V1::Helpers::RootHelpers
     key :produces, ['application/json']
   end
   
+  #=== SHARED PARAMETERS ===#
+
+  SHARED_PARAMETER_MODELS = [:shared]
+
+  def define_shared_parameters(*models)
+    (SHARED_PARAMETER_MODELS + models).map do |model_name|
+      "Api::V1::Parameters::#{model_name.to_s.camelize}Parameters".constantize
+    end.each do |parameters_class|
+      parameters_class.parameters.each do |parameter_spec|
+        parameter parameter_spec[:name] do
+          key :name, parameter_spec[:parameter_key]
+          key :in, parameter_spec[:in]
+          key :description, parameter_spec[:description]
+          key :required, parameter_spec[:required]
+          key :type, parameter_spec[:type]
+          key :enum, parameter_spec[:enum] if parameter_spec[:enum].present?
+          key :default, parameter_spec[:default] if parameter_spec[:default].present?
+          key :maximum, parameter_spec[:maximum] if parameter_spec[:maximum].present?
+          key :minimum, parameter_spec[:minimum] if parameter_spec[:minimum].present?
+        end
+      end
+    end
+  end
+
   #=== MODEL TAGS ===#
 
   def define_model_tags(*models)
@@ -80,8 +104,8 @@ module Api::V1::Helpers::RootHelpers
           "The endorsement operations enable one-step awarding of a badge by providing an email address as the unique identifier of " \
           "the intended recipient. Note that this method of badge awarding can result in a badge holder portfolio which has no evidence " \
           "other than the endorsement itself. It is therefore recommended to use other techniques which result in the creation of a more " \
-          "robust evidence profile.\n\n" \
-          \
+          "robust evidence profile.\n" \
+          "\n" \
           "When a badge is awarded via pre-emptive endorsement there are several possible outcomes:\n" \
           "- **New User Invitation:** If the email address does not correspond to an existing Badge List user account, the user will be " \
           "invited to sign up and will be added to the group's list of 'Invited Members'. The badge endorsement will be stored along with " \
@@ -108,6 +132,47 @@ module Api::V1::Helpers::RootHelpers
         key :description, 'Every time a user joins a badge, a portfolio is created. The portfolio acts as a container for the evidence ' \
           'items which get posted (as entries). The portfolio also has a `status` which keeps track of where the user is in the feedback ' \
           'process.'
+      end
+    end
+    
+    # APP
+    if models.include? :app
+      tag do
+        key :name, 'appModel'
+        key :'x-displayName', 'Apps'
+        key :'x-blType', 'model'
+        key :description, "Apps are a new object in Badge List which is currently under active development. " \
+          "Check back for more details soon.\n" \
+          "\n" \
+          "Apps exist to create an easy way to integrate external applications into the platform. The primary role of an app is to " \
+          "create activity which is linked to users and groups. In order to maintain strict privacy controls, all app activity is " \
+          "managed by memberships between the app and each user and group for which the app creates data."
+      end
+    end
+    
+    # APP USER MEMBERSHIP
+    if models.include? :app_user_membership
+      tag do
+        key :name, 'appUserMembershipModel'
+        key :'x-displayName', 'App User Memberships'
+        key :'x-blType', 'model'
+        key :description, 'The app user membership record allows users to manage their preferences for a given app. It has a two-sided ' \
+          'approval process which allows the membership to be denied by either side. The membership record itself typically persists ' \
+          'even after a membership is disabled by one or both sides, helping the app remember that it is no longer allowed to ' \
+          'post data for a particular user.'
+      end
+    end
+    
+    # APP GROUP MEMBERSHIP
+    if models.include? :app_group_membership
+      tag do
+        key :name, 'appGroupMembershipModel'
+        key :'x-displayName', 'App Group Memberships'
+        key :'x-blType', 'model'
+        key :description, 'The app group membership record allows groups to manage their preferences for a given app. It has a two-sided ' \
+          'approval process which allows the membership to be denied by either side. The membership record itself typically persists ' \
+          'even after a membership is disabled by one or both sides, helping the app remember that it is no longer allowed to ' \
+          'post data for a particular group.'
       end
     end
     
@@ -203,20 +268,27 @@ module Api::V1::Helpers::RootHelpers
   #=== SECURITY ===#
 
   def define_security(*security_methods)
+    api_root = (Rails.env.production?) ? 'https://www.badgelist.com/api/v1' : "#{ENV['root_url']}/api/v1"
+    
     if security_methods.include? :authentication_token
       security_definition :authentication_token do
         key :type, :apiKey
         key :name, :token
-        key :description, "You must include your authentication token in every API request.\n\n" \
-          "For all types of requests, the token may be put in a `token` query parameter:\n" \
+        key :description, "You must include your authentication token in every API request. You have three options.\n\n" \
+          "**Option 1:** Include an HTTP header called `token`.\n" \
           "```shell\n" \
-          "curl -x GET \"https://www.badgelist.com/api/v1/badges?token=271b8c2395421f5205bf709eLLXUHd1lQv4DbaQzWZzCh8OQmXzLVh\"\n" \
+          "curl -H \"token: 271b8c2395421f5205bf709eLLXUHd1lQv4DbaQzWZzCh8OQmXzLVh\" -x GET \"#{api_root}/badges\"\n"\
           "```\n\n" \
-          "For requests with a JSON body you may alternately include the token at the root level of JSON document:\n" \
+          "**Option 2:** Include a `token` query parameter.\n" \
+          "```shell\n" \
+          "curl -x GET \"#{api_root}/badges?token=271b8c2395421f5205bf709eLLXUHd1lQv4DbaQzWZzCh8OQmXzLVh\"\n" \
+          "```\n\n" \
+          "**Option 3:** Include a `token` key at the root level of the JSON request body object. (Only possible for requests which " \
+          "have a request body.)\n" \
           "```shell\n" \
           "curl \n" \
           "  -H \"Content-Type: application/json\" \n" \
-          "  -X POST https://www.badgelist.com/api/v1/badges \n" \
+          "  -X POST #{api_root}/badges \n" \
           "  -d '{\n" \
           "    \"token\": \"271b8c2395421f5205bf709eLLXUHd1lQv4DbaQzWZzCh8OQmXzLVh\",\n" \
           "    \"data\": {\n" \
@@ -224,7 +296,7 @@ module Api::V1::Helpers::RootHelpers
           "    }\n" \
           "  }'\n" \
           "```"
-        key :in, :query
+        key :in, :header
       end
     end
 

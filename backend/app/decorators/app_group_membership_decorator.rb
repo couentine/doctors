@@ -31,13 +31,14 @@ class AppGroupMembershipDecorator < SimpleDelegator
   # Accepted item types: group, group change decorator, group id/string
   # Accepted membership_status values: :active, :pending, :disabled, :any
   def has_group_membership?(item, membership_status = :active)
-    item = BSON::ObjectId.from_string(item) if item.class.to_s == String
+    return false if item.nil?
 
-    case item.class.to_s
-    when 'Group', 'GroupChangeDecorator'
+    if item.class.to_s.starts_with? 'Group'
       this_group_id = item.id
-    when 'BSON::ObjectId'
+    elsif item.class.to_s == 'BSON::ObjectId'
       this_group_id = item
+    elsif item.class.to_s == 'String'
+      this_group_id = BSON::ObjectId.from_string(item)
     else
       raise ArgumentError.new("Invalid type #{item.class.to_s} for item. (Accepted types are Group, ObjectId or String.)")
     end
@@ -104,23 +105,23 @@ class AppGroupMembershipDecorator < SimpleDelegator
     return group_membership
   end
 
-  # Pass a newly created or updated group membership and this method updates the group relations which mirror the memberships.
+  # Pass a newly created, updated or destroyed group membership and this method updates the group relations which mirror the memberships.
   def update_group_relations_with(group_membership, current_user)
     group = group_membership.group # shortcut
 
-    if group_membership.active?
+    if group_membership.active? && !group_membership.destroyed?
       self.groups << group unless groups.include?(group)
     else
       self.groups.delete(group) if groups.include?(group)
     end
 
-    if group_membership.pending?
+    if group_membership.pending? && !group_membership.destroyed?
       self.pending_groups << group unless pending_groups.include?(group)
     else
       self.pending_groups.delete(group) if pending_groups.include?(group)
     end
 
-    if group_membership.disabled?
+    if group_membership.disabled? && !group_membership.destroyed?
       self.disabled_groups << group unless disabled_groups.include?(group)
     else
       self.disabled_groups.delete(group) if disabled_groups.include?(group)
@@ -136,10 +137,14 @@ class AppGroupMembershipDecorator < SimpleDelegator
 
     attr_accessor :parent_app
 
-    def initialize(group_membership, decorated_parent_app)
+    def initialize(group_membership, decorated_parent_app = nil)
       super(group_membership)
       
-      @parent_app = decorated_parent_app
+      @parent_app = decorated_parent_app || AppGroupMembershipDecorator.new(group_membership.app)
+    end
+
+    def save
+      raise ArgumentError.new('You must use save_as to save this item')
     end
 
     def save_as(current_user)
@@ -152,6 +157,21 @@ class AppGroupMembershipDecorator < SimpleDelegator
       super(current_user)
 
       @parent_app.update_group_relations_with self, current_user
+    end
+
+    def destroy
+      raise ArgumentError.new('You must use destroy_as to destroy this item')
+    end
+
+    def destroy_as(current_user)
+      if @parent_app.mandatory?
+        self.errors.add(:base, 'This app is part of the core Badge List platform, the membership cannot be deleted')
+        return false
+      end
+
+      return false if !super
+
+      @parent_app.update_group_relations_with(self, current_user)
     end
 
   end

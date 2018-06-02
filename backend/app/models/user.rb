@@ -60,6 +60,7 @@ class User
   has_many :created_groups,               inverse_of: :creator,         class_name: 'Group'
   has_many :owned_groups,                 inverse_of: :owner,           class_name: 'Group'
   has_many :owned_apps,                   inverse_of: :owner,           class_name: 'App'
+  has_many :created_apps,                 inverse_of: :creator,         class_name: 'App'
   has_many :created_badges,               inverse_of: :creator,         class_name: 'Badge'
   has_many :created_entries,              inverse_of: :creator,         class_name: 'Entry'
   has_many :owned_domains,                inverse_of: :owner,           class_name: 'Domain'

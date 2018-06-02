@@ -298,7 +298,7 @@ private
     @current_user_is_entry_creator = current_user && (current_user.id == @entry.creator_id)
     @visible_to_current_user = @badge_list_admin || @entry.visible_to?(current_user, @badge)
 
-    if current_user
+    if current_user.present?
       @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil 
     end
   end

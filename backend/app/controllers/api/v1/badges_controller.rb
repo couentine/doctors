@@ -19,31 +19,25 @@ class Api::V1::BadgesController < Api::V1::BaseController
   # This can be accessed via the my badges index (only available to logged in users) or via the group badges index (available to anyone who
   # can see that group).
   def index
-    # Determine mode we are in (group badge index or my badge index), then authorize the appropriate policy
+    skip_authorization
+
+    # Determine mode we are in (group badge index or my badge index), then authorize the appropriate policy and build query
     if params[:group_id].present?
-      @group = Group.find(params[:group_id]) rescue nil
-      if @group
-        authorize @group, :badges_index?
-      else
-        skip_authorization
-
-        return render_not_found
-      end
+      @group = Group.find(params[:group_id])
+      return render_not_found if @group.blank?
+      return render_not_authorized if !Pundit.policy(@current_user, @group).can_see_badges?
+      
+      badge_criteria = BadgePolicy::GroupScope.new(@current_user, @group.badges, @group).resolve.includes(:group)
     else
-      authorize :badge
-    end
-
-    # Build the core criteria based on the filter and on the current users permission (if relevant)
-    if @group
-      badge_criteria = BadgePolicy::GroupScope.new(@current_user, @group.badges, @group).resolve
-    else
+      return render_not_authorized if !Pundit.policy(@current_user, :badge).index?
+      
       load_filter MY_BADGES_INDEX_FILTER
       if @filter[:status] == 'seeker'
-        badge_criteria = Badge.where(:id.in => @current_user.learner_badge_ids)
+        badge_criteria = Badge.where(:id.in => @current_user.learner_badge_ids).includes(:group)
       elsif @filter[:status] == 'holder'
-        badge_criteria = Badge.where(:id.in => @current_user.expert_badge_ids)
+        badge_criteria = Badge.where(:id.in => @current_user.expert_badge_ids).includes(:group)
       else
-        badge_criteria = Badge.where(:id.in => @current_user.all_badge_ids)
+        badge_criteria = Badge.where(:id.in => @current_user.all_badge_ids).includes(:group)
       end
     end
     
@@ -56,27 +50,23 @@ class Api::V1::BadgesController < Api::V1::BaseController
     set_calculated_pagination_variables(@badges)
 
     @policy = Pundit.policy(@current_user, @badges)
-    render_json_api @badges, expose: { show_all_fields: true, meta_index: @policy.meta_index }
+    render_json_api @badges, expose: { policy_index: @policy.policy_index }
   end
 
   # Accessible via either getBadge or getGroupBadge
   def show
+    skip_authorization
     if params[:group_id].present?
       @badge = Badge.find(params[:group_id] + '.' + params[:id])
     else
       @badge = Badge.find(params[:id])
     end
+    return render_not_found if @badge.blank?
 
-    if @badge
-      authorize @badge # always returns true, fields are filtered in the serializer
-      
-      @policy = Pundit.policy(@current_user, @badge)
-      render_json_api @badge, expose: { show_all_fields: @policy.show_all_fields?, meta: @policy.meta }
-    else
-      skip_authorization
+    @policy = Pundit.policy(@current_user, @badge)
+    return render_not_authorized if !@policy.show?
 
-      render_not_found
-    end
+    render_json_api @badge, expose: { policy: @policy }
   end
 
 end

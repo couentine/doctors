@@ -34,23 +34,21 @@ class Api::V1::EndorsementsController < Api::V1::BaseController
   # BATCH MODE Returns a 202 response with the data of the created poller.
   # 
   def create
+    authorize :endorsement
+    
     @badge = Badge.find(params[:badge_id])
-    skip_authorization
+    return render_not_found if !@badge.present?
 
-    if @badge.present?
-      if !BadgePolicy.new(@current_user, @badge).bulk_award?
-        if @badge.group.has? :bulk_tools
-          return render_not_authorized
-        else
-          return render_not_authorized('The group to which this badge belongs does not have the bulk tools feature.')
-        end
+    if !BadgePolicy.new(@current_user, @badge).create_endorsement?
+      if @badge.group.has? :bulk_tools
+        return render_not_authorized
+      else
+        return render_not_authorized('The group to which this badge belongs does not have the bulk tools feature.')
       end
-    else
-      return render_not_found
     end
 
     # Create a deserializer
-    deserializer = Api::V1::DeserializableEndorsement.new(params)
+    deserializer = Api::V1::DeserializableEndorsement.new(params, [:email, :summary, :body]) #==> Endorsement policy is wonky, hard code
 
     # Now determine the mode
     if deserializer.endorsements.present?

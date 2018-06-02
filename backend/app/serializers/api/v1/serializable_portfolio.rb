@@ -1,41 +1,41 @@
 class Api::V1::SerializablePortfolio < Api::V1::SerializableDocument
-  extend JSONAPI::Serializable::Resource::ConditionalFields
+  type :portfolio
 
-  type 'portfolio'
+  #=== FIELDS ===#
 
-  attribute :status
+  field :status
   
-  attribute :badge_id do
-    @object.badge_id.to_s
-  end
-  attribute :user_id do
-    @object.user_id.to_s
-  end
-  attribute :user_name
-  attribute :user_username do 
-    @object.user_username_with_caps 
-  end
+  field :badge_id
+  field :user_id
+  field :user_name
+  field :user_username,                 from: :user_username_with_caps 
 
-  attribute :show_on_badge
-  attribute :show_on_profile
+  field :show_on_badge
+  field :show_on_profile
+  field :receive_feedback_request_emails, 
+    from: :receive_validation_request_emails
 
-  attribute :date_started
-  attribute :date_requested
-  attribute :date_withdrawn
-  attribute :date_issued
-  attribute :date_retracted
-  attribute :date_originally_issued
+  field :retracted
+
+  field :started_at,                    from: :date_started,          convert: :iso8601
+  field :requested_at,                  from: :date_requested,        convert: :iso8601
+  field :withdrawn_at,                  from: :date_withdrawn,        convert: :iso8601
+  field :issued_at,                     from: :date_issued,           convert: :iso8601
+  field :retracted_at,                  from: :date_retracted,        convert: :iso8601
+  field :originally_issued_at,          from: :date_originally_issued,convert: :iso8601
+
+  #=== LINKS ===#
   
-  link :self do "/api/v1/portfolios/#{@object.id.to_s}" end
+  link :self do 
+    "/api/v1/portfolios/#{@object.id.to_s}" 
+  end
   link :self_web do 
     @object.full_url(@group || @object.badge.group, @badge || @object.badge, @user || @object.user)
   end
 
-  belongs_to :badge do
-    link :self do "/api/v1/badges/#{@object.badge_id.to_s}" end
-  end
-  belongs_to :user do
-    link :self do "/api/v1/users/#{@object.user_id.to_s}" end
-  end
+  #=== RELATIONSHIPS ===#
 
+  relationships \
+    :user,
+    :badge
 end
