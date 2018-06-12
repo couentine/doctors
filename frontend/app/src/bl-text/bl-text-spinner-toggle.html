@@ -12,7 +12,6 @@
 
 This component either displays the contents of the inserted slot or displays an inline block spinner.
 It was designed to be used inside of a paper-button when you want the button to display a spinner after it is clicked.
-Any classes applied to this component are also applied to the child spinner.
 
 Usage: `<bl-text-spinner-toggle spinner="[[badge.backend.status.isLoading]]">Text goes here</bl-text-spinner-toggle>`
 
@@ -54,7 +53,7 @@ CSS Variable          | Description                           | Default Value
     <div id="content">
       <slot></slot>
       <div id="spinnerWrapper" hidden="[[!spinner]]">
-        <paper-spinner-lite class$="[[class]]" active="[[spinner]]"></paper-spinner-lite>
+        <paper-spinner-lite active="[[spinner]]"></paper-spinner-lite>
       </div>
     </div>
 

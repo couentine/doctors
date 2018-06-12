@@ -62,29 +62,31 @@ It also provides methods for adding toast and opening dialogs.
       // #=== PUBLIC HELPER & UTILITY METHODS ===#
 
       /**
-       * This is a simple utility method to check if two arguments are equal. It is designed to be used in template data bindings.
-       * If you make sure that one of the arguments is dynamic it allows you to ensure that the binding is updated, rather than being
-       * set statically on page load (which is what happens with normal functional bindings).
+       * Checks if the first passed argument (`testValue`) is equal to any of the remaining arguments (`matchList`). You can use this to 
+       * check equality between two arguments or to check if the first argument is "in" the list of remaining arguments. If you make sure 
+       * that one of the arguments is dynamic it allows you to ensure that the binding is updated, rather than being set statically on 
+       * page load (which is what happens with normal functional bindings).
        */
-      equal(arg1, arg2) {
-        return arg1 == arg2;
-      }
-
-      /**
-       * This is a simple utility method to check if the first passed argument (`testValue`) is equal to any of the remaining arguments
-       * (`matchList`).
-       */
-      in(testValue, ...matchList) {
+      equal(testValue, ...matchList) {
         return matchList.includes(testValue);
       }
 
       /**
-       * This is a simple utility methods which evaluates to true if all of the passed arguments evaluate to true.
+       * Returns true if all of the passed arguments evaluate to true.
        */
       and(...args) {
         return args.reduce((returnValue, item) => {
-          return returnValue && (item ? true : false);
+          return returnValue && !!item;
         }, true);
+      }
+
+      /**
+       * Returns true if any of the passed arguments evaluate to true.
+       */
+      or(...args) {
+        return args.reduce((returnValue, item) => {
+          return returnValue || !!item;
+        }, false);
       }
 
       /**

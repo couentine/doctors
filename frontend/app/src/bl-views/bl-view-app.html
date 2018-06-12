@@ -388,7 +388,7 @@ The home page for logged in users.
 
               <!-- #=== MEMBERSHIP NON-DESTRUCTIVE ACTIONS ===# -->
               <p class="dialogBodyActions">
-                <paper-button hidden="[[!in(membershipMode, 'pendingUser', 'deniedUser')]]" class="light-blue borderless" 
+                <paper-button hidden="[[!equal(membershipMode, 'pendingUser', 'deniedUser')]]" class="light-blue borderless" 
                     on-tap="enableMembership" disabled="[[currentUserMembership.backend.status.isLoading]]">
                   <bl-text-spinner-toggle spinner="[[currentUserMembership.backend.status.isLoading]]">
                     <span hidden="[[!equal(membershipMode, 'pendingUser')]]">Accept App Invitation</span>

@@ -280,7 +280,7 @@ The home page for logged in users.
               
             <!-- #=== EMAIL VERIFICATION NEEDED ===# -->
             <bl-label class="orange" 
-                hidden="[[!currentUser.backend.status.hasContent || !currentUser.attributes.email_verification_needed]]">
+                hidden="[[!and(currentUser.backend.status.hasContent, currentUser.attributes.email_verification_needed)]]">
               <i class="icon-envelope-warning"></i>
               Your email address needs verification
             </bl-label>
