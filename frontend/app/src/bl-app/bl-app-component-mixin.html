@@ -15,8 +15,13 @@ It also provides methods for adding toast and opening dialogs.
           /** Links to the `<bl-app>` component. */
           app: Object,
           
-          /** The details of the logged in user provided from the backend on initial page load. Null if logged out. */
-          currentUser: Object
+          /** This can optionally be set by the parent if the component needs access to the current user. */
+          currentUser: Object,
+
+          assetLoadingComplete: {
+            type: Boolean,
+            value: false,
+          },
 
         };
       }
@@ -27,15 +32,106 @@ It also provides methods for adding toast and opening dialogs.
         if (super.connectedCallback) super.connectedCallback();
 
         this.app = document.querySelector('bl-app');
+      }
 
-        // Add a listener for when the current user is set
-        this.app.addEventListener('current-user-changed', e => this._appCurrentUserChanged(e));
+      /** Overload this event to run code when the assets are loaded. (Remember to run `super.assetsLoaded()`). */
+      assetsLoaded() {
+        this.assetLoadingComplete = true;
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      hasFlag(flag) {
+        return this.app && this.app.manifest && this.app.manifest.flags && this.app.manifest.flags.includes(flag);
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
 
-      _appCurrentUserChanged(e) {
-        this.currentUser = this.app.currentUser;
+      static get observers() {
+        return [
+          '_appAssetsChanged(app.manifest.assets)'
+        ]
+      }
+
+      _appAssetsChanged(e) {
+        if (this.app && this.app.manifest && this.app.manifest.assets && !this.assetLoadingComplete) {
+          this.assetsLoaded();
+        }
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /**
+       * This is a simple utility method to check if two arguments are equal. It is designed to be used in template data bindings.
+       * If you make sure that one of the arguments is dynamic it allows you to ensure that the binding is updated, rather than being
+       * set statically on page load (which is what happens with normal functional bindings).
+       */
+      equal(arg1, arg2) {
+        return arg1 == arg2;
+      }
+
+      /**
+       * This is a simple utility method to check if the first passed argument (`testValue`) is equal to any of the remaining arguments
+       * (`matchList`).
+       */
+      in(testValue, ...matchList) {
+        return matchList.includes(testValue);
+      }
+
+      /**
+       * This is a simple utility methods which evaluates to true if all of the passed arguments evaluate to true.
+       */
+      and(...args) {
+        return args.reduce((returnValue, item) => {
+          return returnValue && (item ? true : false);
+        }, true);
+      }
+
+      /**
+       * This calls the `path` method on the parent app.
+       * 
+       * USAGE:
+       * appPath('session.new')
+       * appPath('appUserMembership.new')
+       * appPath('user.appUserMembership.new')
+       * appPath('user.get', '[user_key]')
+       * appPath('group.badge.get', '[badge_key]', '[parent_group_key]')
+       */
+      appPath(...args) {
+        if (!this.app || (args.length == 0)) {
+          return null;
+        } else {
+          var actionPath = args[0].split('.');
+          if (actionPath.length < 2) throw 'The action path has to have at least two items';
+          if (actionPath.length > 3) throw 'The action path cannot have more than three items';
+          
+          var model = actionPath[actionPath.length - 2];                      //==> second from the last
+          var parentModel = (actionPath.length == 3) ? actionPath[0] : null;  //==> first item if there are three, otherwise blank
+          var verb = actionPath[actionPath.length - 1];                       //==> last
+
+          var key = args[1];
+          var parentKey = args[2];
+
+          return this.app.path({
+            verb: verb,
+            model: model,
+            parentModel: parentModel,
+            key: key,
+            parentKey: parentKey,
+          });
+        }
+      }
+
+      /** Capitalizes the first character of the passed string */
+      upperCaseFirstCharacter(s) {
+        return (s) ? s[0].toUpperCase() + s.substr(1) : null;
+      }
+
+      /** Converts `app_user_membership` to `appUserMembership` (or `AppUserMembership` if upperCaseFirst is set to true). */
+      snakeCaseToCamelCase(snakeCaseString, upperCaseFirst = false) {
+        var returnValue = snakeCaseString.replace(/_([a-z])/gi, function (match) { return match[1].toUpperCase(); });
+
+        return upperCaseFirst ? this.upperCaseFirstCharacter(returnValue) : returnValue;
       }
 
     }

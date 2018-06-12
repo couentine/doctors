@@ -15,6 +15,14 @@ class Api::V1::Schemas::UserSchemas < Api::V1::Schemas::ApiSchema
       'username, email hash and image will be visible to users without access to see the domain.',
     example: false
 
+  field :email_verification_needed, :boolean,
+    description: "True if the user's email address needs to be confirmed.",
+    example: false
+
+  field :email_inactive, :boolean,
+    description: "True if the user's email address has been blocked.",
+    example: false
+
   field :email_hash, :string,
     description: "A hashed version of the user's email address",
     example: 'sha256$5c30dbe2195a1a8aa6e2575e8bf33f5a1860370df5b7f07096baffbe26f21e29'
@@ -72,8 +80,16 @@ class Api::V1::Schemas::UserSchemas < Api::V1::Schemas::ApiSchema
     max_from: :website,
     example: 'An American astronaut and aeronautical engineer. First person to walk on the Moon.'
 
+  field :badge_count, :integer,
+    description: 'The total number of badges awarded to this user',
+    example: 235
+
   field :last_active, [:string, :date],
     description: 'The date on which this user was last active'
+
+  field :async_poller_id, [:string, :id],
+    description: 'When async updates are pending this contains the id of the poller record which can be used to track the ' \
+      'background process'
 
   #=== SCHEMAS ===#
 

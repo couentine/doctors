@@ -150,6 +150,29 @@ class Api::V1::Paths::UserPaths
 
   end
 
+  swagger_path '/users/{user_key}/app_user_memberships/{key}' do
+
+    #=== GET USER APP USER MEMBERSHIP ===#
+
+    operation :get do
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
+
+      # Basic Info
+      define_basic_info :app_user_membership, :get, 'Get membership by app key for specified user', :user
+      
+      # Parameters
+      parameter :user_user_key
+      parameter :app_key
+
+      # Responses
+      define_success_response :badge, 200, include: [:relationships]
+      define_unauthorized_response
+      define_not_found_response
+    end
+
+  end
+
   #=== INTERNAL-ONLY USER PATHS ===#
 
   class Internal < Api::V1::Paths::UserPaths

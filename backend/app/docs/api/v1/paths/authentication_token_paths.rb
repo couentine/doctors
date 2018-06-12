@@ -32,6 +32,7 @@ class Api::V1::Paths::AuthenticationTokenPaths
       
       # Parameters
       parameter :authentication_token_id
+      define_put_parameters :authentication_token
 
       # Responses
       define_success_response :authentication_token, 200, include: [:relationships]

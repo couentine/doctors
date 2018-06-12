@@ -1099,7 +1099,9 @@ namespace :db do
         print "-"
       else
         begin
-          app.create_user_membership user, app.proxy_user
+          aum = app.create_user_membership user, app.proxy_user
+          aum.created_at = user.created_at
+          aum.save_without_history
           print "."
         rescue => e
           print "!#{user.username || user.id.to_s}"
@@ -1121,7 +1123,9 @@ namespace :db do
         print "-"
       else
         begin
-          app.create_group_membership group, app.proxy_user
+          agm = app.create_group_membership group, app.proxy_user
+          agm.created_at = group.created_at
+          agm.save_without_history
           print "."
         rescue => e
           print "!#{group.url_with_caps}"

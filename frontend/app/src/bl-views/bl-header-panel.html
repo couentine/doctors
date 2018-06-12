@@ -39,6 +39,12 @@ It provides a sliding header panel and holds the page content.
           top: 0; right: 0; bottom: 0; left: 0;
         }
 
+      /* === FOOTER STYLES === */
+
+        bl-footer.full-bleed-true {
+          padding-top: 0;
+        }
+
       /* === COMPONENT STYLES === */
 
         #header {
@@ -86,7 +92,7 @@ It provides a sliding header panel and holds the page content.
     <div id="body" style$="padding-top: [[bodyPadding]]rem;">
       <slot name="content"></slot>
       <slot name="footer">
-        <bl-footer></bl-footer>
+        <bl-footer class$="full-bleed-[[fullBleedBody]]"></bl-footer>
       </slot>
     </div>
 
@@ -101,7 +107,7 @@ It provides a sliding header panel and holds the page content.
         <slot name="headerBottom"></slot>
         <slot name="leftNav"></slot>
         <slot name="rightNav">
-          <bl-header-nav-right id="rightNav"></bl-header-nav-right>
+          <bl-header-nav-right id="rightNav" current-user="[[currentUser]]"></bl-header-nav-right>
         </slot>
       </div>
     </div>
@@ -127,47 +133,47 @@ It provides a sliding header panel and holds the page content.
            */
           fullBleedBody: {
             type: Boolean,
-            value: false
+            value: false,
           },
 
           /* Returns `expanded`, `partial` or `condensed`. */
           headerStatus: {
             type: String,
             value: 'expanded',
-            notify: true
+            notify: true,
           },
 
           /* Between zero (fully expanded) and 1 (fully condensed). */
           condensedPercentage: {
             type: Number, 
             value: 0.0,
-            notify: true
+            notify: true,
           },
 
           /* Between zero (fully condensed) and 1 (fully expanded). */
           expandedPercentage: {
             type: Number, 
             value: 1.0,
-            notify: true
+            notify: true,
           },
           
           /* Current header height. In rem. */
           headerHeight: { 
             type: Number, 
             computed: '_headerHeight(condensedHeight, expandedHeight, condensedPercentage)',
-            notify: true
+            notify: true,
           },
 
           bodyPadding: {
             type: Number,
-            computed: '_bodyPadding(expandedHeight, fullBleedBody)'
+            computed: '_bodyPadding(expandedHeight, fullBleedBody)',
           },
 
           /* Used internally to track the scroll position. */
           _lastKnownScrollPosition: {
             type: Number,
             readOnly: true,
-            value: 0
+            value: 0,
           },
 
           /* Used internally to prevent unneccessary code execution while waiting for the scroll animation to paint. */
@@ -175,7 +181,7 @@ It provides a sliding header panel and holds the page content.
             type: Boolean,
             readOnly: true,
             value: false
-          }
+          },
 
         };
       }

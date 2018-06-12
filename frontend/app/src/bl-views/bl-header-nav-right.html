@@ -60,7 +60,8 @@ Custom property | Description | Default
           a#sign-in-link i { font-size: 2em; }
 
         #menuButtonWrapper {
-          border: 0.1em solid var(--link-color, var(--bl-grey-800));
+          border: 0.1em solid var(--avatar-border-color, var(--link-color, var(--bl-grey-400)));
+          background: var(--avatar-background, var(--bl-grey-200));
           border-radius: 500px;
           overflow: hidden;
           width: 1.8em;
@@ -108,42 +109,42 @@ Custom property | Description | Default
       
       <div id="menuButtonWrapper">
         <paper-menu-button horizontal-align="right" no-overlap>
-          <paper-icon-button class="menu-button" src="[[app.currentUser.avatar_image_medium_url]]" slot="dropdown-trigger">
+          <paper-icon-button class="menu-button" src="[[currentUser.attributes.image_medium_url]]" slot="dropdown-trigger">
           </paper-icon-button>
 
           <paper-listbox slot="dropdown-content">
-            <paper-item hidden="[[!app.currentUser.email_inactive]]" class="error">
-              <a href="/users/edit">
+            <paper-item hidden="[[!currentUser.attributes.email_inactive]]" class="error">
+              <a href$="[[appPath('currentUser.edit')]]">
                 <i class="icon-warning"></i> Email blocked
               </a>
             </paper-item>
             <paper-item>
-              <a href$="/u/[[app.currentUser.username_with_caps]]">
+              <a href$="[[appPath('user.show', currentUser.attributes.username)]]">
                 <i class="icon-shield-user"></i> Badge profile
               </a>
             </paper-item>
             <paper-item>
-              <a href="/report_results">
+              <a href$="[[appPath('reportResult.index')]]">
                 <i class="icon-file-spreadsheet"></i> Run reports
               </a>
             </paper-item>    
             <paper-item>
-              <a href="/users/edit">
+              <a href$="[[appPath('currentUser.edit')]]">
                 <i class="icon-user-gear"></i> Manage account
               </a>
             </paper-item>
             <paper-item>
-              <a href="/users/edit#upload-image">
+              <a href$="[[appPath('currentUser.edit')]]#upload-image">
                 <i class="icon-portrait"></i> Change image
               </a>
             </paper-item> 
-            <paper-item hidden="[[!app.currentUser.admin]]">
+            <paper-item hidden="[[!hasFlag('pat')]]">
               <a href="/a">
                 <i class="icon-wrench2"></i> Admin tools
               </a>
             </paper-item>
             <paper-item>
-              <a href="/users/logout" class="signout" data-method="delete">
+              <a href$="[[appPath('session.delete')]]" class="signout" data-method="delete">
                 <i class="icon-exit"></i> Sign out
               </a>
             </paper-item>
@@ -179,7 +180,7 @@ Custom property | Description | Default
       // #=== PROPERTY COMPUTER METHODS ===#
 
       _isLoggedIn(app) {
-        if (true && app && app.manifest && app.manifest.current_user && app.manifest.current_user.name)
+        if (true && app && app.manifest && app.manifest.current_user && app.manifest.current_user.id)
           return true;
         else
           return false;

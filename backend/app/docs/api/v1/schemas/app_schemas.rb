@@ -49,6 +49,11 @@ class Api::V1::Schemas::AppSchemas < Api::V1::Schemas::ApiSchema
     enum_from: :review_status,
     example: :approved
 
+  field :required, :boolean,
+    description: 'Indicates whether this app is a required part of the core Badge List platform. Required apps are built into the ' \
+      'platform and cannot be unjoined without deleting your user account.',
+    example: false
+
   field :description, [:string, :html],
     description: 'Longer HTML-formatted free text description of the app',
     max_from: :description,

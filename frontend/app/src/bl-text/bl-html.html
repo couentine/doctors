@@ -1,0 +1,57 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List HTML Outputter #
+
+This is a simple component which outputs HTML. This is required because Polymer does not natively support data binding output of 
+unescaped HTML.
+
+Usage: `<bl-html value="[[variable]]"></bl-html>`
+
+Note: This is, by design, a potential XSS vulnerability. It should only be used with clean HTML from the server, or with dirty HTML
+entered directly on the client.
+-->
+<dom-module id="bl-html">
+  <template>
+
+    <style include="bl-style-classes">
+        
+      :host { display: inline; }
+
+    </style>
+
+    <slot></slot>
+
+  </template>
+
+  <script>
+    class BlHtml extends Polymer.Element {
+      
+      static get is() { return 'bl-html'; }
+
+      static get properties() {
+        return {
+
+          value: {
+            type: String,
+            observer: '_valueChanged'
+          },
+
+        }
+      }
+
+      // #=== LISTENER & OBSERVER METHODS ===#
+
+      _valueChanged(newValue, oldValue) {
+        this.innerHTML = newValue;
+      }
+
+    }
+
+    window.customElements.define(BlHtml.is, BlHtml);
+  </script>
+</dom-module>

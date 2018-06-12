@@ -1,0 +1,103 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Date Time Formatter #
+
+This takes an ISO 8601 formatted date time string (the format provided by the API) and presents it in a readable format, adjusted to 
+the local time zone of the current browser.
+
+## Formats ##
+
+- dateTimeShort ==> '12/3/2021, 2:07 PM'
+- dateTimeLong ==> 'December 3, 2021, 2:07 PM'
+-->
+<dom-module id="bl-date-time">
+  <template>
+
+    <style include="bl-style-classes">
+        
+      :host {
+        display: inline-flex; /*==> required in order for there to be no gaps around the element when used inline */
+      }
+
+    </style>
+
+    <template is="dom-if" if="[[equal(format, 'dateTimeShort')]]">
+      [[parts.month]]/[[parts.day]]/[[parts.year]], [[parts.hour]]:[[parts.minuteText]] [[parts.periodText]]
+    </template>
+
+    <template is="dom-if" if="[[equal(format, 'dateTimeLong')]]">
+      [[parts.monthText]] [[parts.day]], [[parts.year]], [[parts.hour]]:[[parts.minuteText]] [[parts.periodText]]
+    </template>
+
+  </template>
+
+  <script>
+    class BlDateTime extends Polymer.Element {
+      
+      static get is() { return 'bl-date-time'; }
+
+      static get properties() {
+        return {
+
+          /** Set this to an iso 8601 date time string. */
+          value: String,
+
+          format: String,
+
+          /**
+           * This object contains the broken down parts of the the date time provided in value (after conversion to the local time zone).
+           * Example date time used for below examples: 12/3/2021 at 2:07 PM
+           *
+           * @property {number} month - Numeric month. (Example: `12`)
+           * @property {string} monthText - Name of the month written out in full. (Example: `December`)
+           * @property {number} day - Numeric day. (Example: `3`)
+           * @property {number} year - Numeric year. (Example: `2021`)
+           * @property {number} hour - Numeric hour. (Example: `2`)
+           * @property {number} minute - Numeric minute. (Example: `7`)
+           * @property {string} minuteText - Minute with leading zero. (Example: `07`)
+           * @property {string} periodText - AM/PM written in all caps. (Example: `PM`)
+           */
+          parts: {
+            type: Object,
+            computed: '_parts(value)',
+          },
+
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _parts(value) {
+        var dateValue = new Date(value);
+
+        return {
+          month: dateValue.getMonth() + 1,
+          monthText: 
+            ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+            [dateValue.getMonth()],
+          day: dateValue.getDate(),
+          year: dateValue.getFullYear(),
+          hour: (dateValue.getHours() > 12) ? (dateValue.getHours() - 12) : dateValue.getHours(),
+          minute: dateValue.getMinutes(),
+          minuteText: ((dateValue.getMinutes() < 10) ? '0' : '') + dateValue.getMinutes(),
+          periodText: (dateValue.getHours() < 12) ? 'AM' : 'PM',
+        };
+      }
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      /** Checks if the two arguments are equal. */
+      equal(arg1, arg2) {
+        return arg1 == arg2;
+      }
+
+    }
+
+    window.customElements.define(BlDateTime.is, BlDateTime);
+  </script>
+</dom-module>

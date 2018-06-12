@@ -29,6 +29,7 @@ class Api::V1::Paths::AppPaths
 
       # Basic Info
       define_basic_info :app, :update
+      define_put_parameters :app
       
       # Parameters
       parameter :app_key

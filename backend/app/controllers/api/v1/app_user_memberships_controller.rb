@@ -81,9 +81,20 @@ class Api::V1::AppUserMembershipsController < Api::V1::BaseController
     render_json_api @app_user_memberships, expose: { policy_index: @policy.policy_index }
   end
 
+  # This can be accessed via id from the root app user memberships route or via app key from the user subroute.
   def show
     skip_authorization
-    @app_user_membership = AppUserMembership.find(params[:id]) rescue nil
+
+    if params[:user_id].present?
+      @user = User.find(params[:user_id])
+      @app = App.find(params[:id])
+      return render_not_found if @user.blank? || @app.blank?
+      return render_not_authorized if !Pundit.policy(@current_user, @user).can_see_app_user_memberships?
+
+      @app_user_membership = @user.app_memberships.where(app_id: @app.id).first
+    else
+      @app_user_membership = AppUserMembership.find(params[:id]) rescue nil
+    end
     return render_not_found if @app_user_membership.blank?
 
     @policy = Pundit.policy(@current_user, @app_user_membership)
@@ -129,11 +140,17 @@ class Api::V1::AppUserMembershipsController < Api::V1::BaseController
     end
     @app_user_membership.validate
 
-    # The last step is to check that the app can actually be joined by outside users. This is only needed if the membership is being 
-    # created from the user side. If the membership is created from the app side then this user is an admin of the app.
-    if @app_user_membership.errors.empty? && (parent_relationship == :user) \
-        && !Pundit.policy(@current_user, @app_user_membership.app).join_as_user?
-      @app_user_membership.errors.add(:base, 'This app has a closed user membership and can only be joined by invitation')
+    # The last pre-saving step is only for memberships created from the user relationship. Now that we know the app is present, we can 
+    # check the user joinability setting. If it is closed then this app user membership creation request is invalid altogether.
+    # If it is by request only then we can create it. If it is open, then we can create it and automatically approve it right now.
+    if @app_user_membership.errors.empty? && (parent_relationship == :user)
+      if @app_user_membership.app.user_joinability == 'open'
+        @app_user_membership.app_approval_status = 'approved'
+      elsif @app_user_membership.app.user_joinability == 'by_request'
+        @app_user_membership.app_approval_status = 'requested'
+      else
+        @app_user_membership.errors.add(:base, 'This app has a closed user membership and can only be joined by invitation')
+      end
     end
 
     # Then do the save / render any errors
@@ -154,7 +171,7 @@ class Api::V1::AppUserMembershipsController < Api::V1::BaseController
     return render_not_authorized if !@policy.update?
 
     # AppUserMembershiply the field updates from the params and wrap it in the change decorator
-    @app = AppUserMembershipDecorator::UserMembershipDecorator.new(
+    @app_user_membership = AppUserMembershipDecorator::UserMembershipDecorator.new(
       Api::V1::DeserializableAppUserMembership.new(
         params, @policy.current_user_editable_fields, existing_document: @app_user_membership
       ).app_user_membership

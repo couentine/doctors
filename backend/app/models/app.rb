@@ -137,6 +137,8 @@ class App
     return MANDATORY_APPS.include? slug
   end
 
+  alias_method :required, 'mandatory?'
+
   def full_url
     "#{ENV['root_url'] || 'https://www.badgelist.com'}/apps/#{slug}"
   end

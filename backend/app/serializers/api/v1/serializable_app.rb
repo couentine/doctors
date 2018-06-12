@@ -11,6 +11,7 @@ class Api::V1::SerializableApp < Api::V1::SerializableDocument
 
   field :status
   field :review_status
+  field :required
   
   field :description
   field :organization

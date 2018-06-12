@@ -17,6 +17,7 @@
 <link rel="import" href="../bl-styles/fonts.html">
 <link rel="import" href="../bl-views/bl-view-badge-endorsements-add.html">
 <link rel="import" href="../bl-views/bl-view-home.html">
+<link rel="import" href="../bl-views/bl-view-app.html">
 
 <!--
 # Badge List App #
@@ -44,8 +45,22 @@ The mixin also provides various actions for interacting with the container. (Ref
         #toastContainer {
           display: block;
           position: fixed;
-          top: 2em; right: 0; left: 0;
+          bottom: 6rem;
+          right: 1rem;
+          left: 1rem;
           z-index: 150;
+        }
+        @media (min-width: 840px) {
+          #toastContainer {
+            bottom: 0.5rem;
+            right: 10rem;
+          }
+        }
+        @media (min-width: 1200px) {
+          #toastContainer {
+            left: 2rem;
+            bottom: 1.5rem;
+          }
         }
 
     </style>
@@ -55,24 +70,122 @@ The mixin also provides various actions for interacting with the container. (Ref
 
     <!-- #=== APP ROUTING ===# -->
     <app-location id="location" route="{{route}}" 
-      url-space-regex="(^/home$)|(^/[a-zA-Z0-9_-]{3,}/[a-zA-Z0-9_-]{3,}/endorsements/add)"></app-location>
+      url-space-regex="(^/home$)|(^/apps/[a-zA-Z0-9_-]+)|(^/[a-zA-Z0-9_-]{3,}/[a-zA-Z0-9_-]{3,}/endorsements/add)"></app-location>
     
-    <app-route id="homeViewRoute" active="{{homeViewActive}}" route="{{route}}" pattern="/home" title="Home - Badge List"></app-route>
-    <app-route id="groupRoute" route="{{route}}" pattern="/:slug" data="{{groupRouteData}}" tail="{{groupSubroute}}"></app-route>
-      <app-route id="badgeRoute" route="{{groupSubroute}}" pattern="/:slug" data="{{badgeRouteData}}" tail="{{badgeSubroute}}"></app-route>
-        <app-route id="addBadgeEndorsementsViewRoute" active="{{addBadgeEndorsementsViewActive}}" route="{{badgeSubroute}}" 
-          pattern="/endorsements/add" title="Bulk Award - [[badge.attributes.name]] - Badge List"></app-route>
+    <app-route
+      pattern="/home"
+      root-level
+      route="{{route}}"
+      id="homeViewRoute"
+      active="{{homeViewActive}}"
+    ></app-route>
+
+    <app-route
+      pattern="/apps/:key"
+      root-level
+      route="{{route}}"
+      id="appRoute"
+      active="{{appActive}}"
+      data="{{appRouteData}}"
+    ></app-route>
+    
+    <app-route
+      pattern="/:key"
+      route="{{route}}"
+      id="groupRoute"
+      data="{{groupRouteData}}"
+      tail="{{groupSubroute}}"
+    ></app-route>
+
+      <app-route
+        pattern="/:key"
+        route="{{groupSubroute}}"
+        id="groupBadgeRoute"
+        data="{{groupBadgeRouteData}}"
+        tail="{{groupBadgeSubroute}}"
+      ></app-route>
+
+        <app-route
+          pattern="/endorsements/add"
+          route="{{groupBadgeSubroute}}" 
+          id="addBadgeEndorsementsViewRoute"
+          active="{{addBadgeEndorsementsViewActive}}"
+        ></app-route>
     
     <!-- #=== APP BACKEND MODEL ITEMS ===# -->
-    <bl-backend-item id="backendGroup" target="{{group}}" model="group" key="[[filteredGroupKey]]"></bl-backend-item>
-    <bl-backend-item id="backendBadge" target="{{badge}}" model="badge" key="[[badgeRouteData.slug]]" parent-model="group"
-      parent-key="[[filteredGroupKey]]"></bl-backend-item>
-    <bl-poller id="userPoller" poller-id="{{userPollerId}}" target="{{userPoller}}"></bl-poller>
+    
+    <bl-backend-item 
+      model="user"
+      id="backendCurrentUser" 
+      target="{{currentUser}}" 
+      key="[[manifest.current_user.id]]"
+    ></bl-backend-item>
+    
+    <bl-backend-item
+      model="app"
+      id="backendApp"
+      target="{{appRecord}}"
+      key="[[appRouteData.key]]"
+    ></bl-backend-item>
+
+    <bl-backend-item
+      model="app_user_membership"
+      parent-model="user"
+      id="backendCurrentUserAppUserMemberhsip"
+      target="{{currentUserAppUserMembership}}"
+      key="[[appRouteData.key]]" 
+      parent-key="[[manifest.current_user.id]]"
+    ></bl-backend-item>
+
+    <bl-backend-item
+      model="group"
+      id="backendGroup"
+      target="{{group}}"
+      key="[[filteredGroupKey]]"
+    ></bl-backend-item>
+
+    <bl-backend-item
+      model="badge"
+      parent-model="group"
+      id="backendBadge"
+      target="{{groupBadge}}"
+      key="[[groupBadgeRouteData.key]]"
+      parent-key="[[filteredGroupKey]]"
+    ></bl-backend-item>
+
+    <bl-poller
+      id="userPoller" 
+      poller-id="{{userPollerId}}"
+      target="{{userPoller}}"
+    ></bl-poller>
 
     <!-- #=== APP VIEWS ===# -->
-    <bl-view-home id="homeView" active="{{homeViewActive}}"></bl-view-home>
-    <bl-view-badge-endorsements-add id="addBadgeEndorsementsView" active="{{addBadgeEndorsementsViewActive}}" group="{{group}}"
-      badge="{{badge}}"></bl-view-badge-endorsements-add>
+
+    <bl-view-home
+      id="homeView"
+      active="{{homeViewActive}}"
+      current-user="[[currentUser]]"
+      title="Home - Badge List"
+    ></bl-view-home>
+    
+    <bl-view-app
+      id="appView"
+      active="{{appActive}}"
+      app-record="{{appRecord}}"
+      current-user="[[currentUser]]"
+      current-user-membership="[[currentUserAppUserMembership]]"
+      title="[[appRecord.attributes.name]] App - Badge List"
+    ></bl-view-app>
+
+    <bl-view-badge-endorsements-add
+      id="addBadgeEndorsementsView"
+      active="{{addBadgeEndorsementsViewActive}}"
+      group="{{group}}"
+      badge="{{groupBadge}}"
+      current-user="[[currentUser]]"
+      title="Bulk Award - [[groupBadge.attributes.name]] - Badge List"
+      no-chat
+    ></bl-view-badge-endorsements-add>
 
     <!-- #=== TOAST CONTAINER ===# -->
     <div id="toastContainer"></div>
@@ -102,22 +215,24 @@ The mixin also provides various actions for interacting with the container. (Ref
           /** The manifest is required from the backend. It contains details of the logged in user and a CSRF token to use for forms. */
           manifest: {
             type: Object,
-            observer: '_manifestChanged'
+            observer: '_manifestChanged',
           },
 
           /** Automatically set to the current user from the manifest. */
           currentUser: {
             type: Object,
-            notify: true
+            notify: true,
           },
 
           /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
-          activeView: Object,
+          activeView: {
+            type: Object,
+          },
 
           /** True if Intercom is being used and has booted. */
           intercomLoaded: {
             type: Boolean,
-            value: false
+            value: false,
           },
 
           /** Used by userPoller dialog. */
@@ -126,51 +241,116 @@ The mixin also provides various actions for interacting with the container. (Ref
           /** Used by userPoller dialog. */
           userPoller: Object,
 
+          /** The app object which is currently active. Null if current view does not have a corresponding app. */
+          appRecord: Object,
+
+          /** Stores the current user's membership in appRecord, if present. */
+          currentUserAppUserMembership: Object,
+
           /** The group object which is currently active. Null if current view does not have a corresponding group. */
           group: Object,
           
           /** The group path as computed based on the current route data. */
           filteredGroupKey: {
             type: String,
-            computed: '_filteredGroupKey(groupRouteData.slug)'
+            computed: '_filteredGroupKey(groupRouteData.key)',
           },
 
           /** The badge object which is currently active. Null if current view does not have a corresponding badge. */
-          badge: Object,
+          groupBadge: Object,
 
-          /** Stores the active route which is currently being used as the source of the document title. */
-          routeTitleSource: Object
+          /** Stores a list of root level strings which are reserved (and thus do not get mapped to group routes). */
+          reservedRootLevelPaths: {
+            type: Array,
+            value: function() { return ['home', 'apps']; },
+          },
+
+          /** 
+           * This powers the path() helper.
+           * Whenever linking to any page within the app, use the path() helper rather than hard-coding the href. 
+           */
+          pathMap: {
+            type: Object,
+            value: function() {
+              return {
+                session: {
+                  new: '/users/sign_in',
+                  delete: '/users/logout',
+                },
+                currentUser: {
+                  edit: '/users/edit'
+                },
+                user: {
+                  show: '/u/{key}',
+                },
+                group: {
+                  show: '/{key}',
+                  new: '/groups/new',
+                },
+                reportResult: {
+                  index: '/report_results',
+                },
+                docs: {
+                  index: '/docs',
+                },
+                website: {
+                  index: '/w',
+                  pricing: '/pricing',
+                },
+                link: {
+                  community: 'https://www.badgelist.com/community',
+                  tutorialVideo: 'https://www.youtube.com/watch?v=cXjP7qXRqxo&t=1s',
+                  csvTutorial: 'https://www.computerhope.com/issues/ch001356.htm',
+                },
+                template: {
+                  bulkAwardingCsv: 'https://s3.amazonaws.com/badgelist/templates/badge-endorsements.csv',
+                },
+              };
+            },
+          },
 
         };
       }
 
       // #=== PUBLIC ACTION METHODS ===#
 
-      /** Displays new toast item in the app toast container. Leave type or autoCloseAfter blank to use the default. */
-      addToast(text, type, autoCloseAfter) {
+      /**
+       * Displays new toast item in the app toast container. 
+       * Options accepted: duration, actionFunction, actionText 
+       */
+      addToast(text, options = {}) {
         var newToast = document.createElement('bl-toast');
+        
         newToast.text = text;
-        newToast.type = type;
-        if (autoCloseAfter != undefined) newToast.autoCloseAfter = autoCloseAfter;
+        
+        if (options.duration != undefined) newToast.duration = options.duration;
+        if (options.actionFunction != undefined) newToast.actionFunction = options.actionFunction;
+        if (options.actionText != undefined) newToast.actionText = options.actionText;
+        
         this.$.toastContainer.appendChild(newToast);
       }
 
-      // #=== LIFECYCLE EVENTS ===#
-
-      connectedCallback() {
-        if (super.connectedCallback) super.connectedCallback();
-        
-        // Add listeners to the routes so that we can update the document title, also check for which is active so we can set initial title
-        var routeElements = this.shadowRoot.querySelectorAll('app-route');
-        routeElements.forEach(function(routeElement) {
-          routeElement.addEventListener('active-changed', e => this._activeRouteChanged(e));
-          
-          if (routeElement.active && routeElement.title) {
-            document.title = routeElement.title;
-            this.routeTitleSource = routeElement;
-          }
-        }.bind(this));
+      /** 
+       * Sets the `hidden` flag on the intercom container element if it exists.
+       * If the intercom container does not exist, then this method does nothing.
+       */
+      hideIntercom() {
+        if (document.querySelector('#intercom-container')) {
+          document.querySelector('#intercom-container').hidden = true;
+        }
       }
+
+      /** 
+       * Clears the `hidden` flag on the intercom container element if it exists.
+       * If the intercom container does not exist, then this method does nothing.
+       */
+      showIntercom() {
+        if (document.querySelector('#intercom-container')) {
+          document.querySelector('#intercom-container').hidden = false;
+        }
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
 
       ready() {
         if (super.ready) super.ready();
@@ -178,17 +358,29 @@ The mixin also provides various actions for interacting with the container. (Ref
         // Remove `loading` class from the body.
         document.getElementsByTagName('body')[0].classList.remove('loading');
 
+        // Listen for Intercom boot
         // Wait for Intercom to load (max 30 seconds)
         const timeout = setTimeout(() => clearInterval(interval), 30000);
         const interval = setInterval(() => {
-          if (('Intercom' in window) && window.Intercom.booted) {
+          if (('Intercom' in window) && window.Intercom.booted && document.querySelector('#intercom-container')) {
             // Intercom is booted!
             clearInterval(interval);
             clearTimeout(timeout);
 
-            this.intercomLoaded = true;
+            if (this.activeView && this.activeView.noChat) this.hideIntercom();
+            this.set('intercomLoaded', true);
           }
         }, 100);
+      }
+
+      attached() {
+        if (super.attached) super.attached();
+
+        // Build out the list of reserved root level paths by looking for all <app-route> elements with the `root-level` option.
+        // NOTE: This isn't happening fast enough so for now I'm hard coding the root level routes in the default value.
+        this.reservedRootLevelPaths = [...this.shadowRoot.querySelectorAll('app-route[root-level]')].map(appRouteElement => {
+          return appRouteElement.pattern.split('/')[1];
+        });
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
@@ -196,8 +388,7 @@ The mixin also provides various actions for interacting with the container. (Ref
       static get observers() {
           return [
             '_userPollerCompletedChanged(userPoller.attributes.completed)',
-            '_currentUserAsyncPollerIdChanged(currentUser.async_callback_poller_id)',
-            '_checkForTitleChange(group.name, badge.name)' /* Update the arguments whenever adding new record fields in a route title. */
+            '_currentUserAsyncPollerIdChanged(currentUser.attributes.async_poller_id)',
           ]
       }
 
@@ -214,43 +405,56 @@ The mixin also provides various actions for interacting with the container. (Ref
         }
       }
 
-      /**
-       * This method checks whether the querying of a record has resulted in a change in the document title.
-       * Update the arguments whenever adding new record fields in a route title.
-       */
-      _checkForTitleChange(groupName, badgeName) {
-        if (this.routeTitleSource && this.routeTitleSource.title && (this.routeTitleSource.title != document.title))
-          document.title = this.routeTitleSource.title;
-      }
-
       _manifestChanged(newValue, oldValue) {
         if (newValue) {
-          this.setProperties({
-            currentUser: newValue.current_user
-          });
-
           if (newValue.toast && newValue.toast.length)
             newValue.toast.forEach(function(toastItem) {
-              this.addToast(toastItem.text, toastItem.type)
+              this.addToast(toastItem.text)
             }.bind(this));
-        }
-      }
-
-      /** Sets the document title when the active route changes. */
-      _activeRouteChanged(event) {
-        if ((event.detail.value == true) && event.target && event.target.title) {
-          document.title = event.target.title;
-          this.routeTitleSource = event.target;
         }
       }
 
       // #=== PROPERTY COMPUTER METHODS ===#
 
       _filteredGroupKey(groupSlug) {
-        if (groupSlug && groupSlug.length && (groupSlug != 'home'))
+        if (groupSlug && groupSlug.length && !this.reservedRootLevelPaths.includes(groupSlug))
           return groupSlug.toLowerCase();
         else
           return null;
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /** 
+       * Always use this helper to calculate links to different parts of the app. Don't hardcode the hrefs. 
+       * This is essentially just a wrapper around `pathMap`, so when adding new paths, just add them to `pathMap`.
+       *
+       * @param {string} options.verb - Http verb of the action.
+       * @param {string} options.model - Camel case model name. Singular. Examples: user, appUserMembership
+       * @param {string} options.parentModel - Camel case parent model name. Singular.
+       * @param {string} options.key - Key of the primary model, if needed for this path.
+       * @param {string} options.parentKey - Key of the parent model, if needed for this path.
+       */
+      path(options) {
+        var pathTemplate;
+
+        if (options.parentModel) {
+          if (this.pathMap[options.parentModel] && this.pathMap[options.parentModel][options.model])
+            pathTemplate = this.pathMap[options.parentModel][options.model][options.verb];
+        } else {
+          if (this.pathMap[options.model])
+            pathTemplate = this.pathMap[options.model][options.verb];
+        }
+
+        if (!pathTemplate) {
+          console.log('No app path found for options = ');
+          console.log(options);
+          return null;
+        }
+
+        return pathTemplate
+          .replace(/{key}/, options.key)
+          .replace(/{parentKey}/, options.parentKey);
       }
 
     }

@@ -79,6 +79,38 @@ module Api::V1::Helpers::OperationFormat::RecordItem
     end
   end
 
+  def define_put_parameters(model)
+    camelized_model = model.to_s.camelize
+    spaced_model = model.to_s.gsub('_', ' ')
+
+    parameter do
+
+      key :name, :body
+      key :in, :body
+      key :description, "The JSON API formatted details of the #{spaced_model.to_s} record"
+      key :required, true
+      
+      schema do
+        key :type, :object
+
+        # Data Key
+        property :data do
+          key :type, :object
+
+          # Item Type
+          property :id, type: :string, format: :id, description: "The id of the record to update"
+          property :type, type: :string, enum: [model], description: "Must always be equal to `#{model.to_s}`"
+
+          # Item Attributes
+          property :attributes do
+            key :'$ref', "#{camelized_model}InputAttributes"
+          end
+        end
+      end
+
+    end
+  end
+
   def define_successfully_deleted_response(model, response_code: 204)
     response response_code do
       key :description, "The #{model.to_s} was successfully deleted"

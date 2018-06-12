@@ -43,6 +43,7 @@ class UserPolicy < ApplicationPolicy
 
   SELF_FIELD = { visible_to: :all_roles, editable_by: [:self] }
   READ_ONLY_FIELD = { visible_to: :all_roles, editable_by: :nobody }
+  PRIVATE_READ_ONLY_FIELD = { visible_to: :self, editable_by: :nobody }
 
   field :username_with_caps,            SELF_FIELD
   field :avatar_image_url,              SELF_FIELD
@@ -54,13 +55,19 @@ class UserPolicy < ApplicationPolicy
   field :email,                         SELF_FIELD
   field :password,                      SELF_FIELD
   
+  field :expert_badge_count,            READ_ONLY_FIELD
+  
   field :is_private,                    READ_ONLY_FIELD
+  field :email_verification_needed,     READ_ONLY_FIELD
+  field :email_inactive,                READ_ONLY_FIELD
   field :identity_hash,                 READ_ONLY_FIELD
   field :identity_salt,                 READ_ONLY_FIELD
   field :avatar_image_medium_url,       READ_ONLY_FIELD
   field :avatar_image_small_url,        READ_ONLY_FIELD
   field :type,                          READ_ONLY_FIELD
   field :last_active,                   READ_ONLY_FIELD
+
+  field :async_callback_poller_id,      PRIVATE_READ_ONLY_FIELD
 
   #=== ROLE DEFINITIONS ===#
 

@@ -74,14 +74,17 @@ contained in the `bl-backend` folder.
 
       /**
        * Finds the swagger client function corresponding to an operation within the API and executes it with the passed parameters.
-       * Returns a promise with either the response object OR an error. Errors are passed as a promise rejection either with the 
-       * response object as the parameter or with a simple string parameter. That means that the list of errors themselves will be 
-       * available in `response.errors` unless no response was received.
+       * Returns a promise with a result object. The result object will have the following keys:
+       * - `response` contains the response body
+       * - `httpCode` contains the numeric http status code of the response
+       * - `errorMessage` contains a user facing error message string if there is an error (key not included when successful)
        * 
        * @param {string} options.formatTag - The format tag (ex: `recordItemFormat`) of the operation in swagger.
        * @param {string} options.verb - The verb (get, create, delete, update, search, etc) of this operation.
        * @param {string} options.model - The model name, without the word model (ex: `badge`) of the primary model.
-       * @param {string} options.parentModel - The parent model name, w/o the word model (ex: `group`) of the secondary model if needed.
+       * @param {string} options.parentModel - 
+       *   The parent model name, w/o the word model (ex: `group`) of the secondary model if needed.
+       *   Note: If verb is update or delete, then parentModel is ignored. (All deletion / updating happens at the root.)
        * @param {string} parameters - The parameters object which should be passed to the operation. 
        *   A NOTE ABOUT RECORD ID / KEY: Any parameters called `key` or `parentKey` will automatically be renamed according to the accepted
        *   parameters for the specified operation. For instance: `key` might become `id`, or `parentKey` might become `group_key`.
@@ -92,6 +95,7 @@ contained in the `bl-backend` folder.
         var operationFunction = this.getOperationFunction(options.formatTag, operationId);
         var operationParameters = this.getOperationParameters(options.formatTag, operationId);
         var operationParameterNames = operationParameters.map(function(parameter) { return parameter.name });
+        var parentModel = (['update', 'delete'].includes(options.verb) ? null : options.parentModel);
 
         // Now setup the parameters then determine if we need to change the name of the key / parent key
         if (parameters == null) parameters = {};
@@ -100,13 +104,13 @@ contained in the `bl-backend` folder.
           parameters.id = parameters.key;
           delete parameters.key;
         }
-        if (parameters.hasOwnProperty('parentKey')) {
+        if (parentModel && parameters.hasOwnProperty('parentKey')) {
           // `parentKey` is never an option so we need to figure out what the appropriate parameter name is and move it over
-          if (operationParameterNames.includes(options.parentModel + '_id')) {
-            parameters[options.parentModel + '_id'] = parameters.parentKey;
+          if (operationParameterNames.includes(parentModel + '_id')) {
+            parameters[parentModel + '_id'] = parameters.parentKey;
             delete parameters.parentKey;
-          } else if (operationParameterNames.includes(options.parentModel + '_key')) {
-            parameters[options.parentModel + '_key'] = parameters.parentKey;
+          } else if (operationParameterNames.includes(parentModel + '_key')) {
+            parameters[parentModel + '_key'] = parameters.parentKey;
             delete parameters.parentKey;
           } else {
             this.showErrorDialog('Could not find a parent key parameter for this operation');
@@ -125,12 +129,27 @@ contained in the `bl-backend` folder.
 
         return new Promise(function(resolve, reject) {
           operationFunction(parameters, authOptions).then(function(responseDetails) {
-            resolve(responseDetails.obj);
+            resolve({
+              response: responseDetails.obj,
+              httpCode: responseDetails.status,
+            });
           }).catch(function(error) {
             if (error && error.obj && error.obj.errors) {
-              reject(error.obj);
+              reject({
+                response: error.obj, 
+                httpCode: error.status,
+                errorMessage: (
+                  error.obj.errors.map(errorItem => {
+                    return errorItem.detail || errorItem.title;
+                  }).join(". ") + '.'
+                ),
+              });
             } else {
-              reject('There was a problem communicating with the server. Please try again later.');
+              reject({
+                response: null,
+                httpCode: error.status,
+                errorMessage: 'There was a problem communicating with the server. Please try again later.'
+              });
             }
           }.bind(this));
         }.bind(this));
@@ -142,13 +161,16 @@ contained in the `bl-backend` folder.
        * @param {string} options.formatTag - The format tag (ex: `recordItemFormat`) of the operation in swagger.
        * @param {string} options.verb - The verb (get, create, delete, update, search, etc) of this operation.
        * @param {string} options.model - The model name, without the word model (ex: `badge`) of the primary model.
-       * @param {string} options.parentModel - The parent model name, w/o the word model (ex: `group`) of the secondary model if needed.
+       * @param {string} options.parentModel - 
+       *   The parent model name, w/o the word model (ex: `group`) of the secondary model if needed.
+       *   Note: If verb is update or delete, then parentModel is ignored. (All deletion / updating happens at the root.)
        */
       getOperationId(options) {
+        var parentModel = (['update', 'delete'].includes(options.verb) ? null : options.parentModel);
         var pluralizeModel = this.client.apis[options.formatTag].vendorExtensions['x-blType'].toLowerCase().includes('list');
         var expectedOperationId = options.verb
-          + (options.parentModel ? options.parentModel : '')
-          + options.model
+          + (parentModel ? parentModel.replace(/_/g, '') : '')
+          + options.model.replace(/_/g, '')
           + (pluralizeModel ? 's' : '');
         var matchingOperationIds = Object.keys(this.client[options.formatTag].operations)
           .filter(function(operationId) {
@@ -198,7 +220,15 @@ contained in the `bl-backend` folder.
         else
           modelName = modelReferenceString;
 
-        return this.client.definitions[modelName].properties;
+        return (this.client.definitions[modelName]) ? this.client.definitions[modelName].properties : null;
+      }
+
+      /**
+       * Returns the model reference string (ex: `AppUserMembershipInputAttributes`) suitable for passing to modelProperties.
+       * Pass the snake case model string along with the attribute_set (usually `input` or `output`).
+       */
+      getModelReferenceString(model, attribute_set) {
+        return this.snakeCaseToCamelCase(model, true) + this.upperCaseFirstCharacter(attribute_set) + 'Attributes';
       }
 
       /** Opens the network error dialog with the specified error message.  */

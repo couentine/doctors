@@ -32,6 +32,7 @@ class Api::V1::Paths::AppGroupMembershipPaths
       
       # Parameters
       parameter :app_group_membership_id
+      define_put_parameters :app_group_membership
 
       # Responses
       define_success_response :app_group_membership, 200, include: [:relationships]

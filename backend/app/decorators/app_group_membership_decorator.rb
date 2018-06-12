@@ -131,11 +131,19 @@ class AppGroupMembershipDecorator < SimpleDelegator
     true
   end
 
-  # === GROUP MEMBERSHIP DECORATOR INNER CLASS === #
+  #=== GROUP MEMBERSHIP DECORATOR INNER CLASS ===#
 
   class GroupMembershipDecorator < SimpleDelegator
 
     attr_accessor :parent_app
+
+    #=== CLASS METHODS ===#
+
+    def self.find(params)
+      return self.new(AppGroupMembership.find(params))
+    end
+
+    #=== INSTANCE METHODS ===#
 
     def initialize(group_membership, decorated_parent_app = nil)
       super(group_membership)

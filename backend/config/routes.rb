@@ -46,7 +46,7 @@ BadgeList::Application.routes.draw do
         resources :portfolios, only: [:index]
         
         resources :apps, only: [:index]
-        resources :app_user_memberships, only: [:index, :create]
+        resources :app_user_memberships, only: [:index, :create, :show]
         resources :authentication_tokens, only: [:index, :create]
         
         match ':email/portfolios' => 'portfolios#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
@@ -206,6 +206,9 @@ BadgeList::Application.routes.draw do
 
   # === MANUAL TAG PATHS === #
   match ':group_id/:badge_id/:tag_id/restore' => 'tags#restore', via: :post, as: :tag_restore
+
+  # === APP ROUTES === #
+  resources :apps, only: [:show]
 
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #
   match ':id/edit' => 'groups#edit', via: :get

@@ -120,11 +120,17 @@ class Api::V1::AppGroupMembershipsController < Api::V1::BaseController
     end
     @app_group_membership.validate
 
-    # The last step is to check that the app can actually be joined by outside groups. This is only needed if the membership is being 
-    # created from the group side. If the membership is created from the app side then this user is an admin of the app.
-    if @app_group_membership.errors.empty? && (parent_relationship == :group) \
-        && !Pundit.policy(@group.proxy_user, @app_group_membership.app).join_as_group?
-      @app_group_membership.errors.add(:base, 'This app has a closed group membership and can only be joined by invitation')
+    # The last pre-saving step is only for memberships created from the group relationship. Now that we know the app is present, we can 
+    # check the group joinability setting. If it is closed then this app group membership creation request is invalid altogether.
+    # If it is by request only then we can create it. If it is open, then we can create it and automatically approve it right now.
+    if @app_group_membership.errors.empty? && (parent_relationship == :group)
+      if @app_group_membership.app.group_joinability == 'open'
+        @app_group_membership.app_approval_status = 'approved'
+      elsif @app_group_membership.app.group_joinability == 'by_request'
+        @app_group_membership.app_approval_status = 'requested'
+      else
+        @app_group_membership.errors.add(:base, 'This app has a closed group membership and can only be joined by invitation')
+      end
     end
 
     # Then do the save / render any errors
@@ -145,7 +151,7 @@ class Api::V1::AppGroupMembershipsController < Api::V1::BaseController
     return render_not_authorized if !@policy.update?
 
     # AppGroupMembershiply the field updates from the params and wrap it in the change decorator
-    @app = AppGroupMembershipDecorator::GroupMembershipDecorator.new(
+    @app_group_membership = AppGroupMembershipDecorator::GroupMembershipDecorator.new(
       Api::V1::DeserializableAppGroupMembership.new(
         params, @policy.current_user_editable_fields, existing_document: @app_group_membership
       ).app_group_membership

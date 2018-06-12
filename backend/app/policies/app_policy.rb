@@ -68,6 +68,7 @@ class AppPolicy < ApplicationPolicy
   field :email,                         ADMIN_FIELD
   field :new_image_url,                 ADMIN_FIELD
   
+  field :required,                      READ_ONLY_FIELD
   field :status,                        READ_ONLY_FIELD
   field :image_url,                     READ_ONLY_FIELD
   field :processing_image,              READ_ONLY_FIELD

@@ -105,9 +105,9 @@ module FieldHistory
   # field_history_revision so that an additional save is not required to commit it to the db.
   # Raises an ArgumentError if the `field_history_user` accessor is unset (unless skip_field_history is set).
   def increment_field_history_revision
-    raise ArgumentError.new('Value missing for field_history_user accessor') if field_history_user.blank? && !skip_field_history
-    
     if !field_history_is_running && !skip_field_history && get_changed_fields.present?
+      raise ArgumentError.new('Value missing for field_history_user accessor') if field_history_user.blank?
+    
       # Only update the field history revision if it hasn't been updated already.
       # There could've been an error in prior before_save, or the consuming model could want to specify a manual revision number.
       if !field_history_revision_changed?

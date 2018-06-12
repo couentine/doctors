@@ -34,25 +34,42 @@
           
     </style>
     
-    <a class="logo" title="Badge List Home" href$="[[link]]">
+    <a class="logo" title="Badge List Home" href$="[[linkHref]]">
       <slot></slot>
     </a>
 
   </template>
 
   <script>
-    class BlHeaderNavLeft extends Polymer.Element {
+    class BlHeaderNavLeft extends BlAppComponentMixin(Polymer.Element) {
       
       static get is() { return 'bl-header-nav-left'; }
 
       static get properties() {
         return {
-          /* Sets the href of the anchor tag */
-          link: {
+
+          /* Overrides href of the anchor tag if set. Otherwise it defaults to `/` for visitors and `/home` for signed in users. */
+          link: String,
+
+          /** This is the actual href used for the link. */
+          linkHref: {
             type: String,
-            value: '/'
-          }
+            computed: '_linkHref(link, app.manifest.current_user.id)',
+          },
+
         };
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _linkHref(link, currentUserId) {
+        if (link) {
+          return link;
+        } else if (currentUserId) { //==> user is signed in 
+          return '/home';
+        } else { //==> anonymous visitor
+          return '/';
+        }
       }
 
     }

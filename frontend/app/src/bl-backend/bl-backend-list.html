@@ -118,7 +118,9 @@ Use this component to bind a local component property with a list endpoint in th
           formatTag: 'paginatedListFormat',
           verb: 'get',
           model: this.model
-        }, parametersWithPage).then(function(response) {
+        }, parametersWithPage).then(function(result) {
+          var response = result.response;
+
           if (response.data && response.data.length)
             for (var i = 0; i < response.data.length; i++)
               this.push('target.items', response.data[i]);
@@ -126,8 +128,8 @@ Use this component to bind a local component property with a list endpoint in th
           this.set('target.nextPage', response.meta.page.next);
           this.set('target.hasNextPage', (response.meta.page.next != null) && !isNaN(response.meta.page.next));
           this._updateStatus('ready');
-        }.bind(this)).catch(function(error) { 
-          this._updateStatus('error', (error.errObj && error.errObj.message) ? error.errObj.message : error);
+        }.bind(this)).catch(function(result) { 
+          this._updateStatus('error', result.errorMessage);
         }.bind(this));
       }
       

@@ -13,6 +13,8 @@
 <link rel="import" href="../bl-styles/bl-styles.html">
 <link rel="import" href="../bl-text/bl-label.html">
 <link rel="import" href="../bl-text/bl-subheader.html">
+<link rel="import" href="../bl-skeletons/bl-text-skeleton.html">
+<link rel="import" href="../bl-skeletons/bl-image-skeleton.html">
 <link rel="import" href="../bl-user/bl-user-badge-count.html">
 <link rel="import" href="bl-header-nav-left.html">
 <link rel="import" href="bl-header-nav-right.html">
@@ -97,25 +99,33 @@ The home page for logged in users.
           }
           @media (min-width: 480px) { #imagePanel { width: 120px; height: 120px; } }
           @media (min-width: 840px) { #imagePanel { width: 150px; height: 150px; } }
+            #imagePanel bl-image-skeleton {
+              display: block;
+              height: 100%;
+              width: 100%;
+              --skeleton-color: var(--bl-grey-300);
+              --skeleton-border: 2px solid rgb(250,250,250);
+            }
             #imagePanel img { 
               display: block;
-              border-radius: 500px; 
-              border: 2px solid rgb(250,250,250);
-              width: 66px;
+              width: 100%;
+              height: 100%;
             }
-            @media (min-width: 480px) { #imagePanel img { width: 116px; } }
-            @media (min-width: 840px) { #imagePanel img { width: 146px; } }
 
             #imagePanel a, #imagePanel a:visited {
               position: absolute;
               top: 0; right: 0; bottom: 0; left: 0;
+
+              display: flex;
+              justify-content: center;
+              align-items: center;
+
               color: white;
               opacity: 0;
               text-align: center;
               text-decoration: none;
               font-size: 3em;
-              padding-top: 0.3em;
-              border-radius: 500px;
+              border-radius: 100%;
               filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2));
               -webkit-filter: drop-shadow(4px 4px 1px rgba(0,0,0,0.2)); 
               transition: opacity 0.3s;
@@ -138,11 +148,21 @@ The home page for logged in users.
               line-height: 1.3em;
               margin: 0;
             }
+              #textPanel h1 bl-text-skeleton {
+                --skeleton-color: var(--bl-grey-300);
+                --skeleton-line-width: 90%;
+                --first-line-margin-top: 0.6rem;
+              }
             #textPanel .subtitle { 
               font-size: 1.8em;
               line-height: 1.3em;
               margin: 0;
             }
+              #textPanel .subtitle bl-text-skeleton {
+                --skeleton-color: var(--bl-grey-300);
+                --skeleton-line-width: 70%;
+                margin: 1rem 0 0.5rem 0;
+              }
             #textPanel a.button { 
               margin-top: 0.5em;
             }
@@ -206,18 +226,30 @@ The home page for logged in users.
 
     <!-- #=== HEADER PANEL ===# -->
 
-    <bl-header-panel id="headerPanel" expanded-height="9" condensed-height="6">
+    <bl-header-panel id="headerPanel" expanded-height="9" condensed-height="6" current-user="[[currentUser]]">
       <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
       <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
 
       <ul id="headerBottomLinks" slot="headerBottom">
-        <li><a href="/community"><i class="icon-group-circle"></i> Community</a></li>
-        <li><a href="/docs"><i class="icon-question-circle"></i> Help Docs</a></li>
-        <li><a href="/w"><i class="icon-earth"></i> Website</a></li>
+        <li>
+          <a href$="[[appPath('link.community', app.initialized)]]">
+            <i class="icon-group-circle"></i> Community
+          </a>
+        </li>
+        <li>
+          <a href$="[[appPath('docs.index', app.initialized)]]">
+            <i class="icon-question-circle"></i> Help Docs
+          </a>
+        </li>
+        <li>
+          <a href$="[[appPath('website.index', app.initialized)]]">
+            <i class="icon-earth"></i> Website
+          </a>
+        </li>
       </ul>
 
       <bl-header-nav-left slot="leftNav">
-        <img src$="[[rootPath]]/images/badge-list-shield-square.png">
+        <img src$="[[app.manifest.assets.brand.shieldPng]]">
       </bl-header-nav-left>
 
       <div id="content" slot="content">
@@ -226,29 +258,39 @@ The home page for logged in users.
 
         <div id="pageHeader">
           <div id="imagePanel">
-            <img src$="[[currentUser.avatar_image_medium_url]]">
-            <a href="/users/edit#upload-image">
-              <i class="icon-pencil"></i>
-            </a>
+            <bl-image-skeleton id="imageSkeleton" rounded loaded="[[currentUser.backend.status.hasContent]]" 
+                spinner="[[currentUser.backend.status.isLoading]]" error="[[currentUser.backend.status.isError]]">
+              <img src$="[[currentUser.attributes.image_medium_url]]">
+              <a href$="[[appPath('currentUser.edit', app.initialized)]]#upload-image">
+                <i class="icon-pencil"></i>
+              </a>
+            </bl-image-skeleton>
           </div>
           
           <div id="textPanel">
-            <h1>[[currentUser.name]]</h1>
+            <h1>
+              <bl-text-skeleton loaded="[[currentUser.backend.status.hasContent]]">
+                [[currentUser.attributes.name]]
+              </bl-text-skeleton>
+            </h1>
             
-            <template is="dom-if" if="[[currentUser.email_verification_needed]]">
-              <!-- #=== EMAIL VERIFICATION NEEDED ===# -->
-              <bl-label class="orange">
-                <i class="icon-envelope-warning"></i>
-                Your email address needs verification
-              </bl-label>
-            </template>
+            <div class="subtitle" hidden="[[currentUser.backend.status.hasContent]]">
+              <bl-text-skeleton></bl-text-skeleton>
+            </div>
+              
+            <!-- #=== EMAIL VERIFICATION NEEDED ===# -->
+            <bl-label class="orange" 
+                hidden="[[!currentUser.backend.status.hasContent || !currentUser.attributes.email_verification_needed]]">
+              <i class="icon-envelope-warning"></i>
+              Your email address needs verification
+            </bl-label>
 
-            <template is="dom-if" if="[[!currentUser.email_verification_needed]]">
-              <!-- #=== EMAIL VERIFICATION NOT NEEDED ===# -->
-              <div class="subtitle">[[currentUser.username_with_caps]]</div>
-            </template>
+            <!-- #=== EMAIL VERIFICATION NOT NEEDED ===# -->
+            <div class="subtitle" hidden="[[currentUser.attributes.email_verification_needed]]">
+              [[currentUser.attributes.username]]
+            </div>
 
-            <a class="button" href$="/u/[[currentUser.username_with_caps]]#upload-image" tabindex="-1">
+            <a class="button" href$="[[appPath('currentUser.edit', app.initialized)]]" tabindex="-1">
               <paper-button raised>Manage Account</paper-button>
             </a>
           </div>
@@ -275,7 +317,7 @@ The home page for logged in users.
               <strong>Want to earn a badge?</strong>
             </p>
             <p>
-              Join the <a class="placeholder-link" href="/community">Badge List Community</a>!
+              Join the <a class="placeholder-link" href$="[[appPath('link.community', app.initialized)]]">Badge List Community</a>!
             </p>
           </bl-backend-list-placeholder>
         </div>
@@ -286,8 +328,8 @@ The home page for logged in users.
         <bl-subheader>
           <span slot="title">Your groups</span>
           <div slot="buttons">
-            <a href="/groups/new" class="button">
-              <paper-button class="light-blue">
+            <a href$="[[appPath('group.new', app.initialized)]]" class="button">
+              <paper-button class="light-blue" raised>
                 <i class="icon-plus"></i> New Group
               </paper-button>
             </a>
@@ -312,7 +354,7 @@ The home page for logged in users.
             </p>
             <p>
               Click the blue "New Group" button to create your first group! 
-              We've got a <a href="https://www.youtube.com/watch?v=cXjP7qXRqxo&t=1s" target="_blank">2 minute video tutorial</a>
+              We've got a <a href$="[[appPath('link.tutorialVideo', app.initialized)]]" target="_blank">2 minute video tutorial</a>
               to help you get started.
             </p>
           </bl-backend-list-placeholder>

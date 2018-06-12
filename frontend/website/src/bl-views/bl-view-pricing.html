@@ -46,7 +46,6 @@
           color: var(--bl-grey-700);
           background-color: var(--bl-grey-300);
 
-          background-image: var(--pricing-view-background-image);
           background-size: 900px 900px;
           background-blend-mode: screen;
 
@@ -251,12 +250,12 @@
       </div>
 
       <bl-header-nav-left slot="leftNav">
-        <img src$="[[rootPath]]/images/badge-list-shield-white-square.png">
+        <img src$="[[website.manifest.assets.brand.shieldWhitePng]]">
       </bl-header-nav-left>
       
       <bl-header-nav-right slot="rightNav" id="rightNave"></bl-header-nav-right>
 
-      <div id="content" slot="content">
+      <div id="content" slot="content" style$="background-image: url('[[website.manifest.assets.backgrounds.topographicMapPng]]')">
         
         <!-- === BANNER ROW === -->
         <div id="bannerRow">
@@ -661,14 +660,6 @@
         // Add listeners
         this.website.addEventListener('location-hash-key-changed', e => this._websiteLocationHashKeyChanged(e.detail.value));
         this.website.addEventListener('intercom-loaded-changed', e => this._websiteIntercomLoadedChanged(e.detail.value));
-      }
-
-      assetsLoaded() {
-        if (super.assetsLoaded) super.assetsLoaded();
-        
-        this.updateStyles({
-          '--pricing-view-background-image': 'url("' + this.assetUrl('backgrounds/topgraphic-map.png', this.website.manifest) + '")'
-        });
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#

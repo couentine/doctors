@@ -168,11 +168,19 @@ class AppUserMembershipDecorator < SimpleDelegator
     true
   end
 
-  # === USER MEMBERSHIP DECORATOR INNER CLASS === #
+  #=== USER MEMBERSHIP DECORATOR INNER CLASS ===#
 
   class UserMembershipDecorator < SimpleDelegator
 
     attr_accessor :parent_app
+
+    #=== CLASS METHODS ===#
+
+    def self.find(params)
+      return self.new(AppUserMembership.find(params))
+    end
+
+    #=== INSTANCE METHODS ===#
 
     def initialize(user_membership, decorated_parent_app = nil)
       super(user_membership)
