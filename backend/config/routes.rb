@@ -44,14 +44,32 @@ BadgeList::Application.routes.draw do
       resources :users, only: [:show] do
         resources :groups, only: [:index]
         resources :portfolios, only: [:index]
+        
+        resources :apps, only: [:index]
+        resources :app_user_memberships, only: [:index, :create, :show]
+        resources :authentication_tokens, only: [:index, :create]
+        
         match ':email/portfolios' => 'portfolios#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
         match ':email/groups' => 'groups#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        match ':email/app_user_memberships' => 'app_user_memberships#index', 
+          constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        match ':email/app_user_memberships' => 'app_user_memberships#create',
+          constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :post
+        match ':email/apps' => 'apps#index', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
+        match ':email/authentication_tokens' => 'authentication_tokens#index', 
+          constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
         match ':email' => 'users#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
       end
+      resources :authentication_tokens, only: [:index, :update, :show, :destroy]
+
       resources :groups, only: [:index, :show] do
         resources :badges, only: [:index, :show]
         resources :users, only: [:index]
+        
+        resources :apps, only: [:index]
+        resources :app_group_memberships, only: [:index, :create]
       end
+      
       resources :badges, only: [:index, :show] do
         resources :portfolios, only: [:index, :show] do
           match ':email' => 'portfolios#show', constraints: { :email => /.+@.+\..*/ }, on: :collection, via: :get
@@ -59,11 +77,16 @@ BadgeList::Application.routes.draw do
         resources :endorsements, only: [:create]
       end
       resources :portfolios, only: [:show]
-      resources :authentication_tokens, only: [:index, :create, :show, :destroy]
 
-      match 'swagger.json' => 'docs#external', via: :get
-      match 'openapi.json' => 'docs#external', via: :get
-      match 'internal.json' => 'docs#internal', via: :get
+      resources :apps, only: [:index, :create, :update, :show, :destroy] do
+        resources :app_user_memberships, only: [:index, :create]
+        resources :app_group_memberships, only: [:index, :create]
+
+        resources :users, only: [:index]
+        resources :groups, only: [:index]
+      end
+      resources :app_user_memberships, only: [:index, :update, :show, :destroy]
+      resources :app_group_memberships, only: [:update, :show, :destroy]
     end
   end
 
@@ -72,12 +95,11 @@ BadgeList::Application.routes.draw do
 
     namespace :api do
       namespace :v1 do
-        match 'user' => 'user_api_docs#show_html', via: :get
-        match 'group' => 'group_api_docs#show_html', via: :get
+        root to: 'external_api_docs#show_html'
         match 'internal' => 'internal_api_docs#show_html', via: :get
 
-        match 'user_api.json' => 'user_api_docs#show_json', via: :get, as: :user_json
-        match 'group_api.json' => 'group_api_docs#show_json', via: :get, as: :group_json
+        match 'swagger.json' => 'external_api_docs#show_json', via: :get, as: :external_json
+        match 'openapi.json' => 'external_api_docs#show_json', via: :get
         match 'internal_api.json' => 'internal_api_docs#show_json', via: :get, as: :internal_json
       end
     end
@@ -184,6 +206,9 @@ BadgeList::Application.routes.draw do
 
   # === MANUAL TAG PATHS === #
   match ':group_id/:badge_id/:tag_id/restore' => 'tags#restore', via: :post, as: :tag_restore
+
+  # === APP ROUTES === #
+  resources :apps, only: [:show]
 
   # === NESTED RESOURCE PATHS FOR GROUP, BADGE, LOG & ENTRY === #
   match ':id/edit' => 'groups#edit', via: :get

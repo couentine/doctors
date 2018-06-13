@@ -1,0 +1,19 @@
+# BADGE LIST STANDARD APPS
+# 
+# This is consumed by the `standard_apps.rb` initializer and contains instances of the App model which will be automatically
+# built on app startup.
+# 
+# For now this only contains the Badge List app itself, but in the future it may contain other first-party data integrations.
+
+#=== BADGE LIST ===#
+badgelist:
+  name: Badge List
+  summary: This app is a standard part of the Badge List platform and is used to help you manage your activity data.
+  description: |
+    <p>The Badge List platform supports many apps. Apps are able to post activity to your Badge List account which can be viewed on leader
+    boards, browsed on your Badge List profile and used to earn badges.</p>
+    <p>This particular app is used to manage activity generated within the Badge List platform itself.</p>
+  organization: Badge List
+  website: https://www.badgelist.com/docs
+  email: team@badgelist.com
+  image_url: https://s3.amazonaws.com/badgelist/images/badge-list-icon.png

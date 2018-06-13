@@ -13,14 +13,26 @@ class Api::V1::Paths::AuthenticationTokenPaths
       define_basic_info :authentication_token, :get
 
       # Parameters
-      parameter do
-        key :name, :id
-        key :format, :id
-        key :in, :path
-        key :description, 'The id of the authentication token record'
-        key :required, true
-        key :type, :string
-      end
+      parameter :authentication_token_id
+
+      # Responses
+      define_success_response :authentication_token, 200, include: [:relationships]
+      define_unauthorized_response
+      define_not_found_response
+    end
+
+    #=== UPDATE AUTHENTICATION TOKEN ===#
+
+    operation :put do
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
+
+      # Basic Info
+      define_basic_info :authentication_token, :update
+      
+      # Parameters
+      parameter :authentication_token_id
+      define_put_parameters :authentication_token
 
       # Responses
       define_success_response :authentication_token, 200, include: [:relationships]
@@ -38,19 +50,10 @@ class Api::V1::Paths::AuthenticationTokenPaths
       define_basic_info :authentication_token, :delete
       
       # Parameters
-      parameter do
-        key :name, :id
-        key :format, :id
-        key :in, :path
-        key :description, 'The id of the authentication token record'
-        key :required, true
-        key :type, :string
-      end
+      parameter :authentication_token_id
 
       # Responses
-      response 204 do
-        key :description, 'The authentication token was successfully deleted'
-      end
+      define_successfully_deleted_response :authentication_token
       define_unauthorized_response
       define_not_found_response
     end
@@ -69,28 +72,12 @@ class Api::V1::Paths::AuthenticationTokenPaths
       define_basic_info :authentication_token, 'Get list of authentication_tokens for current user'
       
       # Parameters
-      define_index_parameters :authentication_token
+      parameter :authentication_token_sort
+      parameter :page_number
+      parameter :page_size
 
       # Responses
       define_success_response :authentication_token, include: [:relationships]
-      define_unauthorized_response
-    end
-
-    #=== CREATE AUTHENTICATION TOKEN ===#
-
-    operation :post do
-      extend Api::V1::Helpers::OperationFormat::Base
-      extend Api::V1::Helpers::OperationFormat::RecordItem
-
-      # Basic Info
-      define_basic_info :authentication_token, :create
-      
-      # Parameters
-      define_post_parameters :authentication_token
-
-      # Responses
-      define_success_response :authentication_token, 201, include: [:relationships]
-      define_field_error_response
       define_unauthorized_response
     end
 

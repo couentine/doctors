@@ -238,7 +238,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
               background: var(--bl-orange-100);
               border: 1rem solid var(--bl-orange-200);
               opacity: 0.3;
-              z-index: 2;
+              z-index: 1;
             }
             #tableFooter > .ring.divider {
               width: 10rem;
@@ -248,19 +248,27 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
               background: transparent;
               border-bottom: 1px solid var(--bl-grey-300);
               border-radius: 0;
-              z-index: 3;
+              z-index: 1;
             }
             #tableActions {
               list-style: none;
               margin: 0;
               padding: 0;
               display: flex;
-              justify-content: center;
+              justify-content: left;
             }
-              #tableActions>li {
+            @media(min-width: 480px) {
+              #tableActions {
+                justify-content: center;
+              }
+            }
+              #tableActions > li {
                 display: block;
                 margin: 0.5em;
               }
+                #tableActions > li > paper-button {
+                  min-width: 0;
+                }
 
           #tableContent {
             padding-bottom: 5rem;
@@ -324,7 +332,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
     <!-- #=== HEADER PANEL ===# -->
 
     <bl-header-panel id="headerPanel" expanded-height="10" condensed-height="3.5" expanded-percentage="{{expandedPercentage}}"
-        class$="hasItems_[[hasItems]]">
+        class$="hasItems_[[hasItems]]" current-user="[[currentUser]]">
       <div id="expandedBackground" slot="expandedBackground">
         <div class="headerBackgroundImage"></div>
       </div>
@@ -579,10 +587,10 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             <p><small>Helpful Resources:</small></p>
             <ul class="small">
               <li>
-                <a href="https://s3.amazonaws.com/badgelist/templates/badge-endorsements.csv">Download Bulk Awarding CSV template</a>.
+                <a href$="[[appPath('template.bulkAwardingCsv')]]">Download Bulk Awarding CSV template</a>.
               </li>
               <li>
-                <a href="https://www.computerhope.com/issues/ch001356.htm" target="_blank">Tutorial: How to build a CSV file</a>.
+                <a href$="[[appPath('link.csvTutorial')]]" target="_blank">Tutorial: How to build a CSV file</a>.
               </li>
             </ul>
             <input id="csvFileInput" accept=".csv" type="file" hidden>
@@ -674,7 +682,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
             <paper-checkbox id="sendEmailsCheckbox" checked="{{importerParameters.send_emails_to_new_users}}" class="orange">
               Send email notifications to new users
-              <span class="subtitle">
+              <span class="help-text">
                 Existing users will always receive notifications according to their preferences.
               </span>
             </paper-checkbox>
@@ -994,8 +1002,6 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
       connectedCallback() {
         if (super.connectedCallback) super.connectedCallback();
-        
-        this.tryToHideIntercom();
 
         this.$.csvFileInput.addEventListener('change', e => this._csvFileChanged());
         this.$.importer.addEventListener('csv-parsing-complete', e => this._csvParsingComplete());

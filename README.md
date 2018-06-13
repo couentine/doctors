@@ -26,6 +26,7 @@ when deploying.
 - ENV['root_url'] = https://www.badgelist.com, etc
 - ENV['from_email'] = app@badgelist.com or knowledgestreem@gmail.com, etc
 - ENV['REDIS_PROVIDER'] = REDISCLOUD_URL
+- ENV['bl_admin_account_email'] ==> This is the email address of the user account which is used to own automatically created records. It should be an admin account. If there is no account with this email on bootup one will automatically be created with a random password.
 
 **Example ".env" file for dev environment:**
 ```
@@ -65,6 +66,7 @@ lti_unique_tool_id=badgelist-dev
 bl_admin_email=app-errors@badgelist.com
 google_tag_manager_container_id=GTM-ABC123
 RACK_TIMEOUT_SERVICE_TIMEOUT=300
+bl_admin_account_email=hank@badgelist.com
 ```
 
 ## Running the app ##

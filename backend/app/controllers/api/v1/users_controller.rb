@@ -17,54 +17,58 @@ class Api::V1::UsersController < Api::V1::BaseController
 
   #=== ACTIONS ===#
 
-  # This can be accessed only via the group users index
+  # This can be accessed via the group users index and the app users index.
   def index
-    @group = Group.find(params[:group_id]) rescue nil
+    skip_authorization
 
-    if @group
+    if params[:group_id].present?
+      @group = Group.find(params[:group_id]) rescue nil
+      return render_not_found if @group.blank?
+
       # Build the core criteria and authorize based on the filter
       load_filter
       if @filter[:status] == 'member'
-        authorize @group, :members_index?
+        return render_not_authorized if !Pundit.policy(@current_user, @group).members_index?
         user_criteria = @group.members
       elsif @filter[:status] == 'admin'
-        authorize @group, :admins_index?
+        return render_not_authorized if !Pundit.policy(@current_user, @group).admins_index?
         user_criteria = @group.admins
       else
-        authorize @group, :members_and_admins_index?
+        return render_not_authorized if !Pundit.policy(@current_user, @group).can_see_users?
         user_criteria = @group.users
       end
+    elsif params[:app_id].present?
+      @app = App.find(params[:app_id]) rescue nil
+      return render_not_found if @app.blank?
+      return render_not_authorized if !Pundit.policy(@current_user, @app).can_see_users?
       
-      # Generate @sort_string from the sort parameter and load the pagination variables
-      build_sort_string
-      set_initial_pagination_variables
-
-      # Generate the final query and then generate the calculated pagination variables
-      @users = user_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
-      set_calculated_pagination_variables(@users)
-
-      @policy = Pundit.policy(@current_user, @users)
-      render_json_api @users, expose: { show_all_fields: true, meta_index: @policy.meta_index }
+      # There's no filtering for this endpoint, so just build the core criteria
+      user_criteria = @app.users
     else
-      skip_authorization
-
-      render_not_found
+      raise ArgumentError.new('Invalid user index route')
     end
+    
+    # Generate @sort_string from the sort parameter and load the pagination variables
+    build_sort_string
+    set_initial_pagination_variables
+
+    # Generate the final query and then generate the calculated pagination variables
+    @users = user_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
+    set_calculated_pagination_variables(@users)
+
+    @policy = Pundit.policy(@current_user, @users)
+    render_json_api @users, expose: { policy_index: @policy.policy_index }
   end
 
   def show
+    skip_authorization
     @user = User.find(params[:id] || params[:email])
-
-    if @user
-      authorize @user # always returns true, fields are filtered in the serializer
+    return render_not_found if @user.blank?
       
-      @policy = Pundit.policy(@current_user, @user)
-      render_json_api @user, expose: { show_all_fields: @policy.show_all_fields?, meta: @policy.meta }
-    else
-      skip_authorization
+    @policy = Pundit.policy(@current_user, @user)
+    return render_not_authorized if !@policy.show?
 
-      render_not_found
-    end
+    render_json_api @user, expose: { policy: @policy }
   end
 
 end

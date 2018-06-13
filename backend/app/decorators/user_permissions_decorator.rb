@@ -1,16 +1,23 @@
 class UserPermissionsDecorator < SimpleDelegator
 
-  attr_accessor :available_permission_sets, :access_method
+  attr_accessor :api_permissions, :access_method
 
   def initialize(user, authentication_token = nil, access_method = nil)
     self.access_method = access_method
-    unfiltered_permission_sets = ApplicationPolicy::PERMISSION_SETS.keys
+    unfiltered_permissions = ApplicationPolicy::API_PERMISSIONS.keys
     availability_filter = nil
     
     if authentication_token.present?
       # This request comes from an api user so start with the permission sets from their token.
-      unfiltered_permission_sets = authentication_token.permission_sets
-      availability_filter = (user.type == 'group') ? :api_group : :api_user
+      unfiltered_permissions = authentication_token.permissions
+      
+      if user.type == 'group'
+        availability_filter = :api_group
+      elsif user.type == 'app'
+        availability_filter = :api_app
+      else
+        availability_filter = :api_user
+      end
     elsif user.present?
       availability_filter = :web_user
     elsif access_method == :web
@@ -20,21 +27,21 @@ class UserPermissionsDecorator < SimpleDelegator
     end
 
     # Now filter the permission sets by only those which are available based on the current authentication type / access method combo
-    self.available_permission_sets = unfiltered_permission_sets & (ApplicationPolicy::PERMISSION_SETS.select do |permission_set, settings|
+    self.api_permissions = unfiltered_permissions & (ApplicationPolicy::API_PERMISSIONS.select do |permission, settings|
       settings[:available_to].include? availability_filter
     end.keys)
     super(user)
   end
 
-  # Returns true if user has ALL of the passed permission sets
-  def has?(*required_permission_sets)
-    if available_permission_sets.blank?
+  # Returns true if user has ALL of the passed permissions
+  def has?(*required_permissions)
+    if api_permissions.blank?
       return false
     else
       has_all = true
       
-      required_permission_sets.each do |permission_set|
-        has_all = has_all && available_permission_sets.include?(permission_set)
+      required_permissions.each do |permission|
+        has_all = has_all && api_permissions.include?(permission)
       end
 
       return has_all
@@ -42,12 +49,12 @@ class UserPermissionsDecorator < SimpleDelegator
   end
 
   # Returns true if user is missing ANY of the passed permission sets
-  def missing?(*required_permission_sets)
-    if available_permission_sets.blank?
+  def missing?(*required_permissions)
+    if api_permissions.blank?
       return true
     else
-      required_permission_sets.each do |permission_set|
-        return true if !available_permission_sets.include?(permission_set)
+      required_permissions.each do |permission|
+        return true if !api_permissions.include?(permission)
       end
 
       return false

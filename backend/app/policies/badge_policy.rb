@@ -1,104 +1,122 @@
 class BadgePolicy < ApplicationPolicy
-  attr_reader :current_user, :badge, :badges
-
-  def initialize(current_user, badge_or_badges)
-    @current_user = current_user
-    if (badge_or_badges.class == Mongoid::Criteria)
-      @badges = badge_or_badges
-      @records = badge_or_badges
-    else
-      @badge = badge_or_badges
-      @record = badge_or_badges
-    end
-  end
 
   #=== ACTION POLICIES ===#
 
-  # Only available to authenticated users
-  def index?
-    return @current_user.present? && @current_user.has?('all:index') && @current_user.has?('badges:read')
-  end
+  standard_actions :badge,
+    show_roles: :everyone,
+    update_roles: [:editor],
+    destroy_roles: [:admin]
 
-  def show?
-    # All badges are shown, but fields are conditionally displayed based on `show_all_fields?`
-    return @current_user.has?('badges:read')
-  end
+  action :award,
+    roles: [:awarder],
+    permissions: ['portfolios:review']
 
-  def edit?
-    if @current_user.present? && @current_user.has?('badges:write')
-      return true if @current_user.admin?
-      return true if @current_user.admin_of?(@badge.group_id)
-      return true if (@badge.editability == 'experts') && @current_user.expert_of?(@badge)
-    end
+  action :create_endorsement,
+    roles: [:awarder],
+    permissions: ['portfolios:review'],
+    features: [:bulk_tools]
 
-    return false
-  end
-  
-  def award?
-    return @current_user.has?('portfolios:review') && is_awarder?
-  end
-  
-  def bulk_award?
-    return award? && @badge.group.has?(:bulk_tools)
-  end
-  
-  #=== FILTER POLICIES ===#
-  
-  def show_all_fields?
-    return true if @badge.visibility == 'public'
-    
-    if @current_user.present?
-      return true if @current_user.admin?
-      return true if @current_user.admin_of? @badge.group_id
-      return true if @current_user.learner_or_expert_of?(@badge)
-      return true if (@badge.visibility == 'private') && @current_user.member_of?(@badge.group_id)
-    end
-  
-    return false
-  end
-
-  # Returns true if the current user is allowed to see both the details of the badge and the members list of the group
-  def show_people?
-    return false if !show_all_fields?
-    
-    # The group member visibility controls whether child badges are allowed to expose portfolio lists
-    # NOTE: This is a little confusing... Why consider visbiility of members and not admins? But it's easier this way to avoid crazy complex
-    #   queries where we are checking at the log level for users who are admins vs members. For now that is overkill.
-    return Pundit.policy(@current_user, @badge.group).show_members?
-  end
-  
-  # This differs from the award? policy because it just checks that the user *can* award, not that the token has the award permission.
-  def is_awarder?
-    if @current_user.present?
-      return true if @current_user.admin?
-      return true if @current_user.admin_of?(@badge.group_id)
-      return true if (@badge.awardability == 'experts') && @current_user.expert_of?(@badge)
-    end
-
-    return false
-  end
+  action :portfolios_index,
+    roles: [:portfolio_viewer, :seeker, :holder, :admin],
+    permissions: ['all:index', 'portfolios:read']
 
   #=== RELATIONSHIP POLICIES ===#
 
-  def portfolios_index?
-    return @current_user.has?('all:index') \
-      && @current_user.has?('badges:read') \
-      && @current_user.has?('portfolios:read') \
-      && show_people?
+  belongs_to :creator,
+    via: :creator_id,
+    policy_model: :user,
+    visible_to: :all_roles,
+    creation_role: :admin,
+    read_only: true
+
+  belongs_to :group,
+    via: :group_id,
+    visible_to: :everyone,
+    creation_role: :admin
+
+  has_many :portfolios,
+    visible_to: [:portfolio_viewer, :seeker, :holder, :admin],
+    creatable_by: [:holder, :editor, :admin]
+
+  #=== FIELD POLICIES ===#
+
+  ADMIN_FIELD = { visible_to: :all_roles, editable_by: [:admin] }
+  PUBLIC_ADMIN_FIELD = { visible_to: :everyone, editable_by: [:admin] }
+  EDITOR_FIELD = { visible_to: :all_roles, editable_by: [:editor] }
+  READ_ONLY_FIELD = { visible_to: :all_roles, editable_by: :nobody }
+
+  field :url_with_caps,                 PUBLIC_ADMIN_FIELD
+  field :visibility,                    ADMIN_FIELD
+  
+  field :name,                          EDITOR_FIELD
+  field :summary,                       EDITOR_FIELD
+  field :image_url,                     EDITOR_FIELD
+
+  field :validation_request_count,      READ_ONLY_FIELD
+  field :learner_count,                 READ_ONLY_FIELD
+  field :expert_count,                  READ_ONLY_FIELD
+  field :image_medium_url,              READ_ONLY_FIELD
+  field :image_small_url,               READ_ONLY_FIELD
+  
+  #=== ROLE DEFINITIONS ===#
+
+
+  # This is only intended to capture the edge cases where someone is not a badge expert/learner or group admin but can still view
+  role :viewer do |current_user, badge|
+    next true if badge.visibility == 'public'
+    
+    if current_user.present?
+      next true if (badge.visibility == 'private') && current_user.member_of?(badge.group_id)
+    end
+  
+    next false
   end
 
-  #=== USER-FACING METADATA ===#
+  # Returns true if the current user is allowed to see the group member list AND the badge container itself
+  # This is only intended to capture the edge cases where someone is not a badge expert/learner or group admin but can still view.
+  # The group member visibility controls whether child badges are allowed to expose portfolio lists
+  # NOTE: This is a little confusing... Why consider visbility of members and not admins? But it's easier this way to avoid crazy complex
+  #   queries where we are checking at the log level for users who are admins vs members. For now that is overkill.
+  role :portfolio_viewer do |current_user, badge, policy|
+    policy.is_viewer? && (
+      (current_user.present? && current_user.member_of?(badge.group_id)) \
+      || (badge.group.member_visibility == 'public')
+    )
+  end
   
-  def meta
-    return {
-      current_user: {
-        can_see_record: show_all_fields?,
-        can_edit_record: edit?,
-        can_award_record: award?,
-        is_seeker: @current_user.present? && @current_user.learner_of?(@badge),
-        is_holder: @current_user.present? && @current_user.expert_of?(@badge)
-      }
-    }
+  role :seeker do |current_user, badge|
+    current_user.present? && current_user.learner_of?(badge)
+  end
+  
+  role :holder do |current_user, badge|
+    current_user.present? && current_user.expert_of?(badge)
+  end
+  
+  role :awarder do |current_user, badge|
+    current_user.present? && (
+      current_user.admin_of?(badge.group_id) \
+      || ((badge.awardability == 'experts') && current_user.expert_of?(badge))
+    )
+  end
+  
+  role :editor do |current_user, badge|
+    current_user.present? && (
+      current_user.admin_of?(badge.group_id) \
+      || ((badge.editability == 'experts') && current_user.expert_of?(badge))
+    )
+  end
+  
+  role :admin do |current_user, badge|
+    current_user.present? && (
+      current_user.admin_of?(badge.group_id) \
+      || (current_user.id == badge.creator_id)
+    )
+  end
+  
+  #=== FEATURE DEFINITIONS ===#
+
+  feature :bulk_tools do |badge|
+    badge.group.has? :bulk_tools
   end
 
   #=== SCOPES ===#

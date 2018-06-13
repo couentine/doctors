@@ -53,8 +53,8 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
 
           /**
            * Required. The target object receiving the binding. The object will contain the direct json properties of the record returned
-           * by the backend. In additional to the record properties, an additional `backend` property object will be added to the target,
-           * providing status variables to track network state as well as functions for interacting with the backend.
+           * by the backend. In additional to the record properties, additional `backend` and `frontend` property objects will be added 
+           * to the target, providing a way to transform the object and interact with the API.
            *
            * The `backend` object contains the following properties:
            * @property {object} status - Stores the current state of the network connection.
@@ -66,7 +66,16 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
            *   will return to `complete` whenever any additional network operations successfuly complete.
            * @property {boolean} status.isError - True if the status is 'error'.
            * @property {string} status.errorMessage - Error message from backend. Null unless `isError` is `true`.
+           * @property {boolean} status.hasContent - True once content has been loaded into the target object. This can be used to indicate
+           *   when placeholder content should be displayed.
+           * @property {number} status.httpCode - The http status code of the most recent response.
+           * @property {object} model - Stores the important model specs from the API spec
+           * @property {object} model.input - Keys are all accepted input fields, values are the API spec of the fields.
            * @property {object} doOperation - Contains a callback to run an operation by verb.
+           *
+           * The `frontend` object contains the following properties:
+           * @property {object} actions - Contains methods which reset or transform the record
+           * @property {object} actions.new - When creating a new record, this initializes the attributes appropriately.
            */
           target: {
             type: Object,
@@ -81,6 +90,8 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
 
       /** 
        * Executes any of the `recordItemFormat` operations with the passed parameters and stores the response in `target`. 
+       * Returns a promise which can optionally be used to take action upon operation completion / failure.
+       * The promise passes the same result object returned by the client. It has keys for response, httpCode and errorMessage.
        * Note: You can only run one operation at a time. And you can only call this action after the backend client is initialized.
        */
       doOperation(verb, parameters) {
@@ -89,34 +100,77 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
 
           // Clone the parameters so we can inject the record keys without messing up the passed parameters object
           var parametersWithKeys = {
-            key: this.key
+            key: this.target.id || this.key, //==> always use the id if we have it
           };
           if (this.parentModel && this.parentModel.length) parametersWithKeys.parentKey = this.parentKey;
           Object.assign(parametersWithKeys, parameters);
 
+          // Build the body parameter if needed
+          if ((verb == 'create') || (verb == 'update')) {
+            parametersWithKeys.body = {};
+            parametersWithKeys.body.data = (verb == 'create') ? {} : { id: this.target.id };
+            parametersWithKeys.body.data.type = this.model;
+            
+            var allowedFields;
+            if (verb == 'create') {
+              allowedFields = Object.keys(this.target.backend.model.input);
+            } else {
+              allowedFields = this.target.meta.current_user.editable_fields;
+            }
+
+            parametersWithKeys.body.data.attributes = allowedFields.reduce((attributes, field) => {
+              if (this.target.attributes.hasOwnProperty(field)) attributes[field] = this.target.attributes[field];
+              return attributes;
+            }, {});
+          }
+
           // Build the query options
           var options = {
             formatTag: 'recordItemFormat',
-            verb: 'get',
-            model: this.model
+            verb: verb,
+            model: this.model,
           };
           if (this.parentModel && this.parentModel.length) options.parentModel = this.parentModel;
           
           // Do the query
-          this.app.$.backend.doOperation(options, parametersWithKeys).then(function(response) {
-            if (response && response.data) {
-              var newTargetObject = response.data;
-              newTargetObject.backend = this.target.backend; // preserve the backend property
-              this.setProperties({target: newTargetObject}); // trigger the property change notifications with a cohesive set
-              
-              this._updateStatus('complete');
-            } else {
-              this._updateStatus('error', 'The data which was returned from the server is corrupted');
-            }
-          }.bind(this)).catch(function(error) { 
-            this._updateStatus('error', error);
-          }.bind(this)); 
-        }
+          return new Promise((resolve, reject) => {
+            this.app.$.backend.doOperation(options, parametersWithKeys).then((result) => {
+              var response = result.response;
+              this.set('target.backend.status.httpCode', result.httpCode);
+
+              if (response && response.data) {
+                var newTargetObject = response.data;
+                newTargetObject.backend = this.target.backend; // preserve the backend property
+                newTargetObject.frontend = this.target.frontend; // preserve the frontend property
+                newTargetObject.backend.status.hasContent = true;
+                
+                this.setProperties({target: newTargetObject}); // trigger the property change notifications with a cohesive set
+                this._updateStatus('complete');
+                resolve(result);
+              } else if ((verb == 'delete') && (result.httpCode == 204)) {
+                var newTargetObject = {
+                  id: null,
+                  type: this.model,
+                  backend: this.target.backend,
+                  frontend: this.target.frontend,
+                };
+                newTargetObject.backend.status.hasContent = false; // it was deleted
+
+                this.setProperties({target: newTargetObject}); // trigger the property change notifications with a cohesive set
+                this._updateStatus('complete');
+                resolve(result);
+              } else {
+                this._updateStatus('error', 'The data which was returned from the server is corrupted');
+                result.errorMessage = 'The data which was returned from the server is corrupted'
+                reject(result);
+              }
+            }).catch((result) => { 
+              this.set('target.backend.status.httpCode', result.httpCode);
+              this._updateStatus('error', result.errorMessage);
+              reject(result);
+            }); 
+          }); //==> end of promise
+        } //==> end of conditional wrapping entire method
       }
       
       // #=== PRIVATE ACTION METHODS ===#
@@ -137,14 +191,26 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
         if (this.target.backend.status.isError != isError) this.set('target.backend.status.isError', isError);
 
         // Always trigger a notification for the error message, but ensure that it's always null if there's no error
-        if (isError) this.set('target.backend.status.errorMessage', ((error && error.message) ? error.message : error));
-        else this.set('target.backend.status.errorMessage', null);
+        if (isError && error) {
+          if (error.errors) { //==> This is probably the standard json api response
+            this.set('target.backend.status.errorMessage', error.errors.map(errorItem => {
+              return errorItem.detail;
+            }).join(". "));
+          } else if (error.message) { //==> This is probably an exception
+            this.set('target.backend.status.errorMessage', error.message);
+          } else { //==> This is probably a string
+            this.set('target.backend.status.errorMessage', error);
+          }
+        } else {
+          this.set('target.backend.status.errorMessage', null);
+        }
       }
 
       /** Initializes the object bound to the target property. Adds callbacks and sets initial property values. */
       _setupTargetObject() {
         // Add to the existing target object instead of overwriting it, in case the parent element has given it extra properties
         this.set('target.backend', {});
+        
         this.set('target.backend.status', {});
         this.set('target.backend.status.code', 'uninitialized');
         this.set('target.backend.status.isReady', false);
@@ -152,9 +218,35 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
         this.set('target.backend.status.isComplete', false);
         this.set('target.backend.status.isError', false);
         this.set('target.backend.status.errorMessage', null);
+        this.set('target.backend.status.hasContent', false);
+        this.set('target.backend.status.httpCode', null);
+        
+        this.set('target.backend.model', {}); //==> Note: This gets setup once the backend is initialized
 
-        // No need to notify for this one
+        this.set('target.frontend', {});
+        this.set('target.frontend.actions', {});
+
+        // No need to notify for these
         this.target.backend.doOperation = (verb, parameters) => this.doOperation(verb, parameters);
+        this.target.frontend.actions.new = () => this._new();
+      }
+
+      /** Initializes the id, type and attributes of the target object to the default new values according to the input model. */
+      _new() {
+        this.set('target.id', null);
+        this.set('target.type', this.model);
+        this.set('target.attributes',
+          Object.keys(this.target.backend.model.input)
+            .reduce((attributes, field) => {
+              if (this.target.backend.model.input[field].hasOwnProperty('default')) {
+                attributes[field] = this.target.backend.model.input[field].default;
+              } else {
+                attributes[field] = null;
+              }
+              
+              return attributes;
+            }, {})
+        );
       }
 
       // #=== LIFECYCLE EVENTS ===#
@@ -174,6 +266,7 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
       _keyChanged(newValue, oldValue) {
         if (newValue && newValue.length 
             && (!this.parentModel || (this.parentKey && this.parentKey.length))
+            && this.target && this.target.backend && this.target.backend.status
             && (this.target.backend.status.isReady || this.target.backend.status.isComplete || this.target.backend.status.isError)) {
           this.doOperation('get');
         }
@@ -193,9 +286,15 @@ This is a reusable way to interact with any endpoints marked with the `recordIte
        */
       _appBackendInitializedChanged(e) {
         if (e.detail.value && (this.target.backend.status.code == 'uninitialized')) {
+          // Finish setting up the backend models
+          this.target.backend.model.input = this.app.$.backend.modelProperties(
+            this.app.$.backend.getModelReferenceString(this.model, 'input')
+          );
+
           // Set status ready and trigger a get (if one of the record identifiers is already set)
           this._updateStatus('ready');
-          if (this.key && this.key.length && this.parentKey && this.parentKey.length) {
+          if (this.key && this.key.length && (
+              !this.parentModel || (this.parentKey && this.parentKey.length))) {
             this.doOperation('get');
           }
         }

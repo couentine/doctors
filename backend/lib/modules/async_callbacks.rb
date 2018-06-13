@@ -21,7 +21,7 @@ module AsyncCallbacks
   #      _id_changed? && some_field_changed? && (some_field == 'some value')
   #    end
   #
-  # 3. Then create an exlamation point method which will be called from an asynchronous thread if the condition is met.
+  # 3. Then create an exclamation point method which will be called from an asynchronous thread if the condition is met.
   #    Keep in mind that there may be many different async callbacks being run on the record during the same asynchronous transaction.
   #    The record will automatically be saved when all of the relevant callbacks have run, so you don't need to ecplicitly save, but you 
   #    can if needed.
@@ -40,6 +40,7 @@ module AsyncCallbacks
     field :async_callback_poller_id,    type: BSON::ObjectId
     field :async_callback_status,       type: String # Process Flow: nil > pending > executing > nil
     field :async_callback_errors,       type: Array, default: []
+    field :async_user_id,               type: BSON::ObjectId
   
     # === REGISTER CALLBACK CHECKERS === #
 
@@ -54,25 +55,56 @@ module AsyncCallbacks
 
       if (record.async_callback_status == 'pending')
         poller = Poller.find(record.async_callback_poller_id) rescue nil
-
+        
         record.async_callback_status = 'executing'
-        record.save
 
-        callbacks_to_execute.each do |callback_name|
-          begin
-            record.send(callback_name.to_s + '!')
-          rescue => e
-            record.async_callback_errors << e.to_s
+        # If this model uses the FieldHistory module then the field history accessor is required
+        if record.respond_to? :field_history_user
+          record.field_history_user = record.async_user_id
+        end
+        
+        begin
+          record.save!
+
+          callbacks_to_execute.each do |callback_name|
+            begin
+              record.send(callback_name.to_s + '!')
+            rescue => e
+              record.async_callback_errors << e.to_s
+            end
           end
+        rescue => e
+          record.async_callback_errors << e.to_s
         end
 
         record.async_callback_status = nil
         record.async_callback_poller_id = nil
-        record.save
+        record.async_user_id = nil
         
-        if poller
-          poller.status = 'successful'
-          poller.save
+        if record.save
+          if poller
+            poller.status = 'successful'
+            poller.save
+          end
+        else
+          if poller
+            poller.status = 'failed'
+            poller.message = 'Could not update the record'
+            poller.results = record.async_callback_errors
+            poller.save
+          end
+
+          # Log this failure as an info item
+          item = InfoItem.new
+          item.type = 'async-callback-failure'
+          item.name = "Async Callback Failure on #{record.class.to_s}"
+          item.data = {
+            record_id: record_id.to_s,
+            record_class: record.class.to_s,
+            callbacks_to_execute: callbacks_to_execute,
+            errors: record.async_callback_errors,
+          }
+          item.save
         end
       end
     end
@@ -104,6 +136,11 @@ module AsyncCallbacks
       self.async_callback_poller_id = poller.id
       self.async_callback_errors = []
       self.async_callback_status = 'pending'
+
+      # If this model uses the FieldHistory module then the field history accessor is required, so we need to persist it
+      if self.respond_to? :field_history_user
+        self.async_user_id = field_history_user.id
+      end
     end
   end
 

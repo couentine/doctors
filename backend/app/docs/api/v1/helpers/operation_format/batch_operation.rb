@@ -1,7 +1,7 @@
 module Api::V1::Helpers::OperationFormat::BatchOperation
 
   # - verb = one of >> [:get, :create, :update, :delete]
-  def define_basic_info(model, verb, summary = nil, parent_model = nil)
+  def define_basic_info(model, verb, summary = nil, parent_model = nil, description = nil)
     camelized_model = model.to_s.camelize
     uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
     spaced_model = model.to_s.gsub('_', ' ')
@@ -9,15 +9,23 @@ module Api::V1::Helpers::OperationFormat::BatchOperation
     if parent_model.present?
       camelized_parent_model = parent_model.to_s.camelize
       uncapitalized_camelized_parent_model = camelized_parent_model[0, 1].downcase + camelized_parent_model[1..-1]
-    end
+      permissions = ApplicationPolicy.get_action_permissions(parent_model, model, :create).map{ |item| "- `#{item}`" }
 
-    if parent_model.present?
       key :operationId, "#{verb.to_s}#{camelized_parent_model}#{camelized_model.pluralize}"
     else
+      permissions = ApplicationPolicy.get_action_permissions(model, :create).map{ |item| "- `#{item}`" }
+
       key :operationId, "#{verb.to_s}#{camelized_model.pluralize}"
     end
     key :summary, summary
     key :tags, ['batchOperationFormat', "#{uncapitalized_camelized_model}Model"]
+
+    key :description, "#{description}\n" \
+      "\n" \
+      "-----\n" \
+      "**Required Permissions:**\n" \
+      + permissions.join("\n") + "\n" \
+      "-----"
   end
 
   # Optionally include a hash of meta_properties with keys equal to the meta properties and values equal 

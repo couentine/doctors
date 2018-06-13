@@ -21,12 +21,37 @@ class ApplicationController < ActionController::Base
   end
 
   def render_404(exception)
+    if request.path.starts_with?('/api/')
+      return render_single_error_json_api(
+        status: 404, 
+        title: 'Not found', 
+        detail: 'The specified path could not be found'
+      )
+    end
+    
     @not_found_path = exception.message
     respond_to do |format|
       format.html { render template: 'errors/not_found', layout: 'layouts/legacy', 
         status: 404 }
       format.all { render nothing: true, status: 404 }
     end
+  end
+
+  # This renders a JSON API formatted error message from a single string.
+  # For rendering a list of active model errors use the `render_field_errors` method below
+  def render_single_error_json_api(status: 500, title: 'Server error', detail: nil, meta: nil)
+    render json: {
+      errors: [
+        {
+          status: status,
+          title: title,
+          detail: detail
+        }
+      ],
+      jsonapi: {
+        version: '1.0'
+      }
+    }, status: status
   end
  
   def render_500(exception)
@@ -100,6 +125,14 @@ class ApplicationController < ActionController::Base
       @toast = nil
     end
 
+    if current_user.present?
+      current_user_json = {
+        id: current_user.id.to_s,
+      }
+    else
+      current_user_json = nil
+    end
+
     @initial_document_title = initial_document_title
     @metadata = metadata
     @include_metadata = metadata && metadata.count
@@ -107,12 +140,13 @@ class ApplicationController < ActionController::Base
       app_root_url: ENV['root_url'],
       polymer_root_url: @polymer_app_root_url,
       csrf_token: form_authenticity_token,
-      current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
+      current_user: current_user_json,
       toast: @toast,
+      flags: (current_user.present? && current_user.admin?) ? [:pat] : [], #==> 'pat' = Platform Admin Tools = Enables Admin UI
       
       # these are initialized in `environment.rb`
       asset_base_url: ASSET_BASE_URL,
-      assets: ASSET_PATHS
+      assets: POLYMER_APP_ASSETS,
     }
     
     render template: 'polymer/app', layout: 'polymer_app'
@@ -141,10 +175,11 @@ class ApplicationController < ActionController::Base
       csrf_token: form_authenticity_token,
       current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
       toast: @toast,
+      flags: (current_user.present? && current_user.admin?) ? [:pat] : [], #==> 'pat' = Platform Admin Tools = Enables Admin UI
       
       # these are initialized in `environment.rb`
       asset_base_url: ASSET_BASE_URL,
-      assets: ASSET_PATHS
+      assets: POLYMER_WEBSITE_ASSETS,
     }
     
     render template: 'polymer/website', layout: 'polymer_website'
@@ -162,7 +197,7 @@ class ApplicationController < ActionController::Base
 private
 
   def log_activity
-    current_user.log_activity if current_user
+    current_user.log_activity if current_user.present?
   end
 
 protected

@@ -116,7 +116,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/app/bower.json",
-    "revision": "394c8dec64e861c34a445db9bbac30b0"
+    "revision": "88b9ef2940d02f17312ab0ad5438d171"
   },
   {
     "url": "p/app/images/badge-list-shield-square.png",
@@ -140,7 +140,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/app/src/bl-app/bl-app.html",
-    "revision": "ee0b3a4e6aba90d6e2b5d3f3f83c1a78"
+    "revision": "00584706409d5d9ca16c46ba13df54e4"
   },
   {
     "url": "p/app/src/bl-app/bl-component-template.html",
@@ -240,7 +240,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/website/src/bl-website/bl-website.html",
-    "revision": "3bd8923658913a1d31e8560247ecc717"
+    "revision": "a8f7c1405aa114604367e90ea19dc56d"
   }
 ]);
   }

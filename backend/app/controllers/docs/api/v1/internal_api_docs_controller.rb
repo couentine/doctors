@@ -5,21 +5,31 @@ class Docs::Api::V1::InternalApiDocsController < ActionController::Base
   #=== CONSTANTS ===#
 
   SWAGGERED_CLASSES = [
-    ::Api::V1::Paths::UserPaths,
-    ::Api::V1::Schemas::UserSchemas,
-    ::Api::V1::Paths::GroupPaths,
-    ::Api::V1::Schemas::GroupSchemas,
+    
+    ::Api::V1::Paths::AppGroupMembershipPaths,
+    ::Api::V1::Paths::AppPaths,
+    ::Api::V1::Paths::AppUserMembershipPaths,
+    ::Api::V1::Paths::AuthenticationTokenPaths,
     ::Api::V1::Paths::BadgePaths,
+    ::Api::V1::Paths::GroupPaths,
+    ::Api::V1::Paths::PollerPaths,
+    ::Api::V1::Paths::PortfolioPaths,
+    ::Api::V1::Paths::UserPaths,
+    ::Api::V1::Paths::UserPaths::Internal,
+
+    ::Api::V1::Schemas::AppGroupMembershipSchemas,
+    ::Api::V1::Schemas::AppSchemas,
+    ::Api::V1::Schemas::AppUserMembershipSchemas,
+    ::Api::V1::Schemas::AuthenticationTokenSchemas,
     ::Api::V1::Schemas::BadgeSchemas,
     ::Api::V1::Schemas::EndorsementSchemas,
-    ::Api::V1::Paths::PollerPaths,
+    ::Api::V1::Schemas::ErrorSchemas,
+    ::Api::V1::Schemas::GroupSchemas,
     ::Api::V1::Schemas::PollerSchemas,
-    ::Api::V1::Paths::PortfolioPaths,
     ::Api::V1::Schemas::PortfolioSchemas,
     ::Api::V1::Schemas::SharedSchemas,
-    ::Api::V1::Schemas::ErrorSchemas,
-    ::Api::V1::Paths::AuthenticationTokenPaths,
-    ::Api::V1::Schemas::AuthenticationTokenSchemas,
+    ::Api::V1::Schemas::UserSchemas,
+
     self
   ].freeze
 
@@ -33,7 +43,6 @@ class Docs::Api::V1::InternalApiDocsController < ActionController::Base
     #=== BASE API INFO / MARKDOWN DESCRIPTION ===#
 
     define_info(
-      api_noun: :internal,
       title: 'Badge List Internal API',
       logo_url: 'https://s3.amazonaws.com/badgelist/images/badge-list-icon-blue-grey.png',
       background_color: COLORS['blue_grey'][600],
@@ -42,7 +51,7 @@ class Docs::Api::V1::InternalApiDocsController < ActionController::Base
         "The Badge List Internal API is used by the Badge List website itself. It is only able to be accessed from pages rendered by " \
         "the Badge List server and via requests authenticated via the normal user login flow.\n" \
         "\n" \
-        "For the publicly-available APIs refer to the [User API Docs](user) or the [Group API Docs](group)." \
+        "For the publicly-available API refer to the [Badge List API Docs](../v1)." \
         "\n" \
         "## Usage Restrictions ##\n" \
         "Permission to access to the Badge List Internal API by developers outside of Knowledgestreem must be granted in writing " \
@@ -56,9 +65,15 @@ class Docs::Api::V1::InternalApiDocsController < ActionController::Base
         "and may result in legal action."
     )
     
+    #=== PARAMETERS ===#
+
+    define_shared_parameters :user, :group, :badge, :endorsement, :portfolio, :app, :app_user_membership, :app_group_membership, :poller, 
+      :authentication_token
+
     #=== MODEL TAGS ===#
 
-    define_model_tags :user, :group, :badge, :endorsement, :portfolio, :poller, :authentication_token
+    define_model_tags :user, :group, :badge, :endorsement, :portfolio, :app, :app_user_membership, :app_group_membership, :poller, 
+      :authentication_token
 
     #=== OPERATION FORMAT TAGS ===#
     
@@ -66,7 +81,8 @@ class Docs::Api::V1::InternalApiDocsController < ActionController::Base
 
     #=== TAG GROUPS (USED BY REDOC) ===#
     
-    define_tag_groups :user, :group, :badge, :endorsement, :portfolio, :poller, :authentication_token
+    define_tag_groups :user, :group, :badge, :endorsement, :portfolio, :app, :app_user_membership, :app_group_membership, :poller, 
+      :authentication_token
 
     #=== SECURITY ===#
 

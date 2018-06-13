@@ -36,8 +36,8 @@ class Group
     link_info: [:id, :name, :full_url, :full_path, :avatar_image_url, 
       :avatar_image_medium_url, :avatar_image_small_url],
     api_v1: {
-      everyone: [:id, { :url => :record_path }, :parent_path, :name, { :url => :slug }, { :url_with_caps => :slug_with_caps }, :location, :type, 
-        :color, { :avatar_image_url => :image_url }, { :avatar_image_medium_url => :image_medium_url }, 
+      everyone: [:id, { :url => :record_path }, :parent_path, :name, { :url => :slug }, { :url_with_caps => :slug_with_caps }, :location, 
+        :type, :color, { :avatar_image_url => :image_url }, { :avatar_image_medium_url => :image_medium_url }, 
         { :avatar_image_small_url => :image_small_url }, :member_count, :admin_count, :total_user_count, :badge_count, 
         :full_url, { :full_path => :relative_url }, :current_user_permissions]
     },
@@ -67,16 +67,22 @@ class Group
 
   # === RELATIONSHIPS === #
 
-  has_one :proxy_user, inverse_of: :proxy_group, class_name: 'User'
-  belongs_to :creator, inverse_of: :created_groups, class_name: 'User'
-  belongs_to :owner, inverse_of: :owned_groups, class_name: 'User'
-  has_and_belongs_to_many :admins, inverse_of: :admin_of, class_name: 'User'
-  has_and_belongs_to_many :members, inverse_of: :member_of, class_name: 'User',
-    after_add: :do_group_welcome
-  has_many :badges, dependent: :restrict # You have to delete all the badges FIRST
-  has_many :info_items, dependent: :destroy
-  has_many :tags, dependent: :destroy, class_name: 'GroupTag'
+  has_one :proxy_user,                    inverse_of: :proxy_group,     class_name: 'User',                 dependent: :destroy
+  belongs_to :creator,                    inverse_of: :created_groups,  class_name: 'User'
+  belongs_to :owner,                      inverse_of: :owned_groups,    class_name: 'User'
 
+  has_and_belongs_to_many :admins,        inverse_of: :admin_of,        class_name: 'User'
+  has_and_belongs_to_many :members,       inverse_of: :member_of,       class_name: 'User',                 after_add: :do_group_welcome
+
+  has_many :badges,                       dependent: :restrict
+  has_many :tags,                         dependent: :destroy,          class_name: 'GroupTag'
+  has_many :info_items,                   dependent: :destroy
+
+  has_many :app_memberships,              inverse_of: :group,           class_name: 'AppGroupMembership',   dependent: :destroy
+  has_and_belongs_to_many :apps,          inverse_of: :groups,          class_name: 'App'
+  has_and_belongs_to_many :pending_apps,  inverse_of: :pending_groups,  class_name: 'App'
+  has_and_belongs_to_many :disabled_apps, inverse_of: :disabled_groups, class_name: 'App'
+  
   # === FIELDS & VALIDATIONS === #
 
   field :name,                            type: String
@@ -296,7 +302,7 @@ class Group
 
   # This is used by the API and requires that the current_user model attribute be set
   def current_user_permissions
-    if current_user
+    if current_user.present?
       {
         can_see_record: true,
         is_member: has_member?(current_user),
@@ -1747,7 +1753,7 @@ class Group
         ).save
       else
         if group
-          # First we need to record that we are working on the subscription (so any incoming stripe webhooks will be ignored until we're done)
+          # First we need to record that we are working on the subscription (so any incoming stripe webhooks are ignored until we're done)
           group.stripe_push_pending = true
           group.save
         end

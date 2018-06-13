@@ -287,263 +287,372 @@ This import contains all of the Badge List styles and needed shims.
         }
 
       /* === PAPER BUTTON STYLES === */
-      /*
-        Button Classes:
-        - Adding a color class (`orange`, `deep-purple`, etc) styles the background, border color and text color.
-        - `block` forces the button to display as block.
-        - `transparent` makes the background clear (except on hover/focus).
-        - `borderless` makes the border clear (even on hover/focus).
-        - `narrow` minimizes the width of the button.
-        - `whiteText` forces the text color to pure white.
-        - `small`, `large` or `jumbo` will decrease/increase the size and padding.
+        /*
+          Button Classes:
+          - Adding a color class (`orange`, `deep-purple`, etc) styles the background, border color and text color.
+          - `block` forces the button to display as block.
+          - `transparent` makes the background clear (except on hover/focus).
+          - `borderless` makes the border clear (even on hover/focus).
+          - `narrow` minimizes the width of the button.
+          - `whiteText` forces the text color to pure white.
+          - `small`, `large` or `jumbo` will decrease/increase the size and padding.
 
-        When wrapping `paper-button` in a link, always add the `button` class to the anchor tag.
-      */
+          When wrapping `paper-button` in a link, always add the `button` class to the anchor tag.
+        */
 
-        paper-button {
-          display: inline-block;
-          font-size: 0.8em;
-          font-weight: 500;
-          text-align: center;
-          text-transform: uppercase;
-          padding: 0.4em 1.35em;
-          border-radius: 500em;
+        /* Base Styles */
+          paper-button {
+            display: inline-block;
+            font-size: 0.8em;
+            font-weight: 500;
+            text-align: center;
+            text-transform: uppercase;
+            padding: 0.4em 1.35em;
+            border-radius: 500em;
 
-          background: radial-gradient(circle at 60% 40%, var(--bl-grey-50), var(--bl-grey-200));
-          border: 1.5px solid var(--bl-grey-600);
-          color: var(--bl-grey-600);
+            background: 
+              radial-gradient(circle at 60% 40%, var(--bl-button-off-g1, var(--bl-grey-50)), var(--bl-button-off-g2, var(--bl-grey-200)));
+            border: 1.5px solid var(--bl-button-off-border-color, var(--bl-grey-600));
+            color: var(--bl-button-off-text-color, var(--bl-grey-600));
 
-          transition: all 0.5s;
-        }
-        paper-button:hover, paper-button:focus {
-          background: radial-gradient(circle at 60% 40%, var(--bl-grey-50), var(--bl-grey-300));
-          color: var(--bl-grey-700);
-        }
-        paper-button.small {
-          font-size: 0.7em;
-          padding: 0.4em 1.1em;
-        }
-        paper-button.large {
-          font-size: 0.9em;
-          padding: 0.6em 1.5em;
-        }
-        paper-button.jumbo {
-          font-size: 1em;
-          padding: 0.8em 1.8em;
-        }
-        paper-button[disabled] {
-          opacity: 0.25;
-        }
-        paper-button.block {
-          display: block;
-        }
-        paper-button.transparent {
-          background: none !important;
-        }
-        paper-button.borderless {
-          border-color: transparent !important;
-        }
-        paper-button.narrow {
-          padding-left: 0.5em !important;
-          padding-right: 0.5em !important;
-          min-width: unset !important;
-        }
-        paper-button.whiteText {
-          color: white !important;
-        }
-        paper-button.red {
-          background: radial-gradient(circle at 60% 40%, var(--bl-red-500), var(--bl-red-600));
-          border-color: var(--bl-red-100);
-          color: var(--bl-red-100);
-        }
-          paper-button.red:hover, paper-button.red:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-red-400), var(--bl-red-700));
-            color: white;
+            transition: all 0.5s;
           }
-        paper-button.pink {
-          background: radial-gradient(circle at 60% 40%, var(--bl-pink-500), var(--bl-pink-600));
-          border-color: var(--bl-pink-100);
-          color: var(--bl-pink-100);
-        }
-          paper-button.pink:hover, paper-button.pink:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-pink-400), var(--bl-pink-700));
-            color: white;
+          paper-button:hover, paper-button:focus {
+            background: 
+              radial-gradient(circle at 60% 40%, var(--bl-button-on-g1, var(--bl-grey-50)), var(--bl-button-on-g2, var(--bl-grey-300)));
+            border: 1.5px solid var(--bl-button-on-border-color, var(--bl-grey-600));
+            color: var(--bl-button-on-text-color, var(--bl-grey-700));
           }
-        paper-button.purple {
-          background: radial-gradient(circle at 60% 40%, var(--bl-purple-500), var(--bl-purple-600));
-          border-color: var(--bl-purple-100);
-          color: var(--bl-purple-100);
-        }
-          paper-button.purple:hover, paper-button.purple:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-purple-400), var(--bl-purple-700));
-            color: white;
+          paper-button[raised] {
+            @apply --bl-shadow-3;
           }
-        paper-button.deep-purple {
-          background: radial-gradient(circle at 60% 40%, var(--bl-deep-purple-500), var(--bl-deep-purple-600));
-          border-color: var(--bl-deep-purple-100);
-          color: var(--bl-deep-purple-100);
-        }
-          paper-button.deep-purple:hover, paper-button.deep-purple:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-deep-purple-400), var(--bl-deep-purple-700));
-            color: white;
+            paper-button[raised]:hover, paper-button[raised]:focus {
+              @apply --bl-shadow-5;
+            }
+
+        /* General Utility Classes */
+          paper-button.small {
+            font-size: 0.7em;
+            padding: 0.4em 1.1em;
           }
-        paper-button.indigo {
-          background: radial-gradient(circle at 60% 40%, var(--bl-indigo-500), var(--bl-indigo-600));
-          border-color: var(--bl-indigo-100);
-          color: var(--bl-indigo-100);
-        }
-          paper-button.indigo:hover, paper-button.indigo:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-indigo-400), var(--bl-indigo-700));
-            color: white;
+          paper-button.large {
+            font-size: 0.9em;
+            padding: 0.6em 1.5em;
           }
-        paper-button.blue {
-          background: radial-gradient(circle at 60% 40%, var(--bl-blue-500), var(--bl-blue-600));
-          border-color: var(--bl-blue-100);
-          color: var(--bl-blue-100);
-        }
-          paper-button.blue:hover, paper-button.blue:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-blue-400), var(--bl-blue-700));
-            color: white;
+          paper-button.jumbo {
+            font-size: 1em;
+            padding: 0.8em 1.8em;
           }
-        paper-button.light-blue {
-          background: radial-gradient(circle at 60% 40%, var(--bl-light-blue-500), var(--bl-light-blue-600));
-          border-color: var(--bl-light-blue-100);
-          color: var(--bl-light-blue-100);
-        }
-          paper-button.light-blue:hover, paper-button.light-blue:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-light-blue-400), var(--bl-light-blue-700));
-            color: white;
+          paper-button[disabled] {
+            opacity: 0.7;
           }
-        paper-button.cyan {
-          background: radial-gradient(circle at 60% 40%, var(--bl-cyan-500), var(--bl-cyan-600));
-          border-color: var(--bl-cyan-100);
-          color: var(--bl-cyan-100);
-        }
-          paper-button.cyan:hover, paper-button.cyan:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-cyan-400), var(--bl-cyan-700));
-            color: white;
+          paper-button.block {
+            display: block;
           }
-        paper-button.teal {
-          background: radial-gradient(circle at 60% 40%, var(--bl-teal-500), var(--bl-teal-600));
-          border-color: var(--bl-teal-100);
-          color: var(--bl-teal-100);
-        }
-          paper-button.teal:hover, paper-button.teal:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-teal-400), var(--bl-teal-700));
-            color: white;
-          }
-        paper-button.green {
-          background: radial-gradient(circle at 60% 40%, var(--bl-green-500), var(--bl-green-600));
-          border-color: var(--bl-green-100);
-          color: var(--bl-green-100);
-        }
-          paper-button.green:hover, paper-button.green:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-green-400), var(--bl-green-700));
-            color: white;
-          }
-        paper-button.light-green {
-          background: radial-gradient(circle at 60% 40%, var(--bl-light-green-500), var(--bl-light-green-600));
-          border-color: var(--bl-light-green-100);
-          color: var(--bl-light-green-100);
-        }
-          paper-button.light-green:hover, paper-button.light-green:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-light-green-400), var(--bl-light-green-700));
-            color: white;
-          }
-        paper-button.lime {
-          background: radial-gradient(circle at 60% 40%, var(--bl-lime-500), var(--bl-lime-600));
-          border-color: var(--bl-lime-100);
-          color: var(--bl-lime-100);
-        }
-          paper-button.lime:hover, paper-button.lime:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-lime-400), var(--bl-lime-700));
-            color: white;
-          }
-        paper-button.yellow {
-          background: radial-gradient(circle at 60% 40%, var(--bl-yellow-500), var(--bl-yellow-600));
-          border-color: var(--bl-yellow-100);
-          color: var(--bl-yellow-100);
-        }
-          paper-button.yellow:hover, paper-button.yellow:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-yellow-400), var(--bl-yellow-700));
-            color: white;
-          }
-        paper-button.amber {
-          background: radial-gradient(circle at 60% 40%, var(--bl-amber-500), var(--bl-amber-600));
-          border-color: var(--bl-amber-100);
-          color: var(--bl-amber-100);
-        }
-          paper-button.amber:hover, paper-button.amber:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-amber-400), var(--bl-amber-700));
-            color: white;
-          }
-        paper-button.orange {
-          background: radial-gradient(circle at 60% 40%, var(--bl-orange-500), var(--bl-orange-600));
-          border-color: var(--bl-orange-100);
-          color: var(--bl-orange-100);
-        }
-          paper-button.orange:hover, paper-button.orange:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-orange-400), var(--bl-orange-700));
-            color: white;
-          }
-        paper-button.deep-orange {
-          background: radial-gradient(circle at 60% 40%, var(--bl-deep-orange-500), var(--bl-deep-orange-600));
-          border-color: var(--bl-deep-orange-100);
-          color: var(--bl-deep-orange-100);
-        }
-          paper-button.deep-orange:hover, paper-button.deep-orange:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-deep-orange-400), var(--bl-deep-orange-700));
-            color: white;
-          }
-        paper-button.brown {
-          background: radial-gradient(circle at 60% 40%, var(--bl-brown-500), var(--bl-brown-600));
-          border-color: var(--bl-brown-100);
-          color: var(--bl-brown-100);
-        }
-          paper-button.brown:hover, paper-button.brown:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-brown-400), var(--bl-brown-700));
-            color: white;
-          }
-        paper-button.grey {
-          background: radial-gradient(circle at 60% 40%, var(--bl-grey-500), var(--bl-grey-600));
-          border-color: var(--bl-grey-100);
-          color: var(--bl-grey-100);
-        }
-          paper-button.grey:hover, paper-button.grey:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-grey-400), var(--bl-grey-700));
-            color: white;
-          }
-        paper-button.blue-grey {
-          background: radial-gradient(circle at 60% 40%, var(--bl-blue-grey-500), var(--bl-blue-grey-600));
-          border-color: var(--bl-blue-grey-100);
-          color: var(--bl-blue-grey-100);
-        }
-          paper-button.blue-grey:hover, paper-button.blue-grey:focus {
-            background: radial-gradient(circle at 60% 40%, var(--bl-blue-grey-400), var(--bl-blue-grey-700));
-            color: white;
+          paper-button.narrow {
+            padding-left: 0.5em !important;
+            padding-right: 0.5em !important;
+            min-width: unset !important;
           }
 
-        a.button {
-          display: inline-block;
-        }
-        a.button, a.button:visited {
-          color: inherit;
-        }
-        a.button paper-button { 
-          display: inline-block; 
-          margin: 0;
-        }
+        /* Base Color Classes */
+          paper-button.red {
+            --bl-button-off-g1: var(--bl-red-500);
+            --bl-button-off-g2: var(--bl-red-600);
+            --bl-button-off-border-color: var(--bl-red-100);
+            --bl-button-off-text-color: var(--bl-red-100);
+            
+            --bl-button-on-g1: var(--bl-red-400);
+            --bl-button-on-g2: var(--bl-red-700);
+            --bl-button-on-border-color: var(--bl-red-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-red-700);
+          }
+          paper-button.pink {
+            --bl-button-off-g1: var(--bl-pink-500);
+            --bl-button-off-g2: var(--bl-pink-600);
+            --bl-button-off-border-color: var(--bl-pink-100);
+            --bl-button-off-text-color: var(--bl-pink-100);
+            
+            --bl-button-on-g1: var(--bl-pink-400);
+            --bl-button-on-g2: var(--bl-pink-700);
+            --bl-button-on-border-color: var(--bl-pink-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-pink-700);
+          }
+          paper-button.purple {
+            --bl-button-off-g1: var(--bl-purple-500);
+            --bl-button-off-g2: var(--bl-purple-600);
+            --bl-button-off-border-color: var(--bl-purple-100);
+            --bl-button-off-text-color: var(--bl-purple-100);
+            
+            --bl-button-on-g1: var(--bl-purple-400);
+            --bl-button-on-g2: var(--bl-purple-700);
+            --bl-button-on-border-color: var(--bl-purple-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-purple-700);
+          }
+          paper-button.deep-purple {
+            --bl-button-off-g1: var(--bl-deep-purple-500);
+            --bl-button-off-g2: var(--bl-deep-purple-600);
+            --bl-button-off-border-color: var(--bl-deep-purple-100);
+            --bl-button-off-text-color: var(--bl-deep-purple-100);
+            
+            --bl-button-on-g1: var(--bl-deep-purple-400);
+            --bl-button-on-g2: var(--bl-deep-purple-700);
+            --bl-button-on-border-color: var(--bl-deep-purple-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-deep-purple-700);
+          }
+          paper-button.indigo {
+            --bl-button-off-g1: var(--bl-indigo-500);
+            --bl-button-off-g2: var(--bl-indigo-600);
+            --bl-button-off-border-color: var(--bl-indigo-100);
+            --bl-button-off-text-color: var(--bl-indigo-100);
+            
+            --bl-button-on-g1: var(--bl-indigo-400);
+            --bl-button-on-g2: var(--bl-indigo-700);
+            --bl-button-on-border-color: var(--bl-indigo-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-indigo-700);
+          }
+          paper-button.blue {
+            --bl-button-off-g1: var(--bl-blue-500);
+            --bl-button-off-g2: var(--bl-blue-600);
+            --bl-button-off-border-color: var(--bl-blue-100);
+            --bl-button-off-text-color: var(--bl-blue-100);
+            
+            --bl-button-on-g1: var(--bl-blue-400);
+            --bl-button-on-g2: var(--bl-blue-700);
+            --bl-button-on-border-color: var(--bl-blue-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-blue-700);
+          }
+          paper-button.light-blue {
+            --bl-button-off-g1: var(--bl-light-blue-500);
+            --bl-button-off-g2: var(--bl-light-blue-600);
+            --bl-button-off-border-color: var(--bl-light-blue-100);
+            --bl-button-off-text-color: var(--bl-light-blue-100);
+            
+            --bl-button-on-g1: var(--bl-light-blue-400);
+            --bl-button-on-g2: var(--bl-light-blue-700);
+            --bl-button-on-border-color: var(--bl-light-blue-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-light-blue-700);
+          }
+          paper-button.cyan {
+            --bl-button-off-g1: var(--bl-cyan-500);
+            --bl-button-off-g2: var(--bl-cyan-600);
+            --bl-button-off-border-color: var(--bl-cyan-100);
+            --bl-button-off-text-color: var(--bl-cyan-100);
+            
+            --bl-button-on-g1: var(--bl-cyan-400);
+            --bl-button-on-g2: var(--bl-cyan-700);
+            --bl-button-on-border-color: var(--bl-cyan-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-cyan-700);
+          }
+          paper-button.teal {
+            --bl-button-off-g1: var(--bl-teal-500);
+            --bl-button-off-g2: var(--bl-teal-600);
+            --bl-button-off-border-color: var(--bl-teal-100);
+            --bl-button-off-text-color: var(--bl-teal-100);
+            
+            --bl-button-on-g1: var(--bl-teal-400);
+            --bl-button-on-g2: var(--bl-teal-700);
+            --bl-button-on-border-color: var(--bl-teal-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-teal-700);
+          }
+          paper-button.green {
+            --bl-button-off-g1: var(--bl-green-500);
+            --bl-button-off-g2: var(--bl-green-600);
+            --bl-button-off-border-color: var(--bl-green-100);
+            --bl-button-off-text-color: var(--bl-green-100);
+            
+            --bl-button-on-g1: var(--bl-green-400);
+            --bl-button-on-g2: var(--bl-green-700);
+            --bl-button-on-border-color: var(--bl-green-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-green-700);
+          }
+          paper-button.light-green {
+            --bl-button-off-g1: var(--bl-light-green-500);
+            --bl-button-off-g2: var(--bl-light-green-600);
+            --bl-button-off-border-color: var(--bl-light-green-100);
+            --bl-button-off-text-color: var(--bl-light-green-100);
+            
+            --bl-button-on-g1: var(--bl-light-green-400);
+            --bl-button-on-g2: var(--bl-light-green-700);
+            --bl-button-on-border-color: var(--bl-light-green-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-light-green-700);
+          }
+          paper-button.lime {
+            --bl-button-off-g1: var(--bl-lime-500);
+            --bl-button-off-g2: var(--bl-lime-600);
+            --bl-button-off-border-color: var(--bl-lime-100);
+            --bl-button-off-text-color: var(--bl-lime-100);
+            
+            --bl-button-on-g1: var(--bl-lime-400);
+            --bl-button-on-g2: var(--bl-lime-700);
+            --bl-button-on-border-color: var(--bl-lime-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-lime-700);
+          }
+          paper-button.yellow {
+            --bl-button-off-g1: var(--bl-yellow-500);
+            --bl-button-off-g2: var(--bl-yellow-600);
+            --bl-button-off-border-color: var(--bl-yellow-100);
+            --bl-button-off-text-color: var(--bl-yellow-100);
+            
+            --bl-button-on-g1: var(--bl-yellow-400);
+            --bl-button-on-g2: var(--bl-yellow-700);
+            --bl-button-on-border-color: var(--bl-yellow-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-yellow-700);
+          }
+          paper-button.amber {
+            --bl-button-off-g1: var(--bl-amber-500);
+            --bl-button-off-g2: var(--bl-amber-600);
+            --bl-button-off-border-color: var(--bl-amber-100);
+            --bl-button-off-text-color: var(--bl-amber-100);
+            
+            --bl-button-on-g1: var(--bl-amber-400);
+            --bl-button-on-g2: var(--bl-amber-700);
+            --bl-button-on-border-color: var(--bl-amber-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-amber-700);
+          }
+          paper-button.orange {
+            --bl-button-off-g1: var(--bl-orange-500);
+            --bl-button-off-g2: var(--bl-orange-600);
+            --bl-button-off-border-color: var(--bl-orange-100);
+            --bl-button-off-text-color: var(--bl-orange-100);
+            
+            --bl-button-on-g1: var(--bl-orange-400);
+            --bl-button-on-g2: var(--bl-orange-700);
+            --bl-button-on-border-color: var(--bl-orange-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-orange-700);
+          }
+          paper-button.deep-orange {
+            --bl-button-off-g1: var(--bl-deep-orange-500);
+            --bl-button-off-g2: var(--bl-deep-orange-600);
+            --bl-button-off-border-color: var(--bl-deep-orange-100);
+            --bl-button-off-text-color: var(--bl-deep-orange-100);
+            
+            --bl-button-on-g1: var(--bl-deep-orange-400);
+            --bl-button-on-g2: var(--bl-deep-orange-700);
+            --bl-button-on-border-color: var(--bl-deep-orange-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-deep-orange-700);
+          }
+          paper-button.brown {
+            --bl-button-off-g1: var(--bl-brown-500);
+            --bl-button-off-g2: var(--bl-brown-600);
+            --bl-button-off-border-color: var(--bl-brown-100);
+            --bl-button-off-text-color: var(--bl-brown-100);
+            
+            --bl-button-on-g1: var(--bl-brown-400);
+            --bl-button-on-g2: var(--bl-brown-700);
+            --bl-button-on-border-color: var(--bl-brown-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-brown-700);
+          }
+          paper-button.grey {
+            --bl-button-off-g1: var(--bl-grey-500);
+            --bl-button-off-g2: var(--bl-grey-600);
+            --bl-button-off-border-color: var(--bl-grey-100);
+            --bl-button-off-text-color: var(--bl-grey-100);
+            
+            --bl-button-on-g1: var(--bl-grey-400);
+            --bl-button-on-g2: var(--bl-grey-700);
+            --bl-button-on-border-color: var(--bl-grey-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-grey-700);
+          }
+          paper-button.blue-grey {
+            --bl-button-off-g1: var(--bl-blue-grey-500);
+            --bl-button-off-g2: var(--bl-blue-grey-600);
+            --bl-button-off-border-color: var(--bl-blue-grey-100);
+            --bl-button-off-text-color: var(--bl-blue-grey-100);
+            
+            --bl-button-on-g1: var(--bl-blue-grey-400);
+            --bl-button-on-g2: var(--bl-blue-grey-700);
+            --bl-button-on-border-color: var(--bl-blue-grey-100);
+            --bl-button-on-text-color: white;
+            
+            --bl-button-inverse-color: var(--bl-blue-grey-700);
+          }
+
+        /* Coloration Utility Classes */
+          paper-button.inverse {
+            background: var(--bl-button-off-text-color, var(--bl-grey-600));
+            border-color: var(--bl-button-inverse-color, var(--bl-grey-100));
+            color: var(--bl-button-inverse-color, var(--bl-grey-50));
+          }
+          paper-button.transparent, paper-button.transparent:focus, paper-button.transparent:hover {
+            background: transparent;
+          }
+            paper-button.inverse:hover, paper-button.inverse:focus {
+              border-color: var(--bl-button-on-border-color, var(--bl-grey-600));
+              color: var(--bl-button-on-text-color, var(--bl-grey-700));
+            }
+            paper-button.inverse.transparent:not(.borderless):hover, paper-button.inverse.transparent:not(.borderless):focus {
+              background: 
+                radial-gradient(circle at 60% 40%, var(--bl-button-on-g1, var(--bl-grey-50)), var(--bl-button-on-g2, var(--bl-grey-300)));
+            }
+            paper-button.inverse.transparent.borderless:hover, paper-button.inverse.transparent.borderless:focus {
+              color: var(--bl-button-off-g2, var(--bl-grey-200));
+            }
+          paper-button.borderless, paper-button.borderless:focus, paper-button.borderless:hover {
+            border-color: transparent;
+          }
+          paper-button.whiteText, paper-button.whiteText:focus, paper-button.whiteText:hover {
+            color: white;
+          }
+
+        /* Anchor Tag Buttons */
+          a.button {
+            display: inline-block;
+          }
+          a.button, a.button:visited {
+            color: inherit;
+          }
+          a.button paper-button { 
+            display: inline-block; 
+            margin: 0;
+          }
 
       /* === PAPER DIALOG STYLES === */
-      /*
-        Dialog Classes and Variables:
-        - Adding a color class (`orange`, `deep-purple`, etc) styles the title bar and the form icon as well as the background and border 
-          of the buttons panel if present.
-        - `dialog-gradients` switches the title bar and form icon to gradients. To use this you must also set `--bl-dialog-gradient-color1`
-          and `--bl-dialog-gradient-color2`.
-        - `no-title-bar` suppresses the display of the colored bar underneath the title and colors the title text instead.
-        - The body content of the dialog should either be a `<paper-dialog-scrollable>` element or a div with class `dialogContent`.
-      */
+        /*
+          Dialog Classes and Variables:
+          - Adding a color class (`orange`, `deep-purple`, etc) styles the title bar and the form icon as well as the background and border 
+            of the buttons panel if present.
+          - `dialog-gradients` switches the title bar and form icon to gradients. To use this you must also set `--bl-dialog-gradient-color1`
+            and `--bl-dialog-gradient-color2`.
+          - `no-title-bar` suppresses the display of the colored bar underneath the title and colors the title text instead.
+          - The body content of the dialog should either be a `<paper-dialog-scrollable>` element or a div with class `dialogContent`.
+        */
 
         paper-dialog {
           --paper-dialog: {
@@ -569,7 +678,8 @@ This import contains all of the Badge List styles and needed shims.
           --bl-dialog-design-elements-color: var(--bl-grey-700);
         }
           
-        paper-dialog:not(.no-title-bar) h2::after {
+        paper-dialog:not(.no-title-bar) h2:not(.with-subtitle)::after,
+        paper-dialog:not(.no-title-bar) .subtitle::after {
           content: '';
           display: block;
           width: 2em;
@@ -578,11 +688,19 @@ This import contains all of the Badge List styles and needed shims.
           background: var(--bl-dialog-design-elements-color);
           border-radius: 500em;
         }
-        paper-dialog:not(.no-title-bar).dialog-gradients h2::after {
+        paper-dialog:not(.no-title-bar).dialog-gradients h2:not(.with-subtitle)::after,
+        paper-dialog:not(.no-title-bar).dialog-gradients .subtitle::after {
           background: linear-gradient(70deg, var(--bl-dialog-gradient-color1), var(--bl-dialog-gradient-color2));
         }
         paper-dialog.no-title-bar h2 {
           color: var(--bl-dialog-design-elements-color);
+        }
+
+        paper-dialog .subtitle {
+          margin-top: 0.6rem;
+          line-height: 1.4em;
+          color: var(--bl-grey-600);
+          font-weight: 300;
         }
 
         paper-dialog .dialogIcon {
@@ -634,6 +752,7 @@ This import contains all of the Badge List styles and needed shims.
             padding: 1rem 1.5rem 3rem 1.5rem;
             overflow-y: scroll;
             max-height: 22em;
+            max-width: none;
           };
         }
         paper-dialog-scrollable.can-scroll:not(.is-scrolled) {
@@ -660,6 +779,18 @@ This import contains all of the Badge List styles and needed shims.
         paper-dialog h3:last-child {
           margin-bottom: 0;
         }
+        paper-dialog h3.warning {
+          color: var(--bl-red-900);
+        }
+
+        paper-dialog .divider {
+          display: block;
+
+          margin: 1.5rem 0;
+          height: 1px;
+          
+          background: var(--bl-grey-200);
+        }
 
         paper-dialog paper-checkbox {
           margin: 0.5rem 0;
@@ -675,8 +806,15 @@ This import contains all of the Badge List styles and needed shims.
           color: var(--bl-grey-800);
           line-height: 1.3em;
         }
-          paper-dialog p, paper-dialog ul>li {
-            margin: 0.5em 0;
+          paper-dialog p {
+            margin: 1rem 0;
+          }
+          paper-dialog p.dialogBodyActions {
+            margin: 1.5rem -0.2rem;
+          }
+
+          paper-dialog ul>li {
+            margin: 0.5rem 0;
           }
           paper-dialog p:first-child, paper-dialog ul>li:first-child {
             margin-top: 0;
@@ -855,7 +993,7 @@ This import contains all of the Badge List styles and needed shims.
 
       /* === PAPER CHECKBOX STYLES === */
 
-        paper-checkbox .subtitle {
+        paper-checkbox .help-text {
           display: block;
           font-size: 0.8em;
           margin-top: 0.3rem;
@@ -885,7 +1023,6 @@ This import contains all of the Badge List styles and needed shims.
         paper-checkbox.brown { --primary-color: var(--bl-brown-500); }
         paper-checkbox.grey { --primary-color: var(--bl-grey-500); }
         paper-checkbox.blue-grey { --primary-color: var(--bl-blue-grey-500); }
-
 
       /* === PAPER DRODOWN MENU STYLES === */
 
@@ -947,14 +1084,14 @@ This import contains all of the Badge List styles and needed shims.
 
       /* === ICON CLASSES === */
 
-      /* 
-        NOTE: Making changes to these requires rebuilding bl-icons from icomoon.io
-        then replacing the files in /backend/app/stylesheets/shared/bl-icons
-        and then copying the classes from /backend/app/stylesheets/shared/bl-icons/style.css
-        into this file. There are instructions in /backend/app/stylesheets/shared/bl-icons/README.md
+        /* 
+          NOTE: Making changes to these requires rebuilding bl-icons from icomoon.io
+          then replacing the files in /backend/app/stylesheets/shared/bl-icons
+          and then copying the classes from /backend/app/stylesheets/shared/bl-icons/style.css
+          into this file. There are instructions in /backend/app/stylesheets/shared/bl-icons/README.md
 
-        To view a complete list of available icons open /a/icons in the app.
-      */
+          To view a complete list of available icons open /a/icons in the app.
+        */
       
         i {
           /* use !important to prevent issues with browser extensions that change fonts */

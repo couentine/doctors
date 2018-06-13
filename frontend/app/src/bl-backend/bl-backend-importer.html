@@ -190,7 +190,7 @@ The target object provides methods for building a list of items to import either
             dynamicTyping: true,
             skipEmptyLines: true,
             complete: (parseResults) => this._processParseResults(parseResults),
-            error: (error) => this._updateStatus('error', error)
+            error: (error) => this._updateStatus('error', error.message)
           });
         }
       }
@@ -298,10 +298,9 @@ The target object provides methods for building a list of items to import either
       // #=== PRIVATE ACTION METHODS ===#
 
       /** 
-       * Sets and notifies all of the target properties related to status. Only include error if statusCode is 'error'. 
-       * 'error' can be an error object or a string.
+       * Sets and notifies all of the target properties related to status. Only include errorMessage if statusCode is 'error'. 
        */
-      _updateStatus(statusCode, error) {
+      _updateStatus(statusCode, errorMessage) {
         var isReady = (statusCode == 'ready');
         var isParsing = (statusCode == 'parsing');
         var isMapping = (statusCode == 'mapping');
@@ -316,7 +315,7 @@ The target object provides methods for building a list of items to import either
         if (this.target.status.isError != isError) this.set('target.status.isError', isError);
 
         // Always trigger a notification for the error message, but ensure that it's always null if there's no error
-        if (isError) this.set('target.status.errorMessage', ((error && error.message) ? error.message : error));
+        if (isError) this.set('target.status.errorMessage', errorMessage);
         else this.set('target.status.errorMessage', null);
 
         this.set('target.status.code', statusCode);
@@ -475,8 +474,7 @@ The target object provides methods for building a list of items to import either
             this.dispatchEvent(new CustomEvent('csv-parsing-complete', { detail: { parseResults: parseResults } }));
           }
         } catch(e) {
-          throw e;
-          this._updateStatus('error', e);
+          this._updateStatus('error', e.message);
         }
       }
 
@@ -525,7 +523,9 @@ The target object provides methods for building a list of items to import either
         };
         if (this.parentModel && this.parentModel.length) options.parentModel = this.parentModel;
 
-        this.app.$.backend.doOperation(options, parameters).then(function(response) {
+        this.app.$.backend.doOperation(options, parameters).then(function(result) {
+          var response = result.response;
+
           // Setting the `_pollerId` property automatically kicks off the polling process in `<bl-poller>`.
           // There is a property observer on `target.status.poller.attributes.completed` which fires `_processImportResults` 
           // when the poller is done.
@@ -534,8 +534,8 @@ The target object provides methods for building a list of items to import either
           } else {
             this._logImportBatchError('There was a server error. Please try again later.');
           }
-        }.bind(this)).catch(function(response) {
-          this._logImportBatchError(response);
+        }.bind(this)).catch(function(result) {
+          this._logImportBatchError(result.errorMessage);
         }.bind(this));
       }
 
@@ -576,7 +576,7 @@ The target object provides methods for building a list of items to import either
         * Logs a network or server error which occurs during the importing of a batch. 
         * Pass either a string error message or an API response with an array of errors.
         */
-      _logImportBatchError(errorStringOrRespose) {
+      _logImportBatchError(errorMessage) {
         var firstIndex;
         var lastIndex;
 
@@ -590,12 +590,8 @@ The target object provides methods for building a list of items to import either
         // This might have been a multi-batch process where previous batches were successful. If so, then we need to move imported items.
         this._moveImportedItems();
 
-        if ((typeof errorStringOrRespose) == 'string') {
-          this._updateStatus('error', errorStringOrRespose); 
-        } else if (errorStringOrRespose && errorStringOrRespose.errors) {
-          this._updateStatus('error', errorStringOrRespose.errors.map(function(errorItem) {
-            return (errorItem.detail) ? errorItem.detail : errorItem.title
-          }).join('. ') + '.');
+        if (errorMessage) {
+          this._updateStatus('error', errorMessage); 
         } else {
           this._updateStatus('error', 'An error has occurred. Please try again later.'); 
         }

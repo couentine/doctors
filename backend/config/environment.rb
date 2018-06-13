@@ -38,3 +38,31 @@ if ENV['cdn_asset_host']
 else
   ASSET_BASE_URL = "#{ENV['root_url']}/assets/"
 end
+
+# Now make the json version of the asset paths
+JSON_ASSET_PATHS = {}
+ASSET_PATHS.each do |key, value|
+  current_hash = JSON_ASSET_PATHS
+  
+  if key.include?('/')
+    path_items = key.split('/')
+    pathless_key = path_items.last
+    path_items.first(path_items.count - 1).each do |path_item|
+      camelized_path_item = path_item.gsub(/[-\.\/]/, '_').camelize(:lower)
+      current_hash[camelized_path_item] = {} if !current_hash.has_key?(camelized_path_item)
+      current_hash = current_hash[camelized_path_item]
+    end
+  else
+    pathless_key = key
+  end
+
+  current_hash[pathless_key.gsub(/[-\.\/]/, '_').camelize(:lower)] = ASSET_BASE_URL + value
+end
+
+# NOTE: The polymer website and app only have a subset of the total assets available. Root-level assets are not included, only the items
+# in the specified sub-folder of the assets folder are available.
+website_asset_folders = ['icons', 'graphics', 'brand', 'customers', 'backgrounds']
+app_asset_folders = ['brand', 'backgrounds']
+
+POLYMER_WEBSITE_ASSETS = JSON_ASSET_PATHS.select{|key, value| website_asset_folders.include? key }
+POLYMER_APP_ASSETS = JSON_ASSET_PATHS.select{|key, value| app_asset_folders.include? key }

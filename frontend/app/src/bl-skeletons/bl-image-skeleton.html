@@ -1,0 +1,120 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Text Skeleton #
+
+Use this in order to display skeleton image while an item is loading.
+
+Set the `--skeleton-color` variable to control the color of the skeleton text.
+
+Set the `--skeleton-border-radius` variable to control the border-radius of the skeleton.
+Or set the `rounded` property to make it a circle.
+-->
+<dom-module id="bl-image-skeleton">
+  <template>
+
+    <style include="bl-style-classes">
+        
+      :host {
+        display: block;
+        position: relative;
+
+        background: var(--skeleton-color, var(--bl-grey-200));
+        border: var(--skeleton-border, none);
+        border-radius: var(--skeleton-border-radius, 9px);
+        overflow: hidden;
+      }
+      :host([rounded]) {
+        border-radius: 100%;
+      }
+      :host([loaded]) {
+        background: transparent;
+      }
+
+      #spinner-container, #error-container {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+        #spinner {
+          width: 60%;
+          height: 60%;
+          flex: 0 0 auto;
+
+          --paper-spinner-color: var(--skeleton-spinner-color, var(--bl-grey-400));
+          --paper-spinner-stroke-width: var(--skeleton-stroke-width, 5px);
+        }
+        #error-container i {
+          display: inline-block;
+          font-size: 3em;
+          color: var(--skeleton-error-color, var(--bl-red-300));
+        }
+
+    </style>
+    
+    <slot></slot>
+
+    <div id="spinner-container" hidden="[[!spinner]]">
+      <paper-spinner-lite id="spinner" alt="Loading" active></paper-spinner-lite>
+    </div>
+    <div id="error-container" hidden="[[!error]]">
+      <i class="icon-warning"></i>
+    </div>
+
+  </template>
+
+  <script>
+    class BlImageSkeleton extends Polymer.Element {
+      
+      static get is() { return 'bl-image-skeleton'; }
+
+      static get properties() {
+        return {
+
+          /* This is a simple boolean which controls whether the skeleton image is displayed. False = skeleton image visible. */
+          loaded: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+          },
+
+          /* Set this to true to display a spinner. */
+          spinner: {
+            type: Boolean,
+            value: false,
+          },
+
+          /* Set this to true to display an exception icon. */
+          error: {
+            type: Boolean,
+            value: false,
+          },
+
+          rounded: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+          },
+
+        }
+      }
+
+    }
+
+    window.customElements.define(BlImageSkeleton.is, BlImageSkeleton);
+  </script>
+</dom-module>

@@ -12,6 +12,12 @@ All Badge List app views components should extend this mixin. It extends the `bl
 
       static get properties() {
         return {
+
+          /* Required. Indicates the document title when this view is activated. */
+          title: {
+            type: String,
+            observer: '_typeChanged',
+          },
           
           /**
            * The current status of the view.
@@ -23,7 +29,13 @@ All Badge List app views components should extend this mixin. It extends the `bl
             value: 'uninitialized',
             notify: true,
             readOnly: true,
-            reflectToAttribute: true
+            reflectToAttribute: true,
+          },
+
+          /** Set this to true to hide the chat widget. */
+          noChat: {
+            type: Boolean,
+            value: false,
           },
 
           /** 
@@ -33,8 +45,10 @@ All Badge List app views components should extend this mixin. It extends the `bl
           */
           active: {
             type: Boolean,
-            observer: '_activeChanged'
-          }
+            observer: '_activeChanged',
+          },
+
+          _timer: Object,
 
         };
       }
@@ -49,34 +63,17 @@ All Badge List app views components should extend this mixin. It extends the `bl
        * start the visual transition without triggering a network reload. Then set the `status` to `active` when everything is ready.
        */
       activate() {
-        if (!this.app.currentView || (this.app.currentView.id != this.id)) {
+        if (!this.app.activeView || (this.app.activeView.id != this.id)) {
           this._setStatus('active');
-          if (this.app.currentView) this.app.currentView.deactivate();
-          this.app.currentView = this;
+          if (this.app.activeView) this.app.activeView.deactivate();
+          document.title = this.title;
+          this.app.activeView = this;
+
+          (this.noChat
+            ? this.app.hideIntercom
+            : this.app.showIntercom
+          )();
         }
-      }
-
-      showIntercom() {
-        if (Intercom) {
-          Intercom('show');
-        }
-      }
-
-      /** 
-       * Call this in order to attempt hiding the intercom UI. Runs recursively every 100 milliseconds waiting for the intercom container
-       * to show up.
-       *
-       * @param {number} remainingTryCount - How many attempts should be made? Defaults to 100.
-       */
-      tryToHideIntercom(remainingTryCount) {
-        if (!remainingTryCount) remainingTryCount = 100;
-
-        if (document.querySelector('#intercom-container'))
-          document.querySelector('#intercom-container').hidden = true;
-        else if (remainingTryCount > 0)
-          setTimeout(function() {
-            this.tryToHideIntercom(remainingTryCount - 1); 
-          }.bind(this), 100);
       }
 
       /** 
@@ -84,14 +81,34 @@ All Badge List app views components should extend this mixin. It extends the `bl
        * Override this method in order to add special logic when the page is de-activated.
        */
       deactivate() {
+        if (this._timer) clearTimeout(this._timer);
         this._setStatus('inactive');
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
 
+      static get observers() {
+          return [
+            '_intercomLoadedChanged(app.intercomLoaded)',
+          ];
+      }
+
+      _intercomLoadedChanged(newValue, oldValue) {
+        if (newValue && this && (this.status == 'active') && this.noChat) {
+          this.app.hideIntercom();
+        }
+      }
+
+      _typeChanged(newValue, oldValue) {
+        if (newValue && (this.status == 'active')) {
+          document.title = newValue;
+        }
+      }
+
       _activeChanged(newValue, oldValue) {
-        if (newValue && !oldValue)
+        if (newValue && !oldValue) {
           this.activate();
+        }
       }
 
       // #=== PUBLIC HELPER & UTILITY METHODS ===#

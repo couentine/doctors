@@ -1,44 +1,61 @@
 class AuthenticationTokenPolicy < ApplicationPolicy
-  attr_reader :current_user, :authentication_token, :authentication_tokens
-
-  def initialize(current_user, token_or_tokens)
-    @current_user = current_user
-    if (token_or_tokens.class == Mongoid::Criteria)
-      @authentication_tokens = token_or_tokens
-      @records = token_or_tokens
-    else
-      @authentication_token = token_or_tokens
-      @record = token_or_tokens
-    end
-  end
 
   #=== ACTION POLICIES ===#
 
-  def index?
-    return @current_user.present? && @current_user.has?('all:index') && @current_user.has?('authentication_tokens:read')
-  end
+  standard_actions :authentication_token,
+    show_roles: :all_roles,
+    update_roles: [:admin],
+    destroy_roles: [:admin]
 
-  def show?
-    return @current_user.present? && @current_user.has?('authentication_tokens:read') && user_can_manage_token?
-  end
+  #=== RELATIONSHIP POLICIES ===#
 
-  def create?
-    return @current_user.present? && @current_user.has?('authentication_tokens:write')
-  end
+  belongs_to :user,
+    via: :user_id,
+    visible_to: :all_roles,
+    creation_role: :admin
 
-  def destroy?
-    return @current_user.present? && @current_user.has?('authentication_tokens:write') && user_can_manage_token?
-  end
+  belongs_to :creator,
+    via: :creator_id,
+    policy_model: :user,
+    visible_to: :all_roles,
+    creation_role: :admin,
+    read_only: true
 
-  #=== USER-FACING METADATA ===#
-  
-  def meta
-    return {
-      current_user: {
-        can_see_record: show?,
-        can_delete_record: destroy?
-      }
-    }
+  #=== FIELD POLICIES ===#
+
+  ADMIN_FIELD = { visible_to: [:admin], editable_by: [:admin] }
+  READ_ONLY_FIELD = { visible_to: [:admin], editable_by: :nobody }
+  SECRET_FIELD = { visible_to: [:admin], editable_by: :nobody, secret: true }
+
+  field :name,                          ADMIN_FIELD
+  field :permissions,                   ADMIN_FIELD
+
+  field :request_count,                 READ_ONLY_FIELD
+  field :last_used_at,                  READ_ONLY_FIELD
+  field :ip_address,                    READ_ONLY_FIELD
+  field :user_agent,                    READ_ONLY_FIELD
+
+  field :value,                         SECRET_FIELD
+
+  #=== ROLE DEFINITIONS ===#
+
+  role :admin do |current_user, authentication_token|
+    next false if current_user.blank?
+
+    if authentication_token.user
+      if authentication_token.user.type == 'individual'
+        # Tokens for individual users can only be created by the users themselves
+        next current_user.id == authentication_token.user.id
+      elsif (authentication_token.user.type == 'group') && authentication_token.user.proxy_group
+        # Tokens for group users can only be created by group admins
+        next current_user.admin_of?(authentication_token.user.proxy_group)
+      elsif (authentication_token.user.type == 'app') && authentication_token.user.proxy_app
+        # Tokens for app users can only be created by app admins
+        next AppUserMembershipDecorator.new(authentication_token.user.proxy_app).has_admin? current_user
+      end
+    else
+      next false
+    end
   end
 
   #=== SCOPES ===#
@@ -50,27 +67,6 @@ class AuthenticationTokenPolicy < ApplicationPolicy
       else
         nil
       end
-    end
-  end
-  
-  #=== UTILITY METHODS ===#
-
-  # Returns true if the @current_user has permission to manage the @authentication_token
-  def user_can_manage_token?
-    raise ArgumentError.new('Record must be an instantiated AuthenticationToken') if !@authentication_token.is_a?(AuthenticationToken)
-
-    @authentication_token_user = @authentication_token_user || User.find(@authentication_token.user_id) rescue nil
-
-    if @authentication_token_user
-      if @authentication_token_user.type == 'individual'
-        # Tokens for individual users can only be created by the users themselves
-        return true if @current_user.id == @authentication_token_user.id
-      elsif (@authentication_token_user.type == 'group') && @authentication_token_user.proxy_group
-        # Tokens for group users can only be created by group admins
-        return true if @current_user.admin_of?(@authentication_token_user.proxy_group)
-      end
-    else
-      return false
     end
   end
 

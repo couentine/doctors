@@ -15,7 +15,7 @@ class S3BadgeUploader < CarrierWave::Uploader::Base
         model.read_attribute(mounted_as)
       else
         # preferred standard filename
-        'badge.png'
+        "#{model.class.to_s.underscore}.png"
       end
     end
   end

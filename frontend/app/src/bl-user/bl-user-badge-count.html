@@ -98,7 +98,7 @@ The ribbon is a link to the user's badge profile.
 
     </style>
 
-    <a class="outer" href$="/u/[[user.username_with_caps]]">
+    <a class="outer" href$="/u/[[user.attributes.username]]">
       <div class="inner">
         <div class$="number digit-count-[[digitCount]]">[[count]]</div>  
       </div>
@@ -120,7 +120,7 @@ The ribbon is a link to the user's badge profile.
           /** Extracts the count from the user or returns 0. */
           count: {
             type: Number,
-            computed: '_count(user)'
+            computed: '_count(user.attributes.badge_count)'
           },
 
           /** Returns the number of digits in `count`. Used to size the text. */
@@ -134,8 +134,8 @@ The ribbon is a link to the user's badge profile.
 
       // #=== PROPERTY COMPUTER METHODS ===#
 
-      _count(user) {
-        if (user) return user.expert_badge_count;
+      _count(user_badge_count) {
+        if (user_badge_count) return user_badge_count;
         else return 0;
       }
 

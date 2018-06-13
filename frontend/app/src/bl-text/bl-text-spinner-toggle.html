@@ -1,0 +1,83 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Text Spinner Toggle #
+
+This component either displays the contents of the inserted slot or displays an inline block spinner.
+It was designed to be used inside of a paper-button when you want the button to display a spinner after it is clicked.
+
+Usage: `<bl-text-spinner-toggle spinner="[[badge.backend.status.isLoading]]">Text goes here</bl-text-spinner-toggle>`
+
+CSS Variable          | Description                           | Default Value
+----------------------|---------------------------------------|--------------
+`--bl-spinner-color`  | Sets the color of the spinner         | white
+`--bl-sroke-width`    | Sets the stroke width of the spinner  | 2px 
+-->
+<dom-module id="bl-text-spinner-toggle">
+  <template>
+
+    <style include="bl-style-classes">
+        
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+
+        #spinnerWrapper {
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+          paper-spinner-lite {
+            width: 1.3em;
+            height: 1.3em;
+            margin: 0;
+
+            --paper-spinner-color: var(--bl-spinner-color, white);
+            --paper-spinner-stroke-width: var(--bl-stroke-width, 2px);
+          }
+
+    </style>
+
+    <div id="content">
+      <slot></slot>
+      <div id="spinnerWrapper" hidden="[[!spinner]]">
+        <paper-spinner-lite active="[[spinner]]"></paper-spinner-lite>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlTextSpinnerToggle extends Polymer.Element {
+      
+      static get is() { return 'bl-text-spinner-toggle'; }
+
+      static get properties() {
+        return {
+
+          /** When true, the spinner is displayed and the slot is hidden. */
+          spinner: {
+            type: Boolean,
+            value: false,
+          },
+
+        }
+      }
+
+    }
+
+    window.customElements.define(BlTextSpinnerToggle.is, BlTextSpinnerToggle);
+  </script>
+</dom-module>

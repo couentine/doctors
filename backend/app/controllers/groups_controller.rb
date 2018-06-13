@@ -142,7 +142,7 @@ class GroupsController < ApplicationController
     if @current_user_is_admin || @badge_list_admin
       @validation_request_count = @group.badges.where(:validation_request_count.gt => 0)\
         .sum{ |badge| badge.validation_request_count }
-    elsif current_user
+    elsif current_user.present?
       @validation_request_count = @group.badges.where(:validation_request_count.gt => 0, 
         :awardability => 'experts', :expert_user_ids.in => [current_user.id])\
         .sum{ |badge| badge.validation_request_count }
@@ -237,7 +237,7 @@ class GroupsController < ApplicationController
   # POST /groups
   # POST /groups.json
   def create
-    @group = Group.new(group_params)
+    @group = GroupChangeDecorator.new(Group.new(group_params))
     @group.creator = @group.owner = current_user
     @group_type_options = GROUP_TYPE_OPTIONS
     @pricing_group_options = PRICING_GROUP_OPTIONS

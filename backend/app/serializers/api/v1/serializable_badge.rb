@@ -1,35 +1,33 @@
 class Api::V1::SerializableBadge < Api::V1::SerializableDocument
-  extend JSONAPI::Serializable::Resource::ConditionalFields
+  type :badge
 
-  type 'badge'
+  #=== FIELDS ===#
 
-  attribute :slug do @object.url_with_caps end
+  field :slug,                          from: :url_with_caps
   
-  attribute :name,                        if: -> { @show_all_fields }
-  attribute :summary,                     if: -> { @show_all_fields }
-  attribute :visibility,                  if: -> { @show_all_fields }
+  field :name
+  field :summary
+  field :visibility
 
-  attribute :feedback_request_count,      if: -> { @show_all_fields } do 
-    @object.validation_request_count
-  end
-  attribute :seeker_count,                if: -> { @show_all_fields } do 
-    @object.learner_count
-  end
-  attribute :holder_count,                if: -> { @show_all_fields } do 
-    @object.expert_count
-  end
-  attribute :image_url,                   if: -> { @show_all_fields }
-  attribute :image_medium_url,            if: -> { @show_all_fields }
-  attribute :image_small_url,             if: -> { @show_all_fields }
+  field :feedback_request_count,        from: :validation_request_count
+  field :seeker_count,                  from: :learner_count
+  field :holder_count,                  from: :expert_count
+  
+  field :image_url
+  field :image_medium_url
+  field :image_small_url
 
-  link :self do "/api/v1/badges/#{@object.id.to_s}" end
-  link :self_web do @object.full_url end
+  field :group_id
+  field :creator_id
 
-  belongs_to :group do
-    link :self do "/api/v1/groups/#{@object.group_id.to_s}" end
-  end
-  has_many :portfolios do
-    link :self do "/api/v1/badges/#{@object.id.to_s}/portfolios" end
-  end
-
+  #=== LINKS ===#
+  
+  self_links
+  
+  #=== RELATIONSHIPS ===#
+  
+  relationships \
+    :group,
+    :portfolios,
+    [:creator, :user, :creator_id]
 end

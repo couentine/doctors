@@ -1,155 +1,113 @@
 class GroupPolicy < ApplicationPolicy
-  attr_reader :current_user, :group, :groups
-
-  def initialize(current_user, group_or_groups)
-    @current_user = current_user
-    if (group_or_groups.class == Mongoid::Criteria)
-      @groups = group_or_groups
-      @records = group_or_groups
-    else
-      @group = group_or_groups
-      @record = group_or_groups
-    end
-  end
 
   #=== ACTION POLICIES ===#
-
-  # Only available to authenticated users
-  def index?
-    return @current_user.present? && @current_user.has?('all:index') && @current_user.has?('groups:read')
-  end
-
-  def show?
-    # All groups and fields are shown, but relationships are conditionally displayed based on filters below
-    return @current_user.has?('groups:read')
-  end
-
-  def edit?
-    if @current_user.present? && @current_user.has?('groups:write')
-      return true if @current_user.admin?
-      return true if @current_user.id == @group.owner_id
-    end
-    
-    return false
-  end
-
-  #=== FILTER POLICIES ===#
   
-  def show_members?
-    return true if @group.member_visibility == 'public'
-    if @current_user.present?
-      return true if @current_user.admin?
-      return true if @current_user.admin_of?(@group)
-      return true if (@group.member_visibility == 'private') && @current_user.member_of?(@group)
-    end
-    
-    return false
-  end
+  standard_actions :group,
+    show_roles: :everyone,
+    update_roles: [:admin, :owner],
+    destroy_roles: [:owner]
   
-  def show_admins?
-    return true if @group.admin_visibility == 'public'
-    if @current_user.present?
-      return true if @current_user.admin?
-      return true if @current_user.admin_of?(@group)
-      return true if (@group.admin_visibility == 'private') && @current_user.member_of?(@group)
-    end
-    
-    return false
-  end
+  action :members_index,
+    roles: [:member_list_viewer, :member, :admin, :owner],
+    permissions: ['all:index', 'users:read']
   
-  def show_group_tags?
-    return true if @group.tag_visibility == 'public'
-    if @current_user.present?
-      return true if @current_user.admin?
-      return true if @current_user.admin_of?(@group)
-      return true if (@group.tag_visibility == 'members') && @current_user.member_of?(@group)
-    end
-
-    return false
-  end
+  action :admins_index,
+    roles: [:admin_list_viewer, :member, :admin, :owner],
+    permissions: ['all:index', 'users:read']
 
   #=== RELATIONSHIP POLICIES ===#
 
-  def badges_index?
-    # There is no action-level restriction on the badges index. The individual badges are filtered by visibility.
-    return @current_user.has?('all:index') \
-      && @current_user.has?('groups:read') \
-      && @current_user.has?('badges:read')
-  end
+  belongs_to :creator,
+    via: :creator_id,
+    policy_model: :user,
+    visible_to: :everyone,
+    creation_role: :owner,
+    read_only: true
 
-  # This authorizes whether the user can see a list of users who are members
-  def members_index?
-    return @current_user.has?('all:index') \
-      && @current_user.has?('groups:read') \
-      && @current_user.has?('users:read') \
-      && show_members?
-  end
+  belongs_to :owner,
+    via: :owner_id,
+    policy_model: :user,
+    visible_to: :everyone,
+    creation_role: :owner,
+    read_only: true
 
-  # This authorizes whether the user can see a list of users who are admins
-  def admins_index?
-    return @current_user.has?('all:index') \
-      && @current_user.has?('groups:read') \
-      && @current_user.has?('users:read') \
-      && show_admins?
-  end
+  has_many :app_group_memberships,
+    visible_to: [:member_list_viewer, :member, :admin, :owner],
+    creatable_by: [:admin, :owner]
 
-  # This authorizes whether the user can see a list of users who are members AND admins
-  def members_and_admins_index?
-    return @current_user.has?('all:index') \
-      && @current_user.has?('groups:read') \
-      && @current_user.has?('users:read') \
-      && show_members? \
-      && show_admins?
-  end
+  has_and_belongs_to_many :users,
+    visible_to: [:member_list_viewer, :member, :admin, :owner]
 
-  def copy_badges?
-    return true if @group.badge_copyability == 'public'
-    if @current_user.present? && @current_user.has?('groups:read', 'badges:read', 'badges:write')
-      return true if @current_user.admin?
-      return true if @current_user.admin_of?(@group)
-      return true if (@group.badge_copyability == 'members') && @current_user.member_of?(@group)
-    end
+  has_and_belongs_to_many :badges,
+    visible_to: :everyone
 
-    return false
-  end
+  has_and_belongs_to_many :apps,
+    visible_to: [:member_list_viewer, :member, :admin, :owner]
 
-  def assign_group_tags?
-    if @current_user.present? && @current_user.has?('group_tags:write')
-      return true if @current_user.admin?
-      return true if @current_user.admin_of?(@group)
-      return true if (@group.tag_assignability == 'members') && @current_user.member_of?(@group)
-    end
-    
-    return false
-  end
 
-  def create_group_tags?
-    if @current_user.present? && @current_user.has?('group_tags:write')
-      return true if @current_user.admin?
-      return true if @current_user.admin_of?(@group)
-      return true if (@group.tag_creatability == 'members') && @current_user.member_of?(@group)
-    end
-    
-    return false
-  end
+  #=== FIELD POLICIES ===#
 
-  #=== USER-FACING METADATA ===#
+  OWNER_FIELD = { visible_to: :everyone, editable_by: [:owner] }
+  ADMIN_FIELD = { visible_to: :everyone, editable_by: [:admin] }
+  READ_ONLY_FIELD = { visible_to: :all_roles, editable_by: :nobody }
+  PRIVATE_ADMIN_FIELD = { visible_to: [:admin], editable_by: [:admin] }
+  PRIVATE_BL_ADMIN_FIELD = { visible_to: [:bl_admin], editable_by: [:bl_admin] }
+
+  field :name,                                    OWNER_FIELD
+  field :url_with_caps,                           OWNER_FIELD
+  field :description,                             OWNER_FIELD
+  field :location,                                OWNER_FIELD
+  field :website,                                 OWNER_FIELD
+  field :type,                                    OWNER_FIELD
+  field :subscription_plan,                       OWNER_FIELD
+  field :joinability,                             OWNER_FIELD
+  field :new_owner_username,                      OWNER_FIELD
+  field :member_visibility,                       OWNER_FIELD
+  field :admin_visibility,                        OWNER_FIELD
+  field :badge_copyability,                       OWNER_FIELD
   
-  def meta
-    return {
-      current_user: {
-        can_see_record: show?,
-        can_edit_record: edit?,
-        can_see_members: show_members?,
-        can_see_admins: show_admins?,
-        can_see_group_tags: show_group_tags?,
-        can_copy_badges: copy_badges?,
-        can_assign_group_tags: assign_group_tags?,
-        can_create_group_tags: create_group_tags?,
-        is_member: @current_user.present? && @current_user.member_of?(@group),
-        is_admin: @current_user.present? && @current_user.admin_of?(@group)
-      }
-    }
+  field :color,                                   ADMIN_FIELD
+  field :tag_assignability,                       ADMIN_FIELD
+  field :tag_creatability,                        ADMIN_FIELD
+  field :tag_visibility,                          ADMIN_FIELD
+
+  field :member_count,                            READ_ONLY_FIELD
+  field :admin_count,                             READ_ONLY_FIELD
+  field :total_user_count,                        READ_ONLY_FIELD
+  field :badge_count,                             READ_ONLY_FIELD
+  
+  field :join_code,                               PRIVATE_ADMIN_FIELD
+
+  field :feature_grant_file_uploads,              PRIVATE_BL_ADMIN_FIELD
+  field :feature_grant_reporting,                 PRIVATE_BL_ADMIN_FIELD
+  field :feature_grant_bulk_tools,                PRIVATE_BL_ADMIN_FIELD
+  field :feature_grant_integration,               PRIVATE_BL_ADMIN_FIELD
+  field :feature_grant_hub,                       PRIVATE_BL_ADMIN_FIELD
+  field :feature_grant_leaderboards_weekly,       PRIVATE_BL_ADMIN_FIELD
+  field :feature_grant_leaderboards_realtime,     PRIVATE_BL_ADMIN_FIELD
+
+  #=== ROLE DEFINITIONS ===#
+  
+  # This only needs to capture folks who aren't already members/admins/other roles
+  role :member_list_viewer do |current_user, group|
+    group.member_visibility == 'public'
+  end
+
+  # This only needs to capture folks who aren't already members/admins/other roles
+  role :admin_list_viewer do |current_user, group|
+    group.admin_visibility == 'public'
+  end
+
+  role :member do |current_user, group|
+    current_user.present? && current_user.member_of?(group)
+  end
+
+  role :admin do |current_user, group|
+    current_user.present? && current_user.admin_of?(group)
+  end
+
+  role :owner do |current_user, group|
+    current_user.present? && (current_user.id == group.owner_id)
   end
 
   #=== SCOPES ===#

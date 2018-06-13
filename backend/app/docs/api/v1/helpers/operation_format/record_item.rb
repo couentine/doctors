@@ -3,7 +3,7 @@ module Api::V1::Helpers::OperationFormat::RecordItem
   # EXAMPLE USAGE:
   # - model = :authentication_token
   # - verb = one of >> [:get, :create, :update, :delete]
-  def define_basic_info(model, verb, summary = nil, parent_model = nil)
+  def define_basic_info(model, verb, summary = nil, parent_model = nil, description = nil)
     camelized_model = model.to_s.camelize
     uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
     spaced_model = model.to_s.gsub('_', ' ')
@@ -11,12 +11,16 @@ module Api::V1::Helpers::OperationFormat::RecordItem
     if parent_model.present?
       camelized_parent_model = parent_model.to_s.camelize
       uncapitalized_camelized_parent_model = camelized_parent_model[0, 1].downcase + camelized_parent_model[1..-1]
-    end
 
-    if parent_model.present?
       key :operationId, "#{verb.to_s}#{camelized_parent_model}#{camelized_model}"
     else
       key :operationId, "#{verb.to_s}#{camelized_model}"
+    end
+    
+    if parent_model.present? && (verb == :create)
+      permissions = ApplicationPolicy.get_action_permissions(parent_model, model, verb).map{ |item| "- `#{item}`" }
+    else
+      permissions = ApplicationPolicy.get_action_permissions(model, verb).map{ |item| "- `#{item}`" }
     end
     
     if summary.blank?
@@ -24,17 +28,22 @@ module Api::V1::Helpers::OperationFormat::RecordItem
       when :get
         key :summary, "Get #{spaced_model} by id"
       when :create
-        key :summary, "Create a new #{spaced_model} record"
+        key :summary, "Create a new #{spaced_model}"
       when :update
-        key :summary, "Update an existing #{spaced_model} record by id"
+        key :summary, "Update an existing #{spaced_model} by id"
       when :delete
-        key :summary, "Delete an existing #{spaced_model} record by id"
+        key :summary, "Delete an existing #{spaced_model} by id"
       end
     else
       key :summary, summary
     end
       
     key :tags, ['recordItemFormat', "#{uncapitalized_camelized_model}Model"]
+
+    key :description, (description.present? ? "#{description}\n\n" : '') + "-----\n" \
+      "**Required Permissions:**\n" \
+      + permissions.join("\n") + "\n" \
+      "-----"
   end
 
   # EXAMPLE USAGE:
@@ -67,6 +76,44 @@ module Api::V1::Helpers::OperationFormat::RecordItem
         end
       end
 
+    end
+  end
+
+  def define_put_parameters(model)
+    camelized_model = model.to_s.camelize
+    spaced_model = model.to_s.gsub('_', ' ')
+
+    parameter do
+
+      key :name, :body
+      key :in, :body
+      key :description, "The JSON API formatted details of the #{spaced_model.to_s} record"
+      key :required, true
+      
+      schema do
+        key :type, :object
+
+        # Data Key
+        property :data do
+          key :type, :object
+
+          # Item Type
+          property :id, type: :string, format: :id, description: "The id of the record to update"
+          property :type, type: :string, enum: [model], description: "Must always be equal to `#{model.to_s}`"
+
+          # Item Attributes
+          property :attributes do
+            key :'$ref', "#{camelized_model}InputAttributes"
+          end
+        end
+      end
+
+    end
+  end
+
+  def define_successfully_deleted_response(model, response_code: 204)
+    response response_code do
+      key :description, "The #{model.to_s} was successfully deleted"
     end
   end
 

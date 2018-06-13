@@ -12,48 +12,96 @@
 
 class Api::V1::DeserializableDocument < Api::V1::DeserializableHash
 
-  attr_reader :document, :documents
+  # This class inherits the accessors from the DeserializableHash class. In addition it has the following:
+  # - document_class = The class used to instantiate / update items
+  
+  class << self
+    attr_accessor :document_class
+  end
 
-  TYPE = :document
-  DOCUMENT_CLASS = Mongoid::Document
+  # Aliases for document and documents will automatically be created based on object type
+  # You shouldn't need to override the initialize method
+
+  attr_reader :document, :documents
 
   # This builds a new record (or an array of new records) from the provided JSON API formatted params.
   # Accepts either an single param object or an array of param objects in the `:data` param.
-  def initialize(params)
-    @document = nil
+  # If this is an update to an existing record then include it in the `existing_document` argument.
+  def initialize(params, target_editable_fields, existing_document: nil)
+    @document = existing_document
     @documents = nil
 
     # Call the DeserializableHash initializer to parse the params and raise any errors
-    super(params)
+    super(params, target_editable_fields)
 
     # If we make it to this line then we know that the input params were valid and either @hash or @hashes is set
     # Next step is to convert the hash/hashes into documents of the appropriate class
-
-    # Determine if there are multiple data items or not, then if not go ahead and encapsulate the single item in an array (to keep code dry)
-    is_array = @hashes.present?
-    items_list = is_array ? @hashes : [@hash]
     
-    # Loop through and attempt to convert each hash into a document instance, logging the errors along the way
-    new_documents = []
+    is_array = @hashes.present?
     error_list = []
-    items_list.each_with_index do |item, index|
+
+    if is_array
+      @documents = []
+
+      @hashes.each_with_index do |hash, index|
+        begin
+          @documents << self.class.document_class.new(hash)
+        rescue => e
+          error_list << {
+            message: e.message,
+            pointer: "/data/#{index}/attributes",
+          }
+        end
+      end
+    else
       begin
-        new_documents << self.class::DOCUMENT_CLASS.new(item)
+        if @document.present?
+          @document.assign_attributes(@hash)
+        else
+          @document = self.class.document_class.new(@hash)
+        end
       rescue => e
         error_list << {
           message: e.message,
-          pointer: (is_array ? "/data/#{index}/attributes" : "/data/attributes"),
+          pointer: '/data/attributes',
         }
       end
     end
 
-    if !error_list.empty?
-      raise Api::V1::DeserializationError.new(error_list)
-    elsif is_array
-      @documents = new_documents
-    else
-      @document = new_documents.first
+    raise Api::V1::DeserializationError.new(error_list) if error_list.present?
+  end
+
+  #=== TYPE DEFINITION ===#
+
+  # EXAMPLE 1:
+  # type :badge
+  # 
+  # EXAMPLE 2:
+  # type :portfolio, class: Log
+  # 
+  # ==> CREATES INSTANCE METHODS: `portolfio`, `portolfios`
+  # 
+  # This sets the object type class instance variable. The JSON type key must match this exactly in order to be accepted.
+  # If `class:` is left off, the class is assumed to be the camelized version of the object type.
+
+  def self.type(object_type, document_class: nil)
+    @object_type = object_type
+    @document_class = document_class || object_type.to_s.camelize.constantize
+
+    # Declare singular getter
+    send :define_method, object_type.to_sym do
+      return document
+    end
+    
+    # Declare pllural getter
+    send :define_method, object_type.to_s.pluralize.to_sym do
+      return documents
     end
   end
+
+  #=== FIELD DEFINITIONS ===#
+
+  # Field definition works exactly the same as it does for DeserializableHash.
+  # Refer to the comments in DeserializableHash for documentation of the syntax.
 
 end

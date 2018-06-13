@@ -11,6 +11,7 @@ class Log
 
   # === CONSTANTS === #
   
+  STATUS_VALUES = ['requested', 'withdrawn', 'validated']
   VALIDATION_STATUS_VALUES = ['incomplete', 'requested', 'withdrawn', 'validated']
   ISSUE_STATUS_VALUES = ['unissued', 'issued', 'retracted']
   JSON_FIELDS = [:user, :validation_status, :issue_status]
@@ -128,6 +129,7 @@ class Log
   end
 
   # This is a unified portfolio status field. It is used by the API. It transforms the values of the validation_status field.
+  # Valid values are available in STATUS_VALUES
   def status
     if validation_status == 'requested'
       return 'requested'

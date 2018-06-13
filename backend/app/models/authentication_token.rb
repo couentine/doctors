@@ -14,6 +14,7 @@ class AuthenticationToken
 
   BODY_LENGTH = 30
   MONGO_ID_LENGTH = 24 # this is just here for easy reference, it should never change
+  MAX_NAME_LENGTH = 50
 
   # === RELATIONSHIPS === #
 
@@ -22,7 +23,9 @@ class AuthenticationToken
 
   # === FIELDS === #
 
-  field :permission_sets, type: Array, default: []
+  field :name,           type: String
+
+  field :permissions,     type: Array, default: []
   field :body,            type: String
   field :last_used_at,    type: Time
   field :ip_address,      type: String
@@ -32,11 +35,30 @@ class AuthenticationToken
   # === VALIDATIONS === #
 
   validates :user, presence: true
+  validates :name, length: { maximum: MAX_NAME_LENGTH }
 
   # === CALLBACK === #
 
+  validate :no_reparenting
   before_create :generate_body
-  before_save :clean_permission_sets
+  before_save :clean_permissions
+
+  # === CLASS METHODS === #
+
+  def self.find(token_identifier, suppress_warning: false)
+    authentication_token = super(token_identifier) rescue nil
+
+    if authentication_token.nil? && (token_identifier.to_s.length == (24 + BODY_LENGTH))
+      if suppress_warning
+        authentication_token = AuthenticationToken.where(body: token_identifier.last(BODY_LENGTH)).first
+      else
+        raise ArgumentError.new('WARNING: Searching for tokens in production is susceptible to to timing attacks. ' \
+          'To suppress this warning add `suppress_warning: true`.')
+      end
+    end
+
+    return authentication_token
+  end
 
   # === INSTANCE METHODS === #
 
@@ -69,6 +91,12 @@ class AuthenticationToken
 
   protected
 
+  def no_reparenting
+    if persisted? && user_id_changed? && user_id.present?
+      errors.add(:user_id, 'cannot be changed after the token is created')
+    end
+  end
+
   def generate_body
     loop do
       self.body = SecureRandom.base64(BODY_LENGTH).first(BODY_LENGTH).tr('+/=', 'BLr'); # BLr = Badge List Rules! :)
@@ -76,17 +104,17 @@ class AuthenticationToken
     end
   end
 
-  # Forces the inclusion of the `all_users` permission sets. Removes any invalid permission sets.
-  def clean_permission_sets
-    self.permission_sets = ApplicationPolicy::PERMISSION_SETS.select do |permission_set, settings| 
-      settings[:all_users]
-    end.keys + permission_sets
-    self.permission_sets.uniq!
+  # Forces the inclusion of the `mandatory` permission sets. Removes any invalid permission sets.
+  def clean_permissions
+    self.permissions = ApplicationPolicy::API_PERMISSIONS.select do |permission, settings| 
+      settings[:mandatory]
+    end.keys + permissions
+    self.permissions.uniq!
 
-    if permission_sets.present?
-      permission_sets.each do |permission_set|
-        if !ApplicationPolicy::PERMISSION_SETS.has_key?(permission_set)
-          self.permission_sets.delete permission_set
+    if permissions.present?
+      permissions.each do |permission|
+        if !ApplicationPolicy::API_PERMISSIONS.has_key?(permission)
+          self.permissions.delete permission
         end
       end
     end

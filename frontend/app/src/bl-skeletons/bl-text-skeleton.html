@@ -1,0 +1,101 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List Text Skeleton #
+
+Use this in order to display skeleton text while an item is loading.
+
+Set the `--skeleton-color` variable to control the color of the skeleton text.
+-->
+<dom-module id="bl-text-skeleton">
+  <template>
+
+    <style include="bl-style-classes">
+        
+      :host {
+        display: block;
+      }
+
+      #lines {
+        display: block;
+      }
+        .line {
+          height: 0.9em;
+          margin: 0.9em 0;
+          background: var(--skeleton-color, var(--bl-grey-200));
+          border-radius: 2em;
+        }
+        .line:first-of-type {
+          margin-top: var(--first-line-margin-top, 0);
+        }
+        .line:last-of-type {
+          margin-bottom: var(--last-line-margin-bottom, 0);
+        }
+
+    </style>
+
+    <div id="slot" hidden="[[!loaded]]">
+      <slot></slot>
+    </div>
+
+    <div id="lines" hidden="[[loaded]]">
+      <template is="dom-repeat" items="[[lineWidths]]" as="lineWidth">
+        <div class="line" style$="width: var(--skeleton-line-width, [[lineWidth]]);">&nbsp;</div>
+      </template>
+    </div>
+
+  </template>
+
+  <script>
+    class BlTextSkeleton extends Polymer.Element {
+      
+      static get is() { return 'bl-text-skeleton'; }
+
+      static get properties() {
+        return {
+
+          /* This is a simple boolean which controls whether the skeleton text is displayed. False = skeleton text visible. */
+          loaded: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+          },
+
+          /* The number of lines of skeleton text. */
+          lines: {
+            type: Number,
+            value: 1,
+          },
+
+          /* Used internally to display the rendered skeleton lines. */
+          lineWidths: {
+            type: Array,
+            computed: '_lineWidths(lines)',
+          },
+
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _lineWidths(lines) {
+        if (lines && (lines > 1)) {
+          return [...Array(lines)].map((item, index) => {
+            // If there are multiple lines then each should be a random value between 60% and 100%
+            return Math.ceil((Math.random() * 40) + 60) + '%';
+          });
+        } else {
+          // If there is only a single line then it should be full width
+          return ['100%'];
+        }
+      }
+
+    }
+
+    window.customElements.define(BlTextSkeleton.is, BlTextSkeleton);
+  </script>
+</dom-module>

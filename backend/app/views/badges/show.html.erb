@@ -463,7 +463,7 @@
                   </li>
                 <% elsif can_join_badge %>
                   <li>
-                    <% if current_user %>
+                    <% if current_user.present? %>
                       <%= link_to '<i class="fa fa-plus-circle"></i> Join this badge'.html_safe, 
                         "#{group_badge_path(@group, @badge)}/join", class: 'btn btn-small' %>
                     <% else %>

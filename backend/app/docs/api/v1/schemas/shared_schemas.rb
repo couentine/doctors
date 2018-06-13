@@ -39,7 +39,7 @@ class Api::V1::Schemas::SharedSchemas
 
   #=== ROOT META OBJECT (WITH PERMISSIONS SETS) ===#
 
-  swagger_schema :RootMetaObjectWithPermissionSets do
+  swagger_schema :RootMetaObjectWithPermissions do
     key :type, :object
 
     property :authentication_method do
@@ -52,10 +52,10 @@ class Api::V1::Schemas::SharedSchemas
       key :enum, [:api, :web]
       key :description, 'How the API is being accessed. Always equals `api` (unless being used from within the Badge List web app).'
     end
-    property :permission_sets do
+    property :permissions do
       key :type, :array
       key :items, { type: :string }
-      key :description, 'List of permission sets enabled for the current request'
+      key :description, 'List of permissions available for the current request'
     end
   end
 

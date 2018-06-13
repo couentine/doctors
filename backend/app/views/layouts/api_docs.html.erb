@@ -9,7 +9,7 @@
   # used in the CSS.
   # 
   # Required Parameters:
-  # - api_noun = The title cased string indicating the primary noun of this api ('Group', 'User', 'Internal', 'App')
+  # - api_title = The title cased string used to describe the API. (Example: 'Badge List API')
   # - theme_color = The color from colors.yml to use as the primary color in the ReDoc theme. Defaults to orange.
 
   @theme_color = (yield(:theme_color) || 'orange').to_s
@@ -51,7 +51,7 @@
     <%= render 'layouts/shared/google_tag_manager_head' %>
     <link rel="icon" type="image/png" href="<%= image_path('badge-list-icon-32-square.png') %>"/>
 
-    <title>Badge List <%= yield(:api_noun) %> API Reference</title>
+    <title><%= yield(:api_title) %> Reference</title>
 
     <% #=== GENERIC METADATA ===# %>
     <meta charset="utf-8"/>
@@ -60,9 +60,9 @@
 
     <% #=== OPEN GRAPH METADATA ===# %>
     <meta property="og:type" content="Article" />
-    <meta property="og:title" content="Badge List <%= yield(:api_noun) %> API Reference" />
+    <meta property="og:title" content="<%= yield(:api_title) %> Reference" />
     <meta property="og:description" 
-      content="The Badge List <%= yield(:api_noun) %> API is a RESTful JSON API designed around the JSON API v1 spec and fully 
+      content="The <%= yield(:api_title) %> is a RESTful JSON API designed around the JSON API v1 spec and fully 
       documented via the Swagger v2 spec. Badge List is a platform for creating and awarding evidence-based digital badges." />
     <meta property="og:image" content="https://s3.amazonaws.com/badgelist/images/badge-list-icon.png" />
     <meta property="og:site_name" content="Badge List" />
@@ -70,9 +70,9 @@
     <% #=== TWITTER CARD METADATA ===# %>
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@badgelist" />
-    <meta name="twitter:title" content="Badge List <%= yield(:api_noun) %> API Reference" />
+    <meta name="twitter:title" content="<%= yield(:api_title) %> Reference" />
     <meta name="twitter:description" 
-      content="The Badge List <%= yield(:api_noun) %> API is a RESTful JSON API designed around the JSON API v1 spec and fully 
+      content="The <%= yield(:api_title) %> is a RESTful JSON API designed around the JSON API v1 spec and fully 
       documented via the Swagger v2 spec. Badge List is a platform for creating and awarding evidence-based digital badges." />
     <meta name="twitter:image" content="https://s3.amazonaws.com/badgelist/images/badge-list-icon.png" />
 
@@ -121,6 +121,35 @@
       #redoc .menu-item-depth-1.active > .menu-item-header {
         color: <%= COLORS[@theme_color][900] %>;
         background: <%= COLORS[@theme_color][100] %>;
+      }
+
+      #redoc .redoc-markdown-block code {
+        color: <%= COLORS[@theme_color][900] %>;
+      }
+      #redoc .redoc-markdown-block pre code {
+        color: white;
+      }
+
+      #redoc .operation-tags {
+        margin-bottom: 10px;
+      }
+        #redoc .operation-tags a, #redoc .operation-tags a:visited {
+          color: <%= COLORS[@theme_color][900] %>;
+        }
+        #redoc .operation-tags a::before {
+          margin-right: -0.1em;
+        }
+      
+      #redoc .operation-description .redoc-markdown-block hr {
+        display: block;
+        height: 1px;
+        border: 0;
+        border-top: 1px solid <%= COLORS['grey'][200] %>;
+        margin: 1em 0;
+        padding: 0;
+      }
+      #redoc .operation-description .redoc-markdown-block hr:last-child {
+        margin-top: 1.5em;
       }
 
     </style>

@@ -1,0 +1,645 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="bl-header-nav-left.html">
+<link rel="import" href="bl-header-panel.html">
+<link rel="import" href="bl-view-mixin.html">
+<link rel="import" href="../bl-skeletons/bl-image-skeleton.html">
+<link rel="import" href="../bl-skeletons/bl-text-skeleton.html">
+<link rel="import" href="../bl-text/bl-html.html">
+<link rel="import" href="../bl-text/bl-date-time.html">
+<link rel="import" href="../bl-text/bl-text-spinner-toggle.html">
+
+<!--
+# Badge List Home View #
+
+The home page for logged in users.
+-->
+<dom-module id="bl-view-app">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: none;
+        }
+        :host([status=active]) {
+          display: block;
+        }
+
+      /* === HEADER PANEL STYLES === */
+
+        bl-header-panel {
+          background-color: var(--bl-grey-100);
+          
+          --avatar-border-color: var(--bl-purple-300);
+        }
+          #expandedBackground {
+            border-top: 4px solid var(--bl-purple-200);
+            background: transparent;
+          }
+          #condensedBackground {
+            border-top: 4px solid var(--bl-purple-600);
+            background: white;
+          }
+
+        #leftNavLogo {
+          opacity: 0.8;
+        }
+
+      /* === CONTENT STYLES === */
+        
+        #content {
+          min-height: 50em;
+          padding: 6rem 2rem 3rem 2rem;
+          color: var(--bl-grey-800);
+
+          background-size: 500px 500px;
+        }
+          #card {
+            max-width: 50em;
+            margin: 0 auto;
+            background: white;
+            border-radius: 7px;
+            position: relative;
+
+            @apply --bl-shadow-5;
+          }
+            #cardTop {
+              position: relative;
+              padding: 1rem;
+              background: var(--bl-purple-300);
+              border-radius: 7px 7px 0 0;
+              border-bottom: 1px solid var(--bl-purple-100);
+            }
+              #cardTop .text {
+                text-transform: uppercase;
+                color: white;
+                text-align: center;
+              }
+              #antennae {
+                position: absolute;
+                top: -2.5rem;
+                right: 0;
+                left: 0;
+                height: 2.1rem;
+
+                display: flex;
+              }
+                .antenna {
+                  flex: 1 1 auto;
+                  
+                  height: 2.5rem;
+                  margin: 0 auto;
+                  
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                }
+                  .antenna .circle {
+                    width: 1.2rem;
+                    height: 1.2rem;
+                    background: var(--bl-purple-300);
+                    border-radius: 50em;
+                    flex: 0 0 auto;
+                    position: relative;
+                    bottom: -0.1rem;
+                  }
+                  .antenna .line {
+                    width: 0.6rem;
+                    flex: 1 1 auto;
+                    border-bottom: 1.3rem solid var(--bl-purple-300);
+                    border-left: 0.15rem solid transparent;
+                    border-right: 0.15rem solid transparent;
+                  }
+
+            #cardHeader {
+              display: flex;
+              flex-wrap: wrap;
+              
+              padding: 2rem;
+            }
+            @media(min-width: 480px) {
+              #cardHeader {
+                flex-wrap: nowrap;
+              }
+            }
+              #cardHeader .image {
+                flex: 0 0 6rem;
+                margin-right: 1.5rem;
+              }
+                #cardHeader .image bl-image-skeleton {
+                  display: block;
+                  height: 6rem;
+                }
+                #cardHeader img {
+                  max-width: 6rem;
+                }
+              #cardHeader .text {
+                flex: 1 1 auto;
+                position: relative;
+              }
+                #cardHeader .name {
+                  margin: 0 0 0.7rem 0;
+                }
+                  #cardHeader .name h1 {
+                    font-size: 1.5rem;
+                    line-height: 1.3em;
+                    margin: 0;
+                    font-weight: 600;
+                  }
+                
+                #cardHeader .membership {
+                  line-height: 1.3em;
+                }
+                  #cardHeader .membership bl-text-skeleton {
+                    --first-line-margin-top: 1.9rem;
+                  }
+                #cardHeader .actions {
+                  margin: 1.2rem 0 0 0;
+                }
+                  #manageSettingsButtonSpinner { /*==> bl-text-spinner-toggle */
+                    --bl-spinner-color: var(--bl-purple-700);
+                  }
+                
+                #errorMessage {
+                  position: absolute;
+                  top: 0;
+                  right: 0;
+                  bottom: 0;
+                  width: 100%;
+
+                  display: none;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: flex-start;
+                }
+                #errorMessage.status-404 {
+                  display: flex;
+                }
+                  #errorMessage .inner {
+                    display: none;
+                    max-width: 19em;
+                    text-align: left;
+                    color: var(--bl-red-300);
+                    margin: 0 0 1.2rem 1.2rem;
+                    font-size: 1.4rem;
+                    font-weight: bold;
+                    line-height: 1.3em;
+                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.14);
+                  }
+                  #errorMessage.status-404 .inner {
+                    display: block;
+                  }
+
+            #cardBody {
+              padding: 2rem;
+
+              border-top: 1px solid var(--bl-grey-200);
+            }
+              #cardBody .summary {
+                font-size: 1.2rem;
+                line-height: 1.3em;
+                font-weight: 300;
+                color: var(--bl-grey-600);
+                margin: 0 0 1.5rem 0;
+              }
+              #cardBody h1, #cardBody h2, #cardBody h3, #cardBody h4, #cardBody h5 {
+                font-size: 1.1rem;
+                color: var(--bl-purple-900);
+                line-height: 1.3em;
+              }
+
+    </style>
+
+    <!-- #=== HEADER PANEL ===# -->
+
+    <bl-header-panel id="headerPanel" expanded-height="4" condensed-height="3.2" full-bleed-body current-user="[[currentUser]]">
+      <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
+      <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
+
+      <bl-header-nav-left slot="leftNav">
+        <img src$="[[app.manifest.assets.brand.shieldPurplePng]]" id="leftNavLogo">
+      </bl-header-nav-left>
+
+      <div id="content" slot="content" style$="background-image: url('[[app.manifest.assets.backgrounds.circuitBoardPng]]')">
+        
+        <div id="card">
+          <div id="cardTop">
+            <div id="antennae">
+              <div class="antenna">
+                <div class="circle"></div>
+                <div class="line"></div>
+              </div>
+              <div class="antenna">
+                <div class="circle"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+
+            <div class="text">
+              Badge List Platform App
+            </div>
+          </div>
+            
+          <div id="cardHeader">
+            <div class="image">
+              <bl-image-skeleton id="imageSkeleton" loaded="[[appRecord.backend.status.hasContent]]" 
+                  spinner="[[appRecord.backend.status.isLoading]]" error="[[appRecord.backend.status.isError]]">
+                <img src$="[[appRecord.attributes.image_medium_url]]">
+              </bl-image-skeleton>
+            </div>
+            <div class="text">
+              <div class="name">
+                <h1>
+                  <bl-text-skeleton loaded="[[appRecord.backend.status.hasContent]]">
+                    [[appRecord.attributes.name]]
+                  </bl-text-skeleton>
+                </h1>
+              </div>
+
+              <div class="membership">
+                <bl-text-skeleton loaded="[[appRecord.backend.status.hasContent]]" lines="2">
+                  [[membershipText]]
+                </bl-text-skeleton>
+              </div>
+
+              <div class="actions" hidden="[[!appRecord.backend.status.hasContent]]">
+
+                <!-- #=== ACTION BUTTONS ===# -->
+
+                <paper-button hidden="[[!equal(membershipMode, 'joinable')]]" raised class="light-blue borderless" 
+                    on-tap="join" disabled="[[currentUserMembership.backend.status.isLoading]]">
+                  <bl-text-spinner-toggle spinner="[[currentUserMembership.backend.status.isLoading]]">
+                    Join <span class="showAt480">This App</span>
+                  </bl-text-spinner-toggle>
+                </paper-button>
+
+                <paper-button hidden="[[!equal(membershipMode, 'requestable')]]" raised class="light-blue borderless"
+                    on-tap="request" disabled="[[currentUserMembership.backend.status.isLoading]]">
+                  <bl-text-spinner-toggle spinner="[[currentUserMembership.backend.status.isLoading]]">
+                    Request <span class="showAt480">App Membership</span>
+                  </bl-text-spinner-toggle>
+                </paper-button>
+
+                <paper-button hidden="[[!equal(membershipMode, 'pendingUser')]]" raised 
+                    class="light-blue borderless" on-tap="enableMembership" disabled="[[currentUserMembership.backend.status.isLoading]]">
+                  <bl-text-spinner-toggle spinner="[[currentUserMembership.backend.status.isLoading]]">
+                    Accept <span class="showAt480">App Invitation</span>
+                  </bl-text-spinner-toggle>
+                </paper-button>
+
+                <paper-button hidden="[[!currentUserMembership.backend.status.hasContent]]" class="borderless" 
+                    on-tap="manageMembership" disabled="[[currentUserMembership.backend.status.isLoading]]">
+                  <bl-text-spinner-toggle id="manageSettingsButtonSpinner" spinner="[[currentUserMembership.backend.status.isLoading]]">
+                    <span class="showAt480">Manage</span> App Settings
+                  </bl-text-spinner-toggle>
+                </paper-button>
+
+              </div>
+              
+              <div id="errorMessage" class$="status-[[appRecord.backend.status.httpCode]]">
+                <div id="404-message" class="inner">
+                  The specified app could not be found. 
+                  <span class="showAt480">Please check the url and try again.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="cardBody">
+            <div class="summary">
+              [[appRecord.attributes.summary]]
+            </div>
+            <div class="description">
+              <bl-text-skeleton loaded="[[appRecord.backend.status.hasContent]]" lines="5">
+                <bl-html value="[[appRecord.attributes.description]]"></bl-html>
+              </bl-text-skeleton>
+            </div>
+          </div>
+        </div>
+        
+
+      </div>
+    </bl-header-panel>
+
+    <!-- #=== MANAGE MEMBERSHIP DIALOG ===# -->
+
+    <paper-dialog id="manageMembershipDialog" class="light-blue" modal dynamic-align>
+      <h2 class="with-subtitle">App Membership Settings</h2>
+      <div class="subtitle">for [[appRecord.attributes.name]]</div>
+
+      <paper-dialog-scrollable>
+        <iron-form>
+          <form>
+
+            <p>
+              <strong>
+                Membership created&nbsp;<bl-date-time value="[[currentUserMembership.attributes.created_at]]" 
+                  format="dateTimeLong"></bl-date-time>.
+              </strong>
+            </p>
+
+            <!-- #=== REQUIRED APP NARRATIVE ===# -->
+            <template is="dom-if" if="[[appRecord.attributes.required]]">
+              <h3>
+                This is a Required App
+              </h3>
+
+              <p>
+                This app is a core part of the Badge List platform. You can control the visibility of the data created by the Badge List
+                app, but you are not able to disable or delete your app membership.
+              </p>
+              <p>
+                If you don't want the Badge List app to post data to your account anymore, then you'll need to disable (or delete) your 
+                Badge List account itself. For more information, reach out to Badge List support.
+              </p>
+            </template>
+
+            <!-- #=== NON-REQUIRED APP SECTION ===# -->
+            <template is="dom-if" if="[[!appRecord.attributes.required]]">
+
+              <!-- #=== MEMBERSHIP STATUS NARRATIVE ===# -->
+              <p hidden="[[!equal(membershipMode, 'pendingUser')]]">
+                You have been invited to join this app. You must accept the invitation before the app is allowed to post data to your
+                Badge List account.
+              </p>
+              <p hidden="[[!equal(membershipMode, 'pendingApp')]]">
+                Your membership is currently pending app admin approval. If you've changed your mind you can reverse your approval by 
+                clicking the button below.
+              </p>
+              <p hidden="[[!equal(membershipMode, 'active')]]">
+                Your app membership is currently active. This app is allowed to post data to your Badge List account.
+              </p>
+              <p hidden="[[!equal(membershipMode, 'deniedUser')]]">
+                You have disabled this app. It is not currently allowed to post data to your Badge List account.
+              </p>
+              <p hidden="[[!equal(membershipMode, 'deniedApp')]]">
+                Your membership has been disabled by the app admins. This app will not post any data to your Badge List account.
+              </p>
+
+              <!-- #=== MEMBERSHIP NON-DESTRUCTIVE ACTIONS ===# -->
+              <p class="dialogBodyActions">
+                <paper-button hidden="[[!equal(membershipMode, 'pendingUser', 'deniedUser')]]" class="light-blue borderless" 
+                    on-tap="enableMembership" disabled="[[currentUserMembership.backend.status.isLoading]]">
+                  <bl-text-spinner-toggle spinner="[[currentUserMembership.backend.status.isLoading]]">
+                    <span hidden="[[!equal(membershipMode, 'pendingUser')]]">Accept App Invitation</span>
+                    <span hidden="[[!equal(membershipMode, 'deniedUser')]]">Re-Enable This App</span>
+                  </bl-text-spinner-toggle>
+                </paper-button>
+
+                <paper-button hidden="[[equal(membershipMode, 'deniedUser')]]" class="borderless" on-tap="disableMembership" 
+                    disabled="[[currentUserMembership.backend.status.isLoading]]">
+                  <bl-text-spinner-toggle spinner="[[currentUserMembership.backend.status.isLoading]]">
+                    Disable This App
+                  </bl-text-spinner-toggle>
+                </paper-button>
+              </p>
+
+              <p>
+                <small>
+                  <strong>Note:</strong>
+                  Badge List platform apps are currently in beta and are not able to post data <em>quite yet</em>.
+                  Once apps are actually allowed to post data, you will be able to manage the visibility of that data here.
+                </small>
+              </p>
+
+              <div class="divider">&nbsp;</div>
+
+              <!-- #=== MEMBERSHIP DESTRUCTIVE ACTIONS ===# -->
+              <h3 class="warning">
+                Danger Zone
+              </h3>
+
+              <p>
+                To delete your app membership, click the button below.
+              </p>
+              <p class="dialogBodyActions">
+                <paper-button class="red transparent inverse" on-tap="deleteMembership" 
+                    disabled="[[currentUserMembership.backend.status.isLoading]]">
+                  <bl-text-spinner-toggle spinner="[[currentUserMembership.backend.status.isLoading]]">
+                    <i class="icon-trash"></i>
+                    Delete Your App Membership
+                  </bl-text-spinner-toggle>
+                </paper-button>
+              </p>
+              <p>
+                <small>
+                  <strong>Warning:</strong>
+                  This will immediately delete any data which this app has posted to your Badge List account. It will also delete all of
+                  your privacy settings for this app.
+                </small>
+              </p>
+
+            </template> <!--==> End of Non-Required App Section -->
+
+          </form>
+        </iron-form>
+      </paper-dialog-scrollable>
+
+      <div class="buttons">
+        <paper-button class="light-blue transparent borderless" dialog-dismiss>
+          <i class="icon-cross"></i> Close Settings
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    class BlViewApp extends BlViewMixin(Polymer.Element) {
+
+      static get is() { return 'bl-view-app'; }
+
+      static get properties() {
+        return {
+          
+          appRecord: Object,
+
+          currentUserMembership: Object,
+
+          /**
+           * This returns a string indicating the current membership state of the current user.
+           * Values = active, pendingUser, pendingApp, deniedUser, deniedApp, joinable, requestable, closed
+           */
+          membershipMode: {
+            type: String,
+            computed: '_membershipMode(currentUserMembership, appRecord.attributes.user_joinability)',
+          },
+
+          membershipText: {
+            type: String,
+            computed: '_membershipText(membershipMode, currentUserMembership)',
+          },
+
+        }
+      }
+
+      // #=== PUBLIC ACTION METHODS ===#
+
+      join() {
+        if (this.membershipMode == 'joinable') {
+          if (this.currentUser.id) {
+            this._createNewMembership('App membership created', 'There was a problem joining the app');
+          } else {
+            window.location.href = this.appPath('session.new');
+          }
+        }
+      }
+
+      request() {
+        if (this.membershipMode == 'requestable') {
+          if (this.currentUser.id) {
+            this._createNewMembership('App membership requested', 'There was a problem requesting app membership');
+          } else {
+            window.location.href = this.appPath('session.new');
+          }
+        }
+      }
+
+      manageMembership() {
+        this.$.manageMembershipDialog.open();
+      }
+
+      enableMembership() {
+        if (this.currentUserMembership.backend.status.hasContent 
+            && (this.currentUserMembership.attributes.user_approval_status != 'approved')) {
+          this.currentUserMembership.attributes.user_approval_status = 'approved';
+          this._updateMembership('App membership enabled', 'There was a problem updating your app membership');
+          this.$.manageMembershipDialog.close();
+        }
+      }
+
+      disableMembership() {
+        if (this.membershipMode != 'deniedUser') {
+          this.currentUserMembership.attributes.user_approval_status = 'denied';
+          this._updateMembership('App membership disabled', 'There was a problem updating your app membership');
+          this.$.manageMembershipDialog.close();
+        }
+      }
+
+      deleteMembership() {
+        if (this.currentUserMembership.backend.status.hasContent && !this.appRecord.attributes.required) {
+          if (confirm('Are you sure that you want to permanently delete your app membership?')) {
+            this.currentUserMembership.backend.doOperation('delete').then((result) => {
+              this.app.addToast('App membership deleted');
+            }).catch((result) => {
+              this.app.addToast('There was a problem deleting your app membership', {
+                actionText: 'View Error',
+                actionFunction: function() {
+                  alert(`A problem occured while trying to delete your app membership.\n\nError Message:\n${result.errorMessage}`);
+                },
+              });
+            });
+            this.$.manageMembershipDialog.close();
+          }
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _membershipMode(currentUserMembership, appUserJoinability) {
+        if (currentUserMembership && currentUserMembership.attributes) {
+          var isAdmin = currentUserMembership.attributes.type == 'admin';
+          
+          if (currentUserMembership.attributes.status == 'active') {
+            return 'active';
+          } else if (currentUserMembership.attributes.status == 'pending') {
+            if (currentUserMembership.attributes.user_approval_status == 'pending') {
+              return 'pendingUser';
+            } else {
+              return 'pendingApp';
+            }
+          } else { //==> status is disabled
+            if (currentUserMembership.attributes.user_approval_status == 'denied') {
+              return 'deniedUser';
+            } else {
+              return 'deniedApp';
+            }
+          }
+        } else if (appUserJoinability == 'open') {
+          return 'joinable';
+        } else if (appUserJoinability == 'by_request') {
+          return 'requestable';
+        } else {
+          return 'closed';
+        }
+      }
+
+      _membershipText(membershipMode, currentUserMembership) {
+        var isAdmin = currentUserMembership && currentUserMembership.attributes && (currentUserMembership.attributes.type == 'admin');
+        
+        var messages = {
+          closed: 'This is a closed app, membership is by invitation only',
+          joinable: 'This is an open app, anyone can join',
+          requestable: 'Membership requests for this app must be approved by the app admins',
+          pendingUser: 'You have a pending app membership invitation which needs your approval',
+          pendingApp: 'Your app membership request is pending approval by the app admins',
+          active: `You are an active ${isAdmin ? 'admin' : 'member'} of this app`,
+          deniedUser: 'You have blocked this app, it cannot post activity to your account',
+          deniedApp: 'Your membership is currently disabled',
+        };
+
+        return messages[membershipMode];
+      }
+
+      // #=== PRIVATE HELPER & UTILITY METHODS ===#
+
+      /**
+       * Set success_word and failure_word to fill in the blanks:
+       * SUCCESS = 'App membership [success_word]' 
+       * FAILURE = 'There was a problem [failure_word] your app membership' 
+       */
+      _createNewMembership(success_text, failure_text) {
+        this.currentUserMembership.frontend.actions.new();
+        this.currentUserMembership.attributes.app_id = this.appRecord.id;
+        
+        // Delete unallowed fields for user-based membership creation
+        delete this.currentUserMembership.attributes.type;
+        delete this.currentUserMembership.attributes.user_id;
+        delete this.currentUserMembership.attributes.app_approval_status;
+
+        this.currentUserMembership.backend.doOperation('create').then((result) => {
+          this.app.addToast(success_text, {
+            actionText: 'App Settings',
+            actionFunction: () => {
+              this.manageMembership();
+            },
+          });
+        }).catch((result) => {
+          this.app.addToast(failure_text, {
+            actionText: 'View Error',
+            actionFunction: () => {
+              alert(`A problem occured while trying to create a new app membership for you.\n\nError Message:\n${result.errorMessage}`);
+            },
+          });
+        });
+      }
+
+      /** Updates the existing current user membership. */
+      _updateMembership(success_text, failure_text) {
+        this.currentUserMembership.backend.doOperation('update').then((result) => {
+          this.app.addToast(success_text);
+        }).catch((result) => {
+          this.app.addToast(failure_text, {
+            actionText: 'View Error',
+            actionFunction: () => {
+              alert(`A problem occured while trying to update your app membership.\n\nError Message:\n${result.errorMessage}`);
+            },
+          });
+        });
+      }
+
+    }
+
+    window.customElements.define(BlViewApp.is, BlViewApp);
+  </script>
+</dom-module>

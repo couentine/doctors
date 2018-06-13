@@ -3,16 +3,19 @@ module Api::V1::Helpers::OperationFormat::PaginatedList
   # EXAMPLE USAGE:
   # - model = :badge
   # - summary = 'Gets a list of all badges the current user has joined'
-  def define_basic_info(model, summary, parent_model = nil)
+  def define_basic_info(model, summary, parent_model = nil, extra_permission = nil)
     camelized_model = model.to_s.camelize
     uncapitalized_camelized_model = camelized_model[0, 1].downcase + camelized_model[1..-1]
-
+    
     if parent_model.present?
       camelized_parent_model = parent_model.to_s.camelize
       uncapitalized_camelized_parent_model = camelized_parent_model[0, 1].downcase + camelized_parent_model[1..-1]
+      permissions = ApplicationPolicy.get_action_permissions(parent_model, model, :index).map{ |item| "- `#{item}`" }
       
       key :operationId, "get#{camelized_parent_model}#{camelized_model.pluralize}"
     else
+      permissions = ApplicationPolicy.get_action_permissions(model, :index).map{ |item| "- `#{item}`" }
+
       key :operationId, "get#{camelized_model.pluralize}"
     end
     key :summary, summary
@@ -20,45 +23,11 @@ module Api::V1::Helpers::OperationFormat::PaginatedList
       'paginatedListFormat',
       "#{uncapitalized_camelized_model}Model"
     ]
-  end
 
-  # EXAMPLE USAGE:
-  # - model = :badge
-  def define_index_parameters(model)
-    controller_class_name = model.to_s.camelize.pluralize + 'Controller'
-    sort_fields = "Api::V1::#{controller_class_name}::SORT_FIELDS".constantize
-    default_sort_field = "Api::V1::#{controller_class_name}::DEFAULT_SORT_FIELD".constantize
-    default_sort_order = "Api::V1::#{controller_class_name}::DEFAULT_SORT_ORDER".constantize
-    default_sort_string = ((default_sort_order == :desc) ? '-' : '') + default_sort_field.to_s
-
-    parameter do
-      key :name, 'sort'
-      key :in, :query
-      key :description, 'Accepts a comma-separated list of fields to sort by. Fields are sorted ascending by default. To sort ' \
-        'descending instead, place a hyphen (`-`) before the field name. For instance, `name,-created_at` would sort ascending by name, '\
-        'then descending by creation date time. Allowed sort fields for this operation: ' + sort_fields.keys.join(', ')
-      key :required, false
-      key :type, :string
-      key :default, default_sort_string
-    end
-    parameter do
-      key :name, 'page[number]'
-      key :in, :query
-      key :description, "Specifies which page of results to return"
-      key :required, false
-      key :type, :integer
-      key :default, 1
-    end
-    parameter do
-      key :name, 'page[size]'
-      key :in, :query
-      key :description, "Specifies the maximum number of items to return in each page of results"
-      key :minimum, Api::V1::BaseController::MIN_PAGE_SIZE
-      key :maximum, Api::V1::BaseController::MAX_PAGE_SIZE
-      key :required, false
-      key :type, :integer
-      key :default, APP_CONFIG['page_size_small']
-    end
+    key :description, "-----\n" \
+      "**Required Permissions:**\n" \
+      + permissions.join("\n") + "\n" \
+      "-----"
   end
 
   # EXAMPLE USAGE:

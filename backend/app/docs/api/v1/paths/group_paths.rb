@@ -13,15 +13,7 @@ class Api::V1::Paths::GroupPaths
       define_basic_info :group, :get, 'Get group by id or slug'
 
       # Parameters
-      parameter do
-        key :name, :key
-        key :in, :path
-        key :description, "You can query group records using any of the following keys:\n" \
-          "- Record id\n" \
-          "- Group slug (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
+      parameter :group_key
 
       # Responses
       define_success_response :group, 200, include: [:relationships]
@@ -40,19 +32,13 @@ class Api::V1::Paths::GroupPaths
       extend Api::V1::Helpers::OperationFormat::PaginatedList
 
       # Basic Info
-      define_basic_info :group, 'Get list of groups current user belongs to'
+      define_basic_info :group, 'Get list of groups current user belongs to', nil, 'current_user:read'
       
       # Parameters
-      parameter do
-        key :name, 'filter[status]'
-        key :in, :query
-        key :description, 'Includes only groups where the current user is a member (`member`) or an admin (`admin`)'
-        key :required, false
-        key :type, :string
-        key :enum, [:all, :member, :admin]
-        key :default, :all
-      end
-      define_index_parameters :group
+      parameter :group_membership_status
+      parameter :group_sort
+      parameter :page_number
+      parameter :page_size
 
       # Responses
       define_success_response :group, include: [:relationships]
@@ -63,7 +49,7 @@ class Api::V1::Paths::GroupPaths
   
   swagger_path '/groups/{group_key}/badges' do
     
-    #=== GROUP BADGE INDEX ===#
+    #=== GROUP BADGES INDEX ===#
 
     operation :get do
       extend Api::V1::Helpers::OperationFormat::Base
@@ -73,16 +59,10 @@ class Api::V1::Paths::GroupPaths
       define_basic_info :badge, 'Get list of badges in specified group', :group
       
       # Parameters
-      parameter do
-        key :name, :group_key
-        key :in, :path
-        key :description, "You can query group records using any of the following keys:\n" \
-          "- Record id\n" \
-          "- Group slug (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
-      define_index_parameters :badge
+      parameter :group_group_key
+      parameter :badge_sort
+      parameter :page_number
+      parameter :page_size
 
       # Responses
       define_success_response :badge, include: [:relationships]
@@ -104,25 +84,8 @@ class Api::V1::Paths::GroupPaths
       define_basic_info :badge, :get, 'Get badge by key within specified group', :group
       
       # Parameters
-      parameter do
-        key :name, :key
-        key :format, :id
-        key :in, :path
-        key :description, "The badge key can be any of the following:\n" \
-          "- Record id\n" \
-          "- Badge slug (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
-      parameter do
-        key :name, :group_key
-        key :in, :path
-        key :description, "The group key can be any of the following:\n" \
-          "- Record id\n" \
-          "- Group slug (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
+      parameter :group_group_key
+      parameter :badge_key
 
       # Responses
       define_success_response :badge, 200, include: [:relationships]
@@ -134,7 +97,7 @@ class Api::V1::Paths::GroupPaths
   
   swagger_path '/groups/{group_key}/users' do
     
-    #=== GROUP USER INDEX ===#
+    #=== GROUP USERS INDEX ===#
 
     operation :get do
       extend Api::V1::Helpers::OperationFormat::Base
@@ -144,30 +107,90 @@ class Api::V1::Paths::GroupPaths
       define_basic_info :user, 'Get list of users in specified group', :group
       
       # Parameters
-      parameter do
-        key :name, :group_key
-        key :in, :path
-        key :description, "You can query group records using any of the following keys:\n" \
-          "- Record id\n" \
-          "- Group slug (case insensitive)"
-        key :required, true
-        key :type, :string
-      end
-      parameter do
-        key :name, 'filter[status]'
-        key :in, :query
-        key :description, 'Includes only members (`member`) or admins (`admin`) or both members and admins (`all`)'
-        key :required, false
-        key :type, :string
-        key :enum, [:all, :member, :admin]
-        key :default, :all
-      end
-      define_index_parameters :user
+      parameter :group_group_key
+      parameter :user_group_membership_type
+      parameter :user_sort
+      parameter :page_number
+      parameter :page_size
 
       # Responses
       define_success_response :user, include: [:relationships]
       define_unauthorized_response
       define_not_found_response
+    end
+
+  end
+
+  swagger_path '/groups/{group_key}/apps' do
+    
+    #=== GROUP APPS INDEX ===#
+
+    operation :get do
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::PaginatedList
+
+      # Basic Info
+      define_basic_info :app, 'Get list of active apps for selected group', :group
+      
+      # Parameters
+      parameter :group_group_key
+      parameter :app_user_joinability
+      parameter :app_group_joinability
+      parameter :app_status
+      parameter :app_sort
+      parameter :page_number
+      parameter :page_size
+
+      # Responses
+      define_success_response :app, include: [:relationships]
+      define_unauthorized_response
+      define_not_found_response
+    end
+
+  end
+
+  swagger_path '/groups/{group_key}/app_group_memberships' do
+
+    #=== GROUP APP GROUP MEMBERSHIPS INDEX ===#
+
+    operation :get do
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::PaginatedList
+
+      # Basic Info
+      define_basic_info :app_group_membership, 'Get list of app memberships for selected group', :group
+      
+      # Parameters
+      parameter :group_group_key
+      parameter :app_group_membership_status
+      parameter :app_group_membership_app_approval_status
+      parameter :app_group_membership_group_approval_status
+      parameter :app_group_membership_sort
+      parameter :page_number
+      parameter :page_size
+
+      # Responses
+      define_success_response :app_group_membership, include: [:relationships]
+      define_unauthorized_response
+    end
+
+    #=== CREATE GROUP APP GROUP MEMBERSHIP ===#
+
+    operation :post do
+      extend Api::V1::Helpers::OperationFormat::Base
+      extend Api::V1::Helpers::OperationFormat::RecordItem
+
+      # Basic Info
+      define_basic_info :app_group_membership, :create, 'Create new app membership for selected group', :group
+      
+      # Parameters
+      parameter :group_group_key
+      define_post_parameters :app_group_membership
+
+      # Responses
+      define_success_response :app_group_membership, 201, include: [:relationships]
+      define_field_error_response
+      define_unauthorized_response
     end
 
   end

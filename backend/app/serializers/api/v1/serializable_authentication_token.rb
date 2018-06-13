@@ -1,25 +1,29 @@
 class Api::V1::SerializableAuthenticationToken < Api::V1::SerializableDocument
-  extend JSONAPI::Serializable::Resource::ConditionalFields
+  type :authentication_token
 
-  type 'authentication_token'
+  #=== FIELDS ===#
 
-  attribute :value
+  field :name
+  field :user_id
+  field :permissions
 
-  attribute :permission_sets
+  field :value
 
-  attribute :request_count
-  attribute :last_used_at
-  attribute :ip_address
-  attribute :user_agent
+  field :request_count
+  field :last_used_at,        convert: :iso8601
+  field :ip_address
+  field :user_agent
+  
+  field :creator_id
+
+  #=== LINKS ===#
 
   link :self do "/api/v1/authentication_tokens/#{@object.id.to_s}" end
   # link :self_web do @object.full_url end
 
-  belongs_to :user do
-    link :self do "/api/v1/users/#{@object.user_id.to_s}" end
-  end
-  belongs_to :creator, if: -> { @object.creator_id.present? } do
-    link :self do "/api/v1/users/#{@object.creator_id.to_s}" end
-  end
+  #=== RELATIONSHIPS ===#
 
+  relationships \
+    :user
+    [:creator, :user, :creator_id]
 end
