@@ -140,7 +140,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/app/src/bl-app/bl-app.html",
-    "revision": "aa7ce210331d4756070b0a231fe8fa84"
+    "revision": "2363cc28627166c5a266db562a515ce8"
   },
   {
     "url": "p/app/src/bl-app/bl-component-template.html",
