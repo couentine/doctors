@@ -8,11 +8,11 @@
 #=== BADGE LIST ===#
 badgelist:
   name: Badge List
-  type: free
-  summary: Badge List is a platform for awarding digital badges.
+  summary: This app is a standard part of the Badge List platform and is used to help you manage your activity data.
   description: |
-    The Badge List app generates activity based on your interaction with the platform.
-    Every group that you join automatically has access to all of your Badge List activity within that specific group.
+    <p>The Badge List platform supports many apps. Apps are able to post activity to your Badge List account which can be viewed on leader
+    boards, browsed on your Badge List profile and used to earn badges.</p>
+    <p>This particular app is used to manage activity generated within the Badge List platform itself.</p>
   organization: Badge List
   website: https://www.badgelist.com/docs
   email: team@badgelist.com

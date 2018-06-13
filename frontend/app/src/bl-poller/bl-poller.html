@@ -150,10 +150,11 @@ When the poller complete `<bl-poller>` will stop refreshing.
           formatTag: 'recordItemFormat',
           verb: 'get',
           model: 'poller'
-        }, { id: this.pollerId }).then(function(pollerResponse) {
-            this._updatePollerProperties(pollerResponse);
+        }, { id: this.pollerId }).then(function(result) {
+            var response = result.response;
+            this._updatePollerProperties(response);
 
-            if (pollerResponse.data.attributes.completed) {
+            if (response.data.attributes.completed) {
               this.stop();
             } else if ((Date.now() - this.pollerStarted) >= this.maxDuration) {
               // Mock a failed poller response
@@ -174,11 +175,9 @@ When the poller complete `<bl-poller>` will stop refreshing.
                 }.bind(this), this._currentInterval)
               );
             }
-          }.bind(this)).catch(function(error) { 
-            var errorMessage = (error.errObj && error.errObj.message) ? error.errObj.message : error;
-            
+          }.bind(this)).catch(function(result) { 
             // Indicate the error by mocking a failed poller response
-            this.set('target.message', errorMessage);
+            this.set('target.message', result.errorMessage);
             this.set('target.status', 'failed');
             this.set('target.completed', true);
 
@@ -187,9 +186,9 @@ When the poller complete `<bl-poller>` will stop refreshing.
       }
 
       /** Accepts a newly queried poller response and overrides the target, triggering property change notifications. */
-      _updatePollerProperties(pollerResponse) {
+      _updatePollerProperties(response) {
         this.setProperties({
-          target: pollerResponse.data
+          target: response.data
         });
       }
       

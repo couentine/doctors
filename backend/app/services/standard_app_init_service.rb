@@ -49,7 +49,6 @@ class StandardAppInitService
             
             name:           app_fields['name'],
             slug:           app_slug,
-            type:           app_fields['type'],
             summary:        app_fields['summary'],
             description:    app_fields['description'],
             organization:   app_fields['organization'],
