@@ -129,7 +129,7 @@ module FieldHistory
 
           item = self.field_history_items.new(
             user_id: field_history_user.id,
-            updated_at: updated_at,
+            changed_at: updated_at,
             revision: field_history_revision,
             field: field_name,
             new_value: (field_item[:track_values] ? self[field_name] : nil),

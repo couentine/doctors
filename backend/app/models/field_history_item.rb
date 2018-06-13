@@ -20,7 +20,7 @@ class FieldHistoryItem
 
   field :user_id,                         type: BSON::ObjectId
   field :revision,                        type: Integer
-  field :updated_at,                      type: DateTime
+  field :changed_at,                      type: DateTime
 
   field :field,                           type: String
   field :old_value,                       type: String
@@ -29,7 +29,7 @@ class FieldHistoryItem
   # === VALIDATIONS === #
 
   validates :user_id,                     presence: true
-  validates :updated_at,                  presence: true
+  validates :changed_at,                  presence: true
   validates :field,                       presence: true
   
   # === INSTANCE METHODS === #
@@ -41,7 +41,7 @@ class FieldHistoryItem
   def to_h
     {
       revision: revision,
-      updated_at: updated_at,
+      changed_at: changed_at,
       user_id: user_id,
       field: field,
       old_value: old_value,
