@@ -1094,7 +1094,7 @@ namespace :db do
 
     app = AppUserMembershipDecorator.find('badgelist')
 
-    User.where(type: 'individual').each do |user|
+    User.where(type: 'individual').no_timeout.each do |user|
       if app.has_user_membership? user, :any
         print "-"
       else
@@ -1118,7 +1118,7 @@ namespace :db do
 
     app = AppGroupMembershipDecorator.find('badgelist')
 
-    Group.each do |group|
+    Group.no_timeout.each do |group|
       if app.has_group_membership? group, :any
         print "-"
       else
