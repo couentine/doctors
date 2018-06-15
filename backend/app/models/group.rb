@@ -79,9 +79,6 @@ class Group
   has_many :info_items,                   dependent: :destroy
 
   has_many :app_memberships,              inverse_of: :group,           class_name: 'AppGroupMembership',   dependent: :destroy
-  has_and_belongs_to_many :apps,          inverse_of: :groups,          class_name: 'App'
-  has_and_belongs_to_many :pending_apps,  inverse_of: :pending_groups,  class_name: 'App'
-  has_and_belongs_to_many :disabled_apps, inverse_of: :disabled_groups, class_name: 'App'
   
   # === FIELDS & VALIDATIONS === #
 
@@ -136,6 +133,10 @@ class Group
   field :limited_member_group_count,      type: Integer, default: 0
   field :active_user_count,               type: Integer # RETIRED
   field :monthly_active_users,            type: Hash # RETIRED
+
+  field :app_ids,                         type: Array, default: []
+  field :pending_app_ids,                 type: Array, default: []
+  field :disabled_app_ids,                type: Array, default: []
 
   field :lti_pending_keys,                type: Array, default: []
   field :lti_pending_key_details,         type: Hash, default: {}

@@ -41,10 +41,6 @@ class GroupPolicy < ApplicationPolicy
   has_and_belongs_to_many :badges,
     visible_to: :everyone
 
-  has_and_belongs_to_many :apps,
-    visible_to: [:member_list_viewer, :member, :admin, :owner]
-
-
   #=== FIELD POLICIES ===#
 
   OWNER_FIELD = { visible_to: :everyone, editable_by: [:owner] }

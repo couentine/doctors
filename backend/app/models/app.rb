@@ -35,16 +35,7 @@ class App
   has_one :proxy_user,                    inverse_of: :proxy_app,             class_name: 'User',   dependent: :destroy
   
   has_many :user_memberships,             class_name: 'AppUserMembership',    dependent: :destroy
-  has_and_belongs_to_many :users,         inverse_of: :apps,                  class_name: 'User'
-  has_and_belongs_to_many :pending_users, inverse_of: :pending_apps,          class_name: 'User'
-  has_and_belongs_to_many :member_users,  inverse_of: :member_of_apps,        class_name: 'User'
-  has_and_belongs_to_many :admin_users,   inverse_of: :admin_of_apps,         class_name: 'User'
-  has_and_belongs_to_many :disabled_users,inverse_of: :disabled_apps,         class_name: 'User'
- 
   has_many :group_memberships,            class_name: 'AppGroupMembership',   dependent: :destroy
-  has_and_belongs_to_many :groups,        inverse_of: :apps,                  class_name: 'Group'
-  has_and_belongs_to_many :pending_groups,inverse_of: :pending_apps,          class_name: 'Group'
-  has_and_belongs_to_many :disabled_groups,inverse_of: :disabled_apps,        class_name: 'Group'
 
   # === EDITABLE FIELDS === #
 
@@ -70,8 +61,8 @@ class App
   field :active,                          type: Boolean, default: false
   field :disabled,                        type: Boolean, default: false
 
-  field :user_count,                      type: Integer, default: 0
-  field :group_count,                     type: Integer, default: 0
+  field :user_count,                      type: Integer, default: 0 #==> Set by app user membership decorator
+  field :group_count,                     type: Integer, default: 0 #==> Set by app group membership decorator
 
   mount_uploader :image,                  S3BadgeUploader
   field :processing_image,                type: Boolean
@@ -187,9 +178,6 @@ class App
       self.pending = status == 'pending'
       self.active = status == 'active'
       self.disabled = status == 'disabled'
-
-      self.user_count = user_ids.count
-      self.group_count = group_ids.count
     end
 
     true

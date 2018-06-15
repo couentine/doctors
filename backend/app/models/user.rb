@@ -51,11 +51,6 @@ class User
   has_and_belongs_to_many :group_tags
   
   has_many :app_memberships,              inverse_of: :user,            class_name: 'AppUserMembership',    dependent: :destroy
-  has_and_belongs_to_many :apps,          inverse_of: :users,           class_name: 'App'
-  has_and_belongs_to_many :pending_apps,  inverse_of: :pending_users,   class_name: 'App'
-  has_and_belongs_to_many :member_of_apps,inverse_of: :member_users,    class_name: 'App'
-  has_and_belongs_to_many :admin_of_apps, inverse_of: :admin_users,     class_name: 'App'
-  has_and_belongs_to_many :disabled_apps, inverse_of: :disabled_users,  class_name: 'App'
 
   has_many :created_groups,               inverse_of: :creator,         class_name: 'Group'
   has_many :owned_groups,                 inverse_of: :owner,           class_name: 'Group'
@@ -94,6 +89,12 @@ class User
   field :email_bounces,                   type: Integer, default: 0
   field :last_email_bounce_at,            type: Time
   field :inactive_email_bounce_id,        type: Integer
+
+  field :app_ids,                         type: Array, default: []
+  field :pending_app_ids,                 type: Array, default: []
+  field :member_app_ids,               type: Array, default: []
+  field :admin_app_ids,                type: Array, default: []
+  field :disabled_app_ids,                type: Array, default: []
 
   mount_uploader :direct_avatar,          S3DirectUploader
   mount_uploader :avatar,                 S3AvatarUploader

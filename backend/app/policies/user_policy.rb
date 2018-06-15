@@ -33,9 +33,6 @@ class UserPolicy < ApplicationPolicy
     visible_to: :all_roles,
     creatable_by: [:self]
 
-  has_and_belongs_to_many :apps,
-    visible_to: [:self]
-
   has_and_belongs_to_many :groups,
     visible_to: [:self]
 

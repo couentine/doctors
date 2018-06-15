@@ -62,28 +62,6 @@ class Api::V1::Paths::AppPaths
 
   swagger_path '/apps' do
 
-    #=== APPS INDEX ===#
-
-    operation :get do
-      extend Api::V1::Helpers::OperationFormat::Base
-      extend Api::V1::Helpers::OperationFormat::PaginatedList
-
-      # Basic Info
-      define_basic_info :app, "Get list of current user's active apps"
-      
-      # Parameters
-      parameter :app_user_joinability
-      parameter :app_group_joinability
-      parameter :app_status
-      parameter :app_sort
-      parameter :page_number
-      parameter :page_size
-
-      # Responses
-      define_success_response :app, include: [:relationships]
-      define_unauthorized_response
-    end
-
     #=== CREATE APP ===#
 
     operation :post do
@@ -193,56 +171,6 @@ class Api::V1::Paths::AppPaths
       define_success_response :app_group_membership, 201, include: [:relationships]
       define_field_error_response
       define_unauthorized_response
-    end
-
-  end
-
-  swagger_path '/apps/{app_key}/users' do
-    
-    #=== APP USERS INDEX ===#
-
-    operation :get do
-      extend Api::V1::Helpers::OperationFormat::Base
-      extend Api::V1::Helpers::OperationFormat::PaginatedList
-
-      # Basic Info
-      define_basic_info :user, 'Get list of active app users', :app
-      
-      # Parameters
-      parameter :app_app_key
-      parameter :user_sort
-      parameter :page_number
-      parameter :page_size
-
-      # Responses
-      define_success_response :user, include: [:relationships]
-      define_unauthorized_response
-      define_not_found_response
-    end
-
-  end
-
-  swagger_path '/apps/{app_key}/groups' do
-    
-    #=== APP GROUPS INDEX ===#
-
-    operation :get do
-      extend Api::V1::Helpers::OperationFormat::Base
-      extend Api::V1::Helpers::OperationFormat::PaginatedList
-
-      # Basic Info
-      define_basic_info :group, 'Get list of active app groups', :app
-      
-      # Parameters
-      parameter :app_app_key
-      parameter :group_sort
-      parameter :page_number
-      parameter :page_size
-
-      # Responses
-      define_success_response :group, include: [:relationships]
-      define_unauthorized_response
-      define_not_found_response
     end
 
   end

@@ -91,7 +91,6 @@ class Api::V1::Schemas::GroupSchemas < Api::V1::Schemas::ApiSchema
   relationship_schemas \
     badges: 'The badges contained in this group',
     users: 'The members and admins of this group',
-    apps: 'All apps for which this group is currently an active member',
     app_group_memberships: 'All app memberships for this group, including inactive ones',
     owner: 'The current user owner of the group',
     creator: 'The original creator user of the group'

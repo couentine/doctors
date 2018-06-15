@@ -54,8 +54,9 @@ class Api::V1::PortfoliosController < Api::V1::BaseController
     set_initial_pagination_variables
 
     # Generate the final query and then generate the calculated pagination variables
-    @portfolios = portfolio_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
-    set_calculated_pagination_variables(@portfolios)
+    portfolio_criteria = portfolio_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
+    set_calculated_pagination_variables(portfolio_criteria)
+    @portfolios = portfolio_criteria.entries
 
     if @badge.present?
       @policy = PortfolioPolicy.new(@current_user, @portfolios, expose: { badge: @badge, group: @badge.group })

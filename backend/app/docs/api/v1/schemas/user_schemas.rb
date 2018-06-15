@@ -102,7 +102,6 @@ class Api::V1::Schemas::UserSchemas < Api::V1::Schemas::ApiSchema
     proxy_app: 'If type is `app` this indicates the app for which this user is a proxy.',
     groups: 'The groups to which this user belongs, either as a member or as an admin',
     portfolios: 'The badge portfolios which this user has created',
-    apps: 'All apps for which this user is currently an active member',
     app_user_memberships: 'All app memberships for this user, including inactive ones'
     # authentication_tokens: '' #==> Not including this for now
 

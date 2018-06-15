@@ -24,7 +24,7 @@ class ApplicationPolicy
     @available_permissions = @current_user.api_permissions
     @expose = expose
 
-    if (record_or_records.class == Mongoid::Criteria)
+    if (record_or_records.class == Mongoid::Criteria) || (record_or_records.class == Array)
       @records = record_or_records
     elsif (record_or_records.class == Symbol)
       @records = record_or_records

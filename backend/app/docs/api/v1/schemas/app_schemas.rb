@@ -115,8 +115,6 @@ class Api::V1::Schemas::AppSchemas < Api::V1::Schemas::ApiSchema
   relationship_schemas \
     owner: 'The user who owns the app',
     creator: 'The original creator of the app',
-    users: 'Active user members',
-    groups: 'Active group members',
     app_user_memberships: 'All user memberships for this app, including inactive ones',
     app_group_memberships: 'All group memberships for this app, including inactive ones'
 

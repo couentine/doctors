@@ -121,34 +121,6 @@ class Api::V1::Paths::GroupPaths
 
   end
 
-  swagger_path '/groups/{group_key}/apps' do
-    
-    #=== GROUP APPS INDEX ===#
-
-    operation :get do
-      extend Api::V1::Helpers::OperationFormat::Base
-      extend Api::V1::Helpers::OperationFormat::PaginatedList
-
-      # Basic Info
-      define_basic_info :app, 'Get list of active apps for selected group', :group
-      
-      # Parameters
-      parameter :group_group_key
-      parameter :app_user_joinability
-      parameter :app_group_joinability
-      parameter :app_status
-      parameter :app_sort
-      parameter :page_number
-      parameter :page_size
-
-      # Responses
-      define_success_response :app, include: [:relationships]
-      define_unauthorized_response
-      define_not_found_response
-    end
-
-  end
-
   swagger_path '/groups/{group_key}/app_group_memberships' do
 
     #=== GROUP APP GROUP MEMBERSHIPS INDEX ===#

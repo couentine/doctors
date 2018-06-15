@@ -26,35 +26,29 @@ class AppGroupMembershipDecorator < SimpleDelegator
 
   #=== INSTANCE METHODS ===#
 
+  # Queries the live count of active group memberships from the DB.
+  def calculate_group_count
+    return group_memberships.where(status: 'active').count
+  end
+
   # Returns true if there is a membership record for the specified group.
   # 
-  # Accepted item types: group, group change decorator, group id/string
   # Accepted membership_status values: :active, :pending, :disabled, :any
-  def has_group_membership?(item, membership_status = :active)
-    return false if item.nil?
-
-    if item.class.to_s.starts_with? 'Group'
-      this_group_id = item.id
-    elsif item.class.to_s == 'BSON::ObjectId'
-      this_group_id = item
-    elsif item.class.to_s == 'String'
-      this_group_id = BSON::ObjectId.from_string(item)
-    else
-      raise ArgumentError.new("Invalid type #{item.class.to_s} for item. (Accepted types are Group, ObjectId or String.)")
-    end
+  def has_group_membership?(group, membership_status = :active)
+    return false if !group.present? # if changing this line remember that adding decorators to nil prevents them from evaluating as nil
 
     case membership_status.to_s
     when 'active'
-      relevant_group_ids = group_ids
+      relevant_app_ids = group.app_ids
     when 'pending'
-      relevant_group_ids = pending_group_ids
+      relevant_app_ids = group.pending_app_ids
     when 'disabled'
-      relevant_group_ids = disabled_group_ids
+      relevant_app_ids = group.disabled_app_ids
     else
-      relevant_group_ids = (group_ids + pending_group_ids + disabled_group_ids).uniq
+      relevant_app_ids = (group.app_ids + group.pending_app_ids + group.disabled_app_ids)
     end
 
-    return relevant_group_ids.include? this_group_id
+    return relevant_app_ids.include? self.id
   end
 
   # Returns the group membership of the specified group or nil if none is present
@@ -110,24 +104,32 @@ class AppGroupMembershipDecorator < SimpleDelegator
     group = group_membership.group # shortcut
 
     if group_membership.active? && !group_membership.destroyed?
-      self.groups << group unless groups.include?(group)
+      unless group.app_ids.include?(id)
+        group.app_ids << id
+        self.group_count += 1
+      end
     else
-      self.groups.delete(group) if groups.include?(group)
+      if group.app_ids.include?(id)
+        group.app_ids.delete(id)
+        self.group_count -= 1
+      end
     end
 
     if group_membership.pending? && !group_membership.destroyed?
-      self.pending_groups << group unless pending_groups.include?(group)
+      group.pending_app_ids << id unless group.pending_app_ids.include?(id)
     else
-      self.pending_groups.delete(group) if pending_groups.include?(group)
+      group.pending_app_ids.delete(id) if group.pending_app_ids.include?(id)
     end
 
     if group_membership.disabled? && !group_membership.destroyed?
-      self.disabled_groups << group unless disabled_groups.include?(group)
+      group.disabled_app_ids << id unless group.disabled_app_ids.include?(id)
     else
-      self.disabled_groups.delete(group) if disabled_groups.include?(group)
+      group.disabled_app_ids.delete(id) if group.disabled_app_ids.include?(id)
     end
 
+    group.save if group.changed?
     self.save_as(current_user) if self.changed?
+
     true
   end
 

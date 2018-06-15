@@ -40,8 +40,6 @@ class Api::V1::SerializableApp < Api::V1::SerializableDocument
   #=== RELATIONSHIPS ===#
 
   relationships \
-    :users,
-    :groups,
     :app_user_memberships,
     :app_group_memberships, 
     [:owner, :user, :owner_id], 

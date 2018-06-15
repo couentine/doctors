@@ -64,11 +64,12 @@ class Api::V1::AppGroupMembershipsController < Api::V1::BaseController
     set_initial_pagination_variables
 
     # Generate the final query and then generate the calculated pagination variables
-    @app_group_memberships = \
+    app_group_membership_criteria = \
       app_group_membership_criteria.includes(:group, :app).order_by(@sort_string).page(@page[:number]).per(@page[:size])
-    set_calculated_pagination_variables(@app_group_memberships)
+    set_calculated_pagination_variables(app_group_membership_criteria)
 
-    @policy = Pundit.policy(@current_user, @app_group_memberships)
+    @app_group_memberships = app_group_membership_criteria.entries
+    @policy = AppGroupMembershipPolicy.new(@current_user, @app_group_memberships)
     render_json_api @app_group_memberships, expose: { policy_index: @policy.policy_index }
   end
 

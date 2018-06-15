@@ -35,10 +35,12 @@ class Api::V1::AuthenticationTokensController < Api::V1::BaseController
     set_initial_pagination_variables
 
     # Generate the final query and then generate the calculated pagination variables
-    @authentication_tokens = authentication_token_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
-    set_calculated_pagination_variables(@authentication_tokens)
+    authentication_token_criteria = \
+      authentication_token_criteria.includes(:user).order_by(@sort_string).page(@page[:number]).per(@page[:size])
+    set_calculated_pagination_variables(authentication_token_criteria)
 
-    @policy = Pundit.policy(@current_user, @authentication_tokens)
+    @authentication_tokens = authentication_token_criteria.entries
+    @policy = AuthenticationTokenPolicy.new(@current_user, @authentication_tokens)
     render_json_api @authentication_tokens, expose: { policy_index: @policy.policy_index }
   end
 
