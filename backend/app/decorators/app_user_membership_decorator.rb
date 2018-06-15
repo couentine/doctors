@@ -26,70 +26,43 @@ class AppUserMembershipDecorator < SimpleDelegator
 
   #=== INSTANCE METHODS ===#
 
-  # Returns true if there is a membership record for the specified group.
-  # In the case of users, this only checks for the membership, not the membership type.
+  # Queries the live count of active user memberships from the DB.
+  def calculate_user_count
+    return user_memberships.where(status: 'active').count
+  end
+
+  # Returns true if there is a membership record for the specified user. This only checks for the membership, not the membership type.
   # Will always return false if there is no membership record, even if the user is the proxy_user or owner.
   # 
-  # Accepted item types: user, user change decorator, user id/string
   # Accepted membership_status values: :active, :pending, :disabled, :admin, :member, :any
-  def has_user_membership?(item, membership_status = :active)
-    return false if item.nil?
+  def has_user_membership?(user, membership_status = :active)
+    return false if !user.present? # if changing this line remember that adding user decorators to nil prevents them from evaluating as nil
 
-    if item.class.to_s.starts_with? 'User'
-      this_user_id = item.id
-    elsif item.class.to_s == 'BSON::ObjectId'
-      this_user_id = item
-    elsif item.class.to_s == 'String'
-      this_user_id = BSON::ObjectId.from_string(item)
+    case membership_status.to_sym
+    when :active
+      relevant_app_ids = user.app_ids
+    when :admin
+      relevant_app_ids = user.admin_app_ids
+    when :member
+      relevant_app_ids = user.member_app_ids
+    when :pending
+      relevant_app_ids = user.pending_app_ids
+    when :disabled
+      relevant_app_ids = user.disabled_app_ids
     else
-      raise ArgumentError.new("Invalid type #{item.class.to_s} for item. (Accepted types are User, ObjectId or String.)")
+      relevant_app_ids = (user.app_ids + user.pending_app_ids + user.disabled_app_ids)
     end
 
-    case membership_status.to_s
-    when 'active'
-      relevant_user_ids = user_ids
-    when 'admin'
-      relevant_user_ids = admin_user_ids
-    when 'member'
-      relevant_user_ids = member_user_ids
-    when 'pending'
-      relevant_user_ids = pending_user_ids
-    when 'disabled'
-      relevant_user_ids = disabled_user_ids
-    else
-      relevant_user_ids = (user_ids + pending_user_ids + disabled_user_ids).uniq
-    end
-
-    return relevant_user_ids.include? this_user_id
+    return relevant_app_ids.include? self.id
   end
 
   # Returns true if the specified user is an admin or the owner user or the proxy user.
   # NOTE: Differs from `has_user_membership?` because it returns true even if there is no membership record for the user.
-  # 
-  # Accepted item types: user, user id/string
-  # NOTE: It is most query efficient to pass the full user record.
-  def has_admin?(item)
-    return false if item.nil?
-
-    if item.class.to_s.starts_with? 'User'
-      this_user_id = item.id
-      this_user = item
-    elsif item.class.to_s == 'BSON::ObjectId'
-      this_user_id = item
-    elsif item.class.to_s == 'String'
-      this_user_id = BSON::ObjectId.from_string(item)
-    else
-      raise ArgumentError.new("Invalid type #{item.class.to_s} for item. (Accepted types are User, ObjectId or String.)")
-    end
-    
-    return true if admin_user_ids.include?(this_user_id) || (owner_id == this_user_id)
-
-    # We try to save a query for the proxy user. If we have the full user we can test without querying the app for the proxy user.
-    if this_user.present?
-      return (this_user.type == 'app') && (this_user.proxy_app_id == self.id)
-    else
-      return proxy_user.id == this_user_id
-    end
+  def has_admin?(user)
+    return false if !user.present? # if changing this line remember that adding user decorators to nil prevents them from evaluating as nil
+    return true if owner_id == user.id
+    return true if (user.type == 'app') && (user.proxy_app_id == self.id)
+    return user.admin_app_ids.include? self.id
   end
 
   # Returns the user membership of the specified user or nil if none is present
@@ -135,36 +108,44 @@ class AppUserMembershipDecorator < SimpleDelegator
     user = user_membership.user # shortcut
 
     if user_membership.active? && !user_membership.destroyed?
-      self.users << user unless users.include?(user)
+      unless user.app_ids.include?(id)
+        user.app_ids << id
+        self.user_count += 1
+      end
     else
-      self.users.delete(user) if users.include?(user)
+      if user.app_ids.include?(id)
+        user.app_ids.delete(id)
+        self.user_count -= 1
+      end
     end
 
     if user_membership.pending? && !user_membership.destroyed?
-      self.pending_users << user unless pending_users.include?(user)
+      user.pending_app_ids << id unless user.pending_app_ids.include?(id)
     else
-      self.pending_users.delete(user) if pending_users.include?(user)
+      user.pending_app_ids.delete(id) if user.pending_app_ids.include?(id)
     end
 
     if user_membership.member? && !user_membership.destroyed?
-      self.member_users << user unless member_users.include?(user)
+      user.member_app_ids << id unless user.member_app_ids.include?(id)
     else
-      self.member_users.delete(user) if member_users.include?(user)
+      user.member_app_ids.delete(id) if user.member_app_ids.include?(id)
     end
 
     if user_membership.admin? && !user_membership.destroyed?
-      self.admin_users << user unless admin_users.include?(user)
+      user.admin_app_ids << id unless user.admin_app_ids.include?(id)
     else
-      self.admin_users.delete(user) if admin_users.include?(user)
+      user.admin_app_ids.delete(id) if user.admin_app_ids.include?(id)
     end
 
     if user_membership.disabled? && !user_membership.destroyed?
-      self.disabled_users << user unless disabled_users.include?(user)
+      user.disabled_app_ids << id unless user.disabled_app_ids.include?(id)
     else
-      self.disabled_users.delete(user) if disabled_users.include?(user)
+      user.disabled_app_ids.delete(id) if user.disabled_app_ids.include?(id)
     end
 
+    user.save if user.changed?
     self.save_as(current_user) if self.changed?
+
     true
   end
 

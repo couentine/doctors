@@ -36,7 +36,6 @@ class Api::V1::SerializableGroup < Api::V1::SerializableDocument
   relationships \
     :badges,
     :users,
-    :apps,
     :app_group_memberships,
     [:owner, :user, :owner_id], 
     [:creator, :user, :creator_id]

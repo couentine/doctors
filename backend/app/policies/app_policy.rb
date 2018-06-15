@@ -41,12 +41,6 @@ class AppPolicy < ApplicationPolicy
     visible_to: [:admin],
     creatable_by: [:admin]
 
-  has_and_belongs_to_many :users,
-    visible_to: [:admin]
-
-  has_and_belongs_to_many :groups,
-    visible_to: [:admin]
-
   #=== FIELD POLICIES ===#
 
   OWNER_FIELD = { visible_to: :everyone, editable_by: [:owner] }
@@ -87,7 +81,7 @@ class AppPolicy < ApplicationPolicy
   role :joinable_non_member_group do |current_user, app|
     (app.group_joinability != 'closed') \
       && current_user.present? && (current_user.type == 'group') && current_user.proxy_group_id.present? \
-      && !AppGroupMembershipDecorator.new(app).has_group_membership?(current_user.proxy_group_id)
+      && !AppGroupMembershipDecorator.new(app).has_group_membership?(current_user.proxy_group)
   end
 
   role :member_user do |current_user, app|

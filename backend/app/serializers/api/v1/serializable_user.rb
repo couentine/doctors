@@ -39,7 +39,6 @@ class Api::V1::SerializableUser < Api::V1::SerializableDocument
     :proxy_app,
     :groups,
     :portfolios,
-    :apps,
     :app_user_memberships,
     :authentication_tokens
 end

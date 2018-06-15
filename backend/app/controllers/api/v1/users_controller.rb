@@ -17,7 +17,7 @@ class Api::V1::UsersController < Api::V1::BaseController
 
   #=== ACTIONS ===#
 
-  # This can be accessed via the group users index and the app users index.
+  # This can be accessed only via the group users index
   def index
     skip_authorization
 
@@ -37,13 +37,6 @@ class Api::V1::UsersController < Api::V1::BaseController
         return render_not_authorized if !Pundit.policy(@current_user, @group).can_see_users?
         user_criteria = @group.users
       end
-    elsif params[:app_id].present?
-      @app = App.find(params[:app_id]) rescue nil
-      return render_not_found if @app.blank?
-      return render_not_authorized if !Pundit.policy(@current_user, @app).can_see_users?
-      
-      # There's no filtering for this endpoint, so just build the core criteria
-      user_criteria = @app.users
     else
       raise ArgumentError.new('Invalid user index route')
     end
@@ -53,10 +46,11 @@ class Api::V1::UsersController < Api::V1::BaseController
     set_initial_pagination_variables
 
     # Generate the final query and then generate the calculated pagination variables
-    @users = user_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
-    set_calculated_pagination_variables(@users)
+    user_criteria = user_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
+    set_calculated_pagination_variables(user_criteria)
 
-    @policy = Pundit.policy(@current_user, @users)
+    @users = user_criteria.entries
+    @policy = UserPolicy.new(@current_user, @users)
     render_json_api @users, expose: { policy_index: @policy.policy_index }
   end
 

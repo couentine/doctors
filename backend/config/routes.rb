@@ -45,7 +45,6 @@ BadgeList::Application.routes.draw do
         resources :groups, only: [:index]
         resources :portfolios, only: [:index]
         
-        resources :apps, only: [:index]
         resources :app_user_memberships, only: [:index, :create, :show]
         resources :authentication_tokens, only: [:index, :create]
         
@@ -66,7 +65,6 @@ BadgeList::Application.routes.draw do
         resources :badges, only: [:index, :show]
         resources :users, only: [:index]
         
-        resources :apps, only: [:index]
         resources :app_group_memberships, only: [:index, :create]
       end
       
@@ -78,12 +76,9 @@ BadgeList::Application.routes.draw do
       end
       resources :portfolios, only: [:show]
 
-      resources :apps, only: [:index, :create, :update, :show, :destroy] do
+      resources :apps, only: [:create, :update, :show, :destroy] do
         resources :app_user_memberships, only: [:index, :create]
         resources :app_group_memberships, only: [:index, :create]
-
-        resources :users, only: [:index]
-        resources :groups, only: [:index]
       end
       resources :app_user_memberships, only: [:index, :update, :show, :destroy]
       resources :app_group_memberships, only: [:update, :show, :destroy]

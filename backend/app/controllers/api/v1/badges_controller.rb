@@ -46,10 +46,11 @@ class Api::V1::BadgesController < Api::V1::BaseController
     set_initial_pagination_variables
 
     # Generate the final query and then generate the calculated pagination variables
-    @badges = badge_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
-    set_calculated_pagination_variables(@badges)
+    badge_criteria = badge_criteria.order_by(@sort_string).page(@page[:number]).per(@page[:size])
+    set_calculated_pagination_variables(badge_criteria)
+    @badges = badge_criteria.entries
 
-    @policy = Pundit.policy(@current_user, @badges)
+    @policy = BadgePolicy.new(@current_user, @badges)
     render_json_api @badges, expose: { policy_index: @policy.policy_index }
   end
 
