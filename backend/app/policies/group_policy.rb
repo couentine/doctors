@@ -67,6 +67,9 @@ class GroupPolicy < ApplicationPolicy
   field :tag_creatability,                        ADMIN_FIELD
   field :tag_visibility,                          ADMIN_FIELD
 
+  field :avatar_image_url,                        READ_ONLY_FIELD
+  field :avatar_image_medium_url,                 READ_ONLY_FIELD
+  field :avatar_image_small_url,                  READ_ONLY_FIELD
   field :member_count,                            READ_ONLY_FIELD
   field :admin_count,                             READ_ONLY_FIELD
   field :total_user_count,                        READ_ONLY_FIELD
