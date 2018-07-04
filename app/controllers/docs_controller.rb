@@ -22,7 +22,6 @@ class DocsController < ApplicationController
       @docs = Doc.order(sort_column + " " + sort_direction)
   end
 
-
   def new
     @doc = Doc.new
   end

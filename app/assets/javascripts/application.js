@@ -13,3 +13,6 @@
 //= require rails-ujs
 //= require turbolinks
 //= require_tree .
+$("tr").click(function() {
+  window.location = $(this).data("link")
+})

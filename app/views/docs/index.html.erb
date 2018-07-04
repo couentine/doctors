@@ -5,14 +5,14 @@
 <br>
 <center>
   <!-- Search bar is working on local but not on heroku -->
-  <!--
+
 <%= form_tag(docs_path, :method => "get", id: "search-form") do %>
     <%= text_field_tag :search, params[:search], placeholder: "Search Doctors or Speciality" %>
     <%= submit_tag "Search", :name => nil %>
     <% if @docs.blank? %>
   <h4>There are no doctors containing the term <%= params[:search] %>.</h4>
 <% end %>
-<% end %>-->
+<% end %>
 </center>
 <br>
 
@@ -27,16 +27,18 @@
     </tr>
   </thead>
 
-  <tbody>
+  <tbody class="listdoc">
     <!-- I will print the list of all the doctor -->
     <% @docs.each do |doc| %>
-      <tr>
+
+      <tr  class="clickable" data-link="<%= doc_path(doc) %>">
         <td><%= link_to doc.name, doc %></td>
-        <td><%= doc.specialty %></td>
-        <td><%= doc.zip %></td>
-        <td><%= doc.review %></td>
+        <td><%= link_to doc.specialty, doc %></td>
+        <td><%= link_to  doc.zip, doc %></td>
+        <td><%= link_to doc.review, doc %></td>
       </tr>
     <% end %>
+
   </tbody>
 </table>
 
