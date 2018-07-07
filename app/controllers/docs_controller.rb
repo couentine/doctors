@@ -7,7 +7,6 @@ class DocsController < ApplicationController
       # i set @docs let it be the complete list of doctors in the main page
     @docs = Doc.all
     if params[:search]
-      params[:search].downcase!
        @docs = Doc.search(params[:search])
      else
        @docs = Doc.all
