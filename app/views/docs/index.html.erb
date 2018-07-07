@@ -32,10 +32,10 @@
     <% @docs.each do |doc| %>
 
       <tr  class="clickable" onclick="location.href='<%= doc_path(doc) %>'">
-        <td><%= link_to doc.name, doc %></td>
-        <td><%= link_to doc.specialty, doc %></td>
-        <td><%= link_to  doc.zip, doc %></td>
-        <td><%= link_to doc.review, doc %></td>
+        <td><%= doc.name %></td>
+        <td><%= doc.specialty %></td>
+        <td><%= doc.zip %></td>
+        <td><%= doc.review %></td>
       </tr>
     <% end %>
 
