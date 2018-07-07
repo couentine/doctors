@@ -31,7 +31,7 @@
     <!-- I will print the list of all the doctor -->
     <% @docs.each do |doc| %>
 
-      <tr  class="clickable" data-link="<%= doc_path(doc) %>">
+      <tr  class="clickable" onclick="location.href='<%= doc_path(doc) %>'">
         <td><%= link_to doc.name, doc %></td>
         <td><%= link_to doc.specialty, doc %></td>
         <td><%= link_to  doc.zip, doc %></td>

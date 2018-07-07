@@ -35,12 +35,12 @@
       </tr>
     </thead>
 
-      <tbody>
+        <tbody class="listdoc">
        <!-- I am doing a loop for search in all the doctors list -->
 <% @docs.each do |doc| %>
 <!-- then i select only the doctors with the same speciality than the one display on this page-->
 <% if doc.specialty == @doc.specialty %>
-      <tr>
+    <tr  class="clickable" onclick="location.href='<%= doc_path(doc) %>'">
         <td><%= link_to doc.name, doc%></td>
         <td><%= doc.specialty %></td>
         <td><%= doc.zip%></td>

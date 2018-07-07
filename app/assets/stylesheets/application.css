@@ -1,5 +1,6 @@
 .listdoc tr:hover{
-  background-color: #B2C6F6
+  background-color: #B2C6F6;
+  cursor: pointer;
 }
 
 td a:link{
