@@ -3,7 +3,12 @@
   cursor: pointer;
 }
 
-td a:link{
+tr a:link{
   text-decoration: none;
   color: black
+}
+
+.clickable a{
+  text-decoration: none;
+    color: black
 }
