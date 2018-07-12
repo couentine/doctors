@@ -50,6 +50,8 @@ module ApplicationHelper
         @current_user_persona = 'holder'
       elsif current_user.learner_badge_ids.present?
         @current_user_persona = 'seeker'
+      else
+        @current_user_persona = 'user'
       end
 
       @intercom_settings = {

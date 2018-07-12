@@ -293,10 +293,11 @@
               html: { id: 'settings-form', class: 'form-horizontal' } do |f| %>
 
             <%= f.input :visibility, as: :radio_buttons, 
-              label: 'Who can see the badge and its contents?', 
-              hint: 'This setting controls the visibility of the badge itself, the lists of ' \
-                + 'experts and learners, and all requirement and wiki pages. The visibility of ' \
-                + 'posted evidence is set on each individual requirement.', include_blank: false, 
+              label: 'Who can see the badge contents?', 
+              hint: 'This setting controls the visibility of the lists of experts and learners, the wiki/requirement pages and the ' \
+                'visibility of this badge within the list of badges on the group page. The badge image, summary, basic requirement ' \
+                'details and overview are always visible to anyone with the badge link. Visibility of posted evidence is set on each ' \
+                'individual requirement.', include_blank: false, 
               collection: @badge_visibility_options %>
 
             <%= f.input :editability, as: :radio_buttons, label: 'Who can edit the badge?', 
@@ -521,147 +522,147 @@
   </div>
 </div>
 
-<% if @can_see_badge %>
+<!-- === TOPIC LIST === -->
 
-    <!-- === TOPIC LIST === -->
+<% if !@requirements_json_clone.blank? %>
+    
+  <div class="tab-pane" id="requirements">
 
-  <% if !@requirements_json_clone.blank? %>
-      
-    <div class="tab-pane" id="requirements">
-
-      <div class="row">
-        <div class="span12">
-          <div class="tab-header">
-            <% if @current_user_is_expert || @current_user_is_learner %>
-              <%= link_to "<i class='fa fa-user'></i> View your #{@badge.progress_log}".html_safe, 
-                [@group, @badge, @log], id: 'view-your-log', class: 'btn btn-small btn-primary' %>
-            <% end %>
-
-            <h2>Required Evidence</h2>
-            
-            <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
-              <h3 class="collapse-when-small">
-                <% if @badge.editability == "admins" %>
-                  <i class="fa fa-key"></i> Editable by admins only
-                <% else %>
-                  <i class="fa fa-key"></i> Editable by <%= @experts %>
-                <% end %>
-
-                <% if @current_user_is_admin || @badge_list_admin %>
-                  <a href="#settings" class="btn h3-btn" data-toggle="modal">
-                    Settings
-                  </a>
-                <% end %>
-              </h3>
-            <% end %>
-          </div>
-        </div>
-      </div>
-
-      <div class="row" id="topic-list-row">
-        <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="topics" 
-             data-bl-dyncol-width="12">
-
-          <% @requirements.each do |tag| %>
-
-            <%= render 'shared/badge_requirement', group: @group, badge: @badge, tag: tag, 
-              log: @log, requirements_counts: @requirements_counts %>
-
+    <div class="row">
+      <div class="span12">
+        <div class="tab-header">
+          <% if @current_user_is_expert || @current_user_is_learner %>
+            <%= link_to "<i class='fa fa-user'></i> View your #{@badge.progress_log}".html_safe, 
+              [@group, @badge, @log], id: 'view-your-log', class: 'btn btn-small btn-primary' %>
           <% end %>
 
+          <h2>Required Evidence</h2>
+          
+          <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
+            <h3 class="collapse-when-small">
+              <% if @badge.editability == "admins" %>
+                <i class="fa fa-key"></i> Editable by admins only
+              <% else %>
+                <i class="fa fa-key"></i> Editable by <%= @experts %>
+              <% end %>
+
+              <% if @current_user_is_admin || @badge_list_admin %>
+                <a href="#settings" class="btn h3-btn" data-toggle="modal">
+                  Settings
+                </a>
+              <% end %>
+            </h3>
+          <% end %>
         </div>
       </div>
-
     </div>
 
-  <% end %>
+    <div class="row" id="topic-list-row">
+      <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="topics" 
+           data-bl-dyncol-width="12">
 
+        <% @requirements.each do |tag| %>
 
-  <!-- === BADGE OVERVIEW === -->
+          <%= render 'shared/badge_requirement', group: @group, badge: @badge, tag: tag, 
+            log: @log, requirements_counts: @requirements_counts %>
 
-  <% if @badge.has_overview? || @can_edit_badge %>
-
-    <div class="tab-pane" id="overview">
-  
-      <div class="row">
-        <div class="span12">
-          <div class="tab-header merge-with-card <%= (@badge.has_overview?) ? '' : 'empty' %>">
-            <% if @can_edit_badge %>
-              <a tabindex="-1" class="btn btn-small" id="edit-overview" data-toggle="custom" 
-                data-hide="#edit-overview,#overview-row" 
-                data-focus="#badge_info" data-show="#overview-inline-form">
-
-                  <% if @badge.has_overview? %>
-                    <i class="fa fa-pencil"></i> Edit overview
-                  <% else %>
-                    <i class="fa fa-plus"></i> Add overview
-                  <% end %>
-                  
-              </a>
-            <% end %>
-
-            <h2>Badge Overview</h2>
-
-            <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
-              <h3 class="collapse-when-small">
-                <% if @badge.editability == "admins" %>
-                  <i class="fa fa-key"></i> Editable by admins only
-                <% else %>
-                  <i class="fa fa-key"></i> Editable by <%= @experts %>
-                <% end %>
-
-                <% if @current_user_is_admin || @badge_list_admin %>
-                  <a href="#settings" class="btn h3-btn" data-toggle="modal">
-                    Settings
-                  </a>
-                <% end %>
-              </h3>
-            <% end %>
-          </div>
-        </div>
-      </div>
-
-      <div class="row" id="overview-row">
-        <% if @badge.has_overview? %>
-          <div class="span12">
-            <div class="info-card text-card">
-              <% @badge.info_sections.each do |section_text| %>
-                <div class="section-container">
-                  <%= section_text.html_safe %>
-                </div>
-              <% end unless @badge.info_sections.nil? %>
-            </div>
-          </div>
         <% end %>
+
       </div>
-
-      <% if @can_edit_badge %>
-
-        <!-- === EDIT BADGE OVERVIEW INTERFACE === -->
-
-        <div class="bl-inline-form" id="overview-inline-form" style="display: none">              
-          <%= simple_form_for [@group, @badge], id: 'edit-badge-info-form' do |f| %>
-
-            <div class="form-body">
-              <%= f.input :info, as: :text, label: 'Edit Badge Overview', 
-                input_html: { class: "huge-text-area rich-text-area" } %>
-            </div>
-
-            <div class="form-footer">
-              <%= f.button :submit, 'Save changes', class: 'btn btn-primary' %>
-              <a class="btn" data-toggle="custom"  data-hide="#overview-inline-form" 
-                data-show="#edit-overview,#overview-row">Cancel</a>
-            </div>
-
-          <% end %>
-
-        </div>
-
-      <% end %>
-
     </div>
 
-  <% end %>
+  </div>
+
+<% end %>
+
+
+<!-- === BADGE OVERVIEW === -->
+
+<% if @badge.has_overview? || @can_edit_badge %>
+
+  <div class="tab-pane" id="overview">
+
+    <div class="row">
+      <div class="span12">
+        <div class="tab-header merge-with-card <%= (@badge.has_overview?) ? '' : 'empty' %>">
+          <% if @can_edit_badge %>
+            <a tabindex="-1" class="btn btn-small" id="edit-overview" data-toggle="custom" 
+              data-hide="#edit-overview,#overview-row" 
+              data-focus="#badge_info" data-show="#overview-inline-form">
+
+                <% if @badge.has_overview? %>
+                  <i class="fa fa-pencil"></i> Edit overview
+                <% else %>
+                  <i class="fa fa-plus"></i> Add overview
+                <% end %>
+                
+            </a>
+          <% end %>
+
+          <h2>Badge Overview</h2>
+
+          <% if @current_user_is_member || @current_user_is_admin || @badge_list_admin %>
+            <h3 class="collapse-when-small">
+              <% if @badge.editability == "admins" %>
+                <i class="fa fa-key"></i> Editable by admins only
+              <% else %>
+                <i class="fa fa-key"></i> Editable by <%= @experts %>
+              <% end %>
+
+              <% if @current_user_is_admin || @badge_list_admin %>
+                <a href="#settings" class="btn h3-btn" data-toggle="modal">
+                  Settings
+                </a>
+              <% end %>
+            </h3>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" id="overview-row">
+      <% if @badge.has_overview? %>
+        <div class="span12">
+          <div class="info-card text-card">
+            <% @badge.info_sections.each do |section_text| %>
+              <div class="section-container">
+                <%= section_text.html_safe %>
+              </div>
+            <% end unless @badge.info_sections.nil? %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @can_edit_badge %>
+
+      <!-- === EDIT BADGE OVERVIEW INTERFACE === -->
+
+      <div class="bl-inline-form" id="overview-inline-form" style="display: none">              
+        <%= simple_form_for [@group, @badge], id: 'edit-badge-info-form' do |f| %>
+
+          <div class="form-body">
+            <%= f.input :info, as: :text, label: 'Edit Badge Overview', 
+              input_html: { class: "huge-text-area rich-text-area" } %>
+          </div>
+
+          <div class="form-footer">
+            <%= f.button :submit, 'Save changes', class: 'btn btn-primary' %>
+            <a class="btn" data-toggle="custom"  data-hide="#overview-inline-form" 
+              data-show="#edit-overview,#overview-row">Cancel</a>
+          </div>
+
+        <% end %>
+
+      </div>
+
+    <% end %>
+
+  </div>
+
+<% end %>
+
+<% if @can_see_badge %>
 
   <!-- === BADGE WIKI === -->
 
