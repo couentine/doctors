@@ -9,6 +9,13 @@ class S3Uploader < CarrierWave::Uploader::Base
     "u/#{model.class.to_s.underscore}/#{model.id}"
   end
 
+  process :auto_orient
+  def auto_orient
+    manipulate! do |img|
+      img = img.auto_orient
+    end
+  end
+
   version :thumb do
     process :resize_to_fit => [50, 50]
   end
