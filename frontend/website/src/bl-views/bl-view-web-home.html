@@ -9,6 +9,7 @@
 <link rel="import" href="bl-header-nav-right.html">
 <link rel="import" href="bl-header-panel.html">
 <link rel="import" href="bl-view-mixin.html">
+<link rel="import" href="../bl-cms/bl-cms-section.html">
 
 <!--
 # Badge List Web Home View #
@@ -400,7 +401,7 @@ The external-facing website home page.
         <img src$="[[website.manifest.assets.brand.shieldWhitePng]]">
       </bl-header-nav-left>
       
-      <bl-header-nav-right slot="rightNav" id="rightNave"></bl-header-nav-right>
+      <bl-header-nav-right slot="rightNav" id="rightNav"></bl-header-nav-right>
 
       <div id="content" slot="content">
         
@@ -414,7 +415,7 @@ The external-facing website home page.
           <div class="divider">&nbsp;</div>
 
           <div class="tag-line">
-            Helping educators, companies and professionals build a common language of learning.
+            [[content.fields.headerSubTitle]]
           </div>
         </div>
 
@@ -424,6 +425,12 @@ The external-facing website home page.
           <div class="bar1">&nbsp;</div>
           <div class="bar2">&nbsp;</div>
         </div>
+
+        <!-- === CMS CONTENT SECTIONS === -->
+        <template is="dom-repeat" id="sectionRepeater" items="{{content.fields.sections}}" as="section">
+          <bl-cms-section content="[[section]]"></bl-cms-section>
+        </template>
+
 
         <!-- === ACTION ROW === -->
         <div class="row action-row">

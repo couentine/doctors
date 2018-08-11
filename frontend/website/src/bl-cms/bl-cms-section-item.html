@@ -1,0 +1,57 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List CMS Button #
+
+This renders a CMS section button.
+-->
+<dom-module id="bl-cms-section-item">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: flex;
+          font-size: 1rem; 
+        }
+
+    </style>
+
+    <div id="title">
+      [[content.fields.title]]
+    </div>
+
+    <div id="body">
+      [[content.fields.body]]
+    </div>
+
+  </template>
+
+  <script>
+    class BlCmsSectionItem extends Polymer.Element {
+      
+      static get is() { return 'bl-cms-section-item'; }
+
+      static get properties() {
+        return {
+          
+          content: Object,
+
+          type: String,
+
+          styles: Array,
+
+        }
+      }
+
+    }
+
+    window.customElements.define(BlCmsSectionItem.is, BlCmsSectionItem);
+  </script>
+</dom-module>

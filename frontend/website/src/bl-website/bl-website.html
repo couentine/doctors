@@ -50,28 +50,100 @@
     <app-location id="location" route="{{route}}" 
       url-space-regex="(^/$)|(^/w$)|(^/how-it-works$)|(^/pricing$)|(^/privacy-policy$)|(^/terms-of-service$)"></app-location>
     
-    <app-route id="indexRoute" active="{{indexRouteActive}}" route="{{route}}" pattern="/"
-      title="Badge List - Digital credentials for educators, companies and professional development orgs"></app-route>
-    <app-route id="webRoute" active="{{webRouteActive}}" route="{{route}}" pattern="/w"
-      title="Badge List - Digital credentials for educators, companies and professional development orgs"></app-route>
-    <app-route id="howItWorksViewRoute" active="{{howItWorksViewRouteActive}}" route="{{route}}" pattern="/how-it-works"
-      title="How Badge List Works - Expert validated ePortfolios for recognizing digital learning and professional development"></app-route>
-    <app-route id="pricingViewRoute" active="{{pricingViewRouteActive}}" route="{{route}}" pattern="/pricing"
-      title="Badge List Pricing"></app-route>
-    <app-route id="docsViewRoute" active="{{docsViewRouteActive}}" route="{{route}}" pattern="/docs"
-      title="Badge List Help Documentation"></app-route>
-    <app-route id="privacyPolicyViewRoute" active="{{privacyPolicyViewRouteActive}}" route="{{route}}" pattern="/privacy-policy"
-      title="Privacy Policy - Badge List"></app-route>
-    <app-route id="termsOfServiceViewRoute" active="{{termsOfServiceViewRouteActive}}" route="{{route}}" 
-      pattern="/terms-of-service" title="Terms of Service - Badge List"></app-route>
+    <app-route
+      pattern="/"
+      route="{{route}}"
+      id="indexRoute"
+      active="{{indexRouteActive}}"
+    ></app-route>
+
+    <app-route
+      pattern="/w"
+      route="{{route}}"
+      id="webRoute"
+      active="{{webRouteActive}}"
+    ></app-route>
+
+    <app-route
+      pattern="/how-it-works"
+      id="howItWorksViewRoute"
+      active="{{howItWorksViewActive}}"
+      route="{{route}}"
+    ></app-route>
+
+    <app-route
+      pattern="/pricing"
+      id="pricingViewRoute"
+      active="{{pricingViewActive}}"
+      route="{{route}}"
+    ></app-route>
+
+    <app-route
+      pattern="/docs"
+      id="docsViewRoute"
+      active="{{docsViewActive}}"
+      route="{{route}}"
+    ></app-route>
+
+    <app-route
+      pattern="/privacy-policy"
+      id="privacyPolicyViewRoute"
+      active="{{privacyPolicyViewActive}}"
+      route="{{route}}"
+    ></app-route>
+
+    <app-route
+      pattern="/terms-of-service"
+      id="termsOfServiceViewRoute"
+      active="{{termsOfServiceViewActive}}"
+      route="{{route}}" 
+    ></app-route>
+
 
     <!-- #=== APP VIEWS ===# -->
-    <bl-view-web-home id="webHomeView" active="{{webHomeViewActive}}"></bl-view-web-home>
-    <bl-view-how-it-works id="howItWorksView" active="{{howItWorksViewRouteActive}}"></bl-view-how-it-works>
-    <bl-view-pricing id="pricingView" active="{{pricingViewRouteActive}}"></bl-view-pricing>
-    <bl-view-docs id="docsView" active="{{docsViewRouteActive}}"></bl-view-docs>
-    <bl-view-privacy-policy id="privacyPolicyView" active="{{privacyPolicyViewRouteActive}}"></bl-view-privacy-policy>
-    <bl-view-terms-of-service id="termsOfServiceView" active="{{termsOfServiceViewRouteActive}}"></bl-view-terms-of-service>
+
+    <bl-view-web-home
+      id="webHomeView"
+      active="{{webHomeViewActive}}"
+      title="Badge List - Digital credentials for educators, companies and professional development orgs"
+      cms-key="home"
+    ></bl-view-web-home>
+
+    <bl-view-how-it-works
+      id="howItWorksView"
+      active="{{howItWorksViewActive}}"
+      current-user="[[currentUser]]"
+      title="How Badge List Works - Expert validated ePortfolios for recognizing digital learning and professional development"
+    ></bl-view-how-it-works>
+
+    <bl-view-pricing
+      id="pricingView"
+      active="{{pricingViewActive}}"
+      current-user="[[currentUser]]"
+      title="Badge List Pricing"
+    ></bl-view-pricing>
+
+    <bl-view-docs
+      id="docsView"
+      active="{{docsViewActive}}"
+      current-user="[[currentUser]]"
+      title="Badge List Help Documentation"
+    ></bl-view-docs>
+
+    <bl-view-privacy-policy
+      id="privacyPolicyView"
+      active="{{privacyPolicyViewActive}}"
+      current-user="[[currentUser]]"
+      title="Privacy Policy - Badge List"
+    ></bl-view-privacy-policy>
+
+    <bl-view-terms-of-service
+      id="termsOfServiceView"
+      active="{{termsOfServiceViewActive}}"
+      current-user="[[currentUser]]"
+      title="Terms of Service - Badge List"
+    ></bl-view-terms-of-service>
+
     
     <!-- #=== TOAST CONTAINER ===# -->
     <div id="toastContainer"></div>
@@ -97,6 +169,12 @@
             notify: true
           },
 
+          /** Stores a reference to the CMS client. */
+          cmsClient: {
+            type: Object,
+            notify: true,
+          },
+
           /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
           activeView: Object,
 
@@ -117,7 +195,7 @@
           intercomLoaded: {
             type: Boolean,
             value: false,
-            notify: true
+            notify: true,
           },
 
           indexRouteActive: Boolean,
@@ -141,17 +219,30 @@
         this.$.toastContainer.appendChild(newToast);
       }
 
+      /** 
+       * Sets the `hidden` flag on the intercom container element if it exists.
+       * If the intercom container does not exist, then this method does nothing.
+       */
+      hideIntercom() {
+        if (document.querySelector('#intercom-container')) {
+          document.querySelector('#intercom-container').hidden = true;
+        }
+      }
+
+      /** 
+       * Clears the `hidden` flag on the intercom container element if it exists.
+       * If the intercom container does not exist, then this method does nothing.
+       */
+      showIntercom() {
+        if (document.querySelector('#intercom-container')) {
+          document.querySelector('#intercom-container').hidden = false;
+        }
+      }
+
       // #=== LIFECYCLE EVENTS ===#
 
       connectedCallback() {
         if (super.connectedCallback) super.connectedCallback();
-        
-        // Add listeners to the routes so that we can update the document title, also check for which is active so we can set initial title
-        var routeElements = this.shadowRoot.querySelectorAll('app-route');
-        routeElements.forEach(function(routeElement) {
-          routeElement.addEventListener('active-changed', e => this._activeRouteChanged(e));
-          if (routeElement.active && routeElement.title) document.title = routeElement.title;
-        }.bind(this));
 
         // Add listener for window location hash change
         window.addEventListener('hashchange', e => this._windowLocationHashChanged(e));
@@ -163,14 +254,16 @@
         // Remove `loading` class from the body.
         document.getElementsByTagName('body')[0].classList.remove('loading');
 
+        // Listen for Intercom boot
         // Wait for Intercom to load (max 30 seconds)
         const timeout = setTimeout(() => clearInterval(interval), 30000);
         const interval = setInterval(() => {
-          if (('Intercom' in window) && window.Intercom.booted) {
+          if (('Intercom' in window) && window.Intercom.booted && document.querySelector('#intercom-container')) {
             // Intercom is booted!
             clearInterval(interval);
             clearTimeout(timeout);
 
+            if (this.activeView && this.activeView.noChat) this.hideIntercom();
             this.set('intercomLoaded', true);
           }
         }, 100);
@@ -180,21 +273,23 @@
 
       _manifestChanged(newValue, oldValue) {
         if (newValue) {
+          if (this.cmsClient == null) {
+            // Initialize the Contentful CMS client
+            this.set('cmsClient',  contentful.createClient({
+              space: newValue.cms.space_id,
+              accessToken: newValue.cms.token,
+            }));
+          }
+
           this.setProperties({
             currentUser: newValue.current_user
           });
 
-          if (newValue.toast && newValue.toast.length)
+          if (newValue.toast && newValue.toast.length) {
             newValue.toast.forEach(function(toastItem) {
               this.addToast(toastItem.text, toastItem.type)
             }.bind(this));
-        }
-      }
-
-      /** Sets the document title when the active route changes. */
-      _activeRouteChanged(event) {
-        if ((event.detail.value == true) && event.target && event.target.title) {
-          document.title = event.target.title;
+          }
         }
       }
 

@@ -1,0 +1,89 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List CMS Button #
+
+This renders a CMS section button.
+-->
+<dom-module id="bl-cms-button">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: inline-block;
+          font-size: 1rem; 
+        }
+
+    </style>
+
+    <a href$="[[link]]" target$="[[target]]" class="button">
+      <paper-button raised class$="[[classText]]">[[content.fields.label]]</paper-button>
+    </a>
+
+  </template>
+
+  <script>
+    class BlCmsButton extends Polymer.Element {
+      
+      static get is() { return 'bl-cms-button'; }
+
+      static get properties() {
+        return {
+          
+          content: Object,
+
+          color: String,
+
+          styles: {
+            type: Array,
+            value: () => { return [] },
+          },
+
+          link: {
+            type: String,
+            computed: '_link(content.fields.link, content.fields.linkForUsers)',
+          },
+
+          target: {
+            type: String,
+            computed: '_target(content.fields.openInNewTab)',
+            value: '',
+          },
+
+          classText: {
+            type: String,
+            computed: '_classText(color, styles)',
+          },
+
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _link(link, linkForUsers) {
+        return (linkForUsers && linkForUsers.length) ? linkForUsers : link;
+      }
+
+      _target(openInNewTab) {
+        return (openInNewTab) ? '_blank' : '';
+      }
+
+      _classText(color, styles) {
+        return (color ? (color + ' ') : '') + (styles ? styles : []).join(' ');
+      }
+
+    }
+
+    window.customElements.define(BlCmsButton.is, BlCmsButton);
+  </script>
+</dom-module>

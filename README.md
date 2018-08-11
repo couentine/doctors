@@ -67,6 +67,8 @@ bl_admin_email=app-errors@badgelist.com
 google_tag_manager_container_id=GTM-ABC123
 RACK_TIMEOUT_SERVICE_TIMEOUT=300
 bl_admin_account_email=hank@badgelist.com
+contentful_website_space_id=82w30gzjej4t
+contentful_website_token=abc123
 ```
 
 ## Running the app ##
