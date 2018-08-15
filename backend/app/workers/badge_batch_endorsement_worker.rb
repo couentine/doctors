@@ -11,11 +11,15 @@
 # 
 # ```
 # the_poller = BadgeBatchEndorsementWorker.start(the_badge, the_creator_user, [
-#   validation_items: [
+#   items: [
 #     {
 #       'email' => 'test+1@example.com',
 #       'summary' => 'Required summary value',
 #       'body' => '<p>This is optional</p><p>If can contain <strong>HTML</strong>.</p>'
+#     },
+#     {
+#       'email' => 'test+2@example.com',
+#       'summary' => 'A different summary'
 #     },
 #     {
 #       'email' => 'test+2@example.com',
@@ -29,7 +33,7 @@
 # 
 # ```
 # my_custom_poller = Poller.create()
-# BadgeBatchEndorsementWorker.perform_async(badge.id, creator_user.id, validation_items, true, my_custom_poller.id)
+# BadgeBatchEndorsementWorker.perform_async(badge.id, creator_user.id, items, true, my_custom_poller.id)
 # ```
 # 
 #==========================================================================================================================================#
@@ -39,21 +43,21 @@ class BadgeBatchEndorsementWorker
   sidekiq_options queue: :default, retry: :false
 
   # Returns the poller created by the service
-  def self.start(badge: nil, creator_user: nil, validation_items: [], send_emails_to_new_users: false)
+  def self.start(badge: nil, creator_user: nil, items: [], send_emails_to_new_users: false)
     service = BadgeBatchEndorsementService.new(
       badge: badge, 
       creator_user: creator_user, 
-      validation_items: validation_items,
+      items: items,
       send_emails_to_new_users: send_emails_to_new_users
     )
 
-    BadgeBatchEndorsementWorker.perform_async(badge.id.to_s, creator_user.id.to_s, validation_items, send_emails_to_new_users, 
+    BadgeBatchEndorsementWorker.perform_async(badge.id.to_s, creator_user.id.to_s, items, send_emails_to_new_users, 
       service.poller.id.to_s)
     
     return service.poller
   end
 
-  def perform(badge_id, creator_user_id, validation_items, send_emails_to_new_users, poller_id)
+  def perform(badge_id, creator_user_id, items, send_emails_to_new_users, poller_id)
     badge = Badge.find(badge_id)
     creator_user = User.find(creator_user_id)
     poller = Poller.find(poller_id)
@@ -61,7 +65,7 @@ class BadgeBatchEndorsementWorker
     service = BadgeBatchEndorsementService.new(
       badge: badge, 
       creator_user: creator_user, 
-      validation_items: validation_items,
+      items: items,
       send_emails_to_new_users: send_emails_to_new_users,
       poller: poller
     )

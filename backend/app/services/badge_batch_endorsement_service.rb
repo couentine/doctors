@@ -2,18 +2,22 @@
 # 
 # BADGE BATCH ENDORSEMENT SERVICE
 # 
-# Use this to bulk insert validations for a particular badge and creator user.
+# Use this to bulk insert validations or posts for a particular badge and creator user. There are two different modes in qhich this 
+# service operates: validation mode and post mode. Setting the `requirement` key to a non-blank value automatically triggers post mode.
+# In post mode you must also specify a `format`, which sets the format and maps the `body` value to the format-specific content field.
 # 
 # ## Usage Overview ##
 # 
 # 1. Generate an array of validation items. Each item is a hash of the following format:
 # 
 #   ```
-#   {
-#     'email' => 'test@example.com',
-#     'summary' => 'Required summary value',
-#     'body' => '<p>This is optional</p><p>If can contain <strong>HTML</strong>.</p>'
-#   }
+#  {
+#    'email' => 'test@example.com',
+#    'summary' => 'Required summary value',
+#    'body' => '<p>This is optional</p><p>If can contain <strong>HTML</strong>.</p>',
+#    'requirement' => 'badge-requirement-tag',
+#    'format' => 'text',
+#  }
 #   ```
 # 
 # 2. Initialize the service. The `send_emails_to_new_users` parameter controls whether badge award emails are sent to non-users.
@@ -45,7 +49,7 @@
 # the_service = BadgeBatchEndorsementService.new(
 #   badge: the_badge, 
 #   creator_user: the_creator_user, 
-#   validation_items: [
+#   items: [
 #     {
 #       'email' => 'test+1@example.com',
 #       'summary' => 'Required summary value',
@@ -77,10 +81,11 @@ class BadgeBatchEndorsementService
 
   attr_reader :group
   attr_reader :badge
+  attr_reader :requirement_map
   attr_reader :creator_user
   attr_reader :poller
 
-  attr_reader :validation_items
+  attr_reader :items
   attr_reader :result_items
 
   attr_reader :send_emails_to_new_users
@@ -90,7 +95,7 @@ class BadgeBatchEndorsementService
   # Only badge and creator_user are required
   # A poller is automatically created unless no_poller is true.
   # You can optionally provide your own poller (which will then get returned back to you at the end).
-  def initialize(group: nil, badge: nil, creator_user: nil, validation_items: [], send_emails_to_new_users: false, 
+  def initialize(group: nil, badge: nil, creator_user: nil, items: [], send_emails_to_new_users: false, 
       no_poller: false, 
       poller: nil, 
       poller_waiting_message: DEFAULT_POLLER_WAITING_MESSAGE, 
@@ -101,9 +106,11 @@ class BadgeBatchEndorsementService
     @badge = badge
     @group ||= badge.group
     @creator_user = creator_user
-    @validation_items = validation_items
+    @items = items
     @send_emails_to_new_users = send_emails_to_new_users
     @result_items = []
+
+    @requirement_map = @badge.requirements.map{ |tag| [tag.name, tag] }.to_h
 
     if !no_poller
       @poller = poller || Poller.create(
@@ -127,41 +134,42 @@ class BadgeBatchEndorsementService
       html_sanitizer = Rails::Html::WhiteListSanitizer.new
 
       # First check for top-level error states
-      raise StandardError.new('Validations list is empty or invalid.') if (validation_items.class != Array) || (validation_items.count == 0)
-      validation_count = validation_items.count
-      processed_validation_count = 0
+      raise StandardError.new('Validations list is empty or invalid.') if (items.class != Array) || (items.count == 0)
+      item_count = items.count
+      processed_item_count = 0
 
       # Query for existing users and build a map of them by email
-      emails = validation_items.select{ |validation| !validation['email'].blank? }.map{ |validation| validation['email'].downcase }.uniq
+      emails = items.select{ |item| !item['email'].blank? }.map{ |item| item['email'].downcase }.uniq
       existing_users = User.where(:email.in => emails)
       user_map = {}
       existing_users.each do |user|
         user_map[user.email] = user
       end
 
-      # Loop through the validation_items and process each one
-      validation_items.each_with_index do |validation, index|
+      # Loop through the items and process each one
+      items.each_with_index do |item, index|
         result_type = nil
         error_message = nil
+        tag = (item['requirement'].present?) ? @requirement_map[item['requirement'].downcase] : nil
 
         # First we need to sanitize the body html
-        if !validation['body'].blank?
-          validation['body'] = html_sanitizer.sanitize(validation['body'])
+        if !item['body'].blank?
+          item['body'] = html_sanitizer.sanitize(item['body'])
         end
 
-        if validation['summary'].blank?
+        if item['summary'].blank?
           result_type = 'error'
           error_message = 'Summary is blank'
-        elsif !StringTools.is_valid_email?(validation['email'])
+        elsif !StringTools.is_valid_email?(item['email'])
           result_type = 'error'
           error_message = 'Invalid email'
-        elsif user_map.has_key? validation['email'].downcase
-          # This is an existing user so we add them to the group and badge and then create a validation.
+        elsif user_map.has_key? item['email'].downcase
+          # This is an existing user so we add them to the group and badge and then create an item.
 
-          user = user_map[validation['email'].downcase]
+          user = user_map[item['email'].downcase]
           user_needs_membership = !user.member_or_admin_of?(@group)
           
-          if user_needs_membership && !@group.can_add_members?
+          if user_needs_membership && !@group.can_add_members?(@result_items.count + 1)
             result_type = 'error'
             error_message = 'Group is full'
           else
@@ -180,25 +188,67 @@ class BadgeBatchEndorsementService
             # Get or create the log
             log = @badge.add_learner(user)
 
-            # Add or update the validation
-            entry = log.add_validation(@creator_user, validation['summary'], validation['body'], true, true, true)
+            # Add or update the item
+            if item['requirement'].present?
+              if tag.present?
+                if (item['format'] == 'image') || (item['format'] == 'file')
+                  result_type = 'error'
+                  error_message = "Bulk upload of #{item['format']} evidence is not supported"
+                elsif Entry::FORMAT_VALUES.include?(item['format'])
+                  entry = log.add_post(tag, @creator_user, item['format'], item['summary'], item['body'])
+                else
+                  result_type = 'error'
+                  error_message = 'Invalid post format'
+                end
+              else
+                result_type = 'error'
+                error_message = 'Badge requirement not found'
+              end
+            else
+              entry = log.add_validation(@creator_user, item['summary'], item['body'], true, true, true)
+            end
           end
         else
-          # This is a new user so we just need to make sure that they are added to the invited members/admins list with a validation
-
-          result_type = 'new_user'
-          begin
-            # This will raise an exception if this is a new user invitation and the group is full
-            @group.add_invited_user_validation(@creator_user.id, validation['email'], @badge.url, validation['summary'], 
-              validation['body'], true)
-
-            # Now send the email if needed
-            if send_emails_to_new_users && !User.get_inactive_email_list.include?(validation['email'])
-              NewUserMailer.badge_issued(validation['email'], nil, @creator_user.id, @group.id, @badge.id).deliver
-            end
-          rescue => e
+          if item['requirement'].present? && !tag.present?
             result_type = 'error'
-            error_message = e.to_s
+            error_message = 'Badge requirement not found'
+          else
+            # This is a new user so we just need to make sure that they are added to the invited members/admins list with a item
+            result_type = 'new_user'
+
+            begin
+              if tag.present?
+                if item['format'] == 'file'
+                  result_type = 'error'
+                  error_message = 'Bulk upload of file evidence is not supported'
+                elsif Entry::FORMAT_VALUES.include?(item['format'])
+                  # This will raise an exception if this is a new user invitation and the group is full
+                  @group.add_invited_user_post(
+                    tag_id: tag.id,
+                    current_user_id: @creator_user.id,
+                    email: item['email'],
+                    badge_url: @badge.url,
+                    format: item['format'],
+                    summary: item['summary'],
+                    body: item['body'],
+                  )
+                else
+                  result_type = 'error'
+                  error_message = 'Invalid post format'
+                end
+              else
+                # This will raise an exception if this is a new user invitation and the group is full
+                @group.add_invited_user_validation(@creator_user.id, item['email'], @badge.url, item['summary'], item['body'], true)
+
+                # Now send the email if needed
+                if send_emails_to_new_users && !User.get_inactive_email_list.include?(item['email'])
+                  NewUserMailer.badge_issued(item['email'], nil, @creator_user.id, @group.id, @badge.id).deliver
+                end
+              end
+            rescue => e
+              result_type = 'error'
+              error_message = e.to_s
+            end
           end
         end
         
@@ -212,7 +262,7 @@ class BadgeBatchEndorsementService
 
         # Update the poller progress indicator if needed
         if @poller
-          @poller.progress = @result_items.count * 100 / validation_count
+          @poller.progress = @result_items.count * 100 / item_count
           @poller.save if @poller.changed?
         end
       end
@@ -237,7 +287,7 @@ class BadgeBatchEndorsementService
         @poller.save
       end
 
-      throw e
+      raise e
     end
   end
 
