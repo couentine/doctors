@@ -48,7 +48,8 @@ class Api::V1::EndorsementsController < Api::V1::BaseController
     end
 
     # Create a deserializer
-    deserializer = Api::V1::DeserializableEndorsement.new(params, [:email, :summary, :body]) #==> Endorsement policy is wonky, hard code
+    deserializer = Api::V1::DeserializableEndorsement.new(params, [:email, :summary, :body, :requirement, :format])
+      #==> Endorsement policy is wonky, hard code the fields
 
     # Now determine the mode
     if deserializer.endorsements.present?
@@ -72,7 +73,7 @@ class Api::V1::EndorsementsController < Api::V1::BaseController
       @result_items = BadgeBatchEndorsementService.new(
         badge: @badge, 
         creator_user: current_user, 
-        validation_items: [@endorsement],
+        items: [@endorsement],
         send_emails_to_new_users: @send_emails_to_new_users,
         no_poller: true
       ).perform
@@ -81,7 +82,7 @@ class Api::V1::EndorsementsController < Api::V1::BaseController
       @poller = BadgeBatchEndorsementWorker.start(
         badge: @badge, 
         creator_user: current_user, 
-        validation_items: @endorsements, 
+        items: @endorsements, 
         send_emails_to_new_users: @send_emails_to_new_users)
       render_json_api @poller, status: 202
     end

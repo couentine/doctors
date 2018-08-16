@@ -237,7 +237,7 @@ class BadgesController < ApplicationController
     @learner_list = []
     @already_added_users = @badge.logs.map{ |log| log.user unless log.detached_log } 
 
-    [@group.members, @group.admins].flatten.sort_by { |user| user.name }.each do |user|
+    [@group.members, @group.admins].flatten.sort_by { |user| user.name.to_s }.each do |user|
       @learner_list << {
         user: user,
         disabled: @already_added_users.include?(user)

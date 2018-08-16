@@ -414,13 +414,59 @@ class Log
     self.save
   end
 
-  # Adds or updates a validation entry to the log and returns it
-  # Also updates log validations cache
-  # NOTE: Doesn't work for new records.
+  # Adds or updates a post entry to the log and returns it. If an existing post entry from the same creator and for the same tag already
+  # exists, then it is overwritten if `overwrite_existing` is true. Doesn't work for new records.
+  # Note: `body` maps to link url / image url / file url depending on format.
+  def add_post(tag, creator_user, format, summary, body, overwrite_existing = true)
+    if !new_record?
+      # First look for an existing post for this creator / tag
+      entry = entries.where(creator: creator_user, type: 'post', tag: tag).first
+
+      if entry.nil?
+        entry = Entry.new(
+          log: self,
+          tag: tag,
+          format: format,
+          summary: summary,
+          preserve_body_html: true,
+          type: 'post',
+          creator: creator_user,
+          current_user: creator_user,
+          current_username: creator_user.username,
+        )
+        
+        entry.save
+      elsif overwrite_existing
+        entry.format = format
+        entry.summary = summary
+        entry.preserve_body_html = true
+      end
+
+      if entry.new_record? || overwrite_existing
+        if (format == 'link') || (format == 'tweet')
+          entry.link_url = body
+        elsif format == 'file'
+          entry.remote_uploaded_file_url = body
+        elsif format == 'image'
+          entry.remote_uploaded_image_url = body
+        else
+          entry.body = body
+        end
+      end
+      
+      entry.save if entry.changed?
+
+      return entry
+    else
+      return nil
+    end
+  end
+
+  # Adds or updates a validation entry to the log and returns it. Also updates log validations cache. Doesn't work for new records.
   # log_validated = Boolean
   # Set overwrite_existing=false if you do NOT want to overwrite & save a existing validation
   def add_validation(creator_user, summary, body, log_validated, overwrite_existing = true, preserve_body_html = false)
-    unless new_record?
+    if !new_record?
       # First look for an existing validation for this creator (We're only allowed one per expert)
       entry = entries.find_by(creator: creator_user, type: 'validation') rescue nil
 

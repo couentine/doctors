@@ -24,6 +24,12 @@ class Api::V1::Schemas::EndorsementSchemas < Api::V1::Schemas::ApiSchema
       "is my own shock at the depth and quality of Albert's thought work.</p><p>This badge is definitely well earned. " \
       "<strong>Congratulations</strong>!</p>"
 
+  field :requirement, [:string, :slug],
+    description: 'Deprecated, do not use.'
+
+  field :format, :string,
+    description: 'Deprecated, do not use.'
+
   #=== SCHEMAS ===#
 
   attributes_schema :input

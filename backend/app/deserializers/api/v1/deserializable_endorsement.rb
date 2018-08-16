@@ -5,5 +5,7 @@ class Api::V1::DeserializableEndorsement < Api::V1::DeserializableHash
   field :email
   field :summary
   field :body
+  field :requirement
+  field :format
 
 end
