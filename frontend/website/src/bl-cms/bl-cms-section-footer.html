@@ -1,0 +1,93 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!-- #=== OTHER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
+
+<!--
+# Badge List CMS Section Footer #
+
+This renders the footer for a section. Add class `whiteText` to the host element if the text is white.
+
+Supports a `withDivider` utility class, which adds a divider above the footer. (The css for that class is in `bl-cms-section-styles`.)
+-->
+<dom-module id="bl-cms-section-footer">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & CONTENT STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1.1rem;
+          line-height: 1.5em;
+          margin: 2rem 0 0 0;
+        }
+
+      /* === MARKDOWN STYLES === */
+
+        [slot="markdown-html"] a {
+          color: var(--text-color, var(--bl-light-blue-800));
+          transition: 0.3s all;
+        }
+        [slot="markdown-html"] a:visited {
+          color: var(--text-color, var(--bl-light-blue-600));
+        }
+        [slot="markdown-html"] a:hover,
+        [slot="markdown-html"] a:focus {
+          color: var(--text-color, var(--bl-light-blue-900));
+        }
+
+        :host(.whiteText) [slot="markdown-html"] a {
+          color: white;
+        }
+        :host(.whiteText) [slot="markdown-html"] a:visited {
+          color: var(--text-color, var(--bl-grey-100));
+        }
+        :host(.whiteText) [slot="markdown-html"] a:hover,
+        :host(.whiteText) [slot="markdown-html"] a:focus {
+          color: var(--text-color, var(--bl-grey-50));
+        }
+
+    </style>
+
+    <marked-element markdown="[[content.fields.footer]]">
+      <div slot="markdown-html"></div>
+    </marked-element>
+
+  </template>
+
+  <script>
+    class BlCmsSectionFooter extends Polymer.Element {
+      
+      static get is() { return 'bl-cms-section-footer'; }
+
+      static get properties() {
+        return {
+
+          content: Object,
+
+          hidden: {
+            type: Boolean,
+            reflectToAttribute: true,
+            computed: '_hidden(content.fields.footer)',
+          },
+
+        }
+      }
+      
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _hidden(footer) {
+        return (footer == null) || (footer == undefined) || (footer.length == 0);
+      }
+
+    }
+
+    window.customElements.define(BlCmsSectionFooter.is, BlCmsSectionFooter);
+  </script>
+</dom-module>

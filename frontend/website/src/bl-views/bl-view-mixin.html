@@ -13,9 +13,10 @@ All Badge List website views components should extend this mixin. It extends the
       static get properties() {
         return {
           
-          /* Required. Indicates the document title when this view is activated. */
+          /* Required unless `cmsKey` is set. Indicates the document title when this view is activated. */
           title: {
             type: String,
+            value: 'Badge List',
             observer: '_titleChanged',
           },
           
@@ -51,11 +52,34 @@ All Badge List website views components should extend this mixin. It extends the
           /**
            * Set this to the slug of this page in the Contentful CMS.
            * It is used to query the content delivery API and set `content`.
+           * Note: The `documentTitle` specified in the `content` will automatically override the `title` property if set.
            */
           cmsKey: String,
+          
+          /**
+           * Optional modifier for `cmsKey`. Specifies the value of `landingPagePath` which is used to filter the CMS page.
+           * If there is a CMS page with `slug == cmsKey` but `landingPagePath != cmsPath` then the page is returned as not found.
+           * Defaults to 'none'.
+           */
+          cmsPath: {
+            type: String,
+            value: 'none',
+          },
+
+          /** Returns null if `cmsKey` is blank. Otherwise returns `pending`, `loaded`, or `error`. */
+          cmsStatus: {
+            type: String,
+            readOnly: true,
+          },
+
+          /** If there is an error retrieving content from the CMS, this returns a one sentence, user-facing error message. */
+          cmsErrorMessage: {
+            type: String,
+            readOnly: true,
+          },
 
           /**
-           * This object is bound to the
+           * For pages which are pulled from the CMS, this is the CMS content retrieved for the specified `cmsKey`.
            */
           content: {
             type: Object,
@@ -114,16 +138,32 @@ All Badge List website views components should extend this mixin. It extends the
           this.website.cmsClient.getEntries({
             'content_type': 'page',
             'fields.slug': this.cmsKey,
+            'fields.landingPagePath': this.cmsPath,
             include: 10,
           }).then((entries) => {
             if (entries && entries.items.length) {
               this.setProperties({
                 content: entries.items[0],
+                title: entries.items[0].fields.documentTitle,
               });
+              this._setCmsStatus('loaded');
+            } else {
+              this.title = 'Page Not Found - Badge List';
+              this._setCmsErrorMessage('The specified page could not be found. Please check the link and try again.');
+              this._setCmsStatus('error');
             }
           }).catch((error) => {
             console.log('There was a problem loading content from the CMS:' + error);
+            this.title = 'Error - Badge List';
+            this._setCmsErrorMessage('There was a problem communicating with the Badge List server. Please try again later.');
+            this._setCmsStatus('error');
           });
+        }
+      }
+
+      _cmsKeyChanged(newValue, oldValue) {
+        if ((newValue != undefined) && (newValue != null)) {
+          this._setCmsStatus('pending');
         }
       }
 

@@ -11,6 +11,8 @@
 # Badge List CMS Button #
 
 This renders a CMS section button.
+
+Include a `flat` value in the `styles` array in order to turn off the default raised property.
 -->
 <dom-module id="bl-cms-button">
   <template>
@@ -27,7 +29,7 @@ This renders a CMS section button.
     </style>
 
     <a href$="[[link]]" target$="[[target]]" class="button">
-      <paper-button raised class$="[[classText]]">[[content.fields.label]]</paper-button>
+      <paper-button raised="[[raised]]" class$="[[classText]]">[[content.fields.label]]</paper-button>
     </a>
 
   </template>
@@ -65,6 +67,11 @@ This renders a CMS section button.
             computed: '_classText(color, styles)',
           },
 
+          raised: {
+            type: Boolean,
+            computed: '_raised(styles)',
+          },
+
         }
       }
 
@@ -80,6 +87,10 @@ This renders a CMS section button.
 
       _classText(color, styles) {
         return (color ? (color + ' ') : '') + (styles ? styles : []).join(' ');
+      }
+
+      _raised(styles) {
+         return (styles == undefined) || (styles == null) || !styles.includes('flat');
       }
 
     }

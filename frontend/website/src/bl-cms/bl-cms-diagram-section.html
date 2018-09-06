@@ -1,0 +1,91 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="bl-cms-section-styles.html">
+<link rel="import" href="bl-cms-section-mixin.html">
+<link rel="import" href="bl-cms-background-pattern.html">
+<link rel="import" href="bl-cms-section-title.html">
+<link rel="import" href="bl-cms-section-subtitle.html">
+<link rel="import" href="bl-cms-section-buttons.html">
+<link rel="import" href="bl-cms-section-footer.html">
+
+<!--
+# Badge List CMS Section #
+
+This renders a CMS section item.
+-->
+<dom-module id="bl-cms-diagram-section">
+  <template>
+
+    <style include="bl-cms-section-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+        }
+
+      /* === CONTENT STYLES === */
+
+        #horizontalDiagram {
+          display: none;
+        }
+        #verticalDiagram {
+          display: block;
+        }
+        @media(min-width: 600px) {
+          #horizontalDiagram {
+            display: block;
+          }
+          #verticalDiagram {
+            display: none;
+          }
+        }
+
+        .diagram img {
+          max-width: 100%;
+        }
+
+    </style>
+
+    <div id="row" class$="[[rowClass]]" style$="[[rowStyle]]">
+      <bl-cms-background-pattern content="[[content]]"></bl-cms-background-pattern>
+
+      <div id="rowInner">  
+      
+        <bl-cms-section-title id="title" content="[[content]]"></bl-cms-section-title>
+
+        <bl-cms-section-subtitle id="subtitle" content="[[content]]"></bl-cms-section-subtitle>
+
+        <div id="horizontalDiagram" class="diagram">
+          <img src$="[[content.fields.horizontalDiagram.fields.file.url]]">
+        </div>
+        <div id="verticalDiagram" class="diagram">
+          <img src$="[[content.fields.verticalDiagram.fields.file.url]]">
+        </div>
+
+        <bl-cms-section-buttons id="buttons" content="[[content]]"></bl-cms-section-buttons>
+
+        <bl-cms-section-footer id="footer" content="[[content]]"></bl-cms-section-footer>
+
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlCmsDiagramSection extends BlCmsSectionMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-cms-diagram-section'; }
+
+      static get properties() {
+        return {}
+      }
+
+    }
+
+    window.customElements.define(BlCmsDiagramSection.is, BlCmsDiagramSection);
+  </script>
+</dom-module>

@@ -1,0 +1,133 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="bl-cms-section-styles.html">
+<link rel="import" href="bl-cms-background-pattern.html">
+<link rel="import" href="bl-cms-section-mixin.html">
+<link rel="import" href="bl-cms-section-title.html">
+<link rel="import" href="bl-cms-section-subtitle.html">
+<link rel="import" href="bl-cms-section-buttons.html">
+<link rel="import" href="bl-cms-section-footer.html">
+
+<!--
+# Badge List CMS Section #
+
+This renders a CMS section item.
+-->
+<dom-module id="bl-cms-simple-list-section">
+  <template>
+
+    <style include="bl-cms-section-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+        }
+
+      /* === CONTENT STYLES === */
+
+        #items {
+          list-style: none;
+          margin: -1.5rem -2rem;
+          padding: 0;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+          #items > li {
+            flex: 1 1 10%;
+            display: flex;
+            flex-direction: column;
+            margin: 0 2rem;
+            padding: 2rem 0;
+            min-width: 12rem;
+            
+            border-bottom: 1px solid var(--bl-grey-200);
+            text-align: center;
+          }
+          #row.whiteText #items > li {
+            border-color: rgba(255, 255, 255, 0.4);
+          }
+          #items > li:last-of-type {
+            border-bottom: none;
+          }
+          @media(min-width: 480px) {
+            #items > li {
+              border-bottom: none;
+              text-align: left;
+            }
+          }
+            .itemIcon {
+              margin-bottom: 1rem;
+              font-size: 2rem;
+            }
+            .itemText {
+              line-height: 1.5em;
+            }
+              .itemTitle {
+                margin-bottom: 1rem;
+                font-weight: 600;
+                font-size: 1.1em;
+              }
+              .itemBody {
+                font-size: 0.9em;
+              }
+
+    </style>
+
+    <div id="row" class$="[[rowClass]]" style$="[[rowStyle]]">
+      <bl-cms-background-pattern content="[[content]]"></bl-cms-background-pattern>
+
+      <div id="rowInner">
+      
+        <bl-cms-section-title id="title" content="[[content]]"></bl-cms-section-title>
+
+        <bl-cms-section-subtitle id="subtitle" content="[[content]]"></bl-cms-section-subtitle>
+
+        <ul id="items" hidden="[[!has(content.fields.items)]]">
+          <template is="dom-repeat" items="[[content.fields.items]]" as="item">
+            <li>
+              <div class="itemIcon" style$="color: [[content.fields.itemIconColor]];">
+                <i class$="[[item.fields.iconCode]]"></i>
+              </div>
+              
+              <div class="itemText">
+                <div class="itemTitle" hidden="[[!has(item.fields.title)]]">
+                  [[item.fields.title]]
+                </div>
+                
+                <div class="itemBody" hidden="[[!has(item.fields.body)]]">
+                  [[item.fields.body]]
+                </div>
+              </div>
+            </li>
+          </template>
+        </ul>
+
+        <bl-cms-section-buttons id="buttons" content="[[content]]"></bl-cms-section-buttons>
+
+        <bl-cms-section-footer id="footer" content="[[content]]"></bl-cms-section-footer>
+
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlCmsSimpleListSection extends BlCmsSectionMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-cms-simple-list-section'; }
+
+      static get properties() {
+        return {}
+      }
+
+    }
+
+    window.customElements.define(BlCmsSimpleListSection.is, BlCmsSimpleListSection);
+  </script>
+</dom-module>

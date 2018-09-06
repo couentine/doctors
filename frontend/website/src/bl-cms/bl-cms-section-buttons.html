@@ -1,0 +1,89 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+<link rel="import" href="bl-cms-button.html">
+
+<!--
+# Badge List CMS Section Buttons #
+
+This renders the buttons for a section.
+-->
+<dom-module id="bl-cms-section-buttons">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & CONTENT STYLES === */
+        
+        :host {
+          padding: 0;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          flex-wrap: wrap;
+          
+          font-size: 1rem;
+          margin: 2rem -2rem 0 -2rem;
+        }
+          .wrapper {
+            display: block;
+            margin: 1rem 2rem;
+          }
+
+    </style>
+
+    <template is="dom-repeat" items="[[content.fields.buttons]]" as="button">
+      <div class="wrapper">
+        <bl-cms-button
+          content="[[button]]"
+          color="[[content.fields.buttonColor]]"
+          styles="[[addStyle(content.fields.buttonStyles, 'large')]]"
+        ></bl-cms-button>
+      </div>
+    </template>
+
+  </template>
+
+  <script>
+    class BlCmsSectionButtons extends Polymer.Element {
+      
+      static get is() { return 'bl-cms-section-buttons'; }
+
+      static get properties() {
+        return {
+
+          content: Object,
+
+          hidden: {
+            type: Boolean,
+            reflectToAttribute: true,
+            computed: '_hidden(content.fields.buttons)',
+          },
+
+        }
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /**
+       * Accepts a list of styles (or an undefined/null variable) and returns that array plus the additional value.
+       */
+      addStyle(styleList, additionalStyle) {
+        var styles = styleList ? styleList.slice(0) : [];
+        styles.push(additionalStyle);
+        return styles;
+      }
+      
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _hidden(buttons) {
+        return (buttons == null) || (buttons == undefined) || (buttons.length == 0);
+      }
+
+    }
+
+    window.customElements.define(BlCmsSectionButtons.is, BlCmsSectionButtons);
+  </script>
+</dom-module>

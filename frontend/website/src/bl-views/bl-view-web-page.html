@@ -1,0 +1,406 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-cms/bl-cms-simple-list-section.html">
+<link rel="import" href="../bl-cms/bl-cms-tile-list-section.html">
+<link rel="import" href="../bl-cms/bl-cms-quote-list-section.html">
+<link rel="import" href="../bl-cms/bl-cms-text-section.html">
+<link rel="import" href="../bl-cms/bl-cms-image-section.html">
+<link rel="import" href="../bl-cms/bl-cms-video-section.html">
+<link rel="import" href="../bl-cms/bl-cms-diagram-section.html">
+<link rel="import" href="../bl-cms/bl-cms-button.html">
+<link rel="import" href="../bl-cms/bl-cms-background-pattern.html">
+<link rel="import" href="bl-header-nav-left.html">
+<link rel="import" href="bl-header-nav-right.html">
+<link rel="import" href="bl-header-panel.html">
+<link rel="import" href="bl-view-mixin.html">
+
+<!--
+# Badge List Web Page View #
+
+This displays a page item from the CMS.
+-->
+<dom-module id="bl-view-web-page">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: none;
+        }
+        :host([status=active]) {
+          display: block;
+        }
+
+      /* === TYPOGRAPHY === */
+
+        h1 {
+          font-size: 2.5em;
+          line-height: 1.2em;
+          z-index: 5;
+        }
+        h2 {
+          font-size: 1.4em;
+          margin: 1em 0;
+          z-index: 5;
+        }
+        h3 {
+          font-size: 1.2em;
+          margin: 1em 0;
+          z-index: 5;
+        }
+      
+      /* === HEADER PANEL === */
+
+        #expandedBackground {
+          background: transparent;
+        }
+        #condensedBackground {
+          /*
+            The condensed background color is set set based on the button color, via the `bl-color-vars-*` utility classes in `bl-styles`.
+            Defaults to orange if button color is missing or if there is a CMS error.
+          */
+          background: var(--color-600, var(--bl-orange-600));
+        }
+
+        bl-header-nav-left, bl-header-nav-right {
+          --link-color: white;
+        }
+
+      /* === BANNER ROW === */
+
+        #bannerRow {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          position: relative;
+          
+          padding: 7em 2em;
+        }
+        #bannerRow.centerText {
+          align-items: center;
+        }
+        #bannerRow.whiteText {
+          color: white;
+        }
+          #bannerRow.centerText h1 {
+            text-align: center;
+          }
+          #bannerRow .logo {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            margin: 0;
+
+            z-index: 5;
+          }
+            #bannerRow .logo img.logo-icon { 
+              position: relative;
+              height: 1em;
+              top: -0.1em; 
+              margin-right: 0.3em;
+            }
+            #bannerRow .logo img.logo-text { height: 1em; }
+          
+          #bannerRow .divider {
+            width: 6em;
+            height: 0px;
+            border-top: 1px solid #FFE0B2;
+            margin: 1.5em auto;
+
+            z-index: 5;
+          }
+
+          #bannerRow .tag-line {
+            font-size: 1.2rem;
+            line-height: 1.5em;
+            font-weight: 300;
+
+            z-index: 5;
+          }
+          #bannerRow.centerText .tag-line {
+            text-align: center;
+          }
+          
+          #bannerRow .overlay {
+            -webkit-clip-path: polygon(100% 100%, 100% 0%, 0 100%);
+            clip-path: polygon(100% 100%, 100% 0%, 0 100%);
+            display: block;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 0;
+            height: 10em;
+            width: 100%;
+            background: linear-gradient(-110deg, #ffffff00, #ffffff33);
+          }
+          #bannerRow.hideOverlay .overlay {
+            display: none;
+          }
+
+          #buttons {
+            list-style: none;
+            margin: 2rem -2rem 0 -2rem;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            flex-wrap: wrap;
+            
+            z-index: 5;
+          }
+            #buttons > li {
+              display: block;
+              margin: 1em 2em;
+            }
+
+      /* === CMS PANELS === */
+
+        .cmsPanel {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+
+          font-size: 1.5rem;
+          padding: 3rem;
+          height: calc(100vh - 6rem);
+
+          background: var(--bl-grey-300);
+        }
+          .cmsPanel .inner {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            max-width: 700px;
+          }
+            .cmsPanel .inner img { 
+              height: 1.3em; 
+              margin-right: 0.5em;
+            }
+            .cmsPanel .inner i {
+              font-size: 3rem;
+              color: var(--bl-red-600);
+              margin-right: 0.5em;
+            }
+            .cmsPanel .inner .message {
+              line-height: 1.5em;
+            }
+
+      /* === CMS STATUS VISIBILITY === */
+
+        #expandedBackground.cms-status-error {
+          background: var(--bl-orange-400);
+        }
+
+        #content                    #cmsPending       { display: flex; }
+        #content.cms-status-error   #cmsPending       { display: none; }
+        #content.cms-status-loaded  #cmsPending       { display: none; }
+
+        #content                    #cmsError         { display: none; }
+        #content.cms-status-error   #cmsError         { display: flex; }
+        #content.cms-status-loaded  #cmsError         { display: none; }
+
+        #content                    #bannerRow        { display: none; }
+        #content.cms-status-error   #bannerRow        { display: none; }
+        #content.cms-status-loaded  #bannerRow        { display: flex; }
+
+        #content                    #sectionRepeater  { display: none; }
+        #content.cms-status-error   #sectionRepeater  { display: none; }
+        #content.cms-status-loaded  #sectionRepeater  { display: flex; }        
+
+    </style>
+
+    <bl-header-panel id="headerPanel" expanded-height="4.5" condensed-height="3.5" full-bleed-body>
+      <div id="expandedBackground" slot="expandedBackground" class$="cms-status-[[cmsStatus]]">&nbsp;</div>
+      <div id="condensedBackground" slot="condensedBackground" class$="bl-color-vars-[[content.fields.buttonColor]]">&nbsp;</div>
+
+      <bl-header-nav-left slot="leftNav">
+        <img src$="[[website.manifest.assets.brand.shieldWhitePng]]">
+      </bl-header-nav-left>
+      
+      <bl-header-nav-right slot="rightNav" id="rightNav"></bl-header-nav-right>
+
+      <div id="content" slot="content" class$="cms-status-[[cmsStatus]]">
+        
+        <!-- === CMS PENDING SPINNER === -->
+        <div id="cmsPending" class="cmsPanel">
+          <div class="inner">
+            <img src="https://s3.amazonaws.com/badgelist/images/ripple-spinner.gif">
+            <div class="message">Loading...</div>
+          </div>
+        </div>
+        
+        <!-- === CMS ERROR === -->
+        <div id="cmsError" class="cmsPanel">
+          <div class="inner">
+            <i class="icon-warning-circle"></i>
+            <div class="message">[[cmsErrorMessage]]</div>
+          </div>
+        </div>
+
+        <!-- === BANNER ROW === -->
+        <div id="bannerRow" style$="[[headerRowStyle]]" class$="[[headerRowClass]]">
+          <h1 class="logo" hidden="[[!equal(cmsKey, 'home')]]">
+            <img src$="[[website.manifest.assets.brand.shieldWhitePng]]" class="logo-icon">
+            <img src$="[[website.manifest.assets.brand.logoTextWhitePng]]" class="logo-text" alt="Badge List">
+          </h1>
+          <h1 class="text" hidden="[[equal(cmsKey, 'home')]]">
+            [[content.fields.headerTitle]]
+          </h1>
+          
+          <div class="divider" hidden="[[!equal(cmsKey, 'home')]]">&nbsp;</div>
+
+          <div class="tag-line">
+            [[content.fields.headerSubTitle]]
+          </div>
+
+          <ul id="buttons" hidden="[[!has(content.fields.buttons)]]">
+            <template is="dom-repeat" items="[[content.fields.buttons]]" as="button">
+              <li>
+                <bl-cms-button
+                  content="[[button]]"
+                  color="[[content.fields.buttonColor]]"
+                  styles="[[addStyle(content.fields.buttonStyles, 'large')]]"
+                ></bl-cms-button>
+              </li>
+            </template>
+          </ul>
+
+          <bl-cms-background-pattern content="[[content]]"></bl-cms-background-pattern>
+
+          <div class="overlay">&nbsp;</div>
+        </div>
+
+        <!-- === CMS CONTENT SECTIONS === -->
+        <template is="dom-repeat" id="sectionRepeater" items="{{content.fields.sections}}" as="section">
+          
+          <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'textSection')]]">
+            <bl-cms-text-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-text-section>
+          </template>
+
+          <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'simpleListSection')]]">
+            <bl-cms-simple-list-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-simple-list-section>
+          </template>
+
+          <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'tileListSection')]]">
+            <bl-cms-tile-list-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-tile-list-section>
+          </template>
+
+          <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'quoteListSection')]]">
+            <bl-cms-quote-list-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-quote-list-section>
+          </template>
+
+          <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'diagramSection')]]">
+            <bl-cms-diagram-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-diagram-section>
+          </template>
+
+          <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'imageSection')]]">
+            <bl-cms-image-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-image-section>
+          </template>
+
+          <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'videoSection')]]">
+            <bl-cms-video-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-video-section>
+          </template>
+
+        </template>
+
+      </div>
+
+    </bl-header-panel>
+
+  </template>
+
+  <script>
+    class BlViewWebPage extends BlViewMixin(Polymer.Element) {
+
+      static get is() { return 'bl-view-web-page'; }
+
+      static get properties() {
+        return {
+
+          /**
+           * Required. Bind this to the `widthBreakpoint` property in the parent website component. This powers the dynamic sizing of
+           * CMS images.
+           */
+          widthBreakpoint: {
+            type: Number, 
+            value: 0,
+            notify: true,
+          },
+
+          headerRowStyle: {
+            type: String,
+            computed: '_headerRowStyle(widthBreakpoint, content.fields.backgroundColor, content.fields.backgroundColor2, '
+              + 'content.fields.backgroundImage)',
+          },
+
+          headerRowClass: {
+            type: String,
+            computed: '_headerRowClass(content.fields.styles, content.fields.headerTextColor)',
+          },
+
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _headerRowStyle(widthBreakpoint, backgroundColor, backgroundColor2, backgroundImage) {
+        var color1 = backgroundColor;
+        var color2 = backgroundColor2 ? backgroundColor2 : backgroundColor;
+
+        if (backgroundImage) {
+          var backgroundImageUrl = this.imageUrl(backgroundImage.fields.file.url, widthBreakpoint, '840,840,1200,1500', true);
+
+          return `
+            background:
+              linear-gradient(-170deg, ${color1}, ${color2}),
+              url('${backgroundImageUrl}');
+            background-position: center;
+            background-size: cover;
+          `;
+        } else {
+          return `background: linear-gradient(-170deg, ${color1}, ${color2})`;
+        }
+      }
+
+      _headerRowClass(styles, headerTextColor) {
+        var styleList = styles ? styles : [];
+        
+        if (headerTextColor == 'white') {
+          styleList.push('whiteText');
+        }
+
+        return styleList.join(' ');
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /**
+       * Accepts a CMS image file URL and adds extra tags for the Contenful Images API.
+       * - `fileUrl`: Required. The Contenful image file URL
+       * - `widthBreakpoint`: Required. Bind this to the `widthBreakpoint` property
+       * - `widthMap`: Required. A comma-delimited string list of widths for each breakpoint.
+       * - `progressiveJpg`: Optional. Defaults to false if not set. If true, requests a progressive JPG from the server. If false, the 
+       *   format parameters are left blank (useful for PNGs with transparency).
+       * 
+       */
+      imageUrl(fileUrl, widthBreakpoint, widthMap, progressiveJpg) {
+        var formatString = (progressiveJpg == true) ? 'fm=jpg&fl=progressive&' : '';
+        var widths = widthMap.split(',');
+
+        return `${fileUrl}?${formatString}w=${widths[widthBreakpoint]}`;
+      }
+
+    }
+
+    window.customElements.define(BlViewWebPage.is, BlViewWebPage);
+  </script>
+</dom-module>

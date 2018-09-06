@@ -100,6 +100,12 @@ BadgeList::Application.routes.draw do
     end
   end
   
+  # === CMS LANDING PAGE PATHS === #
+
+  match '/for/:id' => 'home#landing_pages', via: :get
+  match '/customers/:id' => 'home#landing_pages', via: :get
+  match '/features/:id' => 'home#landing_pages', via: :get
+
   # === INFO PATHS === #
   scope '/i' do
     resources :subscription_plans, only: [:index]

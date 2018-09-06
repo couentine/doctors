@@ -9,12 +9,10 @@
 <link rel="import" href="../bl-styles/bl-styles.html">
 <link rel="import" href="../bl-styles/fonts.html">
 <link rel="import" href="../bl-toast/bl-toast.html">
-<link rel="import" href="../bl-views/bl-view-docs.html">
-<link rel="import" href="../bl-views/bl-view-how-it-works.html">
 <link rel="import" href="../bl-views/bl-view-pricing.html">
 <link rel="import" href="../bl-views/bl-view-privacy-policy.html">
 <link rel="import" href="../bl-views/bl-view-terms-of-service.html">
-<link rel="import" href="../bl-views/bl-view-web-home.html">
+<link rel="import" href="../bl-views/bl-view-web-page.html">
 
 <!--
 # Badge List Website #
@@ -48,7 +46,7 @@
     <!-- #=== APP ROUTING ===# -->
     
     <app-location id="location" route="{{route}}" 
-      url-space-regex="(^/$)|(^/w$)|(^/how-it-works$)|(^/pricing$)|(^/privacy-policy$)|(^/terms-of-service$)"></app-location>
+      url-space-regex="(^/$)|(^/w$)|(^/how-it-works$)|(^/pricing$)|(^/privacy-policy$)|(^/terms-of-service$)|(^/docs$)"></app-location>
     
     <app-route
       pattern="/"
@@ -99,22 +97,84 @@
       route="{{route}}" 
     ></app-route>
 
+    <app-route
+      pattern="/for/:key"
+      id="forPageRoute"
+      route="{{route}}"
+      active="{{forPageActive}}"
+      data="{{forPageRouteData}}"
+    ></app-route>
 
-    <!-- #=== APP VIEWS ===# -->
+    <app-route
+      pattern="/customers/:key"
+      id="customerPageRoute"
+      route="{{route}}"
+      active="{{customerPageActive}}"
+      data="{{customerPageRouteData}}"
+    ></app-route>
 
-    <bl-view-web-home
+    <app-route
+      pattern="/features/:key"
+      id="featurePageRoute"
+      route="{{route}}"
+      active="{{featurePageActive}}"
+      data="{{featurePageRouteData}}"
+    ></app-route>
+
+
+    <!-- #=== APP VIEWS (FROM CMS PAGES) ===# -->
+
+    <bl-view-web-page
       id="webHomeView"
       active="{{webHomeViewActive}}"
-      title="Badge List - Digital credentials for educators, companies and professional development orgs"
       cms-key="home"
-    ></bl-view-web-home>
+      width-breakpoint="[[widthBreakpoint]]"
+    ></bl-view-web-page>
 
-    <bl-view-how-it-works
+    <bl-view-web-page
       id="howItWorksView"
       active="{{howItWorksViewActive}}"
       current-user="[[currentUser]]"
-      title="How Badge List Works - Expert validated ePortfolios for recognizing digital learning and professional development"
-    ></bl-view-how-it-works>
+      cms-key="how-it-works"
+      width-breakpoint="[[widthBreakpoint]]"
+    ></bl-view-web-page>
+
+    <bl-view-web-page
+      id="docsView"
+      active="{{docsViewActive}}"
+      current-user="[[currentUser]]"
+      cms-key="docs"
+      width-breakpoint="[[widthBreakpoint]]"
+    ></bl-view-web-page>
+
+    <bl-view-web-page
+      id="forPageView"
+      active="{{forPageActive}}"
+      current-user="[[currentUser]]"
+      cms-key="[[forPageRouteData.key]]"
+      width-breakpoint="[[widthBreakpoint]]"
+      cms-path="for"
+    ></bl-view-web-page>
+
+    <bl-view-web-page
+      id="customerPageView"
+      active="{{customerPageActive}}"
+      current-user="[[currentUser]]"
+      cms-key="[[customerPageRouteData.key]]"
+      cms-path="customers"
+      width-breakpoint="[[widthBreakpoint]]"
+    ></bl-view-web-page>
+
+    <bl-view-web-page
+      id="featurePageView"
+      active="{{featurePageActive}}"
+      current-user="[[currentUser]]"
+      cms-key="[[featurePageRouteData.key]]"
+      cms-path="features"
+      width-breakpoint="[[widthBreakpoint]]"
+    ></bl-view-web-page>
+
+    <!-- #=== APP VIEWS (FROM LOCAL VIEW COMPONENTS) ===# -->
 
     <bl-view-pricing
       id="pricingView"
@@ -122,13 +182,6 @@
       current-user="[[currentUser]]"
       title="Badge List Pricing"
     ></bl-view-pricing>
-
-    <bl-view-docs
-      id="docsView"
-      active="{{docsViewActive}}"
-      current-user="[[currentUser]]"
-      title="Badge List Help Documentation"
-    ></bl-view-docs>
 
     <bl-view-privacy-policy
       id="privacyPolicyView"
@@ -202,7 +255,28 @@
           webRouteActive: Boolean,
           webHomeViewActive: {
             type: Boolean,
-            computed: '_webHomeViewActive(indexRouteActive, webRouteActive)'
+            computed: '_webHomeViewActive(indexRouteActive, webRouteActive)',
+          },
+
+          /**
+           * Contains the breakpoint of the current document width:
+           * - (width < 480px) ==> 0
+           * - (480px <= width < 840px) ==> 1
+           * - (840px <= width < 1200px) ==> 2
+           * - (1200px <= width) ==> 3
+           */
+          widthBreakpoint: {
+            type: Number, 
+            value: 0,
+            notify: true,
+          },
+
+          widthBreakpointList: {
+            type: Array,
+            readOnly: true,
+            value: () => {
+              return [0, 480, 840, 1200];
+            },
           }
 
         };
@@ -246,6 +320,10 @@
 
         // Add listener for window location hash change
         window.addEventListener('hashchange', e => this._windowLocationHashChanged(e));
+
+        // Initialize width breakpoint and listen for future window resize events
+        this._windowResize();
+        window.addEventListener('resize', e => this._windowResize(e));
       }
 
       ready() {
@@ -298,6 +376,17 @@
         var newHashKey = window.location.hash.replace('#', '');
         if (this.locationHashKey != newHashKey)
           this.locationHashKey = newHashKey;
+      }
+
+      _windowResize(e) {
+        var currentWidth = window.innerWidth;
+        var currentBreakpoint = null;
+
+        for (var i = 0; i < this.widthBreakpointList.length; i++) {
+          if (currentWidth >= this.widthBreakpointList[i]) currentBreakpoint = i;
+        }
+
+        if (this.widthBreakpoint != currentBreakpoint) this.widthBreakpoint = currentBreakpoint;
       }
 
       /** Copies the locationHashKey component property to the window location. */

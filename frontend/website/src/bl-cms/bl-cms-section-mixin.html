@@ -1,0 +1,123 @@
+<link rel="import" href="../bl-website/bl-website-component-mixin.html">
+
+<!--
+# Badge List CMS Section Mixin #
+  
+This mixin adds properties and methods which are used by all of the CMS section components.
+-->
+<script>
+
+  BlCmsSectionMixin = function(superClass) {
+    return class extends superClass {
+
+      static get properties() {
+        return {
+          
+          content: Object,
+
+          /**
+           * Required. Bind this to the `widthBreakpoint` property in the parent web page component. This powers the dynamic sizing of
+           * CMS images.
+           */
+          widthBreakpoint: {
+            type: Number, 
+            value: 0,
+            notify: true,
+          },
+
+          /** Returns the class string for the primary row of the section. */
+          rowClass: {
+            type: String,
+            computed: '_rowClass(content.fields.styles, content.fields.textColor)',
+          },
+
+          /** Returns the style string for the primary row of the section. */
+          rowStyle: {
+            type: String,
+            computed:
+              '_rowStyle(widthBreakpoint, content.fields.backgroundColor, content.fields.backgroundColor2, content.fields.backgroundImage)',
+          },
+
+        };
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _rowClass(styles, textColor) {
+        return this.addStyle(styles, `${textColor}Text`).join(' ');
+      }
+
+      _rowStyle(widthBreakpoint, backgroundColor, backgroundColor2, backgroundImage) {
+        var color1 = backgroundColor;
+        var color2 = backgroundColor2 ? backgroundColor2 : backgroundColor;
+
+        if (backgroundImage) {
+          var backgroundImageUrl = this.imageUrl(backgroundImage.fields.file.url, widthBreakpoint, '840,840,1200,1500', true);
+
+          return `
+            background:
+              linear-gradient(-170deg, ${color1}, ${color2}),
+              url('${backgroundImageUrl}');
+            background-position: center;
+            background-size: cover;
+          `;
+        } else {
+          return `background: linear-gradient(-170deg, ${color1}, ${color2})`;
+        }
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /**
+       * Checks if the first passed argument (`testValue`) is equal to any of the remaining arguments (`matchList`). You can use this to 
+       * check equality between two arguments or to check if the first argument is "in" the list of remaining arguments. If you make sure 
+       * that one of the arguments is dynamic it allows you to ensure that the binding is updated, rather than being set statically on 
+       * page load (which is what happens with normal functional bindings).
+       */
+      equal(testValue, ...matchList) {
+        return matchList.includes(testValue);
+      }
+
+      /**
+       * Returns true if the passed value is non-blank.
+       */
+      has(testValue) {
+        return (testValue && (testValue != '')) ? true : false;
+      }
+
+      /**
+       * Returns true if the passed array or string contains the specified value.
+       */
+      contains(testValue, containsText) {
+        return testValue && testValue.includes(containsText);
+      }
+
+      /**
+       * Accepts a list of styles (or an undefined/null variable) and returns that array plus the additional value.
+       */
+      addStyle(styleList, additionalStyle) {
+        var styles = styleList ? styleList.slice(0) : [];
+        styles.push(additionalStyle);
+        return styles;
+      }
+
+      /**
+       * Accepts a CMS image file URL and adds extra tags for the Contenful Images API.
+       * - `fileUrl`: Required. The Contenful image file URL
+       * - `widthBreakpoint`: Required. Bind this to the `widthBreakpoint` property
+       * - `widthMap`: Required. A comma-delimited string list of widths for each breakpoint.
+       * - `progressiveJpg`: Optional. Defaults to false if not set. If true, requests a progressive JPG from the server. If false, the 
+       *   format parameters are left blank (useful for PNGs with transparency).
+       * 
+       */
+      imageUrl(fileUrl, widthBreakpoint, widthMap, progressiveJpg) {
+        var formatString = (progressiveJpg == true) ? 'fm=jpg&fl=progressive&' : '';
+        var widths = widthMap.split(',');
+
+        return `${fileUrl}?${formatString}w=${widths[widthBreakpoint]}`;
+      }
+      
+    }
+  }
+
+</script>

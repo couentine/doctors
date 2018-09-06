@@ -1,0 +1,148 @@
+<!--
+# Badge List CMS Section Styles #
+
+Shared styles for the CMS section components.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/shadycss/apply-shim.html">
+
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<dom-module id="bl-cms-section-style-classes">
+  <template>
+    <style include="bl-style-classes">
+
+      /* === ROW STYLES === */
+
+        #row {
+          display: block;
+          position: relative;
+          padding: 2rem;
+
+          color: var(--text-color, var(--bl-grey-800));
+          background: var(--background-color, white);
+        }
+        #row.whiteText {
+          color: white;
+        }
+        #row.topSlant {
+          clip-path: polygon(0 2rem, 100% 0, 100% 100%, 0 100%);
+          padding-top: 3rem;
+          margin-top: -1rem;
+        }
+        #row.bottomSlant {
+          clip-path: polygon(0 0, 100% 0, 100% calc(100% - 2rem), 0 100%);
+          padding-bottom: 3rem;
+          margin-bottom: -2rem; /*==> Needs to be double on one of the sides in order for them to pull together */
+        }
+        #row.topSlant.bottomSlant {
+          clip-path: polygon(0 2rem, 100% 0, 100% calc(100% - 2rem), 0 100%);
+        }
+        @media(min-width: 840px) {
+          #row {
+            padding: 4rem;
+          }
+          #row.topSlant {
+            clip-path: polygon(0 4rem, 100% 0, 100% 100%, 0 100%);
+            padding-top: 6rem;
+            margin-top: -2rem;
+          }
+          #row.bottomSlant {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4rem), 0 100%);
+            padding-bottom: 6rem;
+            margin-bottom: -4rem; /*==> Needs to be double on one of the sides in order for them to pull together */
+          }
+          #row.topSlant.bottomSlant {
+            clip-path: polygon(0 4rem, 100% 0, 100% calc(100% - 4rem), 0 100%);
+          }
+        }
+          #rowInner {
+            position: relative;
+            
+            margin: 0 auto;
+            max-width: 1000px;
+
+            z-index: 5;
+          }
+
+      /* === COMPONENT-SPECIFIC STYLES === */
+
+        bl-cms-section-footer.withDivider {
+          text-align: center;
+          border-top: 1px solid var(--bl-grey-300);
+          padding-top: 0.5rem;
+        }
+        #row.whiteText bl-cms-section-footer.withDivider {
+          border-top-color: rgba(255, 255, 255, 0.4);
+        }
+
+      /* === MARKDOWN STYLES === */
+
+        [slot="markdown-html"] a {
+          color: var(--text-color, var(--bl-light-blue-800));
+          transition: 0.3s all;
+        }
+        [slot="markdown-html"] a:visited {
+          color: var(--text-color, var(--bl-light-blue-600));
+        }
+        [slot="markdown-html"] a:hover,
+        [slot="markdown-html"] a:focus {
+          color: var(--text-color, var(--bl-light-blue-900));
+        }
+
+        #row.whiteText [slot="markdown-html"] a {
+          color: white;
+        }
+        #row.whiteText [slot="markdown-html"] a:visited {
+          color: var(--text-color, var(--bl-grey-100));
+        }
+        #row.whiteText [slot="markdown-html"] a:hover,
+        #row.whiteText [slot="markdown-html"] a:focus {
+          color: var(--text-color, var(--bl-grey-50));
+        }
+
+        [slot="markdown-html"] h2,
+        [slot="markdown-html"] h3,
+        [slot="markdown-html"] h4 {
+          display: block;
+          margin: 2rem 0;
+          font-weight: 900;
+        }
+        @media(min-width: 840px) {
+          [slot="markdown-html"] h2,
+          [slot="markdown-html"] h3,
+          [slot="markdown-html"] h4 {
+            margin: 2.5rem 0;
+          }
+        }
+        [slot="markdown-html"] h2:first-child,
+        [slot="markdown-html"] h3:first-child,
+        [slot="markdown-html"] h4:first-child {
+          margin-top: 0;
+        }
+
+        [slot="markdown-html"] h2 {
+          font-size: 1.5em;
+          line-height: 1.5em;
+        }
+        [slot="markdown-html"] h3 {
+          font-size: 1.4em;
+          line-height: 1.5em;
+        }
+        [slot="markdown-html"] h4 {
+          font-size: 1.3em;
+          line-height: 1.5em;
+        }
+
+        [slot="markdown-html"] ul li,
+        [slot="markdown-html"] ol li {
+          margin-bottom: 1.5rem;
+        }
+        [slot="markdown-html"] ul li:last-of-type,
+        [slot="markdown-html"] ol li:last-of-type {
+          margin-bottom: 0;
+        }
+
+    </style>
+  </template>
+</dom-module>

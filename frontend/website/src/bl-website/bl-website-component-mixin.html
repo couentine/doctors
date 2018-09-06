@@ -88,6 +88,29 @@ If you need to use the `assetUrl` method to set css properties, overload the `as
         }, false);
       }
 
+      /**
+       * Returns true if the passed value is non-blank.
+       */
+      has(testValue) {
+        return (testValue && (testValue != '')) ? true : false;
+      }
+
+      /**
+       * Returns true if the passed array or string contains the specified value.
+       */
+      contains(testValue, containsText) {
+        return testValue && testValue.includes(containsText);
+      }
+
+      /**
+       * Accepts a list of styles (or an undefined/null variable) and returns that array plus the additional value.
+       */
+      addStyle(styleList, additionalStyle) {
+        var styles = styleList ? styleList.slice(0) : [];
+        styles.push(additionalStyle);
+        return styles;
+      }
+
     }
   }
 

@@ -115,4 +115,18 @@ class HomeController < ApplicationController
     render_polymer_website('Terms of Service - Badge List')
   end
 
+  def landing_pages
+    render_polymer_website('Badge List - Digital credentials for educators, companies and professional development orgs', {
+      'include_metadata' => true,
+      'metadata_title' => 'Badge List',
+      'metadata_description' => 'Badge List helps educators, companies and professional development orgs create Open Badges ' \
+        + 'to guide learning and recognize achievement.',
+      'metadata_image' => bl_asset_url('badge-list-icon.png'),
+      'metadata_image_width' => '500',
+      'metadata_image_height' => '500',
+      'metadata_site_name' => 'Badge List',
+      'metadata_url' => request.original_url
+    })
+  end
+
 end

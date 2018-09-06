@@ -291,16 +291,18 @@ This import contains all of the Badge List styles and needed shims.
           Button Classes:
           - Adding a color class (`orange`, `deep-purple`, etc) styles the background, border color and text color.
           - `block` forces the button to display as block.
-          - `transparent` makes the background clear (except on hover/focus).
-          - `borderless` makes the border clear (even on hover/focus).
-          - `narrow` minimizes the width of the button.
-          - `whiteText` forces the text color to pure white.
           - `small`, `large` or `jumbo` will decrease/increase the size and padding.
+          - `narrow` minimizes the width of the button.
+          
+          - `transparent` makes background clear on non-focus and sets border/text to white. Use against colored backgrounds. Also forces
+            flatness on the non-focus state and slightly lowers the elevation in the focus state.
+          - `inverseTransparent` identical to transparent but sets border/text to inverse color. Use against white backgrounds.
+          - `borderless` makes the border clear in all states and forces flatness in all states (unless combined with `raisable`).
 
           When wrapping `paper-button` in a link, always add the `button` class to the anchor tag.
         */
 
-        /* Base Styles */
+        /* Non-Focus States */
           paper-button {
             display: inline-block;
             font-size: 0.8em;
@@ -310,27 +312,58 @@ This import contains all of the Badge List styles and needed shims.
             padding: 0.4em 1.35em;
             border-radius: 500em;
 
-            background: 
-              radial-gradient(circle at 60% 40%, var(--bl-button-off-g1, var(--bl-grey-50)), var(--bl-button-off-g2, var(--bl-grey-200)));
-            border: 1.5px solid var(--bl-button-off-border-color, var(--bl-grey-600));
-            color: var(--bl-button-off-text-color, var(--bl-grey-600));
+            background: radial-gradient(circle at 60% 40%, var(--bl-button-off-g1), var(--bl-button-off-g2));
+            border: 1.5px solid var(--bl-button-off-border-color);
+            color: var(--bl-button-off-text-color);
 
             transition: all 0.5s;
-          }
-          paper-button:hover, paper-button:focus {
-            background: 
-              radial-gradient(circle at 60% 40%, var(--bl-button-on-g1, var(--bl-grey-50)), var(--bl-button-on-g2, var(--bl-grey-300)));
-            border: 1.5px solid var(--bl-button-on-border-color, var(--bl-grey-600));
-            color: var(--bl-button-on-text-color, var(--bl-grey-700));
           }
           paper-button[raised] {
             @apply --bl-shadow-3;
           }
-            paper-button[raised]:hover, paper-button[raised]:focus {
-              @apply --bl-shadow-5;
-            }
+          paper-button.transparent {
+            background: radial-gradient(circle at 60% 40%, transparent, transparent);
+            border-color: white;
+            color: white;
+            @apply --bl-shadow-0;
+          }
+          paper-button.inverseTransparent {
+            background: radial-gradient(circle at 60% 40%, transparent, transparent);
+            border-color: var(--bl-button-inverse-color);
+            color: var(--bl-button-inverse-color);
+            @apply --bl-shadow-0;
+          }
+          paper-button.borderless {
+            border-color: transparent;
+            @apply --bl-shadow-0;
+            box-shadow: none !important;
+          }
+          
+        /* Focus States */
 
-        /* General Utility Classes */
+          paper-button:hover, paper-button:focus {
+            background: radial-gradient(circle at 60% 40%, var(--bl-button-on-g1), var(--bl-button-on-g2));
+            border: 1.5px solid var(--bl-button-on-border-color);
+            color: var(--bl-button-on-text-color);
+          }
+          paper-button[raised]:hover, paper-button[raised]:focus {
+            @apply --bl-shadow-6;
+          }
+          paper-button[raised].transparent:hover, paper-button[raised].transparent:focus {
+            @apply --bl-shadow-4;
+          }
+          paper-button[raised].inverseTransparent:hover, paper-button[raised].inverseTransparent:focus {
+            background: radial-gradient(circle at 60% 40%, white, var(--bl-button-on-border-color));
+            border-color: var(--bl-button-inverse-color);
+            color: var(--bl-button-inverse-color);
+            @apply --bl-shadow-4;
+          }
+          paper-button.borderless:hover, paper-button.borderless:focus {
+            border-color: transparent;
+            @apply --bl-shadow-0;
+          }
+
+        /* Other Utility Classes */
           paper-button.small {
             font-size: 0.7em;
             padding: 0.4em 1.1em;
@@ -356,11 +389,24 @@ This import contains all of the Badge List styles and needed shims.
           }
 
         /* Base Color Classes */
+          paper-button { /* DEFAULT "uncolored" button has a dark-on-light style. */
+            --bl-button-off-g1: var(--bl-grey-50);
+            --bl-button-off-g2: var(--bl-grey-200);
+            --bl-button-off-border-color: var(--bl-grey-600);
+            --bl-button-off-text-color: var(--bl-grey-600);
+            
+            --bl-button-on-g1: var(--bl-grey-50);
+            --bl-button-on-g2: var(--bl-grey-300);
+            --bl-button-on-border-color: var(--bl-grey-600);
+            --bl-button-on-text-color: var(--bl-grey-700);
+            
+            --bl-button-inverse-color: var(--bl-grey-700); /* inverse state stays dark because it is for use against white backgrounds */
+          }
           paper-button.red {
             --bl-button-off-g1: var(--bl-red-500);
             --bl-button-off-g2: var(--bl-red-600);
-            --bl-button-off-border-color: var(--bl-red-100);
-            --bl-button-off-text-color: var(--bl-red-100);
+            --bl-button-off-border-color: var(--bl-red-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-red-400);
             --bl-button-on-g2: var(--bl-red-700);
@@ -372,8 +418,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.pink {
             --bl-button-off-g1: var(--bl-pink-500);
             --bl-button-off-g2: var(--bl-pink-600);
-            --bl-button-off-border-color: var(--bl-pink-100);
-            --bl-button-off-text-color: var(--bl-pink-100);
+            --bl-button-off-border-color: var(--bl-pink-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-pink-400);
             --bl-button-on-g2: var(--bl-pink-700);
@@ -385,8 +431,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.purple {
             --bl-button-off-g1: var(--bl-purple-500);
             --bl-button-off-g2: var(--bl-purple-600);
-            --bl-button-off-border-color: var(--bl-purple-100);
-            --bl-button-off-text-color: var(--bl-purple-100);
+            --bl-button-off-border-color: var(--bl-purple-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-purple-400);
             --bl-button-on-g2: var(--bl-purple-700);
@@ -398,8 +444,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.deep-purple {
             --bl-button-off-g1: var(--bl-deep-purple-500);
             --bl-button-off-g2: var(--bl-deep-purple-600);
-            --bl-button-off-border-color: var(--bl-deep-purple-100);
-            --bl-button-off-text-color: var(--bl-deep-purple-100);
+            --bl-button-off-border-color: var(--bl-deep-purple-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-deep-purple-400);
             --bl-button-on-g2: var(--bl-deep-purple-700);
@@ -411,8 +457,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.indigo {
             --bl-button-off-g1: var(--bl-indigo-500);
             --bl-button-off-g2: var(--bl-indigo-600);
-            --bl-button-off-border-color: var(--bl-indigo-100);
-            --bl-button-off-text-color: var(--bl-indigo-100);
+            --bl-button-off-border-color: var(--bl-indigo-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-indigo-400);
             --bl-button-on-g2: var(--bl-indigo-700);
@@ -424,8 +470,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.blue {
             --bl-button-off-g1: var(--bl-blue-500);
             --bl-button-off-g2: var(--bl-blue-600);
-            --bl-button-off-border-color: var(--bl-blue-100);
-            --bl-button-off-text-color: var(--bl-blue-100);
+            --bl-button-off-border-color: var(--bl-blue-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-blue-400);
             --bl-button-on-g2: var(--bl-blue-700);
@@ -437,8 +483,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.light-blue {
             --bl-button-off-g1: var(--bl-light-blue-500);
             --bl-button-off-g2: var(--bl-light-blue-600);
-            --bl-button-off-border-color: var(--bl-light-blue-100);
-            --bl-button-off-text-color: var(--bl-light-blue-100);
+            --bl-button-off-border-color: var(--bl-light-blue-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-light-blue-400);
             --bl-button-on-g2: var(--bl-light-blue-700);
@@ -450,8 +496,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.cyan {
             --bl-button-off-g1: var(--bl-cyan-500);
             --bl-button-off-g2: var(--bl-cyan-600);
-            --bl-button-off-border-color: var(--bl-cyan-100);
-            --bl-button-off-text-color: var(--bl-cyan-100);
+            --bl-button-off-border-color: var(--bl-cyan-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-cyan-400);
             --bl-button-on-g2: var(--bl-cyan-700);
@@ -463,8 +509,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.teal {
             --bl-button-off-g1: var(--bl-teal-500);
             --bl-button-off-g2: var(--bl-teal-600);
-            --bl-button-off-border-color: var(--bl-teal-100);
-            --bl-button-off-text-color: var(--bl-teal-100);
+            --bl-button-off-border-color: var(--bl-teal-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-teal-400);
             --bl-button-on-g2: var(--bl-teal-700);
@@ -476,8 +522,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.green {
             --bl-button-off-g1: var(--bl-green-500);
             --bl-button-off-g2: var(--bl-green-600);
-            --bl-button-off-border-color: var(--bl-green-100);
-            --bl-button-off-text-color: var(--bl-green-100);
+            --bl-button-off-border-color: var(--bl-green-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-green-400);
             --bl-button-on-g2: var(--bl-green-700);
@@ -489,8 +535,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.light-green {
             --bl-button-off-g1: var(--bl-light-green-500);
             --bl-button-off-g2: var(--bl-light-green-600);
-            --bl-button-off-border-color: var(--bl-light-green-100);
-            --bl-button-off-text-color: var(--bl-light-green-100);
+            --bl-button-off-border-color: var(--bl-light-green-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-light-green-400);
             --bl-button-on-g2: var(--bl-light-green-700);
@@ -502,8 +548,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.lime {
             --bl-button-off-g1: var(--bl-lime-500);
             --bl-button-off-g2: var(--bl-lime-600);
-            --bl-button-off-border-color: var(--bl-lime-100);
-            --bl-button-off-text-color: var(--bl-lime-100);
+            --bl-button-off-border-color: var(--bl-lime-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-lime-400);
             --bl-button-on-g2: var(--bl-lime-700);
@@ -515,8 +561,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.yellow {
             --bl-button-off-g1: var(--bl-yellow-500);
             --bl-button-off-g2: var(--bl-yellow-600);
-            --bl-button-off-border-color: var(--bl-yellow-100);
-            --bl-button-off-text-color: var(--bl-yellow-100);
+            --bl-button-off-border-color: var(--bl-yellow-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-yellow-400);
             --bl-button-on-g2: var(--bl-yellow-700);
@@ -528,8 +574,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.amber {
             --bl-button-off-g1: var(--bl-amber-500);
             --bl-button-off-g2: var(--bl-amber-600);
-            --bl-button-off-border-color: var(--bl-amber-100);
-            --bl-button-off-text-color: var(--bl-amber-100);
+            --bl-button-off-border-color: var(--bl-amber-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-amber-400);
             --bl-button-on-g2: var(--bl-amber-700);
@@ -541,8 +587,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.orange {
             --bl-button-off-g1: var(--bl-orange-500);
             --bl-button-off-g2: var(--bl-orange-600);
-            --bl-button-off-border-color: var(--bl-orange-100);
-            --bl-button-off-text-color: var(--bl-orange-100);
+            --bl-button-off-border-color: var(--bl-orange-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-orange-400);
             --bl-button-on-g2: var(--bl-orange-700);
@@ -554,8 +600,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.deep-orange {
             --bl-button-off-g1: var(--bl-deep-orange-500);
             --bl-button-off-g2: var(--bl-deep-orange-600);
-            --bl-button-off-border-color: var(--bl-deep-orange-100);
-            --bl-button-off-text-color: var(--bl-deep-orange-100);
+            --bl-button-off-border-color: var(--bl-deep-orange-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-deep-orange-400);
             --bl-button-on-g2: var(--bl-deep-orange-700);
@@ -567,8 +613,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.brown {
             --bl-button-off-g1: var(--bl-brown-500);
             --bl-button-off-g2: var(--bl-brown-600);
-            --bl-button-off-border-color: var(--bl-brown-100);
-            --bl-button-off-text-color: var(--bl-brown-100);
+            --bl-button-off-border-color: var(--bl-brown-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-brown-400);
             --bl-button-on-g2: var(--bl-brown-700);
@@ -580,8 +626,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.grey {
             --bl-button-off-g1: var(--bl-grey-500);
             --bl-button-off-g2: var(--bl-grey-600);
-            --bl-button-off-border-color: var(--bl-grey-100);
-            --bl-button-off-text-color: var(--bl-grey-100);
+            --bl-button-off-border-color: var(--bl-grey-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-grey-400);
             --bl-button-on-g2: var(--bl-grey-700);
@@ -593,8 +639,8 @@ This import contains all of the Badge List styles and needed shims.
           paper-button.blue-grey {
             --bl-button-off-g1: var(--bl-blue-grey-500);
             --bl-button-off-g2: var(--bl-blue-grey-600);
-            --bl-button-off-border-color: var(--bl-blue-grey-100);
-            --bl-button-off-text-color: var(--bl-blue-grey-100);
+            --bl-button-off-border-color: var(--bl-blue-grey-200);
+            --bl-button-off-text-color: white;
             
             --bl-button-on-g1: var(--bl-blue-grey-400);
             --bl-button-on-g2: var(--bl-blue-grey-700);
@@ -602,33 +648,6 @@ This import contains all of the Badge List styles and needed shims.
             --bl-button-on-text-color: white;
             
             --bl-button-inverse-color: var(--bl-blue-grey-700);
-          }
-
-        /* Coloration Utility Classes */
-          paper-button.inverse {
-            background: var(--bl-button-off-text-color, var(--bl-grey-600));
-            border-color: var(--bl-button-inverse-color, var(--bl-grey-100));
-            color: var(--bl-button-inverse-color, var(--bl-grey-50));
-          }
-          paper-button.transparent, paper-button.transparent:focus, paper-button.transparent:hover {
-            background: transparent;
-          }
-            paper-button.inverse:hover, paper-button.inverse:focus {
-              border-color: var(--bl-button-on-border-color, var(--bl-grey-600));
-              color: var(--bl-button-on-text-color, var(--bl-grey-700));
-            }
-            paper-button.inverse.transparent:not(.borderless):hover, paper-button.inverse.transparent:not(.borderless):focus {
-              background: 
-                radial-gradient(circle at 60% 40%, var(--bl-button-on-g1, var(--bl-grey-50)), var(--bl-button-on-g2, var(--bl-grey-300)));
-            }
-            paper-button.inverse.transparent.borderless:hover, paper-button.inverse.transparent.borderless:focus {
-              color: var(--bl-button-off-g2, var(--bl-grey-200));
-            }
-          paper-button.borderless, paper-button.borderless:focus, paper-button.borderless:hover {
-            border-color: transparent;
-          }
-          paper-button.whiteText, paper-button.whiteText:focus, paper-button.whiteText:hover {
-            color: white;
           }
 
         /* Anchor Tag Buttons */
