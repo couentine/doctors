@@ -89,38 +89,18 @@ This displays a page item from the CMS.
         #bannerRow.whiteText {
           color: white;
         }
+          #bannerRow h1 {
+            max-width: 40rem;
+          }
           #bannerRow.centerText h1 {
             text-align: center;
-          }
-          #bannerRow .logo {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            margin: 0;
-
-            z-index: 5;
-          }
-            #bannerRow .logo img.logo-icon { 
-              position: relative;
-              height: 1em;
-              top: -0.1em; 
-              margin-right: 0.3em;
-            }
-            #bannerRow .logo img.logo-text { height: 1em; }
-          
-          #bannerRow .divider {
-            width: 6em;
-            height: 0px;
-            border-top: 1px solid #FFE0B2;
-            margin: 1.5em auto;
-
-            z-index: 5;
           }
 
           #bannerRow .tag-line {
             font-size: 1.2rem;
             line-height: 1.5em;
             font-weight: 300;
+            max-width: 30rem;
 
             z-index: 5;
           }
@@ -146,7 +126,7 @@ This displays a page item from the CMS.
 
           #buttons {
             list-style: none;
-            margin: 2rem -2rem 0 -2rem;
+            margin: 2rem -1rem 0 -1rem;
             padding: 0;
             display: flex;
             flex-direction: row;
@@ -157,7 +137,7 @@ This displays a page item from the CMS.
           }
             #buttons > li {
               display: block;
-              margin: 1em 2em;
+              margin: 1rem;
             }
 
       /* === CMS PANELS === */
@@ -222,11 +202,17 @@ This displays a page item from the CMS.
       <div id="expandedBackground" slot="expandedBackground" class$="cms-status-[[cmsStatus]]">&nbsp;</div>
       <div id="condensedBackground" slot="condensedBackground" class$="bl-color-vars-[[content.fields.buttonColor]]">&nbsp;</div>
 
-      <bl-header-nav-left slot="leftNav">
+      <bl-header-nav-left slot="leftNav" current-user="[[currentUser]]">
         <img src$="[[website.manifest.assets.brand.shieldWhitePng]]">
       </bl-header-nav-left>
       
-      <bl-header-nav-right slot="rightNav" id="rightNav"></bl-header-nav-right>
+      <bl-header-nav-right
+        slot="rightNav"
+        id="rightNav"
+        current-user="[[currentUser]]"
+        cms-preview-mode="[[cmsPreviewMode]]"
+        style$="--button-color: var(--bl-[[content.fields.buttonColor]]-600);"
+      ></bl-header-nav-right>
 
       <div id="content" slot="content" class$="cms-status-[[cmsStatus]]">
         
@@ -248,16 +234,8 @@ This displays a page item from the CMS.
 
         <!-- === BANNER ROW === -->
         <div id="bannerRow" style$="[[headerRowStyle]]" class$="[[headerRowClass]]">
-          <h1 class="logo" hidden="[[!equal(cmsKey, 'home')]]">
-            <img src$="[[website.manifest.assets.brand.shieldWhitePng]]" class="logo-icon">
-            <img src$="[[website.manifest.assets.brand.logoTextWhitePng]]" class="logo-text" alt="Badge List">
-          </h1>
-          <h1 class="text" hidden="[[equal(cmsKey, 'home')]]">
-            [[content.fields.headerTitle]]
-          </h1>
+          <h1>[[content.fields.headerTitle]]</h1>
           
-          <div class="divider" hidden="[[!equal(cmsKey, 'home')]]">&nbsp;</div>
-
           <div class="tag-line">
             [[content.fields.headerSubTitle]]
           </div>

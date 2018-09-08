@@ -185,6 +185,7 @@ class ApplicationController < ActionController::Base
       asset_base_url: ASSET_BASE_URL,
       assets: POLYMER_WEBSITE_ASSETS,
     }
+    @manifest[:cms][:preview_token] = ENV['contentful_website_preview_token'] if current_user && current_user.admin
     
     render template: 'polymer/website', layout: 'polymer_website'
   end

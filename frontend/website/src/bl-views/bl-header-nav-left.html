@@ -19,7 +19,7 @@
           position: absolute;
           top: 4px;
           left: 0;
-          width: 4em;
+          width: 10rem;
           padding: 0.5em 0.8em;
           line-height: 1em;
           align-items: center;
@@ -27,31 +27,31 @@
 
       /* === COMPONENT STYLES === */
 
-        a.logo { 
-          display: inline-block;
-          text-decoration: none;
-        }
-          a.logo ::slotted(img) { height: 2em; }
-        a.appHomeLink {
-          display: none;
-          font-size: 1.5em;
-          margin-left: 0.5rem;
-          text-decoration: none;
+        a { 
+          display: flex;
+          flex-direction: row;
+          align-items: center;
           
-          color: var(--link-color, var(--bl-grey-800));
+          font-size: 1.3rem;
+          line-height: 1em;
+
+          text-decoration: none;
+          color: var(--link-color, var(--bl-grey-700));
+          font-weight: 700;
         }
-          a.appHomeLink.true {
-            display: inline-block;
+          a ::slotted(img) {
+            height: 2rem;
+          }
+          .text {
+            margin-top: -0.1rem;
+            margin-left: 0.5rem;
           }
 
     </style>
     
     <a class="logo" title="[[anchorTitle]]" href$="[[anchorHref]]">
       <slot></slot>
-    </a>
-
-    <a class$="appHomeLink [[isLoggedIn]]" title="Badge List App Home" href="/home">
-      <i class="icon-home2"></i>
+      <span class="text">Badge List</span>
     </a>
 
   </template>
@@ -74,12 +74,6 @@
           linkTitle: {
             type: String,
             observer: '_linkTitleChanged'
-          },
-
-          isLoggedIn: {
-            type: Boolean,
-            readOnly: true,
-            value: false
           },
 
           anchorHref: {
@@ -107,10 +101,8 @@
       
       _currentUserChanged(currentUser) {
         if (currentUser && currentUser.username) {
-          this._setIsLoggedIn(true);
           if (!this.link) this._setAnchorHref('/w');
         } else {
-          this._setIsLoggedIn(false);
           if (!this.link) this._setAnchorHref('/');
         }
       }

@@ -20,8 +20,11 @@ If you need to use the `assetUrl` method to set css properties, overload the `as
             notify: true,
           },
           
-          /** The details of the logged in user provided from the backend on initial page load. Null if logged out. */
+          /** This can optionally be set by the parent if the component needs access to the current user. */
           currentUser: Object,
+          
+          /** This can optionally be set by the parent if the component needs access the CMS preview state. */
+          cmsPreviewMode: Object,
 
           assetLoadingComplete: {
             type: Boolean,

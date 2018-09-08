@@ -34,8 +34,8 @@
 
     <% if @include_metadata %>
       <!-- === OPEN GRAPH METADATA === -->
-      <meta property="og:type" content="Article" />
-      <meta property="og:title" content="<%= @metadata['metadata_title'] %>" />
+      <meta property="og:type" content="Article"/>
+      <meta property="og:title" content="<%= @metadata['metadata_title'] %>" data-key="title"/>
       <meta property="og:description" content="<%= @metadata['metadata_description'] %>" />
       <meta property="og:image" content="<%= @metadata['metadata_image'] %>" />
       <meta property="og:site_name" content="<%= @metadata['metadata_site_name'] %>" />
@@ -44,7 +44,7 @@
       <!-- === TWITTER CARD METADATA === -->
       <meta name="twitter:card" content="summary" />
       <meta name="twitter:site" content="@badgelist" />
-      <meta name="twitter:title" content="<%= @metadata['metadata_title'] %>" />
+      <meta name="twitter:title" content="<%= @metadata['metadata_title'] %>" data-key="title"/>
       <meta name="twitter:description" content="<%= @metadata['metadata_description'] %>" />
       <meta name="twitter:image" content="<%= @metadata['metadata_image'] %>" />
       <meta name="twitter:url" content="<%= @metadata['metadata_url'] %>" />

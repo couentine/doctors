@@ -129,49 +129,56 @@
       active="{{webHomeViewActive}}"
       cms-key="home"
       width-breakpoint="[[widthBreakpoint]]"
+      current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
     ></bl-view-web-page>
 
     <bl-view-web-page
       id="howItWorksView"
       active="{{howItWorksViewActive}}"
-      current-user="[[currentUser]]"
       cms-key="how-it-works"
       width-breakpoint="[[widthBreakpoint]]"
+      current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
     ></bl-view-web-page>
 
     <bl-view-web-page
       id="docsView"
       active="{{docsViewActive}}"
-      current-user="[[currentUser]]"
       cms-key="docs"
       width-breakpoint="[[widthBreakpoint]]"
+      current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
     ></bl-view-web-page>
 
     <bl-view-web-page
       id="forPageView"
       active="{{forPageActive}}"
-      current-user="[[currentUser]]"
       cms-key="[[forPageRouteData.key]]"
       width-breakpoint="[[widthBreakpoint]]"
       cms-path="for"
+      current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
     ></bl-view-web-page>
 
     <bl-view-web-page
       id="customerPageView"
       active="{{customerPageActive}}"
-      current-user="[[currentUser]]"
       cms-key="[[customerPageRouteData.key]]"
       cms-path="customers"
       width-breakpoint="[[widthBreakpoint]]"
+      current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
     ></bl-view-web-page>
 
     <bl-view-web-page
       id="featurePageView"
       active="{{featurePageActive}}"
-      current-user="[[currentUser]]"
       cms-key="[[featurePageRouteData.key]]"
       cms-path="features"
       width-breakpoint="[[widthBreakpoint]]"
+      current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
     ></bl-view-web-page>
 
     <!-- #=== APP VIEWS (FROM LOCAL VIEW COMPONENTS) ===# -->
@@ -180,6 +187,7 @@
       id="pricingView"
       active="{{pricingViewActive}}"
       current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
       title="Badge List Pricing"
     ></bl-view-pricing>
 
@@ -187,6 +195,7 @@
       id="privacyPolicyView"
       active="{{privacyPolicyViewActive}}"
       current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
       title="Privacy Policy - Badge List"
     ></bl-view-privacy-policy>
 
@@ -194,6 +203,7 @@
       id="termsOfServiceView"
       active="{{termsOfServiceViewActive}}"
       current-user="[[currentUser]]"
+      cms-preview-mode="[[cmsPreviewMode]]"
       title="Terms of Service - Badge List"
     ></bl-view-terms-of-service>
 
@@ -227,6 +237,8 @@
             type: Object,
             notify: true,
           },
+          
+          cmsPreviewMode: Boolean,
 
           /** Stores a link to the currently active view component. Managed automatically by the view mixin code. */
           activeView: Object,
@@ -351,13 +363,25 @@
 
       _manifestChanged(newValue, oldValue) {
         if (newValue) {
-          if (this.cmsClient == null) {
-            // Initialize the Contentful CMS client
-            this.set('cmsClient',  contentful.createClient({
-              space: newValue.cms.space_id,
-              accessToken: newValue.cms.token,
-            }));
+          // Initialize the Contentful CMS client
+          var contentfulOptions = {
+            space: newValue.cms.space_id,
+            accessToken: newValue.cms.token,
+          };
+          if (newValue.cms.preview_token && newValue.cms.preview_token.length) {
+            if (sessionStorage.getItem('cmsPreviewMode') == 'on') {
+              this.cmsPreviewMode = 'on';
+              contentfulOptions.accessToken = newValue.cms.preview_token;
+              contentfulOptions.host = 'preview.contentful.com';
+            } else {
+              this.cmsPreviewMode = 'off';
+              sessionStorage.setItem('cmsPreviewMode', 'off');
+            }
+          } else {
+            sessionStorage.removeItem('cmsPreviewMode');
+            this.cmsPreviewMode = null;
           }
+          this.set('cmsClient',  contentful.createClient(contentfulOptions));
 
           this.setProperties({
             currentUser: newValue.current_user

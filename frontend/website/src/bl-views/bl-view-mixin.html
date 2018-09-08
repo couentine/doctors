@@ -170,6 +170,10 @@ All Badge List website views components should extend this mixin. It extends the
       _titleChanged(newValue, oldValue) {
         if (newValue && (this.status == 'active')) {
           document.title = newValue;
+          // FIXME >> Temporary test to see if social metadata can be changed after page load...
+          document.querySelectorAll('meta[data-key="title"]').forEach((item) => {
+            item.content = newValue;
+          })
         }
       }
 

@@ -46,6 +46,9 @@
         bl-header-panel {
           background: var(--bl-grey-50);
         }
+          bl-header-nav-right {
+            --ghost-button-border-color: var(--bl-grey-300);
+          }
           #expandedBackground {
             border-top: 4px solid var(--bl-orange-600);
             background: white;
@@ -119,11 +122,16 @@
         <li><a href="/terms-of-service"><i class="icon-file-text"></i> Terms of Service</a></li>
       </ul>
 
-      <bl-header-nav-left slot="leftNav">
+      <bl-header-nav-left slot="leftNav" current-user="[[currentUser]]">
         <img src$="[[website.manifest.assets.brand.shieldPng]]">
       </bl-header-nav-left>
       
-      <bl-header-nav-right slot="rightNav" id="rightNave"></bl-header-nav-right>
+      <bl-header-nav-right
+        slot="rightNav"
+        id="rightNav"
+        current-user="[[currentUser]]"
+        cms-preview-mode="[[cmsPreviewMode]]"
+      ></bl-header-nav-right>
 
       <div id="content" slot="content">
         
