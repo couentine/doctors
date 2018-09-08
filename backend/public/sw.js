@@ -240,7 +240,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/website/src/bl-website/bl-website.html",
-    "revision": "8930281bde2cb6b4f52c6df6dfe67003"
+    "revision": "8812acc9d8d25fdef5220ecd7be782b0"
   }
 ]);
   }
