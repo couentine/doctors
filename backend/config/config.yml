@@ -62,10 +62,10 @@ defaults: &defaults
   # Subscription Plans
   subscription_plans:
     standard:
-      solo-1m-2:
+      solo-1m-3:
         name: Solo
         type: solo
-        amount: 1000
+        amount: 2500
         currency: usd
         interval: month
         trial_period_days: 0
@@ -84,10 +84,10 @@ defaults: &defaults
           - file_uploads
           - pro_api
           - leaderboards_weekly
-      solo-1y-1:
+      solo-1y-2:
         name: Solo Annual
         type: solo
-        amount: 11000
+        amount: 27500
         currency: usd
         interval: year
         trial_period_days: 0
@@ -225,7 +225,7 @@ defaults: &defaults
         full_member_groups: 5
         limited_member_groups: 50
         full_member_groups_plan: org-1m-2
-        limited_member_groups_plan: solo-1m-2
+        limited_member_groups_plan: solo-1m-3
         features:
           - file_uploads
           - pro_api
@@ -256,7 +256,7 @@ defaults: &defaults
         full_member_groups: 5
         limited_member_groups: 50
         full_member_groups_plan: org-1y-2
-        limited_member_groups_plan: solo-1y-1
+        limited_member_groups_plan: solo-1y-2
         features:
           - file_uploads
           - pro_api
@@ -267,28 +267,52 @@ defaults: &defaults
           - hub
           - leaderboards_realtime
     k12:
-      k12-teacher-1y-1:
-        name: K12 Solo Annual
-        type: solo
-        amount: 2500
+      k12-team-1m-1:
+        name: K12 Team
+        type: team
+        amount: 5000
         currency: usd
-        interval: year
+        interval: month
         trial_period_days: 0
-        statement_descriptor: Badge List K12 Solo
-        fa_icon: fa-user
-        bl_icon: icon-user
-        color: blue
+        statement_descriptor: Badge List K12 Team
+        fa_icon: fa-users
+        bl_icon: icon-group-circle
+        color: green
         description: |
-          For groups where only one person is awarding badges. Includes 1 group admin and up to 100 group members.
-          Only the group admin can award badges.
-        users: 100
-        admins: 1
+          For small teams with a need for more collaboration. Includes up to 3 group admins and 300 group members.
+          All group members can award badges.
+        users: 300
+        admins: 3
         full_member_groups: 0
         limited_member_groups: 0
         features:
           - file_uploads
           - pro_api
           - leaderboards_weekly
+          - community
+      k12-team-1y-1:
+        name: K12 Team Annual
+        type: team
+        amount: 55000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Team
+        fa_icon: fa-users
+        bl_icon: icon-group-circle
+        color: green
+        description: |
+          For small teams with a need for more collaboration. Includes up to 3 group admins and 300 group members.
+          All group members can award badges.
+        users: 300
+        admins: 3
+        full_member_groups: 0
+        limited_member_groups: 0
+        features:
+          - file_uploads
+          - pro_api
+          - leaderboards_weekly
+          - community
       k12-hub-1m-1:
         disabled: true
         name: K12 Hub
@@ -304,13 +328,13 @@ defaults: &defaults
         description: |
           For organizations which want to create many groups with different badges and members and link them all together under a 
           common "hub group". Hub groups support up to 5 "member groups" with the Org plan and up to 50 "member groups" with the Solo plan.
-          Hub groups support up to 2500 total unique users across all of the member groups.
+          K12 Hub groups support up to 2500 total unique users across all of the member groups.
         users: 2500
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
         full_member_groups_plan: org-1m-2
-        limited_member_groups_plan: k12-teacher-1y-1
+        limited_member_groups_plan: solo-1m-3
         features:
           - file_uploads
           - pro_api
@@ -335,13 +359,13 @@ defaults: &defaults
         description: |
           For organizations which want to create many groups with different badges and members and link them all together under a 
           common "hub group". Hub groups support up to 5 "member groups" with the Org plan and up to 50 "member groups" with the Solo plan.
-          Hub groups support up to 2500 total unique users across all of the member groups.
+          K12 Hub groups support up to 2500 total unique users across all of the member groups.
         users: 2500
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
         full_member_groups_plan: org-1y-2
-        limited_member_groups_plan: k12-teacher-1y-1
+        limited_member_groups_plan: solo-1y-2
         features:
           - file_uploads
           - pro_api
@@ -434,7 +458,7 @@ defaults: &defaults
         full_member_groups: 5
         limited_member_groups: 50
         full_member_groups_plan: org-1y-2
-        limited_member_groups_plan: solo-1y-1
+        limited_member_groups_plan: solo-1y-2
         features:
           - file_uploads
           - pro_api
@@ -458,13 +482,13 @@ defaults: &defaults
         description: |
           For organizations which want to create many groups with different badges and members and link them all together under a 
           common "hub group". Hub groups support up to 5 "member groups" with the Org plan and up to 50 "member groups" with the Solo plan.
-          Hub groups support up to 2500 total unique users across all of the member groups.
+          K12 Hub groups support up to 2500 total unique users across all of the member groups.
         users: 2500
         admins: -1
         full_member_groups: 5
         limited_member_groups: 50
         full_member_groups_plan: org-1m-2
-        limited_member_groups_plan: k12-teacher-1y-1
+        limited_member_groups_plan: solo-1y-2
         features:
           - file_uploads
           - pro_api
@@ -475,6 +499,72 @@ defaults: &defaults
           - hub
           - leaderboards_realtime
     retired:
+      solo-1m-2:
+        name: Solo (Legacy)
+        type: solo
+        amount: 1000
+        currency: usd
+        interval: month
+        trial_period_days: 0
+        statement_descriptor: Badge List Solo
+        fa_icon: fa-user
+        bl_icon: icon-user
+        color: blue
+        description: |
+          For groups where only one person is awarding badges. Includes 1 group admin and up to 100 group members.
+          Only the group admin can award badges.
+        users: 100
+        admins: 1
+        full_member_groups: 0
+        limited_member_groups: 0
+        features:
+          - file_uploads
+          - pro_api
+          - leaderboards_weekly
+      solo-1y-1:
+        name: Solo Annual (Legacy)
+        type: solo
+        amount: 11000
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List Solo
+        fa_icon: fa-user
+        bl_icon: icon-user
+        color: blue
+        description: |
+          For groups where only one person is awarding badges. Includes 1 group admin and up to 100 group members.
+          Only the group admin can award badges.
+        users: 100
+        admins: 1
+        full_member_groups: 0
+        limited_member_groups: 0
+        features:
+          - file_uploads
+          - pro_api
+          - leaderboards_weekly
+      k12-teacher-1y-1:
+        name: K12 Solo Annual (Legacy)
+        type: solo
+        amount: 2500
+        currency: usd
+        interval: year
+        trial_period_days: 0
+        statement_descriptor: Badge List K12 Solo
+        fa_icon: fa-user
+        bl_icon: icon-user
+        color: blue
+        description: |
+          For groups where only one person is awarding badges. Includes 1 group admin and up to 100 group members.
+          Only the group admin can award badges.
+        users: 100
+        admins: 1
+        full_member_groups: 0
+        limited_member_groups: 0
+        features:
+          - file_uploads
+          - pro_api
+          - leaderboards_weekly
       org-1m-1:
         name: Org (Legacy)
         type: org
