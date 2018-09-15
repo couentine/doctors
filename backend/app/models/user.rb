@@ -1352,8 +1352,8 @@ protected
   #   only a huge performance hit if there are tons of invitations so skipping for now. Note that it is important that this all happen
   #   synchronously (or via poller) so the user is immediately presented with their correct memberships.
   def convert_group_invitations_on_signup!
-    badge_map = {} # badge_url => badge
     log_map = {} # badge_url => log
+    tag_map = {} # tag_id => tag
     user_map = {} # id => user
     unqueried_user_ids = nil
     is_admin = false
@@ -1365,8 +1365,8 @@ protected
     )
 
     groups_to_join.each do |group|
-      badge_map = {}
       log_map = {}
+      tag_map = {}
       is_admin = group.invited_admins.select{ |item| item['email'] == email }.present?
 
       # Add as an admin or member and clear the invitation
@@ -1396,36 +1396,67 @@ protected
         }
       })
 
-      badge_urls_to_join = (                                                 \
-        (invited_item['badges'] || [])                                        \
-        + (invited_item['validations'] || []).map{ |item| item['badge'] }     \
+      # Query for badges and join them if needed
+      badge_urls_to_join = (
+        (invited_item['badges'] || []) \
+        + (invited_item['validations'] || []).map{ |item| item['badge'] } \
+        + (invited_item['posts'] || []).map{ |item| item['badge'] }
       ).uniq
-
       if badge_urls_to_join.present?
         group.badges.where(:url.in => badge_urls_to_join).each do |badge|
-          badge_map[badge.url] = badge
           log = badge.add_learner(self) # NOTE: This could be rewritten (refer to PERFORMANCE NOTE above)
           log_map[badge.url] = log
         end
       end
 
-      if invited_item['validations'].present?
-        unqueried_user_ids = invited_item['validations'].map{ |item| item['user'] }.uniq - user_map.keys
+      # Query for tags if needed
+      tags_to_query = (invited_item['posts'] || []).map{ |item| item['tag'] }.uniq
+      if tags_to_query.present?
+        Tag.where(:id.in => tags_to_query).each do |tag|
+          tag_map[tag.id.to_s] = tag
+        end
+      end
+
+      # Query for users if needed
+      if invited_item['posts'].present? || invited_item['validations'].present?
+        unqueried_user_ids = ((invited_item['posts'] || []) + (invited_item['validations'] || [])).map do |item|
+          item['user']
+        end.uniq - user_map.keys
+
         if unqueried_user_ids.present?
           User.where(:id.in => unqueried_user_ids).each do |user|
             user_map[user.id.to_s] = user
           end
         end
+      end
 
+      # Create posts if needed
+      if invited_item['posts'].present?
+        invited_item['posts'].each do |post_item|
+          tag = tag_map[post_item['tag']]
+          log = log_map[post_item['badge']]
+          creator_user = user_map[post_item['user'].to_s]
+          format = (post_item['format'].present?) ? post_item['format'] : 'text'
+          summary = post_item['summary']
+          body = post_item['body']
+          preserve_body_html = (post_item['preserve_body_html'] == true)
+
+          if tag.present? && log.present? && creator_user.present? && summary.present?
+            log.add_post(tag, creator_user, format, summary, body)
+          end
+        end
+      end # if invited_item['posts'].present?
+
+      # Create validations if needed
+      if invited_item['validations'].present?
         invited_item['validations'].each do |validation_item|
-          badge = badge_map[validation_item['badge']]
           log = log_map[validation_item['badge']]
           validating_user = user_map[validation_item['user'].to_s]
           summary = validation_item['summary']
           body = validation_item['body']
           preserve_body_html = (validation_item['preserve_body_html'] == true)
 
-          if badge.present? && log.present? && validating_user.present? && summary.present?
+          if log.present? && validating_user.present? && summary.present?
             log.add_validation(validating_user, summary, body, true, true, preserve_body_html)
           end
         end

@@ -973,9 +973,55 @@ class Group
     end
   end
 
+  # This will add a post item to the invited_member or invited_admin list for this email.
+  # If the user has not yet been invited to the group they will be added as a member (an exception is raised if group is full).
+  # If an existing post for this combination of email + badge_url + creator + tag already exists for this current_user_id, it's overwritten.
+  # Returns the created/updated post_item hash.
+  def add_invited_user_post(tag_id: nil, current_user_id: nil, email: nil, badge_url: nil, format: nil, summary: nil, body: nil)
+    # Attempt to find an existing invitation for them and create a new one if needed
+    invited_user_item = invited_admins.detect{ |item| item['email'] == email }
+    invited_user_item ||= invited_members.detect{ |item| item['email'] == email }
+    if invited_user_item.nil?
+      if can_add_members?
+        invited_user_item = { 
+          'email' => email, 
+          'invite_date' => Time.now, 
+          'validations' => [],
+          'posts' => [],
+        }
+        self.invited_members << invited_user_item
+      else
+        raise StandardError.new('Group is full')
+      end
+    end
+
+    # Now attempt to find an existing entry for this combination of current_user_id, badge_url and tag_id. Create blank one if not found.
+    invited_user_item['posts'] = [] if invited_user_item['posts'].nil?
+    post_item = invited_user_item['posts'].detect do |item|
+      (item['user'].to_s == current_user_id.to_s) \
+        && (item['badge'] == badge_url) \
+        && (item['tag'] == tag_id.to_s)
+    end
+    if post_item.nil?
+      post_item = {}
+      invited_user_item['posts'] << post_item
+    end
+
+    # Finally we can set (or overwrite) the fields of the validation
+    post_item['tag'] = tag_id.to_s
+    post_item['user'] = current_user_id.to_s
+    post_item['badge'] = badge_url
+    post_item['format'] = format
+    post_item['summary'] = summary
+    post_item['body'] = body
+
+    # Return the item
+    post_item
+  end
+
   # This will add a validation item to the invited_member or invited_admin list for this email
   # If the user has not yet been invited to the group they will be added as a member (an exception is raised if group is full).
-  # If an existing validation for this email and badge_url already exists for this current_user_id, it will be overwritten
+  # If an existing validation for this combination of email + creator + badge already exists for this current_user_id, it's overwritten.
   # Returns the created/updated validation_item hash.
   def add_invited_user_validation(current_user_id, email, badge_url, summary, body, preserve_body_html = false)
     # Attempt to find an existing invitation for them and create a new one if needed
@@ -986,7 +1032,8 @@ class Group
         invited_user_item = { 
           'email' => email, 
           'invite_date' => Time.now, 
-          'validations' => [] 
+          'validations' => [],
+          'posts' => [],
         }
         self.invited_members << invited_user_item
       else

@@ -343,7 +343,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           <img id="headerImage" src$="[[badge.attributes.image_url]]">
         </div>
         <div id="headerText">
-          <div id="subtitle" style$="font-size: [[subtitleFontSizeEm]]em;">Bulk Award</div>
+          <div id="subtitle" style$="font-size: [[subtitleFontSizeEm]]em;">Bulk Endorse</div>
           <h1 id="title" style$="font-size: [[titleFontSizeEm]]em;">[[badge.attributes.name]]</h1>
         </div>
       </div>
@@ -361,15 +361,16 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
         <div id="blankPanel" hidden="[[hasItems]]">
           <div class="contentBlock">
-            The bulk award tool allows you to create badge endorsements for many people at a time, even if they are not yet a member of your 
-            Badge List group. You will need to build a list of endorsement items. Each item must have an email address and a 
-            &ldquo;summary&rdquo;, which is the text that is displayed on the badge recipient's portfolio.
-            You can optionally include an endorsement body as well.
+            <p>
+              This tool allows you to create badge portfolio items for many people at a time, even if they are not yet a member of your 
+              Badge List group. To use this tool you will need to build a list of portfolio items. Each portfolio item can be either
+              an endorsement or a piece of evidence.
+            </p>
           </div>
 
           <div class="contentBlock">
             <div class="sectionHeader">
-              To add new endorsement items you have three options:
+              To add new portfolio items you have three options:
             </div>
 
             <ul class="optionButtons">
@@ -440,6 +441,8 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                   <th>Email</th>
                   <th>Summary</th>
                   <th class="showAt480">Body</th>
+                  <th class="showAt480">Requirement</th>
+                  <th class="showAt480">Format</th>
                 </tr>
               </thead>
               <tbody>
@@ -456,6 +459,8 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                     <td class="showAt480">
                       <pre hidden="[[!item.attributes.body]]">[[item.attributes.body]]</pre>
                     </td>
+                    <td class="showAt480">[[item.attributes.requirement]]</td>
+                    <td class="showAt480">[[item.attributes.format]]</td>
                   </tr>
                 </template>
               </tbody>
@@ -494,12 +499,18 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             <bl-input-text id="selectedItemEmail" label="Email" format="email" value="{{endorsements.selectedItem.attributes.email}}"
               class="orange" autofocus>
             </bl-input-text>
-            <bl-input-text id="selectedItemSummary" label="Endorsement Summary" value="{{endorsements.selectedItem.attributes.summary}}"
+            <bl-input-text id="selectedItemSummary" label="Summary" value="{{endorsements.selectedItem.attributes.summary}}"
               class="orange">
             </bl-input-text>
-            <bl-input-rich-text id="selectedItemBody" label="Endorsement Body" value="{{endorsements.selectedItem.attributes.body}}"
+            <bl-input-rich-text id="selectedItemBody" label="Body" value="{{endorsements.selectedItem.attributes.body}}"
               class="orange" bounding-element="[[getElement('editItemDialog')]]">
             </bl-input-rich-text>
+            <bl-input-text id="selectedItemRequirement" label="Post as Evidence to Requirement"
+              value="{{endorsements.selectedItem.attributes.requirement}}" class="orange">
+            </bl-input-text>
+            <bl-input-text id="selectedItemFormat" label="Evidence Format"
+              value="{{endorsements.selectedItem.attributes.format}}" class="orange">
+            </bl-input-text>
           </form>
         </iron-form>
       </paper-dialog-scrollable>
@@ -544,12 +555,18 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
 
             <bl-input-textarea id="buildItemsEmails" label="List of Emails" value="{{buildItemsEmails}}" class="orange" autofocus
               rows="5"></bl-input-textarea>
-            <bl-input-text id="buildItemsSummary" label="Endorsement Summary" value="{{buildItemsSummary}}"
+            <bl-input-text id="buildItemsSummary" label="Summary" value="{{buildItemsSummary}}"
               class="orange">
             </bl-input-text>
-            <bl-input-rich-text id="buildItemsBody" label="Endorsement Body" value="{{buildItemsBody}}"
+            <bl-input-rich-text id="buildItemsBody" label="Body" value="{{buildItemsBody}}"
               class="orange" bounding-element="[[getElement('pasteEmailsDialog')]]">
             </bl-input-rich-text>
+            <bl-input-text id="selectedItemRequirement" label="Post as Evidence to Requirement"
+              value="{{endorsements.selectedItem.attributes.requirement}}" class="orange">
+            </bl-input-text>
+            <bl-input-text id="selectedItemFormat" label="Evidence Format"
+              value="{{endorsements.selectedItem.attributes.format}}" class="orange">
+            </bl-input-text>
           </form>
         </iron-form>
       </paper-dialog-scrollable>
@@ -578,19 +595,26 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             <p>
               <strong>Click the &ldquo;Select a File&rdquo; button below to import a file from your computer.</strong>
             </p>
-            <p>
-              <small>
-                To use this tool you will first need to build a CSV file with up to three columns: 
-                Email, Summary and Body. Email and summary are required, body is optional. Body can contain HTML.
-              </small>
-            </p>
-            <p><small>Helpful Resources:</small></p>
+            <small>
+              <p>
+                To use this tool you will first need to build a CSV file with up to five columns: Email, Summary, Body, Requirement and
+                Format. This is an advanced tool which can take some work to figure out when using it for the first time.
+              </p>
+              <p>
+                Please check out the resources below and email us at <a href="mailto:help@badgelist.com">help@badgelist.com</a> if you'd
+                like assistance.
+              </p>
+              <p>Helpful Resources:</p>
+            </small>
             <ul class="small">
               <li>
-                <a href$="[[appPath('template.bulkAwardingCsv')]]">Download Bulk Awarding CSV template</a>.
+                <a href$="[[appPath('link.bulkAwardTutorialVideo', app)]]" target="_blank">3 Minute Tutorial Video on Bulk Endorsing</a>.
               </li>
               <li>
-                <a href$="[[appPath('link.csvTutorial')]]" target="_blank">Tutorial: How to build a CSV file</a>.
+                <a href$="[[appPath('template.bulkAwardingCsv', app)]]">Download Bulk Endorsement CSV template</a>.
+              </li>
+              <li>
+                <a href$="[[appPath('link.csvTutorial', app)]]" target="_blank">Tutorial: How to build a CSV file</a>.
               </li>
             </ul>
             <input id="csvFileInput" accept=".csv" type="file" hidden>
@@ -634,7 +658,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
         <iron-form id="mappingForm">
           <form>
             <p>
-              Please select which column headers from your CSV file contain which of the endorsement item fields.
+              Please select which column headers from your CSV file contain which of the portfolio item fields.
             </p>
 
             <template is="dom-repeat" items="{{endorsements.csvColumnMap}}" as="csvColumnMapItem">
@@ -665,7 +689,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
     <!-- #=== START IMPORT DIALOG ===# -->
 
     <paper-dialog id="startImportDialog" class="orange dialog-gradients" modal dynamic-align>
-      <h2>Import Badge Endorsements</h2>
+      <h2>Import Portfolio Items</h2>
       <div class="dialogIcon">
         <i class="icon-cloud-upload"></i>
       </div>
@@ -674,8 +698,8 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
         <iron-form id="startImportForm">
           <form>
             <p>
-              By importing your endorsement items you will instantly award the badge to any users who already have Badge List accounts. 
-              People who have not yet created accounts will be awarded the badge as soon as they create an account.
+              People who have not yet created Badge List accounts will not be added to the badge until they create their account.
+              Until then they will appear under the &ldquo;Invited Members&rdquo; list on the group screen.
             </p>
 
             <h3>Bulk Award Options</h3>
@@ -695,7 +719,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
           <i class="icon-arrow-left"></i> Return to List
         </paper-button>
         <paper-button class="orange primary" on-tap="startImport" dialog-confirm>
-          <i class="icon-shield"></i> Award Badges Now
+          <i class="icon-shield"></i> Start Import
         </paper-button>
       </div>
     </paper-dialog>
@@ -703,7 +727,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
     <!-- #=== IMPORTER IMPORTING DIALOG ===# -->
 
     <paper-dialog id="importerImportingDialog" class="orange no-title-bar" modal dynamic-align>
-      <h2>Importing Endorsement Items...</h2>
+      <h2>Importing Portfolio Items...</h2>
 
       <paper-spinner-lite active class="orange"></paper-spinner-lite>
             

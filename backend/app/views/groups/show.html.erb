@@ -457,9 +457,23 @@
                 </span>
               </td>
               <td>
-                <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
-                <%= u['validations'].map{|v| "#{v['badge']} (Issued)"}\
-                  .join(', ') unless u['validations'].blank? %>
+                <%
+                  invited_badges = u['badges'] || []
+                  posted_badges = u['posts'].blank? ? [] : u['posts'].map{ |i| i['badge'] }
+                  issued_badges = u['validations'].blank? ? [] : u['validations'].map{ |i| i['badge'] }
+                  badge_strings = (invited_badges + posted_badges + issued_badges).uniq.map do |badge_url|
+                    if issued_badges.include?(badge_url)
+                      badge_status = 'Awarded'
+                    elsif posted_badges.include?(badge_url)
+                      badge_status = 'Evidence'
+                    else
+                      badge_status = 'Invited'
+                    end
+
+                    "#{badge_url} (#{badge_status})"
+                  end
+                %>
+                <%= badge_strings.join(', ') %>
               </td>
               <td>
                 <%= link_to '<i class="fa fa-envelope"></i> Resend'.html_safe, 
@@ -529,7 +543,7 @@
               </td>
               <td>
                 <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
-                <%= u['validations'].map{|v| "#{v['badge']} (Issued)"}\
+                <%= u['validations'].map{|v| "#{v['badge']} (Awarded)"}\
                   .join(', ') unless u['validations'].blank? %>
               </td>
               <td>
