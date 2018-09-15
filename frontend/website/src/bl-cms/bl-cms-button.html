@@ -44,6 +44,8 @@ Include a `flat` value in the `styles` array in order to turn off the default ra
           
           content: Object,
 
+          currentUser: Object,
+
           color: String,
 
           styles: {
@@ -53,7 +55,7 @@ Include a `flat` value in the `styles` array in order to turn off the default ra
 
           link: {
             type: String,
-            computed: '_link(content.fields.link, content.fields.linkForUsers)',
+            computed: '_link(content.fields.link, content.fields.linkForUsers, currentUser)',
           },
 
           target: {
@@ -77,8 +79,12 @@ Include a `flat` value in the `styles` array in order to turn off the default ra
 
       // #=== PROPERTY COMPUTER METHODS ===#
 
-      _link(link, linkForUsers) {
-        return (linkForUsers && linkForUsers.length) ? linkForUsers : link;
+      _link(link, linkForUsers, currentUser) {
+        if (currentUser && currentUser.id && linkForUsers && linkForUsers.length) {
+          return linkForUsers;
+        } else {
+          return link;
+        }
       }
 
       _target(openInNewTab) {

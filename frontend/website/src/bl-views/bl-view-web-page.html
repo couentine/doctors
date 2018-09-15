@@ -247,6 +247,7 @@ This displays a page item from the CMS.
                   content="[[button]]"
                   color="[[content.fields.buttonColor]]"
                   styles="[[addStyle(content.fields.buttonStyles, 'large')]]"
+                  current-user="[[currentUser]]"
                 ></bl-cms-button>
               </li>
             </template>
@@ -261,31 +262,59 @@ This displays a page item from the CMS.
         <template is="dom-repeat" id="sectionRepeater" items="{{content.fields.sections}}" as="section">
           
           <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'textSection')]]">
-            <bl-cms-text-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-text-section>
+            <bl-cms-text-section
+              content="[[section]]"
+              width-breakpoint="[[widthBreakpoint]]"
+              current-user="[[currentUser]]"
+            ></bl-cms-text-section>
           </template>
 
           <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'simpleListSection')]]">
-            <bl-cms-simple-list-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-simple-list-section>
+            <bl-cms-simple-list-section
+              content="[[section]]"
+              width-breakpoint="[[widthBreakpoint]]"
+              current-user="[[currentUser]]"
+            ></bl-cms-simple-list-section>
           </template>
 
           <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'tileListSection')]]">
-            <bl-cms-tile-list-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-tile-list-section>
+            <bl-cms-tile-list-section
+              content="[[section]]"
+              width-breakpoint="[[widthBreakpoint]]"
+              current-user="[[currentUser]]"
+            ></bl-cms-tile-list-section>
           </template>
 
           <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'quoteListSection')]]">
-            <bl-cms-quote-list-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-quote-list-section>
+            <bl-cms-quote-list-section
+              content="[[section]]"
+              width-breakpoint="[[widthBreakpoint]]"
+              current-user="[[currentUser]]"
+            ></bl-cms-quote-list-section>
           </template>
 
           <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'diagramSection')]]">
-            <bl-cms-diagram-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-diagram-section>
+            <bl-cms-diagram-section
+              content="[[section]]"
+              width-breakpoint="[[widthBreakpoint]]"
+              current-user="[[currentUser]]"
+            ></bl-cms-diagram-section>
           </template>
 
           <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'imageSection')]]">
-            <bl-cms-image-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-image-section>
+            <bl-cms-image-section
+              content="[[section]]"
+              width-breakpoint="[[widthBreakpoint]]"
+              current-user="[[currentUser]]"
+            ></bl-cms-image-section>
           </template>
 
           <template is="dom-if" if="[[equal(section.sys.contentType.sys.id, 'videoSection')]]">
-            <bl-cms-video-section content="[[section]]" width-breakpoint="[[widthBreakpoint]]"></bl-cms-video-section>
+            <bl-cms-video-section
+              content="[[section]]"
+              width-breakpoint="[[widthBreakpoint]]"
+              current-user="[[currentUser]]"
+            ></bl-cms-video-section>
           </template>
 
         </template>

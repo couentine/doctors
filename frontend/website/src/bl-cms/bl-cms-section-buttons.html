@@ -40,6 +40,7 @@ This renders the buttons for a section.
           content="[[button]]"
           color="[[content.fields.buttonColor]]"
           styles="[[addStyle(content.fields.buttonStyles, 'large')]]"
+          current-user="[[currentUser]]"
         ></bl-cms-button>
       </div>
     </template>
@@ -55,6 +56,8 @@ This renders the buttons for a section.
         return {
 
           content: Object,
+          
+          currentUser: Object,
 
           hidden: {
             type: Boolean,
