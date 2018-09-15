@@ -10,9 +10,9 @@ class HomeController < ApplicationController
         format.html do 
           render_polymer_website('Badge List - Digital credentials for educators, companies and professional development orgs', {
             'include_metadata' => true,
-            'metadata_title' => 'Overview of the Badge List Platform',
-            'metadata_description' => 'Badge List helps educators, companies and professional development orgs create Open Badges ' \
-              + 'to guide learning and recognize achievement.',
+            'metadata_title' => 'Digital badges help your learning community grow, engage and inspire',
+            'metadata_description' => 'Badge List provides data-driven learning tools that decrease costs and improve outcomes for ' \
+              'professional development, customer training, k12 education and higher ed.',
             'metadata_image' => bl_asset_url('badge-list-icon.png'),
             'metadata_image_width' => '500',
             'metadata_image_height' => '500',
@@ -44,9 +44,9 @@ class HomeController < ApplicationController
     if current_user.present?
       render_polymer_website('Badge List - Digital credentials for educators, companies and professional development orgs', {
         'include_metadata' => true,
-        'metadata_title' => 'Badge List',
-        'metadata_description' => 'Badge List helps educators, companies and professional development orgs create Open Badges ' \
-          + 'to guide learning and recognize achievement.',
+        'metadata_title' => 'Digital badges help your learning community grow, engage and inspire',
+        'metadata_description' => 'Badge List provides data-driven learning tools that decrease costs and improve outcomes for ' \
+          'professional development, customer training, k12 education and higher ed.',
         'metadata_image' => bl_asset_url('badge-list-icon.png'),
         'metadata_image_width' => '500',
         'metadata_image_height' => '500',
@@ -75,7 +75,7 @@ class HomeController < ApplicationController
       'Badge List Pricing', {
         'include_metadata' => true,
         'metadata_title' => 'Badge List Pricing',
-        'metadata_description' => 'Badge List offers a free forever tier and an array of paid plans for organizations of all sizes.',
+        'metadata_description' => 'Badge List is free to use. There are an array of paid plans which offer advanced functionality.',
         'metadata_image' => bl_asset_url('badge-list-icon.png'),
         'metadata_image_width' => '500',
         'metadata_image_height' => '500',
@@ -118,9 +118,9 @@ class HomeController < ApplicationController
   def landing_pages
     render_polymer_website('Badge List - Digital credentials for educators, companies and professional development orgs', {
       'include_metadata' => true,
-      'metadata_title' => 'Badge List',
-      'metadata_description' => 'Badge List helps educators, companies and professional development orgs create Open Badges ' \
-        + 'to guide learning and recognize achievement.',
+      'metadata_title' => 'Digital badges help your learning community grow, engage and inspire',
+      'metadata_description' => 'Badge List provides data-driven learning tools that decrease costs and improve outcomes for ' \
+        'professional development, customer training, k12 education and higher ed.',
       'metadata_image' => bl_asset_url('badge-list-icon.png'),
       'metadata_image_width' => '500',
       'metadata_image_height' => '500',

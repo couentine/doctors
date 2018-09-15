@@ -40,38 +40,51 @@ This renders a CMS section item.
           max-width: 1000px;
         }
         #row.leftAlign #rowInner, #row.rightAlign #rowInner {
-          flex-direction: row;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        @media(min-width: 840px) {
+          #row.leftAlign #rowInner, #row.rightAlign #rowInner {
+            flex-direction: row;
+            align-items: center;
+          }
         }
 
           #image {
             margin: 0 0 1rem 0;
+            padding: 0 0 1.5rem 0;
             flex: 1 1 50%;
             order: 1;
 
             z-index: 5;
           }
+          #image.dropShadow img {
+            filter: drop-shadow(4px 5px 1.7px rgba(0, 0, 0, 0.14));
+            -webkit-filter: drop-shadow(4px 5px 1.7px rgba(0, 0, 0, 0.14)); 
+            filter: drop-shadow(4px 5px 1.7px rgba(0, 0, 0, 0.14));
+          }
+          #image.clipToCircle img {
+            border-radius: 100em;
+          }
+          #image.cardMode img {
+            border-radius: 9px;
+            @apply --bl-shadow-5;
+          }
           @media(min-width: 840px) {
             #image {
               margin: 0 0 2rem 0;
+              padding: 0 0 3rem 0;
             }
-          }
-          #row.leftAlign #image {
-            margin: 0;
-            padding-right: 1rem;
-            text-align: center;
-          }
-          #row.rightAlign #image {
-            margin: 0;
-            padding-left: 1rem;
-            text-align: center;
-            order: 2;
           }
           @media(min-width: 840px) {
             #row.leftAlign #image {
-              padding-right: 2rem;
+              margin: 0;
+              padding: 0 3rem 0 0;
             }
             #row.rightAlign #image {
-              padding-left: 2rem;
+              margin: 0;
+              padding: 0 0 0 3rem;
+              order: 2;
             } 
           }
             #image img {
@@ -92,6 +105,13 @@ This renders a CMS section item.
           #row.centerAlign #content {
             max-width: 80%;
           }
+          #row.leftAlign #content {
+            text-align: left;
+          }
+          #row.rightAlign #content {
+            text-align: left; /* left aligned on mobile */
+            order: 1;
+          }
           @media(min-width: 480px) {
             #row.centerAlign #content {
               max-width: 70%;
@@ -101,13 +121,9 @@ This renders a CMS section item.
             #row.centerAlign #content {
               max-width: 60%;
             }
-          }
-          #row.leftAlign #content {
-            text-align: left;
-          }
-          #row.rightAlign #content {
-            text-align: right;
-            order: 1;
+            #row.rightAlign #content {
+              text-align: right;
+            }
           }
             #body {
               font-size: 1.1rem;
@@ -122,11 +138,13 @@ This renders a CMS section item.
             margin-bottom: 0;
           }
         
-          #row.leftAlign #buttons {
-            justify-content: flex-start;
+          #row.leftAlign #buttons, #row.rightAlign #buttons {
+            justify-content: flex-start;  
           }
-          #row.rightAlign #buttons {
-            justify-content: flex-end;
+          @media(min-width: 840px) {
+            #row.rightAlign #buttons {
+              justify-content: flex-end;
+            }
           }
 
     </style>
@@ -136,8 +154,8 @@ This renders a CMS section item.
 
       <div id="rowInner">
       
-        <div id="image" hidden="[[!has(content.fields.image)]]">
-          <img src$="[[imageUrl(content.fields.image.fields.file.url, widthBreakpoint, '250\,500\,500\,500')]]">
+        <div id="image" hidden="[[!has(content.fields.image)]]" class$="[[imageClass]]">
+          <img src$="[[imageUrl(content.fields.image.fields.file.url, widthBreakpoint, '500\,500\,500\,500')]]">
         </div>
           
         <div id="content">
@@ -175,6 +193,12 @@ This renders a CMS section item.
               '_textRowClass(content.fields.styles, content.fields.textColor, content.fields.sectionAlignment, content.fields.image)',
           },
 
+          /** Returns the class string for the image. */
+          imageClass: {
+            type: String,
+            computed: '_imageClass(content.fields.imageStyles)',
+          },
+
         }
       }
 
@@ -186,6 +210,10 @@ This renders a CMS section item.
           .concat(`${sectionAlignment}Align`)
           .concat(`image${image ? 'Present' : 'Missing'}`)
           .join(' ');
+      }
+
+      _imageClass(imageStyles) {
+        return (imageStyles ? imageStyles : []).join(' ');
       }
 
     }
