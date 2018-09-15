@@ -64,21 +64,12 @@
           background: var(--bl-purple-500);
         }
 
-        #headerBottom {
-          text-align: center;
-          color: white;
-        }
-          h1 {
-            display: inline-block;
-            margin: 0;
-            font-size: 2rem;
-            padding: 0.2em 0.6em;
-            border-radius: 50em;
-            background: radial-gradient(circle at 60% 40%, var(--bl-purple-300), var(--bl-purple-500));
-          }
-
-        bl-header-nav-left, bl-header-nav-right {
+        bl-header-nav-left {
           --link-color: white;
+        }
+        bl-header-nav-right {
+          --link-color: white;
+          --button-color: var(--bl-purple-600);
         }
 
       /* === BANNER ROW === */
@@ -95,12 +86,24 @@
           font-size: 1.1rem;
           line-height: 1.4em;
 
-          height: 22rem;
+          padding-top: 5rem;
+          height: 17rem;
         }
+          h1 {
+            display: block;
+            margin: 0;
+            padding: 0;
+            
+            font-size: 2rem;
+            line-height: 1.5em;
+
+            text-align: center;
+            color: white;
+          }
           #groupMountains {
             position: absolute;
             width: 102%;
-            height: 72%;
+            height: 62%;
             bottom: -28px;
             left: -1%;
             z-index: 4;
@@ -109,6 +112,14 @@
               #groupMountains {
                 bottom: -36px;
               }
+            }
+            @media (min-width: 840px) {
+              #bannerRow {
+                height: 25rem;
+              }
+                #groupMountains {
+                  height: 68%;
+                }
             }
 
       /* === PRICING ROW === */
@@ -241,24 +252,23 @@
         expanded-percentage="{{expandedPercentage}}">
       <div id="expandedBackground" slot="expandedBackground">&nbsp;</div>
       <div id="condensedBackground" slot="condensedBackground">&nbsp;</div>
-      <div id="headerBottom" slot="headerBottom">
-        <h1 style$="font-size:[[linearExpansionValue(2, 1.2, expandedPercentage)]]rem; 
-            margin-bottom:[[linearExpansionValue(0, 0.7, expandedPercentage)]]rem; background: 
-            radial-gradient(circle at 60% 40%, rgba(186,104,200,[[expandedPercentage]]), rgba(142,36,170,[[expandedPercentage]]));">
-          Badge List Pricing
-        </h1>
-      </div>
 
-      <bl-header-nav-left slot="leftNav">
+      <bl-header-nav-left slot="leftNav" current-user="[[currentUser]]">
         <img src$="[[website.manifest.assets.brand.shieldWhitePng]]">
       </bl-header-nav-left>
       
-      <bl-header-nav-right slot="rightNav" id="rightNave"></bl-header-nav-right>
+      <bl-header-nav-right
+        slot="rightNav"
+        id="rightNav"
+        current-user="[[currentUser]]"
+        cms-preview-mode="[[cmsPreviewMode]]"
+      ></bl-header-nav-right>
 
       <div id="content" slot="content" style$="background-image: url('[[website.manifest.assets.backgrounds.topographicMapPng]]')">
         
         <!-- === BANNER ROW === -->
         <div id="bannerRow">
+          <h1>Badge List Pricing</h1>
           <svg id="groupMountains" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 969.77 453.91">
             <defs>
               <linearGradient id="a" x1="488.03" x2="488.03" y1="398.76" gradientUnits="userSpaceOnUse">

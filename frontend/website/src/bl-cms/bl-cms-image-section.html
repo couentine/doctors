@@ -1,0 +1,91 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="bl-cms-section-styles.html">
+<link rel="import" href="bl-cms-section-mixin.html">
+<link rel="import" href="bl-cms-background-pattern.html">
+<link rel="import" href="bl-cms-section-title.html">
+<link rel="import" href="bl-cms-section-subtitle.html">
+<link rel="import" href="bl-cms-section-buttons.html">
+<link rel="import" href="bl-cms-section-footer.html">
+
+<!--
+# Badge List CMS Section #
+
+This renders a CMS section item.
+-->
+<dom-module id="bl-cms-image-section">
+  <template>
+
+    <style include="bl-cms-section-style-classes">
+      
+      /* === LAYOUT & CONTENT STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+        }
+
+        #row.centerText {
+          text-align: center;
+        }
+
+          #image {
+            display: block;
+            margin-top: 2rem;
+          }
+          #row.hideHeader #image {
+            margin-top: 0;
+          }
+            #image img {
+              display: block;
+              max-width: 100%;
+              max-height: calc(80vh - 3rem);
+
+              border-radius: 9px;
+              overflow: hidden;
+              @apply --bl-shadow-5;
+            }
+            #row.centerText #image img {
+              margin: 0 auto;
+            }
+
+    </style>
+
+    <div id="row" class$="[[rowClass]]" style$="[[rowStyle]]">
+      <bl-cms-background-pattern content="[[content]]"></bl-cms-background-pattern>
+
+      <div id="rowInner">  
+      
+        <bl-cms-section-title id="title" content="[[content]]"></bl-cms-section-title>
+
+        <bl-cms-section-subtitle id="subtitle" content="[[content]]"></bl-cms-section-subtitle>
+
+        <div id="image">
+          <img src$="[[imageUrl(content.fields.image.fields.file.url, widthBreakpoint, '480\,840\,1000\,1000', true)]]">
+        </div>
+
+        <bl-cms-section-buttons id="buttons" content="[[content]]" current-user="[[currentUser]]"></bl-cms-section-buttons>
+
+        <bl-cms-section-footer id="footer" content="[[content]]"></bl-cms-section-footer>
+
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlCmsImageSection extends BlCmsSectionMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-cms-image-section'; }
+
+      static get properties() {
+        return {}
+      }
+
+    }
+
+    window.customElements.define(BlCmsImageSection.is, BlCmsImageSection);
+  </script>
+</dom-module>

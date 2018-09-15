@@ -1,0 +1,223 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="bl-cms-section-styles.html">
+<link rel="import" href="bl-cms-background-pattern.html">
+<link rel="import" href="bl-cms-section-mixin.html">
+<link rel="import" href="bl-cms-section-title.html">
+<link rel="import" href="bl-cms-section-subtitle.html">
+<link rel="import" href="bl-cms-section-buttons.html">
+<link rel="import" href="bl-cms-section-footer.html">
+
+<!--
+# Badge List CMS Section #
+
+This renders a CMS section item.
+-->
+<dom-module id="bl-cms-quote-list-section">
+  <template>
+
+    <style include="bl-cms-section-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+        }
+
+      /* === CONTENT STYLES === */
+
+        #items {
+          list-style: none;
+          margin: -1.5rem -2rem;
+          padding: 0;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+          #items > li {
+            flex: 1 1 400px;
+            max-width: 600px;
+            
+            display: flex;
+            flex-direction: column;
+            margin: 2em;
+
+            border-radius: 9px;
+            overflow: hidden;
+
+            @apply --bl-shadow-5;
+          }
+            .itemQuote {
+              flex: 1 0 auto;
+              padding: 1.5rem;
+            }
+              .itemQuote span {
+                font-size: 1.1rem;
+                line-height: 1.7rem;
+                padding: 0.17rem 0.5rem;
+
+                color: white;
+
+                box-decoration-break: clone;
+                -webkit-box-decoration-break: clone;
+              }
+              .itemQuote span::before {
+                content: "\201C";
+                font-size: 3em;
+                line-height: 0;
+                
+                position: relative;
+                top: 0.42em;
+                left: -0.4em;
+                margin-right: -0.35em;
+                
+                color: white;
+                font-family: 'Times New Roman';
+                text-shadow: 1px 1px 1px rgb(0, 0, 0, 0.3);
+              }
+              .itemQuote span::after {
+                content: "\201D";
+                font-size: 3em;
+                line-height: 0;
+                
+                position: relative;
+                top: 0.42em;
+                right: -0.4em;
+                margin-left: -0.35em;
+                
+                color: white;
+                font-family: 'Times New Roman';
+                text-shadow: 1px 1px 1px rgb(0, 0, 0, 0.3);
+              }
+            .itemPerson {
+              flex: 0 0 auto;
+
+              margin: 0 1rem 1rem 1rem;
+              text-align: right;
+
+              font-size: 1em;
+              line-height: 1.5em;
+
+              color: white;
+              font-style: italic;
+            }
+            .itemOrganization {
+              flex: 0 0 auto;
+
+              display: flex;
+              flex-direction: row;
+              justify-content: flex-start;
+              align-items: center;
+
+              font-size: 1.1rem;
+              font-weight: 700;
+              line-height: 1.3em;
+              padding: 1rem 5rem 1rem 1rem;
+              background: var(--bl-grey-100);
+            }
+              .logo {
+                flex: 0 0 auto;
+                margin-right: 1rem;
+              }
+                .logo img {
+                  max-height: 3em;
+                }
+              .itemOrganization a {
+                display: block;
+                flex: 0 1 auto;
+
+                text-decoration: none;
+                color: var(--bl-grey-800);
+                transition: 0.2s all;
+              }
+              .itemOrganization a:hover, .itemOrganization a:focus {
+                text-decoration: underline;
+                color: var(--bl-grey-900);
+              }
+              .itemOrganization a:visited {
+                color: var(--bl-grey-600);
+              }
+
+    </style>
+
+    <div id="row" class$="[[rowClass]]" style$="[[rowStyle]]">
+      <bl-cms-background-pattern content="[[content]]"></bl-cms-background-pattern>
+
+      <div id="rowInner">
+      
+        <bl-cms-section-title content="[[content]]"></bl-cms-section-title>
+
+        <bl-cms-section-subtitle id="subtitle" content="[[content]]"></bl-cms-section-subtitle>
+
+        <ul id="items">
+          <template is="dom-repeat" items="[[content.fields.items]]" as="item">
+            <li style$="[[itemStyle(item, widthBreakpoint)]]">
+              
+              <div class="itemQuote">
+                <span style$="background: [[content.fields.itemHighlightColor]]DD;">
+                  [[item.fields.quote]]
+                </span>
+              </div>
+              
+              <div class="itemPerson">
+                <div class="name">
+                  [[item.fields.name]]
+                </div>
+                <div class="title">
+                  [[item.fields.jobTitle]]
+                </div>
+              </div>
+              
+              <div class="itemOrganization">
+                <a class="logo" href$="[[item.fields.organizationLink]]" target="_blank">
+                  <img src$="[[imageUrl(item.fields.logo.fields.file.url, widthBreakpoint, '70\,70\,100\,100', false)]]">
+                </a>
+                <a href$="[[item.fields.organizationLink]]" target="_blank">[[item.fields.organization]]</a>
+              </div>
+
+            </li>
+          </template>
+        </ul>
+
+        <bl-cms-section-buttons id="buttons" content="[[content]]" current-user="[[currentUser]]"></bl-cms-section-buttons>
+
+        <bl-cms-section-footer id="footer" content="[[content]]" class="withDivider"></bl-cms-section-footer>
+
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlCmsQuoteListSection extends BlCmsSectionMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-cms-quote-list-section'; }
+
+      static get properties() {
+        return {}
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /** Builds the style string for the item `<li>` elements. */
+      itemStyle(item, widthBreakpoint) {
+        var backgroundImageUrl = this.imageUrl(item.fields.heroImage.fields.file.url, widthBreakpoint, '600,840,1000,1000', true);
+
+        return `
+          background:
+            linear-gradient(transparent, transparent, rgba(0, 0, 0, 0.4)),
+            url('${backgroundImageUrl}');
+          background-size: cover;
+          background-position: center;
+        `;
+      }
+
+    }
+
+    window.customElements.define(BlCmsQuoteListSection.is, BlCmsQuoteListSection);
+  </script>
+</dom-module>

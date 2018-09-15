@@ -12,7 +12,7 @@
 %>
 
   <head>
-    <% #=== GOOGLE TAG MANAGER - TAG 1 OF 2 (Loads Google Analytics, Intercom, etc.) ===# %>
+    <% #=== GOOGLE TAG MANAGER - TAG 1 OF 2 ===# %>
     <%= render 'layouts/shared/google_tag_manager_head' %>
 
     <% #=== PAGE TITLE, APP ICON & BASE ===# %>
@@ -34,24 +34,27 @@
 
     <% if @include_metadata %>
       <!-- === OPEN GRAPH METADATA === -->
-      <meta property="og:type" content="Article" />
-      <meta property="og:title" content="<%= @metadata['metadata_title'] %>" />
-      <meta property="og:description" content="<%= @metadata['metadata_description'] %>" />
-      <meta property="og:image" content="<%= @metadata['metadata_image'] %>" />
+      <meta property="og:type" content="Article"/>
+      <meta property="og:title" content="<%= @metadata['metadata_title'] %>" data-key="meta_title" />
+      <meta property="og:description" content="<%= @metadata['metadata_description'] %>"  data-key="meta_description" />
+      <meta property="og:image" content="<%= @metadata['metadata_image'] %>"  data-key="meta_image" />
       <meta property="og:site_name" content="<%= @metadata['metadata_site_name'] %>" />
       <meta property="og:url" content="<%= @metadata['metadata_url'] %>" />
       
       <!-- === TWITTER CARD METADATA === -->
       <meta name="twitter:card" content="summary" />
       <meta name="twitter:site" content="@badgelist" />
-      <meta name="twitter:title" content="<%= @metadata['metadata_title'] %>" />
-      <meta name="twitter:description" content="<%= @metadata['metadata_description'] %>" />
-      <meta name="twitter:image" content="<%= @metadata['metadata_image'] %>" />
-      <meta name="twitter:url" content="<%= @metadata['metadata_url'] %>" />
+      <meta name="twitter:title" content="<%= @metadata['metadata_title'] %>" data-key="meta_title" />
+      <meta name="twitter:description" content="<%= @metadata['metadata_description'] %>"  data-key="meta_description" />
+      <meta name="twitter:image" content="<%= @metadata['metadata_image'] %>"  data-key="meta_image" />
+      <meta name="twitter:url" content="<%= @metadata['metadata_url'] %>"  data-key="meta_url" />
     <% end %>
 
     <% #=== ICONS ===# %>
     <%= stylesheet_link_tag 'shared/bl-icons/style', media: 'all' %>
+    
+    <% #=== GOOGLE FONTS ===# %>
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
 
     <% #=== POLYMER ===# %>
     <script src="<%= @polymer_website_root_url %>/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
@@ -68,6 +71,10 @@
     
     <% #=== INTERCOM ===# %>
     <%= render 'layouts/shared/intercom' %>
+    
+    <% #=== CONTENTFUL CMS ===# %>
+    <script src="https://cdn.jsdelivr.net/npm/contentful@7.0.0/dist/contentful.browser.min.js"></script>
+
   </head>
 
   <style type="text/css">
@@ -108,7 +115,7 @@
 
   <% #=== PAGE BODY ===# %>
   <body class="loading">
-    <% #=== GOOGLE TAG MANAGER (Loads Google Analytics, Intercom, etc.) - TAG 2 OF 2 ===# %>
+    <% #=== GOOGLE TAG MANAGER - TAG 2 OF 2 ===# %>
     <%= render 'layouts/shared/google_tag_manager_body' %>
 
     <%= yield %>

@@ -16,7 +16,7 @@ All Badge List app views components should extend this mixin. It extends the `bl
           /* Required. Indicates the document title when this view is activated. */
           title: {
             type: String,
-            observer: '_typeChanged',
+            observer: '_titleChanged',
           },
           
           /**
@@ -99,7 +99,7 @@ All Badge List app views components should extend this mixin. It extends the `bl
         }
       }
 
-      _typeChanged(newValue, oldValue) {
+      _titleChanged(newValue, oldValue) {
         if (newValue && (this.status == 'active')) {
           document.title = newValue;
         }

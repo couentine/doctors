@@ -176,11 +176,16 @@ class ApplicationController < ActionController::Base
       current_user: (current_user.present?) ? current_user.json(:current_user) : nil,
       toast: @toast,
       flags: (current_user.present? && current_user.admin?) ? [:pat] : [], #==> 'pat' = Platform Admin Tools = Enables Admin UI
+      cms: {
+        space_id: ENV['contentful_website_space_id'],
+        token: ENV['contentful_website_token'],
+      },
       
       # these are initialized in `environment.rb`
       asset_base_url: ASSET_BASE_URL,
       assets: POLYMER_WEBSITE_ASSETS,
     }
+    @manifest[:cms][:preview_token] = ENV['contentful_website_preview_token'] if current_user && current_user.admin
     
     render template: 'polymer/website', layout: 'polymer_website'
   end

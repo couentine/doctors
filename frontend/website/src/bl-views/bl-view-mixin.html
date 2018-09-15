@@ -13,6 +13,13 @@ All Badge List website views components should extend this mixin. It extends the
       static get properties() {
         return {
           
+          /* Required unless `cmsKey` is set. Indicates the document title when this view is activated. */
+          title: {
+            type: String,
+            value: 'Badge List',
+            observer: '_titleChanged',
+          },
+          
           /**
            * The current status of the view.
            * Either `inactive`, `loading` or `active`.
@@ -23,25 +30,63 @@ All Badge List website views components should extend this mixin. It extends the
             value: 'uninitialized',
             notify: true,
             readOnly: true,
-            reflectToAttribute: true
+            reflectToAttribute: true,
+          },
+
+          /** Set this to true to hide the chat widget. */
+          noChat: {
+            type: Boolean,
+            value: false,
           },
 
           /** 
           * Setting active to `true` will activate the view. Setting active to `false` has no direct effect.
           * The intended way to use this property is to bind this property to the `active` property of a corresponding `<app-route>` 
-          * component in `<bl-website>`.
+          * component in `<bl-app>`.
           */
           active: {
             type: Boolean,
-            observer: '_activeChanged'
+            observer: '_activeChanged',
           },
 
-          /** The href of the new group button. Changes based on whether the user is logged in. */
-          createGroupPath: {
+          /**
+           * Set this to the slug of this page in the Contentful CMS.
+           * It is used to query the content delivery API and set `content`.
+           * Note: The `documentTitle` specified in the `content` will automatically override the `title` property if set.
+           */
+          cmsKey: String,
+          
+          /**
+           * Optional modifier for `cmsKey`. Specifies the value of `landingPagePath` which is used to filter the CMS page.
+           * If there is a CMS page with `slug == cmsKey` but `landingPagePath != cmsPath` then the page is returned as not found.
+           * Defaults to 'none'.
+           */
+          cmsPath: {
             type: String,
-            computed: '_createGroupPath(currentUser)',
-            value: '/users/sign_up'
-          }
+            value: 'none',
+          },
+
+          /** Returns null if `cmsKey` is blank. Otherwise returns `pending`, `loaded`, or `error`. */
+          cmsStatus: {
+            type: String,
+            readOnly: true,
+          },
+
+          /** If there is an error retrieving content from the CMS, this returns a one sentence, user-facing error message. */
+          cmsErrorMessage: {
+            type: String,
+            readOnly: true,
+          },
+
+          /**
+           * For pages which are pulled from the CMS, this is the CMS content retrieved for the specified `cmsKey`.
+           */
+          content: {
+            type: Object,
+            value: () => { return {} },
+          },
+
+          _timer: Object,
 
         };
       }
@@ -56,34 +101,17 @@ All Badge List website views components should extend this mixin. It extends the
        * start the visual transition without triggering a network reload. Then set the `status` to `active` when everything is ready.
        */
       activate() {
-        if (!this.website.currentView || (this.website.currentView.id != this.id)) {
+        if (!this.website.activeView || (this.website.activeView.id != this.id)) {
           this._setStatus('active');
-          if (this.website.currentView) this.website.currentView.deactivate();
-          this.website.currentView = this;
+          if (this.website.activeView) this.website.activeView.deactivate();
+          document.title = this.title;
+          this.website.activeView = this;
+
+          (this.noChat
+            ? this.website.hideIntercom
+            : this.website.showIntercom
+          )();
         }
-      }
-
-      showIntercom() {
-        if (Intercom) {
-          Intercom('show');
-        }
-      }
-
-      /** 
-       * Call this in order to attempt hiding the intercom UI. Runs recursively every 100 milliseconds waiting for the intercom container
-       * to show up.
-       *
-       * @param {number} remainingTryCount - How many attempts should be made? Defaults to 100.
-       */
-      tryToHideIntercom(remainingTryCount) {
-        if (!remainingTryCount) remainingTryCount = 100;
-
-        if (document.querySelector('#intercom-container'))
-          document.querySelector('#intercom-container').hidden = true;
-        else if (remainingTryCount > 0)
-          setTimeout(function() {
-            this.tryToHideIntercom(remainingTryCount - 1); 
-          }.bind(this), 100);
       }
 
       /** 
@@ -91,23 +119,64 @@ All Badge List website views components should extend this mixin. It extends the
        * Override this method in order to add special logic when the page is de-activated.
        */
       deactivate() {
+        if (this._timer) clearTimeout(this._timer);
         this._setStatus('inactive');
+      }
+
+      // #=== LIFECYCLE EVENTS ===#
+
+      connectedCallback() {
+        if (super.connectedCallback) super.connectedCallback();
+
+        this.website.addEventListener('cms-client-changed', (e) => this._cmsClientChanged(e));
       }
 
       // #=== LISTENER & OBSERVER METHODS ===#
 
-      _activeChanged(newValue, oldValue) {
-        if (newValue && !oldValue)
-          this.activate();
+      _cmsClientChanged(e) {
+        if (this.cmsKey && this.website.cmsClient) {
+          this.website.cmsClient.getEntries({
+            'content_type': 'page',
+            'fields.slug': this.cmsKey,
+            'fields.landingPagePath': this.cmsPath,
+            include: 10,
+          }).then((entries) => {
+            if (entries && entries.items.length) {
+              this.setProperties({
+                content: entries.items[0],
+                title: entries.items[0].fields.documentTitle,
+              });
+              this._setCmsStatus('loaded');
+            } else {
+              this.title = 'Page Not Found - Badge List';
+              this._setCmsErrorMessage('The specified page could not be found. Please check the link and try again.');
+              this._setCmsStatus('error');
+            }
+          }).catch((error) => {
+            console.log('There was a problem loading content from the CMS:' + error);
+            this.title = 'Error - Badge List';
+            this._setCmsErrorMessage('There was a problem communicating with the Badge List server. Please try again later.');
+            this._setCmsStatus('error');
+          });
+        }
       }
 
-      // #=== PROPERTY COMPUTER METHODS ===#
-      
-      _createGroupPath(currentUser) {
-        if (currentUser && currentUser.username)
-          return '/groups/new';
-        else
-          return '/users/sign_up';
+      _cmsKeyChanged(newValue, oldValue) {
+        if ((newValue != undefined) && (newValue != null)) {
+          this._setCmsStatus('pending');
+        }
+      }
+
+      _titleChanged(newValue, oldValue) {
+        if (newValue && (this.status == 'active')) {
+          document.title = newValue;
+        }
+      }
+
+      _activeChanged(newValue, oldValue) {
+        if (newValue && !oldValue) {
+          this.activate();
+        }
       }
 
       // #=== PUBLIC HELPER & UTILITY METHODS ===#

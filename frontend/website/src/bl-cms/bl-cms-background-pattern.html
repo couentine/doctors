@@ -1,0 +1,75 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List CMS Background Pattern #
+
+This renders a background pattern inside of a relatively positioned element.
+-->
+<dom-module id="bl-cms-background-pattern">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & CONTENT STYLES === */
+        
+        :host {
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          
+          z-index: 1;
+        }
+
+    </style>
+
+  </template>
+
+  <script>
+    class BlCmsBackgroundPattern extends Polymer.Element {
+      
+      static get is() { return 'bl-cms-background-pattern'; }
+
+      static get properties() {
+        return {
+
+          content: Object,
+
+          style: {
+            type: String,
+            reflectToAttribute: true,
+            computed: '_style(content.fields.backgroundPattern, content.fields.backgroundPatternOpacity)',
+          },
+
+        }
+      }
+      
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _style(backgroundPattern, backgroundPatternOpacity) {
+        if ((backgroundPattern != undefined) && (backgroundPattern != null)) {
+          var imageWidth = backgroundPattern.fields.file.details.image.width;
+          var imageHeight = backgroundPattern.fields.file.details.image.height;
+          var opacity = (backgroundPatternOpacity ? backgroundPatternOpacity : 50) / 100;
+
+          return `
+            background: url('${backgroundPattern.fields.file.url}');
+            background-size: ${imageWidth}px ${imageHeight}px;
+            background-repeat: repeat;
+            opacity: ${opacity};
+          `;
+        } else {
+          return 'display: none;'
+        }
+      }
+
+    }
+
+    window.customElements.define(BlCmsBackgroundPattern.is, BlCmsBackgroundPattern);
+  </script>
+</dom-module>

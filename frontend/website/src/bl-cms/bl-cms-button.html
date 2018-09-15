@@ -1,0 +1,106 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== STANDARD POLYMER COMPONENTS ===# -->
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List CMS Button #
+
+This renders a CMS section button.
+
+Include a `flat` value in the `styles` array in order to turn off the default raised property.
+-->
+<dom-module id="bl-cms-button">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: inline-block;
+          font-size: 1rem; 
+        }
+
+    </style>
+
+    <a href$="[[link]]" target$="[[target]]" class="button">
+      <paper-button raised="[[raised]]" class$="[[classText]]">[[content.fields.label]]</paper-button>
+    </a>
+
+  </template>
+
+  <script>
+    class BlCmsButton extends Polymer.Element {
+      
+      static get is() { return 'bl-cms-button'; }
+
+      static get properties() {
+        return {
+          
+          content: Object,
+
+          currentUser: Object,
+
+          color: String,
+
+          styles: {
+            type: Array,
+            value: () => { return [] },
+          },
+
+          link: {
+            type: String,
+            computed: '_link(content.fields.link, content.fields.linkForUsers, currentUser)',
+          },
+
+          target: {
+            type: String,
+            computed: '_target(content.fields.openInNewTab)',
+            value: '',
+          },
+
+          classText: {
+            type: String,
+            computed: '_classText(color, styles)',
+          },
+
+          raised: {
+            type: Boolean,
+            computed: '_raised(styles)',
+          },
+
+        }
+      }
+
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _link(link, linkForUsers, currentUser) {
+        if (currentUser && currentUser.id && linkForUsers && linkForUsers.length) {
+          return linkForUsers;
+        } else {
+          return link;
+        }
+      }
+
+      _target(openInNewTab) {
+        return (openInNewTab) ? '_blank' : '';
+      }
+
+      _classText(color, styles) {
+        return (color ? (color + ' ') : '') + (styles ? styles : []).join(' ');
+      }
+
+      _raised(styles) {
+         return (styles == undefined) || (styles == null) || !styles.includes('flat');
+      }
+
+    }
+
+    window.customElements.define(BlCmsButton.is, BlCmsButton);
+  </script>
+</dom-module>

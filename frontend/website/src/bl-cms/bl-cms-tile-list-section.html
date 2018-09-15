@@ -1,0 +1,163 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="bl-cms-section-styles.html">
+<link rel="import" href="bl-cms-section-mixin.html">
+<link rel="import" href="bl-cms-background-pattern.html">
+<link rel="import" href="bl-cms-section-title.html">
+<link rel="import" href="bl-cms-section-subtitle.html">
+<link rel="import" href="bl-cms-section-buttons.html">
+<link rel="import" href="bl-cms-section-footer.html">
+
+<!--
+# Badge List CMS Section #
+
+This renders a CMS section item.
+-->
+<dom-module id="bl-cms-tile-list-section">
+  <template>
+
+    <style include="bl-cms-section-style-classes">
+      
+      /* === LAYOUT & BASE STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+        }
+
+      /* === CONTENT STYLES === */
+
+        #items {
+          list-style: none;
+          margin: 2.5rem -0.25rem;
+          padding: 0;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          flex-wrap: wrap;
+
+          z-index: 5;
+        }
+          #items > li {
+            flex: 1 1 300px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            margin: 0.25rem;
+            padding: 2.5rem;
+            min-width: 12em;
+
+            border-radius: 2px;
+            line-height: 1.5em;
+
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+          }
+            .itemBackgroundImage {
+              position: absolute;
+              top: -3px;
+              right: -3px;
+              bottom: -3px;
+              left: -3px;
+              
+              filter: blur(1.5px) contrast(0.4) brightness(1.25);
+              z-index: 5;
+            }
+            .itemBackgroundColor {
+              position: absolute;
+              top: -3px;
+              right: -3px;
+              bottom: -3px;
+              left: -3px;
+              z-index: 6;
+
+              opacity: 0.4;
+            }
+            .itemTitle {
+              margin-bottom: 1.5rem;
+              font-weight: 600;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+              font-size: 1.2em;
+              line-height: 1.5em;
+              padding-bottom: 1.5rem;
+              z-index: 7;
+            }
+            .itemBody {
+              font-size: 1em;
+              z-index: 7;
+            }
+
+    </style>
+
+    <div id="row" class$="[[rowClass]]" style$="[[rowStyle]]">
+      <bl-cms-background-pattern content="[[content]]"></bl-cms-background-pattern>
+
+      <div id="rowInner">
+        
+        <bl-cms-section-title id="title" content="[[content]]"></bl-cms-section-title>
+        
+        <bl-cms-section-subtitle id="subtitle" content="[[content]]"></bl-cms-section-subtitle>
+
+        <ul id="items" hidden="[[!has(content.fields.items)]]">
+          <template is="dom-repeat" items="[[content.fields.items]]" as="item">
+            <li>
+              <div class="itemBackgroundImage" style$="[[itemBackgroundImageStyle(item, widthBreakpoint)]]"></div>
+              <div class="itemBackgroundColor" style$="[[itemBackgroundColorStyle(index)]]"></div>
+
+              <div class="itemTitle" hidden="[[!has(item.fields.title)]]">
+                [[item.fields.title]]
+              </div>
+              
+              <div class="itemBody" hidden="[[!has(item.fields.body)]]">
+                [[item.fields.body]]
+              </div>
+            </li>
+          </template>
+        </ul>
+
+        <bl-cms-section-buttons id="buttons" content="[[content]]" current-user="[[currentUser]]"></bl-cms-section-buttons>
+
+        <bl-cms-section-footer id="footer" content="[[content]]" class="withDivider"></bl-cms-section-footer>
+
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class BlCmsTileListSection extends BlCmsSectionMixin(Polymer.Element) {
+      
+      static get is() { return 'bl-cms-tile-list-section'; }
+
+      static get properties() {
+        return {}
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /** Builds the style string for the background image panel. */
+      itemBackgroundImageStyle(item, widthBreakpoint) {
+        var backgroundImageUrl = this.imageUrl(item.fields.backgroundImage.fields.file.url, widthBreakpoint, '600,840,1000,1000', true);
+
+        return `
+          background: url('${backgroundImageUrl}');
+          background-position: center;
+          background-size: cover;
+        `;
+      }
+
+      /** Builds the style string for the background color panel. */
+      itemBackgroundColorStyle(index) {
+        return `
+          background: ${this.content.fields.itemBackgroundColors[index % this.content.fields.itemBackgroundColors.length]};
+        `;
+      }
+
+    }
+
+    window.customElements.define(BlCmsTileListSection.is, BlCmsTileListSection);
+  </script>
+</dom-module>

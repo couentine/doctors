@@ -1,0 +1,66 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List CMS Section Subtitle #
+
+This renders the subtitle for a section.
+-->
+<dom-module id="bl-cms-section-subtitle">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & CONTENT STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1.1rem;
+          line-height: 1.5em;
+          margin: 2rem 0;
+        }
+        @media(min-width: 840px) {
+          :host {
+            margin: 2.5rem 0;
+          }
+        }
+
+    </style>
+
+    [[content.fields.subtitle]]
+
+  </template>
+
+  <script>
+    class BlCmsSectionSubtitle extends Polymer.Element {
+      
+      static get is() { return 'bl-cms-section-subtitle'; }
+
+      static get properties() {
+        return {
+
+          content: Object,
+
+          hidden: {
+            type: Boolean,
+            reflectToAttribute: true,
+            computed: '_hidden(content.fields.subtitle)',
+          },
+
+        }
+      }
+      
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _hidden(subtitle) {
+        return (subtitle == null) || (subtitle == undefined) || (subtitle.length == 0);
+      }
+
+    }
+
+    window.customElements.define(BlCmsSectionSubtitle.is, BlCmsSectionSubtitle);
+  </script>
+</dom-module>

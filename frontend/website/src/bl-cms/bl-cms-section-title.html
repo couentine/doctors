@@ -1,0 +1,104 @@
+<!-- #=== POLYMER & SHIMS ===# -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- #=== BADGE LIST COMPONENTS ===# -->
+<link rel="import" href="../bl-styles/bl-styles.html">
+
+<!--
+# Badge List CMS Section Title #
+
+This renders a csm section title with the appropriate tag based on the header size.
+-->
+<dom-module id="bl-cms-section-title">
+  <template>
+
+    <style include="bl-style-classes">
+      
+      /* === LAYOUT & CONTENT STYLES === */
+        
+        :host {
+          display: block;
+          font-size: 1rem; 
+          margin: 0 0 2rem 0;
+        }
+        @media(min-width: 840px) {
+          :host {
+            margin: 0 0 2.5rem 0;
+          }
+        }
+
+          h2 {
+            font-size: 1.5em;
+            font-weight: 900;
+            line-height: 1.5em;
+            margin: 0;
+          }
+          h3 {
+            font-size: 1.4em;
+            font-weight: 900;
+            line-height: 1.5em;
+            margin: 0;
+          }
+          h4 {
+            font-size: 1.3em;
+            font-weight: 900;
+            line-height: 1.5em;
+            margin: 0;
+          }
+
+    </style>
+
+    <template is="dom-if" if="[[equal(content.fields.headerSize, 'h2')]]">
+      <h2>[[content.fields.title]]</h2>
+    </template>
+    <template is="dom-if" if="[[equal(content.fields.headerSize, 'h3')]]">
+      <h3>[[content.fields.title]]</h3>
+    </template>
+    <template is="dom-if" if="[[equal(content.fields.headerSize, 'h4')]]">
+      <h4>[[content.fields.title]]</h4>
+    </template>
+
+  </template>
+
+  <script>
+    class BlCmsSectionTitle extends Polymer.Element {
+      
+      static get is() { return 'bl-cms-section-title'; }
+
+      static get properties() {
+        return {
+          
+          content: Object,
+
+          hidden: {
+            type: Boolean,
+            reflectToAttribute: true,
+            computed: '_hidden(content.fields.styles)',
+          },
+
+        }
+      }
+
+      // #=== PUBLIC HELPER & UTILITY METHODS ===#
+
+      /**
+       * Checks if the first passed argument (`testValue`) is equal to any of the remaining arguments (`matchList`). You can use this to 
+       * check equality between two arguments or to check if the first argument is "in" the list of remaining arguments. If you make sure 
+       * that one of the arguments is dynamic it allows you to ensure that the binding is updated, rather than being set statically on 
+       * page load (which is what happens with normal functional bindings).
+       */
+      equal(testValue, ...matchList) {
+        return matchList.includes(testValue);
+      }
+      
+      // #=== PROPERTY COMPUTER METHODS ===#
+
+      _hidden(styles) {
+        return styles && styles.includes('hideHeader');
+      }
+
+    }
+
+    window.customElements.define(BlCmsSectionTitle.is, BlCmsSectionTitle);
+  </script>
+</dom-module>
