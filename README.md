@@ -8,68 +8,17 @@ The repo is broken into two main sections: `backend` which contains the Rails ap
 ## Setting up your dev environment (OS X) ##
 
 1. Install the basics: Xcode, Homebrew, Git, Github RVM, Ruby & Rails >> [Instructions here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac) >> Be sure to install the current app version of ruby (2.1.2)
-2. Install mongodb: [Instructions here](https://docs.mongodb.org/v3.0/tutorial/install-mongodb-on-os-x/)
-3. Install redis: [Instructions here](http://jasdeep.ca/2012/05/installing-redis-on-mac-os-x/)
-4. Install imagemagick >> brew install imagemagick
-5. Install foreman >> gem install foreman
-6. Connect to the [Github Repo](https://github.com/hankish/badgelist) and pull down the master branch
-7. Setup your environment variable file (.env)
-8. Run bundle install
-9. Run foreman start
+2. Install mongodb: `brew install mongodb` ([Full instructions here](https://docs.mongodb.org/v3.0/tutorial/install-mongodb-on-os-x/)), then be sure to run `brew services start mongodb` after
+3. Install redis: `brew install redis` ([Full instructions here](http://jasdeep.ca/2012/05/installing-redis-on-mac-os-x/)), then be sure to run `brew services start redis` after
+4. Install imagemagick: `brew install imagemagick`
+5. Install the polymer cli: [Instructions here](https://www.polymer-project.org/2.0/docs/tools/polymer-cli)
+6. Clone this repo: `git clone git@github.com:badgelist/badgelist.git`
+7. Navigate to the root folder and then install foreman in root directory: `gem install foreman`
+8. Get an environment variable file (`.env`) from another developer and then put it in the root directory
+9. Navigate to `/backend` and run `bundle install`
+10. Navigate to `/dev/bl-dev-proxy` and run `npm install`
 
-## Required Environment Variables ##
-
-Key aspects of the app are managed with environment variables.  It's important to use a foreman
-".env" file to store these in your local development environment and to create these in Heroku
-when deploying.
-- ENV['root_domain'] = badgelist.com or localhost, etc
-- ENV['root_url'] = https://www.badgelist.com, etc
-- ENV['from_email'] = app@badgelist.com or knowledgestreem@gmail.com, etc
-- ENV['REDIS_PROVIDER'] = REDISCLOUD_URL
-- ENV['bl_admin_account_email'] ==> This is the email address of the user account which is used to own automatically created records. It should be an admin account. If there is no account with this email on bootup one will automatically be created with a random password.
-
-**Example ".env" file for dev environment:**
-```
-root_domain=localhost:5000
-root_url=http://localhost:5000
-from_email=knowledgestreem@gmail.com
-s3_key=ABC123
-s3_secret=ABC123
-s3_region=us-east-1
-s3_asset_url=https://s3-us-east-1.amazonaws.com
-s3_bucket_name=bl-staging
-stripe_key=ABC123
-stripe_livemode=false
-stripe_api_version=2017-06-05
-stripe_enable_invoice_validation=true
-twitter_consumer_key=abc123
-twitter_consumer_secret=abc123
-twitter_access_token=abc123
-twitter_access_secret=abc123
-ULTRAHOOK_API_KEY=abc123
-INTERCOM_APP_ID=abc123
-INTERCOM_TOKEN=abc123
-INTERCOM_USER_HASH_SECRET_KEY=abc123
-WEB_CONCURRENCY=1
-MIN_THREADS=1
-MAX_THREADS=1
-disable_all_emails=false
-POSTMARK_WEBHOOK_KEY=abc123
-embedly_api_key=abc123
-oauth_google_client_id=abc123
-oauth_google_client_secret=abc123
-dev_gmail_address=knowledgestreem@gmail.com
-dev_gmail_password=PASSWORD_TO_GMAIL_ACCOUNT
-lti_app_name=Badge List Dev
-lti_app_description=Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.
-lti_unique_tool_id=badgelist-dev
-bl_admin_email=app-errors@badgelist.com
-google_tag_manager_container_id=GTM-ABC123
-RACK_TIMEOUT_SERVICE_TIMEOUT=300
-bl_admin_account_email=hank@badgelist.com
-contentful_website_space_id=82w30gzjej4t
-contentful_website_token=abc123
-```
+That's it! You should now be all setup. Follow the instructions under the 'Running the app' section below.
 
 ## Running the app ##
 
@@ -131,4 +80,58 @@ To use the deployment script, navigate to the root of git repo and run the comma
 
 ```
 $ ruby scripts/deploy.rb
+```
+
+## Required Environment Variables ##
+
+Key aspects of the app are managed with environment variables.  It's important to use a foreman
+".env" file to store these in your local development environment and to create these in Heroku
+when deploying.
+- ENV['root_domain'] = badgelist.com or localhost, etc
+- ENV['root_url'] = https://www.badgelist.com, etc
+- ENV['from_email'] = app@badgelist.com or knowledgestreem@gmail.com, etc
+- ENV['REDIS_PROVIDER'] = REDISCLOUD_URL
+- ENV['bl_admin_account_email'] ==> This is the email address of the user account which is used to own automatically created records. It should be an admin account. If there is no account with this email on bootup one will automatically be created with a random password.
+
+**Example ".env" file for dev environment:**
+```
+root_domain=localhost:4000
+root_url=http://localhost:4000
+from_email=knowledgestreem@gmail.com
+s3_key=ABC123
+s3_secret=ABC123
+s3_region=us-east-1
+s3_asset_url=https://s3-us-east-1.amazonaws.com
+s3_bucket_name=bl-staging
+stripe_key=ABC123
+stripe_livemode=false
+stripe_api_version=2017-06-05
+stripe_enable_invoice_validation=true
+twitter_consumer_key=abc123
+twitter_consumer_secret=abc123
+twitter_access_token=abc123
+twitter_access_secret=abc123
+ULTRAHOOK_API_KEY=abc123
+INTERCOM_APP_ID=abc123
+INTERCOM_TOKEN=abc123
+INTERCOM_USER_HASH_SECRET_KEY=abc123
+WEB_CONCURRENCY=1
+MIN_THREADS=1
+MAX_THREADS=1
+disable_all_emails=false
+POSTMARK_WEBHOOK_KEY=abc123
+embedly_api_key=abc123
+oauth_google_client_id=abc123
+oauth_google_client_secret=abc123
+dev_gmail_address=knowledgestreem@gmail.com
+dev_gmail_password=PASSWORD_TO_GMAIL_ACCOUNT
+lti_app_name=Badge List Dev
+lti_app_description=Badge List is a platform for awarding digital credentials compatible with the OpenBadge standard.
+lti_unique_tool_id=badgelist-dev
+bl_admin_email=app-errors@badgelist.com
+google_tag_manager_container_id=GTM-ABC123
+RACK_TIMEOUT_SERVICE_TIMEOUT=300
+bl_admin_account_email=hank@badgelist.com
+contentful_website_space_id=82w30gzjej4t
+contentful_website_token=abc123
 ```
