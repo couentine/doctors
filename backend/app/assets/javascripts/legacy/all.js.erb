@@ -233,6 +233,19 @@ function checkForLocationHash() {
   }
 }
 
+// Checks whether the specified modal id needs to be tracked in intercom and does so if needed.
+function trackModalOpenIfNeeded(modalId) {
+  if (modalId == 'badge-sharing') {
+    Intercom('trackEvent', 'badge-share', {
+      url: (window.location.origin + window.location.pathname),
+    });
+  } else if (modalId == 'add-to-linkedin') {
+    Intercom('trackEvent', 'badge-share-linkedin', {
+      url: (window.location.origin + window.location.pathname),
+    });
+  }
+}
+
 // Changes the location hash when modals & tabs are toggled
 function registerLocationHashEvents() {
   // Tabs
@@ -248,6 +261,8 @@ function registerLocationHashEvents() {
     var scrollTop = $(document).scrollTop();
     window.location.hash = e.target.id;
     $(document).scrollTop(scrollTop);
+
+    trackModalOpenIfNeeded(e.target.id);
   })
   $('.modal').on('hidden', function (e) { window.location.hash = ''; })
   
