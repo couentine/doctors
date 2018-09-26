@@ -9,7 +9,7 @@
     <%= link_to @group.url, group_path(@group) %>
     <span class="divider">/</span>
   </li>
-  <li class="active">New Admins Added</li>
+  <li class="active">New <%= @type.to_s.capitalize.pluralize %> Added</li>
 <% end %>
 
 
