@@ -140,19 +140,19 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/app/src/bl-app/bl-app.html",
-    "revision": "6e0aa21dd2bca24f45115220f2da111a"
+    "revision": "e73e871c05c660a518693ce666ea6f4d"
   },
   {
     "url": "p/app/src/bl-app/bl-component-template.html",
-    "revision": "a5a37c812856197f849db3ab2e1b3231"
+    "revision": "14e145452287dcada2de90399dba50c8"
   },
   {
     "url": "p/app/src/bl-user/bl-user.html",
-    "revision": "ddecdbbea58076cbd49a0f8f1a2a42a8"
+    "revision": "4830617b28d2a2fb8533fe21f86be756"
   },
   {
     "url": "p/app/src/bl-user/test/bl-test-user.html",
-    "revision": "e3b61c46b8cecdf0a9103145bfe7fbd0"
+    "revision": "92424c27208e21118977476a979346de"
   },
   {
     "url": "p/website/bower_components/google-fonts-lato/dcGFAl2aezM9Vq_aFTQ.ttf",
@@ -240,7 +240,7 @@ const workboxSW = new WorkboxSW({
   },
   {
     "url": "p/website/src/bl-website/bl-website.html",
-    "revision": "e53f2347b3572bcf720d1547b258c3c6"
+    "revision": "8e51666348aa75f72619fd0e7ae31996"
   }
 ]);
   }
