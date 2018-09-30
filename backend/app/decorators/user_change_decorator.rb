@@ -34,4 +34,8 @@ class UserChangeDecorator < SimpleDelegator
     return true
   end
 
+  def devise_scope
+    :user
+  end
+
 end

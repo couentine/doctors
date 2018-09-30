@@ -61,4 +61,8 @@ class UserPermissionsDecorator < SimpleDelegator
     end
   end
 
+  def devise_scope
+    :user
+  end
+
 end
