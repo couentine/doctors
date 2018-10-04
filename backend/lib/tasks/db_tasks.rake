@@ -1136,4 +1136,25 @@ namespace :db do
     puts " >> Done."
   end
 
+  # OK to run in production
+  task update_all_user_email_md5_hashes: :environment do
+    print "Updating the email_md5_hash fields for #{User.count} users"
+
+    User.each do |user|
+      user.email_md5_hash = Digest::MD5.hexdigest(user.email)
+
+      if user.changed?
+        if user.save
+          print "."
+        else
+          print "!#{user.username_with_caps}"
+        end
+      else
+        print "-"
+      end
+    end
+    
+    puts " >> Done."
+  end
+
 end
