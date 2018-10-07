@@ -46,6 +46,8 @@ $ ruby scripts/build-sw.rb
 
 ## Running a rails console in development ##
 
+To run a rails console you can either run `./open-rails-console` from the root of the repo or you can follow the instruction below.
+
 You'll need to use foreman to open a rails console as well (since the environment variables need to be loaded in order for the app to launch properly). You'll need to navigate to the backend folder first as well.
 
 ```

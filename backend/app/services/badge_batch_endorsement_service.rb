@@ -13,6 +13,7 @@
 #   ```
 #  {
 #    'email' => 'test@example.com',
+#    'name' => 'Jane Doe',
 #    'summary' => 'Required summary value',
 #    'body' => '<p>This is optional</p><p>If can contain <strong>HTML</strong>.</p>',
 #    'requirement' => 'badge-requirement-tag',
@@ -228,6 +229,7 @@ class BadgeBatchEndorsementService
                     current_user_id: @creator_user.id,
                     email: item['email'],
                     badge_url: @badge.url,
+                    name: item['name'],
                     format: item['format'],
                     summary: item['summary'],
                     body: item['body'],
@@ -238,7 +240,15 @@ class BadgeBatchEndorsementService
                 end
               else
                 # This will raise an exception if this is a new user invitation and the group is full
-                @group.add_invited_user_validation(@creator_user.id, item['email'], @badge.url, item['summary'], item['body'], true)
+                @group.add_invited_user_validation(
+                  current_user_id: @creator_user.id,
+                  email: item['email'],
+                  badge_url: @badge.url,
+                  name: item['name'],
+                  summary: item['summary'],
+                  body: item['body'],
+                  preserve_body_html: true,
+                )
 
                 # Now send the email if needed
                 if send_emails_to_new_users && !User.get_inactive_email_list.include?(item['email'])

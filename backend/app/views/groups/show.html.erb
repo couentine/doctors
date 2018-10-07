@@ -446,6 +446,10 @@
             %>
             <tr class="invited-member-row" data-email="<%= u['email'] %>">
               <td>
+                <% if u['name'].present? %>
+                  <%= u['name'] %>
+                  <br>
+                <% end %>
                 <%= u['email'] %>
                 <i class="fa fa-refresh fa-spin" data-email="<%= u['email'] %>" 
                   style="display: none;"></i>
@@ -531,6 +535,10 @@
             %>
             <tr class="invited-admin-row" data-email="<%= u['email'] %>">
               <td>
+                <% if u['name'].present? %>
+                  <%= u['name'] %>
+                  <br>
+                <% end %>
                 <%= u['email'] %>
                 <i class="fa fa-refresh fa-spin" data-email="<%= u['email'] %>" 
                   style="display: none;"></i>
@@ -2023,11 +2031,13 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                   <% @group.invited_members.take(10).each do |u| %>
                     <li>
                       <a tabindex="-1" href="#manage-invited-members" data-toggle="modal">
-                        <%= if u['name']
-                              "#{u['name']} <#{u['email']}>"
-                            else
-                              u['email']
-                            end %>
+                        <%=
+                          if u['name'].present?
+                            "#{u['name']} <#{u['email']}>"
+                          else
+                            u['email']
+                          end
+                        %>
                       </a>
                     </li>
                   <% end %>
@@ -2202,11 +2212,13 @@ class="footer-row <%= (can_join_group||can_join_group_with_code) ? 'highlight-se
                   <% @group.invited_admins.take(10).each do |u| %>
                     <li>
                       <a tabindex="-1" href="#manage-invited-admins" data-toggle="modal">
-                        <%= if u['name']
-                              "#{u['name']} <#{u['email']}>"
-                            else
-                              u['email']
-                            end %>
+                        <%=
+                          if u['name'].present?
+                            "#{u['name']} <#{u['email']}>"
+                          else
+                            u['email']
+                          end
+                        %>
                       </a>
                     </li>
                   <% end %>

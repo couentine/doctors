@@ -1474,6 +1474,10 @@ protected
     self.all_badge_ids = logs.map{ |log| log.badge_id }
     self.expert_badge_ids = expert_logs.map{ |log| log.badge_id }
     self.learner_badge_ids = all_badge_ids - expert_badge_ids
+
+    # If there is an existing invited user info item for this user then delete it
+    info_item = InfoItem.where(type: UpdateInvitedUserService::INFO_ITEM_TYPE, key: Digest::MD5.hexdigest(email)).first
+    info_item.destroy if info_item.present?
   end
 
   def process_avatar?

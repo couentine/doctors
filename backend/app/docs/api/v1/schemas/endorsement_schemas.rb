@@ -9,6 +9,11 @@ class Api::V1::Schemas::EndorsementSchemas < Api::V1::Schemas::ApiSchema
     required: true,
     example: 'a.einstein@example.com'
 
+  field :name, :string,
+    description: 'The full name of the person to endorse',
+    required: false,
+    example: 'Albert Einstein'
+
   field :summary, :string,
     description: 'The summary text which is used as the title of the endorsement',
     required: true,
