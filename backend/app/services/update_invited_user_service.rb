@@ -36,14 +36,16 @@ class UpdateInvitedUserService
         type: INFO_ITEM_TYPE,
         key: @user_key,
         data: {
-          'name': 'Anonymous User',
+          'name' => 'Anonymous User',
+          'email' => @invited_user['email'],
+          'groups' => {},
         },
       )
     end
   end
 
   def perform
-    @info_item.data[@group.id.to_s] = @invited_user
+    @info_item.data['groups'][@group.id.to_s] = @invited_user
 
     if @invited_user['name'].present?
       @info_item.data['name'] = @invited_user['name']
