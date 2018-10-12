@@ -459,6 +459,8 @@
                         "Invited #{u['invite_date'].to_s(:short_date_time)}"
                         : 'No invitation sent yet' %>
                 </span>
+                <br>
+                <%= link_to 'View profile page', "/u/#{Digest::MD5.hexdigest(u['email'])}", target: '_blank' %>
               </td>
               <td>
                 <%
@@ -498,6 +500,7 @@
     </div>
 
     <div class="modal-footer">
+      <%= link_to 'View All Invited Users', group_invited_users_path(@group), class: 'btn' %>
       <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
   </div>
@@ -548,6 +551,8 @@
                         "Invited #{u['invite_date'].to_s(:short_date_time)}"
                         : 'No invitation sent yet' %>
                 </span>
+                <br>
+                <%= link_to 'View profile page', "/u/#{Digest::MD5.hexdigest(u['email'])}", target: '_blank' %>
               </td>
               <td>
                 <%= u['badges'].map{|b| "#{b} (Invited)"}.join(', ') unless u['badges'].blank? %>
@@ -573,6 +578,7 @@
     </div>
 
     <div class="modal-footer">
+      <%= link_to 'View All Invited Users', group_invited_users_path(@group), class: 'btn' %>
       <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
   </div>

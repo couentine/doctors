@@ -46,14 +46,15 @@ class UsersController < ApplicationController
 
           render :show
         else
-          @info_item = InfoItem.where(type: UpdateInvitedUserService::INFO_ITEM_TYPE, key: params[:id]).first
+          # There's no user with this user id, look for an invited user
+          @user_key = params[:id].to_s.downcase
+          @info_item = InfoItem.where(type: UpdateInvitedUserService::INFO_ITEM_TYPE, key: @user_key).first
 
-          if @info_item.present? && 
+          if @info_item.present?
             # Note: This code is a bit sloppy for now because it is temporary and will be unneccessary after the platform refactor.
             
             @name = @info_item.data['name']
             @email = @info_item.data['email']
-            @user_key = params[:id]
             @avatar_image_url = "https://secure.gravatar.com/avatar/#{@user_key}?s=500&d=mm"
             
             # Get the domain and set the domain booleans

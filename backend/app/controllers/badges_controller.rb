@@ -333,7 +333,7 @@ class BadgesController < ApplicationController
             'badge' => @badge.url,
             'summary' => @summary,
             'body' => @body, 
-            'user' => current_user._id,
+            'user' => current_user.id.to_s,
           }
           UpdateInvitedUserService.new(@group, found_user).perform
         elsif @group.has_invited_admin? @email
@@ -344,7 +344,7 @@ class BadgesController < ApplicationController
             'badge' => @badge.url,
             'summary' => @summary,
             'body' => @body, 
-            'user' => current_user._id,
+            'user' => current_user.id.to_s,
           }
           UpdateInvitedUserService.new(@group, found_user).perform
         elsif !@group.can_add_members?
@@ -355,7 +355,7 @@ class BadgesController < ApplicationController
             'email' => @email,
             'name' => @name,
             'invite_date' => Time.now,
-            'validations' => [{ badge: @badge.url, summary: @summary, body: @body, user: current_user._id }],
+            'validations' => [{ badge: @badge.url, summary: @summary, body: @body, user: current_user.id.to_s }],
           }
           @group.invited_members << invited_user_item
           UpdateInvitedUserService.new(@group, invited_user_item).perform

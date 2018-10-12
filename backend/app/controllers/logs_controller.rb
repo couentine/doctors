@@ -1,7 +1,6 @@
 class LogsController < ApplicationController
-  prepend_before_action :find_parent_records, except: [:show, :edit, :update, :destroy]
-  prepend_before_action :find_all_records, only: [:show, :edit, :update, :destroy, :retract, 
-    :unretract]
+  prepend_before_action :find_parent_records, except: [:edit, :update, :destroy]
+  prepend_before_action :find_all_records, only: [:edit, :update, :destroy, :retract, :unretract]
   before_action :authenticate_user!, only: [:create, :edit, :update, :destroy, :retract, :unretract]
   before_action :log_owner, only: [:edit, :destroy]
   before_action :group_admin_or_log_owner, only: [:update]
@@ -14,54 +13,104 @@ class LogsController < ApplicationController
   # GET /group-url/badge-url/u/username.json?f=ob1
   # GET /group-url/badge-url/u/username.embed => Shows iframe-friendly version
   def show
-    @validations = @log.validations
+    @user = User.find(params[:id].to_s.downcase)
 
-    @presentation_format = params[:f]
-    @first_view_after_issued = @current_user_is_log_owner \
-      && @log.has_flag?('first_view_after_issued')
-    
-    if @log.retracted
-      # We can't just crawl through the field because it's only an id not a relationship
-      @retracted_by = User.find(@log.retracted_by) rescue nil
-    end
+    if @user.present?
+      @log = @user.logs.find_by(badge: @badge) || not_found
+      @current_user_is_log_owner = current_user && (@user == current_user)
+      if @current_user_is_log_owner || @badge_list_admin
+        @show_sharing = (@log.issue_status == 'issued')
+      end
+      if current_user.present?
+        @current_user_log = current_user.logs.find_by(badge: @badge) rescue nil
+        @validation = current_user.created_entries.find_by(log: @log, type: 'validation') rescue nil
+      end
 
-    if @presentation_format == 'ob1'
-      if @log.issue_status == 'retracted'
-        respond_to do |format|
-          format.json { render json: { revoked: true }, status: :gone }
-        end
-      elsif @log.issue_status == 'issued'
-        respond_to do |format|
-          format.json { render json: @log }
+      @validations = @log.validations
+
+      @presentation_format = params[:f]
+      @first_view_after_issued = @current_user_is_log_owner \
+        && @log.has_flag?('first_view_after_issued')
+      
+      if @log.retracted
+        # We can't just crawl through the field because it's only an id not a relationship
+        @retracted_by = User.find(@log.retracted_by) rescue nil
+      end
+
+      if @presentation_format == 'ob1'
+        if @log.issue_status == 'retracted'
+          respond_to do |format|
+            format.json { render json: { revoked: true }, status: :gone }
+          end
+        elsif @log.issue_status == 'issued'
+          respond_to do |format|
+            format.json { render json: @log }
+          end
+        else
+          respond_to do |format|
+            format.json { head :not_found }
+          end
         end
       else
+        if @first_view_after_issued
+          @log.clear_flag 'first_view_after_issued'
+          @log.timeless.save
+        end
+
         respond_to do |format|
-          format.json { head :not_found }
+          format.html do
+            @requirements = @badge.requirements
+            @requirements_json_clone = @badge.requirements_json_clone
+
+            # Now calculate whether at least one item has been submitted for each requirement
+            # NOTE: We save a query by passing in the existing @requirements variable.
+            @all_requirements_complete = @log.all_requirements_complete(@requirements)
+
+            # Get current values of group membership settings
+            if @current_user_is_admin || @current_user_is_member
+              @group_show_on_badges = current_user.get_group_settings_for(@group)['show_on_badges']
+              @group_show_on_profile = current_user.get_group_settings_for(@group)['show_on_profile']
+            end
+          end
+          format.embed { render layout: 'embed' }
+          format.json { render json: @log, filter_user: current_user }
         end
       end
     else
-      if @first_view_after_issued
-        @log.clear_flag 'first_view_after_issued'
-        @log.timeless.save
-      end
+      # There's no user with this user id, look for an invited user
+      @user_key = params[:id].to_s.downcase
+      @info_item = InfoItem.where(type: UpdateInvitedUserService::INFO_ITEM_TYPE, key: @user_key).first
 
-      respond_to do |format|
-        format.html do
-          @requirements = @badge.requirements
-          @requirements_json_clone = @badge.requirements_json_clone
+      if @info_item.present?
+        # Note: This code is a bit sloppy for now because it is temporary and will be unneccessary after the platform refactor.
+        
+        @name = @info_item.data['name']
+        @email = @info_item.data['email']
+        @avatar_image_url = "https://secure.gravatar.com/avatar/#{@user_key}?s=500&d=mm"
 
-          # Now calculate whether at least one item has been submitted for each requirement
-          # NOTE: We save a query by passing in the existing @requirements variable.
-          @all_requirements_complete = @log.all_requirements_complete(@requirements)
-
-          # Get current values of group membership settings
-          if @current_user_is_admin || @current_user_is_member
-            @group_show_on_badges = current_user.get_group_settings_for(@group)['show_on_badges']
-            @group_show_on_profile = current_user.get_group_settings_for(@group)['show_on_profile']
+        # Build the validations then fill in the users
+        @validations = (@info_item.data['groups'][@group.id.to_s]['validations'] || []).select{ |i| i['badge'].to_s.downcase == @badge.url }
+        user_map = User.where(:id.in => @validations.map{ |v| v['user'].to_s }.uniq).map{ |u| [u.id.to_s, u] }.to_h
+        @validations.each{ |v| v['user'] = user_map[v['user']] }
+        
+        # Build the posts then organize them by topic, filling in the requirements from the badge requirements json clone
+        post_map = {}
+        (@info_item.data['groups'][@group.id.to_s]['posts'] || []).each do |post_item| 
+          if post_item['badge'].to_s.downcase == @badge.url
+            post_map[post_item['tag']] = [] if post_map[post_item['tag']].nil?
+            post_map[post_item['tag']] << post_item
           end
         end
-        format.embed { render layout: 'embed' }
-        format.json { render json: @log, filter_user: current_user }
+        @posts_by_topic = @badge.requirements_json_clone.map do |tag_item|
+          {
+            tag: tag_item,
+            posts: (post_map[tag_item['id']] || []),
+          }
+        end
+        
+        render :show_invited 
+      else
+        not_found
       end
     end
   end

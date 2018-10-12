@@ -9,6 +9,46 @@
 <% #=== IF THIS IS A PRIVATE USER THEN WE WILL CONCEAL THE ENTIRE PROFILE IF NEEDED ===# %>
 <% if @current_user_can_see_profile %>
 
+  <% if current_user.blank? %>
+
+    <!-- === REGISTER MODAL === -->
+
+    <div id="register" class="modal hide fade" tabindex="-1" role="dialog" 
+     aria-labelledby="mimm-label" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="mimm-label">This is a preregistered user profile</h3>
+      </div>
+
+      <div class="modal-body">
+        <div class="bl-modal-form">
+          <div class="form-body">
+            
+            <p>
+              The badges listed on this profile have been validated and awarded to <%= @name.blank? ? 'the specified user' : @name %>. 
+              The account for <%= @name.blank? ? 'the specified user' : @name %> has been reserved but has not yet completed Badge List
+              user registration.
+            </p>
+
+            <h4 class="inner-header">Does this account belong to you?</h4>
+
+            <p>
+              If so, click the continue button below to finish registering your account. After completing registration you will be able
+              to manage your badges, add additional content, share your achievements to social media and find other badges to earn.
+            </p>
+           
+           </div>        
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <%= link_to 'Continue Registration', new_user_registration_path, class: 'btn btn-primary' %>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      </div>
+    </div>
+
+  <% end %>
+
   <div class="row add-top-margin">
     <div class="span12">
       <div class="header-card user-header-card">
@@ -37,8 +77,14 @@
               <% end %>
             </h1>
             <h2>
-              Unclaimed Profile
+              Preregistered User
             </h2>
+            <% if current_user.blank? %>
+              <h3>
+                <%= link_to '<i class="fa fa-arrow-circle-right"></i> Register now'.html_safe, '#register', id: 'register-button',
+                  class: 'btn btn-primary animate-pulse-on-load', data: { toggle: 'modal' } %>
+              </h3>
+            <% end %>
           </span>
         </div>
 
