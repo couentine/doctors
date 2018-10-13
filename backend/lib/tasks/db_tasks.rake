@@ -1138,9 +1138,9 @@ namespace :db do
 
   # OK to run in production
   task update_all_user_email_md5_hashes: :environment do
-    print "Updating the email_md5_hash fields for #{User.count} users"
+    print "Updating the email_md5_hash fields for #{User.where(type: 'individual').count} inidividual users"
 
-    User.each do |user|
+    User.where(type: 'individual').each do |user|
       user.email_md5_hash = Digest::MD5.hexdigest(user.email)
 
       if user.changed?
