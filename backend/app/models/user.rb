@@ -103,6 +103,7 @@ class User
 
   field :identity_hash,                   type: String
   field :identity_salt,                   type: String
+  field :email_md5_hash,                  type: String
 
   field :stripe_customer_id,              type: String
   field :stripe_default_source,           type: String
@@ -302,11 +303,15 @@ class User
     if input.to_s.include? '@'
       user = User.find_by(email: input.downcase) rescue nil
     elsif input.to_s.match /^[0-9a-fA-F]{24}$/
+      # This is a potential mongo id
       user = super rescue nil
+    elsif input.to_s.match /^[0-9a-fA-F]{32}$/
+      # This is a potential md5 hash
+      user = User.where(email_md5_hash: input.to_s.downcase).first
     end
 
     if user.nil?
-      user = User.find_by(username: input.to_s.downcase) rescue nil
+      user = User.where(username: input.to_s.downcase).first
     end
 
     user
@@ -981,6 +986,7 @@ class User
   def manually_update_identity_hash
     self.identity_salt = SecureRandom.hex
     self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+    self.email_md5_hash = Digest::MD5.hexdigest(email)
   end
 
   # This updates domain cache related fields from domain.json(:for_user_cache)
@@ -1284,6 +1290,7 @@ protected
     if email_changed?
       self.identity_salt = SecureRandom.hex
       self.identity_hash = 'sha256$' + Digest::SHA256.hexdigest(email + identity_salt)
+      self.email_md5_hash = Digest::MD5.hexdigest(email)
     end
   end
 
@@ -1467,6 +1474,10 @@ protected
     self.all_badge_ids = logs.map{ |log| log.badge_id }
     self.expert_badge_ids = expert_logs.map{ |log| log.badge_id }
     self.learner_badge_ids = all_badge_ids - expert_badge_ids
+
+    # If there is an existing invited user info item for this user then delete it
+    info_item = InfoItem.where(type: UpdateInvitedUserService::INFO_ITEM_TYPE, key: Digest::MD5.hexdigest(email)).first
+    info_item.destroy if info_item.present?
   end
 
   def process_avatar?

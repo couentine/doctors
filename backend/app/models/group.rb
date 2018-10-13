@@ -977,14 +977,15 @@ class Group
   # If the user has not yet been invited to the group they will be added as a member (an exception is raised if group is full).
   # If an existing post for this combination of email + badge_url + creator + tag already exists for this current_user_id, it's overwritten.
   # Returns the created/updated post_item hash.
-  def add_invited_user_post(tag_id: nil, current_user_id: nil, email: nil, badge_url: nil, format: nil, summary: nil, body: nil)
+  def add_invited_user_post(tag_id: nil, current_user_id: nil, email: nil, name: nil, badge_url: nil, format: nil, summary: nil, body: nil)
     # Attempt to find an existing invitation for them and create a new one if needed
     invited_user_item = invited_admins.detect{ |item| item['email'] == email }
     invited_user_item ||= invited_members.detect{ |item| item['email'] == email }
     if invited_user_item.nil?
       if can_add_members?
         invited_user_item = { 
-          'email' => email, 
+          'name' => name,
+          'email' => email,
           'invite_date' => Time.now, 
           'validations' => [],
           'posts' => [],
@@ -994,6 +995,8 @@ class Group
         raise StandardError.new('Group is full')
       end
     end
+
+    invited_user_item['name'] = name if name.present?
 
     # Now attempt to find an existing entry for this combination of current_user_id, badge_url and tag_id. Create blank one if not found.
     invited_user_item['posts'] = [] if invited_user_item['posts'].nil?
@@ -1015,6 +1018,9 @@ class Group
     post_item['summary'] = summary
     post_item['body'] = body
 
+    # Also update the info item which stores a cached version of the invited user
+    UpdateInvitedUserService.new(self, invited_user_item).perform
+
     # Return the item
     post_item
   end
@@ -1023,14 +1029,16 @@ class Group
   # If the user has not yet been invited to the group they will be added as a member (an exception is raised if group is full).
   # If an existing validation for this combination of email + creator + badge already exists for this current_user_id, it's overwritten.
   # Returns the created/updated validation_item hash.
-  def add_invited_user_validation(current_user_id, email, badge_url, summary, body, preserve_body_html = false)
+  def add_invited_user_validation(current_user_id: nil, email: nil, name: nil, badge_url: nil, summary: nil, body: nil,
+      preserve_body_html: false)
     # Attempt to find an existing invitation for them and create a new one if needed
     invited_user_item = invited_admins.detect{ |item| item['email'] == email }
     invited_user_item ||= invited_members.detect{ |item| item['email'] == email }
     if invited_user_item.nil?
       if can_add_members?
         invited_user_item = { 
-          'email' => email, 
+          'email' => email,
+          'name' => name,
           'invite_date' => Time.now, 
           'validations' => [],
           'posts' => [],
@@ -1040,6 +1048,8 @@ class Group
         raise StandardError.new('Group is full')
       end
     end
+
+    invited_user_item['name'] = name if name.present?
 
     # Now attempt to find an existing validation for this combination of current_user_id and badge_url. Create blank one if not found.
     invited_user_item['validations'] = [] if invited_user_item['validations'].nil?
@@ -1057,6 +1067,9 @@ class Group
     validation_item['summary'] = summary
     validation_item['body'] = body
     validation_item['preserve_body_html'] = preserve_body_html
+
+    # Also update the info item which stores a cached version of the invited user
+    UpdateInvitedUserService.new(self, invited_user_item).perform
 
     # Return the item
     validation_item

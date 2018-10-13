@@ -1136,4 +1136,60 @@ namespace :db do
     puts " >> Done."
   end
 
+  # OK to run in production
+  task update_all_user_email_md5_hashes: :environment do
+    print "Updating the email_md5_hash fields for #{User.count} users"
+
+    User.each do |user|
+      user.email_md5_hash = Digest::MD5.hexdigest(user.email)
+
+      if user.changed?
+        if user.save
+          print "."
+        else
+          print "!#{user.username_with_caps}"
+        end
+      else
+        print "-"
+      end
+    end
+    
+    puts " >> Done."
+  end
+
+  # OK to run in production, but it will delete all existing invited user info items thus leaving them missing until the rake completes...
+  # so run it when nobody is using the app.
+  task rebuild_invited_user_info_items: :environment do
+    print "Destroying all existing info items with type = #{UpdateInvitedUserService::INFO_ITEM_TYPE}..."
+    InfoItem.where(type: UpdateInvitedUserService::INFO_ITEM_TYPE).destroy_all
+    puts " >> Done"
+    puts ""
+
+    group_criteria = Group.any_of(
+      { 'invited_members.0' => { :$exists => true } },
+      { 'invited_admins.0' => { :$exists => true } }
+    )
+    print "Rebuilding invited user info items for #{group_criteria.count} groups"
+
+    group_criteria.each do |group|
+      was_error = false
+
+      (group.invited_members + group.invited_admins).each do |invited_user_item|
+        if invited_user_item && invited_user_item['email'].present?
+          if !UpdateInvitedUserService.new(group, invited_user_item).perform
+            print "!"
+            was_error = true
+          end
+        else
+          print "*" #==> should never happen
+        end
+      end
+      
+      print group.url_with_caps if was_error
+      print "."
+    end
+    
+    puts " >> Done."
+  end
+
 end

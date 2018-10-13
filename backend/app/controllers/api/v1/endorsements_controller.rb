@@ -48,8 +48,10 @@ class Api::V1::EndorsementsController < Api::V1::BaseController
     end
 
     # Create a deserializer
-    deserializer = Api::V1::DeserializableEndorsement.new(params, [:email, :summary, :body, :requirement, :format])
-      #==> Endorsement policy is wonky, hard code the fields
+    deserializer = Api::V1::DeserializableEndorsement.new(
+      params, 
+      Api::V1::DeserializableEndorsement.fields.map{ |i| i[:name] } #==> Endorsement policy is wonky, manually specify the fields
+    )
 
     # Now determine the mode
     if deserializer.endorsements.present?

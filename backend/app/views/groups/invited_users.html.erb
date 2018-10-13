@@ -1,0 +1,123 @@
+<% 
+  provide(:title, "Invited Users - #{@group.name}")
+%>
+
+<!-- === PAGE HEADER === -->
+
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="header-bar group-header-bar">
+      <table class="info-table">
+        <tbody>
+          <tr>
+            <td class="left-image">
+              <%= image_tag @group.avatar_image_url(:medium) %>
+            </td>
+            <td class="left-panel">
+              <h1><%= link_to @group.name, @group %></h1>
+              <h2>
+                All Invited Users
+              </h2>
+            </td>
+            <td class="right-panel"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="tab-pane" id="overview">
+
+  <div class="row">
+    <div class="span12">
+      <div class="tab-header merge-with-card">
+        <h2>A Note About Invited Users</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="overview-row">
+    <div class="span12">
+      <div class="info-card text-card">
+        <div class="section-container">
+          Every invited user automatically has an "invited user profile".
+          The URL is generated based on the
+          <a style="font-weight: bold; text-decoration: underline;" href="https://en.wikipedia.org/wiki/MD5" target="_blank">MD5 hash</a>
+          of their email address.
+          It is possible for you to programmatically determine the invited user profile URL in Google Spreadsheets
+          (<a style="font-weight: bold; text-decoration: underline;"
+            href="https://stackoverflow.com/questions/7994410/hash-of-a-cell-text-in-google-spreadsheet" 
+            target="_blank">tutorial here</a>)
+          or any other tool that is able to calculate an MD5 hash.
+          You can also use a browser plugin such as
+          <a href="https://chrome.google.com/webstore/detail/copytables/ekdpkppgmlalfkphpibadldikjimijon/related"
+            style="font-weight: bold; text-decoration: underline;" 
+            target="_blank">Copytables</a> to copy the links from the table below into a spreadsheet.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="tab-pane" id="table">
+
+  <div class="row">
+    <div class="span12">
+      <div class="tab-header merge-with-card">
+        <h2>Invited Users Table</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="table-row">
+    <div class="span12">
+      <div class="info-card text-card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Invited Profile URL</th>
+              <th>Badges</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @invited_user_items.each do |item| %>
+              <tr>
+                <td><%= item['type'] %></td>
+                <td><%= item['name'] %></td>
+                <td><%= item['email'] %></td>
+                <td>
+                  <%= link_to "#{ENV['root_url']}/u/#{Digest::MD5.hexdigest(item['email'])}", "/u/#{Digest::MD5.hexdigest(item['email'])}",
+                    target: '_blank' %>  
+                </td>
+                <td>
+                  <%
+                    invited_badges = item['badges'] || []
+                    posted_badges = item['posts'].blank? ? [] : item['posts'].map{ |i| i['badge'] }
+                    issued_badges = item['validations'].blank? ? [] : item['validations'].map{ |i| i['badge'] }
+                    badge_strings = (invited_badges + posted_badges + issued_badges).uniq.map do |badge_url|
+                      if issued_badges.include?(badge_url)
+                        badge_status = 'Awarded'
+                      elsif posted_badges.include?(badge_url)
+                        badge_status = 'Evidence'
+                      else
+                        badge_status = 'Invited'
+                      end
+
+                      "#{badge_url} (#{badge_status})"
+                    end
+                  %>
+                  <%= badge_strings.join(', ') %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

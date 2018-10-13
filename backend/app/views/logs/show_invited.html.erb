@@ -1,0 +1,323 @@
+<% 
+  provide(:title, "#{@name} - #{@badge.name}")
+%>
+
+<% if current_user.blank? %>
+
+  <!-- === REGISTER MODAL === -->
+
+  <div id="register" class="modal hide fade" tabindex="-1" role="dialog" 
+   aria-labelledby="mimm-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="mimm-label">This is a preregistered badge portfolio</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="bl-modal-form">
+        <div class="form-body">
+          
+          <p>
+            This badge has been validated and awarded to <%= @name.blank? ? 'the specified user' : @name %>. To see the rest of this 
+            user's badges click here: <%= link_to user_url(@user_key), user_path(@user_key) %>.
+          </p>
+
+          <p>
+            The account for <%= @name.blank? ? 'the specified user' : @name %> has been reserved but has not yet completed Badge List
+            user registration.
+          </p>
+
+          <h4 class="inner-header">Does this account belong to you?</h4>
+
+          <p>
+            If so, click the continue button below to finish registering your account. After completing registration you will be able
+            to manage your badges, add additional content, share your achievements to social media and find other badges to earn.
+          </p>
+         
+         </div>        
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <%= link_to 'Continue Registration', new_user_registration_path, class: 'btn btn-primary' %>
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+  </div>
+
+<% end %>
+
+<!-- === PAGE HEADER === -->
+
+<div class="row add-top-margin">
+  <div class="span12">
+    <div class="header-bar log-header-bar">
+      <table class="info-table">
+        <tbody>
+          <tr>
+            <td class="left-image with-right-image">
+              <%= link_to image_tag(@badge.image_url(:medium)), [@group, @badge], title: 'View badge' %>
+            </td>
+            <td class="left-panel with-right-image hidden-phone">
+              <h1><%= link_to @badge.name, [@group, @badge], title: 'View badge' %></h1>
+              <h2>
+                <%= link_to @group.url_with_caps, @group, 
+                  title: @group.name %>/<%= link_to @badge.url_with_caps, [@group, @badge], 
+                  title: "View badge" %>
+              </h2>
+              <h3>
+                <%= @badge.summary %>
+              </h3>
+            </td>
+            
+            <td class="separator hidden-phone with-footer">
+              <span>&nbsp;</span>
+            </td>
+            
+            <td class="right-panel with-right-image">
+              <h1><%= link_to @name, user_path(@user_key), title: 'View badge profile' %></h1>
+              <h2>
+                Preregistered User
+              </h2>  
+            </td>
+            
+            <td class="right-image with-left-image">
+              <span class="header-image">
+                <a href="<%= user_path(@user_key) %>" title="View user profile">
+                  <%= image_tag @avatar_image_url, class: 'img-circle' %>
+                </a>
+              </span>
+            </td>
+          </tr>
+
+          <% if current_user.blank? %>
+            <tr class="footer-row highlight-tertiary">
+              <td colspan="5">
+                <span class="label-text">
+                  This badge has been awarded to a preregistered user
+                </span>
+                
+                <ul class="action-list">
+                  <li>
+                    <%= link_to '<i class="fa fa-arrow-circle-right"></i> Register now'.html_safe, '#register', id: 'register-button',
+                      class: 'btn btn-small animate-pulse-on-load', data: { toggle: 'modal' } %>
+                  </li>
+                </ul>
+              </td>
+            </tr>
+          <% end %>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- === FEEDBACK === -->
+  
+<div class="row">
+  <div class="span12">
+    <div class="tab-header">
+
+      <h2 class="collapse-when-small">Endorsements &amp; Feedback</h2>
+      <h2 class="show-when-small">Feedback</h2>
+    
+    </div>
+  </div>
+</div>
+  
+<% if @validations.empty? %>
+
+  <div class="row">
+    <div class="well span7 offset2">
+      <h3>No feedback yet...</h3>
+      <p>
+        This badge portfolio doesn't have any feedback yet.
+      </p>
+    </div>
+  </div>
+
+<% else %>
+
+  <div class="row">
+    <div class="span12" data-bl-dyncol="parent" data-bl-dyncol-group="validations" data-bl-dyncol-width="12">
+      
+      <% @validations.each do |validation_item| %>
+        <div class="info-card entry-card validation text" data-bl-dyncol="child">
+          <div class="card-headline-row">
+            <h2><%= validation_item['summary'] %></h2>
+          </div>
+
+          <div class="card-body-row">
+            <div class="card-body-inner">
+              <%= validation_item['body'].to_s.html_safe %>
+            </div>
+            
+            <div class="card-footline-row">      
+              <span class="log-gravatar">
+                <%= link_to image_tag(@avatar_image_url, class: "gravatar img-circle expert"),
+                  "/#{@group.to_param}/#{@badge.to_param}/u/#{@user_key}", title: "View portfolio", data: { toggle: 'tooltip' } %>
+                <%= @name %>
+              </span>
+              
+              <% if validation_item['user'].present? %>
+                <span class="creator-gravatar">
+                  <img src="<%= validation_item['user'].avatar_image_url(:small) %>" class="gravatar img-circle expert"
+                    title="Posted by <%= validation_item['user'].username_with_caps %>" data-placement="bottom" data-toggle="tooltip">
+                  
+                  <span class="validation-result positive" title="Feedback includes endorsement" data-toggle="tooltip">
+                    <i class="fa fa-check-circle"></i>
+                  </span>
+                </span>
+              <% end %>
+
+              <span class="left-foot">
+              </span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+    </div>
+  </div>
+
+<% end %>
+
+<% if @show_progress && !@posts_by_topic.blank? %>
+    
+  <!-- === BADGE PORTFOLIO === -->
+
+  <div class="row merge-with-card">
+    <div class="span12">
+      <div class="tab-header merge-with-card">
+        <h2>Badge Portfolio</h2>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row" id="portfolio-row">
+    <div class="span12">
+      <div class="info-card text-card portfolio-card">
+      
+        <% @posts_by_topic.each do |topic_item| %>
+          <% 
+            tag = topic_item[:tag]
+            if tag
+              section_id = "topic-header-#{tag['name']}"
+            else
+              section_id = 'topic-header-etc'
+            end
+
+            if @current_user_is_log_owner || tag.nil? || (tag['privacy'] == 'public') \
+              || @badge_list_admin || @current_user_is_admin                        \
+              || ((tag['privacy'] == 'private') && @current_user_is_member)             \
+              || ((tag['privacy'] == 'secret')                                           \
+                && (@badge.awardability == 'experts') && @current_user_is_expert)
+          %>
+
+            <div class="section-header" id="<%= section_id %>">
+
+              <% if tag.nil? %>
+                <h2>Etcetera</h2>
+              <% else %>
+                <h2>
+                  <%= tag['display_name'] %>
+                  <a class="expand-info" data-toggle="custom" 
+                    data-hide="#<%= section_id %> h2 .expand-info"
+                    data-show="#<%= section_id %> h2 .collapse-info,#<%= section_id %> .topic-info">
+                    <i class="fa fa-plus-square-o"></i>
+                  </a>
+                  <a class="collapse-info" data-toggle="custom" 
+                    data-hide="#<%= section_id %> h2 .collapse-info,#<%= section_id %> .topic-info"
+                    data-show="#<%= section_id %> h2 .expand-info">
+                    <i class="fa fa-minus-square-o"></i>
+                  </a>
+                </h2>
+
+                <div class="topic-info">
+                  <div class="privacy-info">
+                    <i class="fa <%= Tag.privacy_icon(@group.has?(:privacy), tag['privacy']) %>"></i>
+                    Evidence <%= Tag.privacy_text(@group.has?(:privacy), tag['privacy']) %>
+                  </div>
+                  <div class="summary">
+                    <%= tag['summary'] %>
+                    <%= link_to "<i class='fa fa-angle-double-right'></i> More Info".html_safe, 
+                      group_badge_tag_path(@group, @badge, tag['name_with_caps']), 
+                      title: "View full requirement details" %>  
+                  </div>
+                </div>
+              <% end %>
+
+            </div>
+
+            <% if topic_item[:posts].blank? %>
+
+              <div class="section-container">
+                <h3 class="summary-header empty">No evidence submitted for this requirement</h3>
+              </div>
+
+            <% else %>
+
+              <% topic_item[:posts].each do |post| %>
+
+                <div class="section-container">
+
+                  <h3 class="summary-header">
+                    <%= post['summary'] %>
+                  </h3>
+
+                  <!-- === BEGIN ENTRY CONTENT FULL === -->
+
+                  <% if post['format'] == 'link' %>
+
+                    <!-- === WEB LINK (Fallback) === -->
+                    <div class="panel panel-entry-content panel-entry-content-link">
+                      <%= link_to "<i class='fa fa-link'></i> #{post['body']}".html_safe, post['body'], target: '_blank',
+                        class: 'linkified-url' %>
+                    </div>
+
+                  <% elsif post['format'] == 'tweet' %>
+
+                    <!-- === TWITTER LINK === -->
+                    <div class="panel panel-entry-content panel-entry-content-link panel-entry-content-tweet">
+                      <%= link_to "<i class='fa fa-twitter'></i> View on Twitter".html_safe, post['body'], target: '_blank' %>
+                    </div>
+
+                  <% elsif post['format'] == 'code' %>
+
+                    <!-- === CODE SNIPPET RESPONSE === -->
+                    <div class="panel panel-entry-content panel-entry-content-code">
+                      <pre id="entry_body"><%= post['body'] %></pre>
+
+                      <%= render 'shared/ace', element_id: 'entry_body', ace_theme: 'tomorrow', code_format: 'javascript',
+                        use_worker: false, read_only: true  %>
+                    </div>
+
+                  <% else %>
+                    
+                    <!-- === FREE TEXT RESPONSE === -->
+                    <div class="panel panel-entry-content panel-entry-content-text">
+                      <div class="section-container">
+                        <%= post['body'].to_s.html_safe %>
+                      </div>
+                    </div>
+
+                  <% end %>
+
+                  <!-- === END ENTRY CONTENT FULL === -->
+
+                </div>                  
+
+              <% end %>
+
+            <% end %>
+
+          <% end %>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+
+<% end %>
+
+  

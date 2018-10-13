@@ -148,6 +148,7 @@ BadgeList::Application.routes.draw do
   match ':group_id/validations' => 'groups#create_validations', via: :post, as: :group_validations
   match ':group_id/copy_badges' => 'groups#copy_badges_form',via: :get, as: :copy_badges_form
   match ':group_id/copy_badges' => 'groups#copy_badges_action',via: :post, as: :copy_badges_action
+  match ':group_id/invited_users' => 'groups#invited_users',via: :get, as: :group_invited_users
   match ':group_id/lti_keys/:consumer_key' => 'groups#destroy_lti_key', via: :delete, 
     as: :group_lti_key
   match ':group_id/lti_keys' => 'groups#create_lti_key', via: :post, as: :create_group_lti_key

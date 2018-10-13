@@ -439,6 +439,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                 <tr>
                   <th></th>
                   <th>Email</th>
+                  <th>Name</th>
                   <th>Summary</th>
                   <th class="showAt480">Body</th>
                   <th class="showAt480">Requirement</th>
@@ -455,6 +456,7 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
                       </paper-button>
                     </td>
                     <td>[[item.attributes.email]]</td>
+                    <td>[[item.attributes.name]]</td>
                     <td>[[item.attributes.summary]]</td>
                     <td class="showAt480">
                       <pre hidden="[[!item.attributes.body]]">[[item.attributes.body]]</pre>
@@ -499,12 +501,23 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             <bl-input-text id="selectedItemEmail" label="Email" format="email" value="{{endorsements.selectedItem.attributes.email}}"
               class="orange" autofocus>
             </bl-input-text>
-            <bl-input-text id="selectedItemSummary" label="Summary" value="{{endorsements.selectedItem.attributes.summary}}"
-              class="orange">
+            <bl-input-text id="selectedItemName" label="Name" value="{{endorsements.selectedItem.attributes.name}}" class="orange">
             </bl-input-text>
-            <bl-input-rich-text id="selectedItemBody" label="Body" value="{{endorsements.selectedItem.attributes.body}}"
-              class="orange" bounding-element="[[getElement('editItemDialog')]]">
-            </bl-input-rich-text>
+            <bl-input-text id="selectedItemSummary" label="Summary" value="{{endorsements.selectedItem.attributes.summary}}" class="orange">
+            </bl-input-text>
+            
+            <template is="dom-if" if="[[equal(endorsements.selectedItem.attributes.format, 'link', 'tweet')]]">
+              <bl-input-text id="selectedItemBody_SimpleText" label="Body" value="{{endorsements.selectedItem.attributes.body}}"
+                class="orange">
+              </bl-input-text>
+            </bl-input-text>
+            </template>
+            <template is="dom-if" if="[[!equal(endorsements.selectedItem.attributes.format, 'link', 'tweet')]]">
+              <bl-input-rich-text id="selectedItemBody_RichText" label="Body" value="{{endorsements.selectedItem.attributes.body}}"
+                class="orange" bounding-element="[[getElement('editItemDialog')]]">
+              </bl-input-rich-text>
+            </template>
+
             <bl-input-text id="selectedItemRequirement" label="Post as Evidence to Requirement"
               value="{{endorsements.selectedItem.attributes.requirement}}" class="orange">
             </bl-input-text>
@@ -597,8 +610,9 @@ Interface for bulk awarding badges. Only available to groups with the `bulk_tool
             </p>
             <small>
               <p>
-                To use this tool you will first need to build a CSV file with up to five columns: Email, Summary, Body, Requirement and
-                Format. This is an advanced tool which can take some work to figure out when using it for the first time.
+                To use this tool you will first need to build a CSV file with up to six columns:
+                Email, Name, Summary, Body, Requirement and Format.
+                This is an advanced tool which can take some work to figure out when using it for the first time.
               </p>
               <p>
                 Please check out the resources below and email us at <a href="mailto:help@badgelist.com">help@badgelist.com</a> if you'd

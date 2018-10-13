@@ -97,6 +97,27 @@ img.thumbnail {
   }
 }
 
+/* === ANIMATION === */
+
+@keyframes pulse {
+  0% {
+    transform: scale(1.0);
+  }
+  20% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(1.0);
+  }
+  100% {
+    transform: scale(1.0);
+  }
+}
+
+.animate-pulse-on-load {
+  animation: pulse 1.8s ease-in-out 1.5s 2;
+}
+
 /* === FONT AWESOME OVERRIDES === */
 
 .fa-stack.single-stack {
@@ -823,6 +844,11 @@ div.bl-form,div.bl-modal-form,div.bl-inline-form {
     h1,h2,h3,h4 {
       float: left;
       width: 90%;
+
+      &.inner-header {
+        float: none;
+        margin: 1.5rem 0 1rem 0;
+      }
     }
     span.add-on {
       background-color: transparent;
@@ -1715,6 +1741,11 @@ form#group-add-users-form, form#badge-add-learners-form {
         width: 90%;
       }
     }
+
+    table td a {
+      font-weight: bold;
+      text-decoration: underline;
+    }
   }
   .modal-footer {
     background-color: $dark-white;
@@ -2214,6 +2245,9 @@ form#group-add-users-form, form#badge-add-learners-form {
         text-decoration: none;
         border-bottom: 1px dashed $medium-text-color;
         color: $medium-text-color;
+      }
+      a.btn:focus, a.btn:hover {
+        border-bottom: none;
       }
     }
     h1 {

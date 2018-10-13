@@ -287,6 +287,7 @@ class BadgesController < ApplicationController
   # Accepts email param
   def issue_form
     @email = params[:email]
+    @name = params[:name]
     @summary = ''
     @body = ''
     @member_list = []
@@ -302,6 +303,7 @@ class BadgesController < ApplicationController
   # POST /group-url/badge-url/issue?email=a@b.com&summary=text&body=&text
   def issue_save
     @email = params[:email].to_s.downcase
+    @name = params[:name]
     @summary = params[:summary]
     @body = params[:body]
     @member_list = []
@@ -325,21 +327,38 @@ class BadgesController < ApplicationController
         # add them to the group invited members (but be sure not to create a dupe)
         if @group.has_invited_member? @email
           found_user = @group.invited_members.detect { |u| u["email"] == @email}
-          found_user[:validations] = [] unless found_user.include? :validations
-          found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, 
-            user: current_user._id }
+          found_user['name'] = @name if @name.present?
+          found_user['validations'] = [] unless found_user.include? 'validations'
+          found_user['validations'] << {
+            'badge' => @badge.url,
+            'summary' => @summary,
+            'body' => @body, 
+            'user' => current_user.id.to_s,
+          }
+          UpdateInvitedUserService.new(@group, found_user).perform
         elsif @group.has_invited_admin? @email
           found_user = @group.invited_admins.detect { |u| u["email"] == @email}
-          found_user[:validations] = [] unless found_user.include? :validations
-          found_user[:validations] << { badge: @badge.url, summary: @summary, body: @body, 
-            user: current_user._id }
+          found_user['name'] = @name if @name.present?
+          found_user['validations'] = [] unless found_user.include? 'validations'
+          found_user['validations'] << {
+            'badge' => @badge.url,
+            'summary' => @summary,
+            'body' => @body, 
+            'user' => current_user.id.to_s,
+          }
+          UpdateInvitedUserService.new(@group, found_user).perform
         elsif !@group.can_add_members?
           flash[:error] = "This group is full and cannot accept new members."
           render 'issue_form'
         else
-          @group.invited_members << { email: @email, invite_date: Time.now, 
-            validations: [{ badge: @badge.url, summary: @summary, body: @body, 
-              user: current_user._id }] }
+          invited_user_item = {
+            'email' => @email,
+            'name' => @name,
+            'invite_date' => Time.now,
+            'validations' => [{ badge: @badge.url, summary: @summary, body: @body, user: current_user.id.to_s }],
+          }
+          @group.invited_members << invited_user_item
+          UpdateInvitedUserService.new(@group, invited_user_item).perform
         end
 
         # Save the changes to the group and send the email (if not blocked)

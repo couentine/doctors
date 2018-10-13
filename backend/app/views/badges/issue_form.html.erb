@@ -27,7 +27,8 @@
           if (emailValue == "*") {
             $("#email").val("");
             $("#badge-recipient-list").hide();
-            $("#badge-recipient-manual").show();
+            $("#badge-recipient-email").show();
+            $("#badge-recipient-name").show();
             $("#email").focus();
           } else 
             $("#email").val(emailValue);
@@ -77,14 +78,18 @@
           </div>
         <% end %>
 
-        <div class="control-group" style="<%= (@member_list.blank?) ? '' : 'display: none;' %>" 
-          id="badge-recipient-manual">
-
-          <%= label_tag :email, "Badge Recipient", class: "control-label" %>
+        <div class="control-group" style="<%= (@member_list.blank?) ? '' : 'display: none;' %>" id="badge-recipient-email">
+          <%= label_tag :email, "Email Address", class: "control-label" %>
           <div class="controls">
             <%= text_field_tag :email, @email, placeholder: "buzz.aldrin@nasa.gov", maxlength: 100 %>
           </div>
+        </div>
 
+        <div class="control-group" style="<%= (@member_list.blank?) ? '' : 'display: none;' %>" id="badge-recipient-name">
+          <%= label_tag :email, "Name", class: "control-label" %>
+          <div class="controls">
+            <%= text_field_tag :name, @name, placeholder: "Buzz Aldrin", maxlength: 100 %>
+          </div>
         </div>
       
         <h3>Write a public explanation of why this person has earned the badge</h3>
@@ -118,12 +123,6 @@
             </div>
           </div>
         </div>
-          
-          
-  <!-- 
-          <p class="text-success">
-            <em><strong>Please explain your opinion. Include lots of detail!</strong></em>
-          </p> -->
 
       </div>
       

@@ -10,11 +10,11 @@ class GroupsController < ApplicationController
   prepend_before_action :find_group, only: [:get, :show, :edit, :update, :destroy, :cancel_subscription, :join, :leave, 
     :update_group_settings, :destroy_user, :send_invitation, :destroy_invited_user, :users, :badges, :add_users, :create_users, 
     :clear_bounce_log, :copy_badges_form, :copy_badges_action, :review, :full_logs, :create_validations, :create_lti_key, :destroy_lti_key, 
-    :update_lti_context, :destroy_lti_context]
+    :update_lti_context, :destroy_lti_context, :invited_users]
   before_action :authenticate_user!, except: [:get, :show]
   before_action :group_member_or_admin, only: [:leave, :update_group_settings, :users, :badges, :review, :full_logs, :create_validations]
   before_action :group_admin, only: [:update, :destroy_user, :destroy_invited_user, :add_users, :create_users, :clear_bounce_log, 
-    :create_lti_key, :destroy_lti_key, :update_lti_context, :destroy_lti_context]
+    :create_lti_key, :destroy_lti_key, :update_lti_context, :destroy_lti_context, :invited_users]
   before_action :group_owner, only: [:edit, :destroy, :cancel_subscription]
   before_action :can_copy_badges, only: [:copy_badges_form, :copy_badges_action]
   before_action :badge_list_admin, only: [:index]
@@ -1281,6 +1281,11 @@ class GroupsController < ApplicationController
         end
       end
     end
+  end
+
+  def invited_users
+    @invited_user_items = @group.invited_members.map{ |i| i.merge({ 'type' => 'Member' }) } \
+      + @group.invited_admins.map{ |i| i.merge({ 'type' => 'Admin' }) }
   end
 
 private

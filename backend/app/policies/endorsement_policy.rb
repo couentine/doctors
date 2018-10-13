@@ -11,6 +11,7 @@ class EndorsementPolicy < ApplicationPolicy
   CREATOR_FIELD = { visible_to: :all_roles, editable_by: :all_roles }
 
   field :email,               CREATOR_FIELD
+  field :name,                CREATOR_FIELD
   field :summary,             CREATOR_FIELD
   field :body,                CREATOR_FIELD
   field :requirement,         CREATOR_FIELD
