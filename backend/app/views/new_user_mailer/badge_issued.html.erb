@@ -1,8 +1,8 @@
 <% 
   provide(:title, "#{@from_user.name} awarded a badge to you!")
   provide(:color, 'orange')
-  provide(:cta_text, "Claim your badge")
-  provide(:cta_link, "#{new_user_registration_url}?email=#{@to_email}&name=#{@to_name}")
+  provide(:cta_text, "View your badge")
+  provide(:cta_link, group_badge_log_url(@group, @badge, @user_key))
 %>
 
 <p style="text-align: center; margin: 10px 0 0 0; padding: 0;">
@@ -31,6 +31,5 @@
 </p>
 
 <p>
-  To claim your badge you need to create a new Badge List account using the link below. 
-  (Be sure to sign up with the same email address.)
+  All of your awarded badges are visible on your <%= link_to 'Badge List profile', user_url(@user_key) %>.
 </p>

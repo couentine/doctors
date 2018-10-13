@@ -8,6 +8,7 @@ class NewUserMailer < ActionMailer::Base
     @from_user, @group, @badges = User.find(from_user_id), Group.find(group_id), \
         Badge.where(:id.in => badge_ids)
     @invitation_message = invitation_message
+    @user_key = Digest::MD5::hexdigest(@to_email.downcase)
 
     if @to_name.blank?
       to_email_name = @to_email
@@ -29,6 +30,7 @@ class NewUserMailer < ActionMailer::Base
     @from_user, @group, @badges = User.find(from_user_id), Group.find(group_id), \
         Badge.where(:id.in => badge_ids)
     @invitation_message = invitation_message
+    @user_key = Digest::MD5::hexdigest(@to_email.downcase)
 
     if @to_name.blank?
       to_email_name = @to_email
@@ -49,6 +51,7 @@ class NewUserMailer < ActionMailer::Base
     @to_email, @to_name = to_email, to_name
     @from_user, @group, @badge = User.find(from_user_id), Group.find(group_id), \
       Badge.find(badge_id)
+    @user_key = Digest::MD5::hexdigest(@to_email.downcase)
 
     if @to_name.blank?
       to_email_name = @to_email
