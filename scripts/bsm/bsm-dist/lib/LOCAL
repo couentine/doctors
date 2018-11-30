@@ -1,0 +1,26 @@
+# =================================================================
+# LOCAL-DEFAULTS
+# =================================================================
+#
+# NOTE: On install or prior to first use of this utility, make sure that you
+#   modify any or all of the following variable to match the paths and
+#   environment on your local machine
+
+# opera/vivaldi/firefox/chrome browser paths on a Mac - remove or comment out any
+#   browser that is not present on your system
+opera="open -a /Applications/Opera.app/Contents/MacOS/Opera"
+vivaldi="open -a /Applications/Vivaldi.app/Contents/MacOS/Vivaldi"
+firefox="open -a /Applications/Firefox.app/Contents/MacOS/firefox"
+chrome="open -a /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
+
+# set this variable to the browser that you'd like to use to view the local web client
+# for any of the running services
+browser_open=$opera
+
+# this variable should be the path to your local BL development repo
+BL_PROJECT_PATH="$HOME/path/to/your/badgelist/"
+
+# this vriable should be set to a shell file such as '.bashrc', '.bash_profile',
+# '.profile', etc ... which are typically read and loaded during the startup
+# of a shell session
+bsm_alias_file="$HOME/.bashrc"

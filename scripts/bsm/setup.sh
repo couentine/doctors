@@ -7,7 +7,15 @@ colLBL='\033[1;34m'     # light blue
 colCYN='\033[0;36m'     # normal cyan
 NC='\033[0m'            # No Color
 
-ENVFILE="./.env"
+# ---
+# Get the current working path for this 'setup' script.  It will be assumed some other
+# files will exist relative to this path. The source for this snippet to obtaining the
+# CWD for this setup script can be found here:
+#   SOURCE: https://stackoverflow.com/questions/1519006/how-do-you-create-a-remote-git-branch
+#
+CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+ENVFILE="$CWD/bsm-dist/lib/local.sh"
 
 if [ -f $ENVFILE ]; then
   echo ""
@@ -15,7 +23,7 @@ if [ -f $ENVFILE ]; then
   echo ""
 
   # TASK: import local environment setup preferences from '.env' file
-  source .env
+  source $ENVFILE
 
   # TASK: create the top-level ~/.bsm folder
   mkdir ~/.bsm
@@ -33,9 +41,10 @@ else
   echo "${colRED}ERROR: File $ENVFILE does NOT exist.${NC}"
   echo ""
   echo "${colLBL}To fix this: ${NC}"
-  echo "${colLBL}  * rename the ${colCYN}ENV${colLBL} file as ${colCYN}.env${colLBL} in the same folder as this setup.sh file${NC}"
+  echo "${colLBL}  * rename the ${colCYN}$CWD/bsm-dist/lib/LOCAL${colLBL} file as:"
+  echo "${colLBL}     + ${colCYN} $ENVFILE ${colLBL}"
   echo "${colLBL}  * edit any variables in the ${colCYN}.env${colLBL} file to reflect the environment${NC}"
-  echo "${colLBL}      on your local development machine.${NC}"
+  echo "${colLBL}     on your local development machine.${NC}"
 
   echo ""
   echo ""

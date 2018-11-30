@@ -19,8 +19,9 @@ for local development:
 
 ---
 ### SETUP
-* rename the `ENV` file as `.env` in the same folder as the setup.sh file
-* edit any variables in the `.env` file to reflect the environment on your local development machine.
+* rename the `bsm/bsm-dist/lib/LOCAL` file as:
+  + `bsm/bsm-dist/lib/local.sh`
+* edit any variables in this new `local.sh` file to reflect the environment on your local development machine.
 * if necessary change the permissions of the setup file `setup.sh`:
   + `chmod u+x setup.sh`
 * execute the `setup.sh` file
