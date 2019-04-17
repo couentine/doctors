@@ -1,0 +1,54 @@
+<p id="notice"><%= notice %></p>
+<center><h1> <%= @doc.name %> </h1>
+<p>
+  <strong>Name:</strong>
+  <%= @doc.name %>
+</p>
+
+<p>
+  <strong>Specialty:</strong>
+  <%= @doc.specialty %>
+</p>
+
+<p>
+  <strong>Zip Code:</strong>
+  <%= @doc.zip %>
+</p>
+
+<p>
+  <strong>Review:</strong>
+  <%= @doc.review %>/10
+</p>
+<br>
+</center>
+ <!-- this line will change each time the speciality is different -->
+  <p><b>Other <%= @doc.specialty %> Doctors:</b></p>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th><%= sortable 'Name'%></th>
+        <th><%= sortable  'Specialty' %></th>
+        <th><%= sortable  'Zip', 'Zip Code'  %></th>
+        <th><%= sortable  'Review'  %></th>
+        <th colspan="4"></th>
+      </tr>
+    </thead>
+
+        <tbody class="listdoc">
+       <!-- I am doing a loop for search in all the doctors list -->
+<% @docs.each do |doc| %>
+<!-- then i select only the doctors with the same speciality than the one display on this page-->
+<% if doc.specialty == @doc.specialty %>
+    <tr  class="clickable" onclick="location.href='<%= doc_path(doc) %>'">
+        <td><%= link_to doc.name, doc%></td>
+        <td><%= doc.specialty %></td>
+        <td><%= doc.zip%></td>
+        <td><%= doc.review%></td>
+      </tr>
+    <% end %>
+  <% end %>
+  </tbody>
+</table>
+
+<%= link_to 'Back', docs_path %>

@@ -1,0 +1,9 @@
+.listdoc tr:hover{
+  background-color: #B2C6F6;
+  cursor: pointer;
+}
+
+.clickable a{
+  text-decoration: none;
+    color: black
+}
